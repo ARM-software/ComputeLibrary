@@ -14,6 +14,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLArithmeticAdditionKernel.h", "_c_l_arithmetic_addition_kernel_8h.xhtml", [
       [ "CLArithmeticAdditionKernel", "classarm__compute_1_1_c_l_arithmetic_addition_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition_kernel" ]
     ] ],
+    [ "CLArithmeticDivisionKernel.h", "_c_l_arithmetic_division_kernel_8h.xhtml", [
+      [ "CLArithmeticDivisionKernel", "classarm__compute_1_1_c_l_arithmetic_division_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_division_kernel" ]
+    ] ],
     [ "CLArithmeticSubtractionKernel.h", "_c_l_arithmetic_subtraction_kernel_8h.xhtml", [
       [ "CLArithmeticSubtractionKernel", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel" ]
     ] ],
@@ -110,6 +113,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLFillBorderKernel.h", "_c_l_fill_border_kernel_8h.xhtml", [
       [ "CLFillBorderKernel", "classarm__compute_1_1_c_l_fill_border_kernel.xhtml", "classarm__compute_1_1_c_l_fill_border_kernel" ]
+    ] ],
+    [ "CLFlattenLayerKernel.h", "_c_l_flatten_layer_kernel_8h.xhtml", [
+      [ "CLFlattenLayerKernel", "classarm__compute_1_1_c_l_flatten_layer_kernel.xhtml", "classarm__compute_1_1_c_l_flatten_layer_kernel" ]
     ] ],
     [ "CLFloorKernel.h", "_c_l_floor_kernel_8h.xhtml", [
       [ "CLFloorKernel", "classarm__compute_1_1_c_l_floor_kernel.xhtml", "classarm__compute_1_1_c_l_floor_kernel" ]

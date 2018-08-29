@@ -160,8 +160,12 @@ class SmallLSTMLayerDataset final : public LSTMLayerDataset
 public:
     SmallLSTMLayerDataset()
     {
-        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(64U, 2U), ActivationLayerInfo(), 0.05f, 0.93f);
-        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(48U, 2U), ActivationLayerInfo(), 0.05f, 0.93f);
+        add_config(TensorShape(8U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U), TensorShape(16U), TensorShape(64U),
+                   ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
+        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(64U, 2U),
+                   ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
+        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(48U, 2U),
+                   ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,5 +62,5 @@ void CLMedian3x3Kernel::configure(const ICLTensor *input, ICLTensor *output, boo
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }

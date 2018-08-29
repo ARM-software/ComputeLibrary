@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
@@ -91,54 +92,6 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-void matrix_addition_qs8(const ITensor *input, ITensor *output, const Window &window, float beta)
-{
-    const int        fixed_point_position = input->info()->fixed_point_position();
-    const qint8x16_t beta_qs8             = vdupq_n_qs8(sqcvt_qs8_f32(beta, fixed_point_position));
-
-    Iterator in(input, window);
-    Iterator out(output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto in_ptr  = reinterpret_cast<const qint8_t *>(in.ptr());
-        const auto out_ptr = reinterpret_cast<qint8_t *>(out.ptr());
-
-        qint8x16_t       alpha_ab = vld1q_qs8(out_ptr);
-        const qint8x16_t c        = vld1q_qs8(in_ptr);
-
-        // Multiply matrix C by its weight and accumulate
-        alpha_ab = vqmlaq_qs8(alpha_ab, c, beta_qs8, fixed_point_position);
-
-        vst1q_qs8(out_ptr, alpha_ab);
-    },
-    in, out);
-}
-
-void matrix_addition_qs16(const ITensor *input, ITensor *output, const Window &window, float beta)
-{
-    const int        fixed_point_position = input->info()->fixed_point_position();
-    const qint16x8_t beta_qs16            = vdupq_n_qs16(sqcvt_qs16_f32(beta, fixed_point_position));
-
-    Iterator in(input, window);
-    Iterator out(output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto in_ptr  = reinterpret_cast<const qint16_t *>(in.ptr());
-        const auto out_ptr = reinterpret_cast<qint16_t *>(out.ptr());
-
-        qint16x8x2_t       alpha_ab = vld2q_s16(out_ptr);
-        const qint16x8x2_t c        = vld2q_s16(in_ptr);
-
-        // Multiply matrix C by its weight and accumulate
-        alpha_ab.val[0] = vqmlaq_qs16(alpha_ab.val[0], c.val[0], beta_qs16, fixed_point_position);
-        alpha_ab.val[1] = vqmlaq_qs16(alpha_ab.val[1], c.val[1], beta_qs16, fixed_point_position);
-
-        vst2q_s16(out_ptr, alpha_ab);
-    },
-    in, out);
-}
 } // namespace
 
 NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()
@@ -148,10 +101,10 @@ NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()
 
 void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != output->info()->dimension(1));
 
@@ -159,12 +112,6 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
     {
         case DataType::F32:
             _func = &matrix_addition_f32;
-            break;
-        case DataType::QS8:
-            _func = &matrix_addition_qs8;
-            break;
-        case DataType::QS16:
-            _func = &matrix_addition_qs16;
             break;
         case DataType::F16:
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

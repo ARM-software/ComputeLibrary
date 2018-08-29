@@ -208,11 +208,11 @@ public:
     static CLKernelLibrary &get();
     /** Initialises the kernel library.
      *
-     * @param[in] kernel_path (Optional) Path of the directory from which kernel sources are loaded.
-     * @param[in] context     (Optional) CL context used to create programs.
-     * @param[in] device      (Optional) CL device for which the programs are created.
+     * @param[in] kernel_path Path of the directory from which kernel sources are loaded.
+     * @param[in] context     CL context used to create programs.
+     * @param[in] device      CL device for which the programs are created.
      */
-    void init(std::string kernel_path = ".", cl::Context context = cl::Context::getDefault(), cl::Device device = cl::Device::getDefault())
+    void init(std::string kernel_path, cl::Context context, cl::Device device)
     {
         _kernel_path = std::move(kernel_path);
         _context     = std::move(context);
@@ -277,6 +277,12 @@ public:
         return _context;
     }
 
+    /** Gets the CL device for which the programs are created. */
+    cl::Device &get_device()
+    {
+        return _device;
+    }
+
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.
@@ -328,6 +334,18 @@ public:
      * @param[in] program            Built program to add to the cache
      */
     void add_built_program(const std::string &built_program_name, cl::Program program);
+
+    /** Returns true if FP16 is supported by the CL device
+     *
+     * @return true if the CL device supports FP16
+     */
+    bool fp16_supported() const;
+
+    /** Returns true if int64_base_atomics extension is supported by the CL device
+     *
+     * @return true if the CL device supports int64_base_atomics extension
+     */
+    bool int64_base_atomics_supported() const;
 
 private:
     /** Load program and its dependencies.

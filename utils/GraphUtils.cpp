@@ -26,16 +26,19 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/graph/Logger.h"
 #include "arm_compute/runtime/SubTensor.h"
+#include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 #include <iomanip>
+#include <limits>
 
 using namespace arm_compute::graph_utils;
 
 namespace
 {
-std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_permutation_paramaters(const arm_compute::TensorShape &shape,
+std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_permutation_parameters(const arm_compute::TensorShape &shape,
                                                                                                    arm_compute::DataLayout data_layout)
 {
     // Set permutation parameters if needed
@@ -82,9 +85,11 @@ void CaffePreproccessor::preprocess(ITensor &tensor)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
+    const int channel_idx = get_data_layout_dimension_index(tensor.info()->data_layout(), DataLayoutDimension::CHANNEL);
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id.z()];
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id[channel_idx]];
         *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
     });
 }
@@ -144,7 +149,7 @@ NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType d
 template <typename T>
 void NumPyAccessor::access_numpy_tensor(ITensor &tensor)
 {
-    const int num_elements          = tensor.info()->total_size();
+    const int num_elements          = tensor.info()->tensor_shape().total_size();
     int       num_mismatches        = utils::compare_tensor<T>(tensor, _npy_tensor);
     float     percentage_mismatches = static_cast<float>(num_mismatches) / num_elements;
 
@@ -168,38 +173,245 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
     return false;
 }
 
-PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
-    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _preprocessor(std::move(preprocessor))
+ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
+    : _already_loaded(false), _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
 }
 
-bool PPMAccessor::access_tensor(ITensor &tensor)
+bool ImageAccessor::access_tensor(ITensor &tensor)
 {
-    utils::PPMLoader ppm;
-
-    // Open PPM file
-    ppm.open(_ppm_path);
-
-    // Get permutated shape and permutation parameters
-    TensorShape                    permuted_shape = tensor.info()->tensor_shape();
-    arm_compute::PermutationVector perm;
-    if(tensor.info()->data_layout() != DataLayout::NCHW)
+    if(!_already_loaded)
     {
-        std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+        auto image_loader = utils::ImageLoaderFactory::create(_filename);
+        ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
+
+        // Open image file
+        image_loader->open(_filename);
+
+        // Get permutated shape and permutation parameters
+        TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+        arm_compute::PermutationVector perm;
+        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        {
+            std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+        }
+        ARM_COMPUTE_EXIT_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                                image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+
+        // Fill the tensor with the PPM content (BGR)
+        image_loader->fill_planar_tensor(tensor, _bgr);
+
+        // Preprocess tensor
+        if(_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
     }
-    ARM_COMPUTE_ERROR_ON_MSG(ppm.width() != permuted_shape.x() || ppm.height() != permuted_shape.y(),
-                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].", ppm.width(), ppm.height(), permuted_shape.x(), permuted_shape.y());
 
-    // Fill the tensor with the PPM content (BGR)
-    ppm.fill_planar_tensor(tensor, _bgr);
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
+}
 
-    // Preprocess tensor
-    if(_preprocessor)
+ValidationInputAccessor::ValidationInputAccessor(const std::string             &image_list,
+                                                 std::string                    images_path,
+                                                 std::unique_ptr<IPreprocessor> preprocessor,
+                                                 bool                           bgr,
+                                                 unsigned int                   start,
+                                                 unsigned int                   end,
+                                                 std::ostream                  &output_stream)
+    : _path(std::move(images_path)), _images(), _preprocessor(std::move(preprocessor)), _bgr(bgr), _offset(0), _output_stream(output_stream)
+{
+    ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
+
+    std::ifstream ifs;
+    try
     {
-        _preprocessor->preprocess(tensor);
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(image_list, std::ios::in | std::ios::binary);
+
+        // Parse image names
+        unsigned int counter = 0;
+        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        {
+            // Add image to process if withing range
+            if(counter >= start)
+            {
+                std::stringstream linestream(line);
+                std::string       image_name;
+
+                linestream >> image_name;
+                _images.emplace_back(std::move(image_name));
+            }
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+    }
+}
+
+bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
+{
+    bool ret = _offset < _images.size();
+    if(ret)
+    {
+        utils::JPEGLoader jpeg;
+
+        // Open JPEG file
+        std::string image_name = _path + _images[_offset++];
+        jpeg.open(image_name);
+        _output_stream << "[" << _offset << "/" << _images.size() << "] Validating " << image_name << std::endl;
+
+        // Get permutated shape and permutation parameters
+        TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+        arm_compute::PermutationVector perm;
+        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        {
+            std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(),
+                                                                            tensor.info()->data_layout());
+        }
+        ARM_COMPUTE_EXIT_ON_MSG(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
+                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                                jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
+
+        // Fill the tensor with the JPEG content (BGR)
+        jpeg.fill_planar_tensor(tensor, _bgr);
+
+        // Preprocess tensor
+        if(_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
     }
 
-    return true;
+    return ret;
+}
+
+ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list,
+                                                   std::ostream      &output_stream,
+                                                   unsigned int       start,
+                                                   unsigned int       end)
+    : _results(), _output_stream(output_stream), _offset(0), _positive_samples_top1(0), _positive_samples_top5(0)
+{
+    ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
+
+    std::ifstream ifs;
+    try
+    {
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(image_list, std::ios::in | std::ios::binary);
+
+        // Parse image correctly classified labels
+        unsigned int counter = 0;
+        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        {
+            // Add label if within range
+            if(counter >= start)
+            {
+                std::stringstream linestream(line);
+                std::string       image_name;
+                int               result;
+
+                linestream >> image_name >> result;
+                _results.emplace_back(result);
+            }
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+    }
+}
+
+void ValidationOutputAccessor::reset()
+{
+    _offset                = 0;
+    _positive_samples_top1 = 0;
+    _positive_samples_top5 = 0;
+}
+
+bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
+{
+    bool ret = _offset < _results.size();
+    if(ret)
+    {
+        // Get results
+        std::vector<size_t> tensor_results;
+        switch(tensor.info()->data_type())
+        {
+            case DataType::QASYMM8:
+                tensor_results = access_predictions_tensor<uint8_t>(tensor);
+                break;
+            case DataType::F32:
+                tensor_results = access_predictions_tensor<float>(tensor);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+        }
+
+        // Check if tensor results are within top-n accuracy
+        size_t correct_label = _results[_offset++];
+
+        aggregate_sample(tensor_results, _positive_samples_top1, 1, correct_label);
+        aggregate_sample(tensor_results, _positive_samples_top5, 5, correct_label);
+    }
+
+    // Report top_n accuracy
+    if(_offset >= _results.size())
+    {
+        report_top_n(1, _results.size(), _positive_samples_top1);
+        report_top_n(5, _results.size(), _positive_samples_top5);
+    }
+
+    return ret;
+}
+
+template <typename T>
+std::vector<size_t> ValidationOutputAccessor::access_predictions_tensor(arm_compute::ITensor &tensor)
+{
+    // Get the predicted class
+    std::vector<size_t> index;
+
+    const auto   output_net  = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const size_t num_classes = tensor.info()->dimension(0);
+
+    index.resize(num_classes);
+
+    // Sort results
+    std::iota(std::begin(index), std::end(index), static_cast<size_t>(0));
+    std::sort(std::begin(index), std::end(index),
+              [&](size_t a, size_t b)
+    {
+        return output_net[a] > output_net[b];
+    });
+
+    return index;
+}
+
+void ValidationOutputAccessor::aggregate_sample(const std::vector<size_t> &res, size_t &positive_samples, size_t top_n, size_t correct_label)
+{
+    auto is_valid_label = [correct_label](size_t label)
+    {
+        return label == correct_label;
+    };
+
+    if(std::any_of(std::begin(res), std::begin(res) + top_n, is_valid_label))
+    {
+        ++positive_samples;
+    }
+}
+
+void ValidationOutputAccessor::report_top_n(size_t top_n, size_t total_samples, size_t positive_samples)
+{
+    size_t negative_samples = total_samples - positive_samples;
+    float  accuracy         = positive_samples / static_cast<float>(total_samples);
+
+    _output_stream << "----------Top " << top_n << " accuracy ----------" << std::endl
+                   << std::endl;
+    _output_stream << "Positive samples : " << positive_samples << std::endl;
+    _output_stream << "Negative samples : " << negative_samples << std::endl;
+    _output_stream << "Accuracy : " << accuracy << std::endl;
 }
 
 TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
@@ -322,7 +534,6 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
             break;
         }
         case DataType::S8:
-        case DataType::QS8:
         {
             std::uniform_int_distribution<int8_t> distribution_s8(_lower.get<int8_t>(), _upper.get<int8_t>());
             fill<int8_t>(tensor, distribution_s8);
@@ -335,7 +546,6 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
             break;
         }
         case DataType::S16:
-        case DataType::QS16:
         {
             std::uniform_int_distribution<int16_t> distribution_s16(_lower.get<int16_t>(), _upper.get<int16_t>());
             fill<int16_t>(tensor, distribution_s16);
@@ -390,103 +600,19 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
 }
 
 NumPyBinLoader::NumPyBinLoader(std::string filename, DataLayout file_layout)
-    : _filename(std::move(filename)), _file_layout(file_layout)
+    : _already_loaded(false), _filename(std::move(filename)), _file_layout(file_layout)
 {
 }
 
 bool NumPyBinLoader::access_tensor(ITensor &tensor)
 {
-    const TensorShape          tensor_shape = tensor.info()->tensor_shape();
-    std::vector<unsigned long> shape;
-
-    // Open file
-    std::ifstream stream(_filename, std::ios::in | std::ios::binary);
-    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data");
-    std::string header = npy::read_header(stream);
-
-    // Parse header
-    bool        fortran_order = false;
-    std::string typestr;
-    npy::parse_header(header, typestr, fortran_order, shape);
-
-    // Check if the typestring matches the given one
-    std::string expect_typestr = arm_compute::utils::get_typestring(tensor.info()->data_type());
-    ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
-
-    // Reverse vector in case of non fortran order
-    if(!fortran_order)
+    if(!_already_loaded)
     {
-        std::reverse(shape.begin(), shape.end());
+        utils::NPYLoader loader;
+        loader.open(_filename, _file_layout);
+        loader.fill_tensor(tensor);
     }
 
-    // Correct dimensions (Needs to match TensorShape dimension corrections)
-    if(shape.size() != tensor_shape.num_dimensions())
-    {
-        for(int i = static_cast<int>(shape.size()) - 1; i > 0; --i)
-        {
-            if(shape[i] == 1)
-            {
-                shape.pop_back();
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-
-    bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
-
-    // Validate tensor ranks
-    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
-
-    // Set permutation parameters if needed
-    TensorShape                    permuted_shape = tensor_shape;
-    arm_compute::PermutationVector perm;
-    if(are_layouts_different)
-    {
-        std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor_shape, tensor.info()->data_layout());
-    }
-
-    // Validate shapes
-    for(size_t i = 0; i < shape.size(); ++i)
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != shape[i], "Tensor dimensions mismatch");
-    }
-
-    // Validate shapes and copy tensor
-    if(!are_layouts_different || perm.num_dimensions() <= 2)
-    {
-        // Read data
-        if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
-        {
-            // If tensor has no padding read directly from stream.
-            stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
-        }
-        else
-        {
-            // If tensor has padding accessing tensor elements through execution window.
-            Window window;
-            window.use_tensor_dimensions(tensor_shape);
-
-            execute_window_loop(window, [&](const Coordinates & id)
-            {
-                stream.read(reinterpret_cast<char *>(tensor.ptr_to_element(id)), tensor.info()->element_size());
-            });
-        }
-    }
-    else
-    {
-        // If tensor has padding accessing tensor elements through execution window.
-        Window window;
-        window.use_tensor_dimensions(permuted_shape);
-
-        execute_window_loop(window, [&](const Coordinates & id)
-        {
-            Coordinates coords(id);
-            arm_compute::permute(coords, perm);
-            stream.read(reinterpret_cast<char *>(tensor.ptr_to_element(coords)), tensor.info()->element_size());
-        });
-    }
-    return true;
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
 }

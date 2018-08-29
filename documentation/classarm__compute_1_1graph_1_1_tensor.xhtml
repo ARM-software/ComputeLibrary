@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -153,6 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a628ae217fcdf428262157653be68021d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">ITensorAccessor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#a628ae217fcdf428262157653be68021d">accessor</a> ()</td></tr>
 <tr class="memdesc:a628ae217fcdf428262157653be68021d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Backend tensor accessor.  <a href="#a628ae217fcdf428262157653be68021d">More...</a><br /></td></tr>
 <tr class="separator:a628ae217fcdf428262157653be68021d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af471067707e0a541aff90a3cb03b215f"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#af471067707e0a541aff90a3cb03b215f">extract_accessor</a> ()</td></tr>
+<tr class="memdesc:af471067707e0a541aff90a3cb03b215f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts accessor from the tensor.  <a href="#af471067707e0a541aff90a3cb03b215f">More...</a><br /></td></tr>
+<tr class="separator:af471067707e0a541aff90a3cb03b215f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a88d65b04d950e6aba147624fcd308b34"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34">call_accessor</a> ()</td></tr>
 <tr class="memdesc:a88d65b04d950e6aba147624fcd308b34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calls accessor on tensor.  <a href="#a88d65b04d950e6aba147624fcd308b34">More...</a><br /></td></tr>
 <tr class="separator:a88d65b04d950e6aba147624fcd308b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -301,7 +304,7 @@ Public Member Functions</h2></td></tr>
 <p><a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> metadata accessor. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml" title="Tensor object. ">Tensor</a> descriptor metadata </dd></dl>
 
-<p>Referenced by <a class="el" href="arm__compute_2graph_2_utils_8h_source.xhtml#l00044">arm_compute::graph::get_tensor_descriptor()</a>.</p>
+<p>Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00056">arm_compute::graph::backends::detail::get_backing_tensor()</a>, and <a class="el" href="arm__compute_2graph_2_utils_8h_source.xhtml#l00044">arm_compute::graph::get_tensor_descriptor()</a>.</p>
 
 </div>
 </div>
@@ -323,6 +326,25 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af471067707e0a541aff90a3cb03b215f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">ITensorAccessor</a>&gt; extract_accessor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extracts accessor from the tensor. </p>
+<dl class="section warning"><dt>Warning</dt><dd>Accessor gets unbound from the tensor</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The accessor of the tensor </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a1a4fd35b8e2e8a2c7ea38b6d37508673"></a>
 <div class="memitem">
 <div class="memproto">
@@ -339,7 +361,7 @@ Public Member Functions</h2></td></tr>
 <p>Backend tensor handle accessor. </p>
 <dl class="section return"><dt>Returns</dt><dd>Backend tensor handle </dd></dl>
 
-<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00050">arm_compute::graph::backends::detail::get_backing_tensor_info()</a>.</p>
+<p>Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00056">arm_compute::graph::backends::detail::get_backing_tensor()</a>, and <a class="el" href="_validate_helpers_8h_source.xhtml#l00050">arm_compute::graph::backends::detail::get_backing_tensor_info()</a>.</p>
 
 </div>
 </div>
@@ -446,7 +468,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml">Tensor</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

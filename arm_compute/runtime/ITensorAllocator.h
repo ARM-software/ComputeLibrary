@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,9 +50,10 @@ public:
 
     /** Initialize a tensor based on the passed @ref TensorInfo.
      *
-     * @param[in] input TensorInfo object containing the description of the tensor to initialize.
+     * @param[in] input     TensorInfo object containing the description of the tensor to initialize.
+     * @param[in] alignment Alignment in bytes that the underlying base pointer should comply with.
      */
-    void init(const TensorInfo &input);
+    void init(const TensorInfo &input, size_t alignment = 0);
     /** Return a reference to the tensor's metadata
      *
      * @return Reference to the tensor's metadata.
@@ -63,6 +64,11 @@ public:
      * @return Constant reference to the tensor's metadata.
      */
     const TensorInfo &info() const;
+    /** Return underlying's tensor buffer alignment
+     *
+     * @return Tensor buffer alignment
+     */
+    size_t alignment() const;
 
     /** Interface to be implemented by the child class to allocate the tensor.
      *
@@ -87,7 +93,8 @@ protected:
     virtual void unlock() = 0;
 
 private:
-    TensorInfo _info; /**< Tensor's metadata. */
+    TensorInfo _info;      /**< Tensor's metadata. */
+    size_t     _alignment; /**< Tensor's alignment in bytes */
 };
 }
 #endif /*__ARM_COMPUTE_ITENSORALLOCATOR_H__ */

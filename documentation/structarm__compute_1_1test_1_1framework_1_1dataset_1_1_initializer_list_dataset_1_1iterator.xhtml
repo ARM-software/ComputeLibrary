@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -193,7 +193,7 @@ struct arm_compute::test::framework::dataset::InitializerListDataset&lt; T &gt;:
 
 <p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00076">76</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00119">InitializerListDataset&lt; T &gt;::begin()</a>.</p>
+<p>Referenced by <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00118">InitializerListDataset&lt; T &gt;::begin()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;            : _name{ <a class="code" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a> }, _iterator{ <a class="code" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#aca6a8613ae6d8960ace1c8894676ed3c">iterator</a> }</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        {</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        }</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset_xhtml_a37627d5d5bba7f4a8690c71c2ab3cb07"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_named_dataset.xhtml#a37627d5d5bba7f4a8690c71c2ab3cb07">arm_compute::test::framework::dataset::NamedDataset::name</a></div><div class="ttdeci">std::string name() const </div><div class="ttdoc">Return name of the dataset. </div><div class="ttdef"><b>Definition:</b> <a href="_dataset_8h_source.xhtml#l00079">Dataset.h:79</a></div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator_xhtml_aca6a8613ae6d8960ace1c8894676ed3c"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#aca6a8613ae6d8960ace1c8894676ed3c">arm_compute::test::framework::dataset::InitializerListDataset::iterator::iterator</a></div><div class="ttdeci">iterator(std::string name, data_const_iterator iterator)</div><div class="ttdoc">Construct an iterator for the dataset. </div><div class="ttdef"><b>Definition:</b> <a href="_initializer_list_dataset_8h_source.xhtml#l00076">InitializerListDataset.h:76</a></div></div>
 </div><!-- fragment -->
@@ -226,9 +226,8 @@ struct arm_compute::test::framework::dataset::InitializerListDataset&lt; T &gt;:
 
 <p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
 
-<p>References <a class="el" href="_dataset_modes_8h_source.xhtml#l00097">arm_compute::test::framework::to_string()</a>, and <a class="el" href="_toolchain_support_8h_source.xhtml#l00197">arm_compute::support::cpp11::to_string()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        {</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            <span class="keyword">using</span> <a class="code" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">support::cpp11::to_string</a>;</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="keywordflow">return</span> _name + <span class="stringliteral">&quot;=&quot;</span> + <a class="code" href="namespacearm__compute_1_1test_1_1framework.xhtml#ace86dc6f3dfa4f3c256b3999ab250c0a">to_string</a>(*_iterator);</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1framework_xhtml_ace86dc6f3dfa4f3c256b3999ab250c0a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1framework.xhtml#ace86dc6f3dfa4f3c256b3999ab250c0a">arm_compute::test::framework::to_string</a></div><div class="ttdeci">std::string to_string(DatasetMode mode)</div><div class="ttdef"><b>Definition:</b> <a href="_dataset_modes_8h_source.xhtml#l00097">DatasetModes.h:97</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1support_1_1cpp11_xhtml_acc5dddee1cbe93a4eaf0a9f74ee96bb7"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">arm_compute::support::cpp11::to_string</a></div><div class="ttdeci">std::string to_string(T &amp;&amp;value)</div><div class="ttdoc">Convert integer and float values to string. </div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00197">ToolchainSupport.h:197</a></div></div>
+<p>References <a class="el" href="tests_2_type_printer_8h_source.xhtml#l00064">arm_compute::to_string()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        {</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            <span class="keywordflow">return</span> _name + <span class="stringliteral">&quot;=&quot;</span> + <a class="code" href="namespacearm__compute.xhtml#ab75d8ff29ba9b398d5740b3efd156e71">arm_compute::to_string</a>(*_iterator);</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        }</div><div class="ttc" id="namespacearm__compute_xhtml_ab75d8ff29ba9b398d5740b3efd156e71"><div class="ttname"><a href="namespacearm__compute.xhtml#ab75d8ff29ba9b398d5740b3efd156e71">arm_compute::to_string</a></div><div class="ttdeci">std::string to_string(const arm_compute::GradientDimension &amp;type)</div><div class="ttdoc">Formatted output of the GradientDimension type. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2_type_printer_8h_source.xhtml#l00064">TypePrinter.h:64</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -256,8 +255,8 @@ struct arm_compute::test::framework::dataset::InitializerListDataset&lt; T &gt;:
 <p>Get the current value. </p>
 <dl class="section return"><dt>Returns</dt><dd>the current value. </dd></dl>
 
-<p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        {</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            <span class="keywordflow">return</span> std::make_tuple(*_iterator);</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        {</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">return</span> std::make_tuple(*_iterator);</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="af1b1c7856a59f34c7d3570f946a2ff00"></a>
@@ -284,8 +283,8 @@ struct arm_compute::test::framework::dataset::InitializerListDataset&lt; T &gt;:
 <p>Increment the iterator. </p>
 <dl class="section return"><dt>Returns</dt><dd>*this. </dd></dl>
 
-<p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        {</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            ++_iterator;</div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_initializer_list_dataset_8h_source.xhtml#l00103">103</a> of file <a class="el" href="_initializer_list_dataset_8h_source.xhtml">InitializerListDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        {</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            ++_iterator;</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
@@ -297,7 +296,7 @@ struct arm_compute::test::framework::dataset::InitializerListDataset&lt; T &gt;:
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework_1_1dataset.xhtml">dataset</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset.xhtml">InitializerListDataset</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml">iterator</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:53 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

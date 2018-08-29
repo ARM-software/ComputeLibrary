@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,14 +23,15 @@
  */
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include <cmath>
@@ -49,13 +50,24 @@ BorderSize CLMeanStdDevKernel::border_size() const
     return _border_size;
 }
 
+Status CLMeanStdDevKernel::validate(const ITensorInfo *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
+{
+    ARM_COMPUTE_UNUSED(mean);
+    ARM_COMPUTE_UNUSED(stddev);
+    ARM_COMPUTE_UNUSED(global_sum);
+    ARM_COMPUTE_UNUSED(global_sum_squared);
+    ARM_COMPUTE_RETURN_ERROR_ON_INT64_BASE_ATOMICS_UNSUPPORTED();
+    ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
+
+    return Status{};
+}
+
 void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev, cl::Buffer *global_sum_squared)
 {
-    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON(nullptr == mean);
-    ARM_COMPUTE_ERROR_ON(nullptr == global_sum);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, global_sum);
     ARM_COMPUTE_ERROR_ON(stddev && nullptr == global_sum_squared);
+    ARM_COMPUTE_ERROR_THROW_ON(CLMeanStdDevKernel::validate(input->info(), mean, global_sum, stddev, global_sum_squared));
 
     _input              = input;
     _mean               = mean;
@@ -94,7 +106,7 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
     update_window_and_padding(win, input_access);
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLMeanStdDevKernel::run(const Window &window, cl::CommandQueue &queue)

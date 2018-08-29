@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,8 +64,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     uint8_t                                constant_border_value = distribution_u8(gen);
 
     // Create the matrix
-    std::array<float, 6> matrix{ {} };
-    fill_warp_matrix<6>(matrix);
+    std::array<float, 9> matrix{ {} };
+    fill_warp_matrix<9>(matrix);
 
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -76,7 +76,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     NEWarpAffine warp_affine;
-    warp_affine.configure(&src, &dst, matrix.data(), policy, border_mode, constant_border_value);
+    warp_affine.configure(&src, &dst, matrix, policy, border_mode, constant_border_value);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);

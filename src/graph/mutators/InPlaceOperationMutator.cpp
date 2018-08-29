@@ -50,11 +50,26 @@ void InPlaceOperationMutator::mutate(Graph &g)
             // Check if parent has a single output if yes then force in place calculation else not
             if((input_edge != nullptr) && (input_edge->producer() != nullptr) && (input_edge->producer()->output_edges().size() == 1))
             {
-                ARM_COMPUTE_LOG_GRAPH_VERBOSE("Switching to in-place computation for the node with ID : "
-                                              << node->id() << " and name : " << node->name() << std::endl);
-                // Update output
-                auto tensor = input_edge->tensor();
-                node->set_output_tensor(tensor->id(), 0);
+                // Get current and new output tensors
+                auto current_output_tensor = node->output(0);
+                auto new_output_tensor     = input_edge->tensor();
+
+                ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr || new_output_tensor == nullptr);
+
+                // Prevent in-place operation if there is an accessor bound to the in-place tensor
+                if(new_output_tensor->accessor() == nullptr)
+                {
+                    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Switching to in-place computation for the node with ID : "
+                                                  << node->id() << " and name : " << node->name() << std::endl);
+                    // Update accessor
+                    new_output_tensor->set_accessor(current_output_tensor->extract_accessor());
+                    // Update output
+                    node->set_output_tensor(new_output_tensor->id(), 0);
+                }
+                else
+                {
+                    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor\n");
+                }
             }
         }
     }

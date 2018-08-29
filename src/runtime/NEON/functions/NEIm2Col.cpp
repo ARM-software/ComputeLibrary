@@ -34,16 +34,18 @@ NEIm2Col::NEIm2Col()
 {
 }
 
-void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected, bool is_flatten)
+void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, unsigned int num_groups,
+                         bool is_fully_connected, bool is_flatten)
 {
     _y_dim = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
 
-    _kernel.configure(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten);
+    _kernel.configure(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups, is_fully_connected, is_flatten);
 }
 
-Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected, bool is_flatten)
+Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
+                          unsigned int num_groups, bool is_fully_connected, bool is_flatten)
 {
-    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten);
+    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups, is_fully_connected, is_flatten);
 }
 
 void NEIm2Col::run()

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Flatten Layer. </p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00264">264</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00362">362</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a9122dc9cbefd8f81b092eadeae658202"></a>
 <div class="memitem">
@@ -180,8 +180,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Construct a flatten layer. </p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00268">268</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    {</div><div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00366">366</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;    {</div><div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -218,10 +218,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00272">272</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00370">370</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">GraphBuilder::add_flatten_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00064">StreamHints::target_hint</a>.</p>
-<div class="fragment"><div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    {</div><div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">GraphBuilder::add_flatten_node</a>(s.graph(), common_params, input);</div><div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a822583f5b38ff029ea1e1c221dbfe19f"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">arm_compute::graph::GraphBuilder::add_flatten_node</a></div><div class="ttdeci">static NodeID add_flatten_node(Graph &amp;g, NodeParams params, NodeIdxPair input)</div><div class="ttdoc">Adds a flatten layer node to the graph. </div></div>
+<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">GraphBuilder::add_flatten_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00068">StreamHints::target_hint</a>.</p>
+<div class="fragment"><div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    {</div><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">GraphBuilder::add_flatten_node</a>(s.graph(), common_params, input);</div><div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a822583f5b38ff029ea1e1c221dbfe19f"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">arm_compute::graph::GraphBuilder::add_flatten_node</a></div><div class="ttdeci">static NodeID add_flatten_node(Graph &amp;g, NodeParams params, NodeIdxPair input)</div><div class="ttdoc">Adds a flatten layer node to the graph. </div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_a324e8c54c4c5161913681a1a52fef959"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const </div><div class="ttdoc">Layer name accessor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -235,7 +235,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_flatten_layer.xhtml">FlattenLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

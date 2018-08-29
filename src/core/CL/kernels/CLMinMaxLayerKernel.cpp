@@ -62,7 +62,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     TensorShape output_shape = compute_min_max_shape(input);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, output_shape, 1, input->data_type());
 
     const unsigned int num_elems_processed_per_iteration = 1;
 
@@ -105,7 +105,7 @@ void CLMinMaxLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 Status CLMinMaxLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)

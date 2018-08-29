@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,8 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        library->fill_tensor_uniform(tensor, 0);
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, 0);
     }
 
     TensorType compute_target(const TensorShape &src_shape, const TensorShape &dst_shape, DataType data_type, unsigned int axis, ReductionOperation op)

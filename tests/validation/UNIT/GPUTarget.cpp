@@ -47,7 +47,7 @@ TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51") == GPUTarget::G51, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51BIG") == GPUTarget::G51BIG, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G51LIT") == GPUTarget::G51LIT, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TNOX") == GPUTarget::TNOX, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(get_target_from_name("Mali-G76") == GPUTarget::G76, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TTRX") == GPUTarget::TTRX, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-TBOX") == GPUTarget::TBOX, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(get_target_from_name("Mali-T000") == GPUTarget::MIDGARD, framework::LogLevel::ERRORS);

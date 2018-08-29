@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -150,9 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a724673b78b929bbbd03f746c75ad2ec7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml">INEWarpKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a724673b78b929bbbd03f746c75ad2ec7">operator=</a> (<a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml">INEWarpKernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:a724673b78b929bbbd03f746c75ad2ec7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#a724673b78b929bbbd03f746c75ad2ec7">More...</a><br /></td></tr>
 <tr class="separator:a724673b78b929bbbd03f746c75ad2ec7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2788f35df697fab62501262ad001d1f0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a2788f35df697fab62501262ad001d1f0">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
-<tr class="memdesc:a2788f35df697fab62501262ad001d1f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and border mode.  <a href="#a2788f35df697fab62501262ad001d1f0">More...</a><br /></td></tr>
-<tr class="separator:a2788f35df697fab62501262ad001d1f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc8e205d7ea06ff93a2e023970712993"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#acc8e205d7ea06ff93a2e023970712993">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const std::array&lt; float, 9 &gt; &amp;matrix, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="memdesc:acc8e205d7ea06ff93a2e023970712993"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and border mode.  <a href="#acc8e205d7ea06ff93a2e023970712993">More...</a><br /></td></tr>
+<tr class="separator:acc8e205d7ea06ff93a2e023970712993"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -283,7 +283,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2788f35df697fab62501262ad001d1f0"></a>
+<a class="anchor" id="acc8e205d7ea06ff93a2e023970712993"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -305,7 +305,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *&#160;</td>
+          <td class="paramtype">const std::array&lt; float, 9 &gt; &amp;&#160;</td>
           <td class="paramname"><em>matrix</em>, </td>
         </tr>
         <tr>
@@ -338,7 +338,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: U8. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: U8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">matrix</td><td>The perspective or affine matrix to use. Must be 2x3 for affine and 3x3 for perspective of type float. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">matrix</td><td>The perspective or affine matrix to use. Must be 2x3 for affine and 3x3 for perspective of type float. The matrix argument requires 9 values, for the affine case the last 3 values are ignored. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Strategy to use for borders </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">constant_border_value</td><td>Constant value used for filling the border. </td></tr>
   </table>
@@ -457,7 +457,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml">INEWarpKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

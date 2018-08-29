@@ -41,7 +41,7 @@ template <typename T, typename TB>
 SimpleTensor<T> locally_connected(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
 {
     // Create reference
-    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.quantization_info() };
 
     // Compute reference
     const int width_in  = src.shape().x();

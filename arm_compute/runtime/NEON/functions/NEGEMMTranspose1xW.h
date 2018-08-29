@@ -38,13 +38,13 @@ class NEGEMMTranspose1xW : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data type supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32/
+     * @param[in]  input  First input tensor. Data type supported: U8/S8/U16/S16/F16/U32/S32/F32/
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xW
      *
-     * @param[in] input  First input tensor. Data type supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32/
+     * @param[in] input  First input tensor. Data type supported: U8/S8/U16/S16/F16/U32/S32/F32/
      * @param[in] output Output tensor. Data type supported: same as @p input
      *
      * @return a status

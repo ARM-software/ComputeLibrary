@@ -74,8 +74,16 @@ void CLTensorAllocator::allocate()
 
     if(_associated_memory_group == nullptr)
     {
-        ARM_COMPUTE_ERROR_ON(_memory.region()->cl_data().get() != nullptr);
-        _memory = CLMemory(allocate_region(CLScheduler::get().context(), info().total_size(), 0));
+        if(_memory.region()->cl_data().get() != nullptr)
+        {
+            // Memory is already allocated. Reuse it if big enough, otherwise fire an assertion
+            ARM_COMPUTE_ERROR_ON_MSG(info().total_size() > _memory.region()->size(), "Reallocation of a bigger memory region is not allowed!");
+        }
+        else
+        {
+            // Perform memory allocation
+            _memory = CLMemory(allocate_region(CLScheduler::get().context(), info().total_size(), 0));
+        }
     }
     else
     {

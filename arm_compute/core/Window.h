@@ -224,7 +224,13 @@ public:
      * @return The number of iterations
      */
     constexpr size_t num_iterations(size_t dimension) const;
-
+    /** Return the total number of iterations needed to iterate through the entire window
+     *
+     * @return Number of total iterations
+     */
+    size_t num_iterations_total() const;
+    /** Return the shape of the window in number of steps */
+    TensorShape shape() const;
     /** Split a window into a set of sub windows along a given dimension
      *
      * For example to split a window into 3 sub-windows along the Y axis, you would have to do:<br/>

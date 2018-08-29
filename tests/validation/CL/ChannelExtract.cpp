@@ -76,6 +76,7 @@ inline void validate_configuration(const TensorShape &shape, Format format, Chan
     {
         channel_extract.configure(&ref_src, channel, &dst);
     }
+
 }
 } // namespace
 

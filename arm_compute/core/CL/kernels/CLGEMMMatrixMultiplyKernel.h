@@ -53,7 +53,7 @@ public:
     CLGEMMMatrixMultiplyKernel &operator=(CLGEMMMatrixMultiplyKernel &&) = default;
     /** Initialise the kernel's input, output and alpha
      *
-     * @param[in]  input0                    Input tensor containing the Matrix A. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input0                    Input tensor containing the Matrix A. Data types supported: F16/F32
      * @param[in]  input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha                     Weight of the matrix product
@@ -64,7 +64,7 @@ public:
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyKernel
      *
-     * @param[in] input0                    Input tensor containing the Matrix A. Data types supported: QS8/QS16/F16/F32
+     * @param[in] input0                    Input tensor containing the Matrix A. Data types supported: F16/F32
      * @param[in] input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[in] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in] alpha                     Weight of the matrix product
@@ -80,11 +80,13 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
+public:
     const ICLTensor *_input0;
     const ICLTensor *_input1;
     ICLTensor       *_output;
     bool             _slide_matrix_b;
+    bool             _reinterpret_input_as_3d;
+    bool             _reinterpret_output_as_3d;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMMATRIXMULTIPLYKERNEL_H__ */

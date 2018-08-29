@@ -41,7 +41,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class NormalizePlanarYUVLayerValidationFixedPointFixture : public framework::Fixture
+class NormalizePlanarYUVLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -122,17 +122,6 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class NormalizePlanarYUVLayerValidationFixture : public NormalizePlanarYUVLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, DataType dt)
-    {
-        NormalizePlanarYUVLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, dt);
-    }
 };
 } // namespace validation
 } // namespace test

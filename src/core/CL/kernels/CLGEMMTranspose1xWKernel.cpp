@@ -27,12 +27,12 @@
 #include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
@@ -46,8 +46,9 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int mult_transpose1xW_width)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(mult_transpose1xW_width < 1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
-                                                         DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S8,
+                                                         DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
 
     if(output->total_size() != 0)
@@ -55,7 +56,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
                                                            compute_transpose1xW_with_element_size_shape(*input, mult_transpose1xW_width));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -107,7 +107,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
     unsigned int num_elems_processed_per_iteration = 1;
     auto         win_config                        = validate_and_configure_window(input->info(), output->info(), num_elems_processed_per_iteration, mult_transpose1xW_width);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Create build options
     CLBuildOptions build_opts;
@@ -157,7 +157,7 @@ void CLGEMMTranspose1xWKernel::run(const Window &window, cl::CommandQueue &queue
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, in_slice);
         add_3D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice, _lws_hint);
+        enqueue(queue, *this, in_slice, lws_hint());
     }
     while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_3D(out_slice));
 }

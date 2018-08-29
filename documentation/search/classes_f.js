@@ -6,7 +6,7 @@ var searchData=
   ['openclmemoryusage',['OpenCLMemoryUsage',['../classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml',1,'arm_compute::test::framework']]],
   ['opencltimer',['OpenCLTimer',['../classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml',1,'arm_compute::test::framework']]],
   ['opticalflowparameters',['OpticalFlowParameters',['../structarm__compute_1_1_optical_flow_parameters.xhtml',1,'arm_compute']]],
-  ['option',['Option',['../classarm__compute_1_1test_1_1framework_1_1_option.xhtml',1,'arm_compute::test::framework']]],
+  ['option',['Option',['../classarm__compute_1_1utils_1_1_option.xhtml',1,'arm_compute::utils']]],
   ['outputlayer',['OutputLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_output_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['outputnode',['OutputNode',['../classarm__compute_1_1graph_1_1_output_node.xhtml',1,'arm_compute::graph']]]
 ];

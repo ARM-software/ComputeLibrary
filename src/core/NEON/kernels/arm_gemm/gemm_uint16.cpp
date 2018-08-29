@@ -25,24 +25,37 @@
 
 #include "arm_gemm.hpp"
 #include "gemm_common.hpp"
+#include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 
 #include "kernels/a64_gemm_u16_12x8.hpp"
 
-namespace arm_gemm
-{
-template <>
-UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
-                                                              const unsigned int nbatches, const unsigned int nmulti,
-                                                              const bool trA, const bool trB, uint32_t alpha, uint32_t beta,
-                                                              const int maxthreads, const bool pretransposed_hint)
-{
-    return UniqueGemmCommon<uint16_t, uint32_t>(new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+namespace arm_gemm {
+
+class GemmImpl_gemm_u16_interleaved : public GemmImplementation<uint16_t, uint32_t> {
+public:
+    UniqueGemmCommon<uint16_t, uint32_t> instantiate(const GemmArgs<uint32_t> &args) override {
+        return UniqueGemmCommon<uint16_t, uint32_t>(new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(args));
+    }
+
+    GemmImpl_gemm_u16_interleaved() : GemmImplementation<uint16_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED) { }
+};
+
+static GemmImpl_gemm_u16_interleaved gemm_u16_interleaved_impl{};
+
+static std::vector<GemmImplementation<uint16_t, uint32_t> *> gemm_u16_methods = {
+    &gemm_u16_interleaved_impl
+};
+
+template<>
+std::vector<GemmImplementation<uint16_t, uint32_t> *> &gemm_implementation_list<uint16_t, uint32_t>() {
+    return gemm_u16_methods;
 }
 
-// Instantiate static class members
-const int gemm_u16_12x8::out_width;
-const int gemm_u16_12x8::out_height;
+/* Explicitly instantiate the external functions for these types. */
+template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(GemmArgs<uint32_t> &args, GemmConfig *cfg);
+template GemmMethod get_gemm_method<uint16_t, uint32_t>(GemmArgs<uint32_t> &args);
+template bool method_is_compatible<uint16_t, uint32_t>(GemmMethod method, GemmArgs<uint32_t> &args);
 
 } // namespace arm_gemm
 

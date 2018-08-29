@@ -5,6 +5,7 @@ var classarm__compute_1_1_c_l_symbols =
     [ "clBuildProgram_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ad35af0d314615874e570540e9853668c", null ],
     [ "clCreateBuffer_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a301b84af701238b357de87434d0327a9", null ],
     [ "clCreateCommandQueue_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a9edd71637c165f39e1913b22bdafcd67", null ],
+    [ "clCreateContext_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a14a1465f79e3703561c9ee0723276603", null ],
     [ "clCreateContextFromType_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#af60dbcf4d37ee4dd2c34cfbf08e64671", null ],
     [ "clCreateKernel_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a02aff28f848c48e02fababe120a0df36", null ],
     [ "clCreateProgramWithBinary_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a2263b6ca759bdfed0a0727d2b68db916", null ],

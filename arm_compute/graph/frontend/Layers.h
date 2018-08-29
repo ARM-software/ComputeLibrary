@@ -154,6 +154,30 @@ private:
     float               _epsilon;
 };
 
+/** Channel Shuffle Layer */
+class ChannelShuffleLayer final : public ILayer
+{
+public:
+    /** Construct a Channel Shuffle layer.
+     *
+     * @param[in] num_groups Number of groups
+     */
+    ChannelShuffleLayer(unsigned int num_groups)
+        : _num_groups(num_groups)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_channel_shuffle_node(s.graph(), common_params, input, _num_groups);
+    }
+
+private:
+    unsigned int _num_groups;
+};
+
 /** Convolution Layer */
 class ConvolutionLayer final : public ILayer
 {
@@ -213,6 +237,56 @@ private:
     const QuantizationInfo _out_quant_info;
 };
 
+/** Deconvolution Layer */
+class DeconvolutionLayer final : public ILayer
+{
+public:
+    /** Construct a convolution layer.
+     *
+     * @param[in] conv_width   Convolution width.
+     * @param[in] conv_height  Convolution height.
+     * @param[in] ofm          Output feature map.
+     * @param[in] weights      Accessor to get kernel weights from.
+     * @param[in] bias         Accessor to get kernel bias from.
+     * @param[in] deconv_info  Padding and stride information.
+     * @param[in] inner_border Inner border padding (right, top)
+     */
+    DeconvolutionLayer(unsigned int        conv_width,
+                       unsigned int        conv_height,
+                       unsigned int        ofm,
+                       ITensorAccessorUPtr weights,
+                       ITensorAccessorUPtr bias,
+                       PadStrideInfo       deconv_info,
+                       Size2D              inner_border)
+        : _conv_width(conv_width),
+          _conv_height(conv_height),
+          _ofm(ofm),
+          _deconv_info(std::move(deconv_info)),
+          _inner_border(inner_border),
+          _weights(std::move(weights)),
+          _bias(std::move(bias))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        return GraphBuilder::add_deconvolution_node(s.graph(), common_params, input,
+                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info, _inner_border,
+                                                    std::move(_weights), std::move(_bias));
+    }
+
+private:
+    unsigned int        _conv_width;
+    unsigned int        _conv_height;
+    unsigned int        _ofm;
+    const PadStrideInfo _deconv_info;
+    Size2D              _inner_border;
+    ITensorAccessorUPtr _weights;
+    ITensorAccessorUPtr _bias;
+};
+
 /** Depthwise Convolution Layer */
 class DepthwiseConvolutionLayer final : public ILayer
 {
@@ -260,6 +334,30 @@ private:
     const QuantizationInfo _quant_info;
 };
 
+/** Dummy Layer */
+class DummyLayer final : public ILayer
+{
+public:
+    /** Construct an input layer.
+     *
+     * @param[in] shape Output shape
+     */
+    DummyLayer(TensorShape shape)
+        : _shape(shape)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
+    }
+
+private:
+    TensorShape _shape;
+};
+
 /** Flatten Layer */
 class FlattenLayer final : public ILayer
 {
@@ -283,14 +381,25 @@ class FullyConnectedLayer final : public ILayer
 public:
     /** Construct a fully connected layer.
      *
-     * @param[in] num_outputs Number of outputs.
-     * @param[in] weights     Accessor to get weights from.
-     * @param[in] bias        Accessor to get bias from.
+     * @param[in] num_outputs        Number of outputs.
+     * @param[in] weights            Accessor to get weights from.
+     * @param[in] bias               Accessor to get bias from.
+     * @param[in] fc_info            (Optional) Fully connected layer metadata
+     * @param[in] weights_quant_info (Optional) Weights quantization information
+     * @param[in] out_quant_info     (Optional) Output quantization info
      */
-    FullyConnectedLayer(unsigned int        num_outputs,
-                        ITensorAccessorUPtr weights,
-                        ITensorAccessorUPtr bias)
-        : _num_outputs(num_outputs), _weights(std::move(weights)), _bias(std::move(bias))
+    FullyConnectedLayer(unsigned int                  num_outputs,
+                        ITensorAccessorUPtr           weights,
+                        ITensorAccessorUPtr           bias,
+                        const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                        const QuantizationInfo        weights_quant_info = QuantizationInfo(),
+                        const QuantizationInfo        out_quant_info     = QuantizationInfo())
+        : _num_outputs(num_outputs),
+          _weights(std::move(weights)),
+          _bias(std::move(bias)),
+          _fc_info(fc_info),
+          _weights_quant_info(std::move(weights_quant_info)),
+          _out_quant_info(std::move(out_quant_info))
     {
     }
 
@@ -299,13 +408,17 @@ public:
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
-                                                       std::move(_weights), std::move(_bias));
+                                                       std::move(_weights), std::move(_bias), _fc_info,
+                                                       std::move(_weights_quant_info), std::move(_out_quant_info));
     }
 
 private:
-    unsigned int        _num_outputs;
-    ITensorAccessorUPtr _weights;
-    ITensorAccessorUPtr _bias;
+    unsigned int                  _num_outputs;
+    ITensorAccessorUPtr           _weights;
+    ITensorAccessorUPtr           _bias;
+    const FullyConnectedLayerInfo _fc_info;
+    const QuantizationInfo        _weights_quant_info;
+    const QuantizationInfo        _out_quant_info;
 };
 
 /** Normalization Layer */
@@ -330,6 +443,33 @@ public:
 
 private:
     NormalizationLayerInfo _norm_info;
+};
+
+/** Permute Layer */
+class PermuteLayer final : public ILayer
+{
+public:
+    /** Construct a permute layer.
+     *
+     * @param[in] perm   Permutation vector.
+     * @param[in] layout (Optional) Data layout to assign to permuted tensor.
+     *                   If UNKNOWN then the input's layout will be used.
+     */
+    PermuteLayer(PermutationVector perm, DataLayout layout = DataLayout::UNKNOWN)
+        : _perm(perm), _layout(layout)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_permute_node(s.graph(), common_params, input, _perm, _layout);
+    }
+
+private:
+    PermutationVector _perm;
+    DataLayout        _layout;
 };
 
 /** Pooling Layer */
@@ -378,6 +518,28 @@ public:
 
 private:
     TensorShape _shape;
+};
+
+/** Resize Layer */
+class ResizeLayer final : public ILayer
+{
+public:
+    ResizeLayer(InterpolationPolicy policy, float width_scale, float height_scale)
+        : _policy(policy), _width_scale(width_scale), _height_scale(height_scale)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_resize_node(s.graph(), common_params, input, _policy, _width_scale, _height_scale);
+    }
+
+private:
+    InterpolationPolicy _policy;
+    float               _width_scale;
+    float               _height_scale;
 };
 
 /** Scale Layer */
@@ -475,7 +637,7 @@ public:
         }
         else if(_branch_merge_method == BranchMergeMethod::DEPTH_CONCATENATE)
         {
-            // Collect tail nodes and perform DepthConcatenate
+            // Collect tail nodes and concatenate
             std::vector<NodeIdxPair> nodes;
             for(auto &ss : _sub_streams)
             {
@@ -488,14 +650,14 @@ public:
                     }
                 }
             }
-            nid = GraphBuilder::add_depth_concatenate_node(s.graph(), common_params, nodes);
+            nid = GraphBuilder::add_concatenate_node(s.graph(), common_params, nodes, DataLayoutDimension::CHANNEL);
         }
         else
         {
             ARM_COMPUTE_ERROR_ON(_sub_streams.size() != 2);
             NodeIdxPair input0 = { _sub_streams[0]->tail_node(), 0 };
             NodeIdxPair input1 = { _sub_streams[1]->tail_node(), 0 };
-            nid                = GraphBuilder::add_elementwise_node(s.graph(), common_params, input0, input1, EltwiseOperation::ADD);
+            nid                = GraphBuilder::add_elementwise_node(s.graph(), common_params, input0, input1, EltwiseOperation::Add);
         }
         return nid;
     }

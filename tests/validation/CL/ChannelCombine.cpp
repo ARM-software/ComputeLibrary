@@ -65,6 +65,7 @@ inline void validate_configuration(const TensorShape &shape, Format format)
     {
         channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], &dst);
     }
+
 }
 } // namespace
 

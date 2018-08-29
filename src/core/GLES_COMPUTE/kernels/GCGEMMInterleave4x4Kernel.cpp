@@ -51,7 +51,7 @@ void GCGEMMInterleave4x4Kernel::configure(const IGCTensor *input, IGCTensor *out
     output_shape.set(1, std::ceil(input->info()->dimension(1) / 4.0f));
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

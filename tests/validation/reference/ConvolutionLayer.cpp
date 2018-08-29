@@ -23,7 +23,6 @@
  */
 #include "ConvolutionLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Convolution3d.h"
 #include "tests/validation/reference/Permute.h"
@@ -48,8 +47,10 @@ namespace
 
 template <typename T, typename TB>
 SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &dst, const PadStrideInfo &info,
-                                       const Size2D &dilation)
+                                       const Size2D &dilation, unsigned int num_groups)
 {
+    ARM_COMPUTE_ERROR_ON((src.shape()[2] / num_groups) != weights.shape()[2]);
+
     // Compute reference
     const int width_in       = src.shape().x();
     const int height_in      = src.shape().y();
@@ -79,23 +80,28 @@ SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleT
         {
             for(int xi = start_xi; xi < start_xi + end_xi; xi += stride_xi)
             {
-                for(int ofm = 0; ofm < depth_out; ++ofm)
+                for(int group = 0; group < static_cast<int>(num_groups); ++group)
                 {
-                    // Compute input and output offsets
-                    const int offset_in  = r * width_in * height_in * depth_in;
-                    const int xo         = (xi - start_xi) / stride_xi;
-                    const int yo         = (yi - start_yi) / stride_yi;
-                    const int offset_out = xo + yo * width_out + ofm * width_out * height_out + r * width_out * height_out * depth_out;
+                    for(int ofm = 0; ofm < static_cast<int>(depth_out / num_groups); ++ofm)
+                    {
+                        // Compute input and output offsets
+                        const int offset_in  = r * width_in * height_in * depth_in + (group * (depth_in / num_groups) * width_in * height_in);
+                        const int xo         = (xi - start_xi) / stride_xi;
+                        const int yo         = (yi - start_yi) / stride_yi;
+                        const int offset_out = xo + yo * width_out + ((ofm + group * (depth_out / num_groups)) * width_out * height_out) + (r * width_out * height_out * depth_out);
+                        const int offset_w   = (ofm + group * (depth_out / num_groups)) * width_weights * height_weights * depth_weights;
+                        const int offset_b   = (ofm + group * (depth_out / num_groups));
 
-                    ARM_COMPUTE_ASSERT(xo < width_out);
-                    ARM_COMPUTE_ASSERT(yo < height_out);
+                        ARM_COMPUTE_ASSERT(xo < width_out);
+                        ARM_COMPUTE_ASSERT(yo < height_out);
 
-                    // Compute 3D convolution
-                    convolution_3d::detail::convolution3d(src, weights, bias, dst,
-                                                          offset_in, ofm * width_weights * height_weights * depth_weights, ofm, offset_out,
-                                                          xi, yi,
-                                                          width_in, height_in, depth_in,
-                                                          width_weights, height_weights, dilation.x(), dilation.y());
+                        // Compute 3D convolution
+                        convolution_3d::detail::convolution3d(src, weights, bias, dst,
+                                                              offset_in, offset_w, offset_b, offset_out,
+                                                              xi, yi,
+                                                              width_in, height_in, (depth_in / num_groups),
+                                                              width_weights, height_weights, dilation.x(), dilation.y());
+                    }
                 }
             }
         }
@@ -105,10 +111,10 @@ SimpleTensor<T> convolution_layer_nchw(const SimpleTensor<T> &src, const SimpleT
 }
 template <typename T, typename TB>
 SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                  const Size2D &dilation)
+                                  const Size2D &dilation, unsigned int num_groups)
 {
     // Create reference
-    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.quantization_info() };
 
     if(src.data_layout() == DataLayout::NHWC)
     {
@@ -116,24 +122,20 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
         SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
         SimpleTensor<T> dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
 
-        return reference::permute<T>(convolution_layer_nchw(src_nchw, weights_nchw, bias, dst_nchw, info, dilation), PermutationVector(2U, 0U, 1U));
+        return reference::permute<T>(convolution_layer_nchw(src_nchw, weights_nchw, bias, dst_nchw, info, dilation, num_groups), PermutationVector(2U, 0U, 1U));
     }
     else
     {
-        return convolution_layer_nchw(src, weights, bias, dst, info, dilation);
+        return convolution_layer_nchw(src, weights, bias, dst, info, dilation, num_groups);
     }
 }
 
 template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
-                                               const PadStrideInfo &info, const Size2D &dilation);
+                                               const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups);
 template SimpleTensor<half> convolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                              const PadStrideInfo &info, const Size2D &dilation);
-template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info, const Size2D &dilation);
-template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
-                                                  const PadStrideInfo &info, const Size2D &dilation);
+                                              const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups);
 template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info, const Size2D &dilation);
+                                                 const PadStrideInfo &info, const Size2D &dilation, unsigned int num_groups);
 } // namespace reference
 } // namespace validation
 } // namespace test

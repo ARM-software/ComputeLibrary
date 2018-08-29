@@ -75,7 +75,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
         unsigned int pooled_w = 0;
         unsigned int pooled_h = 0;
@@ -118,8 +117,7 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
 
     auto_init(input, output, pooled_w, pooled_h);
 
-    BorderSize     border_size = BorderSize(pool_pad_y, pool_pad_x);
-    const DataType data_type   = input->data_type();
+    BorderSize border_size = BorderSize(pool_pad_y, pool_pad_x);
 
     const int input_width  = input->dimension(0);
     const int input_height = input->dimension(1);
@@ -131,7 +129,7 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
     {
         // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenGLES kernel where
         // each thread computes 4 output elements
-        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
+        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3);
 
         int num_elems_read_per_iteration = pool_size;
 
@@ -261,8 +259,6 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     _output    = output;
     _pool_info = pool_info;
 
-    const DataType data_type = input->info()->data_type();
-
     // Set build options
     std::set<std::string> build_opts;
     build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(1));
@@ -293,7 +289,7 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     {
         // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenGLES kernel where
         // each thread computes 4 output elements
-        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
+        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3);
 
         std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
         if(is_pool3x3_stride_le3)

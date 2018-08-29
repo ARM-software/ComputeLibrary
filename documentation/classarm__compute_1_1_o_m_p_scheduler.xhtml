@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -142,9 +142,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0da94220ee1e0f4928aa31ed0d4b30f7"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">num_threads</a> () const override</td></tr>
 <tr class="memdesc:a0da94220ee1e0f4928aa31ed0d4b30f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of threads that the <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. ">OMPScheduler</a> has in its pool.  <a href="#a0da94220ee1e0f4928aa31ed0d4b30f7">More...</a><br /></td></tr>
 <tr class="separator:a0da94220ee1e0f4928aa31ed0d4b30f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4fc1e7b1c1d9d42903cfc48351e57ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">schedule</a> (<a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a> *kernel, unsigned int split_dimension) override</td></tr>
-<tr class="memdesc:aa4fc1e7b1c1d9d42903cfc48351e57ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multithread the execution of the passed kernel if possible.  <a href="#aa4fc1e7b1c1d9d42903cfc48351e57ad">More...</a><br /></td></tr>
-<tr class="separator:aa4fc1e7b1c1d9d42903cfc48351e57ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d6828523921b7f9313f64c48550617f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a8d6828523921b7f9313f64c48550617f">schedule</a> (<a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a> *kernel, const <a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml">Hints</a> &amp;hints) override</td></tr>
+<tr class="memdesc:a8d6828523921b7f9313f64c48550617f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multithread the execution of the passed kernel if possible.  <a href="#a8d6828523921b7f9313f64c48550617f">More...</a><br /></td></tr>
+<tr class="separator:a8d6828523921b7f9313f64c48550617f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbe7dbaeedd9d2cf45f50a4c1c4260c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#acbe7dbaeedd9d2cf45f50a4c1c4260c3">run_workloads</a> (std::vector&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> &gt; &amp;workloads) override</td></tr>
+<tr class="memdesc:acbe7dbaeedd9d2cf45f50a4c1c4260c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute all the passed workloads.  <a href="#acbe7dbaeedd9d2cf45f50a4c1c4260c3">More...</a><br /></td></tr>
+<tr class="separator:acbe7dbaeedd9d2cf45f50a4c1c4260c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_scheduler"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_scheduler')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a></td></tr>
 <tr class="memitem:a34956db09db14c551e9966c9b66036f9 inherit pub_methods_classarm__compute_1_1_i_scheduler"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a34956db09db14c551e9966c9b66036f9">IScheduler</a> ()</td></tr>
 <tr class="memdesc:a34956db09db14c551e9966c9b66036f9 inherit pub_methods_classarm__compute_1_1_i_scheduler"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a34956db09db14c551e9966c9b66036f9">More...</a><br /></td></tr>
@@ -164,6 +167,18 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a9571a5288c1b52189b63f9e1074768e3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml">OMPScheduler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a9571a5288c1b52189b63f9e1074768e3">get</a> ()</td></tr>
 <tr class="memdesc:a9571a5288c1b52189b63f9e1074768e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the scheduler singleton.  <a href="#a9571a5288c1b52189b63f9e1074768e3">More...</a><br /></td></tr>
 <tr class="separator:a9571a5288c1b52189b63f9e1074768e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_types_classarm__compute_1_1_i_scheduler"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classarm__compute_1_1_i_scheduler')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a></td></tr>
+<tr class="memitem:ad3ab921e075d1edd827faf95870aa808 inherit pub_types_classarm__compute_1_1_i_scheduler"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808">StrategyHint</a> { <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808afe6f99ef1ec99efbdc19a9786cf1facc">STATIC</a>, 
+<a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808a0fcc90da4811c877ba9f9c12f7d60bc9">DYNAMIC</a>
+ }<tr class="memdesc:ad3ab921e075d1edd827faf95870aa808"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strategies available to split a workload.  <a href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808">More...</a><br /></td></tr>
+</td></tr>
+<tr class="separator:ad3ab921e075d1edd827faf95870aa808 inherit pub_types_classarm__compute_1_1_i_scheduler"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cdc00a99619ba76bf79a466cb85d4da inherit pub_types_classarm__compute_1_1_i_scheduler"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> = std::function&lt; void(const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;)&gt;</td></tr>
+<tr class="memdesc:a4cdc00a99619ba76bf79a466cb85d4da inherit pub_types_classarm__compute_1_1_i_scheduler"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signature for the workloads to execute.  <a href="#a4cdc00a99619ba76bf79a466cb85d4da">More...</a><br /></td></tr>
+<tr class="separator:a4cdc00a99619ba76bf79a466cb85d4da inherit pub_types_classarm__compute_1_1_i_scheduler"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Pool of threads to automatically split a kernel's execution among several threads. </p>
@@ -224,7 +239,42 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa4fc1e7b1c1d9d42903cfc48351e57ad"></a>
+<a class="anchor" id="acbe7dbaeedd9d2cf45f50a4c1c4260c3"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void run_workloads </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>workloads</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Execute all the passed workloads. </p>
+<dl class="section note"><dt>Note</dt><dd>there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">workloads</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of workloads to run </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a44031826ec875224d24d820d71934502">IScheduler</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8d6828523921b7f9313f64c48550617f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -240,8 +290,8 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>split_dimension</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml">Hints</a> &amp;&#160;</td>
+          <td class="paramname"><em>hints</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -264,12 +314,12 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel</td><td><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> to execute. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">split_dimension</td><td>Dimension along which to split the kernel's execution window. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hints</td><td>Hints for the scheduler. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a38e28e556fea6e2024019dbb9c7cc943">IScheduler</a>.</p>
+<p>Implements <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler</a>.</p>
 
 </div>
 </div>
@@ -316,7 +366,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml">OMPScheduler</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:50 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

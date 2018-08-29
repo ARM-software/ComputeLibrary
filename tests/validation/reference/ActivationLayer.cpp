@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "ActivationLayer.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -39,7 +38,7 @@ template <typename T, typename std::enable_if<is_floating_point<T>::value, int>:
 SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const T a(info.a());
@@ -92,68 +91,6 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
     return dst;
 }
 
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
-{
-    using namespace fixed_point_arithmetic;
-
-    // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
-
-    // Compute reference
-    const int            fixed_point_position = src.fixed_point_position();
-    const fixed_point<T> a(info.a(), fixed_point_position);
-    const fixed_point<T> b(info.b(), fixed_point_position);
-    const fixed_point<T> const_0(0, fixed_point_position);
-    const fixed_point<T> const_1(1, fixed_point_position);
-
-    for(int i = 0; i < src.num_elements(); ++i)
-    {
-        fixed_point<T> x(src[i], fixed_point_position, true);
-
-        switch(info.activation())
-        {
-            case ActivationLayerInfo::ActivationFunction::ABS:
-                dst[i] = abs(x).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::LINEAR:
-                dst[i] = add(b, mul(a, x)).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                dst[i] = (const_1 / (const_1 + exp(-x))).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::RELU:
-                dst[i] = max(const_0, x).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                dst[i] = min(a, max(const_0, x)).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                dst[i] = min(a, max(b, x)).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-                dst[i] = (x > const_0) ? x.raw() : mul(a, x).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-                dst[i] = log(const_1 + exp(x)).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::SQRT:
-                dst[i] = (const_1 / inv_sqrt(x)).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::SQUARE:
-                dst[i] = mul(x, x).raw();
-                break;
-            case ActivationLayerInfo::ActivationFunction::TANH:
-                dst[i] = mul(a, tanh(mul(b, x))).raw();
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-        }
-    }
-
-    return dst;
-}
-
 template <>
 SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info)
 {
@@ -165,8 +102,6 @@ SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src
 
 template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info);
 template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info);
-template SimpleTensor<qint8_t> activation_layer(const SimpleTensor<qint8_t> &src, ActivationLayerInfo info);
-template SimpleTensor<qint16_t> activation_layer(const SimpleTensor<qint16_t> &src, ActivationLayerInfo info);
 } // namespace reference
 } // namespace validation
 } // namespace test

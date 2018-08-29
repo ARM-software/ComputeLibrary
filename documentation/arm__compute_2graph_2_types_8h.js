@@ -9,24 +9,24 @@ var arm__compute_2graph_2_types_8h =
     [ "NodeID", "arm__compute_2graph_2_types_8h.xhtml#a56952a8591a9d8481450ae707ae355e7", null ],
     [ "TensorID", "arm__compute_2graph_2_types_8h.xhtml#a615af95e19b5d9f74d2760183566a9a3", null ],
     [ "ConvolutionMethod", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517d", [
-      [ "DEFAULT", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee", null ],
+      [ "Default", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67", null ],
       [ "GEMM", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3", null ],
-      [ "DIRECT", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da4c5d06b02c97731aaa976179c62dcf76", null ],
-      [ "WINOGRAD", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8", null ]
+      [ "Direct", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517dafd1dd0c603be8170f9eae0be9f2f6afb", null ],
+      [ "Winograd", "arm__compute_2graph_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da09db1dd1078ec6bdbe2722b4558e578f", null ]
     ] ],
     [ "DepthwiseConvolutionMethod", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821f", [
-      [ "DEFAULT", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821fa5b39c8b553c821e7cddc6da64b5bd2ee", null ],
+      [ "Default", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821fa7a1920d61156abc05a60135aefe8bc67", null ],
       [ "GEMV", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821fa87dc825930f866018839a6374a5e68d2", null ],
-      [ "OPTIMIZED_3x3", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821fa2971a9bcecd987f7a7a006fde61be7a3", null ]
+      [ "Optimized3x3", "arm__compute_2graph_2_types_8h.xhtml#a75ce9b1baad4303a53124d6f0795821fa3bb7b7f3f021a006e65111fc1d226938", null ]
     ] ],
     [ "EltwiseOperation", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4", [
-      [ "ADD", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4a9eeb52badb613229884838847294b90d", null ],
-      [ "SUB", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4a241dd841abade20fcb27b8a9f494e1eb", null ],
-      [ "MUL", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4a2cdf52a55876063ec93b7d18bc741f6c", null ]
+      [ "Add", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4aec211f7c20af43e742bf2570c3cb84f9", null ],
+      [ "Sub", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4ae80155eceb940c89e2de63ad05868db2", null ],
+      [ "Mul", "arm__compute_2graph_2_types_8h.xhtml#aa12973876c037bddff8e9ece94aca0e4a62b6d55816cf737bfc6f42e60df1a3f2", null ]
     ] ],
     [ "FastMathHint", "arm__compute_2graph_2_types_8h.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11", [
-      [ "ENABLED", "arm__compute_2graph_2_types_8h.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ac8cf6eea8f096ed51160b484d97c5bbd", null ],
-      [ "DISABLED", "arm__compute_2graph_2_types_8h.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a055c1a591abb0e8cd86dc969727bcc0b", null ]
+      [ "Enabled", "arm__compute_2graph_2_types_8h.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a00d23a76e43b46dae9ec7aa9dcbebb32", null ],
+      [ "Disabled", "arm__compute_2graph_2_types_8h.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241", null ]
     ] ],
     [ "MemoryManagerAffinity", "arm__compute_2graph_2_types_8h.xhtml#ac866c81ec0f5526139dfc62ddc3f206e", [
       [ "Buffer", "arm__compute_2graph_2_types_8h.xhtml#ac866c81ec0f5526139dfc62ddc3f206ea7e62bc342f41c946868f0ea6f0b712d8", null ],
@@ -35,21 +35,25 @@ var arm__compute_2graph_2_types_8h =
     [ "NodeType", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16", [
       [ "ActivationLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a041485a3394541feee82a34d40249d70", null ],
       [ "BatchNormalizationLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ad0146d2051fad860923cf31f7e00a732", null ],
+      [ "ChannelShuffleLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16af5505217824e3e9e8000ef0d63360158", null ],
+      [ "ConcatenateLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a5c436066fbad2e22ccab352c0d554809", null ],
       [ "ConvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aa252659b59a03bc61e5ec827ab4448b7", null ],
-      [ "DepthConcatenateLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a891821c4deb575beacfbfb9cd21c4a5d", null ],
+      [ "DeconvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ac814c26a7c5317e2a2f58fe0e5a0d410", null ],
       [ "DepthwiseConvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a5b7955cb74be105cc7e044a370d4fce8", null ],
       [ "EltwiseLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ad1b3837fe6a80018e7002c7f7905439d", null ],
       [ "FlattenLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ad87240455a60f188b358a370fe1a83a5", null ],
       [ "FullyConnectedLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a658061ff1dac70c02116fae6c044da1a", null ],
       [ "NormalizationLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a227ecc6e858c8d1f61664f1967173bea", null ],
+      [ "PermuteLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aa84a001cb23ac473e7aae73a9eaf369a", null ],
       [ "PoolingLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aea068ae5aae640d018c4300bc7619575", null ],
       [ "ReshapeLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a1ee0d44744be1e17e38ad5a4e9dcf5dd", null ],
-      [ "ScaleLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a42742d98a5bb6f7457ea584e96f5d459", null ],
+      [ "ResizeLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aea2ded20d74b2bf7921551363737777e", null ],
       [ "SoftmaxLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a4a9567bc4a6c28a527c973010eaf9a25", null ],
       [ "SplitLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16af2ee14b628c0a45e1682de8f33983dc1", null ],
       [ "Input", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a324118a6721dd6b8a9b9f4e327df2bf5", null ],
       [ "Output", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a29c2c02a361c9d7028472e5d92cd4a54", null ],
-      [ "Const", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a79ceee9f8e3c1f0cc74223e05d2448bf", null ]
+      [ "Const", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a79ceee9f8e3c1f0cc74223e05d2448bf", null ],
+      [ "Dummy", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16abcf036b6f33e182d4705f4f5b1af13ac", null ]
     ] ],
     [ "Target", "arm__compute_2graph_2_types_8h.xhtml#a31488d29805a596498c0234ae392d35d", [
       [ "UNSPECIFIED", "arm__compute_2graph_2_types_8h.xhtml#a31488d29805a596498c0234ae392d35da1c04cc3823d476c3017238679a0fdf52", null ],

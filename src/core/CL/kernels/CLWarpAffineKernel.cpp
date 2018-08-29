@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,9 +42,9 @@ using namespace arm_compute;
 
 namespace
 {
-void options_add_matrix(std::set<std::string> &options, const float *matrix, size_t size)
+void options_add_matrix(std::set<std::string> &options, const std::array<float, 9> &matrix)
 {
-    for(size_t i = 0; i < size; ++i)
+    for(size_t i = 0; i < 6; ++i)
     {
         std::stringstream mat_str;
         mat_str << "-DMAT" << i << "=" << matrix[i] << " ";
@@ -58,7 +58,7 @@ BorderSize CLWarpAffineKernel::border_size() const
     return BorderSize(1);
 }
 
-void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, const float *matrix, InterpolationPolicy policy)
+void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
@@ -69,7 +69,7 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
 
     // Create build options
     std::set<std::string> options;
-    options_add_matrix(options, matrix, 6);
+    options_add_matrix(options, matrix);
     options.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
 
     // Create kernel
@@ -98,5 +98,5 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }

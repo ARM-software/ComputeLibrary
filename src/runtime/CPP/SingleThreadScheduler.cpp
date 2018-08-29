@@ -41,14 +41,23 @@ void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
     ARM_COMPUTE_ERROR_ON(num_threads != 1);
 }
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
+void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
-    ARM_COMPUTE_UNUSED(split_dimension);
+    ARM_COMPUTE_UNUSED(hints);
     ThreadInfo info;
     info.cpu_info = &_cpu_info;
     kernel->run(kernel->window(), info);
 }
 
+void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
+{
+    ThreadInfo info;
+    info.cpu_info = &_cpu_info;
+    for(auto &wl : workloads)
+    {
+        wl(info);
+    }
+}
 unsigned int SingleThreadScheduler::num_threads() const
 {
     return 1;

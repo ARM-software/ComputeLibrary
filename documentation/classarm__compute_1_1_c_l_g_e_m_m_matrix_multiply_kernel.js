@@ -6,5 +6,11 @@ var classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel =
     [ "configure", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aa0b9705b5c793dd3867aaada15bda02c", null ],
     [ "operator=", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aea377825b4153d8ea48905038cbb0ff1", null ],
     [ "operator=", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aa158230a3f3ea998530f91a14bb8e5a2", null ],
-    [ "run", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ]
+    [ "run", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ],
+    [ "_input0", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a1ab65df01f310bf054323607cd09956e", null ],
+    [ "_input1", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a6590f81ae0c9f3e01546c73eb31a43c8", null ],
+    [ "_output", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a62d192d931002b4866443cd7fc71419b", null ],
+    [ "_reinterpret_input_as_3d", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aa71ec02f998e1dcfd49ef944ec8cf23e", null ],
+    [ "_reinterpret_output_as_3d", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a7d222bcf0d803c0647a4b93061daa56c", null ],
+    [ "_slide_matrix_b", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a170f236fd8751c4e1675873b496f7cf8", null ]
 ];

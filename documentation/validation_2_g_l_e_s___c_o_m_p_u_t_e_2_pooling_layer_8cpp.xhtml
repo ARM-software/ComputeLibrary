@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -155,11 +155,11 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0100bf102f3cb83c63faa0fe97854a0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0100bf102f3cb83c63faa0fe97854a0c">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;,{TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),}),
-framework::dataset::make(&quot;OutputInfo&quot;,{TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0), TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),})),
+<tr class="memitem:ac216e8393006737b0eeea2fcbf076901"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac216e8393006737b0eeea2fcbf076901">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;,{TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32), TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32), TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),}),
+framework::dataset::make(&quot;OutputInfo&quot;,{TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16), TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32), TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32), TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32), TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),})),
 framework::dataset::make(&quot;PoolInfo&quot;,{PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)), PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)), PoolingLayerInfo(PoolingType::L2, 3, PadStrideInfo(1, 1, 0, 0)), PoolingLayerInfo(PoolingType::AVG), PoolingLayerInfo(PoolingType::MAX), PoolingLayerInfo(PoolingType::AVG),})),
 framework::dataset::make(&quot;Expected&quot;,{false, false, false, false, false, false, false, false, false, true})), input_info, output_info, pool_info, expected)</td></tr>
-<tr class="separator:a0100bf102f3cb83c63faa0fe97854a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:ac216e8393006737b0eeea2fcbf076901"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a098673e36257d071eb42c31b72bf03e1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a098673e36257d071eb42c31b72bf03e1">FIXTURE_DATA_TEST_CASE</a> (RunSmall, GCPoolingLayerFixture&lt; float &gt;, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make(&quot;DataType&quot;, DataType::F32))), framework::dataset::make(&quot;DataLayout&quot;, DataLayout::NCHW)))</td></tr>
 <tr class="separator:a098673e36257d071eb42c31b72bf03e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15cadd1470476644f101753985b04b12"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a15cadd1470476644f101753985b04b12">FIXTURE_DATA_TEST_CASE</a> (RunLarge, GCPoolingLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make(&quot;DataType&quot;, DataType::F32))), framework::dataset::make(&quot;DataLayout&quot;, DataLayout::NCHW)))</td></tr>
@@ -175,7 +175,7 @@ framework::dataset::make(&quot;Expected&quot;,{false, false, false, false, false
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_fbdf7bf92663091dc4d5520df638c068.xhtml">GLES_COMPUTE</a></li><li class="navelem"><a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_pooling_layer_8cpp.xhtml">PoolingLayer.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
+#include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -42,7 +43,7 @@ using namespace utils;
 class NEONCLScaleMedianGaussianExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         /** [NEON / OpenCL Interop] */
         PPMLoader ppm;
@@ -87,6 +88,8 @@ public:
             const std::string output_filename = std::string(argv[1]) + "_out.ppm";
         }
         /** [NEON / OpenCL Interop] */
+
+        return true;
     }
     void do_run() override
     {

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -373,12 +373,12 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialise the kernel's input, output and border mode. </p>
-<dl class="section note"><dt>Note</dt><dd>For <code>scale</code> equal to 1/255 only round to nearest even (implemented as round half up) is supported. For all other scale values only round to zero (implemented as round towards minus infinity) is supported. For QS8/QS16 scale = 1 is the only supported value.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For <code>scale</code> equal to 1/255 only round to nearest even (implemented as round half up) is supported. For all other scale values only round to zero (implemented as round towards minus infinity) is supported.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>An input tensor. Data types supported: U8, QS8 (only if <code>input1</code> is QS8), QS16 (only if <code>input1</code> is QS16), S16/F16 (only if <code>input1</code> is F16), F32 (only if <code>input1</code> is F32). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16 (only if <code>input1</code> is F16), F32 (only if both inputs are F32). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/S16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>An input tensor. Data types supported: U8, S16/F16 (only if <code>input1</code> is F16), F32 (only if <code>input1</code> is F32). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16 (only if <code>input1</code> is F16), F32 (only if both inputs are F32). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Scale to apply after multiplication. Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">overflow_policy</td><td>Overflow policy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rounding_policy</td><td>Rounding policy. </td></tr>
@@ -418,7 +418,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_pixel_wise_multiplication_kernel_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_n_e_pixel_wise_multiplication_kernel_8h_source.xhtml">NEPixelWiseMultiplicationKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEPixelWiseMultiplicationKernel::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab214c0eb5acd40bde3f8a3fb6c0a6613">NEPixelWiseMultiplicationKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a75e09a8ec40fb21b0f71421960b540a6">NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a6685c2ffbda12dbf1e4706b85c688e19">NEPixelWiseMultiplicationKernel::operator=()</a>, <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00178">arm_compute::test::validation::rounding_policy</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEPixelWiseMultiplicationKernel::run()</a>, <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00178">arm_compute::test::validation::scale</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ad2d7ece77e2d56742022a0e604416007">NEPixelWiseMultiplicationKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab299ab73ca304f9e10359a54a763f4d3">NEPixelWiseMultiplicationKernel::~NEPixelWiseMultiplicationKernel()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEPixelWiseMultiplicationKernel::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab214c0eb5acd40bde3f8a3fb6c0a6613">NEPixelWiseMultiplicationKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a75e09a8ec40fb21b0f71421960b540a6">NEPixelWiseMultiplicationKernel::NEPixelWiseMultiplicationKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a6685c2ffbda12dbf1e4706b85c688e19">NEPixelWiseMultiplicationKernel::operator=()</a>, <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00168">arm_compute::test::validation::rounding_policy</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEPixelWiseMultiplicationKernel::run()</a>, <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00168">arm_compute::test::validation::scale</a>, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ad2d7ece77e2d56742022a0e604416007">NEPixelWiseMultiplicationKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab299ab73ca304f9e10359a54a763f4d3">NEPixelWiseMultiplicationKernel::~NEPixelWiseMultiplicationKernel()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEPixelWiseMultiplicationKernel&quot;</span>;</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -584,12 +584,12 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 </div><div class="memdoc">
 
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml">NEPixelWiseMultiplicationKernel</a>. </p>
-<dl class="section note"><dt>Note</dt><dd>For <code>scale</code> equal to 1/255 only round to nearest even (implemented as round half up) is supported. For all other scale values only round to zero (implemented as round towards minus infinity) is supported. For QS8/QS16 scale = 1 is the only supported value.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For <code>scale</code> equal to 1/255 only round to nearest even (implemented as round half up) is supported. For all other scale values only round to zero (implemented as round towards minus infinity) is supported.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>An input tensor. Data types supported: U8, QS8 (only if <code>input1</code> is QS8), QS16 (only if <code>input1</code> is QS16), S16/F16 (only if <code>input1</code> is F16), F32 (only if <code>input1</code> is F32). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16 (only if <code>input1</code> is F16), F32 (only if both inputs are F32). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/S16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>An input tensor. Data types supported: U8, S16/F16 (only if <code>input1</code> is F16), F32 (only if <code>input1</code> is F32). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16 (only if <code>input1</code> is F16), F32 (only if both inputs are F32). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Scale to apply after multiplication. Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">overflow_policy</td><td>Overflow policy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rounding_policy</td><td>Rounding policy.</td></tr>
@@ -611,7 +611,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml">NEPixelWiseMultiplicationKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:49 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

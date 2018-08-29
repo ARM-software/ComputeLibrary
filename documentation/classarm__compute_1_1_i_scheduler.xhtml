@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,6 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_i_scheduler.xhtm
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">IScheduler Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
@@ -127,6 +129,23 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_i_scheduler.xhtm
 
 <p><code>#include &lt;<a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml">Hints</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classarm__compute_1_1_scheduler.xhtml" title="Configurable scheduler which supports multiple multithreading APIs and choosing between different sch...">Scheduler</a> hints.  <a href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ad3ab921e075d1edd827faf95870aa808"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808">StrategyHint</a> { <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808afe6f99ef1ec99efbdc19a9786cf1facc">STATIC</a>, 
+<a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808a0fcc90da4811c877ba9f9c12f7d60bc9">DYNAMIC</a>
+ }<tr class="memdesc:ad3ab921e075d1edd827faf95870aa808"><td class="mdescLeft">&#160;</td><td class="mdescRight">Strategies available to split a workload.  <a href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808">More...</a><br /></td></tr>
+</td></tr>
+<tr class="separator:ad3ab921e075d1edd827faf95870aa808"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cdc00a99619ba76bf79a466cb85d4da"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> = std::function&lt; void(const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;)&gt;</td></tr>
+<tr class="memdesc:a4cdc00a99619ba76bf79a466cb85d4da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signature for the workloads to execute.  <a href="#a4cdc00a99619ba76bf79a466cb85d4da">More...</a><br /></td></tr>
+<tr class="separator:a4cdc00a99619ba76bf79a466cb85d4da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a34956db09db14c551e9966c9b66036f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a34956db09db14c551e9966c9b66036f9">IScheduler</a> ()</td></tr>
@@ -141,9 +160,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac24584a63e484123e3756d1b2a1c9e2f"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ac24584a63e484123e3756d1b2a1c9e2f">num_threads</a> () const =0</td></tr>
 <tr class="memdesc:ac24584a63e484123e3756d1b2a1c9e2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of threads that the <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. ">SingleThreadScheduler</a> has in his pool.  <a href="#ac24584a63e484123e3756d1b2a1c9e2f">More...</a><br /></td></tr>
 <tr class="separator:ac24584a63e484123e3756d1b2a1c9e2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38e28e556fea6e2024019dbb9c7cc943"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a38e28e556fea6e2024019dbb9c7cc943">schedule</a> (<a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a> *kernel, unsigned int split_dimension)=0</td></tr>
-<tr class="memdesc:a38e28e556fea6e2024019dbb9c7cc943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the kernel in the same thread as the caller synchronously.  <a href="#a38e28e556fea6e2024019dbb9c7cc943">More...</a><br /></td></tr>
-<tr class="separator:a38e28e556fea6e2024019dbb9c7cc943"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e58f95544bd5ac6559a421671bd9842"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a> (<a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a> *kernel, const <a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml">Hints</a> &amp;hints)=0</td></tr>
+<tr class="memdesc:a4e58f95544bd5ac6559a421671bd9842"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the kernel in the same thread as the caller synchronously.  <a href="#a4e58f95544bd5ac6559a421671bd9842">More...</a><br /></td></tr>
+<tr class="separator:a4e58f95544bd5ac6559a421671bd9842"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44031826ec875224d24d820d71934502"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a44031826ec875224d24d820d71934502">run_workloads</a> (std::vector&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> &gt; &amp;workloads)=0</td></tr>
+<tr class="memdesc:a44031826ec875224d24d820d71934502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute all the passed workloads.  <a href="#a44031826ec875224d24d820d71934502">More...</a><br /></td></tr>
+<tr class="separator:a44031826ec875224d24d820d71934502"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95f26c7763b9472437a8da8aa6089c9b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_p_u_info.xhtml">CPUInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a95f26c7763b9472437a8da8aa6089c9b">cpu_info</a> ()</td></tr>
 <tr class="memdesc:a95f26c7763b9472437a8da8aa6089c9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get CPU info.  <a href="#a95f26c7763b9472437a8da8aa6089c9b">More...</a><br /></td></tr>
 <tr class="separator:a95f26c7763b9472437a8da8aa6089c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,8 +176,58 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1_scheduler.xhtml" title="Configurable scheduler which supports multiple multithreading APIs and choosing between different sch...">Scheduler</a> interface to run kernels. </p>
 
-<p>Definition at line <a class="el" href="_i_scheduler_8h_source.xhtml#l00034">34</a> of file <a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a>.</p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<p>Definition at line <a class="el" href="_i_scheduler_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a>.</p>
+</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<a class="anchor" id="a4cdc00a99619ba76bf79a466cb85d4da"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> =  std::function&lt;void(const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;)&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Signature for the workloads to execute. </p>
+
+<p>Definition at line <a class="el" href="_i_scheduler_8h_source.xhtml#l00106">106</a> of file <a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a class="anchor" id="ad3ab921e075d1edd827faf95870aa808"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808">StrategyHint</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Strategies available to split a workload. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="ad3ab921e075d1edd827faf95870aa808afe6f99ef1ec99efbdc19a9786cf1facc"></a>STATIC&#160;</td><td class="fielddoc">
+<p>Split the workload evenly among the threads. </p>
+</td></tr>
+<tr><td class="fieldname"><a class="anchor" id="ad3ab921e075d1edd827faf95870aa808a0fcc90da4811c877ba9f9c12f7d60bc9"></a>DYNAMIC&#160;</td><td class="fielddoc">
+<p>Split the workload dynamically using a bucket system. </p>
+</td></tr>
+</table>
+
+<p>Definition at line <a class="el" href="_i_scheduler_8h_source.xhtml#l00040">40</a> of file <a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    {</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        STATIC,  </div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        DYNAMIC, </div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    };</div></div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a34956db09db14c551e9966c9b66036f9"></a>
 <div class="memitem">
 <div class="memproto">
@@ -215,8 +287,6 @@ Public Member Functions</h2></td></tr>
 <p>Get CPU info. </p>
 <dl class="section return"><dt>Returns</dt><dd>CPU info. </dd></dl>
 
-<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00159">arm_compute::setup_assembly_kernel()</a>.</p>
-
 </div>
 </div>
 <a class="anchor" id="ac24584a63e484123e3756d1b2a1c9e2f"></a>
@@ -245,8 +315,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">SingleThreadScheduler</a>.</p>
 
-<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00159">arm_compute::setup_assembly_kernel()</a>.</p>
-
 </div>
 </div>
 <a class="anchor" id="a6298e3b887acb402fdda318de12428ef"></a>
@@ -268,7 +336,42 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a38e28e556fea6e2024019dbb9c7cc943"></a>
+<a class="anchor" id="a44031826ec875224d24d820d71934502"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void run_workloads </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4cdc00a99619ba76bf79a466cb85d4da">Workload</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>workloads</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Execute all the passed workloads. </p>
+<dl class="section note"><dt>Note</dt><dd>there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">workloads</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of workloads to run </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#acbe7dbaeedd9d2cf45f50a4c1c4260c3">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#acbe7dbaeedd9d2cf45f50a4c1c4260c3">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#acbe7dbaeedd9d2cf45f50a4c1c4260c3">SingleThreadScheduler</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a4e58f95544bd5ac6559a421671bd9842"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -284,8 +387,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">unsigned int&#160;</td>
-          <td class="paramname"><em>split_dimension</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml">Hints</a> &amp;&#160;</td>
+          <td class="paramname"><em>hints</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -304,14 +407,12 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel</td><td><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> to execute. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">split_dimension</td><td>Dimension along which to split the kernel's execution window. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hints</td><td><a class="el" href="classarm__compute_1_1_i_scheduler_1_1_hints.xhtml" title="Scheduler hints. ">Hints</a> for the scheduler. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">SingleThreadScheduler</a>.</p>
-
-<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00081">AssemblyKernelGlue&lt; int8_t, int32_t &gt;::run()</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#a8d6828523921b7f9313f64c48550617f">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a8d6828523921b7f9313f64c48550617f">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#a8d6828523921b7f9313f64c48550617f">SingleThreadScheduler</a>.</p>
 
 </div>
 </div>
@@ -347,7 +448,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">SingleThreadScheduler</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00087">main()</a>.</p>
 
 </div>
 </div>
@@ -360,7 +461,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

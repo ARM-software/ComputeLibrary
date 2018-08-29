@@ -41,9 +41,9 @@ using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(),
-      _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _B_pretranspose(), _a_offset(0), _b_offset(0),
-      _run_vector_matrix_multiplication(false), _dot_product_path(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
+    : _memory_group(memory_manager), _asm_glue(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(),
+      _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _original_b(nullptr), _a_offset(0), _b_offset(0), _run_vector_matrix_multiplication(false),
+      _dot_product_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -52,23 +52,27 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
 
+    // Clear state
+    _mtx_a_reshape_kernel = nullptr;
+    _mtx_b_reshape_kernel = nullptr;
+
+    // Set internal variables
     _a_offset                         = a->info()->quantization_info().offset;
     _b_offset                         = b->info()->quantization_info().offset;
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
+    _is_prepared                      = false;
+    _original_b                       = b;
 
 #ifdef __aarch64__
     switch(a->info()->data_type())
     {
-        case DataType::S8:
-        {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretranspose, _memory_group, _asm_glue_signed);
-            break;
-        }
         case DataType::QASYMM8:
         case DataType::U8:
+        case DataType::S8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretranspose, _memory_group, _asm_glue_unsigned);
+            _asm_glue.configure(a, b, output, 1.f, 0.f, _reshape_b_only_on_first_run);
+            _dot_product_path = _asm_glue.is_configured();
             break;
         }
         default:
@@ -160,10 +164,13 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     if(!_dot_product_path && !_run_vector_matrix_multiplication)
     {
         _tmp_a.allocator()->allocate();
-        _tmp_b.allocator()->allocate();
+        if(!_reshape_b_only_on_first_run)
+        {
+            _tmp_b.allocator()->allocate();
+        }
     }
 
-    if(_a_offset != 0)
+    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
     {
         _vector_sum_col.allocator()->allocate();
     }
@@ -188,6 +195,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     ARM_COMPUTE_UNUSED(gemm_info);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the input tensor as 3D");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 1, "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the output tensor as 3D");
 
     int32_t a_offset                         = a->quantization_info().offset;
     int32_t b_offset                         = b->quantization_info().offset;
@@ -248,29 +257,24 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
 
 void NEGEMMLowpMatrixMultiplyCore::run()
 {
+    prepare();
+
     _memory_group.acquire();
 
-    // Do not reshape if we run the vector-by-matrix case and we do not have the optimized gemm with dot product instruction
-    if(!_run_vector_matrix_multiplication && !_dot_product_path)
+    // Reshape inputs
+    if(_mtx_a_reshape_kernel)
     {
-        if(_mtx_a_reshape_kernel)
-        {
-            NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
-        }
-
-        if(_mtx_b_reshape_kernel && (_is_first_run || !_reshape_b_only_on_first_run))
-        {
-            NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
-        }
+        NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
+    }
+    if(_mtx_b_reshape_kernel && !_reshape_b_only_on_first_run)
+    {
+        NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
     }
 
-    if(_asm_glue_unsigned._optimised_kernel != nullptr)
+    // Run GEMM
+    if(_asm_glue.is_configured())
     {
-        _asm_glue_unsigned.run();
-    }
-    else if(_asm_glue_signed._optimised_kernel != nullptr)
-    {
-        _asm_glue_signed.run();
+        _asm_glue.run();
     }
     else
     {
@@ -284,7 +288,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     }
 
     // Run matrix B reduction kernel only if _a_offset is not equal to 0
-    if(_a_offset != 0 && (_is_first_run || !_reshape_b_only_on_first_run))
+    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
     {
         NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
     }
@@ -293,6 +297,38 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
 
     _memory_group.release();
+}
 
-    _is_first_run = false;
+void NEGEMMLowpMatrixMultiplyCore::prepare()
+{
+    if(!_is_prepared)
+    {
+        // Run assembly reshape
+        if(_asm_glue.is_configured() && _reshape_b_only_on_first_run)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            _asm_glue.prepare();
+            _original_b->mark_as_unused();
+        }
+        // Run non-assembly reshape
+        else if(_mtx_b_reshape_kernel && _reshape_b_only_on_first_run)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            // Run reshape kernel and mark original weights tensor as unused
+            _tmp_b.allocator()->allocate();
+            NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
+            _original_b->mark_as_unused();
+        }
+
+        // Run matrix B reduction kernel only if _a_offset is not equal to 0
+        if(_a_offset != 0 && _reshape_b_only_on_first_run)
+        {
+            _vector_sum_col.allocator()->allocate();
+            NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
+        }
+
+        _is_prepared = true;
+    }
 }

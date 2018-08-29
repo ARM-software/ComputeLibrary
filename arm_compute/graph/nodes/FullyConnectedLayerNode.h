@@ -36,29 +36,46 @@ class FullyConnectedLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] num_outputs Number of neurons in the layer
+     * @param[in] num_outputs    Number of neurons in the layer
+     * @param[in] out_quant_info (Optional) Output quantization info
+     * @param[in] fc_info        (Optional) Additional information about the fully connected layer
      */
-    FullyConnectedLayerNode(unsigned int num_outputs);
+    FullyConnectedLayerNode(unsigned int            num_outputs,
+                            QuantizationInfo        out_quant_info = QuantizationInfo(),
+                            FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo());
     /** Computes weights descriptor
      *
      * @warning Works for inputs with 1D batch space
      *
-     * @param[in] input_descriptor Input descriptor
-     * @param[in] num_outputs      Number of output neurons
+     * @param[in] input_descriptor   Input descriptor
+     * @param[in] num_outputs        Number of output neurons
+     * @param[in] fc_info            (Optional) Additional information about the fully connected layer
+     * @param[in] weights_quant_info (Optional) Weights quantization info
      *
      * @return Weights descriptor
      */
-    static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor, unsigned int num_outputs);
+    static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor,
+                                                       unsigned int            num_outputs,
+                                                       FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                                                       QuantizationInfo        weights_quant_info = QuantizationInfo());
     /** Computes fully connected layer output descriptor
      *
      * @warning Works for inputs with 1D batch space
      *
      * @param[in] input_descriptor Input descriptor
      * @param[in] num_outputs      Number of output neurons
+     * @param[in] out_quant_info   (Optional) Weights quantization info
      *
      * @return Output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, unsigned int num_outputs);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                      unsigned int            num_outputs,
+                                                      QuantizationInfo        out_quant_info = QuantizationInfo());
+    /** Fully connected layer addition information
+     *
+     * @return Additional information about the fully connected layer
+     */
+    FullyConnectedLayerInfo info() const;
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -67,7 +84,9 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    unsigned int _num_outputs;
+    unsigned int            _num_outputs;
+    QuantizationInfo        _out_quant_info;
+    FullyConnectedLayerInfo _info;
 };
 } // namespace graph
 } // namespace arm_compute

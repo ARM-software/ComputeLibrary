@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,25 +23,129 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE_PROMOTED, 8)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND(CONVERT((a), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), CONVERT((b), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), DATA_TYPE_PROMOTED, 8, FIXED_POINT_POSITION)
-
-// There is no need to have a larger intermediate type for qs32 because all the arguments are already promoted
-MULQ_SAT_IMPL(qs32x8, qs32x8)
-
-#else /* FIXED_POINT_POSITION */
 #undef CONVERT_SAT
 
 #define ADD_OP(a, b) ((a) + (b))
 #define MUL_OP(a, b) ((a) * (b))
 #define CONVERT_SAT(a, b) ((a))
 
-#endif /* FIXED_POINT_POSITION */
-
 #if defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
+
+#if defined(DATA_LAYOUT_NHWC)
+
+#define PTR_TO_VALUE(PTR, DATA_TYPE) *((__global DATA_TYPE *)(PTR))
+
+/** This kernel performs a direct convolution to convolve the low three dimensions of a tensor with data layout NHWC
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data size must be passed at compile time using -DDATA_SIZE e.g. -DDATA_SIZE=32
+ * @note The convolution stride x must be passed at compile time using -DSTRIDE_X e.g. -DSTRIDE_X=1
+ * @note The third dimensions of the weights tensors must be passed at compile time using -DWEIGHTS_DEPTH
+ * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ *
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
+ * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
+ * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
+ * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
+ * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
+ * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
+ */
+__kernel void direct_convolution1x1_nhwc(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights),
+#ifdef HAS_BIAS
+    VECTOR_DECLARATION(biases),
+#endif /* defined(HAS_BIAS) */
+    unsigned int weights_stride_w)
+{
+    Image    src     = CONVERT_TO_IMAGE_STRUCT(src);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
+    Tensor3D dst     = CONVERT_TO_TENSOR3D_STRUCT(dst);
+
+#ifdef HAS_BIAS
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+#endif /* defined(HAS_BIAS) */
+
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)
+    values        = 0;
+    const int id0 = get_global_id(0);
+    const int id1 = get_global_id(1);
+    const int id2 = get_global_id(2);
+    weights.ptr += id0 * weights_stride_w;
+    __global uchar *src_addr = (__global uchar *)offset(&src, 0, 0) - src_stride_x * id0 + id2 * STRIDE_Y * (int)src_stride_z;
+
+    for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
+    {
+        DATA_TYPE weight = *(__global DATA_TYPE *)weights.ptr;
+#if STRIDE_X == 1
+        VEC_DATA_TYPE(DATA_TYPE, 8)
+        col0 = (VEC_DATA_TYPE(DATA_TYPE, 8))(
+                   PTR_TO_VALUE(src_addr + 0 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 1 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 2 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 3 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 4 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 5 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 6 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 7 * src_stride_y, DATA_TYPE));
+#elif STRIDE_X == 2 /* STRIDE_X == 1 */
+        VEC_DATA_TYPE(DATA_TYPE, 8)
+        col0 = (VEC_DATA_TYPE(DATA_TYPE, 8))(
+                   PTR_TO_VALUE(src_addr + 0 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 2 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 4 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 6 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 8 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 10 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 12 * src_stride_y, DATA_TYPE),
+                   PTR_TO_VALUE(src_addr + 14 * src_stride_y, DATA_TYPE));
+#else               /* STRIDE_X not equals 1 or 2 */
+#error "STRIDE_X larger than 2 is not supported"
+#endif /* STRIDE_X == 2 */
+        values = ADD_OP(values, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))weight, col0));
+
+        src_addr += src_stride_x;
+        weights.ptr += weights_stride_x;
+    }
+
+#ifdef HAS_BIAS
+    values = ADD_OP(values, (VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, id0))));
+#endif /* defined(HAS_BIAS) */
+
+    *((__global DATA_TYPE *)dst.ptr)                      = values.s0;
+    *((__global DATA_TYPE *)(dst.ptr + 1 * dst_stride_y)) = values.s1;
+    *((__global DATA_TYPE *)(dst.ptr + 2 * dst_stride_y)) = values.s2;
+    *((__global DATA_TYPE *)(dst.ptr + 3 * dst_stride_y)) = values.s3;
+    *((__global DATA_TYPE *)(dst.ptr + 4 * dst_stride_y)) = values.s4;
+    *((__global DATA_TYPE *)(dst.ptr + 5 * dst_stride_y)) = values.s5;
+    *((__global DATA_TYPE *)(dst.ptr + 6 * dst_stride_y)) = values.s6;
+    *((__global DATA_TYPE *)(dst.ptr + 7 * dst_stride_y)) = values.s7;
+}
+#endif // defined(DATA_LAYOUT_NHWC)
 
 #if STRIDE_X == 3
 #define INPUT_PIXEL_STR(data_size) extract_input_stride3_##data_size
@@ -58,7 +162,7 @@ MULQ_SAT_IMPL(qs32x8, qs32x8)
  *
  * @param[in] input_pixel Pointer to the first pixel.
  *
- * @return extracted input pixels.
+ * @return extracted input values.
  */
 inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride1(__global const DATA_TYPE *input_pixel)
 {
@@ -69,7 +173,7 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride1(__global const DATA_TYP
  *
  * @param[in] input_pixel Pointer to the first pixel.
  *
- * @return extracted input pixels.
+ * @return extracted input values.
  */
 inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride2(__global const DATA_TYPE *input_pixel)
 {
@@ -82,7 +186,7 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride2(__global const DATA_TYP
  *
  * @param[in] input_pixel Pointer to the first pixel.
  *
- * @return extracted input pixels.
+ * @return extracted input values.
  */
 inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_32(__global const DATA_TYPE *input_pixel)
 {
@@ -101,7 +205,7 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_32(__global const DATA_
  *
  * @param[in] input_pixel Pointer to the first pixel.
  *
- * @return extracted input pixels.
+ * @return extracted input values.
  */
 inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_16(__global const DATA_TYPE *input_pixel)
 {
@@ -118,7 +222,7 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_16(__global const DATA_
  *
  * @param[in] input_pixel Pointer to the first pixel.
  *
- * @return extracted input pixels.
+ * @return extracted input values.
  */
 inline VEC_DATA_TYPE(DATA_TYPE, 8) extract_input_stride3_8(__global const DATA_TYPE *input_pixel)
 {
@@ -185,27 +289,26 @@ __kernel void direct_convolution1x1(
 #endif /* defined(HAS_BIAS) */
 
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)
-    pixels = 0;
+    values = 0;
 
     const uint z_index = get_global_id(2);
 
     weights.ptr += z_index * weights_stride_w;
-
     for(volatile int d = 0; d < WEIGHTS_DEPTH; ++d)
     {
         DATA_TYPE weight = *(__global DATA_TYPE *)weights.ptr;
         VEC_DATA_TYPE(DATA_TYPE, 8)
         input_pixel = INPUT_PIXEL(DATA_SIZE)((__global DATA_TYPE *)src.ptr);
-        pixels      = ADD_OP(pixels, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))weight, input_pixel));
+        values      = ADD_OP(values, MUL_OP((VEC_DATA_TYPE(DATA_TYPE, 8))weight, input_pixel));
         src.ptr += src_stride_z;
         weights.ptr += weights_stride_z;
     }
 
 #ifdef HAS_BIAS
-    pixels = ADD_OP(pixels, (VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, z_index))));
+    values = ADD_OP(values, (VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)) * ((__global DATA_TYPE *)(vector_offset(&biases, z_index))));
 #endif /* defined(HAS_BIAS) */
 
-    vstore8(CONVERT_SAT(pixels, VEC_DATA_TYPE(DATA_TYPE, 8)), 0, (__global DATA_TYPE *)dst.ptr);
+    vstore8(CONVERT_SAT(values, VEC_DATA_TYPE(DATA_TYPE, 8)), 0, (__global DATA_TYPE *)dst.ptr);
 }
 #endif // defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
 

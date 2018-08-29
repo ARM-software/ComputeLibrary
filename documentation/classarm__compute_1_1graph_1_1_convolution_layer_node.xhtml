@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -136,9 +136,9 @@ Collaboration diagram for ConvolutionLayerNode:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a37b4debd51dfb00b417fc3b7f3ccd815"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a37b4debd51dfb00b417fc3b7f3ccd815">ConvolutionLayerNode</a> (<a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> info, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">ConvolutionMethod::DEFAULT</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a> <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a5d23729a29c27170ce6607223a5e47a0">fast_math_hint</a>=<a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a055c1a591abb0e8cd86dc969727bcc0b">FastMathHint::DISABLED</a>, <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
-<tr class="memdesc:a37b4debd51dfb00b417fc3b7f3ccd815"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a37b4debd51dfb00b417fc3b7f3ccd815">More...</a><br /></td></tr>
-<tr class="separator:a37b4debd51dfb00b417fc3b7f3ccd815"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad556cd2cfb55554dbd3cbdefff2a26b7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#ad556cd2cfb55554dbd3cbdefff2a26b7">ConvolutionLayerNode</a> (<a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> info, unsigned int <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a8dcb6000a40ebf3e3ced2bdb0fc496a8">num_groups</a>=1, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67">ConvolutionMethod::Default</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a> <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a5d23729a29c27170ce6607223a5e47a0">fast_math_hint</a>=<a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241">FastMathHint::Disabled</a>, <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:ad556cd2cfb55554dbd3cbdefff2a26b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#ad556cd2cfb55554dbd3cbdefff2a26b7">More...</a><br /></td></tr>
+<tr class="separator:ad556cd2cfb55554dbd3cbdefff2a26b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d809efcf3df31392abc965f2cc3bae6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a9d809efcf3df31392abc965f2cc3bae6">set_convolution_method</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> method)</td></tr>
 <tr class="memdesc:a9d809efcf3df31392abc965f2cc3bae6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the convolution layer method to use.  <a href="#a9d809efcf3df31392abc965f2cc3bae6">More...</a><br /></td></tr>
 <tr class="separator:a9d809efcf3df31392abc965f2cc3bae6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,6 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af8bae150bf98eca8fe0fa86eba1c82e7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#af8bae150bf98eca8fe0fa86eba1c82e7">convolution_info</a> () const </td></tr>
 <tr class="memdesc:af8bae150bf98eca8fe0fa86eba1c82e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convolution metadata accessor.  <a href="#af8bae150bf98eca8fe0fa86eba1c82e7">More...</a><br /></td></tr>
 <tr class="separator:af8bae150bf98eca8fe0fa86eba1c82e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dcb6000a40ebf3e3ced2bdb0fc496a8"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a8dcb6000a40ebf3e3ced2bdb0fc496a8">num_groups</a> () const </td></tr>
+<tr class="memdesc:a8dcb6000a40ebf3e3ced2bdb0fc496a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of groups in convolution accessor.  <a href="#a8dcb6000a40ebf3e3ced2bdb0fc496a8">More...</a><br /></td></tr>
+<tr class="separator:a8dcb6000a40ebf3e3ced2bdb0fc496a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65d13dc93e2df5e8ab725263cf9f4ac5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16">NodeType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">type</a> () const override</td></tr>
 <tr class="memdesc:a65d13dc93e2df5e8ab725263cf9f4ac5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns node's type.  <a href="#a65d13dc93e2df5e8ab725263cf9f4ac5">More...</a><br /></td></tr>
 <tr class="separator:a65d13dc93e2df5e8ab725263cf9f4ac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -254,6 +257,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a20ee33c4a581d8d3507dbb898d47d733 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a20ee33c4a581d8d3507dbb898d47d733">num_outputs</a> () const </td></tr>
 <tr class="memdesc:a20ee33c4a581d8d3507dbb898d47d733 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns number of outputs of the node.  <a href="#a20ee33c4a581d8d3507dbb898d47d733">More...</a><br /></td></tr>
 <tr class="separator:a20ee33c4a581d8d3507dbb898d47d733 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a923898bd4d886a6140b5d63635913d74 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a923898bd4d886a6140b5d63635913d74">common_node_params</a> () const </td></tr>
+<tr class="memdesc:a923898bd4d886a6140b5d63635913d74 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns common node parameters.  <a href="#a923898bd4d886a6140b5d63635913d74">More...</a><br /></td></tr>
+<tr class="separator:a923898bd4d886a6140b5d63635913d74 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adddbd97837525a4714e28c955b3d98a4 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#adddbd97837525a4714e28c955b3d98a4">requested_target</a> () const </td></tr>
 <tr class="memdesc:adddbd97837525a4714e28c955b3d98a4 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns requested target for this node.  <a href="#adddbd97837525a4714e28c955b3d98a4">More...</a><br /></td></tr>
 <tr class="separator:adddbd97837525a4714e28c955b3d98a4 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -272,7 +278,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_convolution_layer_node_8h_source.xhtml#l00034">34</a> of file <a class="el" href="_convolution_layer_node_8h_source.xhtml">ConvolutionLayerNode.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a37b4debd51dfb00b417fc3b7f3ccd815"></a>
+<a class="anchor" id="ad556cd2cfb55554dbd3cbdefff2a26b7"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -285,14 +291,20 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a>&#160;</td>
-          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">ConvolutionMethod::DEFAULT</a></code>, </td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67">ConvolutionMethod::Default</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a>&#160;</td>
-          <td class="paramname"><em>fast_math_hint</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a055c1a591abb0e8cd86dc969727bcc0b">FastMathHint::DISABLED</a></code>, </td>
+          <td class="paramname"><em>fast_math_hint</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241">FastMathHint::Disabled</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -312,6 +324,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">info</td><td>Convolution layer attributes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups (Defaults to 1) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">method</td><td>(Optional) Convolution method to use </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">fast_math_hint</td><td>(Optional) Fast math hint </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">out_quant_info</td><td>(Optional) Output quantization info </td></tr>
@@ -458,7 +471,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Convolution metadata accessor. </p>
 <dl class="section return"><dt>Returns</dt><dd>Convolution information </dd></dl>
 
-<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00067">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00090">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
 
 </div>
 </div>
@@ -479,7 +492,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This is an indication on which convolution layer implementation to use, if it fails to be created the library's heuristic approach will be used</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Convolution layer method to be used by the node </dd></dl>
 
-<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00067">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00090">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
 
 </div>
 </div>
@@ -498,6 +511,8 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Fast math hint accessor. </p>
 <dl class="section return"><dt>Returns</dt><dd>Fast math hint to be used by the node </dd></dl>
+
+<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00090">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
 
 </div>
 </div>
@@ -529,6 +544,26 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8dcb6000a40ebf3e3ced2bdb0fc496a8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int num_groups </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Number of groups in convolution accessor. </p>
+<dl class="section return"><dt>Returns</dt><dd>Number of groups in convolution </dd></dl>
+
+<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00090">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a9d809efcf3df31392abc965f2cc3bae6"></a>
 <div class="memitem">
 <div class="memproto">
@@ -550,8 +585,6 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-
-<p>Referenced by <a class="el" href="_validate_helpers_8h_source.xhtml#l00067">arm_compute::graph::backends::detail::validate_convolution_layer()</a>.</p>
 
 </div>
 </div>
@@ -616,7 +649,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml">ConvolutionLayerNode</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:50 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

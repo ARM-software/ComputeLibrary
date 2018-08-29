@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,12 +116,14 @@ $(document).ready(function(){initNavTree('_toolchain_support_8h.xhtml','');});
   <div class="summary">
 <a href="#nested-classes">Data Structures</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">ToolchainSupport.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;cassert&gt;</code><br />
 <code>#include &lt;cmath&gt;</code><br />
 <code>#include &lt;cstddef&gt;</code><br />
 <code>#include &lt;limits&gt;</code><br />
@@ -158,20 +160,25 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespacearm__compute_1_1support_1_1cpp14"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml">arm_compute::support::cpp14</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:aebc1ea57c14482b68dac0c0dab766126"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aebc1ea57c14482b68dac0c0dab766126">NumericBase</a> { <a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aebc1ea57c14482b68dac0c0dab766126a329acff975f3cc434528bec43bd5b6aa">BASE_10</a>, 
+<a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aebc1ea57c14482b68dac0c0dab766126a027219c7702304969c898aeffed504af">BASE_16</a>
+ }</td></tr>
+<tr class="separator:aebc1ea57c14482b68dac0c0dab766126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:abdba606a789b8d664774f17d18f45cfe"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#abdba606a789b8d664774f17d18f45cfe">stoi</a> (const std::string &amp;str, std::size_t *pos=0, NumericBase base=NumericBase::BASE_10)</td></tr>
+<tr class="memdesc:abdba606a789b8d664774f17d18f45cfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to integer.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#abdba606a789b8d664774f17d18f45cfe">More...</a><br /></td></tr>
+<tr class="separator:abdba606a789b8d664774f17d18f45cfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7b85c41ac94d98f07b1cef18b33d2d1"><td class="memItemLeft" align="right" valign="top">unsigned long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae7b85c41ac94d98f07b1cef18b33d2d1">stoul</a> (const std::string &amp;str, std::size_t *pos=0, NumericBase base=NumericBase::BASE_10)</td></tr>
+<tr class="memdesc:ae7b85c41ac94d98f07b1cef18b33d2d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to unsigned long.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#ae7b85c41ac94d98f07b1cef18b33d2d1">More...</a><br /></td></tr>
+<tr class="separator:ae7b85c41ac94d98f07b1cef18b33d2d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">to_string</a> (T &amp;&amp;value)</td></tr>
 <tr class="memdesc:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert integer and float values to string.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#acc5dddee1cbe93a4eaf0a9f74ee96bb7">More...</a><br /></td></tr>
 <tr class="separator:acc5dddee1cbe93a4eaf0a9f74ee96bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb1811acb18248b8919a2cf1203e3faf"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
-<tr class="memitem:aeb1811acb18248b8919a2cf1203e3faf"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aeb1811acb18248b8919a2cf1203e3faf">stoi</a> (Ts &amp;&amp;...args)</td></tr>
-<tr class="memdesc:aeb1811acb18248b8919a2cf1203e3faf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to integer.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aeb1811acb18248b8919a2cf1203e3faf">More...</a><br /></td></tr>
-<tr class="separator:aeb1811acb18248b8919a2cf1203e3faf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c9ee94e1de3032f244cf041310868b4"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
-<tr class="memitem:a3c9ee94e1de3032f244cf041310868b4"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a3c9ee94e1de3032f244cf041310868b4">stoul</a> (Ts &amp;&amp;...args)</td></tr>
-<tr class="memdesc:a3c9ee94e1de3032f244cf041310868b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to unsigned long.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a3c9ee94e1de3032f244cf041310868b4">More...</a><br /></td></tr>
-<tr class="separator:a3c9ee94e1de3032f244cf041310868b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4152693b62db2a43edcc0039de95e38"><td class="memTemplParams" colspan="2">template&lt;typename... Ts&gt; </td></tr>
 <tr class="memitem:aa4152693b62db2a43edcc0039de95e38"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aa4152693b62db2a43edcc0039de95e38">stof</a> (Ts &amp;&amp;...args)</td></tr>
 <tr class="memdesc:aa4152693b62db2a43edcc0039de95e38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert string values to float.  <a href="namespacearm__compute_1_1support_1_1cpp11.xhtml#aa4152693b62db2a43edcc0039de95e38">More...</a><br /></td></tr>
@@ -196,6 +203,9 @@ Functions</h2></td></tr>
 <tr class="separator:aae1437f4a38c4ada64e7a2586aa35bf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e51e04e3f86c823883757ef22d4f39a"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a9e51e04e3f86c823883757ef22d4f39a">align</a> (std::size_t alignment, std::size_t size, void *&amp;ptr, std::size_t &amp;space)</td></tr>
 <tr class="separator:a9e51e04e3f86c823883757ef22d4f39a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73e352c61baaf9c1178da2d30105b04e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a73e352c61baaf9c1178da2d30105b04e"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a73e352c61baaf9c1178da2d30105b04e">lowest</a> ()</td></tr>
+<tr class="separator:a73e352c61baaf9c1178da2d30105b04e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a079a0ecb5fc05e0a107785f2573bc854"><td class="memTemplParams" colspan="2">template&lt;typename T , typename  = typename std::enable_if&lt;std::is_arithmetic&lt;T&gt;::value&gt;::type&gt; </td></tr>
 <tr class="memitem:a079a0ecb5fc05e0a107785f2573bc854"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp11.xhtml#a079a0ecb5fc05e0a107785f2573bc854">isfinite</a> (T value)</td></tr>
 <tr class="separator:a079a0ecb5fc05e0a107785f2573bc854"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -220,7 +230,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml">support</a></li><li class="navelem"><a class="el" href="_toolchain_support_8h.xhtml">ToolchainSupport.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

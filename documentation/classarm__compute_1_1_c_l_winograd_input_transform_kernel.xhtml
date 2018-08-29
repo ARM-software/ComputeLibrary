@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -385,7 +385,10 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set the input and output of the kernel. </p>
-<dl class="section note"><dt>Note</dt><dd>Winograd input transform supports the following configurations: F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5) <a class="el" href="classarm__compute_1_1_strides.xhtml" title="Strides of an item in bytes. ">Strides</a>: only unit strides</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Winograd input transform supports the following configurations for NCWH data layout F(output tile, kernel size):F(2x2, 3x3), F(2x1, 3x1), F(1x2, 1x3), F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3), F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)</dd>
+<dd>
+Winograd input transform supports the following configurations for NHWC data layout F(output tile, kernel size):F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3), F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)</dd></dl>
+<p><a class="el" href="classarm__compute_1_1_strides.xhtml" title="Strides of an item in bytes. ">Strides</a>: only unit strides</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to transform. Data types supported: F32 </td></tr>
@@ -534,7 +537,10 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_winograd_input_transform_kernel.xhtml">CLWinogradInputTransformKernel</a>. </p>
-<dl class="section note"><dt>Note</dt><dd>Winograd input transform supports the following configurations: F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5) <a class="el" href="classarm__compute_1_1_strides.xhtml" title="Strides of an item in bytes. ">Strides</a>: only unit strides</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Winograd input transform supports the following configurations for NCWH data layout F(output tile, kernel size):F(2x2, 3x3), F(2x1, 3x1), F(1x2, 1x3), F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3), F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)</dd>
+<dd>
+Winograd input transform supports the following configurations for NHWC data layout F(output tile, kernel size):F(4x4, 3x3), F(4x1, 3x1), F(1x4, 1x3), F(4x4, 5x5), F(4x1, 5x1), F(1x4, 1x5)</dd></dl>
+<p><a class="el" href="classarm__compute_1_1_strides.xhtml" title="Strides of an item in bytes. ">Strides</a>: only unit strides</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to transform. Data types supported: F32 </td></tr>
@@ -556,7 +562,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_winograd_input_transform_kernel.xhtml">CLWinogradInputTransformKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

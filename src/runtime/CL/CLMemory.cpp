@@ -61,7 +61,7 @@ ICLMemoryRegion *CLMemory::region() const
 
 void CLMemory::create_empty_region()
 {
-    _region_owned = std::make_shared<CLBufferMemoryRegion>(cl::Context::getDefault(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, 0);
+    _region_owned = std::make_shared<CLBufferMemoryRegion>(cl::Context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, 0);
     _region       = _region_owned.get();
 }
 } // namespace arm_compute

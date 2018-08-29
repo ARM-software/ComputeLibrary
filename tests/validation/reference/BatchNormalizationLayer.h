@@ -37,13 +37,11 @@ namespace reference
 {
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type * = nullptr>
 SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          ActivationLayerInfo act_info,
-                                          int                 fixed_point_position);
+                                          ActivationLayerInfo act_info);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
 SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          ActivationLayerInfo act_info,
-                                          int                 fixed_point_position);
+                                          ActivationLayerInfo act_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -10,6 +10,7 @@ var classarm__compute_1_1_tensor_shape =
     [ "operator=", "classarm__compute_1_1_tensor_shape.xhtml#afbfae7c97606fb71d556a9f4e46dda00", null ],
     [ "remove_dimension", "classarm__compute_1_1_tensor_shape.xhtml#acb74edf42335de0dca0da5158b704c4b", null ],
     [ "set", "classarm__compute_1_1_tensor_shape.xhtml#a9c54fb6cea3557692fe7c00c40bb40ad", null ],
+    [ "shift_right", "classarm__compute_1_1_tensor_shape.xhtml#ab6d90bb06b3c19db6aba94975be64d10", null ],
     [ "total_size", "classarm__compute_1_1_tensor_shape.xhtml#a4eaec01ba2c12093db609d1034ad0bc1", null ],
     [ "total_size_lower", "classarm__compute_1_1_tensor_shape.xhtml#a1a82725c69bdbd17294caa129743984c", null ],
     [ "total_size_upper", "classarm__compute_1_1_tensor_shape.xhtml#a91d8061f66e7f8bc56da91d965f04376", null ]

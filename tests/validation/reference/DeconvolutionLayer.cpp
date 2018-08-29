@@ -23,7 +23,6 @@
  */
 #include "ConvolutionLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -46,7 +45,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     int         out_y        = src.shape().y() + (src.shape().y() - 1) * (stride_y - 1) + a.second + 2 * info.pad().second;
     scaled_shape.set(0, out_x);
     scaled_shape.set(1, out_y);
-    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1 };
 
     const int width_in      = src.shape().x();
     const int height_in     = src.shape().y();
@@ -91,6 +90,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
+template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
+                                                const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 } // namespace reference
 } // namespace validation
 } // namespace test

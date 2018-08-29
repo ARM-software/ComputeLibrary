@@ -51,6 +51,10 @@ void CPUInfo::set_cpu_model(unsigned int cpuid, CPUModel model)
     }
 }
 
+unsigned int CPUInfo::get_cpu_num() const
+{
+    return _percpu.size();
+}
 bool CPUInfo::has_fp16() const
 {
     return _fp16;

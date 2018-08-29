@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,8 +64,8 @@ public:
         std::array<float, 9> matrix = { { 0 } };
         fill_warp_matrix<9>(matrix);
 
-        _target    = compute_target(input_shape, vmask_shape, matrix.data(), policy, border_mode, constant_border_value, data_type);
-        _reference = compute_reference(input_shape, vmask_shape, matrix.data(), policy, border_mode, constant_border_value, data_type);
+        _target    = compute_target(input_shape, vmask_shape, matrix, policy, border_mode, constant_border_value, data_type);
+        _reference = compute_reference(input_shape, vmask_shape, matrix, policy, border_mode, constant_border_value, data_type);
     }
 
 protected:
@@ -75,7 +75,8 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, const TensorShape &vmask_shape, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value,
+    TensorType compute_target(const TensorShape &shape, const TensorShape &vmask_shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+                              uint8_t  constant_border_value,
                               DataType data_type)
     {
         // Create tensors
@@ -105,7 +106,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &vmask_shape, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value,
+    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &vmask_shape, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode,
+                                      uint8_t  constant_border_value,
                                       DataType data_type)
     {
         ARM_COMPUTE_ERROR_ON(data_type != DataType::U8);
@@ -120,7 +122,7 @@ protected:
         fill(src);
 
         // Compute reference
-        return reference::warp_perspective<T>(src, _valid_mask, matrix, policy, border_mode, constant_border_value);
+        return reference::warp_perspective<T>(src, _valid_mask, matrix.data(), policy, border_mode, constant_border_value);
     }
 
     TensorType      _target{};

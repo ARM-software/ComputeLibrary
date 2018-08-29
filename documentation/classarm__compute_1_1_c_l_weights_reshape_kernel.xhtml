@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -154,9 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa453358063eaac09ae587e87aacff69a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#aa453358063eaac09ae587e87aacff69a">~CLWeightsReshapeKernel</a> ()=default</td></tr>
 <tr class="memdesc:aa453358063eaac09ae587e87aacff69a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#aa453358063eaac09ae587e87aacff69a">More...</a><br /></td></tr>
 <tr class="separator:aa453358063eaac09ae587e87aacff69a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74f55a4d6b772d24f720905b5edd8cb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#a74f55a4d6b772d24f720905b5edd8cb0">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output)</td></tr>
-<tr class="memdesc:a74f55a4d6b772d24f720905b5edd8cb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#a74f55a4d6b772d24f720905b5edd8cb0">More...</a><br /></td></tr>
-<tr class="separator:a74f55a4d6b772d24f720905b5edd8cb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32630202628891fb30458ef84581ad2a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#a32630202628891fb30458ef84581ad2a">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, unsigned int num_groups=1)</td></tr>
+<tr class="memdesc:a32630202628891fb30458ef84581ad2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#a32630202628891fb30458ef84581ad2a">More...</a><br /></td></tr>
+<tr class="separator:a32630202628891fb30458ef84581ad2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a493987e85723a8000eb26d1f00e2ad0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, cl::CommandQueue &amp;queue) override</td></tr>
 <tr class="memdesc:a493987e85723a8000eb26d1f00e2ad0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenCL kernel to process the given window on the passed OpenCL command queue.  <a href="#a493987e85723a8000eb26d1f00e2ad0e">More...</a><br /></td></tr>
 <tr class="separator:a493987e85723a8000eb26d1f00e2ad0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,9 +231,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a456f4c799edf3c4be7d0fc8dc87c7364"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#a456f4c799edf3c4be7d0fc8dc87c7364">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
-<tr class="memdesc:a456f4c799edf3c4be7d0fc8dc87c7364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a>.  <a href="#a456f4c799edf3c4be7d0fc8dc87c7364">More...</a><br /></td></tr>
-<tr class="separator:a456f4c799edf3c4be7d0fc8dc87c7364"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b21dcdf84bcfb94b37fea430818b636"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#a5b21dcdf84bcfb94b37fea430818b636">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, unsigned int num_groups=1)</td></tr>
+<tr class="memdesc:a5b21dcdf84bcfb94b37fea430818b636"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a>.  <a href="#a5b21dcdf84bcfb94b37fea430818b636">More...</a><br /></td></tr>
+<tr class="separator:a5b21dcdf84bcfb94b37fea430818b636"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
 <tr class="memitem:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a278f0e6c68ca17e71f4c4ff82f360aa0">num_arguments_per_1D_array</a> ()</td></tr>
 <tr class="memdesc:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D array object.  <a href="#a278f0e6c68ca17e71f4c4ff82f360aa0">More...</a><br /></td></tr>
@@ -358,7 +358,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a74f55a4d6b772d24f720905b5edd8cb0"></a>
+<a class="anchor" id="a32630202628891fb30458ef84581ad2a"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -378,7 +378,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -391,7 +397,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QASYMM8/F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>The shared biases tensor to append. Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with dimensions [OFM, num_patches] if unshared. Data types supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -399,7 +405,8 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section warning"><dt>Warning</dt><dd>Appending biases to weights reshaped matrix is not supported for quantized asymmetric types. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Should be a 2D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a>. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Should be a 2D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> if there are no groups and the weights are not shared; a 3D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> otherwise. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it. </td></tr>
   </table>
   </dd>
 </dl>
@@ -504,7 +511,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a456f4c799edf3c4be7d0fc8dc87c7364"></a>
+<a class="anchor" id="a5b21dcdf84bcfb94b37fea430818b636"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -527,7 +534,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -545,7 +558,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QASYMM8/F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>The shared biases tensor to append. Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with dimensions [OFM, num_patches] if unshared. Data types supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -553,7 +566,8 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section warning"><dt>Warning</dt><dd>Appending biases to weights reshaped matrix is not supported for quantized asymmetric types. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Should be a 2D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a>. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Should be a 2D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> if there are no groups and the weights are not shared; a 3D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> otherwise. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.</td></tr>
   </table>
   </dd>
 </dl>
@@ -570,7 +584,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

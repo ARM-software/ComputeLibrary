@@ -74,14 +74,11 @@ enum class DataType
     UNKNOWN, /**< Unknown data type */
     U8,      /**< unsigned 8-bit number */
     S8,      /**< signed 8-bit number */
-    QS8,     /**< quantized, symmetric fixed-point 8-bit number */
     QASYMM8, /**< quantized, asymmetric fixed-point 8-bit number */
     U16,     /**< unsigned 16-bit number */
     S16,     /**< signed 16-bit number */
-    QS16,    /**< quantized, symmetric fixed-point 16-bit number */
     U32,     /**< unsigned 32-bit number */
     S32,     /**< signed 32-bit number */
-    QS32,    /**< quantized, symmetric fixed-point 32-bit number */
     U64,     /**< unsigned 64-bit number */
     S64,     /**< signed 64-bit number */
     F16,     /**< 16-bit floating-point number */
@@ -127,8 +124,9 @@ enum class DataLayoutDimension
 struct QuantizationInfo
 {
     /** Default constructor */
-    QuantizationInfo()
-        : scale(0.0f), offset(0)
+    QuantizationInfo() noexcept
+        : scale(0.0f),
+          offset(0)
     {
     }
 
@@ -684,6 +682,38 @@ private:
     DimensionRoundingType _round_type;
 };
 
+/** Fully connected layer info */
+struct FullyConnectedLayerInfo
+{
+    DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
+    bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
+    bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
+    bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+
+    /** Sets the weights trained data layout
+     *
+     * @param[in] layout Data layout that the weights were trained with
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_weights_trained_layout(DataLayout layout)
+    {
+        weights_trained_layout = layout;
+        return *this;
+    }
+    /** Sets the transpose weights flag
+     *
+     * @param[in] should_transpose_weights Boolean flag indicating if weights should be transposed
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_transpose_weights(bool should_transpose_weights)
+    {
+        transpose_weights = should_transpose_weights;
+        return *this;
+    }
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {
@@ -946,18 +976,19 @@ class WeightsInfo
 public:
     /** Default constructor */
     WeightsInfo()
-        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0)
+        : _are_reshaped(false), _kernel_width(0), _kernel_height(0), _num_kernels(0), _retain_internal_weights(false)
     {
     }
     /** Constructor
      *
-     * @param[in] are_reshaped  True if the weights have been reshaped
-     * @param[in] kernel_width  Kernel width.
-     * @param[in] kernel_height Kernel height.
-     * @param[in] num_kernels   Number of convolution kernels.
+     * @param[in] are_reshaped            True if the weights have been reshaped
+     * @param[in] kernel_width            Kernel width.
+     * @param[in] kernel_height           Kernel height.
+     * @param[in] num_kernels             Number of convolution kernels.
+     * @param[in] retain_internal_weights (Optional) True if internal reshaped weights must be retained. Used for reconfiguration purposes. Default is false.
      */
-    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels)
-        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels)
+    WeightsInfo(bool are_reshaped, unsigned int kernel_width, unsigned int kernel_height, unsigned int num_kernels, bool retain_internal_weights = false)
+        : _are_reshaped(are_reshaped), _kernel_width(kernel_width), _kernel_height(kernel_height), _num_kernels(num_kernels), _retain_internal_weights(retain_internal_weights)
     {
     }
     /** Flag which specifies if the weights tensor has been reshaped.
@@ -984,12 +1015,17 @@ public:
     {
         return std::make_pair(_kernel_width, _kernel_height);
     }
+    bool retain_internal_weights() const
+    {
+        return _retain_internal_weights;
+    }
 
 private:
     const bool         _are_reshaped;
     const unsigned int _kernel_width;
     const unsigned int _kernel_height;
     const unsigned int _num_kernels;
+    const bool         _retain_internal_weights;
 };
 
 /** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
@@ -1006,7 +1042,7 @@ class GEMMReshapeInfo final
 public:
     /** Default constructor */
     GEMMReshapeInfo()
-        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1)
+        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(1), _reinterpret_input_as_3d(false)
     {
     }
     /** Constructor
@@ -1016,9 +1052,13 @@ public:
      * @param[in] k                         Number of matrix A columns or matrix B rows
      * @param[in] mult_transpose1xW_width   (Optional) Multiplication factor for the width of the 1xW transposed block
      * @param[in] mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleaved block
+     * @param[in] depth_output_gemm3d       (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
+     * @param[in] reinterpret_input_as_3d   (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
+     *                                                 to perform 1x1 convolutions with the NHWC data layout)
      */
-    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1)
-        : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height)
+    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 1, bool reinterpret_input_as_3d = false)
+        : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height), _depth_output_gemm3d(depth_output_gemm3d),
+          _reinterpret_input_as_3d(reinterpret_input_as_3d)
     {
     }
     /** Number of matrix A rows
@@ -1061,13 +1101,34 @@ public:
     {
         return _mult_interleave4x4_height;
     }
+    /** Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
+     *
+     * @note GEMM3D kernel is used when the output has to be reinterpret as 3D tensor. In that case:
+     *       m = depth_output_gemm3d * output_height
+     *
+     * @return the depth of the output tensor to be used with the GEMM3D kernel
+     */
+    int depth_output_gemm3d() const
+    {
+        return _depth_output_gemm3d;
+    }
+    /** Flag which specifies if the input tensor has to be reinterpreted as 3D
+     *
+     * @return True if the input tensor has to be reinterpreted as 3D tensor
+     */
+    bool reinterpret_input_as_3d() const
+    {
+        return _reinterpret_input_as_3d;
+    };
 
 private:
-    const int _m;
-    const int _n;
-    const int _k;
-    const int _mult_transpose1xW_width;
-    const int _mult_interleave4x4_height;
+    const int  _m;
+    const int  _n;
+    const int  _k;
+    const int  _mult_transpose1xW_width;
+    const int  _mult_interleave4x4_height;
+    const int  _depth_output_gemm3d;
+    const bool _reinterpret_input_as_3d;
 };
 
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
@@ -1080,7 +1141,7 @@ class GEMMInfo
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _reshape_info()
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(1), _reinterpret_input_as_3d(false), _retain_internal_weights(false)
     {
     }
     /** Constructor
@@ -1088,10 +1149,15 @@ public:
      * @param[in] is_a_reshaped               True if the matrix A has been reshaped
      * @param[in] is_b_reshaped               True if the matrix B has been reshaped
      * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
-     * @param[in] reshape_info                (Optional) GEMM reshape information object
+     * @param[in] depth_output_gemm3d         (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
+     * @param[in] reinterpret_input_as_3d     (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
+     *                                        to perform 1x1 convolutions with the NHWC data layout)
+     * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
+     *
      */
-    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo())
-        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _reshape_info(reshape_info)
+    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 1, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false)
+        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _depth_output_gemm3d(depth_output_gemm3d),
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1120,20 +1186,38 @@ public:
     {
         return _reshape_b_only_on_first_run;
     };
-    /** GEMMReshapeInfo object which stores the necessary information to understand how the matrix A and matrix B have been reshaped
+    /** Depth of the output when GEMM output is reinterpreted as 3D tensor
      *
-     * @return the GEMMReshapeInfo object
+     * @return the depth of the output tensor
      */
-    const GEMMReshapeInfo &reshape_info() const
+    int depth_output_gemm3d() const
     {
-        return _reshape_info;
-    }
+        return _depth_output_gemm3d;
+    };
+    /** Flag which specifies if the input tensor has to be reinterpreted as 3D
+     *
+     * @return True if the input tensor has to be reinterpreted as 3D tensor
+     */
+    bool reinterpret_input_as_3d() const
+    {
+        return _reinterpret_input_as_3d;
+    };
+    /** Flag which specifies if the weights tensor has to be retained from previous run
+     *
+     * @return True if the weights tensor has to be retained
+     */
+    bool retain_internal_weights() const
+    {
+        return _retain_internal_weights;
+    };
 
 private:
-    const bool      _is_a_reshaped;
-    const bool      _is_b_reshaped;
-    const bool      _reshape_b_only_on_first_run;
-    GEMMReshapeInfo _reshape_info;
+    const bool _is_a_reshaped;
+    const bool _is_b_reshaped;
+    const bool _reshape_b_only_on_first_run;
+    const int  _depth_output_gemm3d;
+    const bool _reinterpret_input_as_3d;
+    const bool _retain_internal_weights;
 };
 
 /** Winograd information */

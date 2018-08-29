@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,16 +50,22 @@ CLCannyEdge::CLCannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLI
       _visited(),
       _recorded(),
       _l1_list_counter(),
-      _l1_stack()
+      _l1_stack(),
+      _output(nullptr)
 {
 }
 
-void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value)
+void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode,
+                            uint8_t constant_border_value)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((1 != norm_type) && (2 != norm_type));
-    ARM_COMPUTE_ERROR_ON(lower_thr > upper_thr);
+    ARM_COMPUTE_ERROR_ON((gradient_size != 3) && (gradient_size != 5) && (gradient_size != 7));
+    ARM_COMPUTE_ERROR_ON((lower_thr < 0) || (lower_thr >= upper_thr));
+
+    _output = output;
 
     const unsigned int L1_hysteresis_stack_size = 8;
     const TensorShape  shape                    = input->info()->tensor_shape();
@@ -122,7 +128,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     }
     else
     {
-        ARM_COMPUTE_ERROR("Gradient %d size not supported", gradient_size);
+        ARM_COMPUTE_ERROR("Gradient size %d not supported", gradient_size);
     }
 
     // Manage intermediate buffers
@@ -187,6 +193,7 @@ void CLCannyEdge::run()
     CLScheduler::get().enqueue(_non_max_suppr, false);
 
     // Clear temporary structures and run edge trace
+    _output->clear(CLScheduler::get().queue());
     _visited.clear(CLScheduler::get().queue());
     _recorded.clear(CLScheduler::get().queue());
     _l1_list_counter.clear(CLScheduler::get().queue());

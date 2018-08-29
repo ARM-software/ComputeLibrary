@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,11 @@
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The data size must be passed at compile time using -DDATA_SIZE e.g. -DDATA_SIZE=32
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in]  sum_ptr                           Pointer to the source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  sum_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  sum_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  sum_step_x                        sum_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the source tensor

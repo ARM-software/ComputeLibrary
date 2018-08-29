@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ class CLReshapeLayer : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs and outputs
      *
-     * @param[in]  input  First tensor input. Data type supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/U32/S32/F16/F32
+     * @param[in]  input  First tensor input. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);

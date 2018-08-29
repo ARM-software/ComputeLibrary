@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,7 +118,7 @@ void CLMinMaxKernel::configure(const ICLImage *input, cl::Buffer *min_max)
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, ceil_to_multiple(num_elems_processed_per_iteration, 16)));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLMinMaxKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -209,7 +209,7 @@ void CLMinMaxLocationKernel::configure(const ICLImage *input, cl::Buffer *min_ma
     constexpr unsigned int num_elems_processed_per_iteration = 1;
     Window                 win                               = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLMinMaxLocationKernel::run(const Window &window, cl::CommandQueue &queue)

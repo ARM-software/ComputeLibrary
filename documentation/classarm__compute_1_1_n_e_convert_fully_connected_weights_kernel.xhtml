@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -340,9 +340,9 @@ This function assumes the weights are already reshaped (transposed) </dd></dl>
 <p>Set the input and output tensor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/U32/S32/QS32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The converted weights tensor. Shape and Data Type: Same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). Must be in NCHW format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>The data layout the weights have been trained in. </td></tr>
   </table>
   </dd>
@@ -380,7 +380,7 @@ This function assumes the weights are already reshaped (transposed) </dd></dl>
 
 <p>Definition at line <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_n_e_convert_fully_connected_weights_kernel_8h_source.xhtml">NEConvertFullyConnectedWeightsKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">NEConvertFullyConnectedWeightsKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a90b1dc1d6e41461530a27a0b98cff105">NEConvertFullyConnectedWeightsKernel::NEConvertFullyConnectedWeightsKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a5d2dd5cf486c0e0093d70cf71bb1c6f5">NEConvertFullyConnectedWeightsKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEConvertFullyConnectedWeightsKernel::run()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a0ee2875b1f3cf5b6bc2361e85b7e53ef">NEConvertFullyConnectedWeightsKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a8f9ea99b237bb2f67663518c8cd1936f">NEConvertFullyConnectedWeightsKernel::~NEConvertFullyConnectedWeightsKernel()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#ac0cfd5b64b24f3dfae04ee3d0f258624">NEConvertFullyConnectedWeightsKernel::configure()</a>, <a class="el" href="_c_l_2_winograd_8cpp_source.xhtml#l00227">arm_compute::test::validation::data_layout</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a90b1dc1d6e41461530a27a0b98cff105">NEConvertFullyConnectedWeightsKernel::NEConvertFullyConnectedWeightsKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a5d2dd5cf486c0e0093d70cf71bb1c6f5">NEConvertFullyConnectedWeightsKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEConvertFullyConnectedWeightsKernel::run()</a>, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a0ee2875b1f3cf5b6bc2361e85b7e53ef">NEConvertFullyConnectedWeightsKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a8f9ea99b237bb2f67663518c8cd1936f">NEConvertFullyConnectedWeightsKernel::~NEConvertFullyConnectedWeightsKernel()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEConvertFullyConnectedWeightsKernel&quot;</span>;</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -536,9 +536,9 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml">NEConvertFullyConnectedWeightsKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/U32/S32/QS32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The converted weights tensor info. Shape and Data Type: Same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). Must be in NCHW format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>The data layout the weights have been trained in. </td></tr>
   </table>
   </dd>
@@ -557,7 +557,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml">NEConvertFullyConnectedWeightsKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

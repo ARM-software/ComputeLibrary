@@ -31,6 +31,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Scale.h"
 
 namespace arm_compute
@@ -99,7 +100,7 @@ protected:
         }
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType src = create_tensor<TensorType>(shape, _data_type, 1, QuantizationInfo(), data_layout);
 
         const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
         const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -107,7 +108,7 @@ protected:
         TensorShape shape_scaled(shape);
         shape_scaled.set(idx_width, shape[idx_width] * scale_x);
         shape_scaled.set(idx_height, shape[idx_height] * scale_y);
-        TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType scale;
@@ -136,7 +137,7 @@ protected:
                                       InterpolationPolicy policy, BorderMode border_mode, T constant_border_value, SamplingPolicy sampling_policy)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1, 0, QuantizationInfo() };
+        SimpleTensor<T> src{ shape, _data_type, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src);

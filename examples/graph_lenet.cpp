@@ -22,12 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph.h"
-
 #include "support/ToolchainSupport.h"
+#include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
-
-#include <cstdlib>
 
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
@@ -41,87 +39,83 @@ using namespace arm_compute::graph_utils;
 class GraphLenetExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    GraphLenetExample()
+        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "LeNet")
     {
-        std::string  data_path;   /** Path to the trainable data */
-        unsigned int batches = 4; /** Number of batches */
-
-        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
-
-        FastMathHint fast_math_hint = FastMathHint::DISABLED;
-
+    }
+    bool do_setup(int argc, char **argv) override
+    {
         // Parse arguments
-        if(argc < 2)
+        cmd_parser.parse(argc, argv);
+
+        // Consume common parameters
+        common_params = consume_common_graph_parameters(common_opts);
+
+        // Return when help menu is requested
+        if(common_params.help)
         {
-            // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
+            cmd_parser.print_help(argv[0]);
+            return false;
         }
-        else if(argc == 2)
-        {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
-        }
-        else if(argc == 3)
-        {
-            //Do something with argv[1]
-            data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " [path_to_data] [batches] [fast_math_hint]\n\n";
-            std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
-        }
-        else if(argc == 4)
-        {
-            data_path = argv[2];
-            batches   = std::strtol(argv[3], nullptr, 0);
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [fast_math_hint]\n\n";
-            std::cout << "No fast math info provided: disabling fast math\n\n";
-        }
-        else
-        {
-            //Do something with argv[1] and argv[2]
-            data_path      = argv[2];
-            batches        = std::strtol(argv[3], nullptr, 0);
-            fast_math_hint = (std::strtol(argv[4], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
-        }
+
+        // Checks
+        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+
+        // Print parameter values
+        std::cout << common_params << std::endl;
+
+        // Get trainable parameters data path
+        std::string  data_path = common_params.data_path;
+        unsigned int batches   = 4; /** Number of batches */
+
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(28U, 28U, 1U, batches), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Set weights trained layout
+        const DataLayout weights_layout = DataLayout::NCHW;
 
         //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
-        graph << target_hint
-              << fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(28U, 28U, 1U, batches), DataType::F32), get_input_accessor(""))
+        graph << common_params.target
+              << common_params.fast_math_hint
+              << InputLayer(input_descriptor, get_input_accessor(common_params))
               << ConvolutionLayer(
                   5U, 5U, 20U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv1")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               << ConvolutionLayer(
                   5U, 5U, 50U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv2")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
               << FullyConnectedLayer(
                   500U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
               .set_name("ip1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu")
               << FullyConnectedLayer(
                   10U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
               .set_name("ip2")
               << SoftmaxLayer().set_name("prob")
-              << OutputLayer(get_output_accessor(""));
+              << OutputLayer(get_output_accessor(common_params));
 
         // Finalize graph
         GraphConfig config;
-        config.use_tuner = (target == 2);
-        graph.finalize(target_hint, config);
+        config.num_threads = common_params.threads;
+        config.use_tuner   = common_params.enable_tuner;
+        config.tuner_file  = common_params.tuner_file;
+
+        graph.finalize(common_params.target, config);
+
+        return true;
     }
     void do_run() override
     {
@@ -130,13 +124,18 @@ public:
     }
 
 private:
-    Stream graph{ 0, "LeNet" };
+    CommandLineParser  cmd_parser;
+    CommonGraphOptions common_opts;
+    CommonGraphParams  common_params;
+    Stream             graph;
 };
 
 /** Main program for LeNet
  *
+ * @note To list all the possible arguments execute the binary appended with the --help option
+ *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] batches, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments
  */
 int main(int argc, char **argv)
 {

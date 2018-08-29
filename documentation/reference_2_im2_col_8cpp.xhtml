@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,6 @@ $(document).ready(function(){initNavTree('reference_2_im2_col_8cpp.xhtml','');})
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_im2_col_8h_source.xhtml">Im2Col.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_permute_8h_source.xhtml">Permute.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_helpers_8h_source.xhtml">tests/validation/Helpers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2reference_2_utils_8h_source.xhtml">tests/validation/reference/Utils.h</a>&quot;</code><br />
@@ -142,21 +141,24 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a323db40f7ed783d6a92c83f4a4b93e05"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a323db40f7ed783d6a92c83f4a4b93e05"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a323db40f7ed783d6a92c83f4a4b93e05">im2col_nchw</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
-<tr class="separator:a323db40f7ed783d6a92c83f4a4b93e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad986200da9376a05059064b4e0372445"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad986200da9376a05059064b4e0372445"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ad986200da9376a05059064b4e0372445">im2col_nchw</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias, unsigned int num_groups)</td></tr>
+<tr class="separator:ad986200da9376a05059064b4e0372445"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a676e94ff38d81a5794e2bf69008c5137"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a676e94ff38d81a5794e2bf69008c5137"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a676e94ff38d81a5794e2bf69008c5137">im2col_nhwc</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
 <tr class="separator:a676e94ff38d81a5794e2bf69008c5137"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d51f96c87706611223db2f17b60ced9"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a6d51f96c87706611223db2f17b60ced9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6d51f96c87706611223db2f17b60ced9">im2col</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
-<tr class="separator:a6d51f96c87706611223db2f17b60ced9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0892d5fb41a83a227678d64aac109e9"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ad0892d5fb41a83a227678d64aac109e9">im2col</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, SimpleTensor&lt; uint8_t &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
-<tr class="separator:ad0892d5fb41a83a227678d64aac109e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a186a59c8ffe7cb7ea92c74875ff48b8c"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a186a59c8ffe7cb7ea92c74875ff48b8c">im2col</a> (const SimpleTensor&lt; half &gt; &amp;src, SimpleTensor&lt; half &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
-<tr class="separator:a186a59c8ffe7cb7ea92c74875ff48b8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a145c48dd208871647d55d529c5b6a07b"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a145c48dd208871647d55d529c5b6a07b">im2col</a> (const SimpleTensor&lt; float &gt; &amp;src, SimpleTensor&lt; float &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
-<tr class="separator:a145c48dd208871647d55d529c5b6a07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0466a0e8f1472317736aee421a5470c4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a0466a0e8f1472317736aee421a5470c4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a0466a0e8f1472317736aee421a5470c4">im2col_nhwc_channel_first</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias)</td></tr>
+<tr class="separator:a0466a0e8f1472317736aee421a5470c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bd08c7461dd60036b4d08830664e6e1"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a6bd08c7461dd60036b4d08830664e6e1"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6bd08c7461dd60036b4d08830664e6e1">im2col</a> (const SimpleTensor&lt; T &gt; &amp;src, SimpleTensor&lt; T &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias, const unsigned int num_groups, bool channels_first_output_nhwc)</td></tr>
+<tr class="separator:a6bd08c7461dd60036b4d08830664e6e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9b0cc8e879682f739cbbc6f4a72a0f7"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ab9b0cc8e879682f739cbbc6f4a72a0f7">im2col</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, SimpleTensor&lt; uint8_t &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias, unsigned int num_groups, bool channels_first_output_nhwc)</td></tr>
+<tr class="separator:ab9b0cc8e879682f739cbbc6f4a72a0f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a637296a7a09da664326961789c84b73f"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a637296a7a09da664326961789c84b73f">im2col</a> (const SimpleTensor&lt; half &gt; &amp;src, SimpleTensor&lt; half &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias, unsigned int num_groups, bool channels_first_output_nhwc)</td></tr>
+<tr class="separator:a637296a7a09da664326961789c84b73f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdea8b426c95dfa6b4d6ab277042bcef"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#abdea8b426c95dfa6b4d6ab277042bcef">im2col</a> (const SimpleTensor&lt; float &gt; &amp;src, SimpleTensor&lt; float &gt; &amp;dst, const Size2D &amp;kernel_dims, const PadStrideInfo &amp;conv_info, bool has_bias, unsigned int num_groups, bool channels_first_output_nhwc)</td></tr>
+<tr class="separator:abdea8b426c95dfa6b4d6ab277042bcef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -164,7 +166,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="reference_2_im2_col_8cpp.xhtml">Im2Col.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

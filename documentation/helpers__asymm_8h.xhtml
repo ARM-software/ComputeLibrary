@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -312,7 +312,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00299">299</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00298">298</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -329,7 +329,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                               \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) constant_term     = 1895147668;                                                              \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) constant_1_over_3 = 715827883;                                                               \</span></div><div class="line"><span class="preprocessor">        const int k_fractional_bits = 31;                                                                                           \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x = a + (1 &lt;&lt; (k_fractional_bits - 3));                                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x2 = ASYMM_MULT(x, x, size);                                                                                                \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x3 = ASYMM_MULT(x2, x, size);                                                                                               \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4 = ASYMM_MULT(x2, x2, size);                                                                                              \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_4 = ASYMM_ROUNDING_DIVIDE_BY_POW2(x4, 2, size);                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_24_plus_x3_over_6_plus_x2 = ASYMM_MULT((x4_over_4 + x3), constant_1_over_3, size) + x2;                             \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_24_plus_x3_over_6_plus_x2_over_2 = ASYMM_ROUNDING_DIVIDE_BY_POW2(x4_over_24_plus_x3_over_6_plus_x2, 1, size);       \</span></div><div class="line"><span class="preprocessor">        return constant_term + ASYMM_MULT(constant_term, x + x4_over_24_plus_x3_over_6_plus_x2_over_2, size);                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_exp_on_interval_between_negative_one_quarter_and_0_excl<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                               \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) constant_term     = 1895147668;                                                              \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) constant_1_over_3 = 715827883;                                                               \</span></div><div class="line"><span class="preprocessor">        const int k_fractional_bits = 31;                                                                                           \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x = a + (1 &lt;&lt; (k_fractional_bits - 3));                                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x2 = ASYMM_MULT(x, x, size);                                                                                                \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x3 = ASYMM_MULT(x2, x, size);                                                                                               \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4 = ASYMM_MULT(x2, x2, size);                                                                                              \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_4 = ASYMM_ROUNDING_DIVIDE_BY_POW2(x4, 2, size);                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_24_plus_x3_over_6_plus_x2 = ASYMM_MULT((x4_over_4 + x3), constant_1_over_3, size) + x2;                             \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                                    \</span></div><div class="line"><span class="preprocessor">        x4_over_24_plus_x3_over_6_plus_x2_over_2 = ASYMM_ROUNDING_DIVIDE_BY_POW2(x4_over_24_plus_x3_over_6_plus_x2, 1, size);       \</span></div><div class="line"><span class="preprocessor">        return constant_term + ASYMM_MULT(constant_term, x + x4_over_24_plus_x3_over_6_plus_x2_over_2, size);                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Calculates \( exp(x) \) for x in [-1/4, 0). </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -340,7 +340,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00077">77</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00076">76</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -374,7 +374,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00304">304</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00303">303</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -401,7 +401,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00164">164</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00163">163</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -429,7 +429,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00302">302</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00301">301</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -446,7 +446,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_mask_if_non_zero<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_zeros = 0;                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                       \</span></div><div class="line"><span class="preprocessor">        return select(all_zeros, all_ones, a != 0);                                          \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_mask_if_non_zero<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_zeros = 0;                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                       \</span></div><div class="line"><span class="preprocessor">        return select(all_zeros, all_ones, a != 0);                                          \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>For each element of input vector, the corresponding bits of the result item are set if the input item is non-zero. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -457,7 +457,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Output vector with bits set when corresponding bit in <code>a</code> is non zero. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00136">136</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00135">135</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -485,7 +485,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00301">301</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00300">300</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -502,7 +502,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_mask_if_zero<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_zeros = 0;                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                   \</span></div><div class="line"><span class="preprocessor">        return select(all_zeros, all_ones, a == 0);                                      \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_mask_if_zero<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_zeros = 0;                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) all_ones  = ~0;                                   \</span></div><div class="line"><span class="preprocessor">        return select(all_zeros, all_ones, a == 0);                                      \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>For each element of input vector, the corresponding bits of the result item are set if the input item is zero. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -513,7 +513,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Output vector with bits set when corresponding bit in <code>a</code> is zero. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00121">121</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00120">120</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -547,7 +547,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00296">296</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00295">295</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -587,9 +587,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00297">297</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
-
-<p>Referenced by <a class="el" href="direct__convolution__1x1__3x3__5x5__quantized_8cl_source.xhtml#l00278">output_stage_quantized()</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00296">296</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -606,8 +604,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">asymm_mult</a><span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a, VEC_DATA_TYPE(int, size) b) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        overflow = a == b &amp;&amp; a == INT_MIN;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        a_64 = convert_long##size(a);                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        b_64 = convert_long##size(b);                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        ab_64 = a_64 * b_64;                                                                                 \</span></div><div class="line"><span class="preprocessor">        </span><span class="comment">/* COMPMID-907 */</span><span class="preprocessor">                                                                                    \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        ab_x2_high32 = convert_int##size(((ab_64 + (1 &lt;&lt; 30)) &gt;&gt; 31));                                       \</span></div><div class="line"><span class="preprocessor">        return select(ab_x2_high32, INT_MAX, overflow);                                                      \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="softmax__layer__quantized_8cl_xhtml_a525a42d38133b1051b8924b456add4a1"><div class="ttname"><a href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">asymm_mult</a></div><div class="ttdeci">#define asymm_mult(a, b)</div><div class="ttdef"><b>Definition:</b> <a href="softmax__layer__quantized_8cl_source.xhtml#l00056">softmax_layer_quantized.cl:56</a></div></div>
-<div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">asymm_mult</a><span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a, VEC_DATA_TYPE(int, size) b) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        overflow = a == b &amp;&amp; a == INT_MIN;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        a_64 = convert_long##size(a);                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        b_64 = convert_long##size(b);                                                                        \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                            \</span></div><div class="line"><span class="preprocessor">        ab_64 = a_64 * b_64;                                                                                 \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        ab_x2_high32 = convert_int##size(((ab_64 + (1 &lt;&lt; 30)) &gt;&gt; 31));                                       \</span></div><div class="line"><span class="preprocessor">        return select(ab_x2_high32, INT_MAX, overflow);                                                      \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="softmax__layer__quantized_8cl_xhtml_a525a42d38133b1051b8924b456add4a1"><div class="ttname"><a href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">asymm_mult</a></div><div class="ttdeci">#define asymm_mult(a, b)</div><div class="ttdef"><b>Definition:</b> <a href="softmax__layer__quantized_8cl_source.xhtml#l00056">softmax_layer_quantized.cl:56</a></div></div>
+<div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Product of two numbers, interpreting them as fixed-point values in the interval [-1, 1), rounding to the nearest value, and saturating -1 * -1 to the maximum value. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -646,7 +644,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00305">305</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00304">304</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -663,7 +661,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_one_over_one_plus_x_for_x_in_0_1<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q0_one = INT_MAX;                                                     \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_one = 1 &lt;&lt; (31 - 2);                                               \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        half_denominator = ASYMM_ROUNDING_HALF_SUM(a, Q0_one, size);                                         \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_48_over_17     = 1515870810;                                       \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_neg_32_over_17 = -1010580540;                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        x = Q2_48_over_17 + ASYMM_MULT(half_denominator, Q2_neg_32_over_17, size);                           \</span></div><div class="line"><span class="preprocessor">        for(int i = 0; i &lt; 3; i++)                                                                           \</span></div><div class="line"><span class="preprocessor">        {                                                                                                    \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            half_denominator_times_x = ASYMM_MULT(half_denominator, x, size);                                \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            one_minus_half_denominator_times_x = Q2_one - half_denominator_times_x;                          \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            tmp = ASYMM_MULT(x, one_minus_half_denominator_times_x, size);                                   \</span></div><div class="line"><span class="preprocessor">            x   = x + ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(tmp, 2, size);                                  \</span></div><div class="line"><span class="preprocessor">        }                                                                                                    \</span></div><div class="line"><span class="preprocessor">        return ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, 1, size);                                           \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_one_over_one_plus_x_for_x_in_0_1<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q0_one = INT_MAX;                                                     \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_one = 1 &lt;&lt; (31 - 2);                                               \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        half_denominator = ASYMM_ROUNDING_HALF_SUM(a, Q0_one, size);                                         \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_48_over_17     = 1515870810;                                       \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) Q2_neg_32_over_17 = -1010580540;                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                             \</span></div><div class="line"><span class="preprocessor">        x = Q2_48_over_17 + ASYMM_MULT(half_denominator, Q2_neg_32_over_17, size);                           \</span></div><div class="line"><span class="preprocessor">        for(int i = 0; i &lt; 3; i++)                                                                           \</span></div><div class="line"><span class="preprocessor">        {                                                                                                    \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            half_denominator_times_x = ASYMM_MULT(half_denominator, x, size);                                \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            one_minus_half_denominator_times_x = Q2_one - half_denominator_times_x;                          \</span></div><div class="line"><span class="preprocessor">            VEC_DATA_TYPE(int, size)                                                                         \</span></div><div class="line"><span class="preprocessor">            tmp = ASYMM_MULT(x, one_minus_half_denominator_times_x, size);                                   \</span></div><div class="line"><span class="preprocessor">            x   = x + ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(tmp, 2, size);                                  \</span></div><div class="line"><span class="preprocessor">        }                                                                                                    \</span></div><div class="line"><span class="preprocessor">        return ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(x, 1, size);                                           \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Calculates \( 1 / (1 + x) \) for x in (0, 1). </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -674,7 +672,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result in fixed-point format Q0. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00258">258</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00257">257</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -714,7 +712,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00308">308</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00307">307</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -731,8 +729,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a><span class="preprocessor">##size(VEC_DATA_TYPE(int, size) value, int src_integer_bits, int dst_integer_bits) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                               \</span></div><div class="line"><span class="preprocessor">        int exponent = src_integer_bits - dst_integer_bits;                                                                         \</span></div><div class="line"><span class="preprocessor">        return ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(value, exponent, size);                                                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="softmax__layer__quantized_8cl_xhtml_ad57ea340cdcfeb2e1375b70c3ae59bae"><div class="ttname"><a href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a></div><div class="ttdeci">#define asymm_rescale(value, src_integer_bits, dst_integer_bits)</div><div class="ttdef"><b>Definition:</b> <a href="softmax__layer__quantized_8cl_source.xhtml#l00058">softmax_layer_quantized.cl:58</a></div></div>
-<div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) <a class="code" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a><span class="preprocessor">##size(VEC_DATA_TYPE(int, size) value, int src_integer_bits, int dst_integer_bits) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                               \</span></div><div class="line"><span class="preprocessor">        int exponent = src_integer_bits - dst_integer_bits;                                                                         \</span></div><div class="line"><span class="preprocessor">        return ASYMM_SATURATING_ROUNDING_MULT_BY_POW2(value, exponent, size);                                                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
+<div class="ttc" id="softmax__layer__quantized_8cl_xhtml_ad57ea340cdcfeb2e1375b70c3ae59bae"><div class="ttname"><a href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a></div><div class="ttdeci">#define asymm_rescale(value, src_integer_bits, dst_integer_bits)</div><div class="ttdef"><b>Definition:</b> <a href="softmax__layer__quantized_8cl_source.xhtml#l00058">softmax_layer_quantized.cl:58</a></div></div>
 </div><!-- fragment -->
 <p>Considering the integer value as fixed-point, change the number of integer bits and update value accordingly. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -743,7 +741,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Rescaled value. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00288">288</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00287">287</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -777,7 +775,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00295">295</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00294">294</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -794,7 +792,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_rounding_divide_by_POW2_<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) x, int exponent) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                              \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                   \</span></div><div class="line"><span class="preprocessor">        mask = (1 &lt;&lt; exponent) - 1;                                                                                \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) zero = 0;                                                                   \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) one  = 1;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                   \</span></div><div class="line"><span class="preprocessor">        threshold = (mask &gt;&gt; 1) + select(zero, one, x &lt; 0);                                                        \</span></div><div class="line"><span class="preprocessor">        return (x &gt;&gt; exponent) + select(zero, one, (x &amp; mask) &gt; threshold);                                        \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_rounding_divide_by_POW2_<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) x, int exponent) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                              \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                   \</span></div><div class="line"><span class="preprocessor">        mask = (1 &lt;&lt; exponent) - 1;                                                                                \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) zero = 0;                                                                   \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) one  = 1;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                   \</span></div><div class="line"><span class="preprocessor">        threshold = (mask &gt;&gt; 1) + select(zero, one, x &lt; 0);                                                        \</span></div><div class="line"><span class="preprocessor">        return (x &gt;&gt; exponent) + select(zero, one, (x &amp; mask) &gt; threshold);                                        \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Correctly-rounded-to-nearest division by a power-of-two. </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -839,7 +837,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00307">307</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00306">306</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -856,7 +854,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_rounding_half_sum<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a, VEC_DATA_TYPE(int, size) b) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        a64 = convert_long##size(a);                                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        b64 = convert_long##size(b);                                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        sum = a64 + b64;                                                                                                  \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(long, size) one       = 1;                                                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(long, size) minus_one = -1;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        sign = select(minus_one, one, sum &gt;= 0);                                                                          \</span></div><div class="line"><span class="preprocessor">        return convert_int##size((sum + sign) / 2);                                                                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_rounding_half_sum<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) a, VEC_DATA_TYPE(int, size) b) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        a64 = convert_long##size(a);                                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        b64 = convert_long##size(b);                                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        sum = a64 + b64;                                                                                                  \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(long, size) one       = 1;                                                                    \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(long, size) minus_one = -1;                                                                   \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(long, size)                                                                                         \</span></div><div class="line"><span class="preprocessor">        sign = select(minus_one, one, sum &gt;= 0);                                                                          \</span></div><div class="line"><span class="preprocessor">        return convert_int##size((sum + sign) / 2);                                                                       \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Calculates (a+b)/2, rounded to the nearest integer. </p>
 <p>Equivalent to VRHADD in the ARM NEON instruction set.</p>
@@ -868,7 +866,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>(a+b)/2, rounded to the nearest integer. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00236">236</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00235">235</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -902,7 +900,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00306">306</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00305">305</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -919,7 +917,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_saturating_rounding_mult_by_pow2<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) x, int exponent) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                      \</span></div><div class="line"><span class="preprocessor">        if(exponent &lt; 0)                                                                                                   \</span></div><div class="line"><span class="preprocessor">        {                                                                                                                  \</span></div><div class="line"><span class="preprocessor">            return ASYMM_ROUNDING_DIVIDE_BY_POW2(x, -exponent, size);                                                      \</span></div><div class="line"><span class="preprocessor">        }                                                                                                                  \</span></div><div class="line"><span class="preprocessor">        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) min = INT_MIN;                                                                      \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) max = INT_MAX;                                                                      \</span></div><div class="line"><span class="preprocessor">        int threshold = ((1 &lt;&lt; (31 - exponent)) - 1);                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        positive_mask = ASYMM_MASK_IF_NON_ZERO(x &gt; threshold, size);                                                       \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        negative_mask = ASYMM_MASK_IF_NON_ZERO(x &lt; -threshold, size);                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        result = x &lt;&lt; exponent;                                                                                            \</span></div><div class="line"><span class="preprocessor">        result = ASYMM_SELECT_USING_MASK(positive_mask, max, result, size);                                                \</span></div><div class="line"><span class="preprocessor">        result = ASYMM_SELECT_USING_MASK(negative_mask, min, result, size);                                                \</span></div><div class="line"><span class="preprocessor">        return result;                                                                                                     \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_saturating_rounding_mult_by_pow2<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) x, int exponent) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                      \</span></div><div class="line"><span class="preprocessor">        if(exponent &lt; 0)                                                                                                   \</span></div><div class="line"><span class="preprocessor">        {                                                                                                                  \</span></div><div class="line"><span class="preprocessor">            return ASYMM_ROUNDING_DIVIDE_BY_POW2(x, -exponent, size);                                                      \</span></div><div class="line"><span class="preprocessor">        }                                                                                                                  \</span></div><div class="line"><span class="preprocessor">        \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) min = INT_MIN;                                                                      \</span></div><div class="line"><span class="preprocessor">        const VEC_DATA_TYPE(int, size) max = INT_MAX;                                                                      \</span></div><div class="line"><span class="preprocessor">        int threshold = ((1 &lt;&lt; (31 - exponent)) - 1);                                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        positive_mask = ASYMM_MASK_IF_NON_ZERO(x &gt; threshold, size);                                                       \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        negative_mask = ASYMM_MASK_IF_NON_ZERO(x &lt; -threshold, size);                                                      \</span></div><div class="line"><span class="preprocessor">        VEC_DATA_TYPE(int, size)                                                                                           \</span></div><div class="line"><span class="preprocessor">        result = x &lt;&lt; exponent;                                                                                            \</span></div><div class="line"><span class="preprocessor">        result = ASYMM_SELECT_USING_MASK(positive_mask, max, result, size);                                                \</span></div><div class="line"><span class="preprocessor">        result = ASYMM_SELECT_USING_MASK(negative_mask, min, result, size);                                                \</span></div><div class="line"><span class="preprocessor">        return result;                                                                                                     \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Calculates the product of a integer value by a power of two, with either a positive exponent (equivalent to an arithmetic left shift, saturating) or a negative exponent (equivalent to an arithmetic right shift, rounding to nearest). </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -930,7 +928,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Arithmetic left or right shift. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00207">207</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00206">206</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -970,7 +968,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00300">300</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00299">299</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -987,7 +985,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_select_using_mask<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) if_mask, VEC_DATA_TYPE(int, size) then_val, VEC_DATA_TYPE(int, size) else_val) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        return (if_mask &amp; then_val) ^ (~if_mask &amp; else_val);                                                                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) asymm_select_using_mask<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) if_mask, VEC_DATA_TYPE(int, size) then_val, VEC_DATA_TYPE(int, size) else_val) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        return (if_mask &amp; then_val) ^ (~if_mask &amp; else_val);                                                                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
 <p>Each bit of the result is set to the corresponding bit of either then_val or else_val depending on whether the corresponding bit of if_mask is set. </p>
 <p>Equivalent to the VBSL instruction in ARM NEON.</p>
@@ -999,7 +997,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Result contaning bits from <code>then_val</code> or from <code>else_val</code> depending on corresponding bit in <code>if_mask</code> is set or not. </dd></dl>
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00108">108</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00107">107</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1057,7 +1055,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00303">303</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00302">302</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1074,9 +1072,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) exp_barrel_shifter<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) result, int exponent, int fp_multiplier, int k_integer_bits, int k_fractional_bits, VEC_DATA_TYPE(int, size) remainder) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                                                                                                         \</span></div><div class="line"><span class="preprocessor">        if(k_integer_bits &gt; exponent)                                                                                                                                                                         \</span></div><div class="line"><span class="preprocessor">        {                                                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">            const int k_shift_amount = k_integer_bits &gt; exponent ? k_fractional_bits + exponent : 0;                                                                                                          \</span></div><div class="line"><span class="preprocessor">            return ASYMM_SELECT_USING_MASK(                                                                                                                                                                   \</span></div><div class="line"><span class="preprocessor">                    ASYMM_MASK_IF_NON_ZERO(remainder &amp; (1 &lt;&lt; k_shift_amount), size),                                                                                                                              \</span></div><div class="line"><span class="preprocessor">                    ASYMM_MULT(result, fp_multiplier, size), result, size);                                                                                                                                       \</span></div><div class="line"><span class="preprocessor">        }                                                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        \</span></div><div class="line"><span class="preprocessor">        return result;                                                                                                                                                                                        \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="fixed__point_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="fixed__point_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="fixed__point_8h_source.xhtml#l00093">fixed_point.h:93</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">inline</span> <a class="code" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<span class="keywordtype">int</span>, size) exp_barrel_shifter<span class="preprocessor">##size(VEC_DATA_TYPE(int, size) result, int exponent, int fp_multiplier, int k_integer_bits, int k_fractional_bits, VEC_DATA_TYPE(int, size) remainder) \</span></div><div class="line"><span class="preprocessor">    {                                                                                                                                                                                                         \</span></div><div class="line"><span class="preprocessor">        if(k_integer_bits &gt; exponent)                                                                                                                                                                         \</span></div><div class="line"><span class="preprocessor">        {                                                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">            const int k_shift_amount = k_integer_bits &gt; exponent ? k_fractional_bits + exponent : 0;                                                                                                          \</span></div><div class="line"><span class="preprocessor">            return ASYMM_SELECT_USING_MASK(                                                                                                                                                                   \</span></div><div class="line"><span class="preprocessor">                    ASYMM_MASK_IF_NON_ZERO(remainder &amp; (1 &lt;&lt; k_shift_amount), size),                                                                                                                              \</span></div><div class="line"><span class="preprocessor">                    ASYMM_MULT(result, fp_multiplier, size), result, size);                                                                                                                                       \</span></div><div class="line"><span class="preprocessor">        }                                                                                                                                                                                                     \</span></div><div class="line"><span class="preprocessor">        \</span></div><div class="line"><span class="preprocessor">        return result;                                                                                                                                                                                        \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="helpers_8h_source.xhtml#l00056">helpers.h:56</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00144">144</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00143">143</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1103,7 +1101,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00323">323</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00322">322</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1129,7 +1127,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00320">320</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00319">319</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1155,7 +1153,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00321">321</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00320">320</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1181,7 +1179,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00322">322</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00321">321</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1217,7 +1215,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00348">348</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00347">347</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1253,7 +1251,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00345">345</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00344">344</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1289,7 +1287,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00346">346</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00345">345</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1325,7 +1323,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00347">347</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00346">346</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1351,7 +1349,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00338">338</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00337">337</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1377,7 +1375,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00335">335</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00334">334</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1403,7 +1401,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00336">336</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00335">335</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1429,7 +1427,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00337">337</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00336">336</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1455,7 +1453,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00333">333</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00332">332</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1481,7 +1479,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00330">330</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00329">329</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1507,7 +1505,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00331">331</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00330">330</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1533,7 +1531,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00332">332</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00331">331</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1569,7 +1567,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00318">318</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00317">317</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1605,7 +1603,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00315">315</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00314">314</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1641,7 +1639,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00316">316</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00315">315</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1677,7 +1675,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00317">317</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00316">316</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1703,7 +1701,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00363">363</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00362">362</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1729,7 +1727,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00360">360</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00359">359</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1755,7 +1753,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00361">361</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00360">360</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1781,7 +1779,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00362">362</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00361">361</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1823,7 +1821,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00368">368</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00367">367</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1865,7 +1863,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00365">365</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00364">364</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1907,7 +1905,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00366">366</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00365">365</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1949,7 +1947,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00367">367</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00366">366</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -1985,7 +1983,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00313">313</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00312">312</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2021,7 +2019,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00310">310</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00309">309</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2057,7 +2055,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00311">311</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00310">310</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2093,7 +2091,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00312">312</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00311">311</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2129,7 +2127,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00358">358</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00357">357</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2165,7 +2163,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00355">355</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00354">354</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2201,7 +2199,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00356">356</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00355">355</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2237,7 +2235,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00357">357</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00356">356</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2273,7 +2271,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00353">353</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00352">352</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2309,7 +2307,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00350">350</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00349">349</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2345,7 +2343,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00351">351</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00350">350</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2381,7 +2379,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00352">352</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00351">351</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2423,7 +2421,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00328">328</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00327">327</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2465,7 +2463,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00325">325</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00324">324</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2507,7 +2505,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00326">326</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00325">325</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2549,7 +2547,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00327">327</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00326">326</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2609,7 +2607,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00343">343</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00342">342</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2669,7 +2667,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00340">340</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00339">339</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2729,7 +2727,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00341">341</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00340">340</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2789,7 +2787,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00342">342</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
+<p>Definition at line <a class="el" href="helpers__asymm_8h_source.xhtml#l00341">341</a> of file <a class="el" href="helpers__asymm_8h_source.xhtml">helpers_asymm.h</a>.</p>
 
 </div>
 </div>
@@ -2799,7 +2797,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="helpers__asymm_8h.xhtml">helpers_asymm.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

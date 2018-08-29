@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -321,7 +321,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the accumulate buffer and the biases of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">accum</td><td>The accumulate tensor to convert. Data type supported: QS8/QS16/F32 </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">accum</td><td>The accumulate tensor to convert. Data type supported: F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>The shared biases tensor to append. It must be 1D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a>. Data type supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -503,7 +503,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">accum</td><td>The accumulate tensor to convert. Data type supported: QS8/QS16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">accum</td><td>The accumulate tensor to convert. Data type supported: F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>The shared biases tensor to append. It must be 1D <a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a>. Data type supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -523,7 +523,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

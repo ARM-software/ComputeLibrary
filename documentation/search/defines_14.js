@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['y0',['Y0',['../sobel__filter_8cl.xhtml#a0b0dcdd1ffa302474e907d3d7ad9dbfe',1,'sobel_filter.cl']]],
-  ['y1',['Y1',['../sobel__filter_8cl.xhtml#a294189cdea31dda8faf609b9b3e2000a',1,'sobel_filter.cl']]],
-  ['y2',['Y2',['../sobel__filter_8cl.xhtml#a3128cc29e366777d66d8b049451ca8a0',1,'sobel_filter.cl']]],
-  ['y3',['Y3',['../sobel__filter_8cl.xhtml#a676acf01638364a90adf5d09d2a215bf',1,'sobel_filter.cl']]],
-  ['y4',['Y4',['../sobel__filter_8cl.xhtml#a5a8e903c2373c4d65724c79cdea8b3d9',1,'sobel_filter.cl']]],
-  ['y5',['Y5',['../sobel__filter_8cl.xhtml#a770267173956bf918cf3ca1247b6de12',1,'sobel_filter.cl']]],
-  ['y6',['Y6',['../sobel__filter_8cl.xhtml#abcdba0de8723fe6f2d2eb284d7e98a41',1,'sobel_filter.cl']]]
+  ['x0',['X0',['../sobel__filter_8cl.xhtml#a8476f4a8de2c191433342c9ce896986a',1,'sobel_filter.cl']]],
+  ['x1',['X1',['../sobel__filter_8cl.xhtml#a1964818ccd90a6173ea48cecb652feeb',1,'sobel_filter.cl']]],
+  ['x2',['X2',['../sobel__filter_8cl.xhtml#a79ae03a0214cb30e57b9e8835f2a0019',1,'sobel_filter.cl']]],
+  ['x3',['X3',['../sobel__filter_8cl.xhtml#adb6fd3d004959525c6a684b82ef50860',1,'sobel_filter.cl']]],
+  ['x4',['X4',['../sobel__filter_8cl.xhtml#a0f79fa7387c308a89a30682d905aa40a',1,'sobel_filter.cl']]],
+  ['x5',['X5',['../sobel__filter_8cl.xhtml#a921884524c9038883b25f03d3bd1b078',1,'sobel_filter.cl']]],
+  ['x6',['X6',['../sobel__filter_8cl.xhtml#a0e11bba5150b8ae2a8831f6f4532e352',1,'sobel_filter.cl']]]
 ];

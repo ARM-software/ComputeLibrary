@@ -50,7 +50,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input  Source tensor. Data types supported: F16/F32. Data layouts supported: NCHW.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
@@ -60,7 +60,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
      *
-     * @param[in] input  Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] input  Source tensor info. Data types supported: F16/F32. Data layouts supported: NCHW.
      * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0

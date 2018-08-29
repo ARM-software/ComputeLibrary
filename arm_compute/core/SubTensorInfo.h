@@ -98,12 +98,6 @@ public:
         _parent->set_format(format);
         return *this;
     };
-    ITensorInfo &set_fixed_point_position(int fixed_point_position) override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        _parent->set_fixed_point_position(fixed_point_position);
-        return *this;
-    };
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override
     {
@@ -143,11 +137,6 @@ public:
         return _parent->offset_element_in_bytes(_coords);
     }
     size_t offset_element_in_bytes(const Coordinates &pos) const override;
-    int fixed_point_position() const override
-    {
-        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
-        return _parent->fixed_point_position();
-    }
     size_t element_size() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);

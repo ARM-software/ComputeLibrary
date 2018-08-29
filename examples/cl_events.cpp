@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -36,7 +37,7 @@ using namespace utils;
 class CLEventsExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         /** [OpenCL events] **/
         PPMLoader     ppm;
@@ -83,6 +84,8 @@ public:
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
         /** [OpenCL events] **/
+
+        return true;
     }
     void do_run() override
     {

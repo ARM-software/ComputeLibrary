@@ -33,8 +33,8 @@
 using namespace arm_compute;
 
 TensorInfo::TensorInfo()
-    : _total_size(0), _fixed_point_position(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN),
-      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
+    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
+      _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
 
@@ -42,7 +42,6 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     : TensorInfo()
 {
     _total_size                    = info.total_size();
-    _fixed_point_position          = info.fixed_point_position();
     _offset_first_element_in_bytes = info.offset_first_element_in_bytes();
     _strides_in_bytes              = info.strides_in_bytes();
     _num_channels                  = info.num_channels();
@@ -72,22 +71,22 @@ TensorInfo::TensorInfo(const TensorShape &tensor_shape, Format format)
     init(tensor_shape, format);
 }
 
-TensorInfo::TensorInfo(size_t num_channels, DataType data_type, size_t fixed_point_position)
+TensorInfo::TensorInfo(size_t num_channels, DataType data_type)
     : TensorInfo()
 {
-    init(TensorShape(), num_channels, data_type, fixed_point_position);
+    init(TensorShape(), num_channels, data_type);
 }
 
-TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position)
+TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type)
     : TensorInfo()
 {
-    init(tensor_shape, num_channels, data_type, fixed_point_position);
+    init(tensor_shape, num_channels, data_type);
 }
 
 TensorInfo::TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, QuantizationInfo quantization_info)
     : TensorInfo()
 {
-    init(tensor_shape, num_channels, data_type, 0);
+    init(tensor_shape, num_channels, data_type);
     _quantization_info = quantization_info;
 }
 
@@ -124,34 +123,28 @@ void TensorInfo::init(const TensorShape &tensor_shape, Format format,
     _format = format;
 }
 
-void TensorInfo::init(size_t num_channels, DataType data_type, size_t fixed_point_position)
+void TensorInfo::init(size_t num_channels, DataType data_type)
 {
-    init(TensorShape(), num_channels, data_type, fixed_point_position);
+    init(TensorShape(), num_channels, data_type);
 }
 
-void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position)
+void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type)
 {
     ARM_COMPUTE_ERROR_ON(num_channels == 0);
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS8 && (fixed_point_position < 1 || fixed_point_position > 6));
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS16 && (fixed_point_position < 1 || fixed_point_position > 14));
 
-    _fixed_point_position = fixed_point_position;
-    _data_type            = data_type;
-    _num_channels         = num_channels;
-    _format               = Format::UNKNOWN;
+    _data_type    = data_type;
+    _num_channels = num_channels;
+    _format       = Format::UNKNOWN;
 
     set_tensor_shape(tensor_shape);
 }
 
 void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type,
                       const Strides &strides_in_bytes, size_t offset_first_element_in_bytes,
-                      size_t total_size_in_bytes, int fixed_point_position)
+                      size_t total_size_in_bytes)
 {
     ARM_COMPUTE_ERROR_ON(num_channels == 0);
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS8 && (fixed_point_position < 1 || fixed_point_position > 6));
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS16 && (fixed_point_position < 1 || fixed_point_position > 14));
 
-    _fixed_point_position          = fixed_point_position;
     _data_type                     = data_type;
     _num_channels                  = num_channels;
     _format                        = Format::UNKNOWN;
@@ -188,17 +181,14 @@ size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, Format for
     return total_size;
 }
 
-size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position)
+size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, size_t num_channels, DataType data_type)
 {
     ARM_COMPUTE_ERROR_ON(num_channels == 0);
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS8 && (fixed_point_position < 1 || fixed_point_position > 6));
-    ARM_COMPUTE_ERROR_ON(data_type == DataType::QS16 && (fixed_point_position < 1 || fixed_point_position > 14));
 
-    _fixed_point_position = fixed_point_position;
-    _data_type            = data_type;
-    _num_channels         = num_channels;
-    _format               = Format::UNKNOWN;
-    _tensor_shape         = tensor_shape;
+    _data_type    = data_type;
+    _num_channels = num_channels;
+    _format       = Format::UNKNOWN;
+    _tensor_shape = tensor_shape;
 
     _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
 
@@ -368,14 +358,6 @@ ITensorInfo &TensorInfo::set_tensor_shape(const TensorShape &shape)
     std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);
 
     _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
-    return *this;
-}
-
-ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
-{
-    ARM_COMPUTE_ERROR_ON(_data_type == DataType::QS8 && (fixed_point_position < 1 || fixed_point_position > 6));
-    ARM_COMPUTE_ERROR_ON(_data_type == DataType::QS16 && (fixed_point_position < 1 || fixed_point_position > 14));
-    _fixed_point_position = fixed_point_position;
     return *this;
 }
 

@@ -5,5 +5,7 @@ var searchData=
   ['gemm',['gemm',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab84214a10c816dc554f190c53b535622',1,'arm_compute::test::validation']]],
   ['gpu_5fid',['gpu_id',['../_mali_counter_8cpp.xhtml#a0169f78cfbefd7d7d6dee6d1df40ee58',1,'MaliCounter.cpp']]],
   ['gpu_5ftarget',['gpu_target',['../structarm__compute_1_1_c_l_device_options.xhtml#aadf3b16e351860b4ba10a540a621b392',1,'arm_compute::CLDeviceOptions']]],
-  ['graph',['graph',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml#a2360aba01fa93c8493ba96683c4fb89c',1,'arm_compute::graph::ExecutionWorkload']]]
+  ['graph',['graph',['../structarm__compute_1_1graph_1_1_execution_workload.xhtml#a2360aba01fa93c8493ba96683c4fb89c',1,'arm_compute::graph::ExecutionWorkload']]],
+  ['green_5fcoef2_5fbt709',['green_coef2_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a27e073d020236f5a325762985b10f8d0',1,'arm_compute::test::colorconvert_helper::detail']]],
+  ['green_5fcoef_5fbt709',['green_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a5e59bd8be31e871da2db7572e8b788ce',1,'arm_compute::test::colorconvert_helper::detail']]]
 ];

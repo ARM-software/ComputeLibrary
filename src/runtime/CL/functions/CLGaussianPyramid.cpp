@@ -166,7 +166,7 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
             _gauss5x5[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode, constant_border_value);
 
             /* Configure scale image kernel */
-            _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode == BorderMode::UNDEFINED, SamplingPolicy::CENTER);
+            _scale_nearest[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), InterpolationPolicy::NEAREST_NEIGHBOR, border_mode, SamplingPolicy::CENTER);
         }
 
         _tmp.allocate();

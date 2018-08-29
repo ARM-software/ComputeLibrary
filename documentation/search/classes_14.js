@@ -5,6 +5,7 @@ var searchData=
   ['tensor',['Tensor',['../classarm__compute_1_1_tensor.xhtml',1,'arm_compute']]],
   ['tensor3d',['Tensor3D',['../struct_tensor3_d.xhtml',1,'']]],
   ['tensor4d',['Tensor4D',['../struct_tensor4_d.xhtml',1,'']]],
+  ['tensoraccessor',['TensorAccessor',['../classarm__compute_1_1_tensor_accessor.xhtml',1,'arm_compute']]],
   ['tensorallocator',['TensorAllocator',['../classarm__compute_1_1_tensor_allocator.xhtml',1,'arm_compute']]],
   ['tensorcache',['TensorCache',['../classarm__compute_1_1test_1_1_tensor_cache.xhtml',1,'arm_compute::test']]],
   ['tensordescriptor',['TensorDescriptor',['../structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml',1,'arm_compute::graph']]],
@@ -21,6 +22,7 @@ var searchData=
   ['tfpreproccessor',['TFPreproccessor',['../classarm__compute_1_1graph__utils_1_1_t_f_preproccessor.xhtml',1,'arm_compute::graph_utils']]],
   ['threadiddecorator',['ThreadIdDecorator',['../classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml',1,'arm_compute::logging']]],
   ['threadinfo',['ThreadInfo',['../structarm__compute_1_1_thread_info.xhtml',1,'arm_compute']]],
-  ['toggleoption',['ToggleOption',['../classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml',1,'arm_compute::test::framework']]],
-  ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]]
+  ['toggleoption',['ToggleOption',['../classarm__compute_1_1utils_1_1_toggle_option.xhtml',1,'arm_compute::utils']]],
+  ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]],
+  ['tunerfactory',['TunerFactory',['../classarm__compute_1_1tuners_1_1_tuner_factory.xhtml',1,'arm_compute::tuners']]]
 ];

@@ -32,9 +32,8 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
-
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 
 #include <memory>
 
@@ -53,13 +52,20 @@ class NEGEMM : public IFunction
 public:
     /** Constructor */
     NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMM(const NEGEMM &) = delete;
+    /** Default move constructor */
+    NEGEMM(NEGEMM &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMM &operator=(const NEGEMM &) = delete;
+    /** Default move assignment operator */
+    NEGEMM &operator=(NEGEMM &&) = default;
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
      * @note GEMM: The tensors a, b, c, d must have the same data type. You should not mix data types when calling this function.
      *
-     * @param[in]  a         First input tensor  (Matrix A or Vector A). Data type supported: QS8/QS16/F16/F32
+     * @param[in]  a         First input tensor  (Matrix A or Vector A). Data type supported: F16/F32
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a
      * @param[out] d         Output tensor. Data type supported: same as @p a
@@ -69,25 +75,39 @@ public:
      *                       if the reshape of matrix B should happen only for the first run
      */
     void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMM.
+     *
+     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
+     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor info. Data type supported: same as @p a
+     * @param[in]  alpha     Weight of the matrix product
+     * @param[in]  beta      Weight of matrix C
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should happen only for the first run
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                _memory_group;
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;
-    AssemblyKernelGlueF32      _asm_glue;
+    NEGEMMAssemblyDispatch     _asm_glue;
     NEGEMMMatrixAdditionKernel _ma_kernel;
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
-    Tensor                     _workspace;
-    Tensor                     _B_pretransposed;
+    const ITensor             *_original_b;
     bool                       _run_vector_matrix_multiplication;
     bool                       _run_addition;
-    bool                       _is_first_run;
     bool                       _reshape_b_only_on_first_run;
+    bool                       _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMM_H__ */

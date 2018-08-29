@@ -131,7 +131,7 @@ class SmallRNNLayerDataset final : public RNNLayerDataset
 public:
     SmallRNNLayerDataset()
     {
-        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), ActivationLayerInfo());
+        add_config(TensorShape(128U, 16U), TensorShape(128U, 32U), TensorShape(32U, 32U), TensorShape(32U), TensorShape(32U, 16U), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
     }
 };
 

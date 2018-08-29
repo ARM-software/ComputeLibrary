@@ -41,19 +41,18 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class BatchNormalizationLayerValidationFixedPointFixture : public framework::Fixture
+class BatchNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fractional_bits)
+    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
     {
-        _fractional_bits = fractional_bits;
-        _data_type       = dt;
-        _use_beta        = use_beta;
-        _use_gamma       = use_gamma;
+        _data_type = dt;
+        _use_beta  = use_beta;
+        _use_gamma = use_gamma;
 
-        _target    = compute_target(shape0, shape1, epsilon, act_info, dt, data_layout, fractional_bits);
-        _reference = compute_reference(shape0, shape1, epsilon, act_info, dt, fractional_bits);
+        _target    = compute_target(shape0, shape1, epsilon, act_info, dt, data_layout);
+        _reference = compute_reference(shape0, shape1, epsilon, act_info, dt);
     }
 
 protected:
@@ -93,7 +92,7 @@ protected:
         {
             int min_bound = 0;
             int max_bound = 0;
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<T>(_fractional_bits);
+            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<T>();
             std::uniform_int_distribution<> distribution(min_bound, max_bound);
             std::uniform_int_distribution<> distribution_var(0, max_bound);
             library->fill(src_tensor, distribution, 0);
@@ -115,12 +114,12 @@ protected:
             else
             {
                 // Fill with default value 1
-                library->fill_tensor_value(gamma_tensor, static_cast<T>(1 << (_fractional_bits)));
+                library->fill_tensor_value(gamma_tensor, static_cast<T>(1));
             }
         }
     }
 
-    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
+    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -128,12 +127,12 @@ protected:
         }
 
         // Create tensors
-        TensorType src   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-        TensorType dst   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-        TensorType mean  = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
-        TensorType var   = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
-        TensorType beta  = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
-        TensorType gamma = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
+        TensorType src   = create_tensor<TensorType>(shape0, dt, 1, QuantizationInfo(), data_layout);
+        TensorType dst   = create_tensor<TensorType>(shape0, dt, 1, QuantizationInfo(), data_layout);
+        TensorType mean  = create_tensor<TensorType>(shape1, dt, 1);
+        TensorType var   = create_tensor<TensorType>(shape1, dt, 1);
+        TensorType beta  = create_tensor<TensorType>(shape1, dt, 1);
+        TensorType gamma = create_tensor<TensorType>(shape1, dt, 1);
 
         // Create and configure function
         FunctionType norm;
@@ -172,38 +171,26 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape0, dt, 1, fixed_point_position };
-        SimpleTensor<T> ref_mean{ shape1, dt, 1, fixed_point_position };
-        SimpleTensor<T> ref_var{ shape1, dt, 1, fixed_point_position };
-        SimpleTensor<T> ref_beta{ shape1, dt, 1, fixed_point_position };
-        SimpleTensor<T> ref_gamma{ shape1, dt, 1, fixed_point_position };
+        SimpleTensor<T> ref_src{ shape0, dt, 1 };
+        SimpleTensor<T> ref_mean{ shape1, dt, 1 };
+        SimpleTensor<T> ref_var{ shape1, dt, 1 };
+        SimpleTensor<T> ref_beta{ shape1, dt, 1 };
+        SimpleTensor<T> ref_gamma{ shape1, dt, 1 };
 
         // Fill reference
         fill(ref_src, ref_mean, ref_var, ref_beta, ref_gamma);
 
-        return reference::batch_normalization_layer(ref_src, ref_mean, ref_var, ref_beta, ref_gamma, epsilon, act_info, fixed_point_position);
+        return reference::batch_normalization_layer(ref_src, ref_mean, ref_var, ref_beta, ref_gamma, epsilon, act_info);
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
     DataType        _data_type{};
     bool            _use_beta{};
     bool            _use_gamma{};
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class BatchNormalizationLayerValidationFixture : public BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
-    {
-        BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, epsilon, use_beta, use_gamma, act_info, dt, data_layout, 0);
-    }
 };
 } // namespace validation
 } // namespace test

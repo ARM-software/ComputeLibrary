@@ -32,18 +32,23 @@ namespace graph
 class INode;
 class ActivationLayerNode;
 class BatchNormalizationLayerNode;
+class ChannelShuffleLayerNode;
+class ConcatenateLayerNode;
 class ConstNode;
 class ConvolutionLayerNode;
-class DepthConcatenateLayerNode;
+class DeconvolutionLayerNode;
 class DepthwiseConvolutionLayerNode;
+class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
 class InputNode;
 class NormalizationLayerNode;
 class OutputNode;
+class PermuteLayerNode;
 class PoolingLayerNode;
 class ReshapeLayerNode;
+class ResizeLayerNode;
 class SoftmaxLayerNode;
 class SplitLayerNode;
 } // namespace graph

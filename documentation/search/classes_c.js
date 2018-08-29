@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['lenet5network',['LeNet5Network',['../classarm__compute_1_1test_1_1networks_1_1_le_net5_network.xhtml',1,'arm_compute::test::networks']]],
-  ['listoption',['ListOption',['../classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml',1,'arm_compute::test::framework']]],
+  ['listoption',['ListOption',['../classarm__compute_1_1utils_1_1_list_option.xhtml',1,'arm_compute::utils']]],
   ['logger',['Logger',['../classarm__compute_1_1logging_1_1_logger.xhtml',1,'arm_compute::logging']]],
   ['loggerregistry',['LoggerRegistry',['../classarm__compute_1_1logging_1_1_logger_registry.xhtml',1,'arm_compute::logging']]],
   ['logleveldecorator',['LogLevelDecorator',['../classarm__compute_1_1logging_1_1_log_level_decorator.xhtml',1,'arm_compute::logging']]],

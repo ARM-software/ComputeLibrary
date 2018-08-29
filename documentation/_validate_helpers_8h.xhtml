@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -147,6 +147,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a9785ffbaaa220b6725a93a6f7f3145ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">arm_compute::ITensorInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a9785ffbaaa220b6725a93a6f7f3145ca">get_backing_tensor_info</a> (<a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml">arm_compute::graph::Tensor</a> *tensor)</td></tr>
 <tr class="memdesc:a9785ffbaaa220b6725a93a6f7f3145ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns backing tensor info of a given tensor.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a9785ffbaaa220b6725a93a6f7f3145ca">More...</a><br /></td></tr>
 <tr class="separator:a9785ffbaaa220b6725a93a6f7f3145ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4632d71bdb4542008ad33b7b74b7b2c"><td class="memTemplParams" colspan="2">template&lt;typename ChannelShuffleLayer &gt; </td></tr>
+<tr class="memitem:ab4632d71bdb4542008ad33b7b74b7b2c"><td class="memTemplItemLeft" align="right" valign="top">Status&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ab4632d71bdb4542008ad33b7b74b7b2c">validate_channel_shuffle_layer</a> (ChannelShuffleLayerNode &amp;node)</td></tr>
+<tr class="memdesc:ab4632d71bdb4542008ad33b7b74b7b2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates a Channel Shuffle layer node.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ab4632d71bdb4542008ad33b7b74b7b2c">More...</a><br /></td></tr>
+<tr class="separator:ab4632d71bdb4542008ad33b7b74b7b2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a84a36a0cae1ceb4313891ca841b11cb3"><td class="memTemplParams" colspan="2">template&lt;typename ConvolutionLayer , typename DirectConvolutionLayer , typename GEMMConvolutionLayer , typename WinogradConvolutionLayer &gt; </td></tr>
 <tr class="memitem:a84a36a0cae1ceb4313891ca841b11cb3"><td class="memTemplItemLeft" align="right" valign="top">Status&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a84a36a0cae1ceb4313891ca841b11cb3">validate_convolution_layer</a> (ConvolutionLayerNode &amp;node)</td></tr>
 <tr class="memdesc:a84a36a0cae1ceb4313891ca841b11cb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates a Convolution layer node.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a84a36a0cae1ceb4313891ca841b11cb3">More...</a><br /></td></tr>
@@ -155,6 +159,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a1634943db602da2c457279f427ab9538"><td class="memTemplItemLeft" align="right" valign="top">Status&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a1634943db602da2c457279f427ab9538">validate_depthwise_convolution_layer</a> (DepthwiseConvolutionLayerNode &amp;node)</td></tr>
 <tr class="memdesc:a1634943db602da2c457279f427ab9538"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates a Depthwise Convolution layer node.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a1634943db602da2c457279f427ab9538">More...</a><br /></td></tr>
 <tr class="separator:a1634943db602da2c457279f427ab9538"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb6f53f28ef137932823d17554043056"><td class="memTemplParams" colspan="2">template&lt;typename PermuteLayer &gt; </td></tr>
+<tr class="memitem:aeb6f53f28ef137932823d17554043056"><td class="memTemplItemLeft" align="right" valign="top">Status&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#aeb6f53f28ef137932823d17554043056">validate_permute_layer</a> (PermuteLayerNode &amp;node)</td></tr>
+<tr class="memdesc:aeb6f53f28ef137932823d17554043056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates a permute layer node.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#aeb6f53f28ef137932823d17554043056">More...</a><br /></td></tr>
+<tr class="separator:aeb6f53f28ef137932823d17554043056"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -162,7 +170,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_99ae3712d1eecd2a93fc4d38b59a99ba.xhtml">graph</a></li><li class="navelem"><a class="el" href="dir_59b2231210c554f4cc243709030bf1f8.xhtml">backends</a></li><li class="navelem"><a class="el" href="_validate_helpers_8h.xhtml">ValidateHelpers.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

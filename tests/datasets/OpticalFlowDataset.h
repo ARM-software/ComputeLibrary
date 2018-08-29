@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_OPTICAL_FLOW_DATASET
 #define ARM_COMPUTE_TEST_OPTICAL_FLOW_DATASET
 
+#include "tests/TypePrinter.h"
 #include "tests/validation/Helpers.h"
 #include "utils/TypePrinter.h"
 

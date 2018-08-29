@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,17 +47,16 @@ class ActivationValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
+    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
-        _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
         _data_type         = data_type;
         _function          = function;
 
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
-        _target    = compute_target(shape, in_place, info, data_type, fractional_bits, quantization_info);
-        _reference = compute_reference(shape, info, data_type, fractional_bits, quantization_info);
+        _target    = compute_target(shape, in_place, info, data_type, quantization_info);
+        _reference = compute_reference(shape, info, data_type, quantization_info);
     }
 
 protected:
@@ -80,17 +79,17 @@ protected:
         {
             int min_bound = 0;
             int max_bound = 0;
-            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type, _fractional_bits);
+            std::tie(min_bound, max_bound) = get_activation_layer_test_bounds<T>(_function, _data_type);
             std::uniform_int_distribution<> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, 0);
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, bool in_place, ActivationLayerInfo info, DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
+    TensorType compute_target(const TensorShape &shape, bool in_place, ActivationLayerInfo info, DataType data_type, QuantizationInfo quantization_info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
 
         // Create and configure function
         FunctionType act_layer;
@@ -128,10 +127,10 @@ protected:
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info, DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, ActivationLayerInfo info, DataType data_type, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T> src{ shape, data_type, 1, quantization_info };
 
         // Fill reference
         fill(src);
@@ -141,7 +140,6 @@ protected:
 
     TensorType                              _target{};
     SimpleTensor<T>                         _reference{};
-    int                                     _fractional_bits{};
     QuantizationInfo                        _quantization_info{};
     DataType                                _data_type{};
     ActivationLayerInfo::ActivationFunction _function{};
@@ -154,18 +152,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type)
     {
-        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, 0, QuantizationInfo());
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ActivationValidationFixedPointFixture : public ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, int fractional_bits)
-    {
-        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, fractional_bits, QuantizationInfo());
+        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, QuantizationInfo());
     }
 };
 
@@ -176,7 +163,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, bool in_place, ActivationLayerInfo::ActivationFunction function, float alpha_beta, DataType data_type, QuantizationInfo quantization_info)
     {
-        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, 0, quantization_info);
+        ActivationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, in_place, function, alpha_beta, data_type, quantization_info);
     }
 };
 

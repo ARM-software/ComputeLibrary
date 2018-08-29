@@ -39,8 +39,9 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f);
-RelativeTolerance<half>  tolerance_f16(half(0.1));
+RelativeTolerance<float> tolerance_f32(0.001f);        /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+RelativeTolerance<half>  rel_tolerance_f16(half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+constexpr float          abs_tolerance_f16(0.02f);     /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -49,53 +50,53 @@ TEST_SUITE(RNNLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::U8, 0),      // Wrong data type
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Wrong input size
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32, 0),     // Wrong weights size
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32, 0),     // Wrong recurrent weights size
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32, 0),     // Wrong bias size
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32, 0),     // Wrong output size
-                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32, 0),     // Wrong hidden output size
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::U8),      // Wrong data type
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Wrong input size
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong weights size
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong recurrent weights size
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong bias size
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong output size
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),     // Wrong hidden output size
                }),
-               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32, 0),
+               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
                })),
-               framework::dataset::make("RecurrentWeightsInfo", { TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
-                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32, 0),
+               framework::dataset::make("RecurrentWeightsInfo", { TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
+                                                                  TensorInfo(TensorShape(11U, 11U), 1, DataType::F32),
                })),
-               framework::dataset::make("BiasInfo", { TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(30U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                      TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
+               framework::dataset::make("BiasInfo", { TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(30U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                      TensorInfo(TensorShape(11U), 1, DataType::F32),
                })),
-               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
+               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
                })),
-               framework::dataset::make("HiddenStateInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32, 0),
-                                                             TensorInfo(TensorShape(11U, 13U, 2U), 1, DataType::F32, 0),
+               framework::dataset::make("HiddenStateInfo", { TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                             TensorInfo(TensorShape(11U, 13U, 2U), 1, DataType::F32),
                })),
                framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -128,7 +129,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLRNNLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // RNNLayer

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -145,7 +145,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::configure(const ICLTensor *i
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 void CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window, cl::CommandQueue &queue)

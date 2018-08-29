@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_convolution_
 </div><!--header-->
 <div class="contents">
 
-<p>Function to reshape and perform 1xW transposition on the weights.  
+<p>Function to reshape the weights.  
  <a href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_g_e_m_m_convolution_layer_8h_source.xhtml">NEGEMMConvolutionLayer.h</a>&gt;</code></p>
@@ -136,12 +136,12 @@ Collaboration diagram for NEConvolutionLayerReshapeWeights:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad20905ddab1af56320f0be3d9921fd6c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#ad20905ddab1af56320f0be3d9921fd6c">NEConvolutionLayerReshapeWeights</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt; memory_manager=nullptr)</td></tr>
-<tr class="memdesc:ad20905ddab1af56320f0be3d9921fd6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#ad20905ddab1af56320f0be3d9921fd6c">More...</a><br /></td></tr>
-<tr class="separator:ad20905ddab1af56320f0be3d9921fd6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65f7ed488a31b8d40862e6f06cd7e70c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#a65f7ed488a31b8d40862e6f06cd7e70c">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, bool transpose1xW)</td></tr>
-<tr class="memdesc:a65f7ed488a31b8d40862e6f06cd7e70c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a65f7ed488a31b8d40862e6f06cd7e70c">More...</a><br /></td></tr>
-<tr class="separator:a65f7ed488a31b8d40862e6f06cd7e70c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b04a8831ea6ef4d064055ddbb2d4d8f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#a0b04a8831ea6ef4d064055ddbb2d4d8f">NEConvolutionLayerReshapeWeights</a> ()</td></tr>
+<tr class="memdesc:a0b04a8831ea6ef4d064055ddbb2d4d8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a0b04a8831ea6ef4d064055ddbb2d4d8f">More...</a><br /></td></tr>
+<tr class="separator:a0b04a8831ea6ef4d064055ddbb2d4d8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61ca4e4a2e1326e12855748838eab503"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#a61ca4e4a2e1326e12855748838eab503">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)</td></tr>
+<tr class="memdesc:a61ca4e4a2e1326e12855748838eab503"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a61ca4e4a2e1326e12855748838eab503">More...</a><br /></td></tr>
+<tr class="separator:a61ca4e4a2e1326e12855748838eab503"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,28 +155,26 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa73f27bae7aaea24f0950554a75eabb5"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#aa73f27bae7aaea24f0950554a75eabb5">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, bool transpose1xW)</td></tr>
-<tr class="memdesc:aa73f27bae7aaea24f0950554a75eabb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a>.  <a href="#aa73f27bae7aaea24f0950554a75eabb5">More...</a><br /></td></tr>
-<tr class="separator:aa73f27bae7aaea24f0950554a75eabb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81d17a75f619c824d037e6304fb2e1c2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml#a81d17a75f619c824d037e6304fb2e1c2">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
+<tr class="memdesc:a81d17a75f619c824d037e6304fb2e1c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a>.  <a href="#a81d17a75f619c824d037e6304fb2e1c2">More...</a><br /></td></tr>
+<tr class="separator:a81d17a75f619c824d037e6304fb2e1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Function to reshape and perform 1xW transposition on the weights. </p>
-<p>This function calls the following kernels:</p><ol type="1">
-<li><a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">NEWeightsReshapeKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a> (executed in case GEMM is required for the operation) </li>
+<div class="textblock"><p>Function to reshape the weights. </p>
+<p>This function calls the following kernel:</p><ol type="1">
+<li><a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">NEWeightsReshapeKernel</a> </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_n_e_g_e_m_m_convolution_layer_8h_source.xhtml#l00056">56</a> of file <a class="el" href="_n_e_g_e_m_m_convolution_layer_8h_source.xhtml">NEGEMMConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_g_e_m_m_convolution_layer_8h_source.xhtml#l00052">52</a> of file <a class="el" href="_n_e_g_e_m_m_convolution_layer_8h_source.xhtml">NEGEMMConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ad20905ddab1af56320f0be3d9921fd6c"></a>
+<a class="anchor" id="a0b04a8831ea6ef4d064055ddbb2d4d8f"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a> </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt;&#160;</td>
-          <td class="paramname"><em>memory_manager</em> = <code>nullptr</code></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -187,7 +185,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a65f7ed488a31b8d40862e6f06cd7e70c"></a>
+<a class="anchor" id="a61ca4e4a2e1326e12855748838eab503"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -207,13 +205,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>transpose1xW</em>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -226,10 +218,9 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output tensors. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as <code>weights</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>weights</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">transpose1xW</td><td>True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise. Data types supported: Same as <code>weights</code>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -275,7 +266,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 </div>
 </div>
-<a class="anchor" id="aa73f27bae7aaea24f0950554a75eabb5"></a>
+<a class="anchor" id="a81d17a75f619c824d037e6304fb2e1c2"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -298,13 +289,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>transpose1xW</em>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -322,10 +307,9 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as <code>weights</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>weights</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">transpose1xW</td><td>True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise. Data types supported: Same as <code>weights</code>.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>weights</code>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -342,7 +326,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

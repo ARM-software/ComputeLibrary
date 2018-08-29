@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ void NENormalizationLayer::configure(const ITensor *input, ITensor *output, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    TensorInfo tensor_info(input->info()->tensor_shape(), 1, input->info()->data_type());
     _input_squared.allocator()->init(tensor_info);
 
     // Manage intermediate buffers

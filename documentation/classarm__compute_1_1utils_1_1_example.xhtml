@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -129,9 +129,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1utils_1_1_example
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a96b30c1d1256c2ab3f731a162ad08609"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml#a96b30c1d1256c2ab3f731a162ad08609">do_setup</a> (int argc, char **argv)</td></tr>
-<tr class="memdesc:a96b30c1d1256c2ab3f731a162ad08609"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup the example.  <a href="#a96b30c1d1256c2ab3f731a162ad08609">More...</a><br /></td></tr>
-<tr class="separator:a96b30c1d1256c2ab3f731a162ad08609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae678db013a8393ad2799a7de8b2b9304"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml#ae678db013a8393ad2799a7de8b2b9304">do_setup</a> (int argc, char **argv)</td></tr>
+<tr class="memdesc:ae678db013a8393ad2799a7de8b2b9304"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup the example.  <a href="#ae678db013a8393ad2799a7de8b2b9304">More...</a><br /></td></tr>
+<tr class="separator:ae678db013a8393ad2799a7de8b2b9304"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90b4bc2c4bae857bc3536f4a18e29772"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a> ()</td></tr>
 <tr class="memdesc:a90b4bc2c4bae857bc3536f4a18e29772"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the example.  <a href="#a90b4bc2c4bae857bc3536f4a18e29772">More...</a><br /></td></tr>
 <tr class="separator:a90b4bc2c4bae857bc3536f4a18e29772"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,7 +146,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Abstract <a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml" title="Abstract Example class. ">Example</a> class. </p>
 <p>All examples have to inherit from this class. </p>
 
-<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00062">62</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00070">70</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="afeec4c960afa54ec7a45c519ad87cf2b"></a>
 <div class="memitem">
@@ -170,8 +170,6 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Default destructor. </p>
-
-<p>Referenced by <a class="el" href="utils_2_utils_8h_source.xhtml#l00074">Example::do_teardown()</a>.</p>
 
 </div>
 </div>
@@ -199,11 +197,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Run the example. </p>
 
-<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00072">72</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;{};</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00085">85</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{};</div></div><!-- fragment -->
 </div>
 </div>
-<a class="anchor" id="a96b30c1d1256c2ab3f731a162ad08609"></a>
+<a class="anchor" id="ae678db013a8393ad2799a7de8b2b9304"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -211,7 +209,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void do_setup </td>
+          <td class="memname">virtual bool do_setup </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>argc</em>, </td>
@@ -239,13 +237,14 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">argc</td><td>Argument count. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Argument values. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Argument values.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>True in case of no errors in setup else false </dd></dl>
 
-<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00070">70</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;{};</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00080">80</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    {</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a9b3acd6be09cf86066760caaa89f7be5"></a>
@@ -271,10 +270,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Teardown the example. </p>
 
-<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00074">74</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
+<p>Definition at line <a class="el" href="utils_2_utils_8h_source.xhtml#l00087">87</a> of file <a class="el" href="utils_2_utils_8h_source.xhtml">Utils.h</a>.</p>
 
-<p>References <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00070">arm_compute::utils::run_example()</a>, and <a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml#afeec4c960afa54ec7a45c519ad87cf2b">Example::~Example()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;{};</div></div><!-- fragment -->
+<p>References <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00070">arm_compute::utils::run_example()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;{};</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -286,7 +285,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1utils.xhtml">utils</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml">Example</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:45 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:56 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -42,7 +42,7 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     permute(dst_shape, perm);
 
     // Create reference
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), src.num_channels(), src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), src.num_channels(), src.quantization_info() };
 
     // Compute reference
     for(int i = 0; i < src.num_elements(); ++i)

@@ -64,26 +64,23 @@ public:
 
     /** Create an uninitialised tensor of the given @p shape and @p format.
      *
-     * @param[in] shape                Shape of the new raw tensor.
-     * @param[in] format               Format of the new raw tensor.
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
+     * @param[in] shape  Shape of the new raw tensor.
+     * @param[in] format Format of the new raw tensor.
      */
-    SimpleTensor(TensorShape shape, Format format, int fixed_point_position = 0);
+    SimpleTensor(TensorShape shape, Format format);
 
     /** Create an uninitialised tensor of the given @p shape and @p data type.
      *
-     * @param[in] shape                Shape of the new raw tensor.
-     * @param[in] data_type            Data type of the new raw tensor.
-     * @param[in] num_channels         (Optional) Number of channels (default = 1).
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers (default = 0).
-     * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantization (default = empty).
-     * @param[in] data_layout          (Optional) Data layout of the tensor (default = NCHW).
+     * @param[in] shape             Shape of the new raw tensor.
+     * @param[in] data_type         Data type of the new raw tensor.
+     * @param[in] num_channels      (Optional) Number of channels (default = 1).
+     * @param[in] quantization_info (Optional) Quantization info for asymmetric quantization (default = empty).
+     * @param[in] data_layout       (Optional) Data layout of the tensor (default = NCHW).
      */
     SimpleTensor(TensorShape shape, DataType data_type,
-                 int              num_channels         = 1,
-                 int              fixed_point_position = 0,
-                 QuantizationInfo quantization_info    = QuantizationInfo(),
-                 DataLayout       data_layout          = DataLayout::NCHW);
+                 int              num_channels      = 1,
+                 QuantizationInfo quantization_info = QuantizationInfo(),
+                 DataLayout       data_layout       = DataLayout::NCHW);
 
     /** Create a deep copy of the given @p tensor.
      *
@@ -171,11 +168,6 @@ public:
      * @return the available padding around the tensor.
      */
     PaddingSize padding() const override;
-    /** Number of bits for the fractional part.
-     *
-     * @return the number of bits for the fractional part.
-     */
-    int fixed_point_position() const override;
     /** Quantization info in case of asymmetric quantized type
      *
      * @return
@@ -224,17 +216,15 @@ protected:
     Format           _format{ Format::UNKNOWN };
     DataType         _data_type{ DataType::UNKNOWN };
     int              _num_channels{ 0 };
-    int              _fixed_point_position{ 0 };
     QuantizationInfo _quantization_info{};
     DataLayout       _data_layout{ DataLayout::UNKNOWN };
 };
 
 template <typename T>
-SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format, int fixed_point_position)
+SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format)
     : _buffer(nullptr),
       _shape(shape),
       _format(format),
-      _fixed_point_position(fixed_point_position),
       _quantization_info(),
       _data_layout(DataLayout::NCHW)
 {
@@ -243,12 +233,11 @@ SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format, int fixed_point_
 }
 
 template <typename T>
-SimpleTensor<T>::SimpleTensor(TensorShape shape, DataType data_type, int num_channels, int fixed_point_position, QuantizationInfo quantization_info, DataLayout data_layout)
+SimpleTensor<T>::SimpleTensor(TensorShape shape, DataType data_type, int num_channels, QuantizationInfo quantization_info, DataLayout data_layout)
     : _buffer(nullptr),
       _shape(shape),
       _data_type(data_type),
       _num_channels(num_channels),
-      _fixed_point_position(fixed_point_position),
       _quantization_info(quantization_info),
       _data_layout(data_layout)
 {
@@ -262,7 +251,6 @@ SimpleTensor<T>::SimpleTensor(const SimpleTensor &tensor)
       _format(tensor.format()),
       _data_type(tensor.data_type()),
       _num_channels(tensor.num_channels()),
-      _fixed_point_position(tensor.fixed_point_position()),
       _quantization_info(tensor.quantization_info()),
       _data_layout(tensor.data_layout())
 {
@@ -300,12 +288,6 @@ template <typename T>
 size_t SimpleTensor<T>::element_size() const
 {
     return num_channels() * element_size_from_data_type(data_type());
-}
-
-template <typename T>
-int SimpleTensor<T>::fixed_point_position() const
-{
-    return _fixed_point_position;
 }
 
 template <typename T>
@@ -428,7 +410,6 @@ void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2)
     swap(tensor1._format, tensor2._format);
     swap(tensor1._data_type, tensor2._data_type);
     swap(tensor1._num_channels, tensor2._num_channels);
-    swap(tensor1._fixed_point_position, tensor2._fixed_point_position);
     swap(tensor1._quantization_info, tensor2._quantization_info);
     swap(tensor1._buffer, tensor2._buffer);
 }

@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -55,8 +56,9 @@ TensorShape transposed_tensor_shape(const TensorShape &in)
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
-                                                         DataType::U16, DataType::S16, DataType::QS16,
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
 
@@ -66,7 +68,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -115,9 +116,8 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
-    _input    = input;
-    _output   = output;
-    _lws_hint = cl::NDRange(2, 8);
+    _input  = input;
+    _output = output;
 
     std::set<std::string> build_opts;
     std::ostringstream    data_type_in_bytes;
@@ -129,5 +129,5 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second, cl::NDRange(2, 8));
 }

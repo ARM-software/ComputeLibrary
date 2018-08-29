@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Size2D.h"
@@ -306,6 +305,38 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
     return valid_region;
 }
 
+/** Create a valid region for Laplacian Pyramid based on tensor shape and valid region at level "i - 1" and border mode
+ *
+ * @note The border size is 2 in case of Laplacian Pyramid
+ *
+ * @param[in] a_shape          Shape used at level "i - 1" of Laplacian Pyramid
+ * @param[in] a_valid_region   Valid region used at level "i - 1" of Laplacian Pyramid
+ * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
+ *
+ *  return The valid region for the level "i" of Laplacian Pyramid
+ */
+inline ValidRegion shape_to_valid_region_laplacian_pyramid(const TensorShape &a_shape, const ValidRegion &a_valid_region, bool border_undefined = false)
+{
+    ValidRegion valid_region = shape_to_valid_region_gaussian_pyramid_half(a_shape, a_valid_region, border_undefined);
+
+    if(border_undefined)
+    {
+        const BorderSize gaussian5x5_border(2);
+
+        auto border_left   = static_cast<int>(gaussian5x5_border.left);
+        auto border_right  = static_cast<int>(gaussian5x5_border.right);
+        auto border_top    = static_cast<int>(gaussian5x5_border.top);
+        auto border_bottom = static_cast<int>(gaussian5x5_border.bottom);
+
+        valid_region.anchor.set(0, valid_region.anchor[0] + border_left);
+        valid_region.anchor.set(1, valid_region.anchor[1] + border_top);
+        valid_region.shape.set(0, std::max(0, static_cast<int>(valid_region.shape[0]) - border_right - border_left));
+        valid_region.shape.set(1, std::max(0, static_cast<int>(valid_region.shape[1]) - border_top - border_bottom));
+    }
+
+    return valid_region;
+}
+
 /** Write the value after casting the pointer according to @p data_type.
  *
  * @warning The type of the value must match the specified data type.
@@ -324,14 +355,12 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             *reinterpret_cast<uint8_t *>(ptr) = value;
             break;
         case DataType::S8:
-        case DataType::QS8:
             *reinterpret_cast<int8_t *>(ptr) = value;
             break;
         case DataType::U16:
             *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case DataType::S16:
-        case DataType::QS16:
             *reinterpret_cast<int16_t *>(ptr) = value;
             break;
         case DataType::U32:
@@ -478,21 +507,20 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
 
 /** Create and initialize a tensor of the given type.
  *
- * @param[in] shape                Tensor shape.
- * @param[in] data_type            Data type.
- * @param[in] num_channels         (Optional) Number of channels.
- * @param[in] fixed_point_position (Optional) Number of fractional bits.
- * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantized types.
- * @param[in] data_layout          (Optional) Data layout. Default is NCHW.
+ * @param[in] shape             Tensor shape.
+ * @param[in] data_type         Data type.
+ * @param[in] num_channels      (Optional) Number of channels.
+ * @param[in] quantization_info (Optional) Quantization info for asymmetric quantized types.
+ * @param[in] data_layout       (Optional) Data layout. Default is NCHW.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
 inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
-                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW)
+                       QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW)
 {
     T          tensor;
-    TensorInfo info(shape, num_channels, data_type, fixed_point_position);
+    TensorInfo info(shape, num_channels, data_type);
     info.set_quantization_info(quantization_info);
     info.set_data_layout(data_layout);
     tensor.allocator()->init(info);
@@ -562,6 +590,61 @@ inline T create_pyramid(const PyramidInfo &pyramid_info)
     pyramid.init_auto_padding(pyramid_info);
 
     return pyramid;
+}
+
+/** Initialize a convolution matrix.
+ *
+ * @param[in, out] conv   The input convolution matrix.
+ * @param[in]      width  The width of the convolution matrix.
+ * @param[in]      height The height of the convolution matrix.
+ * @param[in]      seed   The random seed to be used.
+ */
+inline void init_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
+{
+    std::mt19937                           gen(seed);
+    std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
+
+    for(unsigned int i = 0; i < width * height; ++i)
+    {
+        conv[i] = distribution_int16(gen);
+    }
+}
+
+/** Initialize a separable convolution matrix.
+ *
+ * @param[in, out] conv   The input convolution matrix.
+ * @param[in]      width  The width of the convolution matrix.
+ * @param[in]      height The height of the convolution matrix.
+ * @param[in]      seed   The random seed to be used.
+ */
+inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
+{
+    std::mt19937 gen(seed);
+    // Set it between -128 and 127 to ensure the matrix does not overflow
+    std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
+
+    int16_t conv_row[width];
+    int16_t conv_col[height];
+
+    conv_row[0] = conv_col[0] = 1;
+    for(unsigned int i = 1; i < width; ++i)
+    {
+        conv_row[i] = distribution_int16(gen);
+    }
+
+    for(unsigned int i = 1; i < height; ++i)
+    {
+        conv_col[i] = distribution_int16(gen);
+    }
+
+    // Multiply two matrices
+    for(unsigned int i = 0; i < width; ++i)
+    {
+        for(unsigned int j = 0; j < height; ++j)
+        {
+            conv[i * width + j] = conv_col[i] * conv_row[j];
+        }
+    }
 }
 
 /** Create a vector of random ROIs.

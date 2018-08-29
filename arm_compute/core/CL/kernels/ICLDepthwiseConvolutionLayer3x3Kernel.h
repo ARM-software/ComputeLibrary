@@ -37,7 +37,7 @@ class ICLDepthwiseConvolutionLayer3x3Kernel : public ICLKernel
 public:
     /** Default constructor */
     ICLDepthwiseConvolutionLayer3x3Kernel()
-        : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_y(1), _conv_pad_left(0)
+        : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_y(1)
     {
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -69,7 +69,6 @@ protected:
     const ICLTensor *_weights;
     const ICLTensor *_biases;
     unsigned int     _conv_stride_y;
-    unsigned int     _conv_pad_left;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_ICLDEPTHWISECONVOLUTIONKERNEL3x3_H__ */

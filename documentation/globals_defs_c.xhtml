@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -106,8 +106,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals_defs_j.xhtml#index_j"><span>j</span></a></li>
       <li><a href="globals_defs_l.xhtml#index_l"><span>l</span></a></li>
       <li><a href="globals_defs_m.xhtml#index_m"><span>m</span></a></li>
+      <li><a href="globals_defs_n.xhtml#index_n"><span>n</span></a></li>
+      <li><a href="globals_defs_o.xhtml#index_o"><span>o</span></a></li>
       <li><a href="globals_defs_p.xhtml#index_p"><span>p</span></a></li>
-      <li><a href="globals_defs_q.xhtml#index_q"><span>q</span></a></li>
       <li><a href="globals_defs_r.xhtml#index_r"><span>r</span></a></li>
       <li><a href="globals_defs_s.xhtml#index_s"><span>s</span></a></li>
       <li><a href="globals_defs_t.xhtml#index_t"><span>t</span></a></li>
@@ -156,9 +157,6 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 <li>check_pixel
 : <a class="el" href="canny_8cl.xhtml#a64ee229d1bcee88c8017356d5d485650">canny.cl</a>
 </li>
-<li>CL_HPP_CL_1_2_DEFAULT_BUILD
-: <a class="el" href="_open_c_l_8h.xhtml#a68d54dc532d47c93108cfcdf8c415e43">OpenCL.h</a>
-</li>
 <li>CL_HPP_ENABLE_EXCEPTIONS
 : <a class="el" href="_open_c_l_8h.xhtml#ae7c96c1469662004d842704e2ff076fb">OpenCL.h</a>
 </li>
@@ -167,6 +165,9 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 </li>
 <li>CL_HPP_TARGET_OPENCL_VERSION
 : <a class="el" href="_open_c_l_8h.xhtml#a37ea07405ca286c1570612b42d43b345">OpenCL.h</a>
+</li>
+<li>CL_TARGET_OPENCL_VERSION
+: <a class="el" href="_open_c_l_8h.xhtml#a5990dea19d4ccb046a3d81b311457add">OpenCL.h</a>
 </li>
 <li>CL_VEC_DATA_TYPE
 : <a class="el" href="helpers_8h.xhtml#a0f6ad555d097377151003a5119ccee45">helpers.h</a>
@@ -190,7 +191,6 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 </li>
 <li>CONVERT
 : <a class="el" href="helpers_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">helpers.h</a>
-, <a class="el" href="fixed__point_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be">fixed_point.h</a>
 </li>
 <li>CONVERT_DOWN
 : <a class="el" href="depth__convert_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d">depth_convert.cl</a>
@@ -210,7 +210,6 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 <li>CONVERT_SAT
 : <a class="el" href="direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">direct_convolution1x1.cl</a>
 , <a class="el" href="direct__convolution3x3_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">direct_convolution3x3.cl</a>
-, <a class="el" href="fixed__point_8h.xhtml#a23fb01b6f3453cc0e48a026fd44f6acd">fixed_point.h</a>
 , <a class="el" href="helpers_8h.xhtml#a23fb01b6f3453cc0e48a026fd44f6acd">helpers.h</a>
 </li>
 <li>CONVERT_SAT_ROUND
@@ -220,24 +219,10 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 : <a class="el" href="helpers_8h.xhtml#a341a0c28698c3f6bd171df1771c5a512">helpers.h</a>
 </li>
 <li>CONVERT_SAT_STR
-: <a class="el" href="fixed__point_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">fixed_point.h</a>
-, <a class="el" href="helpers_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">helpers.h</a>
-</li>
-<li>CONVERT_SAT_STR2
-: <a class="el" href="fixed__point_8h.xhtml#a8aa11a06d0685e1cc6dfac964f9c3cee">fixed_point.h</a>
-</li>
-<li>CONVERT_SAT_STR3
-: <a class="el" href="fixed__point_8h.xhtml#ae5bd7ebff4bb9df1b26f2b71b31e928a">fixed_point.h</a>
+: <a class="el" href="helpers_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">helpers.h</a>
 </li>
 <li>CONVERT_STR
-: <a class="el" href="fixed__point_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">fixed_point.h</a>
-, <a class="el" href="helpers_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">helpers.h</a>
-</li>
-<li>CONVERT_STR2
-: <a class="el" href="fixed__point_8h.xhtml#a424c5edfa264fb94d0eb44d59d103e29">fixed_point.h</a>
-</li>
-<li>CONVERT_STR3
-: <a class="el" href="fixed__point_8h.xhtml#a37089d60b5f5a76176fdb94835a98ff4">fixed_point.h</a>
+: <a class="el" href="helpers_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">helpers.h</a>
 </li>
 <li>CONVERT_TENSOR3D_TO_IMAGE_STRUCT
 : <a class="el" href="helpers_8h.xhtml#a541f8db866a0fa93ee67d58ea31a7d0c">helpers.h</a>
@@ -272,14 +257,14 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 <li>CONVERT_UP
 : <a class="el" href="depth__convert_8cl.xhtml#a9bed30cda5ab157322d2f0bbdff46d28">depth_convert.cl</a>
 </li>
-<li>CONVERTQ_DOWN_IMPL
-: <a class="el" href="fixed__point_8h.xhtml#acad65c9300736f277c3b8419326f1413">fixed_point.h</a>
+<li>CONVOLUTION_RECTANGLE_DATA_TEST_CASE
+: <a class="el" href="benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#ace2ab3eb7f9a254dd1c11ca2dbe3e445">Convolution.cpp</a>
 </li>
-<li>CONVERTQ_DOWN_SAT_IMPL
-: <a class="el" href="fixed__point_8h.xhtml#a107bff3ea73b2344cf3bc9795177f5b9">fixed_point.h</a>
+<li>CONVOLUTION_SEPARABLE_DATA_TEST_CASE
+: <a class="el" href="benchmark_2_c_l_2_convolution_8cpp.xhtml#ae80afc4074fadd96dd61fd86ea84e7e5">Convolution.cpp</a>
 </li>
-<li>CONVERTQ_UP_IMPL
-: <a class="el" href="fixed__point_8h.xhtml#a91019976b3e97e493e0b00ff9e92a5d3">fixed_point.h</a>
+<li>CONVOLUTION_SQUARE_DATA_TEST_CASE
+: <a class="el" href="benchmark_2_c_l_2_convolution_8cpp.xhtml#a8864abaea5755acba3e284f15d85bc54">Convolution.cpp</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -287,7 +272,7 @@ $(document).ready(function(){initNavTree('globals_defs_c.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:58 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

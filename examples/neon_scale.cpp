@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
 #include "arm_compute/core/Types.h"
+#include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 using namespace arm_compute;
@@ -32,7 +33,7 @@ using namespace utils;
 class NEONScaleExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         PPMLoader ppm;
 
@@ -71,6 +72,8 @@ public:
             ppm.fill_image(src);
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
+
+        return true;
     }
     void do_run() override
     {

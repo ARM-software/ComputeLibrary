@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
@@ -95,12 +96,12 @@ public:
 
         for(const auto &shape : src_shapes)
         {
-            _srcs.emplace_back(create_tensor<TensorType>(shape, data_type, 1, _fractional_bits));
+            _srcs.emplace_back(create_tensor<TensorType>(shape, data_type, 1));
             src_ptrs.emplace_back(&_srcs.back());
         }
 
-        TensorShape dst_shape = calculate_depth_concatenate_shape(src_ptrs);
-        _dst                  = create_tensor<TensorType>(dst_shape, data_type, 1, _fractional_bits);
+        TensorShape dst_shape = misc::shape_calculator::calculate_depth_concatenate_shape(src_ptrs);
+        _dst                  = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         _depth_concat.configure(src_ptrs, &_dst);
 
@@ -139,7 +140,6 @@ private:
     std::vector<TensorType> _srcs{};
     TensorType              _dst{};
     Function                _depth_concat{};
-    int                     _fractional_bits{ 1 };
 };
 } // namespace benchmark
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,13 +47,12 @@ class SoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, int fractional_bits, QuantizationInfo quantization_info, float beta)
+    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta)
     {
-        _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
 
-        _target    = compute_target(shape, data_type, fractional_bits, quantization_info, beta);
-        _reference = compute_reference(shape, data_type, fractional_bits, quantization_info, beta);
+        _target    = compute_target(shape, data_type, quantization_info, beta);
+        _reference = compute_reference(shape, data_type, quantization_info, beta);
     }
 
 protected:
@@ -65,25 +64,19 @@ protected:
             std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        else // data type is quantized_asymmetric
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
         }
-        else
-        {
-            const int                       one_fixed = 1 << _fractional_bits;
-            std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-            library->fill(tensor, distribution, 0);
-        }
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type, int fixed_point_position,
+    TensorType compute_target(const TensorShape &shape, DataType data_type,
                               QuantizationInfo quantization_info, float beta)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, QuantizationInfo(1.f / 256, 0));
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(1.f / 256, 0));
 
         // Create and configure function
         FunctionType smx_layer;
@@ -108,11 +101,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, int fixed_point_position,
+    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type,
                                       QuantizationInfo quantization_info, float beta)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T> src{ shape, data_type, 1, quantization_info };
 
         // Fill reference
         fill(src);
@@ -122,7 +115,6 @@ protected:
 
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
-    int              _fractional_bits{};
     QuantizationInfo _quantization_info{};
 };
 
@@ -135,24 +127,8 @@ public:
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
                                                                                           data_type,
-                                                                                          0,
                                                                                           QuantizationInfo(),
                                                                                           beta);
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SoftmaxValidationFixedPointFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType data_type, int fixed_point_position)
-    {
-        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                          data_type,
-                                                                                          fixed_point_position,
-                                                                                          QuantizationInfo(),
-                                                                                          1.0f);
     }
 };
 
@@ -165,7 +141,6 @@ public:
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
                                                                                           data_type,
-                                                                                          0,
                                                                                           quantization_info,
                                                                                           beta);
     }

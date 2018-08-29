@@ -44,20 +44,20 @@ TEST_SUITE(WidthConcatenateLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-              framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching data type input/output
-                                                        TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching y dimension
-                                                        TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching total width
-                                                        TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32, 0)
+              framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching data type input/output
+                                                        TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching y dimension
+                                                        TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching total width
+                                                        TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32)
               }),
-              framework::dataset::make("InputInfo2", {  TensorInfo(TensorShape(24U, 27U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32, 0)
+              framework::dataset::make("InputInfo2", {  TensorInfo(TensorShape(24U, 27U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32)
               })),
-              framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(47U, 27U, 5U), 1, DataType::F16, 0),
-                                                        TensorInfo(TensorShape(75U, 12U, 5U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(11U, 27U, 5U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(32U, 27U, 5U), 1, DataType::F32, 0)
+              framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(47U, 27U, 5U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(75U, 12U, 5U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 27U, 5U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(32U, 27U, 5U), 1, DataType::F32)
               })),
               framework::dataset::make("Expected", { false, false, false, true })),
               input_info1, input_info2, output_info,expected)
@@ -126,42 +126,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<float>, framewor
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
-TEST_SUITE(Quantized)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLWidthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QS8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(),
-                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                          DataType::QS8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLWidthConcatenateLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::QS16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QS16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

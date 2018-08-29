@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,14 @@ class CLGEMMLowpMatrixMultiplyCore : public IFunction
 public:
     /** Constructor */
     CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMLowpMatrixMultiplyCore(const CLGEMMLowpMatrixMultiplyCore &) = delete;
+    /** Default move constructor */
+    CLGEMMLowpMatrixMultiplyCore(CLGEMMLowpMatrixMultiplyCore &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMLowpMatrixMultiplyCore &operator=(const CLGEMMLowpMatrixMultiplyCore &) = delete;
+    /** Default move assignment operator */
+    CLGEMMLowpMatrixMultiplyCore &operator=(CLGEMMLowpMatrixMultiplyCore &&) = default;
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
@@ -83,6 +91,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup                      _memory_group;
@@ -96,11 +105,12 @@ private:
     CLTensor                           _vector_sum_row;
     CLTensor                           _tmp_a;
     CLTensor                           _tmp_b;
+    const ICLTensor                   *_original_b;
     int32_t                            _a_offset;
     int32_t                            _b_offset;
     bool                               _is_interleaved_transposed;
-    bool                               _is_first_run;
     bool                               _reshape_b_only_on_first_run;
+    bool                               _is_prepared;
 };
 }
 #endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__ */

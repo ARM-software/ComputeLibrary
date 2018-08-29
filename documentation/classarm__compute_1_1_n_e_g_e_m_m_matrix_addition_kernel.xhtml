@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -317,7 +317,7 @@ This stage is used to finalize the GEMM result and it is computed if and only if
 <dl class="section note"><dt>Note</dt><dd>The input and output tensor must have the same dimensions</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor (Matrix C). Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor (Matrix C). Data types supported: F16/F32 </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">output</td><td>Output tensor. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">NEGEMMMatrixMultiplyKernel</a>. Data type supported: the same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
   </table>
@@ -356,7 +356,7 @@ This stage is used to finalize the GEMM result and it is computed if and only if
 
 <p>Definition at line <a class="el" href="_n_e_g_e_m_m_matrix_addition_kernel_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_n_e_g_e_m_m_matrix_addition_kernel_8h_source.xhtml">NEGEMMMatrixAdditionKernel.h</a>.</p>
 
-<p>References <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00115">arm_compute::test::validation::beta</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#abd3df2f9251266926538e4c020652996">NEGEMMMatrixAdditionKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#ab2165f92396a03786cf5e499c4d0e62c">NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a7bf4194c21adc060991ddb88ed4c8b60">NEGEMMMatrixAdditionKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEGEMMMatrixAdditionKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<p>References <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00087">arm_compute::test::validation::beta</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#abd3df2f9251266926538e4c020652996">NEGEMMMatrixAdditionKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#ab2165f92396a03786cf5e499c4d0e62c">NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a7bf4194c21adc060991ddb88ed4c8b60">NEGEMMMatrixAdditionKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEGEMMMatrixAdditionKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEGEMMMatrixAdditionKernel&quot;</span>;</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -474,7 +474,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">NEGEMMMatrixAdditionKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -75,7 +75,7 @@ void CLLKTrackerInitKernel::configure(const ICLKeyPointArray *old_points, const 
     Window window;
     window.set(Window::DimX, Window::Dimension(0, old_points->num_values(), 1));
     window.set(Window::DimY, Window::Dimension(0, 1, 1));
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 }
 
 void CLLKTrackerInitKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -104,7 +104,7 @@ void CLLKTrackerFinalizeKernel::configure(ICLLKInternalKeypointArray *new_points
     Window window;
     window.set(Window::DimX, Window::Dimension(0, new_points_internal->num_values(), 1));
     window.set(Window::DimY, Window::Dimension(0, 1, 1));
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 }
 
 void CLLKTrackerFinalizeKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -156,7 +156,7 @@ void CLLKTrackerStage0Kernel::configure(const ICLTensor *old_input, const ICLTen
                               AccessWindowStatic(old_scharr_gy->info(), valid_region.start(0), valid_region.start(1),
                                                  valid_region.end(0), valid_region.end(1)));
 
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 
     // Initialize required variables
     const int       level0              = (level == 0) ? 1 : 0;
@@ -232,7 +232,7 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
                               AccessWindowStatic(new_input->info(), valid_region.start(0), valid_region.start(1),
                                                  valid_region.end(0), valid_region.end(1)));
 
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 
     // Initialize required variables
     const int       level0              = (level == 0) ? 1 : 0;

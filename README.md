@@ -1,12 +1,10 @@
 
-:warning: **Deprecation notice: QS8 and QS16 data types will be removed in the next release** (As far as we know nobody uses these data types, if you do or think they are useful please open an Issue or send us an email):warning:
-
 Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 **Make sure you are using the latest version of the library before opening an issue. Thanks**
 
 News:
 
-- We're hiring: Senior Machine Learning C++ Software Engineer in Cambridge (UK)
+- We're hiring: Staff Machine Learning C++ Software Engineer in Cambridge (UK)
     - Required skills:
         - Proficient in C++11.
     - Preferred skills:
@@ -16,7 +14,7 @@ News:
         - Experience programming in assembly language.
 
     Interested ? Contact us: developer-compute@arm.com
-- Come talk to us: [Gian Marco will be presenting his work at the EVS](https://www.embedded-vision.com/summit/even-faster-cnns-exploring-new-class-winograd-algorithms)
+- [Gian Marco's talk on optimizing CNNs with Winograd algorithms at the EVS](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice)
 
 Related projects:
 
@@ -27,6 +25,7 @@ Related projects:
 
 Documentation available here:
 
+- [v18.08](https://arm-software.github.io/ComputeLibrary/v18.08/)
 - [v18.05](https://arm-software.github.io/ComputeLibrary/v18.05/)
 - [v18.03](https://arm-software.github.io/ComputeLibrary/v18.03/)
 - [v18.02](https://arm-software.github.io/ComputeLibrary/v18.02/)
@@ -41,6 +40,8 @@ Documentation available here:
 
 Binaries available here:
 
+- [v18.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-linux.tar.gz)
+- [v18.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-android.tar.gz)
 - [v18.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.05/arm_compute-v18.05-bin-linux.tar.gz)
 - [v18.05-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.05/arm_compute-v18.05-bin-android.tar.gz)
 - [v18.03-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.03/arm_compute-v18.03-bin-linux.tar.gz)

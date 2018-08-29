@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('_c_l_2_reduction_operation_8cpp.xhtml'
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">ReductionOperation.cpp File Reference</div>  </div>
 </div><!--header-->
@@ -157,10 +158,21 @@ Typedefs</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ada475a940bab0a1809774c87d1223989"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ada475a940bab0a1809774c87d1223989">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;,{TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)}), framework::dataset::make(&quot;OutputInfo&quot;,{TensorInfo(TensorShape(1U, 64U), 1, DataType::F16), TensorInfo(TensorShape(1U, 64U), 1, DataType::F32), TensorInfo(TensorShape(1U, 64U), 1, DataType::S16), TensorInfo(TensorShape(1U, 64U), 1, DataType::F32), TensorInfo(TensorShape(1U, 64U), 1, DataType::F32), TensorInfo(TensorShape(1U, 64U), 1, DataType::F32)})), framework::dataset::make(&quot;Axis&quot;,{0U, 0U, 0U, static_cast&lt; unsigned int &gt;(TensorShape::num_max_dimensions), 1U, 0U})), framework::dataset::make(&quot;Expected&quot;,{false, false, false, false, false, true})), input_info, output_info, axis, expected)</td></tr>
 <tr class="separator:ada475a940bab0a1809774c87d1223989"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae85ea8134d6981ba59b2e5b349168af4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae85ea8134d6981ba59b2e5b349168af4">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLReductionOperationFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Axis&quot;,{0})), datasets::ReductionOperations()))</td></tr>
-<tr class="separator:ae85ea8134d6981ba59b2e5b349168af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c48ac6942b58bac18f70376ebb0355d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9c48ac6942b58bac18f70376ebb0355d">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLReductionOperationFixture&lt; half &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;Axis&quot;,{0})), datasets::ReductionOperations()))</td></tr>
+<tr class="separator:a9c48ac6942b58bac18f70376ebb0355d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f99c630b35fcadd8454d08acbde6839"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5f99c630b35fcadd8454d08acbde6839">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLReductionOperationFixture&lt; half &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F16)), framework::dataset::make(&quot;Axis&quot;,{0})), datasets::ReductionOperations()))</td></tr>
+<tr class="separator:a5f99c630b35fcadd8454d08acbde6839"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae">TEST_SUITE_END</a> () <a class="el" href="_window_iterator_8cpp.xhtml#a5d095dd08ec0312b706f25442726d3c1">DATA_TEST_CASE</a>(Configuration = ConvolutionSeparableValidationFixture&lt;CLTensor, CLAccessor, CLConvolution5x5, T&gt;</td></tr>
+<tr class="separator:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1def13c1ae46d02209614c95e9913920"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1def13c1ae46d02209614c95e9913920">combine</a> (combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Axis&quot;,{0})), datasets::ReductionOperations()))</td></tr>
+<tr class="separator:a1def13c1ae46d02209614c95e9913920"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7fd236f8f93676eccccaee43375ba88a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fd236f8f93676eccccaee43375ba88a">FIXTURE_DATA_TEST_CASE</a> (RunLarge, CLReductionOperationFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Axis&quot;,{0})), datasets::ReductionOperations()))</td></tr>
 <tr class="separator:a7fd236f8f93676eccccaee43375ba88a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:af0b6293ddc8365bfe7bf3c4941486ff6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af0b6293ddc8365bfe7bf3c4941486ff6">CLReductionOperationFixture&lt; float &gt;</a></td></tr>
+<tr class="separator:af0b6293ddc8365bfe7bf3c4941486ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -168,7 +180,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_reduction_operation_8cpp.xhtml">ReductionOperation.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

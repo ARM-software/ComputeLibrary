@@ -24,15 +24,14 @@
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "support/ToolchainSupport.h"
-
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
@@ -60,7 +59,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW); // COMPMID-1162
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 3 && weights->dimension(height_idx) != 5, "Only 3 and 5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
@@ -107,12 +105,13 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
     return std::find(fast_math_winograd.begin(), fast_math_winograd.end(), p) != fast_math_winograd.end();
 }
+
 } //namespace
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _arm_gemm(nullptr), _gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr),
-      _activationlayer_function(), _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(),
-      _workspace(), _input(), _weights(), _output(), _reshaped_kernel(false), _is_activationlayer_enabled(false)
+    : _memory_group(memory_manager), _asm_glue(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
+      _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
+      _is_prepared(false), _is_activationlayer_enabled(false)
 {
 } /* arm_compute */
 
@@ -138,9 +137,10 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         ARM_COMPUTE_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
     }
 
-    _weights = weights;
-    _input   = input;
-    _output  = output;
+    _weights     = weights;
+    _input       = input;
+    _output      = output;
+    _is_prepared = false;
 
     std::unique_ptr<INEWinogradLayerTransformInputKernel<float>>   transform_input_kernel;
     std::unique_ptr<INEWinogradLayerTransformWeightsKernel<float>> transform_weights_kernel;
@@ -155,29 +155,32 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         {
             if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
             {
-                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>>();
-                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>>();
-                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>>();
-                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradBase::N_GEMMS;
-                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradConv::N_BLOCK;
+                using config             = NEWinogradLayerConfiguration<float, float, 4, 4, 3, 3>;
+                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                n_gemms                  = config::WinogradBase::N_GEMMS;
+                N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
             else
             {
-                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>>();
-                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>>();
-                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>>();
-                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradBase::N_GEMMS;
-                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradConv::N_BLOCK;
+                using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 3, 3>;
+                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                n_gemms                  = config::WinogradBase::N_GEMMS;
+                N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
             break;
         }
         case 5:
         {
-            transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>>();
-            transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>>();
-            transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>>();
-            n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradBase::N_GEMMS;
-            N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradConv::N_BLOCK;
+            using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 5, 5>;
+            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            n_gemms                  = config::WinogradBase::N_GEMMS;
+            N_BLOCK                  = config::WinogradConv::N_BLOCK;
             break;
         }
         default:
@@ -195,95 +198,137 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const int out_channels = output->info()->dimension(channel_idx);
 
     const Tensor4DShape in_shape(internal_get_input_shape(input));
+    const DataType      data_type      = input->info()->data_type();
     const size_t        data_type_size = input->info()->element_size();
     // Get the memory required to instantiate a new Winograd operator.
-    constexpr size_t storage_alignment   = 64;
-    const size_t     kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels, in_channels) * data_type_size;
-    _kernel_storage.allocator()->init(TensorInfo(TensorShape{ (kernel_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _kernel_storage.allocator()->allocate();
+    constexpr size_t storage_alignment = 64;
+
+    // Kernel Storage
+    const size_t kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels,
+                                                                                         in_channels)
+                                       * data_type_size
+                                       + storage_alignment - 1;
+
     // Input storage
-    const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, use_same_padding) * data_type_size;
-    _input_workspace.allocator()->init(TensorInfo(TensorShape{ (input_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _input_workspace.allocator()->allocate();
+    const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols,
+                                                                                     use_same_padding)
+                                      * data_type_size
+                                      + storage_alignment - 1;
 
     // Output storage
-    const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels, use_same_padding) * data_type_size;
-    _output_workspace.allocator()->init(TensorInfo(TensorShape{ (output_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _output_workspace.allocator()->allocate();
+    const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels,
+                                                                                        use_same_padding)
+                                       * data_type_size
+                                       + storage_alignment - 1;
+    ;
+    const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
+    const int         kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
+
+    const int  output_matrix_stride = transform_output_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
+    const auto output_shape(transform_output_kernel->get_output_shape(kernel_shape, in_shape, use_padding_type));
+
+    const int input_matrix_stride = transform_input_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
+
+    // Configure GEMM
+    const int tile_rows                = iceildiv(output_shape.n_rows, output_tile.height);
+    const int tile_cols                = iceildiv(output_shape.n_cols, output_tile.width);
+    const int m                        = in_shape.n_batches * tile_rows * tile_cols;
+    const int k                        = in_shape.n_channels;
+    const int n                        = out_channels;
+    const int kernel_matrix_row_stride = roundup(out_channels, N_BLOCK);
+    const int output_matrix_row_stride = kernel_matrix_row_stride;
+
+    TensorShape a_shape(k, m, 1, n_gemms);
+    Strides     a_strides(data_type_size);
+    a_strides.set(1, a_strides[0] * k);
+    a_strides.set(2, 0);
+    a_strides.set(3, data_type_size * input_matrix_stride);
+
+    TensorShape b_shape(n, k, n_gemms);
+    Strides     b_strides(data_type_size);
+    b_strides.set(1, data_type_size * kernel_matrix_row_stride);
+    b_strides.set(2, data_type_size * kernel_matrix_stride);
+
+    TensorShape d_shape(n, m, 1, n_gemms);
+    Strides     d_strides(data_type_size);
+    d_strides.set(1, data_type_size * output_matrix_row_stride);
+    d_strides.set(2, 0);
+    d_strides.set(3, data_type_size * output_matrix_stride);
+
+    TensorInfo a_info, b_info, d_info;
+    a_info.init(a_shape, 1, data_type, a_strides, 0, input_storage_size);
+    b_info.init(b_shape, 1, data_type, b_strides, 0, kernel_storage_size);
+    d_info.init(d_shape, 1, data_type, d_strides, 0, output_storage_size);
+
+    _input_workspace.allocator()->init(a_info, storage_alignment);
+    _kernel_storage.allocator()->init(b_info, storage_alignment);
+    _output_workspace.allocator()->init(d_info, storage_alignment);
 
     // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
     TensorInfo info(TensorShape(_output->info()->dimension(2), _output->info()->dimension(0),
                                 _output->info()->dimension(1), _output->info()->dimension(3)),
                     1, _output->info()->data_type());
     _output_nhwc.allocator()->init(info);
-    _output_nhwc.allocator()->allocate();
-
-    // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
-    _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
-    _weights_hwio.allocator()->allocate();
-
-    // configure the kernel to transform the input tensor from NCHW -> NHWC
-    _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
-    _input_nhwc.allocator()->allocate();
-
-    const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
 
     // Configure the InputTransform
-    const int input_matrix_stride = transform_input_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
-    transform_input_kernel->configure(reinterpret_cast<float *>(_input_nhwc.buffer()), in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                      reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+    _memory_group.manage(&_input_workspace);
+    if(data_layout == DataLayout::NCHW)
+    {
+        // configure the kernel to transform the input tensor from NCHW -> NHWC
+        _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
+        _input_nhwc.allocator()->allocate();
+        transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          &_input_workspace, input_matrix_stride);
+    }
+    else
+    {
+        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          &_input_workspace, input_matrix_stride);
+    }
 
     // Configure WeightsTransform
-    const int kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
-    transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+    if(data_layout == DataLayout::NCHW)
+    {
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
+
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
+    }
+    else
+    {
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
+
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
+    }
+    _weights_hwio.allocator()->allocate();
 
     // Configure OutputTransform
     //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
-    const int  output_matrix_stride = transform_output_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
-    const auto output_shape(transform_output_kernel->get_output_shape(kernel_shape, in_shape, use_padding_type));
 
-    transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
-                                       output_matrix_stride, reinterpret_cast<float *>(_output_nhwc.buffer()),
-                                       in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
-
-    // Configure GEMM
-    const int    tile_rows                = iceildiv(output_shape.n_rows, output_tile.height);
-    const int    tile_cols                = iceildiv(output_shape.n_cols, output_tile.width);
-    const int    m                        = in_shape.n_batches * tile_rows * tile_cols;
-    const int    k                        = in_shape.n_channels;
-    const int    n                        = out_channels;
-    const int    input_matrix_row_stride  = in_shape.n_channels;
-    const int    kernel_matrix_row_stride = roundup(out_channels, N_BLOCK);
-    const int    output_matrix_row_stride = kernel_matrix_row_stride;
-    unsigned int num_threads              = NEScheduler::get().num_threads();
-
-    _arm_gemm = arm_gemm::gemm<float, float>(NEScheduler::get().cpu_info(), m, n, k, 1, n_gemms, false, false, 1.f, 0.f, num_threads, false);
-    _arm_gemm->set_arrays(reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_row_stride, 0, input_matrix_stride, reinterpret_cast<float *>(_kernel_storage.buffer()),
-                          kernel_matrix_row_stride, kernel_matrix_stride, reinterpret_cast<float *>(_output_workspace.buffer()), output_matrix_row_stride, 0, output_matrix_stride);
-
-    auto acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapper<arm_gemm::GemmCommon<float, float>>>();
-    acl_gemm_wrapper->configure(_arm_gemm.get());
-    const size_t workspace_size = _arm_gemm->get_working_size();
-
-    // Allocate workspace
-    if(workspace_size > 0)
+    _memory_group.manage(&_output_workspace);
+    if(data_layout == DataLayout::NCHW)
     {
-        const unsigned int alignment = 4096;
-        allocate_workspace(workspace_size, _workspace, &_memory_group, alignment, 1);
-        _arm_gemm->set_working_space(reinterpret_cast<float *>(_workspace.buffer()));
+        transform_output_kernel->configure(biases, &_output_workspace,
+                                           output_matrix_stride, &_output_nhwc,
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+    }
+    else
+    {
+        transform_output_kernel->configure(biases, &_output_workspace,
+                                           output_matrix_stride, _output,
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
 
-    const unsigned int window_size = _arm_gemm->get_window_size();
-    if(window_size < num_threads)
-    {
-        num_threads = window_size;
-        _arm_gemm->set_nthreads(num_threads);
-    }
-
-    _gemm_kernel = std::move(acl_gemm_wrapper);
+    _asm_glue.configure(&_input_workspace, &_kernel_storage, &_output_workspace, 1.0f, 0.f, false);
+    _input_workspace.allocator()->allocate();
+    _kernel_storage.allocator()->allocate();
+    _output_workspace.allocator()->allocate();
 
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
+
+    _output_nhwc.allocator()->allocate();
 
     _transform_input_kernel   = std::move(transform_input_kernel);
     _transform_weights_kernel = std::move(transform_weights_kernel);
@@ -293,38 +338,43 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _is_activationlayer_enabled = act_info.enabled();
     if(_is_activationlayer_enabled)
     {
-        _activationlayer_function.configure(output, nullptr, act_info);
+        _activationlayer_function.configure(_output, nullptr, act_info);
     }
 }
 
 void NEWinogradConvolutionLayer::run()
 {
-    _memory_group.acquire();
-    if(!_reshaped_kernel)
-    {
-        _reshaped_kernel = true;
-        _permute_weights.run();
-        NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
-    }
-    //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
-    _permute_input.run();
+    const DataLayout data_layout = _input->info()->data_layout();
 
+    prepare();
+
+    _memory_group.acquire();
+
+    if(data_layout == DataLayout::NCHW)
+    {
+        //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
+        _permute_input.run();
+    }
     // Transform input tensor to the winograd domain
     NEScheduler::get().schedule(_transform_input_kernel.get(), Window::DimX);
 
     //Run 16 GEMMs in multiple threads, each kernel runs one or more GEMMs
-    NEScheduler::get().schedule(_gemm_kernel.get(), Window::DimX);
+    _asm_glue.run();
 
     // Transform output tensor to the spatial domain
     NEScheduler::get().schedule(_transform_output_kernel.get(), Window::DimX);
 
-    // Reorder the convoluted output to ACL's ordering NCHW
-    _permute_output.run();
+    if(data_layout == DataLayout::NCHW)
+    {
+        // Reorder the convoluted output to ACL's ordering NCHW
+        _permute_output.run();
+    }
 
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function.run();
     }
+
     _memory_group.release();
 }
 
@@ -358,6 +408,7 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Validate input transform
     const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
+
     switch(weights->dimension(idx_width))
     {
         case 3:
@@ -444,13 +495,28 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
             break;
         }
     }
-
     // Validate Activation Layer
     if(act_info.enabled())
     {
         NEActivationLayer::validate(output, nullptr, act_info);
     }
     return Status{};
+}
+
+void NEWinogradConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        // Permute weights
+        _permute_weights.run();
+        _weights->mark_as_unused();
+
+        // Transform weights
+        NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
+        _weights_hwio.allocator()->free();
+
+        _is_prepared = true;
+    }
 }
 
 } // namespace arm_compute

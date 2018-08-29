@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -135,18 +135,18 @@ Collaboration diagram for INEWinogradLayerTransformOutputKernel&lt; T &gt;:</div
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af9c23bac52a4d03b1500cfd081cba624"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#af9c23bac52a4d03b1500cfd081cba624">get_output_storage_size</a> (int n_batches, int n_rows, int n_cols, int n_output_channels, bool same_padding) const =0</td></tr>
-<tr class="memdesc:af9c23bac52a4d03b1500cfd081cba624"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TOut) to allocate for the (Winograd domain) output.  <a href="#af9c23bac52a4d03b1500cfd081cba624">More...</a><br /></td></tr>
-<tr class="separator:af9c23bac52a4d03b1500cfd081cba624"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a638d7da59618abe59378576a0ef76929"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a638d7da59618abe59378576a0ef76929">get_output_storage_size</a> (int num_batches, int num_rows, int num_cols, int num_output_channels, bool same_padding) const =0</td></tr>
+<tr class="memdesc:a638d7da59618abe59378576a0ef76929"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TOut) to allocate for the (Winograd domain) output.  <a href="#a638d7da59618abe59378576a0ef76929">More...</a><br /></td></tr>
+<tr class="separator:a638d7da59618abe59378576a0ef76929"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae25b6ed77179808984b17c39e078ad96"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#ae25b6ed77179808984b17c39e078ad96">get_matrix_stride</a> (const KernelShape &amp;kernel_shape, const Tensor4DShape &amp;input_shape, const PaddingType padding_type) const =0</td></tr>
 <tr class="memdesc:ae25b6ed77179808984b17c39e078ad96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the stride between matrices in the output worspace.  <a href="#ae25b6ed77179808984b17c39e078ad96">More...</a><br /></td></tr>
 <tr class="separator:ae25b6ed77179808984b17c39e078ad96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10f4ee28637f13bfbfa0ec1f13972ac1"><td class="memItemLeft" align="right" valign="top">virtual Tensor4DShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a10f4ee28637f13bfbfa0ec1f13972ac1">get_output_shape</a> (const KernelShape &amp;kernel_shape, const Tensor4DShape &amp;in_shape, const PaddingType padding) const =0</td></tr>
 <tr class="memdesc:a10f4ee28637f13bfbfa0ec1f13972ac1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the output shape of a convolution.  <a href="#a10f4ee28637f13bfbfa0ec1f13972ac1">More...</a><br /></td></tr>
 <tr class="separator:a10f4ee28637f13bfbfa0ec1f13972ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86f888820152f1dce33390f60b2628d5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a86f888820152f1dce33390f60b2628d5">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, const T *const output_workingspace, const int matrix_stride, T *const output, const int n_batches, const int n_rows, const int n_cols, const int n_channels)=0</td></tr>
-<tr class="memdesc:a86f888820152f1dce33390f60b2628d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the output transform kernel.  <a href="#a86f888820152f1dce33390f60b2628d5">More...</a><br /></td></tr>
-<tr class="separator:a86f888820152f1dce33390f60b2628d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e3a05a0aa351da358238d945fbc4de7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a4e3a05a0aa351da358238d945fbc4de7">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output_workingspace, const int matrix_stride, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels)=0</td></tr>
+<tr class="memdesc:a4e3a05a0aa351da358238d945fbc4de7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the output transform kernel.  <a href="#a4e3a05a0aa351da358238d945fbc4de7">More...</a><br /></td></tr>
+<tr class="separator:a4e3a05a0aa351da358238d945fbc4de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0bda64948b232256769698cde90fcdb0"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a0bda64948b232256769698cde90fcdb0">~INEWinogradLayerTransformOutputKernel</a> ()</td></tr>
 <tr class="separator:a0bda64948b232256769698cde90fcdb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_c_p_p_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_c_p_p_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a></td></tr>
@@ -182,7 +182,7 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
 
 <p>Interface for the NEON kernel to perform Winograd output transform. </p>
 
-<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00171">171</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00190">190</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a0bda64948b232256769698cde90fcdb0"></a>
 <div class="memitem">
@@ -205,12 +205,12 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00228">228</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    {</div><div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00247">247</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    {</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a86f888820152f1dce33390f60b2628d5"></a>
+<a class="anchor" id="a4e3a05a0aa351da358238d945fbc4de7"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -226,7 +226,7 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const T *const&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
           <td class="paramname"><em>output_workingspace</em>, </td>
         </tr>
         <tr>
@@ -238,32 +238,32 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">T *const&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramname"><em>output_nhwc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>n_batches</em>, </td>
+          <td class="paramname"><em>num_batches</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>n_rows</em>, </td>
+          <td class="paramname"><em>num_rows</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>n_cols</em>, </td>
+          <td class="paramname"><em>num_cols</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>n_channels</em>&#160;</td>
+          <td class="paramname"><em>num_channels</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -284,16 +284,16 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Pointer to the biases tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output_workingspace</td><td>Pointer to working space for the output tensor in the Winograd domain. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">matrix_stride</td><td>Output matrix stride, can be computed with winograd::WinogradGEMM&lt;2, 2, 3, 3&gt;::Convolution&lt;float, float&gt;::get_output_matrix_stride() </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to NHWC ordered output tensor, in the spatial domain. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_batches</td><td>Number of batches in the input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_rows</td><td>Number of rows in output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_cols</td><td>Number of columns in output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_channels</td><td>Number of feature maps in the output tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output_nhwc</td><td>Pointer to a tensor in NHWC data layout ordered output tensor, in the spatial domain. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_batches</td><td>Number of batches in the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_rows</td><td>Number of rows in output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_cols</td><td>Number of columns in output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_channels</td><td>Number of feature maps in the output tensor. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#af127d7052940cf3b664d0b058d0a6ae3">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a2b01c230c011d65c44f8e4cb316be002">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
 
 </div>
 </div>
@@ -403,7 +403,7 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
 
 </div>
 </div>
-<a class="anchor" id="af9c23bac52a4d03b1500cfd081cba624"></a>
+<a class="anchor" id="a638d7da59618abe59378576a0ef76929"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -414,25 +414,25 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
           <td class="memname">virtual unsigned int get_output_storage_size </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n_batches</em>, </td>
+          <td class="paramname"><em>num_batches</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n_rows</em>, </td>
+          <td class="paramname"><em>num_rows</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n_cols</em>, </td>
+          <td class="paramname"><em>num_cols</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n_output_channels</em>, </td>
+          <td class="paramname"><em>num_output_channels</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -456,17 +456,17 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
 <p>Determine how much memory (in units of TOut) to allocate for the (Winograd domain) output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_batches</td><td>Number of batches in the output tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_rows</td><td>Number of rows in each feature map of the input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_cols</td><td>Number of columns in each feature map of the input tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_output_channels</td><td>Number of feature maps in the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_batches</td><td>Number of batches in the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_rows</td><td>Number of rows in each feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_cols</td><td>Number of columns in each feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_output_channels</td><td>Number of feature maps in the output tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">same_padding</td><td>Use "SAME" padding, otherwise use "VALID".</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Storage size (in units of TOut) required. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#acbbdf018ab122fbd13fd655fa678dee3">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#ab62748ccdc2d0696bca7e8cddbbb33af">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
 
 </div>
 </div>
@@ -479,7 +479,7 @@ class arm_compute::INEWinogradLayerTransformOutputKernel&lt; T &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml">INEWinogradLayerTransformOutputKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

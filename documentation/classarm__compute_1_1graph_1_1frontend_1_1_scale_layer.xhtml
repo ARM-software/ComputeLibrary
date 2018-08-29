@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Scale Layer. </p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00384">384</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00546">546</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="abd50a915acafa4ed21f755d911f9b155"></a>
 <div class="memitem">
@@ -198,8 +198,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00392">392</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;        : _mul_w(std::move(mul_w)), _add_w(std::move(add_w))</div><div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    {</div><div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00554">554</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;        : _mul_w(std::move(mul_w)), _add_w(std::move(add_w))</div><div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;    {</div><div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -236,10 +236,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00398">398</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00560">560</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">GraphBuilder::add_scale_layer()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00064">StreamHints::target_hint</a>.</p>
-<div class="fragment"><div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;    {</div><div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">GraphBuilder::add_scale_layer</a>(s.graph(), common_params, input, std::move(_mul_w), std::move(_add_w));</div><div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a9065925e20c5b5aa449d3ef9dc371085"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">arm_compute::graph::GraphBuilder::add_scale_layer</a></div><div class="ttdeci">static NodeID add_scale_layer(Graph &amp;g, const NodeParams &amp;params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor=nullptr, ITensorAccessorUPtr add_accessor=nullptr)</div><div class="ttdoc">Adds a scale layer node to the graph This layer computes a product of the input with a scale (read fr...</div></div>
+<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">GraphBuilder::add_scale_layer()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00068">StreamHints::target_hint</a>.</p>
+<div class="fragment"><div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    {</div><div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">GraphBuilder::add_scale_layer</a>(s.graph(), common_params, input, std::move(_mul_w), std::move(_add_w));</div><div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a9065925e20c5b5aa449d3ef9dc371085"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">arm_compute::graph::GraphBuilder::add_scale_layer</a></div><div class="ttdeci">static NodeID add_scale_layer(Graph &amp;g, const NodeParams &amp;params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor=nullptr, ITensorAccessorUPtr add_accessor=nullptr)</div><div class="ttdoc">Adds a scale layer node to the graph This layer computes a product of the input with a scale (read fr...</div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_a324e8c54c4c5161913681a1a52fef959"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const </div><div class="ttdoc">Layer name accessor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -253,7 +253,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_scale_layer.xhtml">ScaleLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

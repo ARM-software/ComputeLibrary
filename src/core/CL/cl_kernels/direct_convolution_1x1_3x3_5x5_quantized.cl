@@ -248,6 +248,12 @@ __kernel void direct_convolution_1x1_3x3_5x5_quantized(
 }
 #endif // defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
 
+#if defined(VEC_SIZE)
+
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+#define CONVERT_SAT_UCHAR_STR(x, size) (convert_uchar##size##_sat((x)))
+#define CONVERT_SAT_UCHAR(x, size) CONVERT_SAT_UCHAR_STR(x, size)
+
 /** This function computes the output stage of a depthwise convolution.
  *
  * @param[in] src_ptr                            Pointer to the source image. Supported data types: QASYMM8
@@ -274,7 +280,6 @@ __kernel void direct_convolution_1x1_3x3_5x5_quantized(
  * @param[in] output_multiplier                  Output scale multiplier
  * @param[in] output_shift                       Output scale divisor exponent
  */
-
 __kernel void output_stage_quantized(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
@@ -292,17 +297,29 @@ __kernel void output_stage_quantized(
 #endif //defined(HAS_BIAS)
 
     // Load input
-    int16 vals = vload16(0, (__global int *)(src.ptr));
+    VEC_INT vals = VLOAD(VEC_SIZE)(0, (__global int *)(src.ptr));
 
 #if defined(HAS_BIAS)
     // Load and add bias
+#if defined(NCHW)
     int bias_value = *((__global int *)(vector_offset(&bias, get_global_id(2))));
-    vals += (int16)(bias_value);
+#else  // defined(NCHW)
+    VEC_INT bias_value = VLOAD(VEC_SIZE)(0, ((__global int *)(vector_offset(&bias, get_global_id(0) * VEC_SIZE))));
+#endif // defined(NCHW)
+
+    vals += (VEC_INT)(bias_value);
 #endif //defined(HAS_BIAS)
 
-    vals = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(vals, output_multiplier, output_shift, 16);
+    vals = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(vals, output_multiplier, output_shift, VEC_SIZE);
     vals = vals + output_offset;
 
     // Store result in dst
-    vstore16(convert_uchar16_sat(vals), 0, (__global uchar *)dst.ptr);
+    VSTORE(VEC_SIZE)
+    (CONVERT_SAT_UCHAR(vals, VEC_SIZE), 0, (__global uchar *)dst.ptr);
 }
+
+#undef VEC_INT
+#undef CONVERT_SAT_UCHAR_STR
+#undef CONVERT_SAT_UCHAR
+
+#endif // defined(VEC_SIZE)

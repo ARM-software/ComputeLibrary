@@ -2,7 +2,6 @@ var arm__compute_2core_2_utils_8h =
 [
     [ "adjust_odd_shape", "arm__compute_2core_2_utils_8h.xhtml#add7f7487c235331a6518dd16ad1e3b38", null ],
     [ "build_information", "arm__compute_2core_2_utils_8h.xhtml#a64c17a5a42d2499a1626222ff9753b4d", null ],
-    [ "calculate_depth_concatenate_shape", "arm__compute_2core_2_utils_8h.xhtml#a075313545533c34978309ed57d18333f", null ],
     [ "calculate_matrix_scale", "arm__compute_2core_2_utils_8h.xhtml#a0101a40c4a6acc2af3b55afa7632f16a", null ],
     [ "calculate_same_pad", "arm__compute_2core_2_utils_8h.xhtml#afa7962c747457714d0944af80cb07058", null ],
     [ "calculate_subsampled_shape", "arm__compute_2core_2_utils_8h.xhtml#a9d714e1b7d9d7818309138b7d830ebcb", null ],
@@ -21,7 +20,6 @@ var arm__compute_2core_2_utils_8h =
     [ "get_promoted_data_type", "arm__compute_2core_2_utils_8h.xhtml#a5e4254e9c71fffafb79b99d972df8f81", null ],
     [ "has_format_horizontal_subsampling", "arm__compute_2core_2_utils_8h.xhtml#aa2f22cc01532e0236e438324310fdb94", null ],
     [ "has_format_vertical_subsampling", "arm__compute_2core_2_utils_8h.xhtml#a95358b677c5c17f5cc1e369e4a27e2c2", null ],
-    [ "is_data_type_fixed_point", "arm__compute_2core_2_utils_8h.xhtml#ab6bb62694ae8369d18a9c9687040975e", null ],
     [ "is_data_type_float", "arm__compute_2core_2_utils_8h.xhtml#af5982a092e9eb743fce2d6392bdd8897", null ],
     [ "is_data_type_quantized", "arm__compute_2core_2_utils_8h.xhtml#a0bee325b210f81bb89fe1f9e15badf9c", null ],
     [ "is_data_type_quantized_asymmetric", "arm__compute_2core_2_utils_8h.xhtml#a14f46283f316e7f0fad301d5c1507e9f", null ],

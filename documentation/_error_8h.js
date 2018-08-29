@@ -11,6 +11,7 @@ var _error_8h =
     [ "ARM_COMPUTE_ERROR_ON_LOC_MSG", "_error_8h.xhtml#a1b62e396a1789909dadda61ea4cda96f", null ],
     [ "ARM_COMPUTE_ERROR_ON_MSG", "_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b", null ],
     [ "ARM_COMPUTE_ERROR_THROW_ON", "_error_8h.xhtml#a938dcd406ce611ef5345ad2531cdb948", null ],
+    [ "ARM_COMPUTE_EXIT_ON_MSG", "_error_8h.xhtml#ad39a3601153da57978bb5124ace35d36", null ],
     [ "ARM_COMPUTE_RETURN_ERROR_MSG", "_error_8h.xhtml#a9561091f3566e78ad3aa39259bc4126a", null ],
     [ "ARM_COMPUTE_RETURN_ERROR_ON", "_error_8h.xhtml#a206d6e247e0957ac3dee45d27756fc25", null ],
     [ "ARM_COMPUTE_RETURN_ERROR_ON_LOC", "_error_8h.xhtml#aab9171b209dda7cc9bb560486674c9f6", null ],
@@ -21,7 +22,8 @@ var _error_8h =
     [ "ARM_COMPUTE_UNUSED", "_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6", null ],
     [ "ErrorCode", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05f", [
       [ "OK", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fae0aa021e21dddbd6d8cecec71e9cf564", null ],
-      [ "RUNTIME_ERROR", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fa62be47fdd89da032cf78dfce82239579", null ]
+      [ "RUNTIME_ERROR", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fa62be47fdd89da032cf78dfce82239579", null ],
+      [ "UNSUPPORTED_EXTENSION_USE", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fa0ffe8be9137815d1266845a195c053c7", null ]
     ] ],
     [ "create_error", "_error_8h.xhtml#a3eee3c80d78ee4574a5eed0af5af919d", null ],
     [ "create_error_va_list", "_error_8h.xhtml#a2edb6ec8bea5c26d7d802d21caf64d02", null ],

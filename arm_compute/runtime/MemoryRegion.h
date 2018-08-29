@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include "arm_compute/core/Error.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -38,18 +39,28 @@ class MemoryRegion final : public IMemoryRegion
 public:
     /** Default constructor
      *
-     * @param[in] size Region size
+     * @param[in] size      Region size
+     * @param[in] alignment Alignment in bytes of the base pointer. Defaults to 0
      */
-    MemoryRegion(size_t size)
-        : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
+    MemoryRegion(size_t size, size_t alignment = 0)
+        : IMemoryRegion(size), _mem(nullptr), _alignment(alignment), _offset(0)
     {
         if(size != 0)
         {
-            _mem = std::shared_ptr<uint8_t>(new uint8_t[size](), [](uint8_t *ptr)
+            // Allocate backing memory
+            size_t space = size + alignment;
+            _mem         = std::shared_ptr<uint8_t>(new uint8_t[space](), [](uint8_t *ptr)
             {
                 delete[] ptr;
             });
-            _ptr = _mem.get();
+
+            // Calculate alignment offset
+            if(alignment != 0)
+            {
+                void *aligned_ptr = _mem.get();
+                support::cpp11::align(alignment, size, aligned_ptr, space);
+                _offset = reinterpret_cast<uintptr_t>(aligned_ptr) - reinterpret_cast<uintptr_t>(_mem.get());
+            }
         }
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -64,11 +75,11 @@ public:
     // Inherited methods overridden :
     void *buffer() final
     {
-        return _mem.get();
+        return reinterpret_cast<void *>(_mem.get() + _offset);
     }
     void *buffer() const final
     {
-        return _mem.get();
+        return reinterpret_cast<void *>(_mem.get() + _offset);
     }
     void **handle() final
     {
@@ -77,7 +88,8 @@ public:
 
 protected:
     std::shared_ptr<uint8_t> _mem;
-    uint8_t                 *_ptr;
+    size_t                   _alignment;
+    size_t                   _offset;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_MEMORY_REGION_H__ */

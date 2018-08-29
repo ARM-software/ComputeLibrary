@@ -23,7 +23,6 @@
  */
 #include "WidthConcatenateLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -85,8 +84,7 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs)
 
 template SimpleTensor<float> widthconcatenate_layer(const std::vector<SimpleTensor<float>> &srcs);
 template SimpleTensor<half> widthconcatenate_layer(const std::vector<SimpleTensor<half>> &srcs);
-template SimpleTensor<qint8_t> widthconcatenate_layer(const std::vector<SimpleTensor<qint8_t>> &srcs);
-template SimpleTensor<qint16_t> widthconcatenate_layer(const std::vector<SimpleTensor<qint16_t>> &srcs);
+template SimpleTensor<uint8_t> widthconcatenate_layer(const std::vector<SimpleTensor<uint8_t>> &srcs);
 } // namespace reference
 } // namespace validation
 } // namespace test

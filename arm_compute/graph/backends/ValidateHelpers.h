@@ -52,6 +52,29 @@ inline arm_compute::ITensorInfo *get_backing_tensor_info(arm_compute::graph::Ten
     return ((tensor == nullptr) || (tensor->handle() == nullptr)) ? nullptr : tensor->handle()->tensor().info();
 }
 
+/** Validates a Channel Shuffle layer node
+ *
+ * @tparam ChannelShuffleLayer  Channel Shuffle layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ChannelShuffleLayer>
+Status validate_channel_shuffle_layer(ChannelShuffleLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ChannelShuffle node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input      = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output     = get_backing_tensor_info(node.output(0));
+    const unsigned int        num_groups = node.num_groups();
+
+    return ChannelShuffleLayer::validate(input, output, num_groups);
+}
+
 /** Validates a Convolution layer node
  *
  * @tparam ConvolutionLayer          Default Convolution layer function type
@@ -83,37 +106,31 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
 
     const PadStrideInfo     conv_info      = node.convolution_info();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
+    const bool              fast_math      = node.fast_math_hint() == FastMathHint::Enabled;
+    const unsigned int      num_groups     = node.num_groups();
 
     // Validate function
     Status status{};
     switch(conv_algorithm)
     {
-        case ConvolutionMethod::DIRECT:
+        case ConvolutionMethod::Direct:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "DirectConvolutionLayer does not support grouping!");
             status = DirectConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
         case ConvolutionMethod::GEMM:
-            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info,
+                                                    WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), num_groups);
             break;
-        case ConvolutionMethod::WINOGRAD:
-            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info /*, fast_math*/);
+        case ConvolutionMethod::Winograd:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "WinogradConvolutionLayer does not support grouping!");
+            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, ActivationLayerInfo(), fast_math);
             break;
-        case ConvolutionMethod::DEFAULT:
-            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
+        case ConvolutionMethod::Default:
+            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info,
+                                                WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), fast_math, num_groups);
             break;
         default:
-            break;
-    }
-
-    // If validation fails try the Default approach
-    if(!bool(status))
-    {
-        status = ConvolutionLayer::validate(input, weights, biases, output, conv_info /*, fast_math*/);
-        if(bool(status))
-        {
-            ARM_COMPUTE_LOG_GRAPH_INFO("Switched ConvolutionLayer method of node with ID : "
-                                       << node.id() << " and Name: " << node.name() << std::endl);
-            node.set_convolution_method(ConvolutionMethod::DEFAULT);
-        }
+            ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported convolution method");
     }
 
     return status;
@@ -136,19 +153,53 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    arm_compute::ITensorInfo        *weights       = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *input   = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *weights = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *biases  = get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
+
+    const PadStrideInfo              conv_info     = node.convolution_info();
     const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
-    ARM_COMPUTE_ERROR_ON(weights == nullptr);
 
     // Validate function
-    if((dwc_algorithm == DepthwiseConvolutionMethod::OPTIMIZED_3x3) && (weights->tensor_shape()[get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH)] != 3))
+    Status status{};
+    switch(dwc_algorithm)
     {
-        ARM_COMPUTE_LOG_GRAPH_INFO("Switched DepthwiseConvolutionLayer method of node with ID : "
-                                   << node.id() << " and Name: " << node.name() << std::endl);
-        node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::DEFAULT);
+        case DepthwiseConvolutionMethod::Default:
+        case DepthwiseConvolutionMethod::GEMV:
+            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            break;
+        case DepthwiseConvolutionMethod::Optimized3x3:
+            status = DepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info);
+            break;
+        default:
+            ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported depthwise convolution method");
     }
 
-    return Status{};
+    return status;
+}
+
+/** Validates a permute layer node
+ *
+ * @tparam PermuteLayer Permute layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename PermuteLayer>
+Status validate_permute_layer(PermuteLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PermuteLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input  = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+    const PermutationVector &perm   = node.permutation_vector();
+
+    return PermuteLayer::validate(input, output, perm);
 }
 } // namespace detail
 } // namespace backends

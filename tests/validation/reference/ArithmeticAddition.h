@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,11 @@ namespace validation
 namespace reference
 {
 template <typename T>
+SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy);
+
+template <typename T>
 SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+
 } // namespace reference
 } // namespace validation
 } // namespace test

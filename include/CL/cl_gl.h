@@ -1,5 +1,5 @@
 /**********************************************************************************
- * Copyright (c) 2008-2015 The Khronos Group Inc.
+ * Copyright (c) 2008-2018 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and/or associated documentation files (the
@@ -49,15 +49,19 @@ typedef struct __GLsync *cl_GLsync;
 #define CL_GL_OBJECT_TEXTURE2D                  0x2001
 #define CL_GL_OBJECT_TEXTURE3D                  0x2002
 #define CL_GL_OBJECT_RENDERBUFFER               0x2003
+#ifdef CL_VERSION_1_2
 #define CL_GL_OBJECT_TEXTURE2D_ARRAY            0x200E
 #define CL_GL_OBJECT_TEXTURE1D                  0x200F
 #define CL_GL_OBJECT_TEXTURE1D_ARRAY            0x2010
 #define CL_GL_OBJECT_TEXTURE_BUFFER             0x2011
+#endif
 
 /* cl_gl_texture_info           */
 #define CL_GL_TEXTURE_TARGET                    0x2004
 #define CL_GL_MIPMAP_LEVEL                      0x2005
+#ifdef CL_VERSION_1_2
 #define CL_GL_NUM_SAMPLES                       0x2012
+#endif
 
 
 extern CL_API_ENTRY cl_mem CL_API_CALL
@@ -65,6 +69,8 @@ clCreateFromGLBuffer(cl_context     /* context */,
                      cl_mem_flags   /* flags */,
                      cl_GLuint      /* bufobj */,
                      int *          /* errcode_ret */) CL_API_SUFFIX__VERSION_1_0;
+
+#ifdef CL_VERSION_1_2
 
 extern CL_API_ENTRY cl_mem CL_API_CALL
 clCreateFromGLTexture(cl_context      /* context */,
@@ -74,6 +80,8 @@ clCreateFromGLTexture(cl_context      /* context */,
                       cl_GLuint       /* texture */,
                       cl_int *        /* errcode_ret */) CL_API_SUFFIX__VERSION_1_2;
     
+#endif
+
 extern CL_API_ENTRY cl_mem CL_API_CALL
 clCreateFromGLRenderbuffer(cl_context   /* context */,
                            cl_mem_flags /* flags */,

@@ -25,37 +25,30 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-TensorShape compute_output_shape(const TensorShape &input, size_t conv_w, size_t conv_h)
-{
-    TensorShape output_shape(input);
-    output_shape.set(0, conv_w);
-    output_shape.set(1, conv_h);
-    output_shape.set(2, input.x() / (conv_w * conv_h));
-
-    return output_shape;
-}
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
 
     if(output->total_size() != 0)
     {
-        TensorShape output_shape = compute_output_shape(input->tensor_shape(), conv_w, conv_h);
+        TensorShape output_shape = compute_vector_to_tensor_output_shape(input->tensor_shape(), conv_w, conv_h, output->data_layout());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -72,7 +65,7 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    TensorShape output_shape = compute_output_shape(input->info()->tensor_shape(), conv_w, conv_h);
+    TensorShape output_shape = compute_vector_to_tensor_output_shape(input->info()->tensor_shape(), conv_w, conv_h, output->info()->data_layout());
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), conv_w, conv_h));
@@ -85,6 +78,7 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DCONV_WIDTH=" + support::cpp11::to_string(conv_w));
     build_opts.add_option("-DCONV_HEIGHT=" + support::cpp11::to_string(conv_h));
+    build_opts.add_option("-D" + string_from_data_layout(output->info()->data_layout()));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_vector_to_tensor", build_opts.options()));
 
@@ -93,7 +87,7 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     // The CLDepthwisevectorToTensorKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 Status CLDepthwiseVectorToTensorKernel::validate(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h)

@@ -37,6 +37,22 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
+{
+    ARM_COMPUTE_UNUSED(conv_info);
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && has_bias);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != output->dimension(2));
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
+
+    return Status{};
+}
+} // namespace
+
 template <typename T>
 void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
 {
@@ -120,12 +136,9 @@ NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()
 
 void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && has_bias);
-    ARM_COMPUTE_ERROR_ON((input->info()->dimension(2) * depth_multiplier) != output->info()->dimension(2));
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, depth_multiplier));
 
     _input            = input;
     _output           = output;
@@ -157,6 +170,13 @@ void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, c
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
+}
+
+Status NEDepthwiseIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, depth_multiplier));
+    return Status{};
 }
 
 void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)

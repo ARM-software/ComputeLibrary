@@ -239,9 +239,13 @@ protected:
         dst.allocator()->info().set_tensor_shape(TensorShape(24U, _cur_batches)).set_is_resizable(true).extend_padding(new_dst_padding);
         dst.allocator()->info().set_is_resizable(false);
 
+        // Configure FC info
+        FullyConnectedLayerInfo fc_info;
+        fc_info.retain_internal_weights = true;
+
         // Configure functions (2nd iteration)
-        fc_layer_1.configure(&src, &w1, &b1, &fc1, true, false, true);
-        fc_layer_2.configure(&fc1, &w2, &b2, &dst, true, false, true);
+        fc_layer_1.configure(&src, &w1, &b1, &fc1, fc_info);
+        fc_layer_2.configure(&fc1, &w2, &b2, &dst, fc_info);
 
         // Fill tensors (2nd iteration)
         fill(AccessorType(src), 5);
@@ -357,6 +361,10 @@ protected:
         // Get padding requirements
         auto fc_padding = fc.allocator()->info().padding();
 
+        // Configure FC info
+        FullyConnectedLayerInfo fc_info;
+        fc_info.retain_internal_weights = true;
+
         // Run rest iterations
         for(int i = _max_batches; i >= static_cast<int>(_cur_batches); --i)
         {
@@ -368,7 +376,7 @@ protected:
             dst.allocator()->info().set_tensor_shape(TensorShape(8U, i));
 
             // Configure functions
-            fc_layer.configure(&src, &w, &b, &fc, true, false, true);
+            fc_layer.configure(&src, &w, &b, &fc, fc_info);
             smx_layer.configure(&fc, &dst);
 
             // Fill tensors

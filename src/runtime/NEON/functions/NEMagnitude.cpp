@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,36 +31,18 @@
 
 using namespace arm_compute;
 
-void NEMagnitude::configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type, bool use_fp16)
+void NEMagnitude::configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type)
 {
-    if(use_fp16)
+    if(mag_type == MagnitudeType::L1NORM)
     {
-        if(mag_type == MagnitudeType::L1NORM)
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseFP16Kernel<MagnitudeType::L1NORM, PhaseType::SIGNED>>();
-            k->configure(input1, input2, output, nullptr);
-            _kernel = std::move(k);
-        }
-        else
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseFP16Kernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
-            k->configure(input1, input2, output, nullptr);
-            _kernel = std::move(k);
-        }
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L1NORM, PhaseType::SIGNED>>();
+        k->configure(input1, input2, output, nullptr);
+        _kernel = std::move(k);
     }
     else
     {
-        if(mag_type == MagnitudeType::L1NORM)
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L1NORM, PhaseType::SIGNED>>();
-            k->configure(input1, input2, output, nullptr);
-            _kernel = std::move(k);
-        }
-        else
-        {
-            auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
-            k->configure(input1, input2, output, nullptr);
-            _kernel = std::move(k);
-        }
+        auto k = arm_compute::support::cpp14::make_unique<NEMagnitudePhaseKernel<MagnitudeType::L2NORM, PhaseType::SIGNED>>();
+        k->configure(input1, input2, output, nullptr);
+        _kernel = std::move(k);
     }
 }

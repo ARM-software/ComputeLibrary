@@ -100,6 +100,16 @@ arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, co
     return arm_compute::Status{};
 }
 
+arm_compute::Status arm_compute::error_on_tensor_not_2d(const char *function, const char *file, const int line,
+                                                        const arm_compute::ITensorInfo *tensor)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(tensor->num_dimensions() != 2,
+                                        function, file, line,
+                                        "Only 2D Tensors are supported by this kernel (%d passed)", tensor->num_dimensions());
+    return arm_compute::Status{};
+}
+
 arm_compute::Status arm_compute::error_on_channel_not_in_known_format(const char *function, const char *file, const int line,
                                                                       arm_compute::Format fmt, arm_compute::Channel cn)
 {
@@ -169,7 +179,7 @@ arm_compute::Status arm_compute::error_on_invalid_subtensor(const char *function
     // Subtensor should not index in x, y dimensions.
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords.x() != 0) || (coords.y() != 0)), function, file, line);
     // Subtensor shape should match parent tensor in x, y dimensions.
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) || (parent_shape.y() != parent_shape.y())), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) || (parent_shape.y() != shape.y())), function, file, line);
 
     // Check dimensions
     for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)

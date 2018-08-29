@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -238,10 +238,10 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set the input, weights, biases and output tensors. </p>
-<dl class="section note"><dt>Note</dt><dd>: DirectConvolution only works in the following configurations: 1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/QS16/F16/F32 3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/F16/F32 5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>: DirectConvolution only works in the following configurations: 1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32 3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32 5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Input tensor. Data types supported: QS8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Input tensor. Data types supported: F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Set of kernels to convolve the input volume. Supported sizes: 1x1, 3x3 and 5x5. The 3rd dimension must be the same as the input's volume 3rd dimension. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>Set of biases. Can be nullptr. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. The 3rd dimensions must be equal to the 4th dimension of the <code>kernels</code> tensor. Data types supported: Same as <code>input</code>. </td></tr>
@@ -349,10 +349,10 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 </div><div class="memdoc">
 
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer.xhtml">NEDirectConvolutionLayer</a>. </p>
-<dl class="section note"><dt>Note</dt><dd>: DirectConvolution only works in the following configurations: 1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/QS16/F16/F32 3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = QS8/F16/F32 5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>: DirectConvolution only works in the following configurations: 1x1 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32 3x3 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F16/F32 5x5 convolution with stride_x = 1/2/3, stride_y = 1/2/3 data type = F32</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: QS8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Set of kernels to convolve the input volume. Supported sizes: 1x1, 3x3 and 5x5. The 3rd dimension must be the same as the input's volume 3rd dimension. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>Set of biases. Can be nullptr. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor. The 3rd dimensions must be equal to the 4th dimension of the <code>kernels</code> tensor. Data types supported: Same as <code>input</code>. </td></tr>
@@ -363,7 +363,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_direct_convolution_layer_8cpp_source.xhtml#l00104">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_direct_convolution_layer_8cpp_source.xhtml#l00098">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -376,7 +376,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer.xhtml">NEDirectConvolutionLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

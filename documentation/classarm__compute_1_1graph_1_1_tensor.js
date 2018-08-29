@@ -7,6 +7,7 @@ var classarm__compute_1_1graph_1_1_tensor =
     [ "call_accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34", null ],
     [ "desc", "classarm__compute_1_1graph_1_1_tensor.xhtml#ace1b6c0005a4c373e54bcfdc6d5b7d68", null ],
     [ "desc", "classarm__compute_1_1graph_1_1_tensor.xhtml#a5fb6fe7d94e6579bee7a628aaf979f3a", null ],
+    [ "extract_accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#af471067707e0a541aff90a3cb03b215f", null ],
     [ "handle", "classarm__compute_1_1graph_1_1_tensor.xhtml#a1a4fd35b8e2e8a2c7ea38b6d37508673", null ],
     [ "id", "classarm__compute_1_1graph_1_1_tensor.xhtml#a9746a32d2b9577d7e063077cb5ceda8f", null ],
     [ "set_accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a7ca865118188dd8c307ae9e84f8a75f6", null ],

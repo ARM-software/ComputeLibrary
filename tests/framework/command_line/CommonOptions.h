@@ -25,7 +25,10 @@
 #define ARM_COMPUTE_TEST_COMMONOPTIONS
 
 #include "../instruments/Instruments.h"
-#include "CommandLineOptions.h"
+
+#include "utils/command_line/CommandLineOptions.h"
+#include "utils/command_line/CommandLineParser.h"
+
 #include <memory>
 
 namespace arm_compute
@@ -34,7 +37,6 @@ namespace test
 {
 namespace framework
 {
-class CommandLineParser;
 class Printer;
 enum class LogFormat;
 enum class LogLevel;
@@ -56,7 +58,7 @@ public:
      *
      * @param[in,out] parser A parser on which "parse()" hasn't been called yet.
      */
-    CommonOptions(CommandLineParser &parser);
+    CommonOptions(arm_compute::utils::CommandLineParser &parser);
     /** Prevent instances of this class from being copy constructed */
     CommonOptions(const CommonOptions &) = delete;
     /** Prevent instances of this class from being copied */
@@ -69,19 +71,18 @@ public:
      */
     std::vector<std::unique_ptr<Printer>> create_printers();
 
-    ToggleOption                               *help;           /**< Show help option */
-    EnumListOption<InstrumentsDescription>     *instruments;    /**< Instruments option */
-    SimpleOption<int>                          *iterations;     /**< Number of iterations option */
-    SimpleOption<int>                          *threads;        /**< Number of threads option */
-    EnumOption<LogFormat>                      *log_format;     /**< Log format option */
-    SimpleOption<std::string>                  *log_file;       /**< Log file option */
-    EnumOption<LogLevel>                       *log_level;      /**< Logging level option */
-    ToggleOption                               *throw_errors;   /**< Throw errors option */
-    ToggleOption                               *color_output;   /**< Color output option */
-    ToggleOption                               *pretty_console; /**< Pretty console option */
-    SimpleOption<std::string>                  *json_file;      /**< JSON output file option */
-    SimpleOption<std::string>                  *pretty_file;    /**< Pretty output file option */
-    std::vector<std::shared_ptr<std::ofstream>> log_streams;    /**< Log streams */
+    arm_compute::utils::ToggleOption                           *help;           /**< Show help option */
+    arm_compute::utils::EnumListOption<InstrumentsDescription> *instruments;    /**< Instruments option */
+    arm_compute::utils::SimpleOption<int>                      *iterations;     /**< Number of iterations option */
+    arm_compute::utils::EnumOption<LogFormat>                  *log_format;     /**< Log format option */
+    arm_compute::utils::SimpleOption<std::string>              *log_file;       /**< Log file option */
+    arm_compute::utils::EnumOption<LogLevel>                   *log_level;      /**< Logging level option */
+    arm_compute::utils::ToggleOption                           *throw_errors;   /**< Throw errors option */
+    arm_compute::utils::ToggleOption                           *color_output;   /**< Color output option */
+    arm_compute::utils::ToggleOption                           *pretty_console; /**< Pretty console option */
+    arm_compute::utils::SimpleOption<std::string>              *json_file;      /**< JSON output file option */
+    arm_compute::utils::SimpleOption<std::string>              *pretty_file;    /**< Pretty output file option */
+    std::vector<std::shared_ptr<std::ofstream>>                 log_streams;    /**< Log streams */
 };
 
 } // namespace framework

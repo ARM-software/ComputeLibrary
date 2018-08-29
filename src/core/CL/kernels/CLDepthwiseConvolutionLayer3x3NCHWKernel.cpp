@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -44,14 +45,15 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                                                                                          && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU))),
-                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
+                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
-    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != output->dimension(2));
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1 || conv_info.stride().first > 3);
 
     const bool is_qasymm = is_data_type_quantized_asymmetric(input->data_type());
@@ -66,7 +68,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON((biases->dimension(0) != weights->dimension(2)) && (weights->dimension(2) != 1 || biases->dimension(0) != weights->dimension(3)));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
@@ -167,9 +169,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     }
     else
     {
-        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized_nchw" : "depthwise_convolution_3x3";
+        const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
+
+        kernel_name                       = is_qasymm ? (std::string("depthwise_convolution_3x3_quantized") + (is_dot8_supported ? "_dot8" : "") + "_nchw") : "depthwise_convolution_3x3";
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
-        num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y < 3) ? (2 / conv_stride_y) : 1;
+        num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y == 1) ? 2 : 1;
         num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
         num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
@@ -193,7 +197,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLDepthwiseConvolutionLayer3x3NCHWKernel::CLDepthwiseConvolutionLayer3x3NCHWKernel()
-    : _conv_stride_x(0), _conv_pad_top(0)
+    : _conv_stride_x(0), _conv_pad_top(0), _conv_pad_left(0)
 {
 }
 
@@ -207,6 +211,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
                                                          ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info));
 
     bool is_qasymm = is_data_type_quantized_asymmetric(input->info()->data_type());
 
@@ -275,7 +280,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -340,7 +345,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::Com
         add_3D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_weights);
 
-        enqueue(queue, *this, slice_out, _lws_hint);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }

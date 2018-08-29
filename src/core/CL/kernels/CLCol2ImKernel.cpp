@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <cmath>
@@ -40,30 +40,31 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_layout() != DataLayout::NCHW, "Col2Im output's data layout must always be NCHW");
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims)));
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims, num_groups)).set_data_layout(DataLayout::NCHW));
 
-    const unsigned int num_elems_read_per_iteration = is_data_type_fixed_point(input->data_type()) ? 1 : 8;
+    const unsigned int num_elems_read_per_iteration = 8;
 
     // Configure window
     Window win = calculate_max_window(*input, Steps(num_elems_read_per_iteration));
@@ -86,12 +87,12 @@ CLCol2ImKernel::CLCol2ImKernel()
 {
 }
 
-void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
+void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims, num_groups));
 
     _input          = input;
     _output         = output;
@@ -105,33 +106,20 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
-    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
+    build_opts.add_option_if(num_groups > 1, "-DGROUPING");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts.options()));
 
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning over 30 representative tensor shapes.
-    const GPUTarget gpu_target = get_target();
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
-    {
-        if((_convolved_dims.first == 7) || (_convolved_dims.first == 14))
-        {
-            _lws_hint = cl::NDRange(1, 7, 1);
-        }
-        else
-        {
-            _lws_hint = cl::NDRange(1, 8, 1);
-        }
-    }
-
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims, num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "col2im_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(num_groups);
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
@@ -142,11 +130,11 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims, num_groups));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims, num_groups).first);
     return Status{};
 }
 
@@ -154,13 +142,13 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
-    // The collapse method rely on the assumption that the third dimension of input buffer is 1
-    ARM_COMPUTE_ERROR_ON(window.z().end() != 1);
 
-    Window collapsed_window = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
-    Window slice            = collapsed_window.first_slice_window_3D();
+    Window out_window;
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
-    // Set static kernel arguments
+    Window slice     = window.first_slice_window_3D();
+    Window slice_out = out_window.first_slice_window_3D();
+
     unsigned int idx = 2 * num_arguments_per_3D_tensor();
     _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
 
@@ -169,8 +157,8 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
         // Set inputs
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice, _lws_hint);
+        add_3D_tensor_argument(idx, _output, slice_out);
+        enqueue(queue, *this, slice, lws_hint());
     }
-    while(collapsed_window.slide_window_slice_3D(slice));
+    while(window.slide_window_slice_3D(slice) && out_window.slide_window_slice_3D(slice_out));
 }

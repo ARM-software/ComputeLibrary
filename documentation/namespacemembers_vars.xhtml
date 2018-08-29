@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -112,6 +112,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="#index_q"><span>q</span></a></li>
       <li><a href="#index_r"><span>r</span></a></li>
       <li><a href="#index_s"><span>s</span></a></li>
+      <li><a href="#index_t"><span>t</span></a></li>
+      <li><a href="#index_v"><span>v</span></a></li>
       <li class="current"><a href="#index_w"><span>w</span></a></li>
     </ul>
   </div>
@@ -149,7 +151,7 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 <h3><a class="anchor" id="index__"></a>- _ -</h3><ul>
 <li>_allowed_values
-: <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a813cd3ddc61ff2066016e023927cced0">arm_compute::test::framework</a>
+: <a class="el" href="namespacearm__compute_1_1utils.xhtml#a813cd3ddc61ff2066016e023927cced0">arm_compute::utils</a>
 </li>
 </ul>
 
@@ -174,6 +176,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>bias_info
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a43c38c81ff3058e36ceb9904a944d1ea">arm_compute::test::validation</a>
 </li>
+<li>blue_coef_bt709
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#ab7d52900468f442e85c01d73722d181c">arm_compute::test::colorconvert_helper::detail</a>
+</li>
 <li>border_mode
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5471e46933e7a9c4709972d91fc4ea65">arm_compute::test::validation</a>
 </li>
@@ -193,20 +198,35 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>CLCopyFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a853fdc8b5cffca96a145ad303d57ecfb">arm_compute::test::validation</a>
 </li>
-<li>CLFixedPointPixelWiseMultiplicationFixture&lt; qint16_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae2e213fd0b2223735283b9b5d1272c9d">arm_compute::test::validation</a>
-</li>
-<li>CLFixedPointPixelWiseMultiplicationFixture&lt; qint8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#afc6adad979268c373fb2d0fccd57b2c9">arm_compute::test::validation</a>
+<li>CLGEMMConvolutionLayerFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0f3dc00a54fa25a6e8d565b5c8b56ea0">arm_compute::test::validation</a>
 </li>
 <li>CLGEMMFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7ab157e439f3926f37c01f323ea8715e">arm_compute::test::validation</a>
+</li>
+<li>CLGEMMGroupedConvolutionLayerFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adda980a6f6ff459cb9b0a1720cd8fbe8">arm_compute::test::validation</a>
+</li>
+<li>CLGEMMInputOutput3DFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af37f99d9d7c03d65a5d57545b30f254e">arm_compute::test::validation</a>
+</li>
+<li>CLGEMMOutput3DFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f88e4be563eecf18673c5a3d2022983">arm_compute::test::validation</a>
+</li>
+<li>CLGEMMOutput3DFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a97ed53b7dcef1a0632bcb19c6543b565">arm_compute::test::validation</a>
 </li>
 <li>CLLSTMLayerFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5550422830bbd7b8b38e9df1cfc7e157">arm_compute::test::validation</a>
 </li>
 <li>CLMagnitudeFixture&lt; int32_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5930d371f84eb0c18798b1fdf2881e60">arm_compute::test::validation</a>
+</li>
+<li>CLMeanStdDevFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2c9fcdc70ffb87e0f4b44ecf99a341c4">arm_compute::test::validation</a>
+</li>
+<li>CLMeanStdDevFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af4daef0996ee4fae0f7e619d510f2760">arm_compute::test::validation</a>
 </li>
 <li>CLPhaseFixture&lt; int32_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a82d55a0ca3dd9f8dd5613dab35e50b10">arm_compute::test::validation</a>
@@ -217,11 +237,11 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>CLPixelWiseMultiplicationToF32Fixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7358bbca9e5c79b0b9f8c336fd38c5a1">arm_compute::test::validation</a>
 </li>
-<li>CLPoolingLayerFixedPointFixture&lt; int16_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1b65a3691791b307680adad3330fa3f6">arm_compute::test::validation</a>
-</li>
 <li>CLPoolingLayerFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a563e036c5c2976f911c0f33d91f328ec">arm_compute::test::validation</a>
+</li>
+<li>CLReductionOperationFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af0b6293ddc8365bfe7bf3c4941486ff6">arm_compute::test::validation</a>
 </li>
 <li>CLRNNLayerFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae384fa66bc539fa51ffb8b0ce40b61b8">arm_compute::test::validation</a>
@@ -245,6 +265,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 
 <h3><a class="anchor" id="index_d"></a>- d -</h3><ul>
+<li>data_layout
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a786677cbfb3f5677b4d84f3056eb08db">arm_compute::test::validation</a>
+</li>
 <li>data_transpose
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a21c746108f9b5d95496012a42de374cd">arm_compute::test::validation</a>
 </li>
@@ -253,6 +276,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 </li>
 <li>data_types
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#aab9a2ff74a27ae837d32a79a38952228">arm_compute::test::benchmark</a>
+</li>
+<li>div
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7e7889ab8e84003a7f90aa2a590e1faa">arm_compute::test::validation</a>
 </li>
 <li>dst
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">arm_compute::test::validation</a>
@@ -305,6 +331,12 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>gemm
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab84214a10c816dc554f190c53b535622">arm_compute::test::validation</a>
 </li>
+<li>green_coef2_bt709
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a27e073d020236f5a325762985b10f8d0">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>green_coef_bt709
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a5e59bd8be31e871da2db7572e8b788ce">arm_compute::test::colorconvert_helper::detail</a>
+</li>
 </ul>
 
 
@@ -316,6 +348,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 
 <h3><a class="anchor" id="index_i"></a>- i -</h3><ul>
+<li>in
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad366eaa4cf2d106037d91c30795a5c76">arm_compute::test::validation</a>
+</li>
 <li>input_info
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae008e90eb6906fa3526213bc860f6cc5">arm_compute::test::validation</a>
 </li>
@@ -340,17 +375,14 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 
 <h3><a class="anchor" id="index_n"></a>- n -</h3><ul>
-<li>NEFixedPointPixelWiseMultiplicationFixture&lt; qint16_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6c9f6c7580368d1bcbfa2496d2ecdc2a">arm_compute::test::validation</a>
+<li>NECopyFixture&lt; uint16_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7b85ca1a6c2a6d588a94536f6b23c831">arm_compute::test::validation</a>
 </li>
-<li>NEFixedPointPixelWiseMultiplicationFixture&lt; qint8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5aed71d767e6e9e32c343a64d3403c36">arm_compute::test::validation</a>
+<li>NECopyFixture&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6ed50b0f095f13eef5f3d9fb5b8cd874">arm_compute::test::validation</a>
 </li>
 <li>NEPixelWiseMultiplicationBroadcastFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2e7e44aefaae0abe0312a137133917c4">arm_compute::test::validation</a>
-</li>
-<li>NEPoolingLayerFixedPointFixture&lt; int16_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3177be23c5954005e495f63e0243743e">arm_compute::test::validation</a>
 </li>
 <li>NullTensorID
 : <a class="el" href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph</a>
@@ -359,6 +391,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 
 <h3><a class="anchor" id="index_o"></a>- o -</h3><ul>
+<li>out
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af8a8a0625e7981212a0af48deb9d2a09">arm_compute::test::validation</a>
+</li>
 <li>output_data_type
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa30f40707893f8201695a2c20e2d8c7d">arm_compute::test::validation</a>
 </li>
@@ -368,10 +403,16 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>output_shape
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">arm_compute::test::validation</a>
 </li>
+<li>output_tile
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a62aa9469ab6f4dac26615fa705f55354">arm_compute::test::validation</a>
+</li>
 </ul>
 
 
 <h3><a class="anchor" id="index_p"></a>- p -</h3><ul>
+<li>padding
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a735a025fce26c1ef147b54426df18181">arm_compute::test::validation</a>
+</li>
 <li>PaddingSizesDataset
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a226250a0a5438b40d8c3cefb73f89d83">arm_compute::test::validation</a>
 </li>
@@ -395,6 +436,30 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 
 
 <h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
+<li>red_coef_bt709
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#ac3138daaa2a074986406b22ec6f3d909">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>ref_src1
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adfbaf7926259fb22fe27cf32097e8161">arm_compute::test::validation</a>
+</li>
+<li>ref_src2
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a307b095fb571d6a15243ecc9672726ac">arm_compute::test::validation</a>
+</li>
+<li>rgb2yuv_bt709_cu
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a7b7c28051a725e523cc3554a6e84d0ac">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>rgb2yuv_bt709_cv
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#af3dd0ec6de6bf7d3d4657ad6c7416120">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>rgb2yuv_bt709_kb
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a821b044a6b2074763716791045d83560">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>rgb2yuv_bt709_kg
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a0801967f8d38766ae40f0eb608966d97">arm_compute::test::colorconvert_helper::detail</a>
+</li>
+<li>rgb2yuv_bt709_kr
+: <a class="el" href="namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a14139aa360487fbed344f5556a9fb91d">arm_compute::test::colorconvert_helper::detail</a>
+</li>
 <li>rounding_policy
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a60ad1078faeaf3f59266d69ad937339f">arm_compute::test::validation</a>
 </li>
@@ -418,16 +483,36 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2c387216b8389a6069b2e5205bc03a9">arm_compute::test::validation</a>
 </li>
 <li>shape_b
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab39a7489f0c4ef5db0dfa9291073fe61">arm_compute::test::validation</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a311c7503f0ef6cb1893ffc3bf8f22eb5">arm_compute::test::validation</a>
 </li>
 <li>shape_c
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a141b596a566813a7fc3116f9881d3dc9">arm_compute::test::validation</a>
+</li>
+<li>shape_in
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aeff9a60eefc51f40f1bcfab3cd707ccf">arm_compute::test::validation</a>
+</li>
+<li>shape_out
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa65261d320223230cd08fc3ebc05751b">arm_compute::test::validation</a>
 </li>
 <li>src
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6743f0a130e8311e6f5b1a23df102472">arm_compute::test::validation</a>
 </li>
 <li>src_padding
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac5b50eb53d8a57ca72c8db8b2ce66e2d">arm_compute::test::validation</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_t"></a>- t -</h3><ul>
+<li>tensor_info_in
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acc56b65684fb727508eab26f947dabc7">arm_compute::test::validation</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_v"></a>- v -</h3><ul>
+<li>valid_region
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7819bcbbf45c2e7c1396a137dce54422">arm_compute::test::validation</a>
 </li>
 </ul>
 
@@ -439,8 +524,17 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <li>width_padding
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aff72626973dbadf0707b4a4f6c8550e4">arm_compute::test::validation</a>
 </li>
+<li>winograd_filter_transform
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a359ae7b4283c585278edfbe82ec1f246">arm_compute::test::validation</a>
+</li>
 <li>winograd_info
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a809d18ccde99d938a68cb90ef53aa749">arm_compute::test::validation</a>
+</li>
+<li>winograd_input_transform
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a065fb777c84f46f1c60b64b232a97a60">arm_compute::test::validation</a>
+</li>
+<li>winograd_output_transform
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af0d686a775695bff3cd674e0f5674228">arm_compute::test::validation</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -448,7 +542,7 @@ $(document).ready(function(){initNavTree('namespacemembers_vars.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:45 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:57 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

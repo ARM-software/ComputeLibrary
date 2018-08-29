@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 
-#include "arm_compute/core/FixedPoint.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
@@ -45,15 +45,14 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -139,6 +138,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float16_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float16_t> },
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
+        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
@@ -146,36 +146,6 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     };
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 
-    // Activation functions : QS8
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qs8 =
-    {
-        { ActivationFunction::ABS, &NEActivationLayerKernel::activation<ActivationFunction::ABS, qint8_t> },
-        { ActivationFunction::LINEAR, &NEActivationLayerKernel::activation<ActivationFunction::LINEAR, qint8_t> },
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint8_t> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint8_t> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint8_t> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qint8_t> },
-        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint8_t> },
-        { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint8_t> },
-        { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint8_t> },
-        { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, qint8_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qint8_t> },
-    };
-    // Activation functions : QS16
-    static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qs16 =
-    {
-        { ActivationFunction::ABS, &NEActivationLayerKernel::activation<ActivationFunction::ABS, qint16_t> },
-        { ActivationFunction::LINEAR, &NEActivationLayerKernel::activation<ActivationFunction::LINEAR, qint16_t> },
-        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qint16_t> },
-        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qint16_t> },
-        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qint16_t> },
-        { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qint16_t> },
-        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, qint16_t> },
-        { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, qint16_t> },
-        { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, qint16_t> },
-        { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, qint16_t> },
-        { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, qint16_t> },
-    };
     // Activation functions : QASYMM8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
     {
@@ -187,12 +157,6 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     {
         case DataType::QASYMM8:
             _func = act_map_qasymm8[activation_info.activation()];
-            break;
-        case DataType::QS8:
-            _func = act_map_qs8[activation_info.activation()];
-            break;
-        case DataType::QS16:
-            _func = act_map_qs16[activation_info.activation()];
             break;
         case DataType::F32:
             _func = act_map_f32[activation_info.activation()];
@@ -219,11 +183,14 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    static const float16x8_t CONST_0 = vdupq_n_f16(0.f);
-    static const float16x8_t CONST_1 = vdupq_n_f16(1.f);
+    static const float16x8_t CONST_0   = vdupq_n_f16(0.f);
+    static const float16x4_t CONST_1_H = vdup_n_f16(1.f);
 
-    const float16x8_t a = vdupq_n_f16(_act_info.a());
-    const float16x8_t b = vdupq_n_f16(_act_info.b());
+    static const float32x4_t CONST_1_F32 = vdupq_n_f32(1.f);
+
+    const float16x8_t a   = vdupq_n_f16(_act_info.a());
+    const float16x4_t a_h = vdup_n_f16(_act_info.a());
+    const float16x8_t b   = vdupq_n_f16(_act_info.b());
 
     execute_window_loop(window, [&](const Coordinates &)
     {
@@ -272,14 +239,28 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::LOGISTIC:
+            {
+                const float16x4x2_t in0 =
+                {
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[0]))))))),
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[0]))))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[1]))))))),
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[1]))))))),
+                };
+
                 tmp =
                 {
                     {
-                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[0])))),
-                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[1])))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             case ActivationFunction::RELU:
                 tmp =
                 {
@@ -299,14 +280,28 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::SOFT_RELU:
+            {
+                const float16x4x2_t in0 =
+                {
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[0])))))),
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[0])))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[1])))))),
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[1])))))),
+                };
+
                 tmp =
                 {
                     {
-                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[0]))),
-                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[1]))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             case ActivationFunction::SQRT:
                 tmp =
                 {
@@ -326,14 +321,33 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::TANH:
+            {
+                const float16x8x2_t mul =
+                {
+                    vmulq_f16(b, in.val[0]),
+                    vmulq_f16(b, in.val[1])
+                };
+                const float16x4x2_t in0 =
+                {
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[0]))))),
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[0]))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[1]))))),
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[1]))))),
+                };
+
                 tmp =
                 {
                     {
-                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[0]))),
-                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[1]))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
                 break;
@@ -508,70 +522,6 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
 }
 
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
-{
-    Iterator  input(_input, window);
-    Iterator  output(_output, window);
-    const int fixed_point_position = _input->info()->fixed_point_position();
-
-    static const qint8x16_t CONST_0 = vdupq_n_qs8(0);
-    const qint8x16_t        CONST_1 = vdupq_n_qs8(sqcvt_qs8_f32(1.f, fixed_point_position));
-    const qint8x16_t        a       = vdupq_n_qs8(sqcvt_qs8_f32(_act_info.a(), fixed_point_position));
-    const qint8x16_t        b       = vdupq_n_qs8(sqcvt_qs8_f32(_act_info.b(), fixed_point_position));
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto input_ptr  = reinterpret_cast<const int8_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<int8_t *>(output.ptr());
-
-        const qint8x16_t in  = vld1q_qs8(input_ptr);
-        qint8x16_t       tmp = {};
-
-        switch(F)
-        {
-            case ActivationFunction::ABS:
-                tmp = vqabsq_qs8(in);
-                break;
-            case ActivationFunction::LINEAR:
-                tmp = vqmlaq_qs8(b, a, in, fixed_point_position);
-                break;
-            case ActivationFunction::LOGISTIC:
-                tmp = vqrecipq_qs8(vqaddq_qs8(CONST_1, vqexpq_qs8(vnegq_s8(in), fixed_point_position)), fixed_point_position);
-                break;
-            case ActivationFunction::RELU:
-                tmp = vmaxq_qs8(CONST_0, in);
-                break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp = vminq_qs8(a, vmaxq_qs8(CONST_0, in));
-                break;
-            case ActivationFunction::LU_BOUNDED_RELU:
-                tmp = vminq_qs8(a, vmaxq_qs8(b, in));
-                break;
-            case ActivationFunction::LEAKY_RELU:
-                tmp = vbslq_s8(vcgtq_s8(in, CONST_0), in, vmulq_qs8(a, in, fixed_point_position));
-                break;
-            case ActivationFunction::SOFT_RELU:
-                tmp = vlogq_qs8(vqaddq_qs8(CONST_1, vqexpq_qs8(in, fixed_point_position)), fixed_point_position);
-                break;
-            case ActivationFunction::SQRT:
-                tmp = vqrecipq_qs8(vqinvsqrtq_qs8(in, fixed_point_position), fixed_point_position);
-                break;
-            case ActivationFunction::SQUARE:
-                tmp = vqmulq_qs8(in, in, fixed_point_position);
-                break;
-            case ActivationFunction::TANH:
-                tmp = vqmulq_qs8(a, vqtanhq_qs8(vqmulq_qs8(b, in, fixed_point_position), fixed_point_position), fixed_point_position);
-                break;
-            default:
-                break;
-        }
-
-        vst1q_qs8(output_ptr, tmp);
-    },
-    input, output);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
     Iterator               input(_input, window);
@@ -616,137 +566,6 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
         }
 
         vst1q_u8(output_ptr, tmp);
-    },
-    input, output);
-}
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, qint16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
-{
-    Iterator  input(_input, window);
-    Iterator  output(_output, window);
-    const int fixed_point_position = _input->info()->fixed_point_position();
-
-    static const qint16x8_t CONST_0 = vdupq_n_qs16(0);
-    const qint16x8_t        CONST_1 = vdupq_n_qs16(sqcvt_qs16_f32(1.f, fixed_point_position));
-    const qint16x8_t        a       = vdupq_n_qs16(sqcvt_qs16_f32(_act_info.a(), fixed_point_position));
-    const qint16x8_t        b       = vdupq_n_qs16(sqcvt_qs16_f32(_act_info.b(), fixed_point_position));
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto input_ptr  = reinterpret_cast<const int16_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<int16_t *>(output.ptr());
-
-        const qint16x8x2_t in  = vld2q_s16(input_ptr);
-        qint16x8x2_t       tmp = { {} };
-
-        switch(F)
-        {
-            case ActivationFunction::ABS:
-                tmp =
-                {
-                    {
-                        vqabsq_qs16(in.val[0]),
-                        vqabsq_qs16(in.val[1]),
-                    }
-                };
-                break;
-            case ActivationFunction::LINEAR:
-                tmp =
-                {
-                    {
-                        vqmlaq_qs16(b, a, in.val[0], fixed_point_position),
-                        vqmlaq_qs16(b, a, in.val[1], fixed_point_position),
-                    }
-                };
-                break;
-            case ActivationFunction::LOGISTIC:
-                tmp =
-                {
-                    {
-                        vqrecipq_qs16(vqaddq_qs16(CONST_1, vqexpq_qs16(vnegq_s16(in.val[0]), fixed_point_position)), fixed_point_position),
-                        vqrecipq_qs16(vqaddq_qs16(CONST_1, vqexpq_qs16(vnegq_s16(in.val[1]), fixed_point_position)), fixed_point_position),
-                    }
-                };
-                break;
-            case ActivationFunction::RELU:
-                tmp =
-                {
-                    {
-                        vmaxq_qs16(CONST_0, in.val[0]),
-                        vmaxq_qs16(CONST_0, in.val[1]),
-                    }
-                };
-                break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[0])),
-                        vminq_qs16(a, vmaxq_qs16(CONST_0, in.val[1])),
-                    }
-                };
-                break;
-            case ActivationFunction::LU_BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_qs16(a, vmaxq_qs16(b, in.val[0])),
-                        vminq_qs16(a, vmaxq_qs16(b, in.val[1])),
-                    }
-                };
-                break;
-            case ActivationFunction::LEAKY_RELU:
-                tmp =
-                {
-                    {
-                        vbslq_s16(vcgtq_s16(in.val[0], CONST_0), in.val[0], vmulq_qs16(a, in.val[0], fixed_point_position)),
-                        vbslq_s16(vcgtq_s16(in.val[1], CONST_0), in.val[1], vmulq_qs16(a, in.val[1], fixed_point_position)),
-                    }
-                };
-                break;
-            case ActivationFunction::SOFT_RELU:
-                tmp =
-                {
-                    {
-                        vlogq_qs16(vqaddq_qs16(CONST_1, vqexpq_qs16(in.val[0], fixed_point_position)), fixed_point_position),
-                        vlogq_qs16(vqaddq_qs16(CONST_1, vqexpq_qs16(in.val[1], fixed_point_position)), fixed_point_position),
-                    }
-                };
-                break;
-            case ActivationFunction::SQRT:
-                tmp =
-                {
-                    {
-                        vqrecipq_qs16(vqinvsqrtq_qs16(in.val[0], fixed_point_position), fixed_point_position),
-                        vqrecipq_qs16(vqinvsqrtq_qs16(in.val[1], fixed_point_position), fixed_point_position),
-                    }
-                };
-                break;
-            case ActivationFunction::SQUARE:
-                tmp =
-                {
-                    {
-                        vqmulq_qs16(in.val[0], in.val[0], fixed_point_position),
-                        vqmulq_qs16(in.val[1], in.val[1], fixed_point_position),
-                    }
-                };
-                break;
-            case ActivationFunction::TANH:
-                tmp =
-                {
-                    {
-                        vqmulq_qs16(a, vqtanhq_qs16(vqmulq_qs16(b, in.val[0], fixed_point_position), fixed_point_position), fixed_point_position),
-                        vqmulq_qs16(a, vqtanhq_qs16(vqmulq_qs16(b, in.val[1], fixed_point_position), fixed_point_position), fixed_point_position),
-                    }
-                };
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Function not implemented");
-                break;
-        }
-
-        vst2q_qs16(output_ptr, tmp);
     },
     input, output);
 }

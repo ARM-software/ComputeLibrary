@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -117,7 +117,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_g_e_m_m_matr
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
 <div class="title">CLGEMMMatrixMultiplyKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -130,7 +131,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_g_e_m_m_matr
 <div class="dynheader">
 Collaboration diagram for CLGEMMMatrixMultiplyKernel:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel__coll__graph.svg" width="215" height="187"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel__coll__graph.svg" width="215" height="232"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a target="top" href="graph_legend.xhtml">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -250,6 +251,21 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4b4a20e518c04e657839280cd486a85d">gws_from_window</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global work size given an execution window.  <a href="#a4b4a20e518c04e657839280cd486a85d">More...</a><br /></td></tr>
 <tr class="separator:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Data Fields</h2></td></tr>
+<tr class="memitem:a1ab65df01f310bf054323607cd09956e"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a1ab65df01f310bf054323607cd09956e">_input0</a></td></tr>
+<tr class="separator:a1ab65df01f310bf054323607cd09956e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6590f81ae0c9f3e01546c73eb31a43c8"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a6590f81ae0c9f3e01546c73eb31a43c8">_input1</a></td></tr>
+<tr class="separator:a6590f81ae0c9f3e01546c73eb31a43c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62d192d931002b4866443cd7fc71419b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">_output</a></td></tr>
+<tr class="separator:a62d192d931002b4866443cd7fc71419b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a170f236fd8751c4e1675873b496f7cf8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a170f236fd8751c4e1675873b496f7cf8">_slide_matrix_b</a></td></tr>
+<tr class="separator:a170f236fd8751c4e1675873b496f7cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa71ec02f998e1dcfd49ef944ec8cf23e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aa71ec02f998e1dcfd49ef944ec8cf23e">_reinterpret_input_as_3d</a></td></tr>
+<tr class="separator:aa71ec02f998e1dcfd49ef944ec8cf23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d222bcf0d803c0647a4b93061daa56c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a7d222bcf0d803c0647a4b93061daa56c">_reinterpret_output_as_3d</a></td></tr>
+<tr class="separator:a7d222bcf0d803c0647a4b93061daa56c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>OpenCL kernel to multiply two input matrices "A" and "B" . </p>
@@ -380,7 +396,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Initialise the kernel's input, output and alpha. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input0</td><td>Input tensor containing the Matrix A. Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input0</td><td>Input tensor containing the Matrix A. Data types supported: F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>Input tensor containing the Matrix B. Data type supported: same as <code>input0</code> </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor to store the result of matrix multiplication. Data type supported: same as <code>input0</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
@@ -555,7 +571,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input0</td><td>Input tensor containing the Matrix A. Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input0</td><td>Input tensor containing the Matrix A. Data types supported: F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>Input tensor containing the Matrix B. Data type supported: same as <code>input0</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor to store the result of matrix multiplication. Data type supported: same as <code>input0</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
@@ -569,6 +585,91 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a1ab65df01f310bf054323607cd09956e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a>* _input0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a6590f81ae0c9f3e01546c73eb31a43c8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a>* _input1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a62d192d931002b4866443cd7fc71419b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a>* _output</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="aa71ec02f998e1dcfd49ef944ec8cf23e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool _reinterpret_input_as_3d</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00088">88</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a7d222bcf0d803c0647a4b93061daa56c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool _reinterpret_output_as_3d</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00089">89</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a170f236fd8751c4e1675873b496f7cf8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool _slide_matrix_b</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/CL/kernels/<a class="el" href="_c_l_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">CLGEMMMatrixMultiplyKernel.h</a></li>
 </ul>
@@ -578,7 +679,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

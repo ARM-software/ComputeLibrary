@@ -36,8 +36,10 @@ namespace frontend
 using graph::DataType;
 using graph::DataLayout;
 using graph::TensorShape;
+using graph::PermutationVector;
 
 using graph::ActivationLayerInfo;
+using graph::FullyConnectedLayerInfo;
 using graph::NormalizationLayerInfo;
 using graph::NormType;
 using graph::PadStrideInfo;
@@ -50,6 +52,8 @@ using graph::DepthwiseConvolutionMethod;
 using graph::TensorDescriptor;
 using graph::DimensionRoundingType;
 using graph::GraphConfig;
+using graph::InterpolationPolicy;
+using graph::Size2D;
 
 /** Branch layer merging method */
 enum class BranchMergeMethod
@@ -62,9 +66,9 @@ enum class BranchMergeMethod
 struct StreamHints
 {
     Target                     target_hint                       = { Target::UNSPECIFIED };                 /**< Target execution hint */
-    ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::DEFAULT };          /**< Convolution method hint */
-    DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::DEFAULT }; /**< Depthwise Convolution method hint */
-    FastMathHint               fast_math_hint                    = { FastMathHint::DISABLED };              /**< Fast math hint */
+    ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::Default };          /**< Convolution method hint */
+    DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::Default }; /**< Depthwise Convolution method hint */
+    FastMathHint               fast_math_hint                    = { FastMathHint::Disabled };              /**< Fast math hint */
 };
 } // namespace frontend
 } // namespace graph

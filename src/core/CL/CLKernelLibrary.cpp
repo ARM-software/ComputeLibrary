@@ -149,8 +149,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "accumulate_weighted", "accumulate.cl" },
     { "activation_layer", "activation_layer.cl" },
     { "activation_layer_qa8", "activation_layer_qa8.cl" },
+    { "arithmetic_add_quantized", "arithmetic_op_quantized.cl" },
     { "arithmetic_add", "arithmetic_op.cl" },
     { "arithmetic_sub", "arithmetic_op.cl" },
+    { "arithmetic_div", "arithmetic_op.cl" },
     { "batchnormalization_layer_nchw", "batchnormalization_layer.cl" },
     { "batchnormalization_layer_nhwc", "batchnormalization_layer.cl" },
     { "bitwise_or", "bitwise_op.cl" },
@@ -195,9 +197,13 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_quantized_nchw", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_nhwc", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_quantized_nhwc_stride1", "depthwise_convolution_quantized.cl" },
-    { "depthwise_convolution_3x3_quantized_nhwc_stride2", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_dot8_nchw", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_dot8_nhwc_stride1", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32", "depthwise_convolution.cl" },
@@ -209,14 +215,18 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
+    { "direct_convolution1x1_nhwc", "direct_convolution1x1.cl" },
     { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
     { "direct_convolution3x3", "direct_convolution3x3.cl" },
+    { "direct_convolution3x3_nhwc", "direct_convolution3x3.cl" },
     { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
     { "direct_convolution5x5", "direct_convolution5x5.cl" },
+    { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
     { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
+    { "flatten", "flatten.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
@@ -227,29 +237,25 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_interleave4x4", "gemm.cl" },
     { "gemm_ma_f16", "gemm.cl" },
     { "gemm_ma_f32", "gemm.cl" },
-    { "gemm_ma_qs8", "gemm.cl" },
-    { "gemm_ma_qs16", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },
     { "gemm_mv_quantized", "gemv.cl" },
     { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_qs8", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_qs16", "gemm.cl" },
     { "gemm_mm_floating_point", "gemm.cl" },
     { "gemm_mm_floating_point_f16_bifrost", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
-    { "gemm_mm_qs8", "gemm.cl" },
-    { "gemm_mm_qs16", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1xW", "gemm.cl" },
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
     { "gemmlowp_mm_bifrost", "gemmlowp.cl" },
+    { "gemmlowp_mm_bifrost_dot8", "gemmlowp.cl" },
     { "gemmlowp_mm_midgard", "gemmlowp.cl" },
     { "gemmlowp_mm_interleaved_transposed_bifrost", "gemmlowp.cl" },
+    { "gemmlowp_mm_interleaved_transposed_bifrost_dot8", "gemmlowp.cl" },
     { "gemmlowp_mm_interleaved_transposed_midgard", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down", "gemmlowp.cl" },
@@ -265,13 +271,14 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "hog_detector", "hog.cl" },
     { "hog_orientation_binning", "hog.cl" },
     { "hysteresis", "canny.cl" },
-    { "im2col1x1_stridex1_dchw", "im2col.cl" },
-    { "im2col3x3_dchw", "im2col.cl" },
-    { "im2col5x5_dchw", "im2col.cl" },
-    { "im2col11x11_padx0_pady0_dchw", "im2col.cl" },
-    { "im2col_generic_dchw", "im2col.cl" },
-    { "im2col_generic_padx0_pady0_dchw", "im2col.cl" },
-    { "im2col_reduced_dchw", "im2col.cl" },
+    { "im2col1x1_stridex1_nchw", "im2col.cl" },
+    { "im2col3x3_nchw", "im2col.cl" },
+    { "im2col5x5_nchw", "im2col.cl" },
+    { "im2col11x11_padx0_pady0_nchw", "im2col.cl" },
+    { "im2col_generic_nchw", "im2col.cl" },
+    { "im2col_generic_padx0_pady0_nchw", "im2col.cl" },
+    { "im2col3x3_nhwc", "im2col.cl" },
+    { "im2col_generic_nhwc", "im2col.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
     { "init_level_max_initial_estimate", "optical_flow_pyramid_lk.cl" },
@@ -336,8 +343,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "RGBA8888_to_RGB888_bt709", "color_convert.cl" },
     { "RGBA8888_to_YUV444_bt709", "color_convert.cl" },
     { "roi_pooling_layer", "roi_pooling_layer.cl" },
-    { "scale_nearest_neighbour", "scale.cl" },
-    { "scale_bilinear", "scale.cl" },
+    { "scale_nearest_neighbour_nchw", "scale.cl" },
+    { "scale_nearest_neighbour_nhwc", "scale.cl" },
+    { "scale_bilinear_nchw", "scale.cl" },
+    { "scale_bilinear_nhwc", "scale.cl" },
     { "scharr3x3", "scharr_filter.cl" },
     { "sobel3x3", "sobel_filter.cl" },
     { "sobel_separable5x1", "sobel_filter.cl" },
@@ -364,16 +373,54 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "warp_affine_bilinear", "warp_affine.cl" },
     { "warp_perspective_nearest_neighbour", "warp_perspective.cl" },
     { "warp_perspective_bilinear", "warp_perspective.cl" },
-    { "winograd_filter_transform_2x2_3x3_nchw", "winograd.cl" },
-    { "winograd_filter_transform_4x4_3x3_nchw", "winograd.cl" },
-    { "winograd_filter_transform_4x4_5x5_nchw", "winograd.cl" },
-    { "winograd_input_transform_4x4_5x5_stepz1_nchw", "winograd.cl" },
-    { "winograd_input_transform_2x2_3x3_stepz1_nchw", "winograd.cl" },
-    { "winograd_input_transform_2x2_3x3_stepz2_nchw", "winograd.cl" },
-    { "winograd_input_transform_4x4_3x3_stepz1_nchw", "winograd.cl" },
-    { "winograd_output_transform_2x2_3x3_nchw", "winograd.cl" },
-    { "winograd_output_transform_4x4_3x3_nchw", "winograd.cl" },
-    { "winograd_output_transform_4x4_5x5_nchw", "winograd.cl" },
+    { "winograd_filter_transform_2x2_3x3_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_2x1_3x1_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x2_1x3_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_3x3_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_3x1_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x3_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_5x5_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_5x1_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x5_nchw", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_3x1_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x3_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_3x3_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x4_5x5_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_4x1_5x1_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_filter_transform_1x4_1x5_nhwc", "winograd_filter_transform.cl" },
+    { "winograd_input_transform_2x2_3x3_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_2x2_3x3_stepz2_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_3x1_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_2x1_3x1_stepz2_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x3_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x2_1x3_stepz2_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_3x1_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x3_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_5x5_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_5x1_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x5_stepz1_nchw", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_3x1_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x3_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x4_5x5_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_input_transform_4x1_5x1_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_input_transform_1x4_1x5_stepz1_nhwc", "winograd_input_transform.cl" },
+    { "winograd_output_transform_2x2_3x3_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_2x1_3x1_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_1x2_1x3_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_3x3_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_3x1_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x3_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_5x5_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_5x1_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x5_nchw", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_3x1_nhwc", "winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x3_nhwc", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_3x3_nhwc", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x4_5x5_nhwc", "winograd_output_transform.cl" },
+    { "winograd_output_transform_4x1_5x1_nhwc", "winograd_output_transform.cl" },
+    { "winograd_output_transform_1x4_1x5_nhwc", "winograd_output_transform.cl" },
     { "YUYV422_to_IYUV_bt709", "color_convert.cl" },
     { "YUYV422_to_NV12_bt709", "color_convert.cl" },
     { "YUYV422_to_RGB888_bt709", "color_convert.cl" },
@@ -402,6 +449,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "arithmetic_op.cl",
 #include "./cl_kernels/arithmetic_op.clembed"
+    },
+    {
+        "arithmetic_op_quantized.cl",
+#include "./cl_kernels/arithmetic_op_quantized.clembed"
     },
     {
         "bitwise_op.cl",
@@ -520,12 +571,12 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/fast_corners.clembed"
     },
     {
-        "fill_border.cl",
-#include "./cl_kernels/fill_border.clembed"
+        "flatten.cl",
+#include "./cl_kernels/flatten.clembed"
     },
     {
-        "fixed_point.h",
-#include "./cl_kernels/fixed_point.hembed"
+        "fill_border.cl",
+#include "./cl_kernels/fill_border.clembed"
     },
     {
         "floor.cl",
@@ -712,8 +763,16 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/warp_perspective.clembed"
     },
     {
-        "winograd.cl",
-#include "./cl_kernels/winograd.clembed"
+        "winograd_filter_transform.cl",
+#include "./cl_kernels/winograd_filter_transform.clembed"
+    },
+    {
+        "winograd_input_transform.cl",
+#include "./cl_kernels/winograd_input_transform.clembed"
+    },
+    {
+        "winograd_output_transform.cl",
+#include "./cl_kernels/winograd_output_transform.clembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };
@@ -741,9 +800,24 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     }
     std::string concat_str;
 
-    if(fp16_supported(_device))
+#if defined(ARM_COMPUTE_DEBUG_ENABLED)
+    // Enable debug properties in CL kernels
+    concat_str += " -DARM_COMPUTE_DEBUG_ENABLED";
+#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
+
+    if(fp16_supported())
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
+    }
+
+    if(dot8_supported(_device))
+    {
+        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
+    }
+
+    if(dot8_acc_supported(_device))
+    {
+        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED=1 ";
     }
 
     if(get_cl_version(_device) == CLVersion::CL20)
@@ -792,6 +866,16 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
 void CLKernelLibrary::add_built_program(const std::string &built_program_name, cl::Program program)
 {
     _built_programs_map.emplace(built_program_name, program);
+}
+
+bool CLKernelLibrary::fp16_supported() const
+{
+    return ::fp16_supported(_device);
+}
+
+bool CLKernelLibrary::int64_base_atomics_supported() const
+{
+    return device_supports_extension(_device, "cl_khr_int64_base_atomics");
 }
 
 const Program &CLKernelLibrary::load_program(const std::string &program_name) const
@@ -882,8 +966,7 @@ size_t CLKernelLibrary::max_local_workgroup_size(const cl::Kernel &kernel) const
 
 cl::NDRange CLKernelLibrary::default_ndrange() const
 {
-    cl::Device  device  = cl::Device::getDefault();
-    GPUTarget   _target = get_target_from_device(device);
+    GPUTarget   _target = get_target_from_device(_device);
     cl::NDRange default_range;
 
     switch(_target)

@@ -103,7 +103,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type());
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal sum_access(sum, 0, num_elems_processed_per_iteration_sum);

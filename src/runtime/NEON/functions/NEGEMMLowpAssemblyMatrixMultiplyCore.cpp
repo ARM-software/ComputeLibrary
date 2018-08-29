@@ -38,8 +38,7 @@
 using namespace arm_compute;
 
 NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(),
-      _workspace(), _B_pretransposed()
+    : _memory_group(memory_manager), _asm_glue(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b()
 {
 }
 
@@ -53,18 +52,14 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
     ARM_COMPUTE_ERROR_ON_MSG((b)->info()->dimension(0) != (output)->info()->dimension(0), "The output matrix must have the same number of columns as the matrix B");
 
     bool run_optimised = false;
-#ifdef __aarch64__
     switch(a->info()->data_type())
     {
         case DataType::S8:
-        {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_signed);
-            break;
-        }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_unsigned);
+            _asm_glue.configure(a, b, output, 1.f, 0.f, true);
+            run_optimised = _asm_glue.is_configured();
             break;
         }
         default:
@@ -73,7 +68,6 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
             break;
         }
     }
-#endif /* __aarch64__ */
     if(!run_optimised)
     {
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
@@ -133,13 +127,9 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::run()
         NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
     }
 
-    if(_asm_glue_unsigned._optimised_kernel != nullptr)
+    if(_asm_glue.is_configured())
     {
-        _asm_glue_unsigned.run();
-    }
-    else if(_asm_glue_signed._optimised_kernel != nullptr)
-    {
-        _asm_glue_signed.run();
+        _asm_glue.run();
     }
     else
     {

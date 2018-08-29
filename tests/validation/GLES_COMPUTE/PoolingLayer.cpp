@@ -59,17 +59,17 @@ TEST_SUITE(PoolingLayer)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                   framework::dataset::make("InputInfo",
 {
-    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type
-    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
-    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid pad/size combination
-    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid pad/size combination
-    TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32, 0), // Non-rectangular Global Pooling
-    TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0), // Invalid output Global Pooling
-    TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32, 0),
+    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type
+    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid pad/size combination
+    TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid pad/size combination
+    TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32), // Non-rectangular Global Pooling
+    TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32), // Invalid output Global Pooling
+    TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
 }),
 framework::dataset::make("OutputInfo",
 {
-    TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0), TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32, 0),
+    TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16), TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32), TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32), TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32), TensorInfo(TensorShape(2U, 2U, 5U), 1, DataType::F32), TensorInfo(TensorShape(1U, 1U, 5U), 1, DataType::F32),
 })),
 framework::dataset::make("PoolInfo",
 {

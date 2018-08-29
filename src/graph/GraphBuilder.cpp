@@ -25,8 +25,10 @@
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Utils.h"
-#include "arm_compute/graph/algorithms/BFS.h"
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 #include "arm_compute/graph/nodes/Nodes.h"
+
+#include "support/ToolchainSupport.h"
 
 #define CHECK_NODEIDX_PAIR(pair, g) \
     ARM_COMPUTE_ERROR_ON(((pair).node_id >= (g).nodes().size()) || ((g).node((pair).node_id) == nullptr) || ((pair).index >= (g).node((pair).node_id)->num_outputs()));
@@ -78,43 +80,6 @@ NodeID create_simple_single_input_output_node(Graph &g, NodeParams &params, Node
     set_node_params(g, nid, params);
 
     return nid;
-}
-
-NodeID create_grouped_convolution(Graph &g, NodeParams &params, NodeIdxPair input, NodeID weights, NodeID bias,
-                                  PadStrideInfo conv_info, ConvolutionMethod method, FastMathHint fast_math_hint, unsigned int num_groups)
-{
-    bool has_bias = (bias != EmptyNodeID);
-
-    // Split input
-    NodeID input_split = GraphBuilder::add_split_node(g, params, input, num_groups, 2);
-
-    // Split weights
-    NodeID weights_split = GraphBuilder::add_split_node(g, params, { weights, 0 }, num_groups, 3);
-
-    // Split bias
-    NodeID bias_split = EmptyNodeID;
-    if(has_bias)
-    {
-        // Split bias
-        bias_split = GraphBuilder::add_split_node(g, params, { bias, 0 }, num_groups, 0);
-    }
-
-    std::vector<NodeIdxPair> convolution_outputs;
-    for(unsigned int i = 0; i < num_groups; ++i)
-    {
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint);
-        g.add_connection(input_split, i, conv_nid, 0);
-        g.add_connection(weights_split, i, conv_nid, 1);
-        if(has_bias)
-        {
-            g.add_connection(bias_split, i, conv_nid, 2);
-        }
-        set_node_params(g, conv_nid, params);
-        convolution_outputs.push_back({ conv_nid, 0 });
-    }
-
-    // Depth concatenate output
-    return GraphBuilder::add_depth_concatenate_node(g, params, convolution_outputs);
 }
 } // namespace
 
@@ -203,6 +168,11 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
     return batch_norm_nid;
 }
 
+NodeID GraphBuilder::add_channel_shuffle_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_groups)
+{
+    return create_simple_single_input_output_node<ChannelShuffleLayerNode>(g, params, input, num_groups);
+}
+
 NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                           Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
                                           unsigned int num_groups, ConvolutionMethod method, FastMathHint fast_math_hint,
@@ -239,34 +209,81 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(depth);
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
-    }
-
-    if(num_groups == 1)
-    {
-        // Create convolution node and connect
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint, out_quant_info);
-        g.add_connection(input.node_id, input.index, conv_nid, 0);
-        g.add_connection(w_nid, 0, conv_nid, 1);
-        if(has_bias)
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
         {
-            g.add_connection(b_nid, 0, conv_nid, 2);
+            b_desc.data_type = DataType::S32;
         }
-        set_node_params(g, conv_nid, params);
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+    }
 
-        return conv_nid;
-    }
-    else
+    // Create convolution node and connect
+    NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, num_groups, method, fast_math_hint, out_quant_info);
+    g.add_connection(input.node_id, input.index, conv_nid, 0);
+    g.add_connection(w_nid, 0, conv_nid, 1);
+    if(has_bias)
     {
-        return create_grouped_convolution(g, params, input, w_nid, b_nid, conv_info, method, fast_math_hint, num_groups);
+        g.add_connection(b_nid, 0, conv_nid, 2);
     }
+    set_node_params(g, conv_nid, params);
+
+    return conv_nid;
 }
 
-NodeID GraphBuilder::add_depth_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs)
+NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,
+                                            Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info,
+                                            Size2D inner_border, ITensorAccessorUPtr weights_accessor,
+                                            ITensorAccessorUPtr bias_accessor)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+    ARM_COMPUTE_ERROR_ON(depth == 0);
+    ARM_COMPUTE_ERROR_ON((kernel_spatial_extend.width == 0) || (kernel_spatial_extend.height == 0));
+
+    bool has_bias = (bias_accessor != nullptr);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Create weights node
+    TensorDescriptor w_desc = input_tensor_desc;
+    w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::WIDTH), kernel_spatial_extend.width);
+    w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::HEIGHT), kernel_spatial_extend.height);
+    w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::CHANNEL),
+                     get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
+    w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::BATCHES), depth);
+
+    NodeID w_nid = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
+
+    // Create bias nodes
+    NodeID b_nid = EmptyNodeID;
+    if(has_bias)
+    {
+        TensorDescriptor b_desc = input_tensor_desc;
+        b_desc.shape            = TensorShape(depth);
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+    }
+
+    // Create convolution node and connect
+    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(deconv_info, inner_border);
+    g.add_connection(input.node_id, input.index, deconv_nid, 0);
+    g.add_connection(w_nid, 0, deconv_nid, 1);
+    if(has_bias)
+    {
+        g.add_connection(b_nid, 0, deconv_nid, 2);
+    }
+    set_node_params(g, deconv_nid, params);
+
+    return deconv_nid;
+}
+
+NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, DataLayoutDimension axis)
 {
     ARM_COMPUTE_ERROR_ON(inputs.size() == 0);
 
-    NodeID nid = g.add_node<DepthConcatenateLayerNode>(inputs.size());
+    NodeID nid = g.add_node<ConcatenateLayerNode>(inputs.size(), axis);
 
     unsigned int i = 0;
     for(const auto &input : inputs)
@@ -309,7 +326,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     if(has_bias)
     {
         TensorDescriptor b_desc = input_tensor_desc;
-        b_desc.shape            = TensorShape(b_desc.shape.z());
+        b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
         b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
@@ -324,6 +341,11 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     set_node_params(g, conv_nid, params);
 
     return conv_nid;
+}
+
+NodeID GraphBuilder::add_dummy_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
+{
+    return create_simple_single_input_output_node<DummyNode>(g, params, input, shape);
 }
 
 NodeID GraphBuilder::add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation)
@@ -347,7 +369,9 @@ NodeID GraphBuilder::add_flatten_node(Graph &g, NodeParams params, NodeIdxPair i
 }
 
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
-                                               ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor)
+                                               ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
+                                               const FullyConnectedLayerInfo fc_info,
+                                               const QuantizationInfo weights_quant_info, const QuantizationInfo out_quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -358,7 +382,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create weights node
-    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs);
+    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs, fc_info, weights_quant_info);
     NodeID           w_nid  = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes
@@ -367,11 +391,15 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(num_outputs);
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
-    // Create convolution node and connect
-    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs);
+    // Create fully connected node and connect
+    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info);
     g.add_connection(input.node_id, input.index, fc_nid, 0);
     g.add_connection(w_nid, 0, fc_nid, 1);
     if(has_bias)
@@ -389,6 +417,11 @@ NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdx
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);
 }
 
+NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)
+{
+    return create_simple_single_input_output_node<PermuteLayerNode>(g, params, input, perm, layout);
+}
+
 NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info)
 {
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
@@ -397,6 +430,12 @@ NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair i
 NodeID GraphBuilder::add_reshape_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
 {
     return create_simple_single_input_output_node<ReshapeLayerNode>(g, params, input, shape);
+}
+
+NodeID GraphBuilder::add_resize_node(Graph &g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy,
+                                     float width_scale, float height_scale)
+{
+    return create_simple_single_input_output_node<ResizeLayerNode>(g, params, input, policy, width_scale, height_scale);
 }
 
 NodeID GraphBuilder::add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor, ITensorAccessorUPtr add_accessor)
@@ -421,9 +460,9 @@ NodeID GraphBuilder::add_scale_layer(Graph &g, const NodeParams &params, NodeIdx
     NodeIdxPair      add_const_nidxp = { add_const_nid, 0 };
 
     // Create node and connect
-    NodeID      mul_node      = GraphBuilder::add_elementwise_node(g, params, input, mul_const_nidxp, EltwiseOperation::MUL);
+    NodeID      mul_node      = GraphBuilder::add_elementwise_node(g, params, input, mul_const_nidxp, EltwiseOperation::Mul);
     NodeIdxPair mulnode_nidxp = { mul_node, 0 };
-    NodeID      add_node      = GraphBuilder::add_elementwise_node(g, params, mulnode_nidxp, add_const_nidxp, EltwiseOperation::ADD);
+    NodeID      add_node      = GraphBuilder::add_elementwise_node(g, params, mulnode_nidxp, add_const_nidxp, EltwiseOperation::Add);
 
     return add_node;
 }

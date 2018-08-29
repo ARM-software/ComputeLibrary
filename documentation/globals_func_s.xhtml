@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -151,11 +151,17 @@ $(document).ready(function(){initNavTree('globals_func_s.xhtml','');});
 &#160;
 
 <h3><a class="anchor" id="index_s"></a>- s -</h3><ul>
-<li>scale_bilinear()
-: <a class="el" href="scale_8cl.xhtml#afafd19fca28a0b88836611dae58ed787">scale.cl</a>
+<li>scale_bilinear_nchw()
+: <a class="el" href="scale_8cl.xhtml#a8721515bc3a5bd5c2c07c71680836989">scale.cl</a>
 </li>
-<li>scale_nearest_neighbour()
-: <a class="el" href="scale_8cl.xhtml#ace0505bd2794cb971269d525953b9b78">scale.cl</a>
+<li>scale_bilinear_nhwc()
+: <a class="el" href="scale_8cl.xhtml#ac0b6964599b54e3488b5ce8e294b67cc">scale.cl</a>
+</li>
+<li>scale_nearest_neighbour_nchw()
+: <a class="el" href="scale_8cl.xhtml#ab0d36306b50e1c7961dfa9337d73ecbb">scale.cl</a>
+</li>
+<li>scale_nearest_neighbour_nhwc()
+: <a class="el" href="scale_8cl.xhtml#a2216ff8602b48932fb95cdc3d02c8bba">scale.cl</a>
 </li>
 <li>scharr3x3()
 : <a class="el" href="scharr__filter_8cl.xhtml#a7cc764a3a8a92f986344e05cfb1fe75a">scharr_filter.cl</a>
@@ -196,12 +202,6 @@ $(document).ready(function(){initNavTree('globals_func_s.xhtml','');});
 <li>sort9()
 : <a class="el" href="non__linear__filter__helpers_8h.xhtml#a0960df49e39a9499677066c32600c17f">non_linear_filter_helpers.h</a>
 </li>
-<li>sqcvt_qs16_sat()
-: <a class="el" href="fixed__point_8h.xhtml#ac1d0a82fd450972cab8a7c85217e4441">fixed_point.h</a>
-</li>
-<li>sqcvt_qs8_sat()
-: <a class="el" href="fixed__point_8h.xhtml#a27b4e171bdfd66f52824f5812c9fa522">fixed_point.h</a>
-</li>
 <li>sqrt_op()
 : <a class="el" href="activation__layer_8cl.xhtml#ac6da2650b8dfad9553a22c0ded1d7bc8">activation_layer.cl</a>
 </li>
@@ -213,36 +213,6 @@ $(document).ready(function(){initNavTree('globals_func_s.xhtml','');});
 </li>
 <li>srelu_op()
 : <a class="el" href="activation__layer_8cl.xhtml#af906a313c9c945e03c18f7abf8f53e89">activation_layer.cl</a>
-</li>
-<li>sub_sat_qs16x1()
-: <a class="el" href="fixed__point_8h.xhtml#a4d22f610d17883dae5370c3e7d154c76">fixed_point.h</a>
-</li>
-<li>sub_sat_qs16x16()
-: <a class="el" href="fixed__point_8h.xhtml#a9b91ed896c5093a7b73b15eb2539d804">fixed_point.h</a>
-</li>
-<li>sub_sat_qs16x2()
-: <a class="el" href="fixed__point_8h.xhtml#af0d4e5500f90ef66bdf87b01bbb8e942">fixed_point.h</a>
-</li>
-<li>sub_sat_qs16x4()
-: <a class="el" href="fixed__point_8h.xhtml#ac860bf2f067fb42de2c8db799423104f">fixed_point.h</a>
-</li>
-<li>sub_sat_qs16x8()
-: <a class="el" href="fixed__point_8h.xhtml#ac409af663422e74467d0fe174592b406">fixed_point.h</a>
-</li>
-<li>sub_sat_qs8x1()
-: <a class="el" href="fixed__point_8h.xhtml#a17474ee664876c4e265341f07f6b3562">fixed_point.h</a>
-</li>
-<li>sub_sat_qs8x16()
-: <a class="el" href="fixed__point_8h.xhtml#add35b8b1a8470b2777098251bd3b2230">fixed_point.h</a>
-</li>
-<li>sub_sat_qs8x2()
-: <a class="el" href="fixed__point_8h.xhtml#ae078571f80bab0d4473b5786220ca557">fixed_point.h</a>
-</li>
-<li>sub_sat_qs8x4()
-: <a class="el" href="fixed__point_8h.xhtml#a1acb5de3f800cd2d0068e25d833d8cdc">fixed_point.h</a>
-</li>
-<li>sub_sat_qs8x8()
-: <a class="el" href="fixed__point_8h.xhtml#a7635f49daeea0c64e1b153056d7b8b6c">fixed_point.h</a>
 </li>
 <li>sum()
 : <a class="el" href="reduction__operation_8cl.xhtml#ab0df00f5333da51860deb93deb44a782">reduction_operation.cl</a>
@@ -256,7 +226,7 @@ $(document).ready(function(){initNavTree('globals_func_s.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:58 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -10,6 +10,7 @@ var dir_1633709b037eda5b8477677909f78129 =
     ] ],
     [ "CLKernels.h", "_c_l_kernels_8h.xhtml", null ],
     [ "CLTypes.h", "_c_l_types_8h.xhtml", "_c_l_types_8h" ],
+    [ "CLValidate.h", "_c_l_validate_8h.xhtml", "_c_l_validate_8h" ],
     [ "ICLArray.h", "_i_c_l_array_8h.xhtml", "_i_c_l_array_8h" ],
     [ "ICLDistribution1D.h", "_i_c_l_distribution1_d_8h.xhtml", [
       [ "ICLDistribution1D", "classarm__compute_1_1_i_c_l_distribution1_d.xhtml", "classarm__compute_1_1_i_c_l_distribution1_d" ]

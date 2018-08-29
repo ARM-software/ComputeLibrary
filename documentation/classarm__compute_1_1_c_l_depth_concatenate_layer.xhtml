@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_depth_concat
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLDepthConcatenateLayer Class Reference</div>  </div>
 </div><!--header-->
@@ -138,9 +139,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a59330f009ee600700828b178f60a9b58"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#a59330f009ee600700828b178f60a9b58">CLDepthConcatenateLayer</a> ()</td></tr>
 <tr class="memdesc:a59330f009ee600700828b178f60a9b58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a59330f009ee600700828b178f60a9b58">More...</a><br /></td></tr>
 <tr class="separator:a59330f009ee600700828b178f60a9b58"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1e594a6c6605fb33245f84722039eab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#ae1e594a6c6605fb33245f84722039eab">configure</a> (std::vector&lt; <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> * &gt; inputs_vector, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output)</td></tr>
-<tr class="memdesc:ae1e594a6c6605fb33245f84722039eab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs vector and output.  <a href="#ae1e594a6c6605fb33245f84722039eab">More...</a><br /></td></tr>
-<tr class="separator:ae1e594a6c6605fb33245f84722039eab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c12a28f5554ed633343956f3127c50d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#a6c12a28f5554ed633343956f3127c50d">configure</a> (const std::vector&lt; <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> * &gt; &amp;inputs_vector, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output)</td></tr>
+<tr class="memdesc:a6c12a28f5554ed633343956f3127c50d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs vector and output.  <a href="#a6c12a28f5554ed633343956f3127c50d">More...</a><br /></td></tr>
+<tr class="separator:a6c12a28f5554ed633343956f3127c50d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,6 +152,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
 <tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
 <tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ad1e3678c79b51503e597436347ea04d8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#ad1e3678c79b51503e597436347ea04d8">validate</a> (const std::vector&lt; <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> * &gt; &amp;inputs_vector, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
+<tr class="memdesc:ad1e3678c79b51503e597436347ea04d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">CLDepthConcatenateLayer</a>.  <a href="#ad1e3678c79b51503e597436347ea04d8">More...</a><br /></td></tr>
+<tr class="separator:ad1e3678c79b51503e597436347ea04d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to execute concatenate tensors along z axis. </p>
@@ -180,14 +187,14 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ae1e594a6c6605fb33245f84722039eab"></a>
+<a class="anchor" id="a6c12a28f5554ed633343956f3127c50d"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void configure </td>
           <td>(</td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> * &gt;&#160;</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> * &gt; &amp;&#160;</td>
           <td class="paramname"><em>inputs_vector</em>, </td>
         </tr>
         <tr>
@@ -207,13 +214,13 @@ Public Member Functions</h2></td></tr>
 <p>Initialise the kernel's inputs vector and output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QS8/QS16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32. Input dimensions might differ for each input for the first three dimensions (width, height, depth) and must match for the rest. Note that the difference between the minimum and maximum width and height among the input tensors must be divisible by 2 otherwise it is not clear how padding should be added on the inputs' width and height when they are less than the maximum input sizes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. Output tensor dimensions match the inputs' ones from the fourth dimension and above, while width and height are the maximum width and height of the input tensors. Finally, depth is the sum of the input depths. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="validation_2_c_l_2_depth_concatenate_layer_8cpp_source.xhtml#l00045">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_depth_concatenate_layer_8cpp_source.xhtml#l00083">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -256,6 +263,52 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 </div>
 </div>
+<a class="anchor" id="ad1e3678c79b51503e597436347ea04d8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>inputs_vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">CLDepthConcatenateLayer</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32. Input dimensions might differ for each input for the first three dimensions (width, height, depth) and must match for the rest. Note that the difference between the minimum and maximum width and height among the input tensors must be divisible by 2 otherwise it is not clear how padding should be added on the inputs' width and height when they are less than the maximum input sizes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. Output tensor dimensions match the inputs' ones from the fourth dimension and above, while width and height are the maximum width and height of the input tensors. Finally, depth is the sum of the input depths.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+<p>Referenced by <a class="el" href="validation_2_c_l_2_depth_concatenate_layer_8cpp_source.xhtml#l00047">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/CL/functions/<a class="el" href="_c_l_depth_concatenate_layer_8h_source.xhtml">CLDepthConcatenateLayer.h</a></li>
 </ul>
@@ -265,7 +318,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">CLDepthConcatenateLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

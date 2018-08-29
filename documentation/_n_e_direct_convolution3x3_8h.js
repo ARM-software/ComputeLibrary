@@ -1,9 +1,9 @@
 var _n_e_direct_convolution3x3_8h =
 [
-    [ "convolve_3x3", "_n_e_direct_convolution3x3_8h.xhtml#ac064ba58efa26ec2599bc8f50d3e0851", null ],
-    [ "convolve_3x3< 1 >", "_n_e_direct_convolution3x3_8h.xhtml#a60ec1bb53624bf71d2b0bd885e3234d7", null ],
-    [ "convolve_3x3< 2 >", "_n_e_direct_convolution3x3_8h.xhtml#ac5a80612d739ca7ab7db7e26c05796e1", null ],
-    [ "convolve_3x3< 3 >", "_n_e_direct_convolution3x3_8h.xhtml#adb5abdd9cafbff3bdfc6a5a9ec6bbe5c", null ],
+    [ "convolve_3x3", "_n_e_direct_convolution3x3_8h.xhtml#a87f8e27c52a10ec90100fd5b0fcf663d", null ],
+    [ "convolve_3x3< 1 >", "_n_e_direct_convolution3x3_8h.xhtml#a5d9c87411d51689909ba746f88bcff56", null ],
+    [ "convolve_3x3< 2 >", "_n_e_direct_convolution3x3_8h.xhtml#a2247cf9504428f406ed4da244fdb8d1c", null ],
+    [ "convolve_3x3< 3 >", "_n_e_direct_convolution3x3_8h.xhtml#ab0766fc0a98f3257e3867ac59fb97d5f", null ],
     [ "get_input_num_elems_processed", "_n_e_direct_convolution3x3_8h.xhtml#a30f6368deaea5f10f9dd1bbaa28c24e6", null ],
     [ "get_input_num_elems_processed< 1 >", "_n_e_direct_convolution3x3_8h.xhtml#a7a08a003e6ce7ea86cb7d8f4523c0eb5", null ],
     [ "get_input_num_elems_processed< 2 >", "_n_e_direct_convolution3x3_8h.xhtml#adbdb2272e2409d0c249ba467eaac81ea", null ],

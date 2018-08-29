@@ -51,9 +51,9 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G51LIT;
     }
-    else if(version == "TNOX")
+    else if(version == "G76")
     {
-        return arm_compute::GPUTarget::TNOX;
+        return arm_compute::GPUTarget::G76;
     }
     else if(version == "TTRX")
     {
@@ -106,7 +106,7 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G51, "g51" },
         { GPUTarget::G51BIG, "g51big" },
         { GPUTarget::G51LIT, "g51lit" },
-        { GPUTarget::TNOX, "tnox" },
+        { GPUTarget::G76, "g76" },
         { GPUTarget::TTRX, "ttrx" },
         { GPUTarget::TBOX, "tbox" }
     };
@@ -122,8 +122,8 @@ GPUTarget get_target_from_name(const std::string &device_name)
 
     if(!found_mali)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to UNKNOWN.");
-        return GPUTarget::UNKNOWN;
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to default.");
+        return GPUTarget::MIDGARD;
     }
 
     const char         target  = name_parts.str(1)[0];

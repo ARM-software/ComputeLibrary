@@ -52,14 +52,13 @@ struct is_floating_point<half> : public std::true_type
 
 /** Helper function to get the testing range for each activation layer.
  *
- * @param[in] activation           Activation function to test.
- * @param[in] data_type            Data type.
- * @param[in] fixed_point_position Number of bits for the fractional part. Defaults to 1.
+ * @param[in] activation Activation function to test.
+ * @param[in] data_type  Data type.
  *
  * @return A pair containing the lower upper testing bounds for a given function.
  */
 template <typename T>
-std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, DataType data_type, int fixed_point_position = 0)
+std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
 {
     std::pair<T, T> bounds;
 
@@ -71,15 +70,16 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 
             switch(activation)
             {
+                case ActivationLayerInfo::ActivationFunction::TANH:
                 case ActivationLayerInfo::ActivationFunction::SQUARE:
                 case ActivationLayerInfo::ActivationFunction::LOGISTIC:
                 case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                     // Reduce range as exponent overflows
-                    bounds = std::make_pair(-10._h, 10._h);
+                    bounds = std::make_pair(-2._h, 2._h);
                     break;
                 case ActivationLayerInfo::ActivationFunction::SQRT:
                     // Reduce range as sqrt should take a non-negative number
-                    bounds = std::make_pair(0._h, 255._h);
+                    bounds = std::make_pair(0._h, 128._h);
                     break;
                 default:
                     bounds = std::make_pair(-255._h, 255._h);
@@ -101,26 +101,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
                     break;
                 default:
                     bounds = std::make_pair(-255.f, 255.f);
-                    break;
-            }
-            break;
-        case DataType::QS8:
-        case DataType::QS16:
-            switch(activation)
-            {
-                case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-                case ActivationLayerInfo::ActivationFunction::TANH:
-                    // Reduce range as exponent overflows
-                    bounds = std::make_pair(-(1 << fixed_point_position), 1 << fixed_point_position);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::SQRT:
-                    // Reduce range as sqrt should take a non-negative number
-                    // Can't be zero either as inv_sqrt is used in NEON.
-                    bounds = std::make_pair(1, std::numeric_limits<T>::max());
-                    break;
-                default:
-                    bounds = std::make_pair(std::numeric_limits<T>::lowest(), std::numeric_limits<T>::max());
                     break;
             }
             break;
@@ -168,6 +148,17 @@ struct HarrisCornersParameters
 /** Generate parameters for Harris Corners algorithm. */
 HarrisCornersParameters harris_corners_parameters();
 
+/** Parameters of Canny edge algorithm. */
+struct CannyEdgeParameters
+{
+    int32_t upper_thresh{ 255 };
+    int32_t lower_thresh{ 0 };
+    uint8_t constant_border_value{ 0 };
+};
+
+/** Generate parameters for Canny edge algorithm. */
+CannyEdgeParameters canny_edge_parameters();
+
 /** Helper function to fill the Lut random by a ILutAccessor.
  *
  * @param[in,out] table Accessor at the Lut.
@@ -187,12 +178,10 @@ void fill_lookuptable(T &&table)
 
 /** Helper function to get the testing range for batch normalization layer.
  *
- * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 1.
- *
  * @return A pair containing the lower upper testing bounds.
  */
 template <typename T>
-std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 1)
+std::pair<T, T> get_batchnormalization_layer_test_bounds()
 {
     const bool is_float = std::is_floating_point<T>::value;
     std::pair<T, T> bounds;
@@ -204,7 +193,7 @@ std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_positio
     }
     else
     {
-        bounds = std::make_pair(1, 1 << (fixed_point_position));
+        bounds = std::make_pair(1, 1);
     }
 
     return bounds;
@@ -268,6 +257,15 @@ void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
  */
 template <typename T>
 void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinates &coord);
+
+/** Fill with zeros the input tensor in the area defined by anchor and shape
+ *
+ * @param[in]  in     Input tensor to fill with zeros
+ * @param[out] anchor Starting point of the zeros area
+ * @param[in]  shape  Ending point of the zeros area
+ */
+template <typename T>
+void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &shape);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

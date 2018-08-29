@@ -31,10 +31,14 @@
 #ifndef ARM_COMPUTE_NO_EXCEPTIONS
 #define CL_HPP_ENABLE_EXCEPTIONS
 #endif // ARM_COMPUTE_NO_EXCEPTIONS
-#define CL_HPP_CL_1_2_DEFAULT_BUILD
+#define CL_TARGET_OPENCL_VERSION 200
 #define CL_HPP_TARGET_OPENCL_VERSION 110
 #define CL_HPP_MINIMUM_OPENCL_VERSION 110
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #include <CL/cl2.hpp>
+#pragma GCC diagnostic pop
 
 namespace cl
 {
@@ -78,6 +82,7 @@ public:
 #define DECLARE_FUNCTION_PTR(func_name) \
     std::function<decltype(func_name)> func_name##_ptr = nullptr
 
+    DECLARE_FUNCTION_PTR(clCreateContext);
     DECLARE_FUNCTION_PTR(clCreateContextFromType);
     DECLARE_FUNCTION_PTR(clCreateCommandQueue);
     DECLARE_FUNCTION_PTR(clGetContextInfo);

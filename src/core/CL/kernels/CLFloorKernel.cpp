@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Auto initialize output
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -69,7 +69,7 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLFloorKernel::run(const Window &window, cl::CommandQueue &queue)

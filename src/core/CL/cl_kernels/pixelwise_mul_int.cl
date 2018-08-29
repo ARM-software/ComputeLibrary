@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-
-#include "fixed_point.h"
-
-#if defined(SATURATE)
-#define MUL_OP(x, y, scale, type, size) MUL_SAT_OP_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
-#else // SATURATE
-#define MUL_OP(x, y, scale, type, size) MUL_OP_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
-#endif // SATURATE
-
-#else // FIXED_POINT_POSITION
-
 #if defined(SATURATE)
 #define CONVERT_OP_INT_STR(x, type, size) (convert_##type##size##_sat(x))
 #else // SATURATE
@@ -44,17 +32,14 @@
 
 #define MUL_OP(x, y, scale, type, size) CONVERT_OP_INT((x) * (y) >> scale, type, size)
 
-#endif // FIXED_POINT_POSITION
-
 /** Performs a pixelwise multiplication with integer scale of integer inputs.
  *
  * @attention The inputs and output data types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=ushort -DDATA_TYPE_OUT=short
  * @attention The data_type of the intermediate result of the multiplication should passed as well using -DDATA_TYPE_RES.
  * e.g. If one of inputs is S16 -DDATA_TYPE_RES=int should be passed else -DDATA_TYPE_RES=short.
- * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
  *
- * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8/QS8/QS16/S16
+ * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: U8/S16
  * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -78,7 +63,7 @@
  * @param[in]  out_stride_z                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  out_step_z                        out_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
- * @param[in]  scale                             Integer scaling factor. Supported data types: S32 (ignored for QS8 and QS16 as the assumption is scale = 1).
+ * @param[in]  scale                             Integer scaling factor. Supported data types: S32.
  */
 __kernel void pixelwise_mul_int(
     TENSOR3D_DECLARATION(in1),

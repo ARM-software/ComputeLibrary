@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -149,9 +149,9 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a724673b78b929bbbd03f746c75ad2ec7 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml">INEWarpKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a724673b78b929bbbd03f746c75ad2ec7">operator=</a> (<a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml">INEWarpKernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:a724673b78b929bbbd03f746c75ad2ec7 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#a724673b78b929bbbd03f746c75ad2ec7">More...</a><br /></td></tr>
 <tr class="separator:a724673b78b929bbbd03f746c75ad2ec7 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2788f35df697fab62501262ad001d1f0 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a2788f35df697fab62501262ad001d1f0">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
-<tr class="memdesc:a2788f35df697fab62501262ad001d1f0 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and border mode.  <a href="#a2788f35df697fab62501262ad001d1f0">More...</a><br /></td></tr>
-<tr class="separator:a2788f35df697fab62501262ad001d1f0 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc8e205d7ea06ff93a2e023970712993 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#acc8e205d7ea06ff93a2e023970712993">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const std::array&lt; float, 9 &gt; &amp;matrix, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value)</td></tr>
+<tr class="memdesc:acc8e205d7ea06ff93a2e023970712993 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and border mode.  <a href="#acc8e205d7ea06ff93a2e023970712993">More...</a><br /></td></tr>
+<tr class="separator:acc8e205d7ea06ff93a2e023970712993 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82 inherit pub_methods_classarm__compute_1_1_i_n_e_warp_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,7 +182,7 @@ class arm_compute::NEWarpPerspectiveKernel&lt; interpolation &gt;</h3>
 
 <p>Template interface for the kernel to compute warp perspective. </p>
 
-<p>Definition at line <a class="el" href="_n_e_warp_kernel_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_n_e_warp_kernel_8h_source.xhtml">NEWarpKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_warp_kernel_8h_source.xhtml#l00116">116</a> of file <a class="el" href="_n_e_warp_kernel_8h_source.xhtml">NEWarpKernel.h</a>.</p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_warp_kernel_8h_source.xhtml">NEWarpKernel.h</a></li>
 </ul>
@@ -192,7 +192,7 @@ class arm_compute::NEWarpPerspectiveKernel&lt; interpolation &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_warp_perspective_kernel.xhtml">NEWarpPerspectiveKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:49 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

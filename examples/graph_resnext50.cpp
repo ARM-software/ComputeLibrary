@@ -23,10 +23,9 @@
  */
 #include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
+#include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
-
-#include <cstdlib>
 
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
@@ -35,92 +34,80 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement ResNeXt50 network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_in, [optional] npy_out, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments
  */
 class GraphResNeXt50Example : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    GraphResNeXt50Example()
+        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ResNeXt50")
     {
-        std::string data_path; /* Path to the trainable data */
-        std::string npy_in;    /* Input npy data */
-        std::string npy_out;   /* Output npy data */
-
-        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target       target_hint    = set_target_hint(target);
-        FastMathHint fast_math_hint = FastMathHint::DISABLED;
-
+    }
+    bool do_setup(int argc, char **argv) override
+    {
         // Parse arguments
-        if(argc < 2)
+        cmd_parser.parse(argc, argv);
+
+        // Consume common parameters
+        common_params = consume_common_graph_parameters(common_opts);
+
+        // Return when help menu is requested
+        if(common_params.help)
         {
-            // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
-        }
-        else if(argc == 2)
-        {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
-        }
-        else if(argc == 3)
-        {
-            data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No input npy file provided: using random values\n\n";
-        }
-        else if(argc == 4)
-        {
-            data_path = argv[2];
-            npy_in    = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No output npy file provided: skipping output accessor\n\n";
-        }
-        else if(argc == 5)
-        {
-            data_path = argv[2];
-            npy_in    = argv[3];
-            npy_out   = argv[4];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
-            std::cout << "No fast math info provided: disabling fast math\n\n";
-        }
-        else
-        {
-            data_path      = argv[2];
-            npy_in         = argv[3];
-            npy_out        = argv[4];
-            fast_math_hint = (std::strtol(argv[5], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
+            cmd_parser.print_help(argv[0]);
+            return false;
         }
 
-        graph << target_hint
-              << fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
-                            get_input_accessor(npy_in))
+        // Checks
+        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
+        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type == DataType::F16 && common_params.target == Target::NEON, "F16 NEON not supported for this graph");
+
+        // Print parameter values
+        std::cout << common_params << std::endl;
+
+        // Get trainable parameters data path
+        std::string data_path = common_params.data_path;
+
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Set weights trained layout
+        const DataLayout weights_layout = DataLayout::NCHW;
+
+        graph << common_params.target
+              << common_params.fast_math_hint
+              << InputLayer(input_descriptor, get_input_accessor(common_params))
               << ScaleLayer(get_weights_accessor(data_path, "/cnn_data/resnext50_model/bn_data_mul.npy"),
                             get_weights_accessor(data_path, "/cnn_data/resnext50_model/bn_data_add.npy"))
               .set_name("bn_data/Scale")
               << ConvolutionLayer(
                   7U, 7U, 64U,
-                  get_weights_accessor(data_path, "/cnn_data/resnext50_model/conv0_weights.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/resnext50_model/conv0_weights.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/resnext50_model/conv0_biases.npy"),
                   PadStrideInfo(2, 2, 2, 3, 2, 3, DimensionRoundingType::FLOOR))
               .set_name("conv0/Convolution")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv0/Relu")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool0");
 
-        add_residual_block(data_path, /*ofm*/ 256, /*stage*/ 1, /*num_unit*/ 3, /*stride_conv_unit1*/ 1);
-        add_residual_block(data_path, 512, 2, 4, 2);
-        add_residual_block(data_path, 1024, 3, 6, 2);
-        add_residual_block(data_path, 2048, 4, 3, 2);
+        add_residual_block(data_path, weights_layout, /*ofm*/ 256, /*stage*/ 1, /*num_unit*/ 3, /*stride_conv_unit1*/ 1);
+        add_residual_block(data_path, weights_layout, 512, 2, 4, 2);
+        add_residual_block(data_path, weights_layout, 1024, 3, 6, 2);
+        add_residual_block(data_path, weights_layout, 2048, 4, 3, 2);
 
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool1")
               << FlattenLayer().set_name("predictions/Reshape")
-              << OutputLayer(get_npy_output_accessor(npy_out, TensorShape(2048U), DataType::F32));
+              << OutputLayer(get_npy_output_accessor(common_params.labels, TensorShape(2048U), DataType::F32));
 
         // Finalize graph
         GraphConfig config;
-        config.use_tuner = (target == 2);
-        graph.finalize(target_hint, config);
+        config.num_threads = common_params.threads;
+        config.use_tuner   = common_params.enable_tuner;
+        config.tuner_file  = common_params.tuner_file;
+
+        graph.finalize(common_params.target, config);
+
+        return true;
     }
 
     void do_run() override
@@ -130,9 +117,13 @@ public:
     }
 
 private:
-    Stream graph{ 0, "ResNeXt50" };
+    CommandLineParser  cmd_parser;
+    CommonGraphOptions common_opts;
+    CommonGraphParams  common_params;
+    Stream             graph;
 
-    void add_residual_block(const std::string &data_path, unsigned int base_depth, unsigned int stage, unsigned int num_units, unsigned int stride_conv_unit1)
+    void add_residual_block(const std::string &data_path, DataLayout weights_layout,
+                            unsigned int base_depth, unsigned int stage, unsigned int num_units, unsigned int stride_conv_unit1)
     {
         for(unsigned int i = 0; i < num_units; ++i)
         {
@@ -153,7 +144,7 @@ private:
             SubStream right(graph);
             right << ConvolutionLayer(
                       1U, 1U, base_depth / 2,
-                      get_weights_accessor(data_path, unit_path + "conv1_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv1_weights.npy", weights_layout),
                       get_weights_accessor(data_path, unit_path + "conv1_biases.npy"),
                       PadStrideInfo(1, 1, 0, 0))
                   .set_name(unit_name + "conv1/convolution")
@@ -161,7 +152,7 @@ private:
 
                   << ConvolutionLayer(
                       3U, 3U, base_depth / 2,
-                      get_weights_accessor(data_path, unit_path + "conv2_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv2_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       pad_grouped_conv, 32)
                   .set_name(unit_name + "conv2/convolution")
@@ -172,7 +163,7 @@ private:
 
                   << ConvolutionLayer(
                       1U, 1U, base_depth,
-                      get_weights_accessor(data_path, unit_path + "conv3_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv3_weights.npy", weights_layout),
                       get_weights_accessor(data_path, unit_path + "conv3_biases.npy"),
                       PadStrideInfo(1, 1, 0, 0))
                   .set_name(unit_name + "conv3/convolution");
@@ -182,7 +173,7 @@ private:
             {
                 left << ConvolutionLayer(
                          1U, 1U, base_depth,
-                         get_weights_accessor(data_path, unit_path + "sc_weights.npy"),
+                         get_weights_accessor(data_path, unit_path + "sc_weights.npy", weights_layout),
                          std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                          PadStrideInfo(stride_conv_unit1, stride_conv_unit1, 0, 0))
                      .set_name(unit_name + "sc/convolution")
@@ -199,8 +190,10 @@ private:
 
 /** Main program for ResNeXt50
  *
+ * @note To list all the possible arguments execute the binary appended with the --help option
+ *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [[optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_in, [optional] npy_out )
+ * @param[in] argv Arguments
  */
 int main(int argc, char **argv)
 {

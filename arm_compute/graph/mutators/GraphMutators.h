@@ -25,7 +25,9 @@
 #define __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
 
 #include "arm_compute/graph/mutators/DepthConcatSubTensorMutator.h"
+#include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
 #include "arm_compute/graph/mutators/InPlaceOperationMutator.h"
+#include "arm_compute/graph/mutators/NodeExecutionMethodMutator.h"
 #include "arm_compute/graph/mutators/NodeFusionMutator.h"
 #include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
 

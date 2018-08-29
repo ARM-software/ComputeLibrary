@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,25 +47,11 @@ using NEMagnitudeFixture = MagnitudeFixture<Tensor, NEMagnitude, Accessor>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(Magnitude)
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(FP16)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("Format", { Format::S16 })),
-                                                                                                                 magnitude_types),
-                                                                                                         framework::dataset::make("UseFP16", { true })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("Format", { Format::S16 })),
-                                                                                                               magnitude_types),
-                                                                                                       framework::dataset::make("UseFP16", { true })));
-TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 TEST_SUITE(S16)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("Format", { Format::S16 })),
-                                                                                                                 magnitude_types),
-                                                                                                         framework::dataset::make("UseFP16", { false })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("Format", { Format::S16 })),
-                                                                                                               magnitude_types),
-                                                                                                       framework::dataset::make("UseFP16", { false })));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageShapes(), framework::dataset::make("Format", { Format::S16 })),
+                                                                                                         magnitude_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageShapes(), framework::dataset::make("Format", { Format::S16 })),
+                                                                                                       magnitude_types));
 TEST_SUITE_END() // S16
 TEST_SUITE_END() // Magnitude
 TEST_SUITE_END() // NEON

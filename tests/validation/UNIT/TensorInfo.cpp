@@ -112,12 +112,6 @@ TEST_CASE(TensorInfoBuild, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(info.data_type() == DataType::S32, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(info.num_channels() == 3, framework::LogLevel::ERRORS);
 
-    // Update data type channels and set fixed point position
-    info.set_data_type(DataType::QS8).set_num_channels(1).set_fixed_point_position(3);
-    ARM_COMPUTE_EXPECT(info.data_type() == DataType::QS8, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.num_channels() == 1, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.fixed_point_position() == 3, framework::LogLevel::ERRORS);
-
     // Update data type and set quantization info
     info.set_data_type(DataType::QASYMM8).set_quantization_info(QuantizationInfo(0.5f, 15));
     ARM_COMPUTE_EXPECT(info.data_type() == DataType::QASYMM8, framework::LogLevel::ERRORS);

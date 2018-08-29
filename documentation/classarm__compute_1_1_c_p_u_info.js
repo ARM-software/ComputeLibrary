@@ -5,6 +5,7 @@ var classarm__compute_1_1_c_p_u_info =
     [ "CPUInfo", "classarm__compute_1_1_c_p_u_info.xhtml#a3ec830b104ae38449814a489ec9ea11c", null ],
     [ "get_cpu_model", "classarm__compute_1_1_c_p_u_info.xhtml#a7fd139da3ff8770c43d3db743517cbd7", null ],
     [ "get_cpu_model", "classarm__compute_1_1_c_p_u_info.xhtml#a6a92d9020af0ada82f7437e7a1425224", null ],
+    [ "get_cpu_num", "classarm__compute_1_1_c_p_u_info.xhtml#ab7c005d471e707fc203103a54ab1fb7a", null ],
     [ "get_L1_cache_size", "classarm__compute_1_1_c_p_u_info.xhtml#aaa9c3be024981dcb76d45e31f7ba4812", null ],
     [ "get_L2_cache_size", "classarm__compute_1_1_c_p_u_info.xhtml#ae9d9d483cf960f3a82a423ced1f2a8fc", null ],
     [ "has_dotprod", "classarm__compute_1_1_c_p_u_info.xhtml#aa9fee9479c54cf3efc7ac36cf7902769", null ],

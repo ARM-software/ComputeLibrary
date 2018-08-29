@@ -28,8 +28,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / gnustl NDK r16b
-            - Android am64-v8a: clang++ / gnustl NDK r16b
+            - Android armv7a: clang++ / libc++ NDK r17b
+            - Android am64-v8a: clang++ / libc++ NDK r17b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -215,7 +215,31 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
-v18.05 Public maintenance release
+v18.08 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - Updated recommended NDK version to r17b.
+ - Removed support for QS8/QS16 data types.
+ - Added support for grouped convolution in @ref CLConvolutionLayer.
+ - Added NHWC data layout support to:
+    - @ref NEDepthConcatenateLayer / @ref CLDepthConcatenateLayer
+    - @ref NEWinogradConvolutionLayer / @ref CLWinogradConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref CLDirectConvolutionLayer
+    - @ref CLConvolutionLayer
+    - @ref CLScale
+    - @ref CLIm2ColKernel
+ - New Neon kernels / functions:
+    - @ref NERNNLayer
+ - New OpenCL kernels / functions:
+    - @ref CLArithmeticDivision
+ - Introduced prepare() stage support in the graph API for GLES.
+ - Added support for memory reusage when trying to allocate smaller CLTensors.
+ - Enabled NHWC execution on graph examples.
+ - Added JPEG accessor for validation purposes.
+ - Added validate methods to some kernels / functions.
+
+v18.05 Public major release
  - Various bug fixes.
  - Various optimisations.
  - Major redesign in the interface for the neon kernels implemented in assembly.
@@ -245,7 +269,6 @@ v18.05 Public maintenance release
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
     - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
  - New Neon kernels / functions:
-    - @ref CLRNNLayer
     - @ref NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
  - Created the validate method in @ref CLDepthwiseConvolutionLayer.
  - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
@@ -315,7 +338,7 @@ v18.02 Public major release
     - @ref NEWinogradLayerTransformInputKernel / NEWinogradLayer
     - @ref NEWinogradLayerTransformOutputKernel / NEWinogradLayer
     - @ref NEWinogradLayerTransformWeightsKernel / NEWinogradLayer
-    - Renamed NEWinogradLayerKernel into @ref NEWinogradLayerBatchedGEMMKernel
+    - Renamed NEWinogradLayerKernel into NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
     - @ref GCTensorShiftKernel / @ref GCTensorShift
 
@@ -701,9 +724,8 @@ Example:
 
 For Linux, the library was successfully built and tested using the following Linaro GCC toolchain:
 
- - gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
+ - gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
  - gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
- - gcc-linaro-6.3.1-2017.02-i686_aarch64-linux-gnu
 
 To cross-compile the library in debug mode, with NEON only support, for Linux 32bit:
 
@@ -778,11 +800,11 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 
 i.e. to cross compile the "graph_lenet" example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	arm-linux-gnueabihf-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 i.e. to cross compile the "graph_lenet" example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	aarch64-linux-gnu-g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option and the compiler's name is different)
 
@@ -811,11 +833,11 @@ To compile natively the examples with the Graph API, such as graph_lenet.cpp, yo
 
 i.e. to natively compile the "graph_lenet" example for Linux 32bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 i.e. to natively compile the "graph_lenet" example for Linux 64bit:
 
-	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
+	g++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 L. -larm_compute_graph -larm_compute -larm_compute_core -Wl,--allow-shlib-undefined -o graph_lenet
 
 (notice the only difference with the 32 bit command is that we don't need the -mfpu option)
 
@@ -831,45 +853,39 @@ or
 
 	LD_LIBRARY_PATH=build ./cl_convolution
 
-@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+@note Examples accept different types of arguments, to find out what they are run the example with \a --help as an argument. If no arguments are specified then random values will be used to execute the graph.
 
 For example:
 
-	LD_LIBRARY_PATH=. ./graph_lenet
+	LD_LIBRARY_PATH=. ./graph_lenet --help
 
-	./graph_lenet
-
-	Usage: ./graph_lenet [target] [path_to_data] [batches]
-
-	No data folder provided: using random values
-
-	Test passed
-
-In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
+Below is a list of the common parameters among the graph examples :
+@snippet utils/CommonGraphOptions.h Common graph examples parameters
 
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - clang++ from NDK r16b for armv7a
- - clang++ from NDK r16b for arm64-v8a
+ - clang++ from NDK r17b for armv7a
+ - clang++ from NDK r17b for arm64-v8a
+ - clang++ from NDK r18-beta1 for arm64-v8.2-a with FP16 support
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 <!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
 
 <!-- End of the 2 blank lines --!>
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17b --stl libc++ --api 21
 
-@attention Due to some NDK issues make sure you use clang++ & gnustl
+@attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
 
 @note Make sure to add the toolchains to your PATH:
 
-	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r16b/bin
+	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r17b/bin
 
 @subsubsection S3_3_1_library How to build the library ?
 
@@ -918,9 +934,9 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp utils/CommonGraphOptions.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 @note When linked statically the arm_compute_graph library currently needs the --whole-archive linker flag in order to work properly
@@ -951,18 +967,10 @@ And finally to run the example:
 	adb shell /data/local/tmp/cl_convolution_aarch64
 	adb shell /data/local/tmp/gc_absdiff_aarch64
 
-@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+@note Examples accept different types of arguments, to find out what they are run the example with \a --help as an argument. If no arguments are specified then random values will be used to execute the graph.
 
 For example:
-	adb shell /data/local/tmp/graph_lenet
-
-	/data/local/tmp/graph_lenet
-
-	Usage: /data/local/tmp/graph_lenet [target] [path_to_data] [batches]
-
-	No data folder provided: using random values
-
-	Test passed
+	adb shell /data/local/tmp/graph_lenet --help
 
 In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
 
@@ -1055,5 +1063,106 @@ To cross-compile the stub OpenGLES and EGL libraries simply run:
 	#Linux 64bit
 	aarch64-linux-gnu-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
 	aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
+
+@subsection S3_8_cl_requirements OpenCL DDK Requirements
+
+@subsubsection S3_8_1_cl_hard_requirements Hard Requirements
+
+Compute Library requires OpenCL 1.1 and above with support of non uniform workgroup sizes, which is officially supported in the Mali OpenCL DDK r8p0 and above as an extension (respective extension flag is \a -cl-arm-non-uniform-work-group-size).
+
+Enabling 16-bit floating point calculations require \a cl_khr_fp16 extension to be supported. All Mali GPUs with compute capabilities have native support for half precision floating points.
+
+Use of @ref CLMeanStdDev function requires 64-bit atomics support, thus \a cl_khr_int64_base_atomics should be supported in order to use.
+
+@subsubsection S3_8_2_cl_performance_requirements Performance improvements
+
+Integer dot product built-in function extensions (and therefore optimized kernels) are available with Mali OpenCL DDK r22p0 and above for the following GPUs : G71, G76. The relevant extensions are \a cl_arm_integer_dot_product_int8, \a cl_arm_integer_dot_product_accumulate_int8 and \a cl_arm_integer_dot_product_accumulate_int16.
+
+OpenCL kernel level debugging can be simplified with the use of printf, this requires the \a cl_arm_printf extension to be supported.
+
+SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.
+
+@subsection S3_9_cl_tuner OpenCL Tuner
+
+The OpenCL tuner, a.k.a. CLTuner, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS).
+The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file.
+The OpenCL tuner performs a brute-force approach: it runs the same OpenCL kernel for a range of local workgroup sizes and keep the local workgroup size of the fastest run to use in subsequent calls to the kernel.
+In order for the performance numbers to be meaningful you must disable the GPU power management and set it to a fixed frequency for the entire duration of the tuning phase.
+
+If you wish to know more about LWS and the important role on improving the GPU cache utilization, we suggest having a look at the presentation "Even Faster CNNs: Exploring the New Class of Winograd Algorithms available at the following link:
+
+https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice
+
+Tuning a network from scratch can be long and affect considerably the execution time for the first run of your network. It is recommended for this reason to store the CLTuner's result in a file to amortize this time when you either re-use the same network or the functions with the same configurations. The tuning is performed only once for each OpenCL kernel.
+
+CLTuner looks for the optimal LWS for each unique OpenCL kernel configuration. Since a function (i.e. Convolution Layer, Pooling Layer, Fully Connected Layer ...) can be called multiple times but with different parameters, we associate an "id" (called "config_id") to each kernel to distinguish the unique configurations.
+
+    #Example: 2 unique Matrix Multiply configurations
+@code{.cpp}
+    TensorShape a0 = TensorShape(32,32);
+    TensorShape b0 = TensorShape(32,32);
+    TensorShape c0 = TensorShape(32,32);
+    TensorShape a1 = TensorShape(64,64);
+    TensorShape b1 = TensorShape(64,64);
+    TensorShape c1 = TensorShape(64,64);
+
+    Tensor a0_tensor;
+    Tensor b0_tensor;
+    Tensor c0_tensor;
+    Tensor a1_tensor;
+    Tensor b1_tensor;
+    Tensor c1_tensor;
+
+    a0_tensor.allocator()->init(TensorInfo(a0, 1, DataType::F32));
+    b0_tensor.allocator()->init(TensorInfo(b0, 1, DataType::F32));
+    c0_tensor.allocator()->init(TensorInfo(c0, 1, DataType::F32));
+    a1_tensor.allocator()->init(TensorInfo(a1, 1, DataType::F32));
+    b1_tensor.allocator()->init(TensorInfo(b1, 1, DataType::F32));
+    c1_tensor.allocator()->init(TensorInfo(c1 1, DataType::F32));
+
+    CLGEMM gemm0;
+    CLGEMM gemm1;
+
+    // Configuration 0
+    gemm0.configure(&a0, &b0, nullptr, &c0, 1.0f, 0.0f);
+
+    // Configuration 1
+    gemm1.configure(&a1, &b1, nullptr, &c1, 1.0f, 0.0f);
+@endcode
+
+@subsubsection S3_9_1_cl_tuner_how_to How to use it
+
+All the graph examples in the ACL's folder "examples" and the arm_compute_benchmark accept an argument to enable the OpenCL tuner and an argument to export/import the LWS values to/from a file
+
+    #Enable CL tuner
+    ./graph_mobilenet --enable-tuner –-target=CL
+    ./arm_compute_benchmark --enable-tuner
+
+    #Export/Import to/from a file
+    ./graph_mobilenet --enable-tuner --target=CL --tuner-file=acl_tuner.csv
+    ./arm_compute_benchmark --enable-tuner --tuner-file=acl_tuner.csv
+
+If you are importing the CLTuner'results from a file, the new tuned LWS values will be appended to it.
+
+Either you are benchmarking the graph examples or the test cases in the arm_compute_benchmark remember to:
+
+    -# Disable the power management
+    -# Keep the GPU frequency constant
+    -# Run multiple times the network (i.e. 10).
+
+If you are not using the graph API or the benchmark infrastructure you will need to manually pass a CLTuner object to CLScheduler before configuring any function.
+
+@code{.cpp}
+CLTuner tuner;
+
+// Setup Scheduler
+CLScheduler::get().default_init(&tuner);
+@endcode
+
+After the first run, the CLTuner's results can be exported to a file using the method "save_to_file()".
+- tuner.save_to_file("results.csv");
+
+This file can be also imported using the method "load_from_file("results.csv")".
+- tuner.load_from_file("results.csv");
 */
 } // namespace arm_compute

@@ -59,6 +59,13 @@ Window arm_compute::calculate_max_window(const ValidRegion &valid_region, const 
         ++n;
     }
 
+    if(anchor.num_dimensions() > 2)
+    {
+        window.set(2, Window::Dimension(anchor[2], std::max<size_t>(1, shape[2]), steps[2]));
+
+        ++n;
+    }
+
     for(; n < anchor.num_dimensions(); ++n)
     {
         window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));

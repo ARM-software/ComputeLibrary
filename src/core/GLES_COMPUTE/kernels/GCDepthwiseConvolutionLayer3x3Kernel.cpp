@@ -69,8 +69,7 @@ void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, con
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,
-                       input->info()->data_type(),
-                       input->info()->fixed_point_position());
+                       input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(2) != weights->info()->dimension(2));

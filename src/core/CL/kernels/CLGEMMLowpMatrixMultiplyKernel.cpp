@@ -172,7 +172,7 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1->info()->dimension(0));
     tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0->info()->dimension(1));
 
-    auto_init_if_empty(*output->info(), tensor_shape, 1, DataType::S32, 1, QuantizationInfo());
+    auto_init_if_empty(*output->info(), tensor_shape, 1, DataType::S32, QuantizationInfo());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info));
 
@@ -188,7 +188,9 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     // Configure kernel window
     auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
+
+    const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
 
     // Create build options
     CLBuildOptions build_opts;
@@ -206,15 +208,17 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
         build_opts.add_option("-DTRANSPOSE1XW_WIDTH_STEP=" + support::cpp11::to_string(4 * mult_transpose1xW_width));
         build_opts.add_option("-DMULT_INTERLEAVE4X4_HEIGHT=" + support::cpp11::to_string(mult_interleave4x4_height));
 
-        kernel_name = "gemmlowp_mm_interleaved_transposed_" + string_from_target(arch_target);
+        kernel_name = "gemmlowp_mm_interleaved_transposed_" + string_from_target(arch_target) + (is_dot8_supported ? "_dot8" : "");
     }
     else
     {
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_X=" + support::cpp11::to_string(num_elements_processed.x()));
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elements_processed.y()));
-        kernel_name = "gemmlowp_mm_" + string_from_target(arch_target);
+
+        kernel_name = "gemmlowp_mm_" + string_from_target(arch_target) + (is_dot8_supported ? "_dot8" : "");
     }
+
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -269,7 +273,7 @@ void CLGEMMLowpMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue 
         add_2D_tensor_argument(idx, _input0, slice);
         add_2D_tensor_argument(idx, _input1, slice_b);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

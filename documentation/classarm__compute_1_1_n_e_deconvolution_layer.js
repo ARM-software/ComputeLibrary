@@ -7,5 +7,6 @@ var classarm__compute_1_1_n_e_deconvolution_layer =
     [ "configure", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml#af7844db7c841f3f117547b7bd6ccfc55", null ],
     [ "operator=", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml#af81e2210787e1864c8bc6458b3072f6e", null ],
     [ "operator=", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml#ad441ee7d0846b6acc9d515383525ba52", null ],
+    [ "prepare", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77", null ],
     [ "run", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb", null ]
 ];

@@ -56,29 +56,55 @@ void OMPScheduler::set_num_threads(unsigned int num_threads)
     _num_threads                 = (num_threads == 0) ? num_cores : num_threads;
 }
 
-void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
+void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
-
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
+    ARM_COMPUTE_ERROR_ON_MSG(hints.strategy() == StrategyHint::DYNAMIC,
+                             "Dynamic scheduling is not supported in OMPScheduler");
 
     const Window      &max_window     = kernel->window();
-    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
-    info.num_threads                  = std::min(num_iterations, _num_threads);
+    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
+    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 
-    if(!kernel->is_parallelisable() || info.num_threads == 1)
+    if(!kernel->is_parallelisable() || num_threads == 1)
     {
+        ThreadInfo info;
+        info.cpu_info = &_cpu_info;
         kernel->run(max_window, info);
     }
     else
     {
-        #pragma omp parallel firstprivate(info) num_threads(info.num_threads)
+        const unsigned int                num_windows = num_threads;
+        std::vector<IScheduler::Workload> workloads(num_windows);
+        for(unsigned int t = 0; t < num_windows; t++)
         {
-            const int tid  = omp_get_thread_num();
-            Window    win  = max_window.split_window(split_dimension, tid, info.num_threads);
-            info.thread_id = tid;
-            kernel->run(win, info);
+            //Capture 't' by copy, all the other variables by reference:
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel](const ThreadInfo & info)
+            {
+                Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
+                win.validate();
+                kernel->run(win, info);
+            };
         }
+        run_workloads(workloads);
+    }
+}
+
+void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> &workloads)
+{
+    const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
+    if(num_threads < 1)
+    {
+        return;
+    }
+
+    ThreadInfo info;
+    info.cpu_info    = &_cpu_info;
+    info.num_threads = num_threads;
+    #pragma omp parallel firstprivate(info) num_threads(num_threads)
+    {
+        const int tid  = omp_get_thread_num();
+        info.thread_id = tid;
+        workloads[tid](info);
     }
 }

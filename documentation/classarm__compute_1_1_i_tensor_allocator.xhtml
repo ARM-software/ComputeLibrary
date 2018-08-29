@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -147,15 +147,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8378fc6c887231765b885f8033c7bb99"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a8378fc6c887231765b885f8033c7bb99">~ITensorAllocator</a> ()=default</td></tr>
 <tr class="memdesc:a8378fc6c887231765b885f8033c7bb99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#a8378fc6c887231765b885f8033c7bb99">More...</a><br /></td></tr>
 <tr class="separator:a8378fc6c887231765b885f8033c7bb99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa72161e0e3c0f6b2da20f835de6af680"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#aa72161e0e3c0f6b2da20f835de6af680">init</a> (const <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;input)</td></tr>
-<tr class="memdesc:aa72161e0e3c0f6b2da20f835de6af680"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tensor based on the passed <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a>.  <a href="#aa72161e0e3c0f6b2da20f835de6af680">More...</a><br /></td></tr>
-<tr class="separator:aa72161e0e3c0f6b2da20f835de6af680"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af36143939a43fa124312e395975091ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#af36143939a43fa124312e395975091ed">init</a> (const <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;input, size_t <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a952df9b9d6010a3a7732e40a2da0ddcb">alignment</a>=0)</td></tr>
+<tr class="memdesc:af36143939a43fa124312e395975091ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tensor based on the passed <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a>.  <a href="#af36143939a43fa124312e395975091ed">More...</a><br /></td></tr>
+<tr class="separator:af36143939a43fa124312e395975091ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b12680d0e794d5e81f489df22b38231"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a2b12680d0e794d5e81f489df22b38231">info</a> ()</td></tr>
 <tr class="memdesc:a2b12680d0e794d5e81f489df22b38231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a reference to the tensor's metadata.  <a href="#a2b12680d0e794d5e81f489df22b38231">More...</a><br /></td></tr>
 <tr class="separator:a2b12680d0e794d5e81f489df22b38231"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad129de4883c35830834987e9b68314e1"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#ad129de4883c35830834987e9b68314e1">info</a> () const </td></tr>
 <tr class="memdesc:ad129de4883c35830834987e9b68314e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a constant reference to the tensor's metadata.  <a href="#ad129de4883c35830834987e9b68314e1">More...</a><br /></td></tr>
 <tr class="separator:ad129de4883c35830834987e9b68314e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a952df9b9d6010a3a7732e40a2da0ddcb"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a952df9b9d6010a3a7732e40a2da0ddcb">alignment</a> () const </td></tr>
+<tr class="memdesc:a952df9b9d6010a3a7732e40a2da0ddcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return underlying's tensor buffer alignment.  <a href="#a952df9b9d6010a3a7732e40a2da0ddcb">More...</a><br /></td></tr>
+<tr class="separator:a952df9b9d6010a3a7732e40a2da0ddcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8a4946cd749d482dd996874d295af85"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#aa8a4946cd749d482dd996874d295af85">allocate</a> ()=0</td></tr>
 <tr class="memdesc:aa8a4946cd749d482dd996874d295af85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to allocate the tensor.  <a href="#aa8a4946cd749d482dd996874d295af85">More...</a><br /></td></tr>
 <tr class="separator:aa8a4946cd749d482dd996874d295af85"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -263,6 +266,26 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a952df9b9d6010a3a7732e40a2da0ddcb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t alignment </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return underlying's tensor buffer alignment. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> buffer alignment </dd></dl>
+
+<p>Referenced by <a class="el" href="_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00088">arm_compute::test::validation::TEST_CASE()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="aa8a4946cd749d482dd996874d295af85"></a>
 <div class="memitem">
 <div class="memproto">
@@ -356,7 +379,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa72161e0e3c0f6b2da20f835de6af680"></a>
+<a class="anchor" id="af36143939a43fa124312e395975091ed"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -364,8 +387,18 @@ Public Member Functions</h2></td></tr>
           <td class="memname">void init </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a> &amp;&#160;</td>
-          <td class="paramname"><em>input</em></td><td>)</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>alignment</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -374,11 +407,12 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td><a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> object containing the description of the tensor to initialize. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alignment</td><td>Alignment in bytes that the underlying base pointer should comply with. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="_g_l_e_s___c_o_m_p_u_t_e_2_helper_8h_source.xhtml#l00047">arm_compute::test::create_tensor()</a>, <a class="el" href="_le_net5_network_8h_source.xhtml#l00057">LeNet5Network&lt; TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::init()</a>, and <a class="el" href="_c_l_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00043">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_g_l_e_s___c_o_m_p_u_t_e_2_helper_8h_source.xhtml#l00046">arm_compute::test::create_tensor()</a>, and <a class="el" href="_c_l_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00043">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -443,7 +477,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml">ITensorAllocator</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -135,9 +135,9 @@ Collaboration diagram for CLWarpAffineKernel:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a80f957260bcc6d37da2a6e10eb885fa8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#a80f957260bcc6d37da2a6e10eb885fa8">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const float *matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy)</td></tr>
-<tr class="memdesc:a80f957260bcc6d37da2a6e10eb885fa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, interpolation policy and border_mode.  <a href="#a80f957260bcc6d37da2a6e10eb885fa8">More...</a><br /></td></tr>
-<tr class="separator:a80f957260bcc6d37da2a6e10eb885fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6f6097800a87984c4fab8ab1fffd65e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#aa6f6097800a87984c4fab8ab1fffd65e">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const std::array&lt; float, 9 &gt; &amp;matrix, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy)</td></tr>
+<tr class="memdesc:aa6f6097800a87984c4fab8ab1fffd65e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, interpolation policy and border_mode.  <a href="#aa6f6097800a87984c4fab8ab1fffd65e">More...</a><br /></td></tr>
+<tr class="separator:aa6f6097800a87984c4fab8ab1fffd65e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a423f9a45a52983b4de5e2b347f4369c7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_warp_affine_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">border_size</a> () const override</td></tr>
 <tr class="memdesc:a423f9a45a52983b4de5e2b347f4369c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the border for that kernel.  <a href="#a423f9a45a52983b4de5e2b347f4369c7">More...</a><br /></td></tr>
 <tr class="separator:a423f9a45a52983b4de5e2b347f4369c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -288,7 +288,7 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a80f957260bcc6d37da2a6e10eb885fa8"></a>
+<a class="anchor" id="aa6f6097800a87984c4fab8ab1fffd65e"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -307,7 +307,7 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *&#160;</td>
+          <td class="paramtype">const std::array&lt; float, 9 &gt; &amp;&#160;</td>
           <td class="paramname"><em>matrix</em>, </td>
         </tr>
         <tr>
@@ -329,7 +329,7 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: U8. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor, Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">matrix</td><td>The perspective matrix. Must be 2x3 of type float. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">matrix</td><td>The perspective matrix. Must be 2x3 of type float The matrix argument requires 9 values, the last 3 values are ignored. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>The interpolation type. </td></tr>
   </table>
   </dd>
@@ -346,7 +346,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_warp_affine_kernel.xhtml">CLWarpAffineKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

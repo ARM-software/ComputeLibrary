@@ -25,23 +25,6 @@
 
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define CONST_ONE (1 << FIXED_POINT_POSITION)
-#define ABS_OP(a) ABS_SAT_OP_EXPAND((a), DATA_TYPE, VEC_SIZE)
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE)
-#define SUB_OP(a, b) SUB_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define MLA_OP(a, b, c) MLA_SAT_OP_EXPAND((a), (b), (c), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define DIV_OP(a, b) DIV_SAT_OP_VEC_EXPAND((a), (b), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define EXP_OP(a) EXP_OP_EXPAND((a), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define LOG_OP(a) LOG_OP_EXPAND((a), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define SQRT_OP(a) DIV_OP(CONST_ONE, INVSQRT_OP_EXPAND((a), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION))
-#define TANH_OP(a) TANH_OP_EXPAND((a), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-
-#else /* FIXED_POINT_POSITION */
-
 #define CONST_ONE 1.f
 #define ABS_OP(a) fabs((a))
 #define ADD_OP(a, b) ((a) + (b))
@@ -53,8 +36,6 @@
 #define LOG_OP(a) log((a))
 #define SQRT_OP(a) sqrt((a))
 #define TANH_OP(a) tanh((a))
-
-#endif /* FIXED_POINT_POSITION */
 
 // Logistic Activation
 inline TYPE logistic_op(TYPE x)
@@ -125,9 +106,8 @@ inline TYPE linear_op(TYPE x)
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @note Activation function should be given as a preprocessor argument using -DACT=name. e.g. -DACT=TANH
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
- * @note In case of fixed point calculations the fixed point position is passed using -DFIXED_POINT_POSITION=position. e.g. -DFIXED_POINT_POSITION=3.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

@@ -48,6 +48,14 @@ IDeviceBackend *BackendRegistry::find_backend(Target target)
     return _registered_backends[target].get();
 }
 
+IDeviceBackend &BackendRegistry::get_backend(Target target)
+{
+    IDeviceBackend *backend = find_backend(target);
+    ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
+    ARM_COMPUTE_ERROR_ON_MSG(!backend->is_backend_supported(), "Requested backend isn't supported");
+    return *backend;
+}
+
 bool BackendRegistry::contains(Target target) const
 {
     auto it = _registered_backends.find(target);

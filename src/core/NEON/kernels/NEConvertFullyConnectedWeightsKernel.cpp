@@ -37,25 +37,26 @@ void NEConvertFullyConnectedWeightsKernel::configure(const ITensor *input, ITens
                                                      DataLayout data_layout)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Output tensor auto initialisation if not yet initialized
+    auto_init_if_empty(*output->info(), *input->info()->clone());
+
     ARM_COMPUTE_ERROR_THROW_ON(NEConvertFullyConnectedWeightsKernel::validate(input->info(), output->info(), original_input_shape, data_layout));
 
     _input  = input;
     _output = output;
 
-    const unsigned int num_elems_per_input_plane = original_input_shape.x() * original_input_shape.y();
-    const unsigned int num_channels              = original_input_shape.z();
+    const DataLayout input_data_layout = (data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
 
-    // Set build options
-    if(data_layout == DataLayout::NCHW)
-    {
-        _factor1 = num_elems_per_input_plane;
-        _factor2 = num_channels;
-    }
-    else
-    {
-        _factor1 = num_channels;
-        _factor2 = num_elems_per_input_plane;
-    }
+    const int width_idx   = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::WIDTH);
+    const int height_idx  = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::HEIGHT);
+    const int channel_idx = get_data_layout_dimension_index(input_data_layout, DataLayoutDimension::CHANNEL);
+
+    const unsigned int num_elems_per_input_plane = original_input_shape[width_idx] * original_input_shape[height_idx];
+    const unsigned int num_channels              = original_input_shape[channel_idx];
+
+    _factor1 = (data_layout == DataLayout::NCHW) ? num_elems_per_input_plane : num_channels;
+    _factor2 = (data_layout == DataLayout::NCHW) ? num_channels : num_elems_per_input_plane;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -65,13 +66,22 @@ void NEConvertFullyConnectedWeightsKernel::configure(const ITensor *input, ITens
 Status NEConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,
                                                       DataLayout data_layout)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::QS16, DataType::U32, DataType::S32,
-                                                         DataType::QS32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
+                                                         DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16,
+                                                         DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != original_input_shape.total_size_lower(3));
     ARM_COMPUTE_RETURN_ERROR_ON(data_layout == DataLayout::UNKNOWN);
+
+    // Checks performed when output is configured
+    if((output != nullptr) && (output->total_size() != 0))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
 
     return Status{};
 }

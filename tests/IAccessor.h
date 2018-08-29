@@ -94,12 +94,6 @@ public:
      */
     virtual PaddingSize padding() const = 0;
 
-    /** Number of bits for the fractional part.
-     *
-     * @return the number of bits for the fractional part.
-     */
-    virtual int fixed_point_position() const = 0;
-
     /** Quantization info in case of asymmetric quantized type
      *
      * @return

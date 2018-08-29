@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,35 +21,149 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLMeanStdDev.h"
+#include "arm_compute/core/TensorInfo.h"
 
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/functions/CLMeanStdDev.h"
 
 using namespace arm_compute;
 
-CLMeanStdDev::CLMeanStdDev()
-    : _mean_stddev_kernel(),
+CLMeanStdDev::CLMeanStdDev(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
+    : _memory_group(std::move(memory_manager)),
+      _data_type(),
+      _num_pixels(),
+      _run_stddev(),
+      _reduction_operation_mean(),
+      _reduction_operation_stddev(),
+      _reduction_output_mean(),
+      _reduction_output_stddev(),
+      _mean(nullptr),
+      _stddev(nullptr),
+      _mean_stddev_kernel(),
       _fill_border_kernel(),
       _global_sum(),
       _global_sum_squared()
 {
 }
 
+Status CLMeanStdDev::validate(ITensorInfo *input, float *mean, float *stddev)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D(input);
+    if(is_data_type_float(input->data_type()))
+    {
+        ARM_COMPUTE_UNUSED(mean);
+        ARM_COMPUTE_UNUSED(stddev);
+
+        TensorShape output_shape      = TensorShape{ 1, input->dimension(1) };
+        TensorInfo  output_shape_info = TensorInfo(output_shape, 1, DataType::U8);
+        return CLReductionOperation::validate(input, &output_shape_info, 0, ReductionOperation::SUM);
+    }
+    else
+    {
+        return CLMeanStdDevKernel::validate(input, mean, nullptr, stddev, nullptr);
+    }
+}
+
 void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
 {
-    _global_sum = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
+    // In the case of F16/F32 we call reduction operation for calculating CLMeanStdDev
+    _data_type = input->info()->data_type();
 
-    if(stddev != nullptr)
+    if(is_data_type_float(_data_type))
     {
-        _global_sum_squared = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
+        _num_pixels = input->info()->dimension(0) * input->info()->dimension(1);
+
+        _memory_group.manage(&_reduction_output_mean);
+        _reduction_operation_mean.configure(input, &_reduction_output_mean, 0, ReductionOperation::SUM);
+        _reduction_output_mean.allocator()->allocate();
+        _mean = mean;
+
+        if(stddev != nullptr)
+        {
+            _memory_group.manage(&_reduction_output_stddev);
+            _reduction_operation_stddev.configure(input, &_reduction_output_stddev, 0, ReductionOperation::SUM_SQUARE);
+            _reduction_output_stddev.allocator()->allocate();
+            _stddev     = stddev;
+            _run_stddev = true;
+        }
+    }
+    else
+    {
+        _global_sum = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
+
+        if(stddev != nullptr)
+        {
+            _global_sum_squared = cl::Buffer(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, sizeof(cl_ulong));
+        }
+
+        _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
+        _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
+    }
+}
+
+template <typename T>
+void CLMeanStdDev::run_float()
+{
+    _memory_group.acquire();
+
+    // Perform reduction on x-axis
+    _reduction_operation_mean.run();
+    if(_run_stddev)
+    {
+        _reduction_operation_stddev.run();
+        _reduction_output_stddev.map(true);
     }
 
-    _mean_stddev_kernel.configure(input, mean, &_global_sum, stddev, &_global_sum_squared);
-    _fill_border_kernel.configure(input, _mean_stddev_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint8_t>(0)));
+    _reduction_output_mean.map(true);
+
+    auto mean = static_cast<T>(0);
+
+    // Calculate final result for mean
+    for(unsigned int i = 0; i < _reduction_output_mean.info()->dimension(1); ++i)
+    {
+        mean += *reinterpret_cast<T *>(_reduction_output_mean.buffer() + _reduction_output_mean.info()->offset_element_in_bytes(Coordinates(0, i)));
+    }
+
+    mean /= _num_pixels;
+    *_mean = mean;
+
+    if(_run_stddev)
+    {
+        auto stddev = static_cast<T>(0);
+        // Calculate final result for stddev
+        for(unsigned int i = 0; i < _reduction_output_stddev.info()->dimension(1); ++i)
+        {
+            stddev += *reinterpret_cast<T *>(_reduction_output_stddev.buffer() + _reduction_output_stddev.info()->offset_element_in_bytes(Coordinates(0, i)));
+        }
+        *_stddev = std::sqrt((stddev / _num_pixels) - (mean * mean));
+
+        _reduction_output_stddev.unmap();
+    }
+    _reduction_output_mean.unmap();
+
+    _memory_group.release();
+}
+
+void CLMeanStdDev::run_int()
+{
+    CLScheduler::get().enqueue(_fill_border_kernel);
+    CLScheduler::get().enqueue(_mean_stddev_kernel);
 }
 
 void CLMeanStdDev::run()
 {
-    CLScheduler::get().enqueue(_fill_border_kernel);
-    CLScheduler::get().enqueue(_mean_stddev_kernel);
+    switch(_data_type)
+    {
+        case DataType::F16:
+            run_float<half>();
+            break;
+        case DataType::F32:
+            run_float<float>();
+            break;
+        case DataType::U8:
+            run_int();
+            break;
+        default:
+            ARM_COMPUTE_ERROR_ON("Not supported");
+    }
 }

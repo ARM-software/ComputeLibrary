@@ -6,6 +6,7 @@ var classarm__compute_1_1graph_1_1_i_node =
     [ "INode", "classarm__compute_1_1graph_1_1_i_node.xhtml#ab926b66a0f1c5bfb4b80f6d56e5edbc9", null ],
     [ "accept", "classarm__compute_1_1graph_1_1_i_node.xhtml#a69a6e8613e2e1b00de98610c2ae6288a", null ],
     [ "assigned_target", "classarm__compute_1_1graph_1_1_i_node.xhtml#a72123a16315dde55dade52690642f56c", null ],
+    [ "common_node_params", "classarm__compute_1_1graph_1_1_i_node.xhtml#a923898bd4d886a6140b5d63635913d74", null ],
     [ "configure_output", "classarm__compute_1_1graph_1_1_i_node.xhtml#a98dd474c332ea76a71bd81b790d7e0d9", null ],
     [ "forward_descriptors", "classarm__compute_1_1graph_1_1_i_node.xhtml#a5edbd8a4a1b75060bb3b49bc0ba2c6b0", null ],
     [ "graph", "classarm__compute_1_1graph_1_1_i_node.xhtml#a5332828f81f0c3bc766b90656c9ee631", null ],

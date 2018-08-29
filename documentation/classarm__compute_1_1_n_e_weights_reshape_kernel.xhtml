@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -331,7 +331,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/QASYMM8/QS16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QASYMM8/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>The shared biases tensor to append. Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with dimensions [OFM, num_patches] if unshared. Data types supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -526,7 +526,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">NEWeightsReshapeKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QS8/QASYMM8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared, and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches] if unshared. Data types supported: QASYMM8/F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>The shared biases tensor to append. Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with dimensions [OFM, num_patches] if unshared. Data types supported: Same as <code>input</code> </td></tr>
   </table>
   </dd>
@@ -553,7 +553,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">NEWeightsReshapeKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:49 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

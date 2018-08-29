@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,7 +120,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *output)
@@ -189,7 +189,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
                                                            input->plane(2)->info()->valid_region());
     output_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *output)
@@ -198,6 +198,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
     unsigned int num_elems_processed_per_iteration = 0;
+    unsigned int num_elems_read_per_iteration_x    = 0;
 
     bool  has_two_planes = (output->info()->format() == Format::NV12) || (output->info()->format() == Format::NV21);
     float sub_sampling   = (has_two_planes || (output->info()->format() == Format::IYUV)) ? 0.5f : 1;
@@ -212,9 +213,11 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
                 case Format::NV12:
                 case Format::IYUV:
                     num_elems_processed_per_iteration = 2;
+                    num_elems_read_per_iteration_x    = 8;
                     break;
                 case Format::YUV444:
                     num_elems_processed_per_iteration = 4;
+                    num_elems_read_per_iteration_x    = 16;
                     break;
                 default:
                     break;
@@ -229,6 +232,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
                 case Format::NV12:
                 case Format::IYUV:
                     num_elems_processed_per_iteration = 8;
+                    num_elems_read_per_iteration_x    = 8;
                     break;
                 default:
                     break;
@@ -238,6 +242,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
         default:
             break;
     }
+
     ARM_COMPUTE_ERROR_ON_MSG(num_elems_processed_per_iteration == 0, "Conversion from %s to %s not supported",
                              string_from_format(input->info()->format()).c_str(),
                              string_from_format(output->info()->format()).c_str());
@@ -248,7 +253,6 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     kernel_name << "_to_";
     kernel_name << string_from_format(output->info()->format());
     kernel_name << "_bt709";
-
     _input        = input;
     _multi_output = output;
 
@@ -267,8 +271,10 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     AccessWindowRectangle  output_plane2_access(has_two_planes ? nullptr : output->plane(2)->info(), 0, 0,
                                                 num_elems_processed_per_iteration, 1, sub_sampling, sub_sampling);
 
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_read_per_iteration_x);
+
     update_window_and_padding(win,
-                              AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
+                              input_access,
                               output_plane0_access,
                               output_plane1_access,
                               output_plane2_access);
@@ -279,7 +285,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     output_plane1_access.set_valid_region(win, ValidRegion(input_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(input_region.anchor, output->plane(2)->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *output)
@@ -363,7 +369,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
     output_plane1_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->plane(2)->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)

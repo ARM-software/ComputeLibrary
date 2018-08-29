@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -162,7 +162,7 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_c_l_arithmetic_subtraction_kernel.xhtml">CLArithmeticSubtractionKernel</a>. </p>
-<dl class="section note"><dt>Note</dt><dd>The tensor data type for the inputs must be U8/QS8/QS16/S16/F16/F32. </dd>
+<dl class="section note"><dt>Note</dt><dd>The tensor data type for the inputs must be U8/S16/F16/F32. </dd>
 <dd>
 The function performs an arithmetic subtraction between two tensors. </dd></dl>
 
@@ -207,13 +207,15 @@ The function performs an arithmetic subtraction between two tensors. </dd></dl>
 <p>Initialise the kernel's inputs, output and convertion policy. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input. Data types supported: U8/QS8 (only if <code>input1</code> is QS8), QS16 (only if <code>input1</code> is QS16), S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Policy to use to handle overflow. </td></tr>
   </table>
   </dd>
 </dl>
+
+<p>Referenced by <a class="el" href="_c_l_2_arithmetic_subtraction_8cpp_source.xhtml#l00136">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_c_l_2_arithmetic_subtraction_8cpp_source.xhtml#l00236">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -264,14 +266,16 @@ The function performs an arithmetic subtraction between two tensors. </dd></dl>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml">CLArithmeticSubtraction</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input info. Data types supported: U8/QS8/QS16/S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input info. Data types supported: U8/QS8 (only if <code>input1</code> is QS8), QS16 (only if <code>input1</code> is QS16), S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor input info. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor input info. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8 (Only if both inputs are U8), S16/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Policy to use to handle overflow.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+<p>Referenced by <a class="el" href="_c_l_2_arithmetic_subtraction_8cpp_source.xhtml#l00069">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -284,7 +288,7 @@ The function performs an arithmetic subtraction between two tensors. </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml">CLArithmeticSubtraction</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

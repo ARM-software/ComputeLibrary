@@ -26,8 +26,8 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
@@ -40,6 +40,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
 #include <memory>
@@ -58,22 +59,24 @@ public:
     CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
-     * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                     Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
+     * @param[in]  weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                        Data type supported: QASYMM8/F16/F32.
+     * @param[in]  biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[out] output     Destination tensor. Data types supported: Same as @p weights.
+     * @param[in]  num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      */
-    void configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output);
+    void configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayerReshapeWeights
      *
-     * @param[in] weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                    Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
+     * @param[in] weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
+     *                       Data type supported: QASYMM8/F16/F32.
+     * @param[in] biases     Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in] output     Destination tensor. Data types supported: Same as @p weights.
+     * @param[in] num_groups (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups = 1);
     // Inherited methods overridden:
     void run() override;
 
@@ -83,18 +86,12 @@ private:
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * Note: weights already reshaped for quantized asymmetric is not supported
- *
  * -# @ref CLIm2ColKernel
- * -# @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric)
- * -# @ref CLCol2ImKernel
- *
- * if the weights are already reshaped:
- * -# @ref CLGEMMInterleave4x4Kernel
- * -# @ref CLGEMMMatrixMultiplyKernel
- * else
- * -# @ref CLGEMM
+ * -# @ref CLGEMM (if the data type is FP32 or FP16)
+ * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
+ * -# @ref CLArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
+ * -# @ref CLCol2ImKernel (if NCHW data layout) or @ref CLReshapeLayer (if NHWC with QASYMM8)
  */
 class CLGEMMConvolutionLayer : public IFunction
 {
@@ -116,7 +113,7 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     *                          Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -127,14 +124,15 @@ public:
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
+     * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     *                          Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -145,11 +143,12 @@ public:
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
+     * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run() override;
@@ -158,22 +157,25 @@ public:
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param input                     Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param weights                   Weights tensor. Data type supported: Same as @p input.
-     * @param output                    Output tensor. Data types supported: Same as @p input,
-     *                                                 except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]      input         Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]      weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[in, out] output        Output tensor. Data types supported: Same as @p input,
+     *                               except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]      gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
      */
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
-     * @param[in] input   Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in] weights Weights tensor. Data type supported: Same as @p input.
-     * @param[in] output  Output tensor. Data types supported: Same as @p input,
-     *                                      except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in] input         Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in] weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[in] output        Output tensor. Data types supported: Same as @p input,
+     *                          except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in] gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in] skip_im2col   (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output);
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
 
 private:
     CLMemoryGroup                                       _memory_group;
@@ -184,6 +186,8 @@ private:
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLCol2ImKernel                                      _col2im_kernel;
     CLActivationLayer                                   _activationlayer_function;
+    CLArithmeticAdditionKernel                          _add_bias_kernel;
+    CLReshapeLayer                                      _reshape_layer;
 
     const ICLTensor *_original_weights;
 
@@ -192,9 +196,13 @@ private:
     CLTensor _gemm_output;
     CLTensor _tmp_output;
 
+    DataLayout _data_layout;
+
+    bool _append_bias;
+    bool _skip_im2col;
     bool _is_quantized;
     bool _is_activationlayer_enabled;
     bool _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

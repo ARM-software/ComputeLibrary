@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -133,6 +133,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac1794eb37cf7ace4b8e0f9bf759df6e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml">IDeviceBackend</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#ac1794eb37cf7ace4b8e0f9bf759df6e4">find_backend</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a> target)</td></tr>
 <tr class="memdesc:ac1794eb37cf7ace4b8e0f9bf759df6e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds a backend in the registry.  <a href="#ac1794eb37cf7ace4b8e0f9bf759df6e4">More...</a><br /></td></tr>
 <tr class="separator:ac1794eb37cf7ace4b8e0f9bf759df6e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83ba5515af28873a9ed86a36ac29516a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml">IDeviceBackend</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a83ba5515af28873a9ed86a36ac29516a">get_backend</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a> target)</td></tr>
+<tr class="memdesc:a83ba5515af28873a9ed86a36ac29516a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a backend from the registry.  <a href="#a83ba5515af28873a9ed86a36ac29516a">More...</a><br /></td></tr>
+<tr class="separator:a83ba5515af28873a9ed86a36ac29516a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ab3541aa19379c2a414f6dd8fde588d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a7ab3541aa19379c2a414f6dd8fde588d">contains</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a> target) const </td></tr>
 <tr class="memdesc:a7ab3541aa19379c2a414f6dd8fde588d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if a backend for a given target exists.  <a href="#a7ab3541aa19379c2a414f6dd8fde588d">More...</a><br /></td></tr>
 <tr class="separator:a7ab3541aa19379c2a414f6dd8fde588d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -185,10 +188,10 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_backend_registry_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_backend_registry_8h_source.xhtml">BackendRegistry.h</a>.</p>
+<p>Definition at line <a class="el" href="_backend_registry_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_backend_registry_8h_source.xhtml">BackendRegistry.h</a>.</p>
 
 <p>Referenced by <a class="el" href="_backend_registrar_8h_source.xhtml#l00053">BackendRegistrar&lt; T &gt;::BackendRegistrar()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    _registered_backends[target] = support::cpp14::make_unique&lt;T&gt;();</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;}</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;{</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    _registered_backends[target] = support::cpp14::make_unique&lt;T&gt;();</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ac79ce508f33184eecd9c2cd3253d3f06"></a>
@@ -287,6 +290,32 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a83ba5515af28873a9ed86a36ac29516a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml">IDeviceBackend</a>&amp; get_backend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">Target</a>&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get a backend from the registry. </p>
+<p>The backend must be present and supported.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>Backend target</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Reference to the backend interface </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/graph/backends/<a class="el" href="_backend_registry_8h_source.xhtml">BackendRegistry.h</a></li>
 </ul>
@@ -296,7 +325,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml">backends</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml">BackendRegistry</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -173,35 +173,7 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */
-const std::array<float16x8_t, 8> exp_tab_f16 =
-{
-    {
-        vdupq_n_f16(1.f),
-        vdupq_n_f16(0.0416598916054f),
-        vdupq_n_f16(0.500000596046f),
-        vdupq_n_f16(0.0014122662833f),
-        vdupq_n_f16(1.00000011921f),
-        vdupq_n_f16(0.00833693705499f),
-        vdupq_n_f16(0.166665703058f),
-        vdupq_n_f16(0.000195780929062f),
-    }
-};
-
 /** Logarithm polynomial coefficients */
-const std::array<float16x8_t, 8> log_tab_f16 =
-{
-    {
-        vdupq_n_f16(-2.29561495781f),
-        vdupq_n_f16(-2.47071170807f),
-        vdupq_n_f16(-5.68692588806f),
-        vdupq_n_f16(-0.165253549814f),
-        vdupq_n_f16(5.17591238022f),
-        vdupq_n_f16(0.844007015228f),
-        vdupq_n_f16(4.58445882797f),
-        vdupq_n_f16(0.0141278216615f),
-    }
-};
-
 #ifndef DOXYGEN_SKIP_THIS
 inline float16x4_t vinvsqrt_f16(float16x4_t x)
 {
@@ -264,6 +236,20 @@ inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t
 
 inline float16x8_t vexpq_f16(float16x8_t x)
 {
+    static const std::array<float16x8_t, 8> exp_tab_f16 =
+    {
+        {
+            vdupq_n_f16(1.f),
+            vdupq_n_f16(0.0416598916054f),
+            vdupq_n_f16(0.500000596046f),
+            vdupq_n_f16(0.0014122662833f),
+            vdupq_n_f16(1.00000011921f),
+            vdupq_n_f16(0.00833693705499f),
+            vdupq_n_f16(0.166665703058f),
+            vdupq_n_f16(0.000195780929062f),
+        }
+    };
+
     static const float16x8_t CONST_LN2          = vdupq_n_f16(0.6931471805f); // ln(2)
     static const float16x8_t CONST_INV_LN2      = vdupq_n_f16(1.4426950408f); // 1/ln(2)
     static const float16x8_t CONST_0            = vdupq_n_f16(0.f);
@@ -285,6 +271,20 @@ inline float16x8_t vexpq_f16(float16x8_t x)
 
 inline float16x8_t vlogq_f16(float16x8_t x)
 {
+    static const std::array<float16x8_t, 8> log_tab_f16 =
+    {
+        {
+            vdupq_n_f16(-2.29561495781f),
+            vdupq_n_f16(-2.47071170807f),
+            vdupq_n_f16(-5.68692588806f),
+            vdupq_n_f16(-0.165253549814f),
+            vdupq_n_f16(5.17591238022f),
+            vdupq_n_f16(0.844007015228f),
+            vdupq_n_f16(4.58445882797f),
+            vdupq_n_f16(0.0141278216615f),
+        }
+    };
+
     static const int16x8_t   CONST_127 = vdupq_n_s16(127);           // 127
     static const float16x8_t CONST_LN2 = vdupq_n_f16(0.6931471805f); // ln(2)
 
@@ -303,7 +303,15 @@ inline float16x8_t vlogq_f16(float16x8_t x)
 
 inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
-    return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
+    float32x4_t n0_f32   = vcvt_f32_f16(vget_low_f16(n));
+    float32x4_t n1_f32   = vcvt_f32_f16(vget_high_f16(n));
+    float32x4_t val0_f32 = vcvt_f32_f16(vget_low_f16(val));
+    float32x4_t val1_f32 = vcvt_f32_f16(vget_high_f16(val));
+
+    float32x4_t res0_f32 = vexpq_f32(vmulq_f32(n0_f32, vlogq_f32(val0_f32)));
+    float32x4_t res1_f32 = vexpq_f32(vmulq_f32(n1_f32, vlogq_f32(val1_f32)));
+
+    return vcombine_f16(vcvt_f16_f32(res0_f32), vcvt_f16_f32(res1_f32));
 }
 #endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

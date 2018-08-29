@@ -1,6 +1,6 @@
 var structarm__compute_1_1_quantization_info =
 [
-    [ "QuantizationInfo", "structarm__compute_1_1_quantization_info.xhtml#a915ff61cd41512869bb569f505946e83", null ],
+    [ "QuantizationInfo", "structarm__compute_1_1_quantization_info.xhtml#a842ac5aa8863f371e40dbe93936c115c", null ],
     [ "QuantizationInfo", "structarm__compute_1_1_quantization_info.xhtml#af565d3fc3f7d82e9ed5e36dda5377eab", null ],
     [ "dequantize", "structarm__compute_1_1_quantization_info.xhtml#a9f956adfa6525f0edd3c702e7e5afb8f", null ],
     [ "empty", "structarm__compute_1_1_quantization_info.xhtml#ac6e61de369e994009e36f344f99c15ad", null ],

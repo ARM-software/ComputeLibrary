@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -38,9 +39,9 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input0);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input0->data_type()) && (output->data_type() != DataType::S32));
     ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(2) != input1->dimension(1));
 
@@ -108,14 +109,6 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
         _kernel.setArg<int>(idx++, -_input1->info()->quantization_info().offset);
     }
 
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning for the MobileNets tensor shapes.
-    const GPUTarget gpu_target = get_target();
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
-    {
-        _lws_hint = cl::NDRange(1, 1, 1);
-    }
-
     // Configure kernel window
     const unsigned int num_elems_read_per_iteration = 4;
 
@@ -128,7 +121,7 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLGEMMMatrixVectorMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
@@ -172,7 +165,7 @@ void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueu
         unsigned int idx_2 = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
         add_3D_tensor_argument(idx_0, _input0, slice_in);
         add_1D_tensor_argument(idx_2, _output, slice_out);
-        enqueue(queue, *this, slice_in, _lws_hint);
+        enqueue(queue, *this, slice_in, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
 }

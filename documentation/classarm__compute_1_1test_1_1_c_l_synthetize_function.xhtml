@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1test_1_1_c_l_synt
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLSynthetizeFunction&lt; K &gt; Class Template Reference</div>  </div>
 </div><!--header-->
@@ -153,6 +154,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
 <tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
 <tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a95afd502415c6a2ac3007c9003317f29"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a95afd502415c6a2ac3007c9003317f29"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml#a95afd502415c6a2ac3007c9003317f29">validate</a> (Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a95afd502415c6a2ac3007c9003317f29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate input arguments.  <a href="#a95afd502415c6a2ac3007c9003317f29">More...</a><br /></td></tr>
+<tr class="separator:a95afd502415c6a2ac3007c9003317f29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename K&gt;<br />
@@ -196,6 +204,45 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        k-&gt;configure(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
+<a class="anchor" id="a95afd502415c6a2ac3007c9003317f29"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Validate input arguments. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Configuration arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00055">55</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adace45051d8e72357da6c2b18ceaf25e">arm_compute::test::validation::validate()</a>.</p>
+
+<p>Referenced by <a class="el" href="_c_l_2_col2_im_8cpp_source.xhtml#l00049">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    {</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#adace45051d8e72357da6c2b18ceaf25e">K::validate</a>(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_adace45051d8e72357da6c2b18ceaf25e"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#adace45051d8e72357da6c2b18ceaf25e">arm_compute::test::validation::validate</a></div><div class="ttdeci">validate(dst.info() -&gt;valid_region(), valid_region)</div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>tests/CL/<a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a></li>
 </ul>
@@ -205,7 +252,7 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml">CLSynthetizeFunction</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:52 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

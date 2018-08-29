@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,11 +32,10 @@
 
 using namespace arm_compute;
 
-void NEWarpPerspective::configure(ITensor *input, ITensor *output, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+void NEWarpPerspective::configure(ITensor *input, ITensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON(nullptr == matrix);
 
     switch(policy)
     {

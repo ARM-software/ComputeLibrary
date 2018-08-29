@@ -24,10 +24,6 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
@@ -48,13 +44,16 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 {
     bool flag = true;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G76))
     {
-        // COMPMID-852
         if(k > 256 && m > 4 && is_data_type_float(data_type) && reshape_b_only_on_first_run)
         {
-            const float scale = k < 1024 ? 2.0f : 2.5f;
-            flag              = (scale * n) > ((1.66f * n) + 38.4f);
+            constexpr float alpha = 3.2f;
+            constexpr float fact0 = 1.51f;
+            constexpr float fact1 = 1.66f;
+            constexpr float ops   = 12.0f;
+            const float     scale = k > 1024 ? 1.07f : 1.0f;
+            flag                  = alpha + ((n * fact0) / ops) < ((fact1 * n * scale) / ops);
         }
         else
         {
@@ -84,12 +83,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), alpha, beta, gemm_info));
 
-    // Store original b matrix
-    _original_b = b;
-
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
-    _is_prepared                 = false;
+    _is_prepared                 = gemm_info.retain_internal_weights();
+    _original_b                  = b;
 
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
@@ -104,9 +101,11 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     // Arguments used by GEMMReshapeInfo
     // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
     // in order to know how the matrices have been reshaped
-    const int m                         = a->info()->dimension(1);
+    bool      reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
+    const int m                         = reinterpret_input_as_3d ? (a->info()->dimension(1) * a->info()->dimension(2)) : a->info()->dimension(1);
     const int n                         = b->info()->dimension(0);
     const int k                         = a->info()->dimension(0);
+    const int depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
     int       mult_transpose1xW_width   = 1;
     int       mult_interleave4x4_height = 1;
 
@@ -118,6 +117,12 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
     // Check if we need to reshape the matrix A and matrix B
     _is_interleaved_transposed = is_interleaved_transposed(m, n, k, a->info()->data_type(), _reshape_b_only_on_first_run, gpu_target);
+
+    // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
+    if(_is_interleaved_transposed)
+    {
+        reinterpret_input_as_3d = false;
+    }
 
     if(_is_interleaved_transposed)
     {
@@ -133,13 +138,16 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         // _tmp_a and _tmp_b will be auto configured in _interleave_kernel and in _transpose_kernel
 
         // Configure interleave kernel
-        _interleave_kernel.configure(a, &_tmp_a, mult_interleave4x4_height);
+        _interleave_kernel.configure(a, &_tmp_a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d());
 
         // Configure transpose kernel
         _transpose_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
     }
 
-    _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height));
+    // Configure and tune matrix multiply kernel
+    _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d,
+                                                                                                        reinterpret_input_as_3d));
+    CLScheduler::get().tune_kernel_static(_mm_kernel);
 
     if(_is_interleaved_transposed)
     {
@@ -162,6 +170,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(output);
 
     // Check if we need to reshape the matrix B only on the first run
     const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
@@ -171,7 +180,6 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     TensorInfo tmp_a_info{};
     TensorInfo tmp_b_info{};
-    TensorInfo tmp_output_info = *output->clone();
 
     // Get the GPU target
     const GPUTarget gpu_target = CLScheduler::get().target();
@@ -179,11 +187,13 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     // Arguments used by GEMMReshapeInfo
     // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
     // in order to know how the matrices have been reshaped
-    const int m                         = a->dimension(1);
+    bool      reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
+    const int m                         = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
     const int n                         = b->dimension(0);
     const int k                         = a->dimension(0);
     int       mult_transpose1xW_width   = 1;
     int       mult_interleave4x4_height = 1;
+    const int depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
 
     if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
     {
@@ -191,10 +201,16 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         mult_interleave4x4_height = 2;
     }
 
-    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height);
-
     // Check if we need to reshape the matrix A and matrix B
     const bool run_interleave_transpose = is_interleaved_transposed(m, n, k, a->data_type(), reshape_b_only_on_first_run, gpu_target);
+
+    // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
+    if(run_interleave_transpose)
+    {
+        reinterpret_input_as_3d = false;
+    }
+
+    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d, reinterpret_input_as_3d);
 
     if(run_interleave_transpose)
     {
@@ -202,8 +218,8 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         matrix_b_info = &tmp_b_info;
 
         // Validate interleave kernel
-        auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height)));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height));
+        auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d())));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()));
 
         // Validate transpose kernel
         auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width)));
@@ -211,13 +227,12 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Validate matrix multiply
-    auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info, gpu_target));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target));
 
     if(beta != 0 && c != nullptr)
     {
         // Validate matrix addition kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, &tmp_output_info, beta));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, output, beta));
     }
 
     return Status{};
@@ -259,7 +274,7 @@ void CLGEMM::prepare()
     {
         if(_is_interleaved_transposed && _reshape_b_only_on_first_run)
         {
-            // Run transpose kernel
+            // Run transpose kernel and mark original weights tensor as unused
             _tmp_b.allocator()->allocate();
             CLScheduler::get().enqueue(_transpose_kernel, false);
             _original_b->mark_as_unused();

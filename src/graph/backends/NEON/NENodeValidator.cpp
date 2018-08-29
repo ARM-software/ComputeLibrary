@@ -47,6 +47,8 @@ Status NENodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ChannelShuffleLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ChannelShuffleLayer");
         case NodeType::ConvolutionLayer:
             return detail::validate_convolution_layer<NEConvolutionLayer,
                    NEDirectConvolutionLayer,
@@ -55,7 +57,8 @@ Status NENodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
                    NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
-
+        case NodeType::PermuteLayer:
+            return detail::validate_permute_layer<NEPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
         default:
             return Status{};
     }

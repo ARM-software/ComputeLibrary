@@ -8,5 +8,6 @@ var dir_7484b841a86f2d7fdd057c9b24fbf230 =
     ] ],
     [ "ICPPSimpleKernel.h", "_i_c_p_p_simple_kernel_8h.xhtml", [
       [ "ICPPSimpleKernel", "classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml", "classarm__compute_1_1_i_c_p_p_simple_kernel" ]
-    ] ]
+    ] ],
+    [ "Validate.h", "_c_p_p_2_validate_8h.xhtml", "_c_p_p_2_validate_8h" ]
 ];

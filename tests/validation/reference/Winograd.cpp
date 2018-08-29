@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace arm_compute
 {
@@ -142,13 +143,31 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
     {
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT), imatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT), imatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::INPUT), imatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::INPUT), imatrix4x4_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::INPUT), imatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::INPUT), imatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::INPUT), imatrix4x4_5x5 },
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER), fmatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER), fmatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::FILTER), fmatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5 },
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::OUTPUT), omatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::OUTPUT), omatrix4x4_5x5 },
+        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::OUTPUT), omatrix4x4_5x5 },
     };
 
     // Find transformation matrix
@@ -189,7 +208,10 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     const unsigned int tile_w = output_tile_size.width + kernel_size.width - 1;
     const unsigned int tile_h = output_tile_size.height + kernel_size.height - 1;
 
-    TensorShape tile_dims(tile_w, tile_h);
+    // Get the maximum dimension from the tile size
+    const unsigned int tile_max_dim = std::max(tile_w, tile_h);
+
+    TensorShape tile_dims(tile_max_dim, tile_max_dim);
 
     // Simple tensor for the input tile
     SimpleTensor<T> src_tile{ tile_dims, in.data_type() };
@@ -217,10 +239,45 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     const int in_d        = in.shape().z();
     const int out_d       = out.shape().z();
     const int num_batches = in.shape().total_size() / (in_w * in_h * in_d);
-    const int num_tiles_x = std::ceil((in_w - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
-    const int num_tiles_y = std::ceil((in_h - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
     const int step_x      = output_tile_size.width;
     const int step_y      = output_tile_size.height;
+
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(in_w, in_h),
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
+
+    const int num_tiles_x = num_tiles.width;
+    const int num_tiles_y = num_tiles.height;
+
+    // In case of 1D convolution, the input tile has to be partially filled with zeros
+    int start_x_zero = 0;
+    int start_y_zero = 0;
+    int end_x_zero   = 0;
+    int end_y_zero   = 0;
+
+    if(output_tile_size.width == 1)
+    {
+        start_x_zero = 1;
+        start_y_zero = 0;
+        end_x_zero   = tile_max_dim - 1;
+        end_y_zero   = tile_max_dim;
+    }
+    else if(output_tile_size.height == 1)
+    {
+        start_x_zero = 0;
+        start_y_zero = 1;
+        end_x_zero   = tile_max_dim;
+        end_y_zero   = tile_max_dim - 1;
+    }
+
+    // Set the anchor and shape of the zeros area
+    const Coordinates anchor_zeros(start_x_zero, start_y_zero);
+    const TensorShape shape_zeros(end_x_zero, end_y_zero);
+
+    // If we have a vertical filter (i.e. 1x3, 1x5,..), we need to take the elements along the y direction (step = width of the output tile)
+    const int step_y_transf_tile = kernel_size.width == 1 ? tile_max_dim : 1;
 
     ARM_COMPUTE_ERROR_ON((num_tiles_x * num_tiles_y) != static_cast<int>(out.shape().y()));
 
@@ -238,6 +295,9 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
                     // Get the tile from the input tensor
                     get_tile(in, src_tile, Coordinates(xi, yi, z, b));
 
+                    // Fill partially with zeros in case of 1D convolution
+                    zeros(src_tile, anchor_zeros, shape_zeros);
+
                     // Compute the transformation
                     matrix_multiply(matrix, src_tile, tmp_tile);
                     matrix_multiply(tmp_tile, matrix_transposed, dst_tile);
@@ -247,7 +307,7 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
                     {
                         int xo = z;
                         int yo = x + y * num_tiles_x;
-                        out[coords2index(out.shape(), Coordinates(xo, yo, i, b))] = dst_tile[i];
+                        out[coords2index(out.shape(), Coordinates(xo, yo, i, b))] = dst_tile[i * step_y_transf_tile];
                     }
                 }
             }
@@ -268,27 +328,31 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
     const Size2D output_tile_size = winograd_info.output_tile_size;
     const Size2D kernel_size      = winograd_info.kernel_size;
 
-    TensorShape kernel_tile_dims(kernel_size.width, kernel_size.height);
-
     // Calculate dimensions for the tile
     const unsigned int input_tile_w    = output_tile_size.width + kernel_size.width - 1;
     const unsigned int input_tile_h    = output_tile_size.height + kernel_size.height - 1;
     const unsigned int input_tile_area = input_tile_w * input_tile_h;
 
+    // Get the maximum dimension from the filter size
+    const unsigned int kernel_max_dim = std::max(kernel_size.width, kernel_size.height);
+
+    // Get the maximum dimension from the input tile
+    const unsigned int input_tile_max_dim = std::max(input_tile_w, input_tile_h);
+
     // Simple tensor for the input tile
-    SimpleTensor<T> input_tile{ kernel_tile_dims, in.data_type(), 1 };
+    SimpleTensor<T> input_tile{ TensorShape(kernel_max_dim, kernel_max_dim), in.data_type(), 1 };
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> trans_matrix{ TensorShape(kernel_tile_dims[0], input_tile_w), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix{ TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1 };
 
     // Simple tensor for the transformation matrix transpose
-    SimpleTensor<T> trans_matrix_transposed{ TensorShape(input_tile_w, kernel_tile_dims[0]), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix_transposed{ TensorShape(input_tile_max_dim, kernel_max_dim), in.data_type(), 1 };
 
     // Simple tensor for the temporary tile
-    SimpleTensor<T> tmp_tile{ TensorShape(kernel_tile_dims[0], input_tile_w), in.data_type(), 1 };
+    SimpleTensor<T> tmp_tile{ TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1 };
 
     // Simple tensor for the output tile
-    SimpleTensor<T> transf_tile{ TensorShape(input_tile_w, input_tile_w), in.data_type(), 1 };
+    SimpleTensor<T> transf_tile{ TensorShape(input_tile_max_dim, input_tile_max_dim), in.data_type(), 1 };
 
     // Initialize matrix for the filter transform
     initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::FILTER);
@@ -299,6 +363,9 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
     const int num_channels = in.shape()[2];
     const int num_filters  = in.shape()[3];
     const int num_batches  = in.shape().total_size() / (kernel_size.area() * num_channels * num_filters);
+
+    // If we have a vertical filter (i.e. 1x3, 1x5,..), we need to take the elements along the y direction (step_y_transf_tile = width of the output tile)
+    const int step_y_transf_tile = kernel_size.width == 1 ? input_tile_max_dim : 1;
 
     for(int n = 0; n < num_batches; ++n)
     {
@@ -321,7 +388,7 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
                 // Store the values across the channels
                 for(unsigned int i = 0; i < input_tile_area; ++i)
                 {
-                    out[output_offset + i * num_filters * num_channels] = transf_tile[i];
+                    out[output_offset + i * num_filters * num_channels] = transf_tile[i * step_y_transf_tile];
                 }
             }
         }
@@ -333,8 +400,6 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
 template <typename T>
 SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const SimpleTensor<T> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(winograd_info.output_data_layout != DataLayout::NCHW, "Only supported NCHW data format");
-
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
@@ -350,17 +415,21 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const unsigned int out_tile_h = output_tile_size.height;
 
     ARM_COMPUTE_ERROR_ON(in.shape()[2] != (in_tile_w * in_tile_h));
-    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[2]);
+    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)]);
+
+    // Get the maximum dimension from the tile size
+    const unsigned int in_tile_max_dim  = std::max(in_tile_w, in_tile_h);
+    const unsigned int out_tile_max_dim = std::max(output_tile_size.width, output_tile_size.height);
 
     // Compute tile dimensions
     // Input tile dimensions
-    TensorShape in_tile_dims(in_tile_w, in_tile_h);
+    TensorShape in_tile_dims(in_tile_max_dim, in_tile_max_dim);
 
     // Output tile dimensions
-    TensorShape out_tile_dims(output_tile_size.width, output_tile_size.height);
+    TensorShape out_tile_dims(out_tile_max_dim, out_tile_max_dim);
 
     // Transformation matrix dimensions
-    TensorShape tr_tile_dims(in_tile_w, output_tile_size.width);
+    TensorShape tr_tile_dims(in_tile_max_dim, out_tile_max_dim);
 
     // Create tensors
     // Simple tensor for the input tile
@@ -402,14 +471,23 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const int stridez_out = stridey_out * h_out;
     const int stridew_out = stridez_out * c_out;
 
-    // Compute number of elements to process in the X and Y direction
-    const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int num_elements_y = input_dimensions.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
-    const int num_tiles_x    = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
-    const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input_dimensions.width, input_dimensions.height),
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
+
+    const int num_tiles_x = num_tiles.width;
+    const int num_tiles_y = num_tiles.height;
 
     ARM_COMPUTE_UNUSED(num_tiles_y);
     ARM_COMPUTE_ERROR_ON(in.shape()[1] != static_cast<unsigned int>(num_tiles_x * num_tiles_y));
+
+    // If we have a vertical filter (i.e. 1x3, 1x5,..), we still need to take the elements along the x direction (step_y_transf_tile = 1)
+    const int step_y_transf_tile = kernel_size.width == 1 ? 1 : output_tile.shape()[0];
+
+    // Initialize with zeros the input tile
+    zeros(input_tile, Coordinates(0, 0), input_tile.shape());
 
     for(int n = 0; n < num_batches; ++n)
     {
@@ -443,7 +521,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
                         // Check out-of-bound writes
                         if((xo + xi < w_out) && (yo + yi < h_out))
                         {
-                            out[output_offset + yi * stridey_out + xi] = output_tile[xi + yi * out_tile_w];
+                            out[output_offset + yi * stridey_out + xi] = output_tile[xi + yi * step_y_transf_tile];
 
                             // Add bias
                             out[output_offset + yi * stridey_out + xi] += b[zo];

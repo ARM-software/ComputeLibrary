@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -175,13 +175,13 @@ Static Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Basic function to execute GEMM on OpenCL. </p>
 <p>This function calls the following OpenCL kernels:</p>
 <ol type="1">
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> (if the output tensor is a matrix)</li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a> (if the output tensor is a matrix)</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> (only if the reshaped GEMM is selected by the heuristic model)</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a> (only if the reshaped GEMM is selected by the heuristic model)</li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml">CLGEMMMatrixAdditionKernel</a> (if c != nullptr and beta != 0.0) </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_c_l_g_e_m_m_8h_source.xhtml#l00051">51</a> of file <a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">CLGEMM.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_g_e_m_m_8h_source.xhtml#l00048">48</a> of file <a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">CLGEMM.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a07dc013cbab881bdebe30f07204dbde3"></a>
 <div class="memitem">
@@ -322,7 +322,7 @@ All tensors must have the same data type.</dd>
 Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>Second input tensor (Matrix B). Data type supported: same as <code>a</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Third input tensor (Matrix C). It can be a nullptr if just the multiplication between <code>a</code> and <code>b</code> is needed. Data type supported: same as <code>a</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>a</code> </td></tr>
@@ -333,7 +333,7 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_g_e_m_m_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00140">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_g_e_m_m_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -522,7 +522,7 @@ Will call <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml#aa9b93ef66
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor info (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor info (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: F16/F32 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>Second input tensor info (Matrix B). Data type supported: same as <code>a</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Third input tensor info (Matrix C). It can be a nullptr if just the multiplication between <code>a</code> and <code>b</code> is needed. Data type supported: same as <code>a</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor info. Data type supported: same as <code>a</code> </td></tr>
@@ -545,7 +545,7 @@ Will call <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml#aa9b93ef66
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

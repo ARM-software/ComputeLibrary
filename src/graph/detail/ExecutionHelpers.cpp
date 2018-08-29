@@ -35,14 +35,6 @@ namespace graph
 {
 namespace detail
 {
-void default_initialize_backends()
-{
-    for(const auto &backend : backends::BackendRegistry::get().backends())
-    {
-        backend.second->initialize_backend();
-    }
-}
-
 void validate_all_nodes(Graph &g)
 {
     auto &nodes = g.nodes();
@@ -52,10 +44,9 @@ void validate_all_nodes(Graph &g)
     {
         if(node != nullptr)
         {
-            Target assigned_target = node->assigned_target();
-            auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            Status status = backend->validate_node(*node);
+            Target                    assigned_target = node->assigned_target();
+            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
+            Status                    status          = backend.validate_node(*node);
             ARM_COMPUTE_ERROR_ON_MSG(!bool(status), status.error_description().c_str());
         }
     }
@@ -67,13 +58,12 @@ void configure_all_tensors(Graph &g)
 
     for(auto &tensor : tensors)
     {
-        if(tensor)
+        if(tensor && tensor->handle() == nullptr)
         {
-            Target target  = tensor->desc().target;
-            auto   backend = backends::BackendRegistry::get().find_backend(target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            auto handle = backend->create_tensor(*tensor);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Couldn't create backend handle!");
+            Target                         target  = tensor->desc().target;
+            backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
+            std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
+            ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
             tensor->set_handle(std::move(handle));
         }
     }
@@ -139,35 +129,33 @@ void allocate_all_tensors(Graph &g)
     }
 }
 
-ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
+ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order)
 {
     ExecutionWorkload workload;
     workload.graph = &g;
     workload.ctx   = &ctx;
 
-    auto &nodes = g.nodes();
-
     // Create tasks
-    for(auto &node : nodes)
+    for(auto &node_id : node_order)
     {
+        auto node = g.node(node_id);
         if(node != nullptr)
         {
-            Target assigned_target = node->assigned_target();
-            auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            auto func = backend->configure_node(*node, ctx);
+            Target                     assigned_target = node->assigned_target();
+            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
+            std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
             if(func != nullptr)
             {
                 ExecutionTask task;
                 task.task = std::move(func);
-                task.node = node.get();
+                task.node = node;
                 workload.tasks.push_back(std::move(task));
             }
         }
     }
 
     // Add inputs and outputs
-    for(auto &node : nodes)
+    for(auto &node : g.nodes())
     {
         if(node != nullptr && node->type() == NodeType::Input)
         {
@@ -214,15 +202,12 @@ void call_all_const_node_accessors(Graph &g)
     }
 }
 
-void call_all_input_node_accessors(ExecutionWorkload &workload)
+bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
-    for(auto &input : workload.inputs)
+    return !std::any_of(std::begin(workload.inputs), std::end(workload.inputs), [](Tensor * input_tensor)
     {
-        if(input != nullptr)
-        {
-            input->call_accessor();
-        }
-    }
+        return (input_tensor == nullptr) || !input_tensor->call_accessor();
+    });
 }
 
 void prepare_all_tasks(ExecutionWorkload &workload)
@@ -264,15 +249,15 @@ void call_all_tasks(ExecutionWorkload &workload)
     }
 }
 
-void call_all_output_node_accessors(ExecutionWorkload &workload)
+bool call_all_output_node_accessors(ExecutionWorkload &workload)
 {
-    for(auto &output : workload.outputs)
+    bool is_valid = true;
+    std::for_each(std::begin(workload.outputs), std::end(workload.outputs), [&](Tensor * output_tensor)
     {
-        if(output != nullptr)
-        {
-            output->call_accessor();
-        }
-    }
+        is_valid = is_valid && (output_tensor != nullptr) && output_tensor->call_accessor();
+    });
+
+    return is_valid;
 }
 } // namespace detail
 } // namespace graph

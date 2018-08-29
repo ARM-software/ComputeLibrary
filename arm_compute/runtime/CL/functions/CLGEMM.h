@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_CLGEMM_H__
 #define __ARM_COMPUTE_CLGEMM_H__
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
@@ -34,16 +33,14 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
-#include <memory>
-
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel (if the output tensor is a matrix)
- *  -# @ref CLGEMMTranspose1xWKernel (if the output tensor is a matrix)
+ *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model)
+ *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model)
  *  -# @ref CLGEMMMatrixMultiplyKernel
  *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
  *
@@ -72,7 +69,7 @@ public:
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
      *
-     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F16/F32
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output    Output tensor. Data type supported: same as @p a
@@ -85,7 +82,7 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
      * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
      * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output    Output tensor info. Data type supported: same as @p a

@@ -91,9 +91,14 @@ void force_target_to_graph(Graph &g, Target target);
 PassManager create_default_pass_manager(Target target);
 /** Default setups the graph context if not done manually
  *
- * @param[in] ctx Graph Context
+ * @param[in,out] ctx Graph Context
  */
 void setup_default_graph_context(GraphContext &ctx);
+/** Default releases the graph context if not done manually
+ *
+ * @param[in,out] ctx Graph Context
+ */
+void release_default_graph_context(GraphContext &ctx);
 /** Get size of a tensor's given dimension depending on its layout
  *
  * @param[in] descriptor            Descriptor
@@ -110,6 +115,18 @@ size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDi
  * @return Idx of given dimension
  */
 size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
+/** Get the list of driving nodes of a given node
+ *
+ * @param[in] node Node to find the driving node of
+ *
+ * @return A list with the driving node of a given node
+ */
+std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
+/** Configures tensor
+ *
+ * @param[in, out] tensor Tensor to configure
+ */
+void configure_tensor(Tensor *tensor);
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */

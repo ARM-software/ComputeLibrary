@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,6 @@ $(document).ready(function(){initNavTree('reference_2_arithmetic_addition_8cpp.x
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_arithmetic_addition_8h_source.xhtml">ArithmeticAddition.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">tests/validation/FixedPoint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_helpers_8h_source.xhtml">tests/validation/Helpers.h</a>&quot;</code><br />
 </div>
 <p><a href="reference_2_arithmetic_addition_8cpp_source.xhtml">Go to the source code of this file.</a></p>
@@ -141,11 +140,23 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:aa9f51b34ae0b4b0133029c83ca2536d2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aa9f51b34ae0b4b0133029c83ca2536d2"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa9f51b34ae0b4b0133029c83ca2536d2">arithmetic_addition</a> (const SimpleTensor&lt; T &gt; &amp;src1, const SimpleTensor&lt; T &gt; &amp;src2, SimpleTensor&lt; T &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:aa9f51b34ae0b4b0133029c83ca2536d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdcc52a7e40aa49ac01d31ee6cb4beb1"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:afdcc52a7e40aa49ac01d31ee6cb4beb1"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afdcc52a7e40aa49ac01d31ee6cb4beb1">arithmetic_addition</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src1, const SimpleTensor&lt; uint8_t &gt; &amp;src2, SimpleTensor&lt; uint8_t &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:afdcc52a7e40aa49ac01d31ee6cb4beb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adee51144933417d44100ab657b79ba38"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; int16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#adee51144933417d44100ab657b79ba38">arithmetic_addition</a> (const SimpleTensor&lt; int16_t &gt; &amp;src1, const SimpleTensor&lt; int16_t &gt; &amp;src2, SimpleTensor&lt; int16_t &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:adee51144933417d44100ab657b79ba38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9797511b014f51cfdee035120226e75c"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; int8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9797511b014f51cfdee035120226e75c">arithmetic_addition</a> (const SimpleTensor&lt; int8_t &gt; &amp;src1, const SimpleTensor&lt; int8_t &gt; &amp;src2, SimpleTensor&lt; int8_t &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:a9797511b014f51cfdee035120226e75c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe8a13c6ef359a8d6fb92eee436227ce"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afe8a13c6ef359a8d6fb92eee436227ce">arithmetic_addition</a> (const SimpleTensor&lt; half &gt; &amp;src1, const SimpleTensor&lt; half &gt; &amp;src2, SimpleTensor&lt; half &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:afe8a13c6ef359a8d6fb92eee436227ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69b5aab014117abf92bb001ae7f03d63"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a69b5aab014117abf92bb001ae7f03d63">arithmetic_addition</a> (const SimpleTensor&lt; float &gt; &amp;src1, const SimpleTensor&lt; float &gt; &amp;src2, SimpleTensor&lt; float &gt; &amp;dst, ConvertPolicy convert_policy)</td></tr>
+<tr class="separator:a69b5aab014117abf92bb001ae7f03d63"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae98dcf5421f308ea7bb268ca7a37be5f"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ae98dcf5421f308ea7bb268ca7a37be5f"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ae98dcf5421f308ea7bb268ca7a37be5f">arithmetic_addition</a> (const SimpleTensor&lt; T &gt; &amp;src1, const SimpleTensor&lt; T &gt; &amp;src2, DataType dst_data_type, ConvertPolicy convert_policy)</td></tr>
 <tr class="separator:ae98dcf5421f308ea7bb268ca7a37be5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d398f98a548984dc3869c8394a821d3"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9d398f98a548984dc3869c8394a821d3">arithmetic_addition</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src1, const SimpleTensor&lt; uint8_t &gt; &amp;src2, DataType dst_data_type, ConvertPolicy convert_policy)</td></tr>
-<tr class="separator:a9d398f98a548984dc3869c8394a821d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a426be141440c207990cde03ce6982f19"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; int16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a426be141440c207990cde03ce6982f19">arithmetic_addition</a> (const SimpleTensor&lt; int16_t &gt; &amp;src1, const SimpleTensor&lt; int16_t &gt; &amp;src2, DataType dst_data_type, ConvertPolicy convert_policy)</td></tr>
 <tr class="separator:a426be141440c207990cde03ce6982f19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3bad17e7cc30ec6052ff401a069b9df"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; int8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ab3bad17e7cc30ec6052ff401a069b9df">arithmetic_addition</a> (const SimpleTensor&lt; int8_t &gt; &amp;src1, const SimpleTensor&lt; int8_t &gt; &amp;src2, DataType dst_data_type, ConvertPolicy convert_policy)</td></tr>
@@ -161,7 +172,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="reference_2_arithmetic_addition_8cpp.xhtml">ArithmeticAddition.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -6,5 +6,6 @@ var classarm__compute_1_1_c_l_locally_connected_layer =
     [ "configure", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml#a0e2cfb6fb263bd6f761756c816574345", null ],
     [ "operator=", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml#a24d00f8384ab6f705aa3fe84f05c142b", null ],
     [ "operator=", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml#a62556f200fe50d1b6f02f813ded415f0", null ],
+    [ "prepare", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77", null ],
     [ "run", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml#ad1717410afd0be936c6213a63c8005fb", null ]
 ];

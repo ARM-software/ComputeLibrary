@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,7 +106,7 @@ void CLHarrisScoreKernel::configure(const ICLImage *input1, const ICLImage *inpu
     ValidRegion valid_region = intersect_valid_regions(input1->info()->valid_region(), input2->info()->valid_region());
     output_access.set_valid_region(win, valid_region, border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHarrisScoreKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -8,6 +8,7 @@ var classarm__compute_1_1graph_1_1backends_1_1_i_device_backend =
     [ "create_tensor", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#a0f46e4fef818b4114b3d09c799944046", null ],
     [ "initialize_backend", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#a06c1cd9b4e00e6c00365bfeab0ff7785", null ],
     [ "is_backend_supported", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#aba671d383a01749f55e49d5750646c05", null ],
+    [ "release_backend_context", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#a449129d5832bab24106f9f67583dc8a1", null ],
     [ "setup_backend_context", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#ad172b9815229e40cd25ad1c401d2a0e4", null ],
     [ "validate_node", "classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml#a2ad722cd593bc5300108c8837ce5c980", null ]
 ];

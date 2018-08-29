@@ -73,6 +73,7 @@ public:
 private:
     unsigned int _conv_stride_x;
     unsigned int _conv_pad_top;
+    unsigned int _conv_pad_left;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__ */

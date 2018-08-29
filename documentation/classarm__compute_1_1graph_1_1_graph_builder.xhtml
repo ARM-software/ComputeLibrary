@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -144,33 +144,48 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:acc31c037c3eac4234abae6ec0e080d2f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#acc31c037c3eac4234abae6ec0e080d2f">add_batch_normalization_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, float epsilon, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> mean_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> var_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> beta_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> gamma_accessor=nullptr)</td></tr>
 <tr class="memdesc:acc31c037c3eac4234abae6ec0e080d2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a batch normalization layer node to the graph.  <a href="#acc31c037c3eac4234abae6ec0e080d2f">More...</a><br /></td></tr>
 <tr class="separator:acc31c037c3eac4234abae6ec0e080d2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c8bc1735814df209ef5ad3323cd5863"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a2c8bc1735814df209ef5ad3323cd5863">add_convolution_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> kernel_spatial_extend, unsigned int depth, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, unsigned int num_groups=1, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">ConvolutionMethod::DEFAULT</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a> fast_math_hint=<a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a055c1a591abb0e8cd86dc969727bcc0b">FastMathHint::DISABLED</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> weights_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
-<tr class="memdesc:a2c8bc1735814df209ef5ad3323cd5863"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a convolution layer node to the graph.  <a href="#a2c8bc1735814df209ef5ad3323cd5863">More...</a><br /></td></tr>
-<tr class="separator:a2c8bc1735814df209ef5ad3323cd5863"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e79becb4675e8e78f5ffb30a89460ca"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4e79becb4675e8e78f5ffb30a89460ca">add_depth_concatenate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, std::vector&lt; <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> &gt; inputs)</td></tr>
-<tr class="memdesc:a4e79becb4675e8e78f5ffb30a89460ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a depth concatenate node to the graph.  <a href="#a4e79becb4675e8e78f5ffb30a89460ca">More...</a><br /></td></tr>
-<tr class="separator:a4e79becb4675e8e78f5ffb30a89460ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e4e65674676098214cd6ee38d740bb1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a8e4e65674676098214cd6ee38d740bb1">add_depthwise_convolution_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> kernel_spatial_extend, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821f">DepthwiseConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">DepthwiseConvolutionMethod::DEFAULT</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
-<tr class="memdesc:a8e4e65674676098214cd6ee38d740bb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a depth-wise convolution layer node to the graph.  <a href="#a8e4e65674676098214cd6ee38d740bb1">More...</a><br /></td></tr>
-<tr class="separator:a8e4e65674676098214cd6ee38d740bb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06a2546f9cc520a15aa18981cbc48537"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a06a2546f9cc520a15aa18981cbc48537">add_channel_shuffle_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, unsigned int num_groups)</td></tr>
+<tr class="memdesc:a06a2546f9cc520a15aa18981cbc48537"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds an channel shuffle layer node to the graph.  <a href="#a06a2546f9cc520a15aa18981cbc48537">More...</a><br /></td></tr>
+<tr class="separator:a06a2546f9cc520a15aa18981cbc48537"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1da6bd31124ec2036d37d09b76cf9ffa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a1da6bd31124ec2036d37d09b76cf9ffa">add_convolution_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> kernel_spatial_extend, unsigned int depth, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, unsigned int num_groups=1, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67">ConvolutionMethod::Default</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a> fast_math_hint=<a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241">FastMathHint::Disabled</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> weights_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:a1da6bd31124ec2036d37d09b76cf9ffa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a convolution layer node to the graph.  <a href="#a1da6bd31124ec2036d37d09b76cf9ffa">More...</a><br /></td></tr>
+<tr class="separator:a1da6bd31124ec2036d37d09b76cf9ffa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac37002ce0fe85fb0ac99e530475b2aa4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ac37002ce0fe85fb0ac99e530475b2aa4">add_deconvolution_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> kernel_spatial_extend, unsigned int depth, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> deconv_info, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> inner_border, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr)</td></tr>
+<tr class="memdesc:ac37002ce0fe85fb0ac99e530475b2aa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a deconvolution layer node to the graph.  <a href="#ac37002ce0fe85fb0ac99e530475b2aa4">More...</a><br /></td></tr>
+<tr class="separator:ac37002ce0fe85fb0ac99e530475b2aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13b857340205ae26f8ca1fd30a648b75"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a13b857340205ae26f8ca1fd30a648b75">add_concatenate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, std::vector&lt; <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> &gt; inputs, <a class="el" href="namespacearm__compute.xhtml#a74ce3f7420453d3446218ff3b7453e02">DataLayoutDimension</a> axis)</td></tr>
+<tr class="memdesc:a13b857340205ae26f8ca1fd30a648b75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a depth concatenate node to the graph.  <a href="#a13b857340205ae26f8ca1fd30a648b75">More...</a><br /></td></tr>
+<tr class="separator:a13b857340205ae26f8ca1fd30a648b75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab590239276adf8207d12ed010c0c8667"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ab590239276adf8207d12ed010c0c8667">add_depthwise_convolution_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> kernel_spatial_extend, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821f">DepthwiseConvolutionMethod</a> method=<a class="el" href="namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821fa7a1920d61156abc05a60135aefe8bc67">DepthwiseConvolutionMethod::Default</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:ab590239276adf8207d12ed010c0c8667"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a depth-wise convolution layer node to the graph.  <a href="#ab590239276adf8207d12ed010c0c8667">More...</a><br /></td></tr>
+<tr class="separator:ab590239276adf8207d12ed010c0c8667"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d0d78c3fe7a6530cf184a8f99172214"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a7d0d78c3fe7a6530cf184a8f99172214">add_elementwise_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input0, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input1, <a class="el" href="namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4">EltwiseOperation</a> operation)</td></tr>
 <tr class="memdesc:a7d0d78c3fe7a6530cf184a8f99172214"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds an element-wise layer node to the graph.  <a href="#a7d0d78c3fe7a6530cf184a8f99172214">More...</a><br /></td></tr>
 <tr class="separator:a7d0d78c3fe7a6530cf184a8f99172214"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab00bf734b4da419ec25f0705a7ff30e9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ab00bf734b4da419ec25f0705a7ff30e9">add_dummy_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape)</td></tr>
+<tr class="memdesc:ab00bf734b4da419ec25f0705a7ff30e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a Dummy node to the graph.  <a href="#ab00bf734b4da419ec25f0705a7ff30e9">More...</a><br /></td></tr>
+<tr class="separator:ab00bf734b4da419ec25f0705a7ff30e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a822583f5b38ff029ea1e1c221dbfe19f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a822583f5b38ff029ea1e1c221dbfe19f">add_flatten_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input)</td></tr>
 <tr class="memdesc:a822583f5b38ff029ea1e1c221dbfe19f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a flatten layer node to the graph.  <a href="#a822583f5b38ff029ea1e1c221dbfe19f">More...</a><br /></td></tr>
 <tr class="separator:a822583f5b38ff029ea1e1c221dbfe19f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1dbeadf5e85d923fa0751b19c0a4170"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ad1dbeadf5e85d923fa0751b19c0a4170">add_fully_connected_layer</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, unsigned int num_outputs, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr)</td></tr>
-<tr class="memdesc:ad1dbeadf5e85d923fa0751b19c0a4170"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a fully connected layer node to the graph.  <a href="#ad1dbeadf5e85d923fa0751b19c0a4170">More...</a><br /></td></tr>
-<tr class="separator:ad1dbeadf5e85d923fa0751b19c0a4170"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aece87863ae55a12320fb369677f1f22d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aece87863ae55a12320fb369677f1f22d">add_fully_connected_layer</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, unsigned int num_outputs, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias_accessor=nullptr, const <a class="el" href="structarm__compute_1_1_fully_connected_layer_info.xhtml">FullyConnectedLayerInfo</a> fc_info=<a class="el" href="structarm__compute_1_1_fully_connected_layer_info.xhtml">FullyConnectedLayerInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> weights_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:aece87863ae55a12320fb369677f1f22d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a fully connected layer node to the graph.  <a href="#aece87863ae55a12320fb369677f1f22d">More...</a><br /></td></tr>
+<tr class="separator:aece87863ae55a12320fb369677f1f22d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15885529ec64ecf2b388f6229c5a65fa"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a15885529ec64ecf2b388f6229c5a65fa">add_normalization_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_normalization_layer_info.xhtml">NormalizationLayerInfo</a> norm_info)</td></tr>
 <tr class="memdesc:a15885529ec64ecf2b388f6229c5a65fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a normalization layer node to the graph.  <a href="#a15885529ec64ecf2b388f6229c5a65fa">More...</a><br /></td></tr>
 <tr class="separator:a15885529ec64ecf2b388f6229c5a65fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31b691e746b095214ad519a960fd1f92"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a31b691e746b095214ad519a960fd1f92">add_permute_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="namespacearm__compute.xhtml#a33e65be485104e2e9e69fca551d6f492">PermutationVector</a> perm, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> layout=<a class="el" href="namespacearm__compute.xhtml#a3a440b3893fa10608d4428958be1c52ea696b031073e74bf2cb98e5ef201d4aa3">DataLayout::UNKNOWN</a>)</td></tr>
+<tr class="memdesc:a31b691e746b095214ad519a960fd1f92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a permute layer node to the graph.  <a href="#a31b691e746b095214ad519a960fd1f92">More...</a><br /></td></tr>
+<tr class="separator:a31b691e746b095214ad519a960fd1f92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af8eae85804c35bc91d26fe28efc3936a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#af8eae85804c35bc91d26fe28efc3936a">add_pooling_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> pool_info)</td></tr>
 <tr class="memdesc:af8eae85804c35bc91d26fe28efc3936a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a pooling layer node to the graph.  <a href="#af8eae85804c35bc91d26fe28efc3936a">More...</a><br /></td></tr>
 <tr class="separator:af8eae85804c35bc91d26fe28efc3936a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30a1530d919a233e389f32ad9a6e2b25"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a30a1530d919a233e389f32ad9a6e2b25">add_reshape_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape)</td></tr>
 <tr class="memdesc:a30a1530d919a233e389f32ad9a6e2b25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a reshape layer node to the graph.  <a href="#a30a1530d919a233e389f32ad9a6e2b25">More...</a><br /></td></tr>
 <tr class="separator:a30a1530d919a233e389f32ad9a6e2b25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade08649ceffaa6e410a213c87b71d1f0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ade08649ceffaa6e410a213c87b71d1f0">add_resize_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, float width_scale, float height_scale)</td></tr>
+<tr class="memdesc:ade08649ceffaa6e410a213c87b71d1f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a resize layer node to the graph.  <a href="#ade08649ceffaa6e410a213c87b71d1f0">More...</a><br /></td></tr>
+<tr class="separator:ade08649ceffaa6e410a213c87b71d1f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9065925e20c5b5aa449d3ef9dc371085"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a9065925e20c5b5aa449d3ef9dc371085">add_scale_layer</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;g, const <a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a> &amp;params, <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> input, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> mul_accessor=nullptr, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> add_accessor=nullptr)</td></tr>
 <tr class="memdesc:a9065925e20c5b5aa449d3ef9dc371085"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a scale layer node to the graph This layer computes a product of the input with a scale (read from mul_accessor) and it applies an offset (read from add_accessor).  <a href="#a9065925e20c5b5aa449d3ef9dc371085">More...</a><br /></td></tr>
 <tr class="separator:a9065925e20c5b5aa449d3ef9dc371085"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -335,6 +350,126 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a06a2546f9cc520a15aa18981cbc48537"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_channel_shuffle_node </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds an channel shuffle layer node to the graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the activation layer node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>Number of groups</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
+
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00170">ChannelShuffleLayer::create_layer()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a13b857340205ae26f8ca1fd30a648b75"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_concatenate_node </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> &gt;&#160;</td>
+          <td class="paramname"><em>inputs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a74ce3f7420453d3446218ff3b7453e02">DataLayoutDimension</a>&#160;</td>
+          <td class="paramname"><em>axis</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds a depth concatenate node to the graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Inputs to the depth concatenate layer node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">axis</td><td>Concatenation axis</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
+
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00630">BranchLayer::create_layer()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ac304c66615e62c6b4aa40e8728920002"></a>
 <div class="memitem">
 <div class="memproto">
@@ -393,7 +528,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2c8bc1735814df209ef5ad3323cd5863"></a>
+<a class="anchor" id="a1da6bd31124ec2036d37d09b76cf9ffa"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -446,13 +581,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a>&#160;</td>
-          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">ConvolutionMethod::DEFAULT</a></code>, </td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da7a1920d61156abc05a60135aefe8bc67">ConvolutionMethod::Default</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11">FastMathHint</a>&#160;</td>
-          <td class="paramname"><em>fast_math_hint</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11a055c1a591abb0e8cd86dc969727bcc0b">FastMathHint::DISABLED</a></code>, </td>
+          <td class="paramname"><em>fast_math_hint</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac85a46f3ebd3ab09f576a994ac2dce11ab9f5c797ebbf55adccdd8539a65a0241">FastMathHint::Disabled</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -512,11 +647,11 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00194">ConvolutionLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00218">ConvolutionLayer::create_layer()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a4e79becb4675e8e78f5ffb30a89460ca"></a>
+<a class="anchor" id="ac37002ce0fe85fb0ac99e530475b2aa4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -524,7 +659,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_depth_concatenate_node </td>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_deconvolution_node </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
           <td class="paramname"><em>g</em>, </td>
@@ -538,8 +673,44 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a> &gt;&#160;</td>
-          <td class="paramname"><em>inputs</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>&#160;</td>
+          <td class="paramname"><em>kernel_spatial_extend</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>&#160;</td>
+          <td class="paramname"><em>deconv_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>&#160;</td>
+          <td class="paramname"><em>inner_border</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a>&#160;</td>
+          <td class="paramname"><em>weights_accessor</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a>&#160;</td>
+          <td class="paramname"><em>bias_accessor</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -554,22 +725,28 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Adds a depth concatenate node to the graph. </p>
+<p>Adds a deconvolution layer node to the graph. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Inputs to the depth concatenate layer node as a NodeID-Index pair</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the convolution layer node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernel_spatial_extend</td><td>Spatial extend of convolution kernels </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth</td><td>Number of convolution kernels </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">deconv_info</td><td>Convolution layer information </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inner_border</td><td>Inner border (right, top) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights_accessor</td><td>(Optional) Accessor of the weights node data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias_accessor</td><td>(Optional) Accessor of the bias node data</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00468">BranchLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00271">DeconvolutionLayer::create_layer()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a8e4e65674676098214cd6ee38d740bb1"></a>
+<a class="anchor" id="ab590239276adf8207d12ed010c0c8667"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -610,7 +787,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821f">DepthwiseConvolutionMethod</a>&#160;</td>
-          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5b39c8b553c821e7cddc6da64b5bd2ee">DepthwiseConvolutionMethod::DEFAULT</a></code>, </td>
+          <td class="paramname"><em>method</em> = <code><a class="el" href="namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821fa7a1920d61156abc05a60135aefe8bc67">DepthwiseConvolutionMethod::Default</a></code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -660,7 +837,68 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00244">DepthwiseConvolutionLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00318">DepthwiseConvolutionLayer::create_layer()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab00bf734b4da419ec25f0705a7ff30e9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_dummy_node </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a>&#160;</td>
+          <td class="paramname"><em>shape</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds a Dummy node to the graph. </p>
+<dl class="section note"><dt>Note</dt><dd>this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the dummy node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shape</td><td>Output shape</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
+
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00350">DummyLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -727,7 +965,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00468">BranchLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00630">BranchLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -780,11 +1018,11 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00272">FlattenLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00370">FlattenLayer::create_layer()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ad1dbeadf5e85d923fa0751b19c0a4170"></a>
+<a class="anchor" id="aece87863ae55a12320fb369677f1f22d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -825,7 +1063,25 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a>&#160;</td>
-          <td class="paramname"><em>bias_accessor</em> = <code>nullptr</code>&#160;</td>
+          <td class="paramname"><em>bias_accessor</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_fully_connected_layer_info.xhtml">FullyConnectedLayerInfo</a>&#160;</td>
+          <td class="paramname"><em>fc_info</em> = <code><a class="el" href="structarm__compute_1_1_fully_connected_layer_info.xhtml">FullyConnectedLayerInfo</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>weights_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>out_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -848,13 +1104,16 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the fully connected layer node as a NodeID-Index pair </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">num_outputs</td><td>Number of output neurons </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights_accessor</td><td>(Optional) Accessor of the weights node data </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias_accessor</td><td>(Optional) Accessor of the bias node data</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias_accessor</td><td>(Optional) Accessor of the bias node data </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fc_info</td><td>(Optional) Fully connected layer metadata </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights_quant_info</td><td>(Optional) Weights quantization info </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">out_quant_info</td><td>(Optional) Output quantization info</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00297">FullyConnectedLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00406">FullyConnectedLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -974,7 +1233,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00324">NormalizationLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00437">NormalizationLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -1038,6 +1297,73 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a31b691e746b095214ad519a960fd1f92"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_permute_node </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a33e65be485104e2e9e69fca551d6f492">PermutationVector</a>&#160;</td>
+          <td class="paramname"><em>perm</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a>&#160;</td>
+          <td class="paramname"><em>layout</em> = <code><a class="el" href="namespacearm__compute.xhtml#a3a440b3893fa10608d4428958be1c52ea696b031073e74bf2cb98e5ef201d4aa3">DataLayout::UNKNOWN</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds a permute layer node to the graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the reshape layer node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">perm</td><td>Permutation vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">layout</td><td>(Optional) Data layout to assign to permuted tensor. If UNKNOWN then the input's layout will be used.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
+
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00463">PermuteLayer::create_layer()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="af8eae85804c35bc91d26fe28efc3936a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1094,7 +1420,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00348">PoolingLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00488">PoolingLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -1154,7 +1480,81 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00372">ReshapeLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00512">ReshapeLayer::create_layer()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ade08649ceffaa6e410a213c87b71d1f0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a> add_resize_node </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td>
+          <td class="paramname"><em>g</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_params.xhtml">NodeParams</a>&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structarm__compute_1_1graph_1_1_node_idx_pair.xhtml">NodeIdxPair</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a>&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>width_scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>height_scale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Adds a resize layer node to the graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">g</td><td><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> to add the node to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>Common node parameters </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the reshape layer node as a NodeID-Index pair </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Interpolation policy </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width_scale</td><td>Width scaling factor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height_scale</td><td>Height scaling factor</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
+
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00532">ResizeLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -1222,7 +1622,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00398">ScaleLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00560">ScaleLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -1282,7 +1682,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Node ID of the created node, EmptyNodeID in case of error </dd></dl>
 
-<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00423">SoftmaxLayer::create_layer()</a>.</p>
+<p>Referenced by <a class="el" href="_layers_8h_source.xhtml#l00585">SoftmaxLayer::create_layer()</a>.</p>
 
 </div>
 </div>
@@ -1360,7 +1760,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml">GraphBuilder</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,10 +77,10 @@ __kernel void combine_gradients_L1(
     m = CONVERT_SAT((abs(h) + abs(v)), VEC_DATA_TYPE(DATA_TYPE_OUT, 4));
 
     /* Calculate the angle */
-    float4 p = atan2pi(convert_float4(v), convert_float4(h));
+    float4 p = 180.0f * atan2pi(convert_float4(v), convert_float4(h));
 
     /* Remap angle to range [0, 256) */
-    p = select(p, p + 2, p < 0.0f) * 128.0f;
+    p = select(p, p + 180.0f, p < 0.0f);
 
     /* Store results */
     vstore4(m, 0, (__global DATA_TYPE_OUT *)grad.ptr);
@@ -138,29 +138,27 @@ __kernel void combine_gradients_L2(
     float4 m = sqrt(h * h + v * v);
 
     /* Calculate the angle */
-    float4 p = atan2pi(v, h);
+    float4 p = 180.0f * atan2pi(v, h);
 
     /* Remap angle to range [0, 256) */
-    p = select(p, p + 2, p < 0.0f) * 128.0f;
+    p = select(p, p + 180.0f, p < 0.0f);
 
     /* Store results */
     vstore4(CONVERT_SAT_ROUND(m, VEC_DATA_TYPE(DATA_TYPE_OUT, 4), rte), 0, (__global DATA_TYPE_OUT *)grad.ptr);
     vstore4(convert_uchar4_sat_rte(p), 0, angle.ptr);
 }
 
+#define EDGE 255
+#define NO_EDGE 0
+
 /** Array that holds the relative coordinates offset for the neighbouring pixels.
  */
 __constant short4 neighbours_coords[] =
 {
     { -1, 0, 1, 0 },  // 0
-    { -1, 1, 1, -1 }, // 45
-    { 0, 1, 0, -1 },  // 90
-    { 1, 1, -1, -1 }, // 135
-    { 1, 0, -1, 0 },  // 180
-    { 1, -1, -1, 1 }, // 225
-    { 0, 1, 0, -1 },  // 270
-    { -1, -1, 1, 1 }, // 315
-    { -1, 0, 1, 0 },  // 360
+    { -1, -1, 1, 1 }, // 45
+    { 0, -1, 0, 1 },  // 90
+    { 1, -1, -1, 1 }, // 135
 };
 
 /** Perform non maximum suppression.
@@ -199,18 +197,39 @@ __kernel void suppress_non_maximum(
     Image angle   = CONVERT_TO_IMAGE_STRUCT(angle);
     Image non_max = CONVERT_TO_IMAGE_STRUCT(non_max);
 
+    // Index
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
+
     // Get gradient and angle
     DATA_TYPE_IN gradient = *((__global DATA_TYPE_IN *)grad.ptr);
-    uchar an              = convert_ushort(*angle.ptr);
+    uchar an              = *((__global uchar *)angle.ptr);
 
+    // Early return if not greater than lower threshold
     if(gradient <= lower_thr)
     {
         return;
     }
 
-    // Divide the whole round into 8 directions
-    uchar         ang  = 127 - an;
-    DATA_TYPE_OUT q_an = (ang + 16) >> 5;
+    // Divide the whole round into 4 directions
+    DATA_TYPE_OUT q_an;
+
+    if(an < 22.5f || an >= 157.5f)
+    {
+        q_an = 0;
+    }
+    else if(an < 67.5f)
+    {
+        q_an = 1;
+    }
+    else if(an < 112.5f)
+    {
+        q_an = 2;
+    }
+    else
+    {
+        q_an = 3;
+    }
 
     // Find the two pixels in the perpendicular direction
     short2       x_p = neighbours_coords[q_an].s02;
@@ -220,11 +239,11 @@ __kernel void suppress_non_maximum(
 
     if((gradient > g1) && (gradient > g2))
     {
-        *((global DATA_TYPE_OUT *)non_max.ptr) = gradient;
+        __global uchar *non_max_addr            = non_max_ptr + non_max_offset_first_element_in_bytes + x * non_max_stride_x + y * non_max_stride_y;
+        *((global DATA_TYPE_OUT *)non_max_addr) = gradient;
     }
 }
 
-#define EDGE 255
 #define hysteresis_local_stack_L1 8  // The size of level 1 stack. This has to agree with the host side
 #define hysteresis_local_stack_L2 16 // The size of level 2 stack, adjust this can impact the match rate with VX implementation
 
@@ -330,10 +349,16 @@ kernel void hysteresis(
     // Load value
     DATA_TYPE_IN val = *((__global DATA_TYPE_IN *)offset(&src, x, y));
 
-    // If less than upper threshold set to NO_EDGE and return
+    // If the pixel has already been marked as NO_EDGE, store that value in the output and return
+    if(val == NO_EDGE)
+    {
+        *offset(&out, x, y) = NO_EDGE;
+        return;
+    }
+
+    // Return if it is a MAYBE pixel. Such pixels will become edges if near a strong edge
     if(val <= up_thr)
     {
-        *offset(&out, x, y) = 0;
         return;
     }
 
@@ -372,7 +397,7 @@ kernel void hysteresis(
         // Get direction pixel indices
         int N = max(y - 1, 0), S = min(y + 1, height - 2), W = max(x - 1, 0), E = min(x + 1, width - 2);
 
-        // Check 8 pixels around for week edges where low_thr < val <= up_thr
+        // Check 8 pixels around for weak edges where low_thr < val <= up_thr
         x_tmp = vload4(0, (__global DATA_TYPE_IN *)offset(&src, W, N));
         v_tmp = vload4(0, (__global uint *)offset(&visited, W, N));
         check_pixel(((x_tmp.s0 <= low_thr) || v_tmp.s0 || (x_tmp.s0 > up_thr)), W, N, x, y); // NW

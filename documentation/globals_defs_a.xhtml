@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -106,8 +106,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals_defs_j.xhtml#index_j"><span>j</span></a></li>
       <li><a href="globals_defs_l.xhtml#index_l"><span>l</span></a></li>
       <li><a href="globals_defs_m.xhtml#index_m"><span>m</span></a></li>
+      <li><a href="globals_defs_n.xhtml#index_n"><span>n</span></a></li>
+      <li><a href="globals_defs_o.xhtml#index_o"><span>o</span></a></li>
       <li><a href="globals_defs_p.xhtml#index_p"><span>p</span></a></li>
-      <li><a href="globals_defs_q.xhtml#index_q"><span>q</span></a></li>
       <li><a href="globals_defs_r.xhtml#index_r"><span>r</span></a></li>
       <li><a href="globals_defs_s.xhtml#index_s"><span>s</span></a></li>
       <li><a href="globals_defs_t.xhtml#index_t"><span>t</span></a></li>
@@ -153,25 +154,17 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ABS_OP
 : <a class="el" href="activation__layer_8cl.xhtml#a978f1506e23a332b840745ec64a7e855">activation_layer.cl</a>
 </li>
-<li>ABS_SAT_OP_EXPAND
-: <a class="el" href="fixed__point_8h.xhtml#a66d987917da70dfc88bee76cda323e0a">fixed_point.h</a>
-</li>
-<li>ABS_SAT_OP_EXPAND_STR
-: <a class="el" href="fixed__point_8h.xhtml#a096a0b33d9bf00fd65287a1ceafa227c">fixed_point.h</a>
-</li>
-<li>ABSQ_SAT_IMPL
-: <a class="el" href="fixed__point_8h.xhtml#a1acc7badafd7def20af187c5b5bfdec2">fixed_point.h</a>
-</li>
 <li>ACTIVATION_OP
 : <a class="el" href="activation__layer_8cl.xhtml#a5a310089a4e6b6de57a075a9bd4ced82">activation_layer.cl</a>
 , <a class="el" href="activation__layer__qa8_8cl.xhtml#a5a310089a4e6b6de57a075a9bd4ced82">activation_layer_qa8.cl</a>
 </li>
 <li>ACTIVATION_OP2
-: <a class="el" href="activation__layer__qa8_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_layer_qa8.cl</a>
-, <a class="el" href="activation__layer_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_layer.cl</a>
+: <a class="el" href="activation__layer_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_layer.cl</a>
+, <a class="el" href="activation__layer__qa8_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704">activation_layer_qa8.cl</a>
 </li>
 <li>ADD
 : <a class="el" href="arithmetic__op_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">arithmetic_op.cl</a>
+, <a class="el" href="arithmetic__op__quantized_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">arithmetic_op_quantized.cl</a>
 </li>
 <li>ADD_OP
 : <a class="el" href="activation__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">activation_layer.cl</a>
@@ -180,15 +173,6 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 , <a class="el" href="normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504">normalization_layer.cl</a>
 , <a class="el" href="softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer.cl</a>
 , <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
-</li>
-<li>ADD_SAT_OP_EXPAND
-: <a class="el" href="fixed__point_8h.xhtml#a6b1acbaff6cb3bad4edda9a93dac1f9e">fixed_point.h</a>
-</li>
-<li>ADD_SAT_OP_EXPAND_STR
-: <a class="el" href="fixed__point_8h.xhtml#a8fe4e6aa79b6e2faec019e53e1f39113">fixed_point.h</a>
-</li>
-<li>ADDQ_SAT_IMPL
-: <a class="el" href="fixed__point_8h.xhtml#ad2ad548e04bfbba48bf75e29c9699182">fixed_point.h</a>
 </li>
 <li>ARM_COMPUTE_ASSERT
 : <a class="el" href="_asserts_8h.xhtml#a83bf33add9b97f6897b7b3db2766dd27">Asserts.h</a>
@@ -235,14 +219,23 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_ERROR_ON_COORDINATES_DIMENSIONS_GTE
 : <a class="el" href="_validate_8h.xhtml#aecee2852b71597de947ff5ec4b9765f6">Validate.h</a>
 </li>
+<li>ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED
+: <a class="el" href="_c_p_p_2_validate_8h.xhtml#a8435bbd0f0cad3768e7cdcd9b91aedc5">Validate.h</a>
+</li>
 <li>ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN
 : <a class="el" href="_validate_8h.xhtml#aadf5c9cff86327b96d88d04649d9715e">Validate.h</a>
 </li>
 <li>ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN
 : <a class="el" href="_validate_8h.xhtml#a4264d7e3318c4188e48127a75f3f0f8a">Validate.h</a>
 </li>
+<li>ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED
+: <a class="el" href="_c_l_validate_8h.xhtml#a236e0638b7e5d9ea324a619fb7fb8b0f">CLValidate.h</a>
+</li>
 <li>ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN
 : <a class="el" href="_validate_8h.xhtml#a0d34a8aa07600727e4e5034c7cdad47d">Validate.h</a>
+</li>
+<li>ARM_COMPUTE_ERROR_ON_INT64_BASE_ATOMICS_UNSUPPORTED
+: <a class="el" href="_c_l_validate_8h.xhtml#aeee72a21e2b3fbe356f4830774d4e2c1">CLValidate.h</a>
 </li>
 <li>ARM_COMPUTE_ERROR_ON_INVALID_MULTI_HOG
 : <a class="el" href="_validate_8h.xhtml#abced8d9603a5927ebad9de2528f48962">Validate.h</a>
@@ -271,12 +264,6 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS
 : <a class="el" href="_validate_8h.xhtml#ad9fd47433ba6091668c207e21dd6385f">Validate.h</a>
 </li>
-<li>ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT
-: <a class="el" href="_validate_8h.xhtml#ab92ec8ea3d2b4661f61e26599931ef62">Validate.h</a>
-</li>
-<li>ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION
-: <a class="el" href="_validate_8h.xhtml#af7ffc9f13a83131b59e2a250a7438101">Validate.h</a>
-</li>
 <li>ARM_COMPUTE_ERROR_ON_MISMATCHING_QUANTIZATION_INFO
 : <a class="el" href="_validate_8h.xhtml#a13722b17f287d58f2a24f039dc2b4fc1">Validate.h</a>
 </li>
@@ -304,9 +291,6 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL
 : <a class="el" href="_validate_8h.xhtml#a1b35b0d258183cf9ef36adf684d0b88c">Validate.h</a>
 </li>
-<li>ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT
-: <a class="el" href="_validate_8h.xhtml#a6c48a8f0fea0f127b56dcc7c107fd168">Validate.h</a>
-</li>
 <li>ARM_COMPUTE_ERROR_ON_WINDOW_DIMENSIONS_GTE
 : <a class="el" href="_validate_8h.xhtml#af5084ef537306d09b1ef82aed5d1f63f">Validate.h</a>
 </li>
@@ -315,6 +299,9 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 </li>
 <li>ARM_COMPUTE_ERROR_THROW_ON
 : <a class="el" href="_error_8h.xhtml#a938dcd406ce611ef5345ad2531cdb948">Error.h</a>
+</li>
+<li>ARM_COMPUTE_EXIT_ON_MSG
+: <a class="el" href="_error_8h.xhtml#ad39a3601153da57978bb5124ace35d36">Error.h</a>
 </li>
 <li>ARM_COMPUTE_EXPECT
 : <a class="el" href="_asserts_8h.xhtml#adc60af942e951dc93e22b97b41809b51">Asserts.h</a>
@@ -388,11 +375,20 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_RETURN_ERROR_ON_COORDINATES_DIMENSIONS_GTE
 : <a class="el" href="_validate_8h.xhtml#a4a1f29c69e13d0c271a025771db7e354">Validate.h</a>
 </li>
+<li>ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED
+: <a class="el" href="_c_p_p_2_validate_8h.xhtml#ad2633f3560322e1f8d926949dec1b730">Validate.h</a>
+</li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN
 : <a class="el" href="_validate_8h.xhtml#ae7eed178dac535c6e727061b1f5bc6eb">Validate.h</a>
 </li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN
 : <a class="el" href="_validate_8h.xhtml#aef783de4ec01874dbec6054a5868aea2">Validate.h</a>
+</li>
+<li>ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED
+: <a class="el" href="_c_l_validate_8h.xhtml#ab82bd5de18ef067ae5d9ba4af8065dd6">CLValidate.h</a>
+</li>
+<li>ARM_COMPUTE_RETURN_ERROR_ON_INT64_BASE_ATOMICS_UNSUPPORTED
+: <a class="el" href="_c_l_validate_8h.xhtml#a392dffc92c7ca8a14299c3827f672eb2">CLValidate.h</a>
 </li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_INVALID_MULTI_HOG
 : <a class="el" href="_validate_8h.xhtml#a5022878c0277f395dec8055b219e679c">Validate.h</a>
@@ -421,12 +417,6 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS
 : <a class="el" href="_validate_8h.xhtml#a1da797d2762c1cdbb73bfc83136c3a38">Validate.h</a>
 </li>
-<li>ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT
-: <a class="el" href="_validate_8h.xhtml#a343cfb5e0a477fcaca3bef703003db81">Validate.h</a>
-</li>
-<li>ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION
-: <a class="el" href="_validate_8h.xhtml#a4e44b964e6651d275171025574747135">Validate.h</a>
-</li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO
 : <a class="el" href="_validate_8h.xhtml#aba910b683652be1f65437ef37a9da2a9">Validate.h</a>
 </li>
@@ -453,9 +443,6 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 </li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_UNCONFIGURED_KERNEL
 : <a class="el" href="_validate_8h.xhtml#afe826628d90b663c6efba849910b0795">Validate.h</a>
-</li>
-<li>ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT
-: <a class="el" href="_validate_8h.xhtml#adcdeae303050af15c9511e8e9c4f1680">Validate.h</a>
 </li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_WINDOW_DIMENSIONS_GTE
 : <a class="el" href="_validate_8h.xhtml#ac971a57039435ecc6b3321df4d324743">Validate.h</a>
@@ -523,11 +510,11 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#a0e53aa5d4cbcec7a0c0085838f32453d">helpers_asymm.h</a>
 </li>
-<li>asymm_rescale
-: <a class="el" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">softmax_layer_quantized.cl</a>
-</li>
 <li>ASYMM_RESCALE
 : <a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">helpers_asymm.h</a>
+</li>
+<li>asymm_rescale
+: <a class="el" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">softmax_layer_quantized.cl</a>
 </li>
 <li>ASYMM_RESCALE_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#aace85e2a32bacdaa4e2d2055deabfc57">helpers_asymm.h</a>
@@ -562,7 +549,7 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:58 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

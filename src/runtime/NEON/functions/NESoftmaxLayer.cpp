@@ -62,6 +62,7 @@ Status NESoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 2, "Only 2D inputs are supported");
 
     const TensorShape max_shape           = TensorShape(input->tensor_shape()).set(0, 1);
     const TensorInfo  tensor_info_max_sum = TensorInfo(*input).set_tensor_shape(max_shape).reset_padding();

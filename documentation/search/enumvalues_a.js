@@ -8,7 +8,6 @@ var searchData=
   ['l2norm',['L2NORM',['../namespacearm__compute.xhtml#a7b3ec6413f000b02fdb4e39a951d9f8aad927ac799e8b24f80fc80d89b2eb7131',1,'arm_compute']]],
   ['leaky_5frelu',['LEAKY_RELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaac7e80a3de04936f4e423e1b564fdca10',1,'arm_compute::ActivationLayerInfo']]],
   ['linear',['LINEAR',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaaac544aacc3615aada24897a215f5046',1,'arm_compute::ActivationLayerInfo']]],
-  ['log',['LOG',['../namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca4b5ffcdaf38ce4d463171f5c977c5ab3',1,'arm_compute']]],
   ['logistic',['LOGISTIC',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa72ee60fba0509af07cbbd91398d8db9d',1,'arm_compute::ActivationLayerInfo']]],
   ['lu_5fbounded_5frelu',['LU_BOUNDED_RELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaab1d4411a9e7f5e82002512cddfdc33a',1,'arm_compute::ActivationLayerInfo']]]
 ];

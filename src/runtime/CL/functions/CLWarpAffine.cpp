@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 
 using namespace arm_compute;
 
-void CLWarpAffine::configure(ICLTensor *input, ICLTensor *output, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
+void CLWarpAffine::configure(ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLWarpAffineKernel>();
     k->configure(input, output, matrix, policy);

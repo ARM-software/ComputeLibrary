@@ -69,49 +69,83 @@ namespace
 using namespace arm_compute;
 
 #if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
-struct PerCPUData
-{
-    CPUModel     model     = CPUModel::GENERIC;
-    unsigned int midr      = 0;
-    bool         model_set = false;
-};
 
+bool model_supports_dot(CPUModel model)
+{
+    switch(model)
+    {
+        case CPUModel::GENERIC_FP16_DOT:
+        case CPUModel::A55r1:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool model_supports_fp16(CPUModel model)
+{
+    switch(model)
+    {
+        case CPUModel::GENERIC_FP16:
+        case CPUModel::GENERIC_FP16_DOT:
+        case CPUModel::A55r1:
+            return true;
+        default:
+            return false;
+    }
+}
 /* Convert an MIDR register value to a CPUModel enum value. */
 CPUModel midr_to_model(const unsigned int midr)
 {
-    CPUModel model;
+    CPUModel model = CPUModel::GENERIC;
 
     // Unpack variant and CPU ID
-    const int variant = (midr >> 20) & 0xF;
-    const int cpunum  = (midr >> 4) & 0xFFF;
+    const int implementer = (midr >> 24) & 0xFF;
+    const int variant     = (midr >> 20) & 0xF;
+    const int cpunum      = (midr >> 4) & 0xFFF;
 
-    // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
-    switch(cpunum)
+    if(implementer == 0x41) // Arm CPUs
     {
-        case 0xd03:
-            model = CPUModel::A53;
-            break;
-
-        case 0xd05:
-            if(variant != 0)
-            {
-                model = CPUModel::A55r1;
-            }
-            else
-            {
-                model = CPUModel::A55r0;
-            }
-            break;
-
-        default:
-            model = CPUModel::GENERIC;
-            break;
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0xd03: // A53
+            case 0xd04: // A35
+                model = CPUModel::A53;
+                break;
+            case 0xd05: // A55
+                if(variant != 0)
+                {
+                    model = CPUModel::A55r1;
+                }
+                else
+                {
+                    model = CPUModel::A55r0;
+                }
+                break;
+            case 0xd0a: // A75
+                if(variant != 0)
+                {
+                    model = CPUModel::GENERIC_FP16_DOT;
+                }
+                else
+                {
+                    model = CPUModel::GENERIC_FP16;
+                }
+                break;
+            case 0xd0b: // A76
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
     }
 
     return model;
 }
 
-void populate_models_cpuid(std::vector<PerCPUData> &cpusv)
+void populate_models_cpuid(std::vector<CPUModel> &cpusv)
 {
     // If the CPUID capability is present, MIDR information is provided in /sys. Use that to populate the CPU model table.
     uint32_t i = 0;
@@ -126,16 +160,14 @@ void populate_models_cpuid(std::vector<PerCPUData> &cpusv)
             std::string line;
             if(bool(getline(file, line)))
             {
-                const unsigned long midr = support::cpp11::stoul(line, nullptr, 16);
-                c.midr                   = (midr & 0xffffffff);
-                c.model                  = midr_to_model(c.midr);
-                c.model_set              = true;
+                const unsigned long midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
+                c                        = midr_to_model(midr & 0xffffffff);
             }
         }
     }
 }
 
-void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
+void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 {
     // If "long-form" cpuinfo is present, parse that to populate models.
     std::regex proc_regex("^processor.*(\\d+)$");
@@ -160,7 +192,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
             if(std::regex_match(line, match, proc_regex))
             {
                 std::string id     = match[1];
-                int         newcpu = support::cpp11::stoi(id, nullptr, 0);
+                int         newcpu = support::cpp11::stoi(id, nullptr);
 
                 if(curcpu >= 0 && midr == 0)
                 {
@@ -170,9 +202,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
                 if(curcpu >= 0)
                 {
-                    cpusv[curcpu].midr      = midr;
-                    cpusv[curcpu].model     = midr_to_model(midr);
-                    cpusv[curcpu].model_set = true;
+                    cpusv[curcpu] = midr_to_model(midr);
                 }
 
                 midr   = 0;
@@ -183,28 +213,28 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
             if(std::regex_match(line, match, imp_regex))
             {
-                int impv = support::cpp11::stoi(match[1], nullptr, 16);
+                int impv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (impv << 24);
                 continue;
             }
 
             if(std::regex_match(line, match, var_regex))
             {
-                int varv = support::cpp11::stoi(match[1], nullptr, 16);
-                midr |= (varv << 16);
+                int varv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
+                midr |= (varv << 20);
                 continue;
             }
 
             if(std::regex_match(line, match, part_regex))
             {
-                int partv = support::cpp11::stoi(match[1], nullptr, 16);
+                int partv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (partv << 4);
                 continue;
             }
 
             if(std::regex_match(line, match, rev_regex))
             {
-                int regv = support::cpp11::stoi(match[1], nullptr, 10);
+                int regv = support::cpp11::stoi(match[1], nullptr);
                 midr |= (regv);
                 midr |= (0xf << 16);
                 continue;
@@ -213,9 +243,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
         if(curcpu >= 0)
         {
-            cpusv[curcpu].midr      = midr;
-            cpusv[curcpu].model     = midr_to_model(midr);
-            cpusv[curcpu].model_set = true;
+            cpusv[curcpu] = midr_to_model(midr);
         }
     }
 }
@@ -251,7 +279,7 @@ int get_max_cpus()
 
             line.erase(line.begin(), startfrom);
 
-            max_cpus = support::cpp11::stoi(line, nullptr, 0) + 1;
+            max_cpus = support::cpp11::stoi(line, nullptr) + 1;
             success  = true;
         }
     }
@@ -262,7 +290,6 @@ int get_max_cpus()
         max_cpus = std::thread::hardware_concurrency();
     }
 #endif /* BARE_METAL */
-
     return max_cpus;
 }
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
@@ -274,9 +301,9 @@ namespace arm_compute
 void get_cpu_configuration(CPUInfo &cpuinfo)
 {
 #if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
-    bool cpuid        = false;
-    bool fp16_support = false;
-    bool dot_support  = false;
+    bool cpuid               = false;
+    bool hwcaps_fp16_support = false;
+    bool hwcaps_dot_support  = false;
 
     const uint32_t hwcaps = getauxval(AT_HWCAP);
 
@@ -287,54 +314,17 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
 
     if((hwcaps & HWCAP_ASIMDHP) != 0)
     {
-        fp16_support = true;
+        hwcaps_fp16_support = true;
     }
 
     if((hwcaps & HWCAP_ASIMDDP) != 0)
     {
-        dot_support = true;
+        hwcaps_dot_support = true;
     }
 
-#ifdef __aarch64__
-    /* Pre-4.15 kernels don't have the ASIMDDP bit.
-     *
-     * Although the CPUID bit allows us to read the feature register
-     * directly, the kernel quite sensibly masks this to only show
-     * features known by it to be safe to show to userspace.  As a
-     * result, pre-4.15 kernels won't show the relevant bit in the
-     * feature registers either.
-     *
-     * So for now, use a whitelist of CPUs known to support the feature.
-     */
-    if(!dot_support && cpuid)
-    {
-        /* List of CPUs with dot product support:         A55r1       A75r1       A75r2  */
-        const unsigned int dotprod_whitelist_masks[]  = { 0xfff0fff0, 0xfff0fff0, 0xfff0fff0, 0 };
-        const unsigned int dotprod_whitelist_values[] = { 0x4110d050, 0x4110d0a0, 0x4120d0a0, 0 };
-
-        unsigned long cpuid;
-
-        __asm __volatile(
-            "mrs %0, midr_el1\n"
-            : "=r"(cpuid)
-            :
-            : );
-
-        for(int i = 0; dotprod_whitelist_values[i] != 0; i++)
-        {
-            if((cpuid & dotprod_whitelist_masks[i]) == dotprod_whitelist_values[i])
-            {
-                dot_support = true;
-                break;
-            }
-        }
-    }
-#endif /* __aarch64__ */
     const unsigned int max_cpus = get_max_cpus();
     cpuinfo.set_cpu_num(max_cpus);
-    cpuinfo.set_fp16(fp16_support);
-    cpuinfo.set_dotprod(dot_support);
-    std::vector<PerCPUData> percpu(max_cpus);
+    std::vector<CPUModel> percpu(max_cpus, CPUModel::GENERIC);
     if(cpuid)
     {
         populate_models_cpuid(percpu);
@@ -344,10 +334,17 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
         populate_models_cpuinfo(percpu);
     }
     int j(0);
+    // Update dot product and FP16 support if all CPUs support these features:
+    bool all_support_dot  = true;
+    bool all_support_fp16 = true;
     for(const auto &v : percpu)
     {
-        cpuinfo.set_cpu_model(j++, v.model);
+        all_support_dot &= model_supports_dot(v);
+        all_support_fp16 &= model_supports_fp16(v);
+        cpuinfo.set_cpu_model(j++, v);
     }
+    cpuinfo.set_dotprod(all_support_dot || hwcaps_dot_support);
+    cpuinfo.set_fp16(all_support_fp16 || hwcaps_fp16_support);
 #else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */

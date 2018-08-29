@@ -6,5 +6,6 @@ var classarm__compute_1_1_c_l_depthwise_convolution_layer =
     [ "configure", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#ab3c474a65a8c44a18cd50670c5d3aee4", null ],
     [ "operator=", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#acf1baa6f148b8ac41e5a766f599784de", null ],
     [ "operator=", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#ae2f97590ca5e33e6dbc69628dd2e5d2a", null ],
+    [ "prepare", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77", null ],
     [ "run", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb", null ]
 ];

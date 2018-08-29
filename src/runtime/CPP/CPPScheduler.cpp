@@ -29,6 +29,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CPUUtils.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
@@ -37,7 +38,59 @@
 
 namespace arm_compute
 {
-class Thread
+namespace
+{
+class ThreadFeeder
+{
+public:
+    /** Constructor
+     *
+     * @param[in] start First value that will be returned by the feeder
+     * @param[in] end   End condition (The last value returned by get_next() will be end - 1)
+     */
+    explicit ThreadFeeder(unsigned int start = 0, unsigned int end = 0)
+        : _atomic_counter(start), _end(end)
+    {
+    }
+    /** Return the next element in the range if there is one.
+     *
+     * @param[out] next Will contain the next element if there is one.
+     *
+     * @return False if the end of the range has been reached and next wasn't set.
+     */
+    bool get_next(unsigned int &next)
+    {
+        next = atomic_fetch_add_explicit(&_atomic_counter, 1u, std::memory_order_relaxed);
+        return next < _end;
+    }
+
+private:
+    std::atomic_uint   _atomic_counter;
+    const unsigned int _end;
+};
+
+/** Execute workloads[info.thread_id] first, then call the feeder to get the index of the next workload to run.
+ *
+ * Will run workloads until the feeder reaches the end of its range.
+ *
+ * @param[in]     workloads The array of workloads
+ * @param[in,out] feeder    The feeder indicating which workload to execute next.
+ * @param[in]     info      Threading and CPU info.
+ */
+void process_workloads(std::vector<IScheduler::Workload> &workloads, ThreadFeeder &feeder, const ThreadInfo &info)
+{
+    unsigned int workload_index = info.thread_id;
+    do
+    {
+        ARM_COMPUTE_ERROR_ON(workload_index >= workloads.size());
+        workloads[workload_index](info);
+    }
+    while(feeder.get_next(workload_index));
+}
+
+} //namespace
+
+class CPPScheduler::Thread
 {
 public:
     /** Start a new thread. */
@@ -51,11 +104,15 @@ public:
     /** Destructor. Make the thread join. */
     ~Thread();
 
-    /** Request the worker thread to start executing the given kernel
-     * This function will return as soon as the kernel has been sent to the worker thread.
+    /** Request the worker thread to start executing workloads.
+     *
+     * The thread will start by executing workloads[info.thread_id] and will then call the feeder to
+     * get the index of the following workload to run.
+     *
+     * @note This function will return as soon as the workloads have been sent to the worker thread.
      * wait() needs to be called to ensure the execution is complete.
      */
-    void start(ICPPKernel *kernel, const Window &window, const ThreadInfo &info);
+    void start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info);
 
     /** Wait for the current kernel execution to complete. */
     void wait();
@@ -64,39 +121,38 @@ public:
     void worker_thread();
 
 private:
-    std::thread             _thread;
-    ICPPKernel             *_kernel{ nullptr };
-    Window                  _window;
-    ThreadInfo              _info;
-    std::mutex              _m;
-    std::condition_variable _cv;
-    bool                    _wait_for_work{ false };
-    bool                    _job_complete{ true };
-    std::exception_ptr      _current_exception;
+    std::thread                        _thread{};
+    ThreadInfo                         _info{};
+    std::vector<IScheduler::Workload> *_workloads{ nullptr };
+    ThreadFeeder                      *_feeder{ nullptr };
+    std::mutex                         _m{};
+    std::condition_variable            _cv{};
+    bool                               _wait_for_work{ false };
+    bool                               _job_complete{ true };
+    std::exception_ptr                 _current_exception{ nullptr };
 };
 
-Thread::Thread()
-    : _thread(), _window(), _info(), _m(), _cv(), _current_exception(nullptr)
+CPPScheduler::Thread::Thread()
 {
     _thread = std::thread(&Thread::worker_thread, this);
 }
 
-Thread::~Thread()
+CPPScheduler::Thread::~Thread()
 {
     // Make sure worker thread has ended
     if(_thread.joinable())
     {
-        start(nullptr, Window(), ThreadInfo());
+        ThreadFeeder feeder;
+        start(nullptr, feeder, ThreadInfo());
         _thread.join();
     }
 }
 
-void Thread::start(ICPPKernel *kernel, const Window &window, const ThreadInfo &info)
+void CPPScheduler::Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info)
 {
-    _kernel = kernel;
-    _window = window;
-    _info   = info;
-
+    _workloads = workloads;
+    _feeder    = &feeder;
+    _info      = info;
     {
         std::lock_guard<std::mutex> lock(_m);
         _wait_for_work = true;
@@ -105,7 +161,7 @@ void Thread::start(ICPPKernel *kernel, const Window &window, const ThreadInfo &i
     _cv.notify_one();
 }
 
-void Thread::wait()
+void CPPScheduler::Thread::wait()
 {
     {
         std::unique_lock<std::mutex> lock(_m);
@@ -118,7 +174,7 @@ void Thread::wait()
     }
 }
 
-void Thread::worker_thread()
+void CPPScheduler::Thread::worker_thread()
 {
     while(true)
     {
@@ -129,15 +185,14 @@ void Thread::worker_thread()
         _current_exception = nullptr;
 
         // Time to exit
-        if(_kernel == nullptr)
+        if(_workloads == nullptr)
         {
             return;
         }
 
         try
         {
-            _window.validate();
-            _kernel->run(_window, _info);
+            process_workloads(*_workloads, *_feeder, _info);
         }
         catch(...)
         {
@@ -174,56 +229,90 @@ unsigned int CPPScheduler::num_threads() const
     return _num_threads;
 }
 
-void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
+void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
+{
+    const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
+    if(num_threads < 1)
+    {
+        return;
+    }
+    ThreadFeeder feeder(num_threads, workloads.size());
+    ThreadInfo   info;
+    info.cpu_info          = &_cpu_info;
+    info.num_threads       = num_threads;
+    unsigned int t         = 0;
+    auto         thread_it = _threads.begin();
+    for(; t < num_threads - 1; ++t, ++thread_it)
+    {
+        info.thread_id = t;
+        thread_it->start(&workloads, feeder, info);
+    }
+
+    info.thread_id = t;
+    process_workloads(workloads, feeder, info);
+
+    try
+    {
+        for(auto &thread : _threads)
+        {
+            thread.wait();
+        }
+    }
+    catch(const std::system_error &e)
+    {
+        std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
+    }
+}
+
+void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
-    /** [Scheduler example] */
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-
     const Window      &max_window     = kernel->window();
-    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
-    info.num_threads                  = std::min(num_iterations, _num_threads);
+    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
+    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 
     if(num_iterations == 0)
     {
         return;
     }
 
-    if(!kernel->is_parallelisable() || info.num_threads == 1)
+    if(!kernel->is_parallelisable() || num_threads == 1)
     {
+        ThreadInfo info;
+        info.cpu_info = &_cpu_info;
         kernel->run(max_window, info);
     }
     else
     {
-        int  t         = 0;
-        auto thread_it = _threads.begin();
-
-        for(; t < info.num_threads - 1; ++t, ++thread_it)
+        unsigned int num_windows = 0;
+        switch(hints.strategy())
         {
-            Window win     = max_window.split_window(split_dimension, t, info.num_threads);
-            info.thread_id = t;
-            thread_it->start(kernel, win, info);
-        }
-
-        // Run last part on main thread
-        Window win     = max_window.split_window(split_dimension, t, info.num_threads);
-        info.thread_id = t;
-        kernel->run(win, info);
-
-        try
-        {
-            for(auto &thread : _threads)
+            case StrategyHint::STATIC:
+                num_windows = num_threads;
+                break;
+            case StrategyHint::DYNAMIC:
             {
-                thread.wait();
+                // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
+                const unsigned int max_iterations = static_cast<unsigned int>(_num_threads) * 3;
+                num_windows                       = num_iterations > max_iterations ? max_iterations : num_iterations;
+                break;
             }
+            default:
+                ARM_COMPUTE_ERROR("Unknown strategy");
         }
-        catch(const std::system_error &e)
+        std::vector<IScheduler::Workload> workloads(num_windows);
+        for(unsigned int t = 0; t < num_windows; t++)
         {
-            std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
+            //Capture 't' by copy, all the other variables by reference:
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel](const ThreadInfo & info)
+            {
+                Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
+                win.validate();
+                kernel->run(win, info);
+            };
         }
+        run_workloads(workloads);
     }
-    /** [Scheduler example] */
 }
 } // namespace arm_compute

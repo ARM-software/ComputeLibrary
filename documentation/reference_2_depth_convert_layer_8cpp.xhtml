@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,6 @@ $(document).ready(function(){initNavTree('reference_2_depth_convert_layer_8cpp.x
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_depth_convert_layer_8h_source.xhtml">DepthConvertLayer.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">tests/validation/FixedPoint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_helpers_8h_source.xhtml">tests/validation/Helpers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2_types_8h_source.xhtml">tests/Types.h</a>&quot;</code><br />
 </div>
@@ -141,19 +140,19 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a742cdbdf3c1db76c9a189f1bcd745579"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , typename std::enable_if&lt; std::is_integral&lt; T1 &gt;::value &amp;&amp;std::is_floating_point&lt; T2 &gt;::value, int &gt;::type &gt; </td></tr>
+<tr class="memitem:a742cdbdf3c1db76c9a189f1bcd745579"><td class="memTemplParams" colspan="2">template&lt;typename T1 , typename T2 , typename std::enable_if&lt; std::is_integral&lt; T1 &gt;::value &amp;&amp;std::is_integral&lt; T2 &gt;::value &amp;&amp;!std::is_same&lt; T1, T2 &gt;::value, int &gt;::type &gt; </td></tr>
 <tr class="memitem:a742cdbdf3c1db76c9a189f1bcd745579"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T2 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a742cdbdf3c1db76c9a189f1bcd745579">depth_convert</a> (const SimpleTensor&lt; T1 &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
 <tr class="separator:a742cdbdf3c1db76c9a189f1bcd745579"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87c420d7f8a98dead76b0b32b2df6777"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a87c420d7f8a98dead76b0b32b2df6777">depth_convert</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
 <tr class="separator:a87c420d7f8a98dead76b0b32b2df6777"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa23e45fa7a8f9f196704d4473721d6ab"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aa23e45fa7a8f9f196704d4473721d6ab">depth_convert</a> (const SimpleTensor&lt; uint16_t &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
 <tr class="separator:aa23e45fa7a8f9f196704d4473721d6ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a968f4da89a68d28ad39d8e39d8d19f93"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a968f4da89a68d28ad39d8e39d8d19f93">depth_convert</a> (const SimpleTensor&lt; int16_t &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
-<tr class="separator:a968f4da89a68d28ad39d8e39d8d19f93"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3f03fb276c241cb8545e8f19b0718dc"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ae3f03fb276c241cb8545e8f19b0718dc">depth_convert</a> (const SimpleTensor&lt; int8_t &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
-<tr class="separator:ae3f03fb276c241cb8545e8f19b0718dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77181952330fca74c9b3528f9a51fa10"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; int8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a77181952330fca74c9b3528f9a51fa10">depth_convert</a> (const SimpleTensor&lt; float &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
-<tr class="separator:a77181952330fca74c9b3528f9a51fa10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5201f074018073904e418e8e241ae1c"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#af5201f074018073904e418e8e241ae1c">depth_convert</a> (const SimpleTensor&lt; int16_t &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
+<tr class="separator:af5201f074018073904e418e8e241ae1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a109ffc40641c411b40d1ce2d50a771da"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a109ffc40641c411b40d1ce2d50a771da">depth_convert</a> (const SimpleTensor&lt; float &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
+<tr class="separator:a109ffc40641c411b40d1ce2d50a771da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dbe0d0e52cf797820d0d2baddf86dd4"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9dbe0d0e52cf797820d0d2baddf86dd4">depth_convert</a> (const SimpleTensor&lt; half &gt; &amp;src, DataType dt_out, ConvertPolicy policy, uint32_t shift)</td></tr>
+<tr class="separator:a9dbe0d0e52cf797820d0d2baddf86dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -161,7 +160,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="reference_2_depth_convert_layer_8cpp.xhtml">DepthConvertLayer.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

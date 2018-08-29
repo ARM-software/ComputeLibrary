@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -43,24 +44,17 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8,
-                                                         DataType::QS16, DataType::F16,
-                                                         DataType::QS32, DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8,
+                                                         DataType::F16,
+                                                         DataType::S32, DataType::F32);
 
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::QS32, DataType::S32, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::S32, DataType::F32);
 
-        if(is_data_type_fixed_point(input->data_type()))
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS8 && bias->data_type() != DataType::QS8, "Wrong data type for bias");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS16 && bias->data_type() != DataType::QS8, "Wrong data type for bias");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS32 && bias->data_type() != DataType::QS16, "Wrong data type for bias");
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, bias);
-        }
-        else if(is_data_type_quantized_asymmetric(input->data_type()))
+        if(is_data_type_quantized_asymmetric(input->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
         }
@@ -80,17 +74,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
-        if(is_data_type_fixed_point(input->data_type()))
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS8 && output->data_type() != DataType::QS8, "Wrong data type for output");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS16 && output->data_type() != DataType::QS8, "Wrong data type for output");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS32 && output->data_type() != DataType::QS16, "Wrong data type for output");
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
-        }
-        else if(is_data_type_quantized_asymmetric(output->data_type()))
+        if(is_data_type_quantized_asymmetric(output->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && output->data_type() != DataType::QASYMM8, "Wrong data type for bias");
         }
@@ -168,44 +155,11 @@ inline float32x4_t internal_vld1q(const float *in)
 {
     return vld1q_f32(in);
 }
-inline qint8x16_t internal_vld1q(const qint8_t *in)
-{
-    return vld1q_qs8(in);
-}
-inline qint16x8_t internal_vld1q(const qint16_t *in)
-{
-    return vld1q_qs16(in);
-}
-inline qint32x4_t internal_vld1q(const qint32_t *in)
-{
-    return vld1q_s32(in);
-}
 
 // Internal store
 inline void internal_vst1q(float *p, const float32x4_t &v)
 {
     vst1q_f32(p, v);
-}
-inline void internal_vst1q(qint8_t *p, const qint8x16_t &v)
-{
-    vst1q_qs8(p, v);
-}
-inline void internal_vst1q(qint8_t *p, const qint16x8_t &v)
-{
-    vst1_qs8(p, vqmovn_s16(v));
-}
-inline void internal_vst1q(qint16_t *p, const qint16x8_t &v)
-{
-    vst1q_qs16(p, v);
-}
-inline void internal_vst1q(qint32_t *p, const qint32x4_t &v)
-{
-    vst1q_s32(p, v);
-}
-
-inline void internal_vst1q(qint16_t *p, const qint32x4_t &v)
-{
-    vst1_qs16(p, vqmovn_qs32(v));
 }
 
 // Internal vdup
@@ -213,35 +167,11 @@ inline float32x4_t internal_vdupq_n(float v)
 {
     return vdupq_n_f32(v);
 }
-inline qint8x16_t internal_vdupq_n(qint8_t v)
-{
-    return vdupq_n_qs8(v);
-}
-inline qint16x8_t internal_vdupq_n(qint16_t v)
-{
-    return vdupq_n_qs16(v);
-}
-inline qint32x4_t internal_vdupq_n(qint32_t v)
-{
-    return vdupq_n_qs32(v);
-}
 
 // Internal vadd
 inline float32x4_t internal_vqaddq(const float32x4_t &x, const float32x4_t &y)
 {
     return vaddq_f32(x, y);
-}
-inline qint8x16_t internal_vqaddq(const qint8x16_t &x, const qint8x16_t &y)
-{
-    return vqaddq_qs8(x, y);
-}
-inline qint16x8_t internal_vqaddq(const qint16x8_t &x, const qint16x8_t &y)
-{
-    return vqaddq_qs16(x, y);
-}
-inline qint32x4_t internal_vqaddq(const qint32x4_t &x, const qint32x4_t &y)
-{
-    return vqaddq_qs32(x, y);
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -494,39 +424,6 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     {
         switch(input->info()->data_type())
         {
-            case DataType::QS8:
-            {
-                if(bias == nullptr)
-                {
-                    _func = (output == nullptr) ? &output_stage<qint8_t, qint8_t, true, false> : &output_stage<qint8_t, qint8_t, false, false>;
-                }
-                else
-                {
-                    _func = (output == nullptr) ? &output_stage<qint8_t, qint8_t, true, true> : &output_stage<qint8_t, qint8_t, false, true>;
-                }
-                break;
-            }
-            case DataType::QS16:
-            {
-                if(bias != nullptr && bias->info()->data_type() == DataType::QS8)
-                {
-                    _func = (output == nullptr) ? &output_stage<qint16_t, qint8_t, true, true> : &output_stage<qint16_t, qint8_t, false, true>;
-                }
-                else if(bias == nullptr)
-                {
-                    _func = (output == nullptr) ? &output_stage<qint16_t, qint8_t, true, false> : &output_stage<qint16_t, qint8_t, false, false>;
-                }
-                else
-                {
-                    ARM_COMPUTE_ERROR("Not implemented");
-                }
-                break;
-            }
-            case DataType::QS32:
-            {
-                _func = (output == nullptr) ? &output_stage<qint32_t, qint16_t, true, true> : &output_stage<qint32_t, qint16_t, false, true>;
-                break;
-            }
             case DataType::S32:
             {
                 _func = (bias == nullptr) ? &output_stage<int32_t, uint8_t, false, false> : &output_stage<int32_t, uint8_t, false, true>;
@@ -570,7 +467,7 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
 Status NEDirectConvolutionLayerOutputStageKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), bias->clone().get(), output == nullptr ? nullptr : output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), bias == nullptr ? nullptr : bias->clone().get(), output == nullptr ? nullptr : output->clone().get()).first);
 
     return Status{};
 }

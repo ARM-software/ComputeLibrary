@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "SoftmaxLayer.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/FixedPoint.h"
 
 namespace arm_compute
 {
@@ -38,7 +37,7 @@ template <typename T, typename std::enable_if<is_floating_point<T>::value, int>:
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const int cols       = src.shape()[0];
@@ -71,65 +70,21 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
     return dst;
 }
 
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
+template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type>
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
-{
-    ARM_COMPUTE_UNUSED(beta);
-
-    using namespace fixed_point_arithmetic;
-
-    // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
-
-    // Compute reference
-    const int cols       = src.shape()[0];
-    const int upper_dims = src.num_elements() / cols;
-
-    for(int r = 0; r < upper_dims; ++r)
-    {
-        const T *src_row_ptr = src.data() + r * cols;
-        T       *dst_row_ptr = dst.data() + r * cols;
-
-        // Find max
-        const fixed_point<T> max(*std::max_element(src_row_ptr, src_row_ptr + cols), src.fixed_point_position(), true);
-
-        // Regularize
-        using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
-        fixed_point<promoted_type> sum(0, src.fixed_point_position(), true);
-        std::transform(src_row_ptr, src_row_ptr + cols, dst_row_ptr, [&](T val)
-        {
-            const fixed_point<T> res = exp(fixed_point<T>(val, src.fixed_point_position(), true) - max);
-            sum                      = add(sum, fixed_point<promoted_type>(res.raw(), src.fixed_point_position(), true));
-            return res.raw();
-        });
-
-        // Normalize
-        fixed_point<T> saturated_sum(sum);
-        std::transform(dst_row_ptr, dst_row_ptr + cols, dst_row_ptr, [&](T val)
-        {
-            return div(fixed_point<T>(val, src.fixed_point_position(), true), saturated_sum).raw();
-        });
-    }
-
-    return dst;
-}
-
-template <>
-SimpleTensor<uint8_t> softmax_layer<uint8_t>(const SimpleTensor<uint8_t> &src, float beta)
 {
     // Note: Output quantization info should always have scale = 1/256 and offset = 0
     const QuantizationInfo output_quantization_info = QuantizationInfo(1.f / 256, 0);
 
-    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>   dst_tmp = softmax_layer<float>(src_tmp, beta);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, output_quantization_info);
+    SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
+    SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta);
+    SimpleTensor<T>     dst     = convert_to_asymmetric(dst_tmp, output_quantization_info);
     return dst;
 }
 
 template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta);
 template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta);
-template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src, float beta);
-template SimpleTensor<qint16_t> softmax_layer(const SimpleTensor<qint16_t> &src, float beta);
+template SimpleTensor<uint8_t> softmax_layer(const SimpleTensor<uint8_t> &src, float beta);
 } // namespace reference
 } // namespace validation
 } // namespace test

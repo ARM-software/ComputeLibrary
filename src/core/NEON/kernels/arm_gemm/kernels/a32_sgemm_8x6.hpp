@@ -25,8 +25,10 @@
 
 #ifdef __arm__
 
-namespace arm_gemm
-{
+#include "../std_transforms_fixed.hpp"
+
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a32_sgemm_8x6(const float *, const float *, float *, int, int, int);
 void a32_sgemm_8x6_a53(const float *, const float *, float *, int, int, int);
@@ -40,35 +42,33 @@ void a32_sgemm_8x6_a55r1(const float *, const float *, float *, int, int, int);
 // All kernels in the family must share these characteristics.  The actual
 // kernel to be used can be chosen at runtime, based on the CPU_type
 // structure.
-class sgemm_8x6
-{
+class sgemm_8x6 {
 public:
     typedef float operand_type;
     typedef float result_type;
 
     typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
 
-    /* Describes the data layout for A input */
-    static const int A_interleave = 6;
-    static const int A_block      = 1;
-    static const int A_transpose  = 0;
-
-    /* Same for B input */
-    static const int B_interleave = 8;
-    static const int B_block      = 1;
-    static const int B_transpose  = 1;
-
     /* Kernel blocking parameters */
-    static const int out_width  = 8;
-    static const int out_height = 6;
-    static const int k_unroll   = 1;
+    static int out_width() {
+        return 8;
+    }
+
+    static int out_height() {
+        return 6;
+    }
+
+    static int k_unroll() {
+        return 1;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsFixed<operand_type, result_type, 6, 8> transforms = {};
 
     kern_type kernel = a32_sgemm_8x6;
 
-    sgemm_8x6(const CPUInfo *ci)
-    {
-        switch(ci->get_cpu_model())
-        {
+    sgemm_8x6(const CPUInfo *ci) {
+        switch(ci->get_cpu_model()) {
             case CPUModel::A53:
                 kernel = a32_sgemm_8x6_a53;
                 break;
@@ -78,7 +78,7 @@ public:
                 break;
 
             default:
-                kernel = a32_sgemm_8x6;
+                /* Generic kernel is selected by default. */
                 break;
         }
     }

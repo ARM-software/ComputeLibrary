@@ -27,6 +27,7 @@
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
 
+#include <utility>
 #include <vector>
 
 namespace arm_compute
@@ -37,8 +38,6 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     {
         case DataType::U8:
             return "uchar";
-        case DataType::QS8:
-            return "qs8";
         case DataType::S8:
             return "char";
         case DataType::QASYMM8:
@@ -47,14 +46,10 @@ std::string get_cl_type_from_data_type(const DataType &dt)
             return "ushort";
         case DataType::S16:
             return "short";
-        case DataType::QS16:
-            return "qs16";
         case DataType::U32:
             return "uint";
         case DataType::S32:
             return "int";
-        case DataType::QS32:
-            return "qs32";
         case DataType::U64:
             return "ulong";
         case DataType::S64:
@@ -74,13 +69,11 @@ std::string get_data_size_from_data_type(const DataType &dt)
     switch(dt)
     {
         case DataType::U8:
-        case DataType::QS8:
         case DataType::S8:
         case DataType::QASYMM8:
             return "8";
         case DataType::U16:
         case DataType::S16:
-        case DataType::QS16:
         case DataType::F16:
             return "16";
         case DataType::U32:
@@ -98,20 +91,10 @@ std::string get_data_size_from_data_type(const DataType &dt)
 
 std::string get_underlying_cl_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
-    {
-        case DataType::QS8:
-            return "char";
-        case DataType::QS16:
-            return "short";
-        case DataType::QS32:
-            return "int";
-        default:
-            return get_cl_type_from_data_type(dt);
-    }
+    return get_cl_type_from_data_type(dt);
 }
 
-GPUTarget get_target_from_device(cl::Device &device)
+GPUTarget get_target_from_device(const cl::Device &device)
 {
     // Query device name size
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
@@ -127,6 +110,16 @@ bool arm_non_uniform_workgroup_supported(const cl::Device &device)
 bool fp16_supported(const cl::Device &device)
 {
     return device_supports_extension(device, "cl_khr_fp16");
+}
+
+bool dot8_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_arm_integer_dot_product_int8");
+}
+
+bool dot8_acc_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_arm_integer_dot_product_accumulate_int8");
 }
 
 CLVersion get_cl_version(const cl::Device &device)
@@ -159,4 +152,47 @@ bool device_supports_extension(const cl::Device &device, const char *extension_n
     return (pos != std::string::npos);
 }
 
+bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout)
+{
+    ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
+
+    using WinogradConfiguration = std::pair<std::pair<int, int>, std::pair<int, int>>;
+
+    std::vector<WinogradConfiguration> winograd_configs_nchw =
+    {
+        WinogradConfiguration(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3)),
+        WinogradConfiguration(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1)),
+        WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3)),
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
+    };
+
+    std::vector<WinogradConfiguration> winograd_configs_nhwc =
+    {
+        WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1)),
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
+    };
+
+    auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),
+                            std::pair<int, int>(kernel_size.width, kernel_size.height));
+
+    // Return true if supported
+    if(data_layout == DataLayout::NCHW)
+    {
+        return (std::find(winograd_configs_nchw.begin(), winograd_configs_nchw.end(), p) != winograd_configs_nchw.end());
+    }
+    else
+    {
+        return (std::find(winograd_configs_nhwc.begin(), winograd_configs_nhwc.end(), p) != winograd_configs_nhwc.end());
+    }
+}
 } // namespace arm_compute

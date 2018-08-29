@@ -29,7 +29,7 @@
  * @attention Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
  * @attention Input tensor depth should be given as a preprocessor argument using -DDEPTH_IN=size. e.g. -DDEPTH_IN=16
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -63,7 +63,7 @@ __kernel void permute_201(
  * @attention Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
  * @attention Input tensor depth should be given as a preprocessor argument using -DDEPTH_IN=size. e.g. -DDEPTH_IN=16
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -97,7 +97,7 @@ __kernel void permute_120(
  * @attention Data type can be passed using the -DDATA_TYPE compile flag, e.g. -DDATA_TYPE=float
  * @attention Input tensor depth should be given as a preprocessor argument using -DDEPTH_IN=size. e.g. -DDEPTH_IN=16
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)

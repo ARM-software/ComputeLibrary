@@ -89,7 +89,7 @@ env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
          '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow','-Wno-implicit-fallthrough'])
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
@@ -104,7 +104,7 @@ if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in 
 if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-implicit-fallthrough'])
 
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])

@@ -108,6 +108,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup        _memory_group;
@@ -117,6 +118,7 @@ private:
     ITensor           *_input;
     PadStrideInfo      _info;
     std::pair<unsigned int, unsigned int> _inner_border;
+    bool _is_prepared;
 };
 } // arm_compute
 #endif /* __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__ */

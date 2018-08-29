@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
@@ -38,16 +38,20 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::NHWC && num_groups > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4 && num_groups > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(3) % num_groups) != 0);
 
     if(biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->num_dimensions() != 1));
         ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->num_dimensions() != 2));
         ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->dimension(0) != input->tensor_shape()[3]));
@@ -57,9 +61,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
@@ -72,17 +75,17 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 {
 }
 
-void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
+void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_weights_reshaped_shape(*input->info(), (biases != nullptr))));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_weights_reshaped_shape(*input->info(), (biases != nullptr), num_groups)));
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
                                                   (biases != nullptr) ? biases->info() : nullptr,
-                                                  output->info()));
+                                                  output->info(), num_groups));
 
     const DataType data_type = input->info()->data_type();
 
@@ -93,30 +96,22 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
     build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
-    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
-
-    // Set static arguments
-    unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
-    idx += (biases != nullptr) ? num_arguments_per_1D_tensor() : 0;
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(0));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(2));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(3));
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
-Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output, num_groups));
     return Status{};
 }
 
@@ -133,6 +128,14 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
 
     Window biases_window;
     Window biases_slice;
+
+    unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
+    idx += (_biases != nullptr) ? num_arguments_per_1D_tensor() : 0;
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(0));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(2));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(3));
+    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes().z());
 
     if(_biases != nullptr)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -567,29 +567,29 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *in, const uint16x4_t pc, co
     const uint32x4_t mk0_0 = vld1q_u32(in - 1);
     const uint32x4_t mk0_1 = vld1q_u32(in + 1);
     uint32x4_t       mask0 = vceqq_u32(pc32, vdupq_n_u32(0));
-    mask0                  = vandq_u32(mask0, vcgeq_u32(mc, mk0_0));
-    mask0                  = vandq_u32(mask0, vcgeq_u32(mc, mk0_1));
+    mask0                  = vandq_u32(mask0, vcgtq_u32(mc, mk0_0));
+    mask0                  = vandq_u32(mask0, vcgtq_u32(mc, mk0_1));
 
     // 45 degree
     const uint32x4_t mk45_0 = vld1q_u32(in - stride_mag - 1);
     const uint32x4_t mk45_1 = vld1q_u32(in + stride_mag + 1);
     uint32x4_t       mask1  = vceqq_u32(pc32, vdupq_n_u32(1));
-    mask1                   = vandq_u32(mask1, vcgeq_u32(mc, mk45_0));
-    mask1                   = vandq_u32(mask1, vcgeq_u32(mc, mk45_1));
+    mask1                   = vandq_u32(mask1, vcgtq_u32(mc, mk45_0));
+    mask1                   = vandq_u32(mask1, vcgtq_u32(mc, mk45_1));
 
     // 90 degree
     const uint32x4_t mk90_0 = vld1q_u32(in - stride_mag);
     const uint32x4_t mk90_1 = vld1q_u32(in + stride_mag);
     uint32x4_t       mask2  = vceqq_u32(pc32, vdupq_n_u32(2));
-    mask2                   = vandq_u32(mask2, vcgeq_u32(mc, mk90_0));
-    mask2                   = vandq_u32(mask2, vcgeq_u32(mc, mk90_1));
+    mask2                   = vandq_u32(mask2, vcgtq_u32(mc, mk90_0));
+    mask2                   = vandq_u32(mask2, vcgtq_u32(mc, mk90_1));
 
     // 135 degree
     const uint32x4_t mk135_0 = vld1q_u32(in - stride_mag + 1);
     const uint32x4_t mk135_1 = vld1q_u32(in + stride_mag - 1);
     uint32x4_t       mask3   = vceqq_u32(pc32, vdupq_n_u32(3));
-    mask3                    = vandq_u32(mask3, vcgeq_u32(mc, mk135_0));
-    mask3                    = vandq_u32(mask3, vcgeq_u32(mc, mk135_1));
+    mask3                    = vandq_u32(mask3, vcgtq_u32(mc, mk135_0));
+    mask3                    = vandq_u32(mask3, vcgtq_u32(mc, mk135_1));
 
     // Merge masks
     mask0 = vorrq_u32(mask0, mask1);
@@ -1338,29 +1338,29 @@ void non_max_suppression_U16_U8_U8(const void *__restrict magnitude_ptr, const v
     const uint16x8_t mk0_0 = vld1q_u16(magnitude - 1);
     const uint16x8_t mk0_1 = vld1q_u16(magnitude + 1);
     uint16x8_t       mask0 = vceqq_u16(pc16, vdupq_n_u16(0));
-    mask0                  = vandq_u16(mask0, vcgeq_u16(mc, mk0_0));
-    mask0                  = vandq_u16(mask0, vcgeq_u16(mc, mk0_1));
+    mask0                  = vandq_u16(mask0, vcgtq_u16(mc, mk0_0));
+    mask0                  = vandq_u16(mask0, vcgtq_u16(mc, mk0_1));
 
     // 45 degree
     const uint16x8_t mk45_0 = vld1q_u16(magnitude - stride_mag - 1);
     const uint16x8_t mk45_1 = vld1q_u16(magnitude + stride_mag + 1);
     uint16x8_t       mask1  = vceqq_u16(pc16, vdupq_n_u16(1));
-    mask1                   = vandq_u16(mask1, vcgeq_u16(mc, mk45_0));
-    mask1                   = vandq_u16(mask1, vcgeq_u16(mc, mk45_1));
+    mask1                   = vandq_u16(mask1, vcgtq_u16(mc, mk45_0));
+    mask1                   = vandq_u16(mask1, vcgtq_u16(mc, mk45_1));
 
     // 90 degree
     const uint16x8_t mk90_0 = vld1q_u16(magnitude - stride_mag);
     const uint16x8_t mk90_1 = vld1q_u16(magnitude + stride_mag);
     uint16x8_t       mask2  = vceqq_u16(pc16, vdupq_n_u16(2));
-    mask2                   = vandq_u16(mask2, vcgeq_u16(mc, mk90_0));
-    mask2                   = vandq_u16(mask2, vcgeq_u16(mc, mk90_1));
+    mask2                   = vandq_u16(mask2, vcgtq_u16(mc, mk90_0));
+    mask2                   = vandq_u16(mask2, vcgtq_u16(mc, mk90_1));
 
     // 135 degree
     const uint16x8_t mk135_0 = vld1q_u16(magnitude - stride_mag + 1);
     const uint16x8_t mk135_1 = vld1q_u16(magnitude + stride_mag - 1);
     uint16x8_t       mask3   = vceqq_u16(pc16, vdupq_n_u16(3));
-    mask3                    = vandq_u16(mask3, vcgeq_u16(mc, mk135_0));
-    mask3                    = vandq_u16(mask3, vcgeq_u16(mc, mk135_1));
+    mask3                    = vandq_u16(mask3, vcgtq_u16(mc, mk135_0));
+    mask3                    = vandq_u16(mask3, vcgtq_u16(mc, mk135_1));
 
     // Merge masks
     mask0 = vorrq_u16(mask0, mask1);
@@ -1399,29 +1399,29 @@ inline uint16x4_t non_max_U32_helper(const uint32_t *input, const uint16x4_t pc,
     const uint32x4_t mk0_0 = vld1q_u32(input - 1);
     const uint32x4_t mk0_1 = vld1q_u32(input + 1);
     uint32x4_t       mask0 = vceqq_u32(pc32, vdupq_n_u32(0));
-    mask0                  = vandq_u32(mask0, vcgeq_u32(mc, mk0_0));
-    mask0                  = vandq_u32(mask0, vcgeq_u32(mc, mk0_1));
+    mask0                  = vandq_u32(mask0, vcgtq_u32(mc, mk0_0));
+    mask0                  = vandq_u32(mask0, vcgtq_u32(mc, mk0_1));
 
     // 45 degree
     const uint32x4_t mk45_0 = vld1q_u32(input - stride_mag - 1);
     const uint32x4_t mk45_1 = vld1q_u32(input + stride_mag + 1);
     uint32x4_t       mask1  = vceqq_u32(pc32, vdupq_n_u32(1));
-    mask1                   = vandq_u32(mask1, vcgeq_u32(mc, mk45_0));
-    mask1                   = vandq_u32(mask1, vcgeq_u32(mc, mk45_1));
+    mask1                   = vandq_u32(mask1, vcgtq_u32(mc, mk45_0));
+    mask1                   = vandq_u32(mask1, vcgtq_u32(mc, mk45_1));
 
     // 90 degree
     const uint32x4_t mk90_0 = vld1q_u32(input - stride_mag);
     const uint32x4_t mk90_1 = vld1q_u32(input + stride_mag);
     uint32x4_t       mask2  = vceqq_u32(pc32, vdupq_n_u32(2));
-    mask2                   = vandq_u32(mask2, vcgeq_u32(mc, mk90_0));
-    mask2                   = vandq_u32(mask2, vcgeq_u32(mc, mk90_1));
+    mask2                   = vandq_u32(mask2, vcgtq_u32(mc, mk90_0));
+    mask2                   = vandq_u32(mask2, vcgtq_u32(mc, mk90_1));
 
     // 135 degree
     const uint32x4_t mk135_0 = vld1q_u32(input - stride_mag + 1);
     const uint32x4_t mk135_1 = vld1q_u32(input + stride_mag - 1);
     uint32x4_t       mask3   = vceqq_u32(pc32, vdupq_n_u32(3));
-    mask3                    = vandq_u32(mask3, vcgeq_u32(mc, mk135_0));
-    mask3                    = vandq_u32(mask3, vcgeq_u32(mc, mk135_1));
+    mask3                    = vandq_u32(mask3, vcgtq_u32(mc, mk135_0));
+    mask3                    = vandq_u32(mask3, vcgtq_u32(mc, mk135_1));
 
     // Merge masks
     mask0 = vorrq_u32(mask0, mask1);

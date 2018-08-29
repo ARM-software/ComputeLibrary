@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 /** This performs the dequantization of 8-bit unsigned integers to floating point.
  *
- * @param[in]  input_ptr                             Pointer to the source image. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_ptr                             Pointer to the source image. Supported data types: F16/F32
  * @param[in]  input_stride_x                        Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                          input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                        Stride of the source image in Y dimension (in bytes)

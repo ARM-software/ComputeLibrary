@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
@@ -47,7 +46,6 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
 
     const Size2D kernel_size      = winograd_info.kernel_size;
     const Size2D output_tile_size = winograd_info.output_tile_size;
@@ -55,11 +53,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Winograd filter transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U)
-                                    && output_tile_size != Size2D(4U, 4U),
-                                    "Winograd filter transform only supports 2x2 or 4x4 output tile for 3x3 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size != Size2D(4U, 4U), "Winograd filter transform only supports 4x4 output tile for 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!cl_winograd_convolution_layer_supported(output_tile_size, kernel_size, input->data_layout()), "Winograd filter transform not supported");
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_w) != kernel_size.width || input->dimension(idx_h) != kernel_size.height);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
 
@@ -79,10 +73,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    const unsigned int num_elems_processed_per_iteration_x = input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH));
-    const unsigned int num_elems_processed_per_iteration_y = input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT));
+    const unsigned int num_elems_processed_per_iteration_x = input->data_layout() == DataLayout::NCHW ? input->dimension(0) : 1;
+    const unsigned int num_elems_processed_per_iteration_y = input->dimension(1);
+    const unsigned int num_elems_read_per_iteration_z      = input->data_layout() == DataLayout::NCHW ? 1 : input->dimension(2);
 
-    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y, num_elems_read_per_iteration_z));
     bool   window_changed = false;
 
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
@@ -111,17 +106,17 @@ void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTenso
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
 
-    const size_t idx_c = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
-
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DNUM_CHANNELS=" + support::cpp11::to_string(input->info()->dimension(idx_c)));
+    build_opts.add_option("-DSRC_DIM_Z=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_FILTER_TRANSFORM_HORIZONTAL");
+    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_FILTER_TRANSFORM_VERTICAL");
 
     const Size2D kernel_size      = winograd_info.kernel_size;
     const Size2D output_tile_size = winograd_info.output_tile_size;
 
     // Create kernel
-    std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_nchw";
+    std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(input->info()->data_layout()));
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     _input  = input;
@@ -130,7 +125,7 @@ void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTenso
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLWinogradFilterTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)

@@ -44,14 +44,17 @@ using arm_compute::DataLayout;
 using arm_compute::DataLayoutDimension;
 using arm_compute::TensorShape;
 using arm_compute::Size2D;
+using arm_compute::PermutationVector;
 
 using arm_compute::ActivationLayerInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
+using arm_compute::FullyConnectedLayerInfo;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 using arm_compute::DimensionRoundingType;
+using arm_compute::InterpolationPolicy;
 
 using TensorID   = unsigned int;
 using NodeID     = unsigned int;
@@ -74,10 +77,11 @@ class TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {
-    bool use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
-    bool use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
-    bool use_tuner{ false };                    /**< Use a tuner in tunable backends */
-    int  num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
+    bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
+    bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    int         num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
+    std::string tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */
 };
 
 /**< Device target types */
@@ -92,33 +96,33 @@ enum class Target
 /** Supported Element-wise operations */
 enum class EltwiseOperation
 {
-    ADD, /**< Arithmetic addition */
-    SUB, /**< Arithmetic subtraction */
-    MUL  /**< Arithmetic multiplication */
+    Add, /**< Arithmetic addition */
+    Sub, /**< Arithmetic subtraction */
+    Mul  /**< Arithmetic multiplication */
 };
 
 /** Supported Convolution layer methods */
 enum class ConvolutionMethod
 {
-    DEFAULT, /**< Default approach using internal heuristics */
+    Default, /**< Default approach using internal heuristics */
     GEMM,    /**< GEMM based convolution */
-    DIRECT,  /**< Deep direct convolution */
-    WINOGRAD /**< Winograd based convolution */
+    Direct,  /**< Deep direct convolution */
+    Winograd /**< Winograd based convolution */
 };
 
 /** Supported Depthwise Convolution layer methods */
 enum class DepthwiseConvolutionMethod
 {
-    DEFAULT,       /**< Default approach using internal heuristics */
-    GEMV,          /**< Generic GEMV based depthwise convolution */
-    OPTIMIZED_3x3, /**< Optimized 3x3 direct depthwise convolution */
+    Default,      /**< Default approach using internal heuristics */
+    GEMV,         /**< Generic GEMV based depthwise convolution */
+    Optimized3x3, /**< Optimized 3x3 direct depthwise convolution */
 };
 
 /** Enable or disable fast math for Convolution layer */
 enum class FastMathHint
 {
-    ENABLED,  /**< Fast math enabled for Convolution layer */
-    DISABLED, /**< Fast math disabled for Convolution layer */
+    Enabled,  /**< Fast math enabled for Convolution layer */
+    Disabled, /**< Fast math disabled for Convolution layer */
 };
 
 /** Supported nodes */
@@ -126,22 +130,27 @@ enum class NodeType
 {
     ActivationLayer,
     BatchNormalizationLayer,
+    ChannelShuffleLayer,
+    ConcatenateLayer,
     ConvolutionLayer,
-    DepthConcatenateLayer,
+    DeconvolutionLayer,
     DepthwiseConvolutionLayer,
     EltwiseLayer,
     FlattenLayer,
     FullyConnectedLayer,
     NormalizationLayer,
+    PermuteLayer,
     PoolingLayer,
     ReshapeLayer,
-    ScaleLayer,
+    ResizeLayer,
     SoftmaxLayer,
     SplitLayer,
 
     Input,
     Output,
     Const,
+
+    Dummy
 };
 
 /** Backend Memory Manager affinity **/

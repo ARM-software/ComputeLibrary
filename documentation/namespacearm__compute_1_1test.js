@@ -1,10 +1,9 @@
 var namespacearm__compute_1_1test =
 [
     [ "benchmark", "namespacearm__compute_1_1test_1_1benchmark.xhtml", "namespacearm__compute_1_1test_1_1benchmark" ],
+    [ "colorconvert_helper", "namespacearm__compute_1_1test_1_1colorconvert__helper.xhtml", null ],
     [ "convolution_3d", "namespacearm__compute_1_1test_1_1convolution__3d.xhtml", null ],
-    [ "fixed_point_arithmetic", "namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml", "namespacearm__compute_1_1test_1_1fixed__point__arithmetic" ],
     [ "framework", "namespacearm__compute_1_1test_1_1framework.xhtml", "namespacearm__compute_1_1test_1_1framework" ],
-    [ "networks", "namespacearm__compute_1_1test_1_1networks.xhtml", "namespacearm__compute_1_1test_1_1networks" ],
     [ "traits", "namespacearm__compute_1_1test_1_1traits.xhtml", "namespacearm__compute_1_1test_1_1traits" ],
     [ "validation", "namespacearm__compute_1_1test_1_1validation.xhtml", "namespacearm__compute_1_1test_1_1validation" ],
     [ "Accessor", "classarm__compute_1_1test_1_1_accessor.xhtml", "classarm__compute_1_1test_1_1_accessor" ],

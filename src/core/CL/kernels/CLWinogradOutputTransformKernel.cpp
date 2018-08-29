@@ -48,25 +48,26 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(winograd_info.output_data_layout != DataLayout::NCHW);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != winograd_info.output_data_layout);
 
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
+    const unsigned int  num_channels     = (winograd_info.kernel_size.width + winograd_info.output_tile_size.width - 1) * (winograd_info.kernel_size.height + winograd_info.output_tile_size.height - 1);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Only 3x3 and 5x5 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(2U, 2U) && input->dimension(2) != 16, "Wrong number of batches");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 36, "Wrong number of batches");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 64, "Wrong number of batches");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!cl_winograd_convolution_layer_supported(output_tile_size, kernel_size, winograd_info.output_data_layout), "Winograd output transform not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->dimension(2) != num_channels, "Wrong number of channels");
 
     // Compute number of elements to process in the X and Y direction
-    const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int num_elements_y = input_dimensions.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
-    const int num_tiles_x    = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
-    const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(input_dimensions,
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles_x * num_tiles_y)));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles.area())));
 
     if(bias != nullptr)
     {
@@ -95,19 +96,30 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool   window_changed = false;
 
+    int output_static_window_end_x = 0;
+    int output_static_window_end_y = 0;
+
+    if(output->data_layout() == DataLayout::NCHW)
+    {
+        output_static_window_end_x = ceil_to_multiple(output->dimension(0), output_tile_size.width);
+        output_static_window_end_y = ceil_to_multiple(output->dimension(1), output_tile_size.height);
+    }
+    else
+    {
+        output_static_window_end_x = output->dimension(0);
+        output_static_window_end_y = std::max(ceil_to_multiple(output->dimension(1), output_tile_size.width), output->dimension(1) + 1 /* For out of bound reads towards the z axis */);
+    }
+
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), output_tile_size.width), ceil_to_multiple(output->dimension(1), output_tile_size.height));
+    AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
+    window_changed = update_window_and_padding(win, input_access, output_access);
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     if(bias != nullptr)
     {
         AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = update_window_and_padding(win, input_access, bias_access, output_access);
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
-    else
-    {
-        window_changed = update_window_and_padding(win, input_access, output_access);
-    }
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -137,22 +149,30 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
-    const int           num_elements_x   = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int           num_tiles_x      = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
+
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(input_dimensions,
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
-    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles_x));
+    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
+    build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+    build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
+    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
 
     // Create kernel
-    std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_nchw";
+    std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -166,6 +186,8 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(winograd_info.output_data_layout));
 }
 
 Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
@@ -198,12 +220,18 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
         add_1D_tensor_argument(idx1, _bias, slice_biases);
     }
 
+    if(_output->info()->data_layout() == DataLayout::NHWC)
+    {
+        unsigned int idx2 = 2 * num_arguments_per_3D_tensor() + ((_bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
+        _kernel.setArg(idx2, static_cast<int>(_output->info()->total_size() - _output->info()->strides_in_bytes().y()));
+    }
+
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out));
 }

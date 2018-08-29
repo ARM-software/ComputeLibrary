@@ -69,7 +69,7 @@ std::string get_underlying_cl_type_from_data_type(const DataType &dt);
  *
  * @return the GPU target
  */
-GPUTarget get_target_from_device(cl::Device &device);
+GPUTarget get_target_from_device(const cl::Device &device);
 
 /** Helper function to get the highest OpenCL version supported
  *
@@ -102,5 +102,30 @@ bool fp16_supported(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool arm_non_uniform_workgroup_supported(const cl::Device &device);
+/** Helper function to check whether the cl_arm_integer_dot_product_int8 extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool dot8_supported(const cl::Device &device);
+
+/** Helper function to check whether the cl_arm_integer_dot_product_accumulate_int8 extension is supported
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if the extension is supported
+ */
+bool dot8_acc_supported(const cl::Device &device);
+
+/** This function checks if the Winograd configuration (defined through the output tile, kernel size and the data layout) is supported on OpenCL
+ *
+ * @param[in] output_tile Output tile for the Winograd filtering algorithm
+ * @param[in] kernel_size Kernel size for the Winograd filtering algorithm
+ * @param[in] data_layout Data layout of the input tensor
+ *
+ * @return True if the configuration is supported
+ */
+bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

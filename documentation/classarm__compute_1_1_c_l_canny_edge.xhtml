@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -138,6 +138,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa5e675eaa99bc8c86a1aed1089326c3b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml#aa5e675eaa99bc8c86a1aed1089326c3b">CLCannyEdge</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt; memory_manager=nullptr)</td></tr>
 <tr class="memdesc:aa5e675eaa99bc8c86a1aed1089326c3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#aa5e675eaa99bc8c86a1aed1089326c3b">More...</a><br /></td></tr>
 <tr class="separator:aa5e675eaa99bc8c86a1aed1089326c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7d8d6eeca4596ff4d3fe4be919ec740"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml#ac7d8d6eeca4596ff4d3fe4be919ec740">CLCannyEdge</a> (const <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> &amp;)=delete</td></tr>
+<tr class="memdesc:ac7d8d6eeca4596ff4d3fe4be919ec740"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#ac7d8d6eeca4596ff4d3fe4be919ec740">More...</a><br /></td></tr>
+<tr class="separator:ac7d8d6eeca4596ff4d3fe4be919ec740"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a390de29c61d4843b56ae0d39fe1f139d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml#a390de29c61d4843b56ae0d39fe1f139d">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> &amp;)=delete</td></tr>
+<tr class="memdesc:a390de29c61d4843b56ae0d39fe1f139d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#a390de29c61d4843b56ae0d39fe1f139d">More...</a><br /></td></tr>
+<tr class="separator:a390de29c61d4843b56ae0d39fe1f139d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa874f9e002bdb799f38411a5fef07b1d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml#aa874f9e002bdb799f38411a5fef07b1d">configure</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
 <tr class="memdesc:aa874f9e002bdb799f38411a5fef07b1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the function's source, destination, thresholds, gradient size, normalization type and border mode.  <a href="#aa874f9e002bdb799f38411a5fef07b1d">More...</a><br /></td></tr>
 <tr class="separator:aa874f9e002bdb799f38411a5fef07b1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,6 +186,32 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Constructor. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac7d8d6eeca4596ff4d3fe4be919ec740"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Prevent instances of this class from being copied (As this class contains pointers) </p>
 
 </div>
 </div>
@@ -259,6 +291,34 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>Referenced by <a class="el" href="validation_2_c_l_2_canny_edge_8cpp_source.xhtml#l00060">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a390de29c61d4843b56ae0d39fe1f139d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a>&amp; operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Prevent instances of this class from being copied (As this class contains pointers) </p>
+
 </div>
 </div>
 <a class="anchor" id="a108972ffc2f5536ceee15428b2b130ad"></a>
@@ -309,7 +369,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

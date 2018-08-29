@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,18 +42,17 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMValidationFixedPointFixture : public framework::Fixture
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool reinterpret_input_as_3d = false, bool reinterpret_ouput_as_3d = false>
+class GEMMValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, DataType data_type)
     {
-        _fractional_bits = fractional_bits;
-        _data_type       = data_type;
+        _data_type = data_type;
 
-        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, fractional_bits);
-        _reference = compute_reference(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, fractional_bits);
+        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
+        _reference = compute_reference(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
     }
 
 protected:
@@ -75,18 +74,20 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
-                              DataType data_type, int fixed_point_position)
+                              DataType data_type)
     {
         // Create tensors
-        TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1, fixed_point_position);
-        TensorType b   = create_tensor<TensorType>(shape_b, data_type, 1, fixed_point_position);
-        TensorType c   = create_tensor<TensorType>(shape_c, data_type, 1, fixed_point_position);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, fixed_point_position);
+        TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1);
+        TensorType b   = create_tensor<TensorType>(shape_b, data_type, 1);
+        TensorType c   = create_tensor<TensorType>(shape_c, data_type, 1);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1);
 
         // Create and configure function
         FunctionType gemm;
-        gemm.configure(&a, &b, &c, &dst, alpha, beta);
-
+        // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
+        // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 1),
+        // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
+        gemm.configure(&a, &b, &c, &dst, alpha, beta, GEMMInfo(false, false, false, (reinterpret_ouput_as_3d ? output_shape[2] : 1), reinterpret_input_as_3d));
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -115,12 +116,19 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
-                                      DataType data_type, int fixed_point_position)
+                                      DataType data_type)
     {
+        TensorShape shape_a_to_use = shape_a;
+        if(reinterpret_input_as_3d)
+        {
+            // Collapse the second and third dimension if the input is 3D
+            shape_a_to_use.collapse(2U, 1U);
+        }
+
         // Create reference
-        SimpleTensor<T> a{ shape_a, data_type, 1, fixed_point_position };
-        SimpleTensor<T> b{ shape_b, data_type, 1, fixed_point_position };
-        SimpleTensor<T> c{ shape_c, data_type, 1, fixed_point_position };
+        SimpleTensor<T> a{ shape_a_to_use, data_type, 1 };
+        SimpleTensor<T> b{ shape_b, data_type, 1 };
+        SimpleTensor<T> c{ shape_c, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
@@ -132,20 +140,9 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
     DataType        _data_type{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMValidationFixture : public GEMMValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, DataType data_type)
-    {
-        GEMMValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type, 0);
-    }
-};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

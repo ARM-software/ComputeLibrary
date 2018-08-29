@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -121,7 +121,6 @@ $(document).ready(function(){initNavTree('_convolution3d_8h.xhtml','');});
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_asymm_helpers_8h_source.xhtml">arm_compute/core/utils/quantization/AsymmHelpers.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">tests/validation/FixedPoint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_helpers_8h_source.xhtml">tests/validation/Helpers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_utils_quantized_asymm_8h_source.xhtml">tests/validation/reference/UtilsQuantizedAsymm.h</a>&quot;</code><br />
 </div>
@@ -146,9 +145,6 @@ Functions</h2></td></tr>
 <tr class="memitem:a74dc80546816db5f19029d6819a8bfee"><td class="memTemplParams" colspan="2">template&lt;typename T , typename TB , typename std::enable_if&lt; validation::is_floating_point&lt; T &gt;::value &amp;&amp;validation::is_floating_point&lt; TB &gt;::value, int &gt;::type  = 0&gt; </td></tr>
 <tr class="memitem:a74dc80546816db5f19029d6819a8bfee"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1convolution__3d_1_1detail.xhtml#a74dc80546816db5f19029d6819a8bfee">convolution3d</a> (const SimpleTensor&lt; T &gt; &amp;in, const SimpleTensor&lt; T &gt; &amp;weights, const SimpleTensor&lt; TB &gt; &amp;bias, SimpleTensor&lt; T &gt; &amp;out, int i_offset, int w_offset, int b_offset, int o_offset, int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x=1, int dilation_y=1)</td></tr>
 <tr class="separator:a74dc80546816db5f19029d6819a8bfee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0be4a57124877f215e0d37de9e538e81"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
-<tr class="memitem:a0be4a57124877f215e0d37de9e538e81"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1convolution__3d_1_1detail.xhtml#a0be4a57124877f215e0d37de9e538e81">convolution3d</a> (const SimpleTensor&lt; uint8_t &gt; &amp;in, const SimpleTensor&lt; uint8_t &gt; &amp;weights, const SimpleTensor&lt; int32_t &gt; &amp;bias, SimpleTensor&lt; uint8_t &gt; &amp;out, int i_offset, int w_offset, int b_offset, int o_offset, int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x, int dilation_y)</td></tr>
-<tr class="separator:a0be4a57124877f215e0d37de9e538e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -156,7 +152,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="_convolution3d_8h.xhtml">Convolution3d.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

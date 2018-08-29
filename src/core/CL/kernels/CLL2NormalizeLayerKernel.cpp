@@ -26,7 +26,6 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -78,7 +77,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type());
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
@@ -121,7 +120,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     auto win_config = validate_and_configure_window(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 Status CLL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)

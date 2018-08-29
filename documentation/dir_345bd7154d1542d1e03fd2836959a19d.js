@@ -1,5 +1,6 @@
 var dir_345bd7154d1542d1e03fd2836959a19d =
 [
+    [ "assembly", "dir_5cc15eabebeaf52b5630c3e40d7a7661.xhtml", "dir_5cc15eabebeaf52b5630c3e40d7a7661" ],
     [ "NEAbsoluteDifference.h", "_n_e_absolute_difference_8h.xhtml", [
       [ "NEAbsoluteDifference", "classarm__compute_1_1_n_e_absolute_difference.xhtml", "classarm__compute_1_1_n_e_absolute_difference" ]
     ] ],
@@ -50,12 +51,18 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEColorConvert.h", "_n_e_color_convert_8h.xhtml", [
       [ "NEColorConvert", "classarm__compute_1_1_n_e_color_convert.xhtml", "classarm__compute_1_1_n_e_color_convert" ]
     ] ],
+    [ "NEConcatenateLayer.h", "_n_e_concatenate_layer_8h.xhtml", [
+      [ "NEConcatenateLayer", "classarm__compute_1_1_n_e_concatenate_layer.xhtml", "classarm__compute_1_1_n_e_concatenate_layer" ]
+    ] ],
     [ "NEConvertFullyConnectedWeights.h", "_n_e_convert_fully_connected_weights_8h.xhtml", [
       [ "NEConvertFullyConnectedWeights", "classarm__compute_1_1_n_e_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_n_e_convert_fully_connected_weights" ]
     ] ],
     [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", "_n_e_convolution_8h" ],
     [ "NEConvolutionLayer.h", "_n_e_convolution_layer_8h.xhtml", [
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", "classarm__compute_1_1_n_e_convolution_layer" ]
+    ] ],
+    [ "NECopy.h", "_n_e_copy_8h.xhtml", [
+      [ "NECopy", "classarm__compute_1_1_n_e_copy.xhtml", "classarm__compute_1_1_n_e_copy" ]
     ] ],
     [ "NEDeconvolutionLayer.h", "_n_e_deconvolution_layer_8h.xhtml", [
       [ "NEDeconvolutionLayer", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml", "classarm__compute_1_1_n_e_deconvolution_layer" ]
@@ -120,6 +127,10 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEGEMM.h", "_n_e_g_e_m_m_8h.xhtml", [
       [ "NEGEMM", "classarm__compute_1_1_n_e_g_e_m_m.xhtml", "classarm__compute_1_1_n_e_g_e_m_m" ]
+    ] ],
+    [ "NEGEMMAssemblyDispatch.h", "_n_e_g_e_m_m_assembly_dispatch_8h.xhtml", [
+      [ "NEGEMMAssemblyDispatch", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch" ],
+      [ "IFallback", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_assembly_dispatch_1_1_i_fallback" ]
     ] ],
     [ "NEGEMMConvolutionLayer.h", "_n_e_g_e_m_m_convolution_layer_8h.xhtml", [
       [ "NEConvolutionLayerReshapeWeights", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights" ],
@@ -223,6 +234,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEReshapeLayer.h", "_n_e_reshape_layer_8h.xhtml", [
       [ "NEReshapeLayer", "classarm__compute_1_1_n_e_reshape_layer.xhtml", "classarm__compute_1_1_n_e_reshape_layer" ]
     ] ],
+    [ "NERNNLayer.h", "_n_e_r_n_n_layer_8h.xhtml", [
+      [ "NERNNLayer", "classarm__compute_1_1_n_e_r_n_n_layer.xhtml", "classarm__compute_1_1_n_e_r_n_n_layer" ]
+    ] ],
     [ "NEROIPoolingLayer.h", "_n_e_r_o_i_pooling_layer_8h.xhtml", [
       [ "NEROIPoolingLayer", "classarm__compute_1_1_n_e_r_o_i_pooling_layer.xhtml", "classarm__compute_1_1_n_e_r_o_i_pooling_layer" ]
     ] ],
@@ -231,6 +245,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEScharr3x3.h", "_n_e_scharr3x3_8h.xhtml", [
       [ "NEScharr3x3", "classarm__compute_1_1_n_e_scharr3x3.xhtml", "classarm__compute_1_1_n_e_scharr3x3" ]
+    ] ],
+    [ "NESimpleAssemblyFunction.h", "_n_e_simple_assembly_function_8h.xhtml", [
+      [ "NESimpleAssemblyFunction", "classarm__compute_1_1_n_e_simple_assembly_function.xhtml", "classarm__compute_1_1_n_e_simple_assembly_function" ]
     ] ],
     [ "NESobel3x3.h", "_n_e_sobel3x3_8h.xhtml", [
       [ "NESobel3x3", "classarm__compute_1_1_n_e_sobel3x3.xhtml", "classarm__compute_1_1_n_e_sobel3x3" ]
@@ -258,6 +275,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEWarpPerspective.h", "_n_e_warp_perspective_8h.xhtml", [
       [ "NEWarpPerspective", "classarm__compute_1_1_n_e_warp_perspective.xhtml", "classarm__compute_1_1_n_e_warp_perspective" ]
+    ] ],
+    [ "NEWidthConcatenateLayer.h", "_n_e_width_concatenate_layer_8h.xhtml", [
+      [ "NEWidthConcatenateLayer", "classarm__compute_1_1_n_e_width_concatenate_layer.xhtml", "classarm__compute_1_1_n_e_width_concatenate_layer" ]
     ] ],
     [ "NEWinogradConvolutionLayer.h", "_n_e_winograd_convolution_layer_8h.xhtml", [
       [ "NEWinogradConvolutionLayer", "classarm__compute_1_1_n_e_winograd_convolution_layer.xhtml", "classarm__compute_1_1_n_e_winograd_convolution_layer" ]

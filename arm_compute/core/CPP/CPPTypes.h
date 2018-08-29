@@ -36,9 +36,11 @@ namespace arm_compute
 enum class CPUModel
 {
     GENERIC,
+    GENERIC_FP16,
+    GENERIC_FP16_DOT,
     A53,
     A55r0,
-    A55r1,
+    A55r1
 };
 
 class CPUInfo final
@@ -118,6 +120,12 @@ public:
      * @param[in] cpu_count the number of CPUs in the system.
      */
     void set_cpu_num(unsigned int cpu_count);
+
+    /** Return the maximum number of CPUs present
+     *
+     * @return Number of CPUs
+     */
+    unsigned int get_cpu_num() const;
 
 private:
     std::vector<CPUModel> _percpu        = {};

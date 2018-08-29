@@ -47,8 +47,8 @@ public:
     void setup(TensorShape shape, const ROIPoolingLayerInfo pool_info, unsigned int num_rois, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
-        const unsigned int fixed_point_position = 4;
-        TensorShape        shape_dst;
+
+        TensorShape shape_dst;
         shape.set(shape.num_dimensions(), batches);
         shape_dst.set(0, pool_info.pooled_width());
         shape_dst.set(1, pool_info.pooled_height());
@@ -56,8 +56,8 @@ public:
         shape_dst.set(3, num_rois);
 
         // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(shape_dst, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(shape, data_type, 1);
+        dst = create_tensor<TensorType>(shape_dst, data_type, 1);
 
         // Create random ROIs
         std::vector<ROI> rois = generate_random_rois(shape, pool_info, num_rois, 0U);

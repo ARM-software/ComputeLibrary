@@ -43,12 +43,16 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-constexpr RelativeTolerance<float> tolerance_f32(0.01f);
+constexpr RelativeTolerance<float> rel_tolerance_f32(0.01f);  /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.001f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr RelativeTolerance<float> tolerance_f16(0.01f);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
-/** Tolerance for fixed point operations */
-constexpr AbsoluteTolerance<float> tolerance_fixed_point(1.f);
+const AbsoluteTolerance<float>            abs_tolerance_f16(0.3f);                   /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                           tolerance_num_f16 = 0.07f;                 /**< Tolerance number for FP16 */
+#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
+
+/** Tolerance for quantized asymmetric operations */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -57,8 +61,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F16,
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
-    DataType::QS8,
-    DataType::QS16,
 });
 
 const auto FullyConnectedParameters = combine(framework::dataset::make("TransposeWeights", { false, true }), framework::dataset::make("ReshapeWeights", { false, true }));
@@ -72,8 +74,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    CNNDataTypes),
                src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
+    const DataType         bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+    const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(2.f / 255.f, 127) : QuantizationInfo();
 
     TensorShape ws(weights_shape);
 
@@ -83,43 +85,44 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
         const size_t shape_x = ws.x();
         ws.set(0, ws.y());
         ws.set(1, shape_x);
-
-        // Weights have to be passed reshaped
-        // Transpose 1xW for batched version
-        if(!reshape_weights && dst_shape.y() > 1)
-        {
-            const float  transpose_width = 16.0f / data_size_from_type(data_type);
-            const size_t shape_x         = ws.x();
-            ws.set(0, ws.y() * static_cast<unsigned int>(transpose_width));
-            ws.set(1, static_cast<unsigned int>(std::ceil(shape_x / transpose_width)));
-        }
     }
 
     // Create tensors
-    Tensor src     = create_tensor<Tensor>(src_shape, data_type, 1, fixed_point_position);
-    Tensor weights = create_tensor<Tensor>(ws, data_type, 1, fixed_point_position);
-    Tensor bias    = create_tensor<Tensor>(bias_shape, data_type, 1, fixed_point_position);
-    Tensor dst     = create_tensor<Tensor>(dst_shape, data_type, 1, fixed_point_position);
+    Tensor src     = create_tensor<Tensor>(src_shape, data_type, 1, quantization_info);
+    Tensor weights = create_tensor<Tensor>(ws, data_type, 1, quantization_info);
+    Tensor bias    = create_tensor<Tensor>(bias_shape, bias_data_type, 1, quantization_info);
+    Tensor dst     = create_tensor<Tensor>(dst_shape, data_type, 1, quantization_info);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+    // Create Fully Connected layer info
+    FullyConnectedLayerInfo fc_info;
+    fc_info.transpose_weights    = transpose_weights;
+    fc_info.are_weights_reshaped = !reshape_weights;
+
+    const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
+    const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
+
     // Create and configure function.
     NEFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
+    fc.configure(&src, &weights, &bias, &dst, fc_info);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
     validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate QuantizationInfo
+    ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 }
 
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Mismatching data types
-                                            TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::QS8, 2), // Mismatching fixed point position
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),    // Invalid weights dimensions
@@ -127,7 +130,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                             TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
                                           }),
     framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(315U, 271U), 1, DataType::F16),
-                                             TensorInfo(TensorShape(315U, 271U), 1, DataType::QS8, 3),
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                              TensorInfo(TensorShape(217U, 315U), 1, DataType::F32),
@@ -135,7 +137,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(192U, 192U), 1, DataType::F32),
                                           })),
     framework::dataset::make("BiasInfo",{ TensorInfo(TensorShape(271U), 1, DataType::F32),
-                                          TensorInfo(TensorShape(271U), 1, DataType::QS8, 2),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           TensorInfo(TensorShape(271U), 1, DataType::F32),
@@ -143,26 +144,30 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                           TensorInfo(TensorShape(192U), 1, DataType::F32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(271U, 3U), 1, DataType::QS8, 3),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(271U, 3U), 1, DataType::F32),
                                             TensorInfo(TensorShape(192U, 4U), 1, DataType::F32),
                                            })),
-    framework::dataset::make("TransposeWeights",{ true, true, true, false, true, true, true })),
-    framework::dataset::make("ReshapedWeights",{ false, false, false, false, false, false , false})),
-    framework::dataset::make("Expected", { false, false, true, true, false, false, true })),
+    framework::dataset::make("TransposeWeights",{ true, true, false, true, true, true })),
+    framework::dataset::make("ReshapedWeights",{ false, false, false, false, false , false})),
+    framework::dataset::make("Expected", { false, true, true, false, false, true })),
     input_info, weights_info, bias_info, output_info, transpose_weights, reshaped_weights, expected)
 {
-    Status status = NEFullyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), transpose_weights, reshaped_weights);
+    // Create Fully Connected layer info
+    FullyConnectedLayerInfo fc_info;
+    fc_info.transpose_weights = transpose_weights;
+    fc_info.are_weights_reshaped = reshaped_weights;
+
+    Status status = NEFullyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), fc_info);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
 
 template <typename T>
-using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
+using NEFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -172,14 +177,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<half>, framework::
                                                                                                                 framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(),
                                                                                                                       FullyConnectedParameters),
                                                                                                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -189,62 +194,39 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixture<float>, framework:
                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
                                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using NEFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixedPointFixture<Tensor, Accessor, NEFullyConnectedLayer, T, true>;
+using NEFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuantizedFixture<Tensor, Accessor, NEFullyConnectedLayer, T>;
 
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunTiny, NEFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 1, 6)))
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(
+                           combine(datasets::SmallFullyConnectedLayerDataset(),
+                                   FullyConnectedParameters),
+                           framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 10) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_fixed_point);
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 1, 6)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEFullyConnectedLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(
+                           combine(datasets::LargeFullyConnectedLayerDataset(),
+                                   FullyConnectedParameters),
+                           framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 256.f, 10) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_fixed_point);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunTiny, NEFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fixed_point);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
-                       FullyConnectedParameters),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fixed_point);
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

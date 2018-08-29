@@ -48,10 +48,9 @@ public:
         shape.set(shape.num_dimensions(), batches);
 
         // Create tensors
-        const int              fixed_point_position = 4;
         const QuantizationInfo q_info(0.5f, -10);
-        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, q_info);
-        dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, q_info);
+        src = create_tensor<TensorType>(shape, data_type, 1, q_info);
+        dst = create_tensor<TensorType>(shape, data_type, 1, q_info);
 
         // Create and configure function
         act_layer.configure(&src, &dst, info);

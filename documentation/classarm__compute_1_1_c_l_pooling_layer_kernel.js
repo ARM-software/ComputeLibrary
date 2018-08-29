@@ -8,5 +8,10 @@ var classarm__compute_1_1_c_l_pooling_layer_kernel =
     [ "configure", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a13226200322fb9ca881174695946705c", null ],
     [ "operator=", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1c744387eb6e27f11fed9e0383ff55b2", null ],
     [ "operator=", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#adf693cc1bc9aaacdfaa73e1309f4c0b3", null ],
-    [ "run", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ]
+    [ "run", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e", null ],
+    [ "_border_size", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4", null ],
+    [ "_input", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53", null ],
+    [ "_num_elems_processed_per_iteration", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1", null ],
+    [ "_output", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b", null ],
+    [ "_pool_info", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a204c8ef37bc558c02542daffbaee06e2", null ]
 ];

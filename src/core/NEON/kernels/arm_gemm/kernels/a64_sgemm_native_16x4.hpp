@@ -25,8 +25,8 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_sgemm_native_16x4(const float *, int, const float *, int, float *, int, float, int, int, int);
 
@@ -38,8 +38,7 @@ void a64_sgemm_native_16x4(const float *, int, const float *, int, float *, int,
 // All kernels in the family must share these characteristics.  The actual
 // kernel to be used can be chosen at runtime, based on the CPU_type
 // structure.
-class sgemm_native_16x4
-{
+class sgemm_native_16x4 {
 public:
     typedef float operand_type;
     typedef float result_type;
@@ -47,15 +46,23 @@ public:
     typedef void (*kern_type)(const float *, int, const float *, int, float *, int, float, int, int, int);
 
     /* Kernel blocking parameters */
-    static const int out_width  = 16;
-    static const int out_height = 4;
-    static const int k_unroll   = 1;
+    static int out_width() {
+        return 16;
+    }
+
+    static int out_height() {
+        return 4;
+    }
+
+    static int k_unroll() {
+        return 1;
+    }
 
     // Default to the generic kernel
-    kern_type kernel = a64_sgemm_native_16x4;
+    kern_type kernel=a64_sgemm_native_16x4;
 
-    sgemm_native_16x4(const CPUInfo *ci)
-    {
+    sgemm_native_16x4(const CPUInfo *ci) {
+
     }
 };
 

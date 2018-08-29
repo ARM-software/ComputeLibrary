@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -142,9 +142,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a6c0dcc38187027dcb89cd9724bc5a823"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">execute_window_loop</a> (const Window &amp;w, L &amp;&amp;lambda_function, Ts &amp;&amp;...iterators)</td></tr>
 <tr class="memdesc:a6c0dcc38187027dcb89cd9724bc5a823"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through the passed window, automatically adjusting the iterators and calling the lambda_functino for each element.  <a href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">More...</a><br /></td></tr>
 <tr class="separator:a6c0dcc38187027dcb89cd9724bc5a823"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a20062caae09fce4a567be558f9d702"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9a20062caae09fce4a567be558f9d702">auto_init_if_empty</a> (ITensorInfo &amp;info, const TensorShape &amp;shape, int num_channels, DataType data_type, int fixed_point_position, QuantizationInfo quantization_info=QuantizationInfo())</td></tr>
-<tr class="memdesc:a9a20062caae09fce4a567be558f9d702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.  <a href="namespacearm__compute.xhtml#a9a20062caae09fce4a567be558f9d702">More...</a><br /></td></tr>
-<tr class="separator:a9a20062caae09fce4a567be558f9d702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47be6fa38308d0003c25b60b7dbc45ce"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">auto_init_if_empty</a> (ITensorInfo &amp;info, const TensorShape &amp;shape, int num_channels, DataType data_type, QuantizationInfo quantization_info=QuantizationInfo())</td></tr>
+<tr class="memdesc:a47be6fa38308d0003c25b60b7dbc45ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto initialize the tensor info (shape, number of channels and data type) if the current assignment is empty.  <a href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">More...</a><br /></td></tr>
+<tr class="separator:a47be6fa38308d0003c25b60b7dbc45ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5844c8e025388ddd8c3afc5c3f7a3256"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5844c8e025388ddd8c3afc5c3f7a3256">auto_init_if_empty</a> (ITensorInfo &amp;info_sink, const ITensorInfo &amp;info_source)</td></tr>
 <tr class="memdesc:a5844c8e025388ddd8c3afc5c3f7a3256"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto initialize the tensor info using another tensor info.  <a href="namespacearm__compute.xhtml#a5844c8e025388ddd8c3afc5c3f7a3256">More...</a><br /></td></tr>
 <tr class="separator:a5844c8e025388ddd8c3afc5c3f7a3256"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,9 +160,6 @@ Functions</h2></td></tr>
 <tr class="memitem:aafd98bfd4651f36d691ddd2631a6e5a0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aafd98bfd4651f36d691ddd2631a6e5a0">set_data_layout_if_unknown</a> (ITensorInfo &amp;info, DataLayout data_layout)</td></tr>
 <tr class="memdesc:aafd98bfd4651f36d691ddd2631a6e5a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the data layout to the specified value if the current data layout is unknown.  <a href="namespacearm__compute.xhtml#aafd98bfd4651f36d691ddd2631a6e5a0">More...</a><br /></td></tr>
 <tr class="separator:aafd98bfd4651f36d691ddd2631a6e5a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0894ed18ca6f55d6053882676cc2c95c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0894ed18ca6f55d6053882676cc2c95c">set_fixed_point_position_if_zero</a> (ITensorInfo &amp;info, int fixed_point_position)</td></tr>
-<tr class="memdesc:a0894ed18ca6f55d6053882676cc2c95c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the fixed point position to the specified value if the current fixed point position is 0 and the data type is QS8 or QS16.  <a href="namespacearm__compute.xhtml#a0894ed18ca6f55d6053882676cc2c95c">More...</a><br /></td></tr>
-<tr class="separator:a0894ed18ca6f55d6053882676cc2c95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75509469ec2689ec143f4a37bbcb4437"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a75509469ec2689ec143f4a37bbcb4437">set_quantization_info_if_empty</a> (ITensorInfo &amp;info, QuantizationInfo quantization_info)</td></tr>
 <tr class="memdesc:a75509469ec2689ec143f4a37bbcb4437"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the quantization info to the specified value if the current quantization info is empty and the data type of asymmetric quantized type.  <a href="namespacearm__compute.xhtml#a75509469ec2689ec143f4a37bbcb4437">More...</a><br /></td></tr>
 <tr class="separator:a75509469ec2689ec143f4a37bbcb4437"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,7 +179,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="_helpers_8inl.xhtml">Helpers.inl</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

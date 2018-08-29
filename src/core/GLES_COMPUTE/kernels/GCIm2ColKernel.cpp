@@ -53,7 +53,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -253,7 +252,7 @@ void GCIm2ColKernel::run_generic(const Window &window)
     if(_input->info()->data_type() == DataType::F16)
     {
         (dynamic_cast<TensorInfo *>(_input->info()))->init(_input->info()->tensor_shape(), _input->info()->num_channels(), _input->info()->data_type(), _input->info()->strides_in_bytes(), 0,
-                                                           _input->info()->total_size(), _input->info()->fixed_point_position());
+                                                           _input->info()->total_size());
     }
 
     _kernel.use();

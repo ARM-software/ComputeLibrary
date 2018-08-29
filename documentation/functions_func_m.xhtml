@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -272,13 +272,16 @@ $(document).ready(function(){initNavTree('functions_func_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#af8fd8a2458beb49170cfefec59bdb099">GraphContext</a>
 </li>
 <li>MemoryGroupBase()
-: <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#a65925c6cf4ee7a89e05557dfb2138c47">MemoryGroupBase&lt; TensorType &gt;</a>
+: <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#adae764eb11b49e048bbd57b023caf402">MemoryGroupBase&lt; TensorType &gt;</a>
+</li>
+<li>MemoryImageFeeder()
+: <a class="el" href="classarm__compute_1_1utils_1_1_memory_image_feeder.xhtml#acb2ecb523bd27f86289cc2e6d88319ba">MemoryImageFeeder</a>
 </li>
 <li>MemoryManagerOnDemand()
-: <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#ae3ae1d55baae4d04de1b3d5fca78c941">MemoryManagerOnDemand</a>
+: <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#ad61f5da57995738b717da9e1fb53c25b">MemoryManagerOnDemand</a>
 </li>
 <li>MemoryRegion()
-: <a class="el" href="classarm__compute_1_1_memory_region.xhtml#ab2306b6e5516e7ffa160156a4ba2739e">MemoryRegion</a>
+: <a class="el" href="classarm__compute_1_1_memory_region.xhtml#a32d4629fe7aa6093bbe54599319d08fa">MemoryRegion</a>
 </li>
 <li>min()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a9d5b954f8e4b47bda9d41a6c47fd0735">InstrumentsStats</a>
@@ -287,12 +290,9 @@ $(document).ready(function(){initNavTree('functions_func_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">TestCaseFactory</a>
 </li>
 <li>model()
-: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#a3fdc663dd36acddc50a879d9b2f84d2a">ICLMultiHOG</a>
-, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a71394cddbab548690b314af51be472f0">IMultiHOG</a>
+: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#aa9d93a19f9961a4ee8b06527cd8842b4">ICLMultiHOG</a>
+, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a75e828c2dc5a300d224761a410c0925f">IMultiHOG</a>
 , <a class="el" href="classarm__compute_1_1_multi_h_o_g.xhtml#aa9d93a19f9961a4ee8b06527cd8842b4">MultiHOG</a>
-</li>
-<li>mul()
-: <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#ad02ce21c48a8f9e419a2ec5f762f3221">functions</a>
 </li>
 <li>mult_interleave4x4_height()
 : <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a2c08b51c2f39ba68a69d654c507aa48f">GEMMReshapeInfo</a>
@@ -311,8 +311,10 @@ $(document).ready(function(){initNavTree('functions_func_m.xhtml','');});
 </li>
 <li>mutate()
 : <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">DepthConcatSubTensorMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">GroupedConvolutionMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a5cbaa2df97059f21e84c1d4f3fef4694">IGraphMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">InPlaceOperationMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">NodeExecutionMethodMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">NodeFusionMutator</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">SplitLayerSubTensorMutator</a>
 </li>
@@ -322,7 +324,7 @@ $(document).ready(function(){initNavTree('functions_func_m.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:58 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -10,6 +10,8 @@ var searchData=
   ['relu',['relu',['../structarm__compute_1_1detail_1_1relu.xhtml',1,'arm_compute::detail']]],
   ['reshapelayer',['ReshapeLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_reshape_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['reshapelayernode',['ReshapeLayerNode',['../classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['resizelayer',['ResizeLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_resize_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['resizelayernode',['ResizeLayerNode',['../classarm__compute_1_1graph_1_1_resize_layer_node.xhtml',1,'arm_compute::graph']]],
   ['reverse_5fiterable',['reverse_iterable',['../classarm__compute_1_1utils_1_1iterable_1_1reverse__iterable.xhtml',1,'arm_compute::utils::iterable']]],
   ['roi',['ROI',['../structarm__compute_1_1_r_o_i.xhtml',1,'arm_compute']]],
   ['roipoolinglayerinfo',['ROIPoolingLayerInfo',['../classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml',1,'arm_compute']]]

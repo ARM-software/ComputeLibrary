@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 GCConvolutionLayerReshapeWeights::GCConvolutionLayerReshapeWeights()
-    : _weights_reshape_kernel(), _weights_reshaped()
+    : _weights_reshape_kernel()
 {
 }
 
@@ -68,7 +68,7 @@ void GCConvolutionLayerReshapeWeights::run()
 
 GCConvolutionLayer::GCConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reshape_weights(), _input_im2col_kernel(), _mm_gemm(), _output_col2im_kernel(), _fill_border(), _activationlayer_function(), _original_weights(nullptr),
-      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _is_first_run(true), _is_activationlayer_enabled(false)
+      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
@@ -88,7 +88,7 @@ Status GCConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorIn
 }
 
 void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
@@ -96,8 +96,10 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     ARM_COMPUTE_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1);
+    ARM_COMPUTE_UNUSED(num_groups);
 
-    _is_first_run     = true;
+    _is_prepared      = false;
     _original_weights = weights;
 
     if(biases != nullptr)
@@ -148,7 +150,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
 
-    TensorInfo im2col_reshaped_info(shape_im2col, 1, dt, input->info()->fixed_point_position());
+    TensorInfo im2col_reshaped_info(shape_im2col, 1, dt);
     _input_im2col_reshaped.allocator()->init(im2col_reshaped_info);
     _memory_group.manage(&_input_im2col_reshaped);
 
@@ -158,7 +160,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     shape_gemm.set(1, mat_input_rows);
     const DataType gemm_data_type = dt;
 
-    TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
+    TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
     _gemm_output.allocator()->init(info_gemm);
     _memory_group.manage(&_gemm_output);
 
@@ -182,9 +184,6 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(0) != conv_w) || (output->info()->dimension(1) != conv_h), "Output shape does not match the expected one");
 
-    // Allocate intermediate tensor
-    _weights_reshaped.allocator()->allocate();
-
     //Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
 
@@ -198,17 +197,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
 
 void GCConvolutionLayer::run()
 {
-    // Run weights reshaping (Runs once for every configure)
-    if(_is_first_run)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        _reshape_weights.run();
-        _is_first_run = false;
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     _memory_group.acquire();
 
@@ -219,17 +208,34 @@ void GCConvolutionLayer::run()
 
     // Run gemm on reshaped matrices
     _mm_gemm.run();
-
     GCScheduler::get().memory_barrier();
+
     // Reshape output matrix
     GCScheduler::get().dispatch(_output_col2im_kernel, false);
+    GCScheduler::get().memory_barrier();
 
     _memory_group.release();
 
-    GCScheduler::get().memory_barrier();
     // Run Activation Layer
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function.run();
+    }
+}
+
+void GCConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights reshaping and mark as unused
+        _weights_reshaped.allocator()->allocate();
+        _reshape_weights.run();
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
+
+        _is_prepared = true;
     }
 }

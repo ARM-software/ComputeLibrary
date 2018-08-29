@@ -65,22 +65,28 @@ class GCFullyConnectedLayer : public IFunction
 public:
     /** Constructor */
     GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCFullyConnectedLayer(const GCFullyConnectedLayer &) = delete;
+    /** Default move constructor */
+    GCFullyConnectedLayer(GCFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCFullyConnectedLayer &operator=(const GCFullyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    GCFullyConnectedLayer &operator=(GCFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                   Source tensor. Data type supported: F16/F32.
-     * @param[in]  weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in]  biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output                  Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights       (Optional) Transpose weights if true. Defaults to true.
-     * @param[in]  are_weights_reshaped    (Optional) Reshape the weights tensor if false. Defaults to false.
-     * @param[in]  retain_internal_weights (Optional) Retain internal reshaped weights. Defaults to false.
-     *                                     Used for reconfiguration purposes.
+     * @param[in]  input   Source tensor. Data type supported: F16/F32.
+     * @param[in]  weights Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in]  biases  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  fc_info (Optional) Fully connected layer additional info
      */
     void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output,
-                   bool transpose_weights = true, bool are_weights_reshaped = false, bool retain_internal_weights = false);
+                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
     //Inherited methods override
     void run() override;
+    void prepare() override;
 
 private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
@@ -93,6 +99,7 @@ private:
     GCGEMMMatrixAccumulateBiasesKernel  _accumulate_biases_kernel;
     GCTensor                            _im2col_output;
     GCTensor                            _reshape_weights_output;
+    const IGCTensor                    *_original_weights;
     bool                                _are_weights_reshaped;
     bool                                _is_fc_after_conv;
     bool                                _accumulate_biases;

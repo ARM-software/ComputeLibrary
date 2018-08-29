@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_depthwise_co
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEDepthwiseConvolutionLayer Class Reference</div>  </div>
 </div><!--header-->
@@ -156,13 +157,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9b93ef660fc3c5b4b19d3fc7b891b77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">prepare</a> () override</td></tr>
+<tr class="memdesc:aa9b93ef660fc3c5b4b19d3fc7b891b77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#aa9b93ef660fc3c5b4b19d3fc7b891b77">More...</a><br /></td></tr>
+<tr class="separator:aa9b93ef660fc3c5b4b19d3fc7b891b77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_function.xhtml">IFunction</a></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
-<tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
-<tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a7c71c0d23282a31f5a996492b570379e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#a7c71c0d23282a31f5a996492b570379e">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, unsigned int depth_multiplier=1)</td></tr>
+<tr class="memdesc:a7c71c0d23282a31f5a996492b570379e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a>.  <a href="#a7c71c0d23282a31f5a996492b570379e">More...</a><br /></td></tr>
+<tr class="separator:a7c71c0d23282a31f5a996492b570379e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to execute a generic depthwise convolution. </p>
@@ -174,7 +181,7 @@ Public Member Functions</h2></td></tr>
 <li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">NEFillBorderKernel</a> (if pad_x or pad_y &gt; 0) </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml#l00098">98</a> of file <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml">NEDepthwiseConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml#l00113">113</a> of file <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml">NEDepthwiseConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aaa71284f868a7571de11d6230081a008"></a>
 <div class="memitem">
@@ -361,6 +368,35 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa9b93ef660fc3c5b4b19d3fc7b891b77"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void prepare </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Prepare the function for executing. </p>
+<p>Any one off pre-processing step required by the function is handled here</p>
+<dl class="section note"><dt>Note</dt><dd>Prepare stage might not need all the function's buffers' backing memory to be available in order to execute </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">IFunction</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ad1717410afd0be936c6213a63c8005fb"></a>
 <div class="memitem">
 <div class="memproto">
@@ -394,9 +430,83 @@ Public Member Functions</h2></td></tr>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd>
 <dd>
-Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26" title="Prepare the function for executing. ">prepare()</a> on first run if hasn't been done </dd></dl>
+Will call <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77" title="Prepare the function for executing. ">prepare()</a> on first run if hasn't been done </dd></dl>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a7c71c0d23282a31f5a996492b570379e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>biases</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>conv_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth_multiplier</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>(Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed. Data type supported: Same as <code>input</code>, S32 when input is QASYMM8. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Padding and stride information to use for the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth_multiplier</td><td>(Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -409,7 +519,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

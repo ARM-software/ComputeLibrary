@@ -77,17 +77,17 @@ TEST_SUITE(Scale)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8, 0),  // Mismatching data type
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Unsupported sampling point
-                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32, 0), // Invalid policy
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Insufficient padding
-                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32, 0),
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),  // Mismatching data type
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported sampling point
+                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32), // Invalid policy
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Insufficient padding
+                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32),
                                               }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
-                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
-                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32, 0),
-                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
-                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32, 0),
+        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32),
                                               })),
         framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR,
                                                           InterpolationPolicy::NEAREST_NEIGHBOR,
@@ -159,8 +159,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     shape_scaled.set(idx_height, src_shape[idx_height] * scale_y);
 
     // Create tensors
-    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, 0, QuantizationInfo(), data_layout);
+    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, QuantizationInfo(), data_layout);
+    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

@@ -67,6 +67,11 @@ ITensorAccessor *Tensor::accessor()
     return _accessor.get();
 }
 
+std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
+{
+    return std::move(_accessor);
+}
+
 bool Tensor::call_accessor()
 {
     // Early exit guard
@@ -85,12 +90,12 @@ bool Tensor::call_accessor()
     }
 
     // Call accessor
-    _accessor->access_tensor(_handle->tensor());
+    bool retval = _accessor->access_tensor(_handle->tensor());
 
     // Unmap tensor
     _handle->unmap();
 
-    return true;
+    return retval;
 }
 
 void Tensor::bind_edge(EdgeID eid)

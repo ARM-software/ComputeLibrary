@@ -19,8 +19,6 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     ] ],
     [ "Dimensions.h", "_dimensions_8h.xhtml", "_dimensions_8h" ],
     [ "Error.h", "_error_8h.xhtml", "_error_8h" ],
-    [ "FixedPoint.h", "arm__compute_2core_2_fixed_point_8h.xhtml", "arm__compute_2core_2_fixed_point_8h" ],
-    [ "FixedPoint.inl", "_fixed_point_8inl.xhtml", "_fixed_point_8inl" ],
     [ "GPUTarget.h", "_g_p_u_target_8h.xhtml", "_g_p_u_target_8h" ],
     [ "Helpers.h", "arm__compute_2core_2_helpers_8h.xhtml", "arm__compute_2core_2_helpers_8h" ],
     [ "Helpers.inl", "_helpers_8inl.xhtml", "_helpers_8inl" ],
@@ -97,5 +95,6 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "Window", "classarm__compute_1_1_window.xhtml", "classarm__compute_1_1_window" ],
       [ "Dimension", "classarm__compute_1_1_window_1_1_dimension.xhtml", "classarm__compute_1_1_window_1_1_dimension" ]
     ] ],
-    [ "Window.inl", "_window_8inl.xhtml", null ]
+    [ "Window.inl", "_window_8inl.xhtml", null ],
+    [ "WindowIterator.h", "_window_iterator_8h.xhtml", "_window_iterator_8h" ]
 ];

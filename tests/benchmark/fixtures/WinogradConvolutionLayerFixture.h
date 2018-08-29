@@ -48,16 +48,16 @@ public:
         ARM_COMPUTE_UNUSED(dilation);
 
         // Set batched in source and destination shapes
-        const unsigned int fixed_point_position = 4;
+
         src_shape.set(3 /* batch */, batches);
         dst_shape.set(3 /* batch */, batches);
         DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
         // Create tensors
-        src     = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
-        weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position);
-        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, fixed_point_position);
-        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
+        src     = create_tensor<TensorType>(src_shape, data_type, 1);
+        weights = create_tensor<TensorType>(weights_shape, data_type, 1);
+        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1);
+        dst     = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         // Create and configure function
         conv_layer.configure(&src, &weights, &biases, &dst, info, act_info);

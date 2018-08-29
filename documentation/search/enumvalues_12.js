@@ -12,10 +12,9 @@ var searchData=
   ['time_5fms',['TIME_MS',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100a8ed2f2476469f812d63a2f4e83166c61',1,'arm_compute::test::framework']]],
   ['time_5fs',['TIME_S',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100a55d658bdb6741297d391d36632cb51b1',1,'arm_compute::test::framework']]],
   ['time_5fus',['TIME_US',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100ab843f590d06438293e06980b4f94bf39',1,'arm_compute::test::framework']]],
-  ['tnox',['TNOX',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a9a42105c81f05fa4a58cb8fd532e739e',1,'arm_compute']]],
-  ['to_5fnearest_5feven',['TO_NEAREST_EVEN',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150',1,'arm_compute::TO_NEAREST_EVEN()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150',1,'arm_compute::test::fixed_point_arithmetic::TO_NEAREST_EVEN()']]],
+  ['to_5fnearest_5feven',['TO_NEAREST_EVEN',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea02ff1fff1812f84c89547fcd6c176150',1,'arm_compute']]],
   ['to_5fnearest_5fup',['TO_NEAREST_UP',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea8c0084566b290fa9e5e429f4ae241f95',1,'arm_compute']]],
-  ['to_5fzero',['TO_ZERO',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06',1,'arm_compute::TO_ZERO()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06',1,'arm_compute::test::fixed_point_arithmetic::TO_ZERO()']]],
+  ['to_5fzero',['TO_ZERO',['../namespacearm__compute.xhtml#add6426cbf2e057a195846d4ba09a50bea5631ad8e27788edfca7e13535d862c06',1,'arm_compute']]],
   ['top_5fleft',['TOP_LEFT',['../namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7ba747385047b85ae751f83adb36435a3c1',1,'arm_compute']]],
   ['ttrx',['TTRX',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3ab39f7e42574174cf9ee7da726bdb13b4',1,'arm_compute']]]
 ];

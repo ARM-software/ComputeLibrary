@@ -27,9 +27,12 @@
 #include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/PassManager.h"
+#include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
 #include "arm_compute/graph/detail/ExecutionHelpers.h"
+
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 
 namespace arm_compute
 {
@@ -38,7 +41,6 @@ namespace graph
 GraphManager::GraphManager()
     : _workloads()
 {
-    detail::default_initialize_backends();
 }
 
 void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target)
@@ -53,7 +55,12 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     }
 
     // Force target to all graph construct
-    Target forced_target = is_target_supported(target) ? target : get_default_target();
+    Target forced_target = target;
+    if(!is_target_supported(target))
+    {
+        forced_target = get_default_target();
+        ARM_COMPUTE_LOG_GRAPH_INFO("Switching target from " << target << " to " << forced_target << std::endl);
+    }
     force_target_to_graph(graph, forced_target);
 
     // Configure all tensors
@@ -62,22 +69,22 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Apply all mutating passes
     pm.run_all(graph);
 
+    // Perform topological sort
+    std::vector<NodeID> topological_sorted_nodes = dfs(graph);
+
     // Validate all nodes
     detail::validate_all_nodes(graph);
 
     // Configure all nodes
-    auto workload = detail::configure_all_nodes(graph, ctx);
+    auto workload = detail::configure_all_nodes(graph, ctx, topological_sorted_nodes);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
 
     // Allocate const tensors and call accessors
     detail::allocate_const_tensors(graph);
     detail::call_all_const_node_accessors(graph);
 
-    if(forced_target == Target::CL)
-    {
-        // Prepare graph
-        detail::prepare_all_tasks(workload);
-    }
+    // Prepare graph
+    detail::prepare_all_tasks(workload);
 
     // Setup tensor memory (Allocate all tensors or setup transition manager)
     if(ctx.config().use_transition_memory_manager)
@@ -95,15 +102,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Register graph
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
-
-    if(forced_target != Target::CL)
-    {
-        // Make first run
-        execute_graph(graph);
-
-        // Release all unused const tensors
-        detail::release_unused_tensors(graph);
-    }
 }
 
 void GraphManager::execute_graph(Graph &graph)
@@ -112,14 +110,23 @@ void GraphManager::execute_graph(Graph &graph)
     auto it = _workloads.find(graph.id());
     ARM_COMPUTE_ERROR_ON_MSG(it == std::end(_workloads), "Graph is not registered!");
 
-    // Call input accessors
-    detail::call_all_input_node_accessors(it->second);
+    while(true)
+    {
+        // Call input accessors
+        if(!detail::call_all_input_node_accessors(it->second))
+        {
+            return;
+        }
 
-    // Run graph
-    detail::call_all_tasks(it->second);
+        // Run graph
+        detail::call_all_tasks(it->second);
 
-    // Call output accessors
-    detail::call_all_output_node_accessors(it->second);
+        // Call output accessors
+        if(!detail::call_all_output_node_accessors(it->second))
+        {
+            return;
+        }
+    }
 }
 
 void GraphManager::invalidate_graph(Graph &graph)

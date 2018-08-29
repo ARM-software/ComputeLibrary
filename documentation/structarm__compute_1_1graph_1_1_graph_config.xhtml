@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -141,11 +141,14 @@ Data Fields</h2></td></tr>
 <tr class="memitem:a08963f7335eef295237ab460863bc3d5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a08963f7335eef295237ab460863bc3d5">num_threads</a> { -1 }</td></tr>
 <tr class="memdesc:a08963f7335eef295237ab460863bc3d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is.  <a href="#a08963f7335eef295237ab460863bc3d5">More...</a><br /></td></tr>
 <tr class="separator:a08963f7335eef295237ab460863bc3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cabfb35cd0014387f7ec2a0c362c20f"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a5cabfb35cd0014387f7ec2a0c362c20f">tuner_file</a> { &quot;acl_tuner.csv&quot; }</td></tr>
+<tr class="memdesc:a5cabfb35cd0014387f7ec2a0c362c20f"><td class="mdescLeft">&#160;</td><td class="mdescRight">File to load/store tuning values from.  <a href="#a5cabfb35cd0014387f7ec2a0c362c20f">More...</a><br /></td></tr>
+<tr class="separator:a5cabfb35cd0014387f7ec2a0c362c20f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> configuration structure Device target types. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00075">75</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00078">78</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Field Documentation</h2>
 <a class="anchor" id="a08963f7335eef295237ab460863bc3d5"></a>
 <div class="memitem">
@@ -159,7 +162,23 @@ Data Fields</h2></td></tr>
 
 <p>Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00080">80</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00083">83</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a5cabfb35cd0014387f7ec2a0c362c20f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string tuner_file { &quot;acl_tuner.csv&quot; }</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>File to load/store tuning values from. </p>
+
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00084">84</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -175,7 +194,7 @@ Data Fields</h2></td></tr>
 
 <p>Use a memory manager to manage per-funcion auxilary memory. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00077">77</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00080">80</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 <p>Referenced by <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00088">arm_compute::graph::backends::get_memory_manager()</a>.</p>
 
@@ -193,7 +212,7 @@ Data Fields</h2></td></tr>
 
 <p>Use a memory manager to manager transition buffer memory. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00078">78</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00081">81</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -209,7 +228,7 @@ Data Fields</h2></td></tr>
 
 <p>Use a tuner in tunable backends. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00079">79</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00082">82</a> of file <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">Types.h</a>.</p>
 
 </div>
 </div>
@@ -222,7 +241,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml">GraphConfig</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

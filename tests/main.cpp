@@ -28,14 +28,15 @@
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/Profiler.h"
-#include "tests/framework/command_line/CommandLineOptions.h"
-#include "tests/framework/command_line/CommandLineParser.h"
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/printers/Printers.h"
+#include "utils/command_line/CommandLineOptions.h"
+#include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 #endif /* ARM_COMPUTE_CL */
 #ifdef ARM_COMPUTE_GC
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
@@ -52,6 +53,18 @@
 using namespace arm_compute;
 using namespace arm_compute::test;
 
+namespace
+{
+std::string command_line(int argc, char **argv)
+{
+    std::stringstream ss;
+    for(int i = 0; i < argc; i++)
+    {
+        ss << argv[i] << " ";
+    }
+    return ss.str();
+}
+} // namespace
 namespace arm_compute
 {
 namespace test
@@ -60,10 +73,25 @@ std::unique_ptr<AssetsLibrary> library;
 } // namespace test
 } // namespace arm_compute
 
+namespace
+{
+#ifdef ARM_COMPUTE_CL
+bool file_exists(const std::string &filename)
+{
+    std::ifstream file(filename);
+    return file.good();
+}
+#endif /* ARM_COMPUTE_CL */
+} //namespace
+
 int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
-    CLScheduler::get().default_init();
+    CLTuner cl_tuner(false);
+    if(opencl_is_available())
+    {
+        CLScheduler::get().default_init(&cl_tuner);
+    }
 #endif /* ARM_COMPUTE_CL */
 
 #ifdef ARM_COMPUTE_GC
@@ -72,7 +100,7 @@ int main(int argc, char **argv)
 
     framework::Framework &framework = framework::Framework::get();
 
-    framework::CommandLineParser parser;
+    utils::CommandLineParser parser;
 
     std::set<framework::DatasetMode> allowed_modes
     {
@@ -83,24 +111,32 @@ int main(int argc, char **argv)
 
     framework::CommonOptions options(parser);
 
-    auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
+    auto dataset_mode = parser.add_option<utils::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
-    auto filter = parser.add_option<framework::SimpleOption<std::string>>("filter", ".*");
+    auto filter = parser.add_option<utils::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
-    auto filter_id = parser.add_option<framework::SimpleOption<std::string>>("filter-id");
+    auto filter_id = parser.add_option<utils::SimpleOption<std::string>>("filter-id");
     filter_id->set_help("List of test ids. ... can be used to define a range.");
-    auto stop_on_error = parser.add_option<framework::ToggleOption>("stop-on-error");
+    auto stop_on_error = parser.add_option<utils::ToggleOption>("stop-on-error");
     stop_on_error->set_help("Abort execution after the first failed test (useful for debugging)");
-    auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
+    auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
-    auto list_tests = parser.add_option<framework::ToggleOption>("list-tests", false);
+    auto list_tests = parser.add_option<utils::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
-    auto test_instruments = parser.add_option<framework::ToggleOption>("test-instruments", false);
+    auto test_instruments = parser.add_option<utils::ToggleOption>("test-instruments", false);
     test_instruments->set_help("Test if the instruments work on the platform");
-    auto error_on_missing_assets = parser.add_option<framework::ToggleOption>("error-on-missing-assets", false);
+    auto error_on_missing_assets = parser.add_option<utils::ToggleOption>("error-on-missing-assets", false);
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
-    auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
+    auto assets = parser.add_positional_option<utils::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
+#ifdef ARM_COMPUTE_CL
+    auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
+    enable_tuner->set_help("Enable OpenCL dynamic tuner");
+    auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
+    tuner_file->set_help("File to load/save CLTuner values");
+#endif /* ARM_COMPUTE_CL */
+    auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
+    threads->set_help("Number of threads to use");
 
     try
     {
@@ -114,8 +150,23 @@ int main(int argc, char **argv)
 
         std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
 
-        Scheduler::get().set_num_threads(options.threads->value());
-
+        Scheduler::get().set_num_threads(threads->value());
+#ifdef ARM_COMPUTE_CL
+        if(enable_tuner->is_set())
+        {
+            cl_tuner.set_tune_new_kernels(enable_tuner->value());
+            // If that's the first run then the file won't exist yet
+            if(file_exists(tuner_file->value()))
+            {
+                cl_tuner.load_from_file(tuner_file->value());
+            }
+        }
+        else if(!tuner_file->value().empty())
+        {
+            //If we're not tuning and the file doesn't exist then we should raise an error:
+            cl_tuner.load_from_file(tuner_file->value());
+        }
+#endif /* ARM_COMPUTE_CL */
         if(options.log_level->value() > framework::LogLevel::NONE)
         {
             for(auto &p : printers)
@@ -129,6 +180,7 @@ int main(int argc, char **argv)
             for(auto &p : printers)
             {
                 p->print_entry("Version", build_information());
+                p->print_entry("CommandLine", command_line(argc, argv));
                 p->print_entry("Seed", support::cpp11::to_string(seed->value()));
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
@@ -141,7 +193,7 @@ int main(int argc, char **argv)
                 }
 #endif /* ARM_COMPUTE_CL */
                 p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
-                p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
+                p->print_entry("Threads", support::cpp11::to_string(threads->value()));
                 {
                     using support::cpp11::to_string;
                     p->print_entry("Dataset mode", to_string(dataset_mode->value()));
@@ -202,7 +254,14 @@ int main(int argc, char **argv)
         }
 
 #ifdef ARM_COMPUTE_CL
-        CLScheduler::get().sync();
+        if(opencl_is_available())
+        {
+            CLScheduler::get().sync();
+            if(enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
+            {
+                cl_tuner.save_to_file(tuner_file->value());
+            }
+        }
 #endif /* ARM_COMPUTE_CL */
 
         return (success ? 0 : 1);

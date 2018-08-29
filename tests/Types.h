@@ -30,18 +30,6 @@
 
 namespace arm_compute
 {
-/** Fixed point operation */
-enum class FixedPointOp
-{
-    ADD,       /**< Addition */
-    SUB,       /**< Subtraction */
-    MUL,       /**< Multiplication */
-    EXP,       /**< Exponential */
-    LOG,       /**< Logarithm */
-    INV_SQRT,  /**< Inverse square root */
-    RECIPROCAL /**< Reciprocal */
-};
-
 /** Gradient dimension type. */
 enum class GradientDimension
 {

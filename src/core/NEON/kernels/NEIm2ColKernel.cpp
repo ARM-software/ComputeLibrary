@@ -23,8 +23,8 @@
  */
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Size2D.h"
@@ -45,33 +45,31 @@ using namespace arm_compute;
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                          bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
+                          bool has_bias, const Size2D &dilation, unsigned int num_groups, bool is_fully_connected, bool is_flatten)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups > 1, "Number of groups greater than one are not supported on NEON");
 
-    TensorShape expected_output_shape;
-    if(is_flatten) /* Called by FlattenLayer */
+    if(output->total_size() > 0)
     {
-        expected_output_shape = misc::shape_calculator::compute_im2col_flatten_shape(input);
-    }
-    else if(!is_fully_connected) /* Called by ConvolutionLayer */
-    {
-        expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation);
-    }
-    else /* Called by FullyConnectedLayer */
-    {
-        const int num_batch_dimensions = std::max(0, static_cast<int>(output->tensor_shape().num_dimensions()) - 1);
-        const int num_input_dimensions = input->tensor_shape().num_dimensions() - num_batch_dimensions;
+        TensorShape expected_output_shape;
 
-        expected_output_shape = misc::shape_calculator::compute_im2col_fc_shape(input, num_input_dimensions);
-    }
+        if(is_flatten || is_fully_connected)
+        {
+            expected_output_shape = misc::shape_calculator::compute_flatten_shape(input);
+        }
+        else
+        {
+            expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false);
+        }
 
-    TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
+        TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
 
     return Status{};
 }
@@ -90,7 +88,6 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                              int                  input_stride_x,
                              int                  input_stride_y,
                              int                  input_stride_z,
-                             int                  fixed_point_position,
                              int                  pad_value,
                              int                  dilation_x,
                              int                  dilation_y)
@@ -171,18 +168,7 @@ inline void linearize_volume(const uint8_t *const in_ptr,
     // Append 1 if the convolution layer has biases
     if(has_bias)
     {
-        if(std::is_same<T, qint8_t>::value)
-        {
-            *out_ptr = sqcvt_qs8_f32(1.0f, fixed_point_position);
-        }
-        else if(std::is_same<T, qint16_t>::value)
-        {
-            *out_ptr = sqcvt_qs16_f32(1.0f, fixed_point_position);
-        }
-        else
-        {
-            *out_ptr = static_cast<T>(1);
-        }
+        *out_ptr = static_cast<T>(1);
     }
 }
 } // namespace
@@ -251,7 +237,6 @@ void NEIm2ColKernel::run_generic(const Window &window)
                                       input_stride_x,
                                       input_stride_y,
                                       input_stride_z,
-                                      _input->info()->fixed_point_position(),
                                       offset,
                                       _dilation.x(),
                                       _dilation.y());
@@ -294,18 +279,7 @@ void NEIm2ColKernel::run_reduced(const Window &window)
         // Add bias
         if(_has_bias)
         {
-            if(std::is_same<T, qint8_t>::value)
-            {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs8_f32(1.0f, _input->info()->fixed_point_position());
-            }
-            else if(std::is_same<T, qint16_t>::value)
-            {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = sqcvt_qs16_f32(1.0f, _input->info()->fixed_point_position());
-            }
-            else
-            {
-                *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = static_cast<T>(1);
-            }
+            *(reinterpret_cast<T *>(out_ptr) + out_width - 1) = static_cast<T>(1);
         }
     }
     while(in_window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
@@ -317,13 +291,14 @@ NEIm2ColKernel::NEIm2ColKernel()
 }
 
 void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                               bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
+                               bool has_bias, const Size2D &dilation, unsigned int num_groups, bool is_fully_connected, bool is_flatten)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
     ARM_COMPUTE_UNUSED(is_fully_connected, is_flatten);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, dilation));
+    ARM_COMPUTE_UNUSED(num_groups);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups, is_fully_connected, is_flatten));
 
     const DataLayout   data_layout = input->info()->data_layout();
     const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -366,12 +341,6 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 _func = &NEIm2ColKernel::run_reduced<float16_t>;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-            case DataType::QS8:
-                _func = &NEIm2ColKernel::run_reduced<qint8_t>;
-                break;
-            case DataType::QS16:
-                _func = &NEIm2ColKernel::run_reduced<qint16_t>;
-                break;
             case DataType::QASYMM8:
                 _func = &NEIm2ColKernel::run_reduced<qasymm8_t>;
                 break;
@@ -392,12 +361,6 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<float16_t, false> : &NEIm2ColKernel::run_generic<float16_t, true>;
                 break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-            case DataType::QS8:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint8_t, false> : &NEIm2ColKernel::run_generic<qint8_t, true>;
-                break;
-            case DataType::QS16:
-                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qint16_t, false> : &NEIm2ColKernel::run_generic<qint16_t, true>;
-                break;
             case DataType::QASYMM8:
                 _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_generic<qasymm8_t, false> : &NEIm2ColKernel::run_generic<qasymm8_t, true>;
                 break;
@@ -417,9 +380,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
 }
 
 Status NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
+                                bool has_bias, const Size2D &dilation, unsigned int num_groups, bool is_fully_connected, bool is_flatten)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, dilation));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups, is_fully_connected, is_flatten));
     return Status{};
 }
 

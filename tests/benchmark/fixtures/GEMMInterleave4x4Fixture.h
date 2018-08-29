@@ -44,14 +44,12 @@ public:
     template <typename...>
     void setup(size_t x, size_t y, DataType data_type)
     {
-        constexpr int fixed_point_position = 4;
-
         const TensorShape shape_a(x, y);
         const TensorShape shape_b(static_cast<size_t>(x * 4.f), static_cast<size_t>(std::ceil(y / 4.f)));
 
         // Create tensors
-        a = create_tensor<TensorType>(shape_a, data_type, 1, fixed_point_position);
-        b = create_tensor<TensorType>(shape_b, data_type, 1, fixed_point_position);
+        a = create_tensor<TensorType>(shape_a, data_type, 1);
+        b = create_tensor<TensorType>(shape_b, data_type, 1);
 
         // Create and configure function
         gemm.configure(&a, &b);

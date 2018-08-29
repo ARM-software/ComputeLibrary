@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -135,9 +135,9 @@ Collaboration diagram for FullyConnectedLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae0a28c6a7a3c5ea2f5087f7eb05eb4a2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml#ae0a28c6a7a3c5ea2f5087f7eb05eb4a2">FullyConnectedLayer</a> (unsigned int num_outputs, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias)</td></tr>
-<tr class="memdesc:ae0a28c6a7a3c5ea2f5087f7eb05eb4a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a fully connected layer.  <a href="#ae0a28c6a7a3c5ea2f5087f7eb05eb4a2">More...</a><br /></td></tr>
-<tr class="separator:ae0a28c6a7a3c5ea2f5087f7eb05eb4a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed1efef2ff5d9d98937162e3220b9412"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml#aed1efef2ff5d9d98937162e3220b9412">FullyConnectedLayer</a> (unsigned int num_outputs, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> weights, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a> bias, const FullyConnectedLayerInfo fc_info=FullyConnectedLayerInfo(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> weights_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:aed1efef2ff5d9d98937162e3220b9412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a fully connected layer.  <a href="#aed1efef2ff5d9d98937162e3220b9412">More...</a><br /></td></tr>
+<tr class="separator:aed1efef2ff5d9d98937162e3220b9412"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a225fb162b43cbef27d5a1dbd7a51c60d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a56952a8591a9d8481450ae707ae355e7">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml#a225fb162b43cbef27d5a1dbd7a51c60d">create_layer</a> (<a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml">IStream</a> &amp;s) override</td></tr>
 <tr class="memdesc:a225fb162b43cbef27d5a1dbd7a51c60d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create layer and add to the given stream.  <a href="#a225fb162b43cbef27d5a1dbd7a51c60d">More...</a><br /></td></tr>
 <tr class="separator:a225fb162b43cbef27d5a1dbd7a51c60d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,9 +155,9 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Fully Connected Layer. </p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00281">281</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00379">379</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="ae0a28c6a7a3c5ea2f5087f7eb05eb4a2"></a>
+<a class="anchor" id="aed1efef2ff5d9d98937162e3220b9412"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -180,7 +180,25 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a41c3f59161734b8492782359f583b676">ITensorAccessorUPtr</a>&#160;</td>
-          <td class="paramname"><em>bias</em>&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const FullyConnectedLayerInfo&#160;</td>
+          <td class="paramname"><em>fc_info</em> = <code>FullyConnectedLayerInfo()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>weights_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>out_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -201,12 +219,15 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">num_outputs</td><td>Number of outputs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Accessor to get weights from. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>Accessor to get bias from. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">fc_info</td><td>(Optional) Fully connected layer metadata </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights_quant_info</td><td>(Optional) Weights quantization information </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">out_quant_info</td><td>(Optional) Output quantization info </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00290">290</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        : _num_outputs(num_outputs), _weights(std::move(weights)), _bias(std::move(bias))</div><div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;    {</div><div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00391">391</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;        : _num_outputs(num_outputs),</div><div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;          _weights(std::move(weights)),</div><div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;          _bias(std::move(bias)),</div><div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;          _fc_info(fc_info),</div><div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;          _weights_quant_info(std::move(weights_quant_info)),</div><div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;          _out_quant_info(std::move(out_quant_info))</div><div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    {</div><div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -243,11 +264,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00297">297</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00406">406</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ad1dbeadf5e85d923fa0751b19c0a4170">GraphBuilder::add_fully_connected_layer()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00064">StreamHints::target_hint</a>.</p>
-<div class="fragment"><div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    {</div><div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ad1dbeadf5e85d923fa0751b19c0a4170">GraphBuilder::add_fully_connected_layer</a>(s.graph(), common_params, input, _num_outputs,</div><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;                                                       std::move(_weights), std::move(_bias));</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_a324e8c54c4c5161913681a1a52fef959"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const </div><div class="ttdoc">Layer name accessor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
-<div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_ad1dbeadf5e85d923fa0751b19c0a4170"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#ad1dbeadf5e85d923fa0751b19c0a4170">arm_compute::graph::GraphBuilder::add_fully_connected_layer</a></div><div class="ttdeci">static NodeID add_fully_connected_layer(Graph &amp;g, NodeParams params, NodeIdxPair input, unsigned int num_outputs, ITensorAccessorUPtr weights_accessor=nullptr, ITensorAccessorUPtr bias_accessor=nullptr)</div><div class="ttdoc">Adds a fully connected layer node to the graph. </div></div>
+<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aece87863ae55a12320fb369677f1f22d">GraphBuilder::add_fully_connected_layer()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00068">StreamHints::target_hint</a>.</p>
+<div class="fragment"><div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    {</div><div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aece87863ae55a12320fb369677f1f22d">GraphBuilder::add_fully_connected_layer</a>(s.graph(), common_params, input, _num_outputs,</div><div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                                                       std::move(_weights), std::move(_bias), _fc_info,</div><div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                                                       std::move(_weights_quant_info), std::move(_out_quant_info));</div><div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_a324e8c54c4c5161913681a1a52fef959"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const </div><div class="ttdoc">Layer name accessor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
+<div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_aece87863ae55a12320fb369677f1f22d"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#aece87863ae55a12320fb369677f1f22d">arm_compute::graph::GraphBuilder::add_fully_connected_layer</a></div><div class="ttdeci">static NodeID add_fully_connected_layer(Graph &amp;g, NodeParams params, NodeIdxPair input, unsigned int num_outputs, ITensorAccessorUPtr weights_accessor=nullptr, ITensorAccessorUPtr bias_accessor=nullptr, const FullyConnectedLayerInfo fc_info=FullyConnectedLayerInfo(), const QuantizationInfo weights_quant_info=QuantizationInfo(), const QuantizationInfo out_quant_info=QuantizationInfo())</div><div class="ttdoc">Adds a fully connected layer node to the graph. </div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -260,7 +281,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_fully_connected_layer.xhtml">FullyConnectedLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

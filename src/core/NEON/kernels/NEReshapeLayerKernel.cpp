@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -32,7 +33,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include <arm_neon.h>
 #include <cstdint>
 
 using namespace arm_compute;
@@ -59,11 +59,10 @@ inline void reshape_tensor(const Window &window, const ITensor *input, ITensor *
 
 void NEReshapeLayerKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::QS8, DataType::U16, DataType::S16, DataType::QS16,
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16,
                                                   DataType::U32, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size());
 
     _input  = input;
@@ -94,12 +93,10 @@ void NEReshapeLayerKernel::run(const Window &window, const ThreadInfo &info)
         case DataType::U8:
         case DataType::S8:
         case DataType::QASYMM8:
-        case DataType::QS8:
             reshape_tensor<uint8_t>(window, _input, _output);
             break;
         case DataType::U16:
         case DataType::S16:
-        case DataType::QS16:
         case DataType::F16:
             reshape_tensor<uint16_t>(window, _input, _output);
             break;

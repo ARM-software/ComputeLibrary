@@ -47,6 +47,8 @@ Status CLNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ChannelShuffleLayer:
+            return detail::validate_channel_shuffle_layer<CLChannelShuffleLayer>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return detail::validate_convolution_layer<CLConvolutionLayer,
                    CLDirectConvolutionLayer,
@@ -55,6 +57,8 @@ Status CLNodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer,
                    CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::PermuteLayer:
+            return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
         default:
             return Status{};
     }

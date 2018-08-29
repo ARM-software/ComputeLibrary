@@ -451,6 +451,22 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 
 #endif // defined(DEPTH_MULTIPLIER)
 
+#if defined(NCHW)
+#define in_stride_x src_stride_x
+#define in_stride_y src_stride_y
+#define in_stride_z src_stride_z
+#define out_stride_x dst_stride_x
+#define out_stride_y dst_stride_y
+#define out_stride_z dst_stride_z
+#else //defined(NCHW)
+#define in_stride_x src_stride_y
+#define in_stride_y src_stride_z
+#define in_stride_z src_stride_x
+#define out_stride_x dst_stride_y
+#define out_stride_y dst_stride_z
+#define out_stride_z dst_stride_x
+#endif //defined(NCHW)
+
 #if defined(SRC_WIDTH) && defined(DATA_TYPE)
 /** This kernel reshapes each of the tensor's low three dimensions to single rows.
  *
@@ -484,17 +500,16 @@ __kernel void depthwise_weights_reshape(
 #endif /* HAS_BIAS */
 )
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif /* HAS_BIAS */
 
-    __global DATA_TYPE *input_ptr = (__global DATA_TYPE *)src.ptr;
-    __global uchar *output_ptr    = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(1) * SRC_WIDTH * dst_stride_x + get_global_id(2) * dst_stride_y;
+    __global uchar *input_ptr  = src_ptr + src_offset_first_element_in_bytes + get_global_id(1) * in_stride_y + get_global_id(2) * in_stride_z;
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + get_global_id(1) * SRC_WIDTH * dst_stride_x + get_global_id(2) * dst_stride_y;
 
-    for(int i = 0; i < SRC_WIDTH; ++i, ++input_ptr)
+    for(int i = 0; i < SRC_WIDTH; ++i, input_ptr += in_stride_x)
     {
-        *((__global DATA_TYPE *)(output_ptr + i * dst_stride_x)) = *input_ptr;
+        *((__global DATA_TYPE *)(output_ptr + i * dst_stride_x)) = *((__global DATA_TYPE *)input_ptr);
     }
 
 #if defined(HAS_BIAS)
@@ -512,7 +527,7 @@ __kernel void depthwise_weights_reshape(
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_LEFT, -DPAD_TOP, -DPAD_RIGHT, -DPAD_BOTTOM, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT, -DDEPTH_MULTIPLIER
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -541,7 +556,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
     const int src_y = -PAD_TOP + src_pixel_linear / max_initial_x * STRIDE_Y;
     const int src_z = get_global_id(2) / DEPTH_MULTIPLIER;
 
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + src_z * src_stride_z;
+    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + src_z * in_stride_z;
     __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst.ptr));
 
     for(int y = src_y; y < src_y + KERNEL_HEIGHT; ++y)
@@ -554,7 +569,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
             }
             else
             {
-                *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
+                *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * in_stride_x + y * in_stride_y));
             }
         }
     }
@@ -572,7 +587,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The convolution information must be passed at compile time using -DCONV_WIDTH, -DCONV_HEIGHT, e.g -DCONV_WIDTH=32, -DCONV_HEIGHT=42
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
@@ -596,7 +611,7 @@ __kernel void depthwise_vector_to_tensor(
     const int z          = id0 / patch_size;
     const int index2D    = id0 - z * patch_size;
 
-    __global uchar *out_ptr          = dst_ptr + dst_offset_first_element_in_bytes + index2D % CONV_WIDTH * dst_stride_x + index2D / CONV_WIDTH * dst_stride_y + z * dst_stride_z;
+    __global uchar *out_ptr          = dst_ptr + dst_offset_first_element_in_bytes + index2D % CONV_WIDTH * out_stride_x + index2D / CONV_WIDTH * out_stride_y + z * out_stride_z;
     *((__global DATA_TYPE *)out_ptr) = *((__global DATA_TYPE *)src.ptr);
 }
 
@@ -980,3 +995,335 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER)
+
+#if defined(VEC_SIZE) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT)
+
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
+
+#if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
+/** This function computes the depthwise convolution for NHWC data layout when the stride along the width or height is not 1.
+ *
+ * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
+ * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
+ * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: FP32
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as src_ptr
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in] max_offset                            Max offset for the input tensor
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: same as src_ptr
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void depthwise_convolution_3x3_nhwc(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights),
+#if defined(HAS_BIAS)
+    VECTOR_DECLARATION(biases),
+#endif /* defined(HAS_BIAS) */
+    int max_offset)
+{
+    int x = get_global_id(0); // channels
+    int y = get_global_id(1); // spatial coordinate x
+    int z = get_global_id(2); // spatial coordinate y
+
+    Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
+
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(float) * VEC_SIZE;
+
+    int  z_coord  = 0;
+    int4 offset   = 0;
+    int4 y_offset = ((int4)(y * CONV_STRIDE_X) + (int4)(0, 1, 2, 3) - CONV_PAD_LEFT) * (int4)src_stride_y;
+
+    // We compute 2x1x1 [C,W,H] elements
+    VEC_FLOAT acc = 0;
+
+    // Load weights
+    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 2 * weights_stride_z));
+
+    // Load input values
+    // z == 0
+    // Clamp z_coord as for z = 0, it can be negative
+    // z_coord is casted to unsigned int in order to use just a min() operation
+    // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
+    z_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
+    offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
+
+    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+
+    // z == 1
+    // z_coord can be only negative for z = 0 so we do not need to clamp it
+    // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
+    z_coord           = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP + 1;
+    offset            = y_offset + (int4)(z_coord * src_stride_z);
+    VEC_FLOAT values3 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values4 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values5 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+
+    // z == 2
+    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
+    // However offset can be out-of-bound so we need to check if it is greater than max_offset
+    offset += (int4)src_stride_z;
+    offset            = min(offset, (int4)max_offset);
+    VEC_FLOAT values6 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values7 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values8 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+
+    acc = fma(values0, w0, acc);
+    acc = fma(values1, w1, acc);
+    acc = fma(values2, w2, acc);
+
+    acc = fma(values3, w3, acc);
+    acc = fma(values4, w4, acc);
+    acc = fma(values5, w5, acc);
+
+    acc = fma(values6, w6, acc);
+    acc = fma(values7, w7, acc);
+    acc = fma(values8, w8, acc);
+
+#if defined(HAS_BIAS)
+    Vector    biases      = CONVERT_TO_VECTOR_STRUCT(biases);
+    VEC_FLOAT bias_values = VLOAD(VEC_SIZE)(0, (__global float *)biases.ptr);
+    acc += bias_values;
+#endif // defined(HAS_BIAS)
+
+    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    VSTORE(VEC_SIZE)
+    (acc, 0, (__global float *)(dst.ptr));
+}
+#endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
+
+#if defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED)
+/** This function computes the depthwise convolution for NHWC data layout when the stride along the width and height is 1.
+ *
+ * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
+ * @note The number of rows processed per thread must be passed at compile time using -DNUM_ROWS_PROCESSED (i.e. -DNUM_ROWS_PROCESSED=2)
+ * @note The number of planes processed per thread must be passed at compile time using -DNUM_PLANES_PROCESSED (i.e. -DNUM_PLANES_PROCESSED=2)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
+ * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: FP32
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as src_ptr
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in] max_offset                            Max offset for the input tensor
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: same as src_ptr
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void depthwise_convolution_3x3_nhwc_stride1(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights),
+#if defined(HAS_BIAS)
+    VECTOR_DECLARATION(biases),
+#endif /* defined(HAS_BIAS) */
+    int max_offset)
+{
+    int x = get_global_id(0); // channels
+    int y = get_global_id(1); // spatial coordinate x
+    int z = get_global_id(2); // spatial coordinate y
+
+    Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
+
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(float) * VEC_SIZE;
+
+    int  z_coord  = 0;
+    int4 offset   = 0;
+    int4 y_offset = ((int4)(y * NUM_ROWS_PROCESSED) + (int4)(0, 1, 2, 3) - (int)CONV_PAD_LEFT) * (int4)src_stride_y;
+
+    // We compute 2x2x2 [C,W,H] elements
+    VEC_FLOAT acc0 = 0;
+    VEC_FLOAT acc1 = 0;
+    VEC_FLOAT acc2 = 0;
+    VEC_FLOAT acc3 = 0;
+
+    // Load weights
+    VEC_FLOAT w0 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w1 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w2 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 0 * weights_stride_z));
+    VEC_FLOAT w3 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w4 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w5 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 1 * weights_stride_z));
+    VEC_FLOAT w6 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 0 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w7 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 1 * weights_stride_y + 2 * weights_stride_z));
+    VEC_FLOAT w8 = VLOAD(VEC_SIZE)(0, (__global float *)(weights.ptr + 2 * weights_stride_y + 2 * weights_stride_z));
+
+    // Load input values
+    // z == 0
+    // Clamp z_coord as for z = 0, it can be negative
+    // z_coord is casted to unsigned int in order to use just a min() operation
+    // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
+    z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP;
+    z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
+    offset  = y_offset + (int4)(z_coord * src_stride_z);
+    offset  = min(offset, (int4)max_offset);
+
+    VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values2 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+    VEC_FLOAT values3 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s3));
+
+    // z == 1
+    // z_coord can be only negative for z = 0 so we do not need to clamp it
+    // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
+    z_coord           = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
+    offset            = y_offset + (int4)(z_coord * src_stride_z);
+    VEC_FLOAT values4 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values5 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values6 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+    VEC_FLOAT values7 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s3));
+
+    // z == 2
+    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
+    // However offset can be out-of-bound so we need to check if it is greater than max_offset
+    offset += (int4)src_stride_z;
+    offset             = min(offset, (int4)max_offset);
+    VEC_FLOAT values8  = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values9  = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values10 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+    VEC_FLOAT values11 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s3));
+
+    // z == 3
+    // After z = 1 we can simply add src_stride_z to offset without updating z_coord
+    // However offset can be out-of-bound so we need to check if it is greater than max_offset
+    offset += (int4)src_stride_z;
+    offset             = min(offset, (int4)max_offset);
+    VEC_FLOAT values12 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
+    VEC_FLOAT values13 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
+    VEC_FLOAT values14 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
+    VEC_FLOAT values15 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s3));
+
+    acc0 = fma(values0, w0, acc0);
+    acc0 = fma(values1, w1, acc0);
+    acc0 = fma(values2, w2, acc0);
+    acc1 = fma(values1, w0, acc1);
+    acc1 = fma(values2, w1, acc1);
+    acc1 = fma(values3, w2, acc1);
+
+    acc0 = fma(values4, w3, acc0);
+    acc0 = fma(values5, w4, acc0);
+    acc0 = fma(values6, w5, acc0);
+    acc1 = fma(values5, w3, acc1);
+    acc1 = fma(values6, w4, acc1);
+    acc1 = fma(values7, w5, acc1);
+
+    acc0 = fma(values8, w6, acc0);
+    acc0 = fma(values9, w7, acc0);
+    acc0 = fma(values10, w8, acc0);
+    acc1 = fma(values9, w6, acc1);
+    acc1 = fma(values10, w7, acc1);
+    acc1 = fma(values11, w8, acc1);
+
+    acc2 = fma(values4, w0, acc2);
+    acc2 = fma(values5, w1, acc2);
+    acc2 = fma(values6, w2, acc2);
+    acc3 = fma(values5, w0, acc3);
+    acc3 = fma(values6, w1, acc3);
+    acc3 = fma(values7, w2, acc3);
+
+    acc2 = fma(values8, w3, acc2);
+    acc2 = fma(values9, w4, acc2);
+    acc2 = fma(values10, w5, acc2);
+    acc3 = fma(values9, w3, acc3);
+    acc3 = fma(values10, w4, acc3);
+    acc3 = fma(values11, w5, acc3);
+
+    acc2 = fma(values12, w6, acc2);
+    acc2 = fma(values13, w7, acc2);
+    acc2 = fma(values14, w8, acc2);
+    acc3 = fma(values13, w6, acc3);
+    acc3 = fma(values14, w7, acc3);
+    acc3 = fma(values15, w8, acc3);
+
+#if defined(HAS_BIAS)
+    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
+
+    VEC_FLOAT bias_values = VLOAD(VEC_SIZE)(0, (__global float *)biases.ptr);
+
+    acc0 += bias_values;
+    acc1 += bias_values;
+    acc2 += bias_values;
+    acc3 += bias_values;
+#endif // defined(HAS_BIAS)
+
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
+
+    VSTORE(VEC_SIZE)
+    (acc0, 0, (__global float *)(dst_addr + 0 * dst_stride_y));
+    VSTORE(VEC_SIZE)
+    (acc1, 0, (__global float *)(dst_addr + 1 * dst_stride_y));
+
+#if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
+    if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
+#endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
+    {
+        VSTORE(VEC_SIZE)
+        (acc2, 0, (__global float *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
+        VSTORE(VEC_SIZE)
+        (acc3, 0, (__global float *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
+    }
+}
+
+#endif // defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED)
+#endif // defined(VEC_SIZE) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT)

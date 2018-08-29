@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,10 +49,16 @@ public:
     static SingleThreadScheduler &get();
     /** Runs the kernel in the same thread as the caller synchronously.
      *
-     * @param[in] kernel          Kernel to execute.
-     * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+     * @param[in] kernel Kernel to execute.
+     * @param[in] hints  Hints for the scheduler.
      */
-    void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
+    void schedule(ICPPKernel *kernel, const Hints &hints) override;
+
+    /** Will run the workloads sequentially and in order.
+     *
+     * @param[in] workloads Workloads to run
+     */
+    void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
     /** Constructor. */

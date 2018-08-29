@@ -73,7 +73,7 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
                                                 ActivationLayerInfo act_info, GPUTarget gpu_target)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
     if(input->data_layout() == DataLayout::NCHW)
     {
@@ -91,7 +91,7 @@ void CLDepthwiseConvolutionLayer3x3::run()
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer()
     : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _input_reshaped(),
-      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_first_run(true), _is_quantized(false), _original_weights(nullptr)
+      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_prepared(false), _is_quantized(false), _original_weights(nullptr)
 {
 }
 
@@ -99,12 +99,17 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
 
-    const size_t weights_w = weights->info()->dimension(0);
-    const size_t weights_h = weights->info()->dimension(1);
-    const size_t weights_z = weights->info()->dimension(2);
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
 
-    _is_first_run     = true;
+    const size_t weights_w = weights->info()->dimension(idx_w);
+    const size_t weights_h = weights->info()->dimension(idx_h);
+    const size_t weights_z = weights->info()->dimension(idx_c);
+
+    _is_prepared      = false;
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
 
@@ -119,8 +124,8 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     // Output width and height
-    const unsigned int conv_w = output_shape.x();
-    const unsigned int conv_h = output_shape.y();
+    const unsigned int conv_w = output_shape[idx_w];
+    const unsigned int conv_h = output_shape[idx_h];
 
     // Set up intermediate tensors
     const size_t patch_size = weights_w * weights_h + ((append_bias) ? 1 : 0);
@@ -134,6 +139,7 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     _input_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
     _im2col_kernel.set_target(gpu_target);
     _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier);
+    CLScheduler::get().tune_kernel_static(_im2col_kernel);
 
     // Weights reshape configuration
     const TensorShape shape_weights_reshape(patch_size, weights_z);
@@ -149,6 +155,7 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     _v2mm_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out));
     _v2mm_kernel.set_target(gpu_target);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
+    CLScheduler::get().tune_kernel_static(_v2mm_kernel);
     _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
     _vector_to_tensor_kernel.configure(&_v2mm_output, (_is_quantized) ? &_output_reshaped : output, conv_w, conv_h);
 
@@ -180,24 +187,27 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
 
     // Allocate intermediate tensors
     _input_reshaped.allocator()->allocate();
-    _weights_reshaped.allocator()->allocate();
     _v2mm_output.allocator()->allocate();
 }
 
 Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier)
 {
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != weights->dimension(2));
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(idx_c) * depth_multiplier) != weights->dimension(idx_c));
 
     const bool         is_quantized = is_data_type_quantized_asymmetric(input->data_type());
     const bool         append_bias  = (biases != nullptr) && !is_quantized;
     const TensorShape  output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
-    const size_t       weights_w    = weights->dimension(0);
-    const size_t       weights_h    = weights->dimension(1);
-    const size_t       weights_z    = weights->dimension(2);
-    const unsigned int conv_w       = output_shape.x();
-    const unsigned int conv_h       = output_shape.y();
+    const size_t       weights_w    = weights->dimension(idx_w);
+    const size_t       weights_h    = weights->dimension(idx_h);
+    const size_t       weights_z    = weights->dimension(idx_c);
+    const unsigned int conv_w       = output_shape[idx_w];
+    const unsigned int conv_h       = output_shape[idx_h];
     const size_t       patch_size   = weights_w * weights_h + ((append_bias) ? 1 : 0);
     const size_t       conv_size    = conv_w * conv_h;
 
@@ -233,18 +243,7 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
 void CLDepthwiseConvolutionLayer::run()
 {
-    // Run weights reshaping (Runs once for every configure)
-    if(_is_first_run)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        CLScheduler::get().enqueue(_weights_reshape_kernel);
-        CLScheduler::get().enqueue(_v2mm_weights_fill_border);
-        _is_first_run = false;
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     CLScheduler::get().enqueue(_im2col_kernel);
     CLScheduler::get().enqueue(_v2mm_input_fill_border);
@@ -253,5 +252,22 @@ void CLDepthwiseConvolutionLayer::run()
     if(_is_quantized)
     {
         CLScheduler::get().enqueue(_output_stage_kernel);
+    }
+}
+
+void CLDepthwiseConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights reshaping and mark original weights tensor as unused
+        _weights_reshaped.allocator()->allocate();
+        CLScheduler::get().enqueue(_weights_reshape_kernel);
+        CLScheduler::get().enqueue(_v2mm_weights_fill_border);
+        _original_weights->mark_as_unused();
+
+        CLScheduler::get().queue().finish();
+        _is_prepared = true;
     }
 }

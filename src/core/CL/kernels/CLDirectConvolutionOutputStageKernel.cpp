@@ -24,11 +24,11 @@
 #include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerOutputStageKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include <cstddef>
@@ -41,11 +41,13 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16,
                                                          DataType::F32);
 
     if(bias != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(bias);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32, DataType::F16, DataType::F32);
 
         if(is_data_type_quantized_asymmetric(input->data_type()))
@@ -88,44 +90,29 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool         window_changed                    = false;
     unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->data_type());
 
-    // Update processed elements when input is S32 (comes from quantization input)
-    if(input->data_type() == DataType::S32)
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    // Input window
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win, input_access);
+
+    // Bias window
+    if(bias != nullptr)
     {
-        num_elems_processed_per_iteration = 16;
+        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->dimension(1));
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
 
-    // Configure kernel window
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
+    // Output window
     if(output != nullptr && (output->total_size() != 0))
     {
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-        if(bias == nullptr)
-        {
-            window_changed = update_window_and_padding(win, input_access, output_access);
-        }
-        else
-        {
-            AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-            window_changed = update_window_and_padding(win, input_access, output_access, bias_access);
-        }
-
+        window_changed = window_changed || update_window_and_padding(win, output_access);
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
     else
     {
-        if(bias == nullptr)
-        {
-            window_changed = update_window_and_padding(win, input_access);
-        }
-        else
-        {
-            AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-            window_changed = update_window_and_padding(win, input_access, bias_access);
-        }
-
         input_access.set_valid_region(win, ValidRegion(Coordinates(), input->tensor_shape()));
     }
 
@@ -163,9 +150,13 @@ void CLDirectConvolutionLayerOutputStageKernel::configure(ICLTensor *input, cons
     _result_shift                 = result_shift;
     _result_offset_after_shift    = result_offset_after_shift;
 
+    const unsigned int num_elems_accessed_per_iteration = 16 / element_size_from_data_type(input->info()->data_type());
+
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option_if(bias != nullptr, "-DHAS_BIAS");
+    build_opts.add_option("-D" + string_from_data_layout(input->info()->data_layout()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_accessed_per_iteration));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("output_stage_quantized", build_opts.options()));
 
     // Set static kernel arguments
@@ -177,13 +168,13 @@ void CLDirectConvolutionLayerOutputStageKernel::configure(ICLTensor *input, cons
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias == nullptr) ? nullptr : bias->info(), (output == nullptr) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLDirectConvolutionLayerOutputStageKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), bias->clone().get(), output == nullptr ? nullptr : output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), bias == nullptr ? nullptr : bias->clone().get(), output == nullptr ? nullptr : output->clone().get()).first);
 
     return Status{};
 }
@@ -211,7 +202,7 @@ void CLDirectConvolutionLayerOutputStageKernel::run(const Window &window, cl::Co
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }

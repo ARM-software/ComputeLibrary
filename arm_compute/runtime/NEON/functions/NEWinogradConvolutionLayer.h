@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -43,7 +43,7 @@ class ITensor;
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel
- * -# @ref NEWinogradLayerBatchedGEMMKernel
+ * -# @ref NEGEMMAssemblyDispatch
  * -# @ref CPPPermute (three times: weights, input and output)
  *
  * @note  Some Winograd configurations (i.e. F(2x2, 5x5), F(4x4, 5x5)) are supported only with enable_fast_math = true
@@ -74,6 +74,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
@@ -101,9 +102,8 @@ public:
     NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
 
 private:
-    MemoryGroup _memory_group;
-    std::unique_ptr<arm_gemm::GemmCommon<float, float>> _arm_gemm;
-    std::unique_ptr<INEKernel> _gemm_kernel;
+    MemoryGroup                _memory_group;
+    NEGEMMAssemblyDispatch     _asm_glue;
     std::unique_ptr<INEKernel> _transform_input_kernel;
     std::unique_ptr<INEKernel> _transform_output_kernel;
     std::unique_ptr<INEKernel> _transform_weights_kernel;
@@ -118,11 +118,10 @@ private:
     Tensor         _input_nhwc;
     Tensor         _output_nhwc;
     Tensor         _weights_hwio;
-    Tensor         _workspace;
     const ITensor *_input;
     const ITensor *_weights;
     ITensor       *_output;
-    bool           _reshaped_kernel;
+    bool           _is_prepared;
     bool           _is_activationlayer_enabled;
 };
 }

@@ -53,6 +53,7 @@ var dir_99ae3712d1eecd2a93fc4d38b59a99ba =
     [ "TensorDescriptor.h", "_tensor_descriptor_8h.xhtml", [
       [ "TensorDescriptor", "structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml", "structarm__compute_1_1graph_1_1_tensor_descriptor" ]
     ] ],
+    [ "TypeLoader.h", "_type_loader_8h.xhtml", "_type_loader_8h" ],
     [ "TypePrinter.h", "arm__compute_2graph_2_type_printer_8h.xhtml", "arm__compute_2graph_2_type_printer_8h" ],
     [ "Types.h", "arm__compute_2graph_2_types_8h.xhtml", "arm__compute_2graph_2_types_8h" ],
     [ "Utils.h", "arm__compute_2graph_2_utils_8h.xhtml", "arm__compute_2graph_2_utils_8h" ],

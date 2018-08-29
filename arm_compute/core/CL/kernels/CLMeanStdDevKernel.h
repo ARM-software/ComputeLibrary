@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,17 @@ public:
      * @param[out] global_sum_squared (Optional if stddev is not set, required if stddev is set) Keeps global sum of squared pixel values (Buffer size: 1 cl_ulong).
      */
     void configure(const ICLImage *input, float *mean, cl::Buffer *global_sum, float *stddev = nullptr, cl::Buffer *global_sum_squared = nullptr);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLMeanStdDevKernel.
+     *
+     * @param[in] input              Input image info. Data types supported: U8.
+     * @param[in] mean               Input average pixel value.
+     * @param[in] global_sum         Keeps global sum of pixel values.
+     * @param[in] stddev             (Optional) Output standard deviation of pixel values.
+     * @param[in] global_sum_squared (Optional if stddev is not set, required if stddev is set) Keeps global sum of squared pixel values.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, float *mean, cl::Buffer *global_sum, float *stddev = nullptr, cl::Buffer *global_sum_squared = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

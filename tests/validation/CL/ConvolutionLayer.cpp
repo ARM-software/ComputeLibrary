@@ -48,7 +48,6 @@ namespace
 constexpr AbsoluteTolerance<float>  absolute_tolerance_float(0.0001f);    /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_fixed(1.0f);                /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
@@ -57,10 +56,16 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 {
     DataType::F16,
     DataType::F32,
-    DataType::QS8,
-    DataType::QS16,
     DataType::QASYMM8,
 });
+
+/** Grouped CNN data types */
+const auto GroupedCNNDataTypes = framework::dataset::make("DataType",
+{
+    DataType::F16,
+    DataType::F32
+});
+
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
@@ -74,32 +79,32 @@ TEST_SUITE(CL)
 TEST_SUITE(ConvolutionLayer)
 
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-                                                                                                   framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(23U, 27U, 31U, 4U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(17U, 31U, 32U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0)
+                                                                                                   framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(23U, 27U, 31U, 4U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 32U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32)
                                                                                                                                          }),
-                                                                                                   framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(3U, 3U, 31U, 21U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0),
-                                                                                                           TensorInfo(TensorShape(5U, 5U, 32U, 19U), 1, DataType::F32, 0),
-                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0)
+                                                                                                   framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 31U, 21U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 32U, 19U), 1, DataType::F32),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32)
                                                                                                                                            })),
-                                                                                               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32, 0)
+                                                                                               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32),
+                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32)
                                                                                                                                       })),
                                                                                            framework::dataset::make("ConvInfo", { PadStrideInfo(1, 2, 1, 1),
                                                                                                                     PadStrideInfo(1, 2, 1, 1),
@@ -156,16 +161,13 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    ActivationFunctionsDataset),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     auto bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
     // Create tensors
-    CLTensor src     = create_tensor<CLTensor>(input_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    CLTensor weights = create_tensor<CLTensor>(weights_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    CLTensor bias    = create_tensor<CLTensor>(bias_shape, bias_data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    CLTensor src     = create_tensor<CLTensor>(input_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    CLTensor weights = create_tensor<CLTensor>(weights_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    CLTensor bias    = create_tensor<CLTensor>(bias_shape, bias_data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -207,7 +209,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<half>, framework:
                                                                                                                  framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                  framework::dataset::make("DataType",
                                                                                                                          DataType::F16)),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                  ActivationFunctionsDataset))
 {
     // Validate output
@@ -218,13 +220,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<half>, framework:
                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::F16)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 
@@ -232,7 +234,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<float>, framework
                                                                                                                   framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::F32)),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                   ActivationFunctionsDataset))
 {
     // Validate output
@@ -243,69 +245,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<float>, framework
                                                                                                                         framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                         framework::dataset::make("DataType",
                                                                                                                                 DataType::F32)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, absolute_tolerance_float);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
-
-template <typename T>
-using CLGEMMConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-// We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 4, 7)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 4, 7)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
@@ -320,29 +267,125 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 0) })),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // GEMMConvolutionLayer
+
+template <typename T>
+using CLGEMMGroupedConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+
+TEST_SUITE(GroupedGEMMConvolutionLayer)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallGroupedConvolutionLayerDataset(), datasets::LargeGroupedConvolutionLayerDataset()),
+                                                                           GroupedCNNDataTypes),
+                                                                   ActivationFunctionsDataset),
+               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
+{
+    ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
+
+    // The number of groups is calculated dividing the number of input channels of the input tensor by the number of input channels of the weights shape
+    const int num_groups = input_shape[2] / weights_shape[2];
+
+    // Create tensors
+    CLTensor src     = create_tensor<CLTensor>(input_shape, data_type);
+    CLTensor weights = create_tensor<CLTensor>(weights_shape, data_type, 1);
+    CLTensor bias    = create_tensor<CLTensor>(bias_shape, data_type, 1);
+    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type, 1);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLGEMMConvolutionLayer conv;
+    conv.configure(&src, &weights, &bias, &dst, info, WeightsInfo(), dilation, act_info, num_groups);
+
+    // Validate valid region
+    const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
+    const ValidRegion weights_valid_region = shape_to_valid_region(weights_shape);
+    const ValidRegion bias_valid_region    = shape_to_valid_region(bias_shape);
+    const ValidRegion dst_valid_region     = shape_to_valid_region(output_shape);
+
+    validate(src.info()->valid_region(), src_valid_region);
+    validate(weights.info()->valid_region(), weights_valid_region);
+    validate(bias.info()->valid_region(), bias_valid_region);
+    validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate padding
+}
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
+                       framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeGroupedConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                       ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                        ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeGroupedConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                      ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // GroupedGEMMConvolutionLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

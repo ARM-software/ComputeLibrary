@@ -26,13 +26,13 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 
 using namespace arm_compute;
 
@@ -40,9 +40,9 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *accum, const ITensorInfo *biases)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(accum);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(biases, accum);
     ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() != 1);
 
     return Status{};
@@ -52,7 +52,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *accum, ITen
                                                         unsigned int &num_elems_processed_per_iteration)
 {
     // Select the vector size to use (8 for Bifrost; 16 for Midgard).
-    num_elems_processed_per_iteration = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) ? 8 : 16;
+    num_elems_processed_per_iteration = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) ? 8 : 16;
 
     // Configure kernel window
     Window win = calculate_max_window(*accum, Steps(num_elems_processed_per_iteration));
@@ -88,14 +88,12 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     // Configure kernel window
     auto win_config = validate_and_configure_window(accum->info(), biases->info(), gpu_target, vector_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Add build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type()));
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
-    build_opts.add_option_if(is_data_type_fixed_point(accum->info()->data_type()),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts.options()));
@@ -128,7 +126,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::run(const Window &window, cl::CommandQu
         add_2D_tensor_argument(idx, _accum, accum_slice);
         add_1D_tensor_argument(idx, _biases, biases_slice);
 
-        enqueue(queue, *this, accum_slice, _lws_hint);
+        enqueue(queue, *this, accum_slice, lws_hint());
     }
     while(window.slide_window_slice_2D(accum_slice));
 }

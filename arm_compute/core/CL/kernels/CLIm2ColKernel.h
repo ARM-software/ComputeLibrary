@@ -69,57 +69,45 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
      * @param[out] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
      *                         while every dimension above represents a batch. Data types supported: Same as @p input
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U));
+    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U),
+                   unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLIm2ColKernel
      *
      * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
      * @param[in] output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
      *                        while every dimension above represents a batch. Data types supported: Same as @p input
      * @param[in] kernel_dims The kernel dimensions (width and height).
      * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias    In case biases are provided expands the matrix with 1.
      * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U));
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U),
+                           unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
-    /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)
-     *
-     * @param[in]     window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     * @param[in,out] queue  Command queue on which to enqueue the kernel.
-     */
-    void run_reduced(const Window &window, cl::CommandQueue &queue);
-    /** run the generic convolution layer input reshape kernel
-     *
-     * @param[in]     window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     * @param[in,out] queue  Command queue on which to enqueue the kernel.
-     */
-    void run_generic(const Window &window, cl::CommandQueue &queue);
-
-    /** Common signature for the kernel to run */
-    using Im2ColFunction = void (CLIm2ColKernel::*)(const Window &, cl::CommandQueue &);
-
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;
-    unsigned int   _num_elems_processed_per_iteration;
-    Im2ColFunction _run_func;
-    Size2D         _kernel_dims;
+    unsigned int  _num_elems_processed_per_iteration;
+    Size2D        _kernel_dims;
+    PadStrideInfo _conv_info;
+    unsigned int  _num_groups;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */

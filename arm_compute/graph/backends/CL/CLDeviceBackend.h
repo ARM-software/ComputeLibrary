@@ -54,6 +54,7 @@ public:
     // Inherited overridden methods
     void initialize_backend() override;
     void setup_backend_context(GraphContext &ctx) override;
+    void release_backend_context(GraphContext &ctx) override;
     bool                           is_backend_supported() override;
     IAllocator                    *backend_allocator() override;
     std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
@@ -63,8 +64,10 @@ public:
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
 
 private:
-    CLTuner           _tuner;     /**< CL kernel tuner */
-    CLBufferAllocator _allocator; /**< CL buffer affinity allocator */
+    int                                _context_count; /**< Counts how many contexts are currently using the backend */
+    CLTuner                            _tuner;         /**< CL kernel tuner */
+    std::unique_ptr<CLBufferAllocator> _allocator;     /**< CL buffer affinity allocator */
+    std::string                        _tuner_file;    /**< Filename to load/store the tuner's values from */
 };
 } // namespace backends
 } // namespace graph

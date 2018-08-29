@@ -23,9 +23,12 @@
  */
 #include "arm_compute/runtime/TensorAllocator.h"
 
+#include "arm_compute/core/utils/misc/Utility.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryRegion.h"
+
 #include "support/ToolchainSupport.h"
+
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -80,6 +83,22 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     t4.allocator()->free();
     ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t4.buffer() == nullptr, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(AlignedAlloc, framework::DatasetMode::ALL)
+{
+    // Init tensor info
+    TensorInfo   info(TensorShape(24U, 16U, 3U), 1, DataType::F32);
+    const size_t requested_alignment = 1024;
+
+    Tensor t;
+    t.allocator()->init(info, requested_alignment);
+    t.allocator()->allocate();
+
+    ARM_COMPUTE_EXPECT(t.buffer() != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t.allocator()->alignment() == requested_alignment, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(arm_compute::utility::check_aligned(reinterpret_cast<void *>(t.buffer()), requested_alignment),
+                       framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END()

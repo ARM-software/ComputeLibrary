@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,14 @@ void CLDepthwiseSeparableConvolutionLayer::configure(ICLTensor *input, const ICL
 
 void CLDepthwiseSeparableConvolutionLayer::run()
 {
+    prepare();
+
     _depthwise_conv.run();
     _pointwise_conv.run();
+}
+
+void CLDepthwiseSeparableConvolutionLayer::prepare()
+{
+    _depthwise_conv.prepare();
+    _pointwise_conv.prepare();
 }

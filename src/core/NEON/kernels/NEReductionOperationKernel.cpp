@@ -134,7 +134,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const TensorShape output_shape = calculate_output_shape(input->tensor_shape(), axis);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, output_shape, 1, input->data_type());
 
     unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());
 

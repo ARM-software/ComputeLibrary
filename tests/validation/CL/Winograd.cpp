@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -51,8 +52,88 @@ namespace validation
 {
 namespace
 {
+// *INDENT-OFF*
+// clang-format off
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
+
+// Input transform
+const auto SmallWinogradInputTransformDatasetNCHW =
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset2x2_3x3(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset2x1_3x1(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x2_1x3(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_3x3(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_3x1(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x4_1x3(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_5x5(),
+           framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_5x1(),
+                                      datasets::SmallWinogradInputTransformDataset1x4_1x5()))))))));
+
+const auto SmallWinogradInputTransformDatasetNHWC = framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_3x3(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_3x1(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x4_1x3(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_5x5(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_5x1(),
+                                                                               datasets::SmallWinogradInputTransformDataset1x4_1x5())))));
+
+const auto LargeWinogradInputTransformDatasetNCHW =
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x2_3x3(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x1_3x1(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x2_1x3(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_3x1(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset1x4_1x3(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_5x5(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_5x1(),
+                                      datasets::LargeWinogradInputTransformDataset1x4_1x5()))))))));
+
+const auto LargeWinogradInputTransformDatasetNHWC =
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_5x5(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_5x1(),
+                                      datasets::LargeWinogradInputTransformDataset1x4_1x5())));
+
+// Filter transform
+const auto SmallWinogradFilterTransformDatasetNCHW =
+           framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U), Size2D(4U, 1U) })),
+           framework::dataset::concat(combine(datasets::Small1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U), Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+
+const auto SmallWinogradFilterTransformDatasetNHWC =
+           framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+           framework::dataset::concat(combine(datasets::Small1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+
+const auto LargeWinogradFilterTransformDatasetNCHW =
+           framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U), Size2D(4U, 1U) })),
+           framework::dataset::concat(combine(datasets::Large1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U), Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+
+const auto LargeWinogradFilterTransformDatasetNHWC =
+           framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+           framework::dataset::concat(combine(datasets::Large1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+
+// Output transform
+const auto SmallWinogradOutputTransformDatasetNCHW = datasets::SmallWinogradOutputTransformDatasetNCHW();
+
+const auto SmallWinogradOutputTransformDatasetNHWC = datasets::SmallWinogradOutputTransformDatasetNHWC();
+
+const auto LargeWinogradOutputTransformDatasetNCHW = datasets::LargeWinogradOutputTransformDatasetNCHW();
+
+const auto LargeWinogradOutputTransformDatasetNHWC = datasets::LargeWinogradOutputTransformDatasetNHWC();
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -61,9 +142,6 @@ TEST_SUITE(CL)
 TEST_SUITE(Winograd)
 
 TEST_SUITE(InputTransform)
-
-// *INDENT-OFF*
-// clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(53U, 21U, 5U, 3U), 1, DataType::F16),     // F16 not supported
@@ -97,20 +175,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 {
     ARM_COMPUTE_EXPECT(bool(CLWinogradInputTransform::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), winograd_info)) == expected, framework::LogLevel::ERRORS);
 }
-// clang-format on
-// *INDENT-ON*
 
 using CLWinogradInputTransformFixture = WinogradInputTransformValidationFixture<CLTensor, CLAccessor, CLWinogradInputTransform, float>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallWinogradInputTransformDataset(), datasets::LargeWinogradInputTransformDataset()),
+TEST_SUITE(NCHW)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(SmallWinogradInputTransformDatasetNCHW,
+                                                                                                      LargeWinogradInputTransformDatasetNCHW),
                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                   framework::dataset::make("DataType", { DataType::F32 })),
+                                                                           framework::dataset::make("DataType", { DataType::F32 })),
                shape_in, winograd_info, data_layout, data_type)
 {
-    TensorShape shape_out = compute_winograd_input_transform_shape(TensorInfo(shape_in, 1, data_type), winograd_info);
+    TensorInfo  tensor_info_in(shape_in, 1, data_type);
+    tensor_info_in.set_data_layout(data_layout);
+
+    TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
 
     // Create tensors
-    CLTensor in  = create_tensor<CLTensor>(shape_in, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor in  = create_tensor<CLTensor>(shape_in, data_type, 1, QuantizationInfo(), data_layout);
     CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
 
     ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -123,24 +204,70 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     winograd_input_transform.configure(&in, &out, winograd_info);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallWinogradInputTransformDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(combine(SmallWinogradInputTransformDatasetNCHW,
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                             framework::dataset::make("DataType", { DataType::F32 })))
+                                                                                                                     framework::dataset::make("DataType", { DataType::F32 })))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradInputTransformDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(LargeWinogradInputTransformDatasetNCHW,
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                           framework::dataset::make("DataType", { DataType::F32 })))
+                                                                                                                   framework::dataset::make("DataType", { DataType::F32 })))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+TEST_SUITE_END() // NCHW
+
+TEST_SUITE(NHWC)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(SmallWinogradInputTransformDatasetNHWC,
+                                                                                                      LargeWinogradInputTransformDatasetNHWC),
+                                                                           framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                           framework::dataset::make("DataType", { DataType::F32 })),
+               shape_in, winograd_info, data_layout, data_type)
+{
+    TensorShape shape_in_nhwc(shape_in);
+
+    // Convert the shape to NHWC
+    permute(shape_in_nhwc, PermutationVector(2U, 0U, 1U));
+
+    // TensorInfo
+    TensorInfo  tensor_info_in(shape_in_nhwc, 1, data_type);
+    tensor_info_in.set_data_layout(data_layout);
+
+    TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
+
+    // Create tensors
+    CLTensor in  = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
+
+    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLWinogradInputTransform winograd_input_transform;
+
+    // Configure the function
+    winograd_input_transform.configure(&in, &out, winograd_info);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(combine(SmallWinogradInputTransformDatasetNHWC,
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                     framework::dataset::make("DataType", { DataType::F32 })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(LargeWinogradInputTransformDatasetNHWC,
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                                                                                   framework::dataset::make("DataType", { DataType::F32 })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // NHWC
 TEST_SUITE_END() // InputTransform
 
 TEST_SUITE(FilterTransform)
-// *INDENT-OFF*
-// clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(3U, 3U, 5U, 3U), 1, DataType::F16),     // F16 not supported
@@ -174,25 +301,25 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 {
     ARM_COMPUTE_EXPECT(bool(CLWinogradFilterTransformKernel::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), winograd_info)) == expected, framework::LogLevel::ERRORS);
 }
-// clang-format on
-// *INDENT-ON*
 
 using CLWinogradFilterTransform        = CLSynthetizeFunctionWithZeroConstantBorder<CLWinogradFilterTransformKernel, 0>;
 using CLWinogradFilterTransformFixture = WinogradFilterTransformValidationFixture<CLTensor, CLAccessor, CLWinogradFilterTransform, float>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::concat(datasets::Small3x3Shapes(), datasets::Large3x3Shapes()),
-                                                                                   framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
-                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                   framework::dataset::make("DataType", { DataType::F32 })),
+TEST_SUITE(NCHW)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
+               combine(combine(framework::dataset::concat(SmallWinogradFilterTransformDatasetNCHW,
+                                                          LargeWinogradFilterTransformDatasetNCHW),
+                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                          framework::dataset::make("DataType", { DataType::F32 })),
                shape_a, output_tile, data_layout, data_type)
 {
-    WinogradInfo winograd_info(output_tile, Size2D(shape_a[0], shape_a[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, DataLayout::NCHW /* Not needed */);
+    WinogradInfo winograd_info(output_tile, Size2D(shape_a[0], shape_a[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, data_layout /* Not needed */);
 
     TensorShape shape_b = compute_winograd_filter_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
 
     // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_a, data_type, 1, 0, QuantizationInfo(), data_layout);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor a = create_tensor<CLTensor>(shape_a, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -202,33 +329,79 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     winograd_filter_transform.configure(&a, &b, winograd_info);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL,
-                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Small3x3Shapes(),
-                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                                                  combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(SmallWinogradFilterTransformDatasetNCHW,
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                               framework::dataset::make("DataType", { DataType::F32 })))
+                                       framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Large3x3Shapes(),
-                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                                                  combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                       combine(combine(LargeWinogradFilterTransformDatasetNCHW,
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                               framework::dataset::make("DataType", { DataType::F32 })))
+                                       framework::dataset::make("DataType", { DataType::F32 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // NCHW
+
+TEST_SUITE(NHWC)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
+               combine(combine(framework::dataset::concat(SmallWinogradFilterTransformDatasetNHWC,
+                                                          LargeWinogradFilterTransformDatasetNHWC),
+                                                          framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                                          framework::dataset::make("DataType", { DataType::F32 })),
+               shape_in, output_tile, data_layout, data_type)
+{
+    TensorShape shape_in_nhwc(shape_in);
+
+    // Convert the shape to NHWC
+    permute(shape_in_nhwc, PermutationVector(2U, 0U, 1U));
+
+    // TensorInfo
+    TensorInfo  tensor_info_in(shape_in_nhwc, 1, data_type);
+    tensor_info_in.set_data_layout(data_layout);
+
+    WinogradInfo winograd_info(output_tile, Size2D(shape_in[0], shape_in[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, data_layout /* Not needed */);
+
+    TensorShape shape_b = compute_winograd_filter_transform_shape(tensor_info_in, winograd_info);
+
+    // Create tensors
+    CLTensor a = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
+
+    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLWinogradFilterTransform winograd_filter_transform;
+    winograd_filter_transform.configure(&a, &b, winograd_info);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(SmallWinogradFilterTransformDatasetNHWC,
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                       framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(LargeWinogradFilterTransformDatasetNHWC,
+                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })),
+                                       framework::dataset::make("DataType", { DataType::F32 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // NHWC
 TEST_SUITE_END() // FilterTransform
 
 TEST_SUITE(OutputTransform)
-// *INDENT-OFF*
-// clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(512U, 49U, 16U, 5U), 1, DataType::F16),      // F16 not supported
@@ -279,21 +452,21 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 {
     ARM_COMPUTE_EXPECT(bool(CLWinogradOutputTransformKernel::validate(&input_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), winograd_info)) == expected, framework::LogLevel::ERRORS);
 }
-// clang-format on
-// *INDENT-ON*
 
 using CLWinogradOutputTransform        = CLSynthetizeFunctionWithZeroConstantBorder<CLWinogradOutputTransformKernel, 0>;
 using CLWinogradOutputTransformFixture = WinogradOutputTransformValidationFixture<CLTensor, CLAccessor, CLWinogradOutputTransform, float>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallWinogradOutputTransformDataset(), datasets::LargeWinogradOutputTransformDataset()),
-                                                                   framework::dataset::make("DataType", { DataType::F32 })),
+TEST_SUITE(NCHW)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(SmallWinogradOutputTransformDatasetNCHW,
+                                                                                              LargeWinogradOutputTransformDatasetNCHW),
+                                                                                              framework::dataset::make("DataType", { DataType::F32 })),
                shape_a, winograd_info, data_type)
 {
     TensorShape shape_b = compute_winograd_output_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
 
     // Create tensors
     CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -303,23 +476,62 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     winograd_output_transform.configure(&a, nullptr, &b, winograd_info);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixture, framework::DatasetMode::ALL, combine(datasets::SmallWinogradOutputTransformDataset(), framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixture, framework::DatasetMode::ALL,
+                       combine(SmallWinogradOutputTransformDatasetNCHW,
+                               framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeWinogradOutputTransformDataset(), framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixture, framework::DatasetMode::NIGHTLY,
+                       combine(LargeWinogradOutputTransformDatasetNCHW,
+                               framework::dataset::make("DataType", { DataType::F32 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // NCHW
+
+TEST_SUITE(NHWC)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(SmallWinogradOutputTransformDatasetNHWC,
+                                                                                              LargeWinogradOutputTransformDatasetNHWC),
+                                                                                              framework::dataset::make("DataType", { DataType::F32 })),
+               shape_a, winograd_info, data_type)
+{
+    TensorShape shape_b = compute_winograd_output_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
+
+    // Create tensors
+    CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
+
+    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLWinogradOutputTransform winograd_output_transform;
+    winograd_output_transform.configure(&a, nullptr, &b, winograd_info);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixture, framework::DatasetMode::ALL,
+                       combine(SmallWinogradOutputTransformDatasetNHWC,
+                               framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixture, framework::DatasetMode::NIGHTLY,
+                       combine(LargeWinogradOutputTransformDatasetNHWC,
+                               framework::dataset::make("DataType", { DataType::F32 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END() // NHWC
 TEST_SUITE_END() // OutputTransform
 
 TEST_SUITE(ConvolutionLayer)
-// *INDENT-OFF*
-// clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                 framework::dataset::make("InputInfo", {
                                                                                         TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F16),     // FP16 not supported
@@ -361,52 +573,147 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 {
     ARM_COMPUTE_EXPECT(bool(CLWinogradConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info)) == expected, framework::LogLevel::ERRORS);
 }
-// clang-format on
-// *INDENT-ON*
 
 using CLWinogradConvolutionLayerFastMathFixture = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
 TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 TEST_SUITE_END() // Conv3x3
 
-TEST_SUITE(Conv5x5)
+TEST_SUITE(Conv3x1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+TEST_SUITE_END() // Conv3x1
+
+TEST_SUITE(Conv1x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x3Dataset(),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+TEST_SUITE_END() // Conv1x3
+
+TEST_SUITE(Conv5x5)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 TEST_SUITE_END() // Conv5x5
 
-TEST_SUITE_END() // ConvolutionLayer
+TEST_SUITE(Conv5x1)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+TEST_SUITE_END() // Conv5x1
+
+TEST_SUITE(Conv1x5)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
+}
+TEST_SUITE_END() // Conv1x5
+
+TEST_SUITE_END() // ConvolutionLayer
 TEST_SUITE_END() // Winograd
 TEST_SUITE_END() // CL
 } // namespace validation

@@ -62,6 +62,14 @@ public:
      * @param[in]  conv_h The converted tensor's height.
      */
     void configure(const ITensor *input, ITensor *output, size_t conv_w, size_t conv_h);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseVectorToTensorKernel
+     *
+     * @param[in] input  The input vector to convert. Data type supported: QASYMM8/S32/F32.
+     * @param[in] output The output tensor. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: same as @p input.
+     * @param[in] conv_w The converted tensor's width.
+     * @param[in] conv_h The converted tensor's height.
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

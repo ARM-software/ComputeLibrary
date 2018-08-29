@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ class ICLTensor;
 
 /** Basic function to execute flatten. This function calls the following OpenCL kernel:
 *
-* -# @ref CLIm2ColKernel
+* -# @ref CLFlattenLayerKernel
 *
 */
 class CLFlattenLayer : public ICLSimpleFunction
@@ -41,11 +41,22 @@ class CLFlattenLayer : public ICLSimpleFunction
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  First input tensor to flatten with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
-     *             w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
+     *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLTranspose
+     *
+     * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
+     *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
+     *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
 

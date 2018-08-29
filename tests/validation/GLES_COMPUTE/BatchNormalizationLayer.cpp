@@ -67,9 +67,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
-
     TensorShape src_dst_shapes = shape0;
     if(data_layout == DataLayout::NHWC)
     {
@@ -77,12 +74,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     }
 
     // Create tensors
-    GCTensor src   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    GCTensor dst   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    GCTensor mean  = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
-    GCTensor var   = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
-    GCTensor beta  = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
-    GCTensor gamma = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
+    GCTensor src   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    GCTensor dst   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    GCTensor mean  = create_tensor<GCTensor>(shape1, dt, 1);
+    GCTensor var   = create_tensor<GCTensor>(shape1, dt, 1);
+    GCTensor beta  = create_tensor<GCTensor>(shape1, dt, 1);
+    GCTensor gamma = create_tensor<GCTensor>(shape1, dt, 1);
 
     // Create and Configure function
     GCBatchNormalizationLayer norm;

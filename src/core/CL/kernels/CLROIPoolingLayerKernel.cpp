@@ -26,13 +26,13 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include <cmath>
@@ -49,13 +49,14 @@ CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
 void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
     ARM_COMPUTE_ERROR_ON(rois->num_values() == 0);
 
     // Output auto inizialitation if not yet initialized
     TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2), rois->num_values());
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pool_info.pooled_width()) || (output->info()->dimension(1) != pool_info.pooled_height()));
@@ -100,7 +101,7 @@ void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLROIArra
 
     update_window_and_padding(window, input_access, output_access);
     output_access.set_valid_region(window, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 }
 
 void CLROIPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)

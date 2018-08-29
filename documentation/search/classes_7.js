@@ -72,5 +72,6 @@ var searchData=
   ['graphbuilder',['GraphBuilder',['../classarm__compute_1_1graph_1_1_graph_builder.xhtml',1,'arm_compute::graph']]],
   ['graphconfig',['GraphConfig',['../structarm__compute_1_1graph_1_1_graph_config.xhtml',1,'arm_compute::graph']]],
   ['graphcontext',['GraphContext',['../classarm__compute_1_1graph_1_1_graph_context.xhtml',1,'arm_compute::graph']]],
-  ['graphmanager',['GraphManager',['../classarm__compute_1_1graph_1_1_graph_manager.xhtml',1,'arm_compute::graph']]]
+  ['graphmanager',['GraphManager',['../classarm__compute_1_1graph_1_1_graph_manager.xhtml',1,'arm_compute::graph']]],
+  ['groupedconvolutionmutator',['GroupedConvolutionMutator',['../classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml',1,'arm_compute::graph']]]
 ];

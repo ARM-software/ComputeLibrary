@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -183,9 +183,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a79e20eacb1e963e24a21ebd7369effd7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">PaddingSize</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">padding</a> () const override</td></tr>
 <tr class="memdesc:a79e20eacb1e963e24a21ebd7369effd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available padding around the tensor.  <a href="#a79e20eacb1e963e24a21ebd7369effd7">More...</a><br /></td></tr>
 <tr class="separator:a79e20eacb1e963e24a21ebd7369effd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35ccf2eb0c18a15feab2db98b307b78b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">fixed_point_position</a> () const override</td></tr>
-<tr class="memdesc:a35ccf2eb0c18a15feab2db98b307b78b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of bits for the fractional part.  <a href="#a35ccf2eb0c18a15feab2db98b307b78b">More...</a><br /></td></tr>
-<tr class="separator:a35ccf2eb0c18a15feab2db98b307b78b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac74736e3863207232a23b7181c1d0f44"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">quantization_info</a> () const override</td></tr>
 <tr class="memdesc:ac74736e3863207232a23b7181c1d0f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quantization info in case of asymmetric quantized type.  <a href="#ac74736e3863207232a23b7181c1d0f44">More...</a><br /></td></tr>
 <tr class="separator:ac74736e3863207232a23b7181c1d0f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -235,8 +232,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00082">82</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    : _tensor{ tensor }</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;{</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00081">81</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    : _tensor{ tensor }</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;{</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a1dc30c7bdc2d650f29ed45ec5110a0c6"></a>
@@ -316,10 +313,10 @@ Public Member Functions</h2></td></tr>
 <p>Get the tensor data. </p>
 <dl class="section return"><dt>Returns</dt><dd>a constant pointer to the tensor data. </dd></dl>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00142">142</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00136">136</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">Tensor::buffer()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;{</div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">buffer</a>();</div><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_ace7b855e3c647d29cc37a1ce147901dc"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">arm_compute::Tensor::buffer</a></div><div class="ttdeci">uint8_t * buffer() const override</div><div class="ttdoc">Interface to be implemented by the child class to return a pointer to CPU memory. ...</div></div>
+<div class="fragment"><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;{</div><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">buffer</a>();</div><div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_ace7b855e3c647d29cc37a1ce147901dc"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">arm_compute::Tensor::buffer</a></div><div class="ttdeci">uint8_t * buffer() const override</div><div class="ttdoc">Interface to be implemented by the child class to return a pointer to CPU memory. ...</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -347,10 +344,10 @@ Public Member Functions</h2></td></tr>
 <p>Get the tensor data. </p>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to the tensor data. </dd></dl>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00147">147</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00141">141</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">Tensor::buffer()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;{</div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">buffer</a>();</div><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_ace7b855e3c647d29cc37a1ce147901dc"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">arm_compute::Tensor::buffer</a></div><div class="ttdeci">uint8_t * buffer() const override</div><div class="ttdoc">Interface to be implemented by the child class to return a pointer to CPU memory. ...</div></div>
+<div class="fragment"><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;{</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">buffer</a>();</div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_ace7b855e3c647d29cc37a1ce147901dc"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#ace7b855e3c647d29cc37a1ce147901dc">arm_compute::Tensor::buffer</a></div><div class="ttdeci">uint8_t * buffer() const override</div><div class="ttdoc">Interface to be implemented by the child class to return a pointer to CPU memory. ...</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -380,10 +377,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a367b5090ab432bc7de2c32369e087ab1">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00107">107</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00106">106</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1">ITensorInfo::data_layout()</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;{</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1">data_layout</a>();</div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
+<div class="fragment"><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;{</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1">data_layout</a>();</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a367b5090ab432bc7de2c32369e087ab1"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1">arm_compute::ITensorInfo::data_layout</a></div><div class="ttdeci">virtual DataLayout data_layout() const =0</div><div class="ttdoc">Get the data layout of the tensor. </div></div>
 </div><!-- fragment -->
 </div>
@@ -414,10 +411,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a7cfb31af63202568efef5214acfbf3ba">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00112">112</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00111">111</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">ITensorInfo::data_type()</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;{</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">data_type</a>();</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7cfb31af63202568efef5214acfbf3ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">arm_compute::ITensorInfo::data_type</a></div><div class="ttdeci">virtual DataType data_type() const =0</div><div class="ttdoc">Data type used for each element of the tensor. </div></div>
+<div class="fragment"><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;{</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">data_type</a>();</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7cfb31af63202568efef5214acfbf3ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">arm_compute::ITensorInfo::data_type</a></div><div class="ttdeci">virtual DataType data_type() const =0</div><div class="ttdoc">Data type used for each element of the tensor. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -448,44 +445,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#aa459796b5489eca8a9160cb5dcf1a103">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">ITensorInfo::element_size()</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;{</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">element_size</a>();</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_aa459796b5489eca8a9160cb5dcf1a103"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">arm_compute::ITensorInfo::element_size</a></div><div class="ttdeci">virtual size_t element_size() const =0</div><div class="ttdoc">Element size in bytes calculated as data_size() * num_channels() </div></div>
-<div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
-</div><!-- fragment -->
-</div>
-</div>
-<a class="anchor" id="a35ccf2eb0c18a15feab2db98b307b78b"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">int fixed_point_position </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Number of bits for the fractional part. </p>
-<dl class="section return"><dt>Returns</dt><dd>the number of bits for the fractional part. </dd></dl>
-
-<p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#ab21a362740e892b6e913bd8db03b0e67">IAccessor</a>.</p>
-
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00132">132</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
-
-<p>References <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67">ITensorInfo::fixed_point_position()</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;{</div><div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67">fixed_point_position</a>();</div><div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_ab21a362740e892b6e913bd8db03b0e67"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67">arm_compute::ITensorInfo::fixed_point_position</a></div><div class="ttdeci">virtual int fixed_point_position() const =0</div><div class="ttdoc">Fixed point position used when the tensor data type is QS8 or QS16. </div></div>
+<div class="fragment"><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;{</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">element_size</a>();</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_aa459796b5489eca8a9160cb5dcf1a103"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">arm_compute::ITensorInfo::element_size</a></div><div class="ttdeci">virtual size_t element_size() const =0</div><div class="ttdoc">Element size in bytes calculated as data_size() * num_channels() </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -516,10 +479,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00102">102</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00101">101</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">ITensorInfo::format()</a>, and <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;{</div><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">format</a>();</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a57360dd9ca408834c0ea1a8ef70a11f4"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">arm_compute::ITensorInfo::format</a></div><div class="ttdeci">virtual Format format() const =0</div><div class="ttdoc">Colour format of the image. </div></div>
+<div class="fragment"><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;{</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">format</a>();</div><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a57360dd9ca408834c0ea1a8ef70a11f4"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">arm_compute::ITensorInfo::format</a></div><div class="ttdeci">virtual Format format() const =0</div><div class="ttdoc">Colour format of the image. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -550,10 +513,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#ac492280ef2d7889f1226d34743b74459">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00117">117</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00116">116</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ad7829ae79223ab87f9da4c0bd7d229ba">ITensorInfo::num_channels()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;{</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#ad7829ae79223ab87f9da4c0bd7d229ba">num_channels</a>();</div><div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_ad7829ae79223ab87f9da4c0bd7d229ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#ad7829ae79223ab87f9da4c0bd7d229ba">arm_compute::ITensorInfo::num_channels</a></div><div class="ttdeci">virtual size_t num_channels() const =0</div><div class="ttdoc">The number of channels for each tensor element. </div></div>
+<div class="fragment"><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;{</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#ad7829ae79223ab87f9da4c0bd7d229ba">num_channels</a>();</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_ad7829ae79223ab87f9da4c0bd7d229ba"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#ad7829ae79223ab87f9da4c0bd7d229ba">arm_compute::ITensorInfo::num_channels</a></div><div class="ttdeci">virtual size_t num_channels() const =0</div><div class="ttdoc">The number of channels for each tensor element. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -584,11 +547,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a7596bc2928432a0ac2271bc9184d692e">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00122">122</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00121">121</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>, and <a class="el" href="_tensor_shape_8h_source.xhtml#l00157">TensorShape::total_size()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;{</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">tensor_shape</a>().<a class="code" href="classarm__compute_1_1_tensor_shape.xhtml#a4eaec01ba2c12093db609d1034ad0bc1">total_size</a>();</div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7c66505457d00ece3aa4b34cab80757d"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">arm_compute::ITensorInfo::tensor_shape</a></div><div class="ttdeci">virtual const TensorShape &amp; tensor_shape() const =0</div><div class="ttdoc">Size for each dimension of the tensor. </div></div>
-<div class="ttc" id="classarm__compute_1_1_tensor_shape_xhtml_a4eaec01ba2c12093db609d1034ad0bc1"><div class="ttname"><a href="classarm__compute_1_1_tensor_shape.xhtml#a4eaec01ba2c12093db609d1034ad0bc1">arm_compute::TensorShape::total_size</a></div><div class="ttdeci">size_t total_size() const </div><div class="ttdoc">Collapses all dimensions to a single linear total size. </div><div class="ttdef"><b>Definition:</b> <a href="_tensor_shape_8h_source.xhtml#l00157">TensorShape.h:157</a></div></div>
+<p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>, and <a class="el" href="_tensor_shape_8h_source.xhtml#l00171">TensorShape::total_size()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;{</div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">tensor_shape</a>().<a class="code" href="classarm__compute_1_1_tensor_shape.xhtml#a4eaec01ba2c12093db609d1034ad0bc1">total_size</a>();</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7c66505457d00ece3aa4b34cab80757d"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">arm_compute::ITensorInfo::tensor_shape</a></div><div class="ttdeci">virtual const TensorShape &amp; tensor_shape() const =0</div><div class="ttdoc">Size for each dimension of the tensor. </div></div>
+<div class="ttc" id="classarm__compute_1_1_tensor_shape_xhtml_a4eaec01ba2c12093db609d1034ad0bc1"><div class="ttname"><a href="classarm__compute_1_1_tensor_shape.xhtml#a4eaec01ba2c12093db609d1034ad0bc1">arm_compute::TensorShape::total_size</a></div><div class="ttdeci">size_t total_size() const </div><div class="ttdoc">Collapses all dimensions to a single linear total size. </div><div class="ttdef"><b>Definition:</b> <a href="_tensor_shape_8h_source.xhtml#l00171">TensorShape.h:171</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -626,10 +589,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a583a35e4fd72f072a6b76ce58c2e3998">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00152">152</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00146">146</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;{</div><div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a>(coord);</div><div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a48c7a05cc63f541d732250e39339cee2"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">arm_compute::ITensor::ptr_to_element</a></div><div class="ttdeci">uint8_t * ptr_to_element(const Coordinates &amp;id) const </div><div class="ttdoc">Return a pointer to the element at the passed coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="_i_tensor_8h_source.xhtml#l00063">ITensor.h:63</a></div></div>
+<div class="fragment"><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;{</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a>(coord);</div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a48c7a05cc63f541d732250e39339cee2"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">arm_compute::ITensor::ptr_to_element</a></div><div class="ttdeci">uint8_t * ptr_to_element(const Coordinates &amp;id) const </div><div class="ttdoc">Return a pointer to the element at the passed coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="_i_tensor_8h_source.xhtml#l00063">ITensor.h:63</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -666,10 +629,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a9fd1359f2b5ea45a31bd79b381281eb4">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00157">157</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00151">151</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;{</div><div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a>(coord);</div><div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a48c7a05cc63f541d732250e39339cee2"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">arm_compute::ITensor::ptr_to_element</a></div><div class="ttdeci">uint8_t * ptr_to_element(const Coordinates &amp;id) const </div><div class="ttdoc">Return a pointer to the element at the passed coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="_i_tensor_8h_source.xhtml#l00063">ITensor.h:63</a></div></div>
+<div class="fragment"><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;{</div><div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a>(coord);</div><div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a48c7a05cc63f541d732250e39339cee2"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">arm_compute::ITensor::ptr_to_element</a></div><div class="ttdeci">uint8_t * ptr_to_element(const Coordinates &amp;id) const </div><div class="ttdoc">Return a pointer to the element at the passed coordinates. </div><div class="ttdef"><b>Definition:</b> <a href="_i_tensor_8h_source.xhtml#l00063">ITensor.h:63</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -751,10 +714,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a07b929c34ad1dc823d8315876aa403ce">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00127">127</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00126">126</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce">ITensorInfo::padding()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;{</div><div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce">padding</a>();</div><div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a07b929c34ad1dc823d8315876aa403ce"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce">arm_compute::ITensorInfo::padding</a></div><div class="ttdeci">virtual PaddingSize padding() const =0</div><div class="ttdoc">Padding of tensor. </div></div>
+<div class="fragment"><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;{</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce">padding</a>();</div><div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a07b929c34ad1dc823d8315876aa403ce"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce">arm_compute::ITensorInfo::padding</a></div><div class="ttdeci">virtual PaddingSize padding() const =0</div><div class="ttdoc">Padding of tensor. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -785,10 +748,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a3f3e1a3200223e6a304a533b1016e749">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00137">137</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00131">131</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">ITensorInfo::quantization_info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;{</div><div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>();</div><div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a3f3e1a3200223e6a304a533b1016e749"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">arm_compute::ITensorInfo::quantization_info</a></div><div class="ttdeci">virtual QuantizationInfo quantization_info() const =0</div><div class="ttdoc">Get the quantization settings (scale and offset) of the tensor. </div></div>
+<div class="fragment"><div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;{</div><div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>();</div><div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a3f3e1a3200223e6a304a533b1016e749"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">arm_compute::ITensorInfo::quantization_info</a></div><div class="ttdeci">virtual QuantizationInfo quantization_info() const =0</div><div class="ttdoc">Get the quantization settings (scale and offset) of the tensor. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -819,12 +782,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a1c5e120ea2712b21296aa8f62421d3c1">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>.</p>
-
-<p>Referenced by <a class="el" href="_le_net5_network_8h_source.xhtml#l00166">LeNet5Network&lt; TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::get_classifications()</a>, <a class="el" href="_mobile_net_network_8h_source.xhtml#l00175">MobileNetNetwork&lt; TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionLayerFunction, ReshapeFunction, PoolingLayerFunction &gt;::get_classifications()</a>, <a class="el" href="_mobile_net_v1_network_8h_source.xhtml#l00211">MobileNetV1Network&lt; TensorType, Accessor, ActivationLayerFunction, BatchNormalizationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionFunction, ReshapeFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::get_classifications()</a>, and <a class="el" href="_alex_net_network_8h_source.xhtml#l00431">AlexNetNetwork&lt; ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::get_classifications()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;{</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">tensor_shape</a>();</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7c66505457d00ece3aa4b34cab80757d"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">arm_compute::ITensorInfo::tensor_shape</a></div><div class="ttdeci">virtual const TensorShape &amp; tensor_shape() const =0</div><div class="ttdoc">Size for each dimension of the tensor. </div></div>
+<div class="fragment"><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;{</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">tensor_shape</a>();</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a7c66505457d00ece3aa4b34cab80757d"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">arm_compute::ITensorInfo::tensor_shape</a></div><div class="ttdeci">virtual const TensorShape &amp; tensor_shape() const =0</div><div class="ttdoc">Size for each dimension of the tensor. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -855,10 +816,10 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#aa983ddaeded5756189f46428be79c631">IAccessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
+<p>Definition at line <a class="el" href="_accessor_8h_source.xhtml#l00096">96</a> of file <a class="el" href="_accessor_8h_source.xhtml">Accessor.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">Tensor::info()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">ITensorInfo::total_size()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;{</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">total_size</a>();</div><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a18064e0011c3869d884653e9e7c47b66"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">arm_compute::ITensorInfo::total_size</a></div><div class="ttdeci">virtual size_t total_size() const =0</div><div class="ttdoc">Returns the total size of the tensor in bytes. </div></div>
+<div class="fragment"><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordflow">return</span> _tensor.<a class="code" href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">info</a>()-&gt;<a class="code" href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">total_size</a>();</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_a18064e0011c3869d884653e9e7c47b66"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">arm_compute::ITensorInfo::total_size</a></div><div class="ttdeci">virtual size_t total_size() const =0</div><div class="ttdoc">Returns the total size of the tensor in bytes. </div></div>
 <div class="ttc" id="classarm__compute_1_1_tensor_xhtml_aa68535e0983cc60a425253a72b162661"><div class="ttname"><a href="classarm__compute_1_1_tensor.xhtml#aa68535e0983cc60a425253a72b162661">arm_compute::Tensor::info</a></div><div class="ttdeci">ITensorInfo * info() const override</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor&amp;#39;s metadata. </div></div>
 </div><!-- fragment -->
 </div>
@@ -872,7 +833,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml">Accessor</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:52 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

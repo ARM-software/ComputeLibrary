@@ -43,13 +43,10 @@ namespace validation
 {
 namespace
 {
-// COMPMID-517 Invesitgate the mismatch to see whether it is a real bug
 RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
 RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
 constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
 
-constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(0);     /**< Tolerance for fixed point tests */
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(0);    /**< Tolerance for fixed point tests */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance for quantized tests */
 
 /** Direct convolution data set. */
@@ -63,16 +60,7 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                                  combine(framework::dataset::make("PadY", 0, 2),
                                                                          framework::dataset::make("KernelSize", { 3, 5 })))),
                                                   framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
-const auto data_fixed_point = combine(datasets::TinyDirectConvolutionShapes(),
-                                      combine(framework::dataset::make("StrideX", 1, 3),
-                                              combine(framework::dataset::make("StrideY", 1, 3),
-                                                      combine(concat(combine(framework::dataset::make("PadX", 0),
-                                                                             combine(framework::dataset::make("PadY", 0),
-                                                                                     framework::dataset::make("KernelSize", 1))),
-                                                                     combine(framework::dataset::make("PadX", 0, 2),
-                                                                             combine(framework::dataset::make("PadY", 0, 2),
-                                                                                     framework::dataset::make("KernelSize", { 3 })))),
-                                                              framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -89,53 +77,53 @@ TEST_SUITE(DirectConvolutionLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type input/weights
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching input feature maps
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Unsupported kernel width
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Non-rectangular weights dimensions
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid weights dimensions
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid stride
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid biases size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid biases dimensions
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Invalid output size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
-                                                       TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/weights
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching input feature maps
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Unsupported kernel width
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non-rectangular weights dimensions
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid weights dimensions
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid stride
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases size
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid biases dimensions
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Invalid output size
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+                                                       TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(9U, 9U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U, 3U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                                        TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),
+               framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(9U, 9U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U, 3U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(3U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U, 2U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
+               framework::dataset::make("BiasesInfo",{ TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(26U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32, 0),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(26U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(25U, 11U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("ConvInfo",  { PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
@@ -181,7 +169,7 @@ TEST_SUITE_END()
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                  ActivationFunctionsDataset),
-                                                                                                         framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -195,33 +183,6 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
-template <typename T>
-using CLDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFixedPointFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
-                                                                                                                    DataType::QS8)),
-                                                                                                                    framework::dataset::make("FractionalBits", 2, 7)),
-                                                                                                                    ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
-                                                                                                                     DataType::QS16)),
-                                                                                                                     framework::dataset::make("FractionalBits", 2, 15)),
-                                                                                                                     ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

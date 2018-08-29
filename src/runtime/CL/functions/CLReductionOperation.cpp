@@ -71,7 +71,6 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
         sums_vector[i].set_data_type(input->data_type());
         sums_vector[i].set_tensor_shape(shape);
         sums_vector[i].set_num_channels(input->num_channels());
-        sums_vector[i].set_fixed_point_position(input->fixed_point_position());
     }
 
     // Validate ReductionOperation only on first kernel
@@ -105,7 +104,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     for(unsigned int i = 0; i < _num_of_stages - 1; i++)
     {
         shape.set(0, ceil(shape.x() / 128.f));
-        _sums_vector[i].allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+        _sums_vector[i].allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type()));
     }
 
     // Apply ReductionOperation only on first kernel

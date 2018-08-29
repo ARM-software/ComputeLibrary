@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -122,11 +122,13 @@ $(document).ready(function(){initNavTree('_graph_utils_8h.xhtml','');});
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_pixel_value_8h_source.xhtml">arm_compute/core/PixelValue.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml">arm_compute/core/Utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_utility_8h_source.xhtml">arm_compute/core/utils/misc/Utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_graph_8h_source.xhtml">arm_compute/graph/Graph.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_i_tensor_accessor_8h_source.xhtml">arm_compute/graph/ITensorAccessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">arm_compute/graph/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_common_graph_options_8h_source.xhtml">utils/CommonGraphOptions.h</a>&quot;</code><br />
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;random&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
@@ -154,8 +156,14 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml">NumPyAccessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">NumPy accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_p_p_m_accessor.xhtml">PPMAccessor</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">PPM accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_p_p_m_accessor.xhtml#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml">ImageAccessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_image.xhtml" title="Structure to hold Image information. ">Image</a> accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_validation_input_accessor.xhtml">ValidationInputAccessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Input Accessor used for network validation.  <a href="classarm__compute_1_1graph__utils_1_1_validation_input_accessor.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml">ValidationOutputAccessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Output Accessor used for network validation.  <a href="classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml">TopNPredictionsAccessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml#details">More...</a><br /></td></tr>
@@ -183,15 +191,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a30bee0b52a919bbcb1dc48b1b6546a16">get_weights_accessor</a> (const std::string &amp;path, const std::string &amp;data_file, DataLayout file_layout=DataLayout::NCHW)</td></tr>
 <tr class="memdesc:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate weights accessor according to the specified path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a30bee0b52a919bbcb1dc48b1b6546a16">More...</a><br /></td></tr>
 <tr class="separator:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9984cc47279cdb732b7b83caf0627de6"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a9984cc47279cdb732b7b83caf0627de6">get_input_accessor</a> (const std::string &amp;ppm_path, std::unique_ptr&lt; IPreprocessor &gt; preprocessor=nullptr, bool bgr=true)</td></tr>
-<tr class="memdesc:a9984cc47279cdb732b7b83caf0627de6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate input accessor according to the specified ppm_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a9984cc47279cdb732b7b83caf0627de6">More...</a><br /></td></tr>
-<tr class="separator:a9984cc47279cdb732b7b83caf0627de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf0c8eff756108c8bb23aecf51d44f79"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#aaf0c8eff756108c8bb23aecf51d44f79">get_output_accessor</a> (const std::string &amp;labels_path, size_t top_n=5, std::ostream &amp;output_stream=std::cout)</td></tr>
-<tr class="memdesc:aaf0c8eff756108c8bb23aecf51d44f79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate output accessor according to the specified labels_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#aaf0c8eff756108c8bb23aecf51d44f79">More...</a><br /></td></tr>
-<tr class="separator:aaf0c8eff756108c8bb23aecf51d44f79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab14324184f90f342227699c161654b1b"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab14324184f90f342227699c161654b1b">get_input_accessor</a> (const <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml">arm_compute::utils::CommonGraphParams</a> &amp;graph_parameters, std::unique_ptr&lt; IPreprocessor &gt; preprocessor=nullptr, bool bgr=true)</td></tr>
+<tr class="memdesc:ab14324184f90f342227699c161654b1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate input accessor according to the specified graph parameters.  <a href="namespacearm__compute_1_1graph__utils.xhtml#ab14324184f90f342227699c161654b1b">More...</a><br /></td></tr>
+<tr class="separator:ab14324184f90f342227699c161654b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3d177d243f5fb34544105a4ee4e1f58"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ae3d177d243f5fb34544105a4ee4e1f58">get_output_accessor</a> (const <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml">arm_compute::utils::CommonGraphParams</a> &amp;graph_parameters, size_t top_n=5, bool is_validation=false, std::ostream &amp;output_stream=std::cout)</td></tr>
+<tr class="memdesc:ae3d177d243f5fb34544105a4ee4e1f58"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate output accessor according to the specified graph parameters.  <a href="namespacearm__compute_1_1graph__utils.xhtml#ae3d177d243f5fb34544105a4ee4e1f58">More...</a><br /></td></tr>
+<tr class="separator:ae3d177d243f5fb34544105a4ee4e1f58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2347ca9557fd9e841d5f2104b1687996"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; graph::ITensorAccessor &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a2347ca9557fd9e841d5f2104b1687996">get_npy_output_accessor</a> (const std::string &amp;npy_path, TensorShape shape, DataType data_type, std::ostream &amp;output_stream=std::cout)</td></tr>
 <tr class="memdesc:a2347ca9557fd9e841d5f2104b1687996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate npy output accessor according to the specified npy_path.  <a href="namespacearm__compute_1_1graph__utils.xhtml#a2347ca9557fd9e841d5f2104b1687996">More...</a><br /></td></tr>
 <tr class="separator:a2347ca9557fd9e841d5f2104b1687996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3a897163a7fe23208f1d9c618062ee2"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab3a897163a7fe23208f1d9c618062ee2">permute_shape</a> (TensorShape tensor_shape, DataLayout in_data_layout, DataLayout out_data_layout)</td></tr>
+<tr class="memdesc:ab3a897163a7fe23208f1d9c618062ee2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Permutes a given tensor shape given the input and output data layout.  <a href="namespacearm__compute_1_1graph__utils.xhtml#ab3a897163a7fe23208f1d9c618062ee2">More...</a><br /></td></tr>
+<tr class="separator:ab3a897163a7fe23208f1d9c618062ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6dc388200717b5fae17342af13f5e41"><td class="memItemLeft" align="right" valign="top">graph::Target&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab6dc388200717b5fae17342af13f5e41">set_target_hint</a> (int target)</td></tr>
 <tr class="memdesc:ab6dc388200717b5fae17342af13f5e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function to return the TargetHint.  <a href="namespacearm__compute_1_1graph__utils.xhtml#ab6dc388200717b5fae17342af13f5e41">More...</a><br /></td></tr>
 <tr class="separator:ab6dc388200717b5fae17342af13f5e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,7 +213,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml">utils</a></li><li class="navelem"><a class="el" href="_graph_utils_8h.xhtml">GraphUtils.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,9 @@ class MagnitudeValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, Format format, MagnitudeType magnitude_type, bool use_fp16)
+    void setup(TensorShape shape, Format format, MagnitudeType magnitude_type)
     {
-        _target         = compute_target(shape, format, magnitude_type, use_fp16);
+        _target         = compute_target(shape, format, magnitude_type);
         _reference      = compute_reference(shape, format, magnitude_type);
         _magnitude_type = magnitude_type;
     }
@@ -57,7 +57,7 @@ protected:
         library->fill_tensor_uniform(tensor, seed_offset);
     }
 
-    TensorType compute_target(const TensorShape &shape, Format format, MagnitudeType magnitude_type, bool use_fp16)
+    TensorType compute_target(const TensorShape &shape, Format format, MagnitudeType magnitude_type)
     {
         DataType data_type = data_type_from_format(format);
 
@@ -73,7 +73,7 @@ protected:
 
         // Create and configure function
         FunctionType magnitude;
-        magnitude.configure(&src1, &src2, &dst, magnitude_type, use_fp16);
+        magnitude.configure(&src1, &src2, &dst, magnitude_type);
 
         ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);

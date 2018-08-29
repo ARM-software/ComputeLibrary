@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,16 +51,15 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @note QS8 and QS16 are supported only for pool sizes 3, 5 and 7
      *
-     * @param[in]  input     Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  input     Source tensor. Data types supported: QASYMM8/F16/F32.
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPoolingLayerKernel
      *
-     * @param[in] input     Source tensor info. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] input     Source tensor info. Data types supported: QASYMM8/F16/F32.
      * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *
@@ -72,7 +71,7 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
     PoolingLayerInfo _pool_info;

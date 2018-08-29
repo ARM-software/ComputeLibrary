@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,12 +61,12 @@ NECannyEdge::NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLI
 void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value,
                             bool use_fp16)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON(gradient_size < 3);
-    ARM_COMPUTE_ERROR_ON(gradient_size > 7);
-    ARM_COMPUTE_ERROR_ON(lower_thr > upper_thr);
     ARM_COMPUTE_ERROR_ON((1 != norm_type) && (2 != norm_type));
+    ARM_COMPUTE_ERROR_ON((gradient_size != 3) && (gradient_size != 5) && (gradient_size != 7));
+    ARM_COMPUTE_ERROR_ON((lower_thr < 0) || (lower_thr >= upper_thr));
 
     _output = output;
 
@@ -119,7 +119,7 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     }
     else
     {
-        ARM_COMPUTE_ERROR("Gradient size not supported\n");
+        ARM_COMPUTE_ERROR("Gradient size %d not supported\n", gradient_size);
     }
 
     // Manage intermediate buffers
@@ -171,24 +171,23 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
 void NECannyEdge::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
-    ARM_COMPUTE_ERROR_ON(_output == nullptr);
 
     _memory_group.acquire();
 
     // Run sobelNxN
     _sobel->run();
 
-    // Fill border before non-maxima suppression. Nop for border mode undefined.
-    NEScheduler::get().schedule(&_border_mag_gradient, Window::DimZ);
-
     // Run gradient
     NEScheduler::get().schedule(_gradient.get(), Window::DimY);
+
+    // Fill border before non-maxima suppression. Nop for border mode undefined.
+    NEScheduler::get().schedule(&_border_mag_gradient, Window::DimZ);
 
     // Run non-maxima suppression
     NEScheduler::get().schedule(&_non_max_suppr, Window::DimY);
 
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
-    memset(_output->buffer(), 0, _output->info()->total_size());
+    std::fill_n(_output->buffer(), _output->info()->total_size(), 0);
 
     // Fill border before edge trace
     NEScheduler::get().schedule(&_border_edge_trace, Window::DimZ);

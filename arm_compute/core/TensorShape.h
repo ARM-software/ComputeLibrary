@@ -136,6 +136,20 @@ public:
         // Make sure all empty dimensions are filled with 1
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
     }
+    /** Shifts right the tensor shape increasing its dimensions
+     *
+     * @param[in] step Rotation step
+     */
+    void shift_right(size_t step)
+    {
+        ARM_COMPUTE_ERROR_ON(step > TensorShape::num_max_dimensions - num_dimensions());
+
+        std::rotate(begin(), begin() + TensorShape::num_max_dimensions - step, end());
+        _num_dimensions += step;
+
+        // Correct number dimensions to ignore trailing dimensions of size 1
+        apply_dimension_correction();
+    }
 
     /** Return a copy with collapsed dimensions starting from a given point.
      *
@@ -146,7 +160,7 @@ public:
     TensorShape collapsed_from(size_t start) const
     {
         TensorShape copy(*this);
-        copy.collapse(num_dimensions(), start);
+        copy.collapse(num_dimensions() - start, start);
         return copy;
     }
 

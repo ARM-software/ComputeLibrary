@@ -1,6 +1,7 @@
 var namespacearm__compute_1_1test_1_1validation =
 [
     [ "AbsoluteTolerance", "classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml", "classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance" ],
+    [ "CannyEdgeParameters", "structarm__compute_1_1test_1_1validation_1_1_canny_edge_parameters.xhtml", "structarm__compute_1_1test_1_1validation_1_1_canny_edge_parameters" ],
     [ "compare", "structarm__compute_1_1test_1_1validation_1_1compare.xhtml", null ],
     [ "compare< AbsoluteTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_absolute_tolerance_3_01_u_01_4_01_4.xhtml", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_absolute_tolerance_3_01_u_01_4_01_4" ],
     [ "compare< RelativeTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_relative_tolerance_3_01_u_01_4_01_4.xhtml", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_relative_tolerance_3_01_u_01_4_01_4" ],

@@ -30,7 +30,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -56,6 +56,14 @@ class NEGEMMLowpMatrixMultiplyCore : public IFunction
 public:
     /** Constructor */
     NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpMatrixMultiplyCore(const NEGEMMLowpMatrixMultiplyCore &) = delete;
+    /** Default move constructor */
+    NEGEMMLowpMatrixMultiplyCore(NEGEMMLowpMatrixMultiplyCore &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMLowpMatrixMultiplyCore &operator=(const NEGEMMLowpMatrixMultiplyCore &) = delete;
+    /** Default move assignment operator */
+    NEGEMMLowpMatrixMultiplyCore &operator=(NEGEMMLowpMatrixMultiplyCore &&) = default;
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM_LOWP:  low precision GEMM kernel
@@ -86,11 +94,11 @@ public:
 
     // Inherited methods overridden
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                        _memory_group;
-    AssemblyKernelGlueU8U32            _asm_glue_unsigned;
-    AssemblyKernelGlueS8S32            _asm_glue_signed;
+    NEGEMMAssemblyDispatch             _asm_glue;
     std::unique_ptr<INEKernel>         _mm_kernel;
     std::unique_ptr<INEKernel>         _mtx_a_reshape_kernel;
     std::unique_ptr<INEKernel>         _mtx_b_reshape_kernel;
@@ -101,14 +109,13 @@ private:
     Tensor                             _vector_sum_row;
     Tensor                             _tmp_a;
     Tensor                             _tmp_b;
-    Tensor                             _workspace;
-    Tensor                             _B_pretranspose;
+    const ITensor                     *_original_b;
     int32_t                            _a_offset;
     int32_t                            _b_offset;
     bool                               _run_vector_matrix_multiplication;
     bool                               _dot_product_path;
-    bool                               _is_first_run;
     bool                               _reshape_b_only_on_first_run;
+    bool                               _is_prepared;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

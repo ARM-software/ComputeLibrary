@@ -19,11 +19,7 @@ var searchData=
   ['disabled_5fregister_5ffixture_5fdata_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a934ee9a7581b65523fd180c96b159fb8',1,'Macros.h']]],
   ['disabled_5fregister_5ffixture_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a55d2ae62838572e7be1c87128d02b493',1,'Macros.h']]],
   ['disabled_5ftest_5fcase',['DISABLED_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a89747ae30c60b9f052fbf9707c8301a9',1,'Macros.h']]],
+  ['div',['DIV',['../arithmetic__op_8cl.xhtml#a49f6fecffd852cda3b0ece53dcbb2b87',1,'arithmetic_op.cl']]],
   ['div_5fop',['DIV_OP',['../activation__layer_8cl.xhtml#a59d29af688da2590946e966789041856',1,'DIV_OP():&#160;activation_layer.cl'],['../normalization__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;normalization_layer.cl'],['../pooling__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer_quantized.cl'],['../softmax__layer_8cl.xhtml#a8cde99b1ce0f3c1dacd49261b0cf03d8',1,'DIV_OP():&#160;softmax_layer.cl']]],
-  ['div_5fop_5fnhwc',['DIV_OP_NHWC',['../pooling__layer_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer_quantized.cl']]],
-  ['div_5fsat_5fop_5fexpand',['DIV_SAT_OP_EXPAND',['../fixed__point_8h.xhtml#aa13fe0d2ecef3e5b22315baf39715e46',1,'fixed_point.h']]],
-  ['div_5fsat_5fop_5fexpand_5fstr',['DIV_SAT_OP_EXPAND_STR',['../fixed__point_8h.xhtml#ac2995f9506cbc5c918ecf47f447bcfce',1,'fixed_point.h']]],
-  ['div_5fsat_5fop_5fvec_5fexpand',['DIV_SAT_OP_VEC_EXPAND',['../fixed__point_8h.xhtml#a774126960511e4d827f0d2d3d68abe97',1,'fixed_point.h']]],
-  ['div_5fsat_5fop_5fvec_5fexpand_5fstr',['DIV_SAT_OP_VEC_EXPAND_STR',['../fixed__point_8h.xhtml#a6ad4d9db82a42c5266cba5e0f317998c',1,'fixed_point.h']]],
-  ['divq_5fsat_5fimpl',['DIVQ_SAT_IMPL',['../fixed__point_8h.xhtml#aac0b47414a86d32e5c891ab6a75b313b',1,'fixed_point.h']]]
+  ['div_5fop_5fnhwc',['DIV_OP_NHWC',['../pooling__layer_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer_quantized.cl']]]
 ];

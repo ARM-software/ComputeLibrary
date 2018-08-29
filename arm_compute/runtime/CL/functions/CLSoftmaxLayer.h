@@ -53,14 +53,14 @@ public:
     CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
      * @param[in]  beta   (Optional) A scaling factor for the exponent. Defaults to 1.f
      */
     void configure(const ICLTensor *input, ICLTensor *output, float beta = 1.0f);
     /** Static function to check if given info will lead to a valid configuration of @ref CLSoftmaxLayer
      *
-     * @param[in] input  Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32
+     * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32
      * @param[in] output Destination tensor. Data types supported: same as @p input
      *
      * @return a status

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,20 +27,20 @@ namespace arm_compute
 {
 namespace test
 {
-RawTensor::RawTensor(TensorShape shape, Format format, int fixed_point_position)
-    : SimpleTensor(shape, format, fixed_point_position)
+RawTensor::RawTensor(TensorShape shape, Format format)
+    : SimpleTensor(shape, format)
 {
     _buffer = support::cpp14::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() * SimpleTensor::element_size());
 }
 
-RawTensor::RawTensor(TensorShape shape, DataType data_type, int num_channels, int fixed_point_position)
-    : SimpleTensor(shape, data_type, num_channels, fixed_point_position)
+RawTensor::RawTensor(TensorShape shape, DataType data_type, int num_channels)
+    : SimpleTensor(shape, data_type, num_channels)
 {
     _buffer = support::cpp14::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() * SimpleTensor::element_size());
 }
 
 RawTensor::RawTensor(const RawTensor &tensor)
-    : SimpleTensor(tensor.shape(), tensor.data_type(), tensor.num_channels(), tensor.fixed_point_position())
+    : SimpleTensor(tensor.shape(), tensor.data_type(), tensor.num_channels())
 {
     _format = tensor.format();
     _buffer = support::cpp14::make_unique<uint8_t[]>(num_elements() * num_channels() * element_size());

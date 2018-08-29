@@ -545,71 +545,6 @@ inline arm_compute::Status error_on_mismatching_data_types(const char *function,
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_types(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
-/** Return an error if the passed tensor infos have different fixed point data types or different fixed point positions
- *
- * @note: If the first tensor doesn't have fixed point data type, the function returns without throwing an error
- *
- * @param[in] function      Function in which the error occurred.
- * @param[in] file          Name of the file where the error occurred.
- * @param[in] line          Line on which the error occurred.
- * @param[in] tensor_info_1 The first tensor info to be compared.
- * @param[in] tensor_info_2 The second tensor info to be compared.
- * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
- *
- * @return Status
- */
-template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_fixed_point(const char *function, const char *file, const int line,
-                                                            const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
-{
-    DataType &&first_data_type            = tensor_info_1->data_type();
-    const int  first_fixed_point_position = tensor_info_1->fixed_point_position();
-
-    if(!is_data_type_fixed_point(first_data_type))
-    {
-        return arm_compute::Status{};
-    }
-
-    const std::array < const ITensorInfo *, 1 + sizeof...(Ts) > tensor_infos_array{ { tensor_info_2, std::forward<Ts>(tensor_infos)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->data_type() != first_data_type;
-    }),
-    function, file, line, "Tensors have different fixed point data types");
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_infos_array.begin(), tensor_infos_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->fixed_point_position() != first_fixed_point_position;
-    }),
-    function, file, line, "Tensors have different fixed point positions");
-
-    return arm_compute::Status{};
-}
-/** Return an error if the passed tensor have different fixed point data types or different fixed point positions
- *
- * @note: If the first tensor doesn't have fixed point data type, the function returns without throwing an error
- *
- * @param[in] function Function in which the error occurred.
- * @param[in] file     Name of the file where the error occurred.
- * @param[in] line     Line on which the error occurred.
- * @param[in] tensor_1 The first tensor to be compared.
- * @param[in] tensor_2 The second tensor to be compared.
- * @param[in] tensors  (Optional) Further allowed tensors.
- *
- * @return Status
- */
-template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_fixed_point(const char *function, const char *file, const int line,
-                                                            const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
-{
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point(function, file, line, tensor_1->info(), tensor_2->info(),
-                                                                                detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
-    return arm_compute::Status{};
-}
-#define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
-#define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
-
 /** Return an error if the passed tensor infos have different asymmetric quantized data types or different quantization info
  *
  * @note: If the first tensor info doesn't have asymmetric quantized data type, the function returns without throwing an error
@@ -804,6 +739,43 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 
+/** Return an error if the data type of the passed tensor info is FP16 and FP16 extension is not supported by the device.
+ *
+ * @param[in] function          Function in which the error occurred.
+ * @param[in] file              Name of the file where the error occurred.
+ * @param[in] line              Line on which the error occurred.
+ * @param[in] tensor_info       Tensor info to validate.
+ * @param[in] is_fp16_supported Is fp16 supported by the device.
+ *
+ * @return Status
+ */
+inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
+                                                     const ITensorInfo *tensor_info, bool is_fp16_supported)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::F16 && !is_fp16_supported),
+                                        function, file, line, "FP16 not supported by the device");
+    return arm_compute::Status{};
+}
+
+/** Return an error if the data type of the passed tensor is FP16 and FP16 extension is not supported by the device.
+ *
+ * @param[in] function          Function in which the error occurred.
+ * @param[in] file              Name of the file where the error occurred.
+ * @param[in] line              Line on which the error occurred.
+ * @param[in] tensor            Tensor to validate.
+ * @param[in] is_fp16_supported Is fp16 supported by the device.
+ *
+ * @return Status
+ */
+inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
+                                                     const ITensor *tensor, bool is_fp16_supported)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(function, file, line, tensor->info(), is_fp16_supported));
+    return arm_compute::Status{};
+}
+
 /** Return an error if the tensor is not 2D.
  *
  * @param[in] function Function in which the error occurred.
@@ -815,6 +787,19 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
  */
 arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
                                            const ITensor *tensor);
+
+/** Return an error if the tensor info is not 2D.
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   Tensor info to validate.
+ *
+ * @return Status
+ */
+arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
+                                           const ITensorInfo *tensor);
+
 #define ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(t) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D(t) \
@@ -939,96 +924,5 @@ arm_compute::Status error_on_invalid_subtensor_valid_region(const char *function
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
 #define ARM_COMPUTE_RETURN_ERROR_ON_INVALID_SUBTENSOR_VALID_REGION(pv, sv) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_invalid_subtensor_valid_region(__func__, __FILE__, __LINE__, pv, sv))
-
-/** Return an error if the input fixed-point positions are different.
- *
- * @param[in] function      Function in which the error occurred.
- * @param[in] file          Name of the file where the error occurred.
- * @param[in] line          Line on which the error occurred.
- * @param[in] tensor_info_1 The first tensor info to be compared.
- * @param[in] tensor_info_2 The second tensor info to be compared.
- * @param[in] tensor_infos  (Optional) Further allowed tensor infos.
- *
- * @return Status
- */
-template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_fixed_point_position(const char *function, const char *file, const int line,
-                                                                     const ITensorInfo *tensor_info_1, const ITensorInfo *tensor_info_2, Ts... tensor_infos)
-{
-    const std::array < const ITensorInfo *, 1 + sizeof...(Ts) > tensor_info_array{ { tensor_info_2, std::forward<Ts>(tensor_infos)... } };
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensor_info_array.begin(), tensor_info_array.end(), [&](const ITensorInfo * tensor_info)
-    {
-        return tensor_info->fixed_point_position() != tensor_info_1->fixed_point_position();
-    }),
-    function, file, line, "Tensors have different fixed-point positions");
-    return arm_compute::Status{};
-}
-/** Return an error if the input fixed-point positions are different.
- *
- * @param[in] function Function in which the error occurred.
- * @param[in] file     Name of the file where the error occurred.
- * @param[in] line     Line on which the error occurred.
- * @param[in] tensor_1 The first tensor to be compared.
- * @param[in] tensor_2 The second tensor to be compared.
- * @param[in] tensors  (Optional) Further allowed tensors.
- *
- * @return Status
- */
-template <typename... Ts>
-inline arm_compute::Status error_on_mismatching_fixed_point_position(const char *function, const char *file, const int line,
-                                                                     const ITensor *tensor_1, const ITensor *tensor_2, Ts... tensors)
-{
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point_position(function, file, line, tensor_1->info(), tensor_2->info(),
-                                                                                         detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
-    return arm_compute::Status{};
-}
-#define ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__))
-#define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_fixed_point_position(__func__, __FILE__, __LINE__, __VA_ARGS__))
-
-/** Return an error if the fixed-point value is not representable in the specified Q format.
- *
- * @param[in] function    Function in which the error occurred.
- * @param[in] file        Name of the file where the error occurred.
- * @param[in] line        Line on which the error occurred.
- * @param[in] value       The floating point value to be checked.
- * @param[in] tensor_info Input tensor info that has information on data type and fixed-point position.
- *
- * @return Status
- */
-inline arm_compute::Status error_on_value_not_representable_in_fixed_point(const char *function, const char *file, int line,
-                                                                           float value, const ITensorInfo *tensor_info)
-{
-    const int          fixed_point_position = tensor_info->fixed_point_position();
-    const DataType     dt                   = tensor_info->data_type();
-    const unsigned int q_max_range          = 0xFFFFFFFFu >> (((sizeof(unsigned int) - element_size_from_data_type(dt)) * 8) + 1);
-    const float        max_range            = q_max_range / (static_cast<float>(1 << fixed_point_position));
-
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(value > max_range, function, file, line,
-                                        "Value %f is not representable in %s with fixed-point position %d", value, string_from_data_type(dt).c_str(), fixed_point_position);
-    return arm_compute::Status{};
-}
-/** Return an error an error if the fixed-point value is not representable in the specified Q format.
- *
- * @param[in] function Function in which the error occurred.
- * @param[in] file     Name of the file where the error occurred.
- * @param[in] line     Line on which the error occurred.
- * @param[in] value    The floating point value to be checked.
- * @param[in] tensor   Input tensor that has information on data type and fixed-point position.
- *
- * @return Status
- */
-inline arm_compute::Status error_on_value_not_representable_in_fixed_point(const char *function, const char *file, int line,
-                                                                           float value, const ITensor *tensor)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_value_not_representable_in_fixed_point(function, file, line, value, tensor->info()));
-    return arm_compute::Status{};
-}
-#define ARM_COMPUTE_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(...) \
-    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
-#define ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(...) \
-    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_value_not_representable_in_fixed_point(__func__, __FILE__, __LINE__, __VA_ARGS__))
 }
 #endif /* __ARM_COMPUTE_VALIDATE_H__*/

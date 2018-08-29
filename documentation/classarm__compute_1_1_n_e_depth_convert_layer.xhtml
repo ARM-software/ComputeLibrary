@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -253,14 +253,13 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initialize the function's source, destination. </p>
-<p>Valid conversions Input -&gt; Output : QS8 -&gt; QS8, F32 U8 -&gt; U16, S16, S32 U16 -&gt; U8, U32 S16 -&gt; U8, S32 QS16 -&gt; QS16, F32 F32 -&gt; QS8, QS16</p>
-<dl class="section warning"><dt>Warning</dt><dd>In case of in-place fixed point position conversion make sure that configure has been called before the updated tensor is used in other functions, as the <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> of the tensor will be altered. In-place is only supported for QS8 -&gt; QS8, QS16 -&gt; QS16.</dd></dl>
+<p>Valid conversions Input -&gt; Output : U8 -&gt; U16, S16, S32 U16 -&gt; U8, U32 S16 -&gt; U8, S32</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>The input tensor to convert (Written in case of in-place computation). Data types supported: U8/QS8/U16/S16/F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Can be null in case of in-place computation. Data types supported: U8/QS8/U16/S16/U32/S32/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>The input tensor to convert (Written in case of in-place computation). Data types supported: U8/U16/S16/F32. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Can be null in case of in-place computation. Data types supported: U8/U16/S16/U32/S32/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Conversion policy. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>(Optional) Value for down/up conversions. Must be 0 &lt;= shift &lt; 8. In case of fixed point position conversion, it specifies the new fixed point position, if operation is in-place. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>(Optional) Value for down/up conversions. Must be 0 &lt;= shift &lt; 8. </td></tr>
   </table>
   </dd>
 </dl>
@@ -302,7 +301,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depth_convert_layer.xhtml">NEDepthConvertLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

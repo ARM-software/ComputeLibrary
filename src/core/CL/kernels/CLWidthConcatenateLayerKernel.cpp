@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -32,7 +33,6 @@
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
@@ -59,10 +59,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
 Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::QS16, DataType::F16, DataType::U32,
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::F16, DataType::U32,
                                                          DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) + width_offset > output->dimension(0));
 
     for(size_t i = 1; i < Coordinates::num_max_dimensions; ++i)
@@ -102,20 +102,16 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(_width_offset));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width", build_opts.options()));
-
-    const int offset_to_first_elements_in_bytes = _width_offset * _output->info()->strides_in_bytes()[0];
-
-    unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
-    _kernel.setArg<cl_int>(idx, offset_to_first_elements_in_bytes);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), width_offset, output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 void CLWidthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_depth_concat
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLDepthConcatenateLayerKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -228,8 +229,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ae16dd5c32acf1c224739b7899ac88b1e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml#ae16dd5c32acf1c224739b7899ac88b1e">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, unsigned int depth_offset, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
+<tr class="memdesc:ae16dd5c32acf1c224739b7899ac88b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">CLDepthConcatenateLayerKernel</a>.  <a href="#ae16dd5c32acf1c224739b7899ac88b1e">More...</a><br /></td></tr>
+<tr class="separator:ae16dd5c32acf1c224739b7899ac88b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
 <tr class="memitem:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a278f0e6c68ca17e71f4c4ff82f360aa0">num_arguments_per_1D_array</a> ()</td></tr>
 <tr class="memdesc:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D array object.  <a href="#a278f0e6c68ca17e71f4c4ff82f360aa0">More...</a><br /></td></tr>
@@ -412,7 +416,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Initialise the kernel's inputs and output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: QS8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">depth_offset</td><td>The offset on the Z axis. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>.</td></tr>
   </table>
@@ -522,6 +526,57 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae16dd5c32acf1c224739b7899ac88b1e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">CLDepthConcatenateLayerKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: QASYMM8/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth_offset</td><td>The offset on the Z axis. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: Same as <code>input</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/CL/kernels/<a class="el" href="_c_l_depth_concatenate_layer_kernel_8h_source.xhtml">CLDepthConcatenateLayerKernel.h</a></li>
 </ul>
@@ -531,7 +586,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">CLDepthConcatenateLayerKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

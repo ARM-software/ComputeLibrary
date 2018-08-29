@@ -44,18 +44,20 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool batch_size_on_z>
 class Im2ColValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout)
+    void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
+               unsigned int num_groups, bool channels_first_output_nhwc)
     {
         _kernel_dims = kernel_dims;
         _conv_info   = conv_info;
         _quant_info  = quant_info;
         _data_layout = data_layout;
         _has_bias    = data_type != DataType::QASYMM8;
+        _num_groups  = num_groups;
 
         if(_data_layout == DataLayout::NHWC)
         {
@@ -65,11 +67,10 @@ public:
         TensorInfo input_info(input_shape, 1, data_type);
         input_info.set_data_layout(_data_layout);
 
-        const TensorShape output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U));
+        const TensorShape output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), batch_size_on_z && _num_groups == 1, _num_groups);
+        _target                        = compute_target(input_shape, output_shape, data_type);
 
-        _target = compute_target(input_shape, output_shape, data_type);
-
-        compute_reference(input_shape, output_shape, data_type);
+        compute_reference(input_shape, output_shape, data_type, channels_first_output_nhwc);
     }
 
 protected:
@@ -82,12 +83,12 @@ protected:
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, _quant_info, _data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, _quant_info);
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, _quant_info, _data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, _quant_info);
 
         // Create and configure function
         FunctionType im2col_func;
-        im2col_func.configure(&src, &dst, _kernel_dims, _conv_info, _has_bias);
+        im2col_func.configure(&src, &dst, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), _num_groups);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -108,14 +109,16 @@ protected:
         return dst;
     }
 
-    void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
+    void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type, bool channels_first_output_nhwc)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, _quant_info, _data_layout };
-        _reference = SimpleTensor<T>(output_shape, data_type, 1, 0, _quant_info, DataLayout::NCHW);
+        SimpleTensor<T> src{ input_shape, data_type, 1, _quant_info, _data_layout };
+        _reference = SimpleTensor<T>(output_shape, data_type, 1, _quant_info, DataLayout::NCHW);
+
         // Fill reference
         fill(src);
-        reference::im2col<T>(src, _reference, _kernel_dims, _conv_info, _has_bias);
+
+        reference::im2col<T>(src, _reference, _kernel_dims, _conv_info, _has_bias, _num_groups, channels_first_output_nhwc);
     }
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
@@ -124,6 +127,7 @@ protected:
     DataLayout       _data_layout{};
     QuantizationInfo _quant_info{};
     bool             _has_bias{};
+    unsigned int     _num_groups{};
 };
 } // namespace validation
 } // namespace test

@@ -159,7 +159,7 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
                                                     vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
                                                     a_offset, b_offset); // NOLINT
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "gemmlowp_offset_contribution_";

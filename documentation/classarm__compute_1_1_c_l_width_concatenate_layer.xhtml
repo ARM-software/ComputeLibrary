@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -213,8 +213,8 @@ Static Public Member Functions</h2></td></tr>
 <p>Initialise the kernel's inputs vector and output. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32. <a class="el" href="classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. ">Dimensions</a> of all the inputs should match apart for the width which can differ. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. Output tensor dimensions are the same with the inputs from the second dimension and above. The first dimension (width) is the sum of the input tensors' widths. </td></tr>
   </table>
   </dd>
 </dl>
@@ -297,8 +297,8 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">CLDepthConcatenateLayerKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors info to concatenate. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: Same as <code>input</code>.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inputs_vector</td><td>The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32. <a class="el" href="classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. ">Dimensions</a> of all the inputs should match apart for the width which can differ. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor. Data types supported: Same as <code>input</code>. Output tensor dimensions are the same with the inputs from the second dimension and above. The first dimension (width) is the sum of the input tensors' widths.</td></tr>
   </table>
   </dd>
 </dl>
@@ -317,7 +317,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_width_concatenate_layer.xhtml">CLWidthConcatenateLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

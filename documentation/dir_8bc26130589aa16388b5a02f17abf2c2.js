@@ -50,7 +50,8 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
       [ "IPoolManager", "classarm__compute_1_1_i_pool_manager.xhtml", "classarm__compute_1_1_i_pool_manager" ]
     ] ],
     [ "IScheduler.h", "_i_scheduler_8h.xhtml", [
-      [ "IScheduler", "classarm__compute_1_1_i_scheduler.xhtml", "classarm__compute_1_1_i_scheduler" ]
+      [ "IScheduler", "classarm__compute_1_1_i_scheduler.xhtml", "classarm__compute_1_1_i_scheduler" ],
+      [ "Hints", "classarm__compute_1_1_i_scheduler_1_1_hints.xhtml", "classarm__compute_1_1_i_scheduler_1_1_hints" ]
     ] ],
     [ "ISimpleLifetimeManager.h", "_i_simple_lifetime_manager_8h.xhtml", [
       [ "ISimpleLifetimeManager", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml", "classarm__compute_1_1_i_simple_lifetime_manager" ]

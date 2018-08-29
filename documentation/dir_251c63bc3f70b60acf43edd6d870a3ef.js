@@ -14,6 +14,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLArithmeticAddition.h", "_c_l_arithmetic_addition_8h.xhtml", [
       [ "CLArithmeticAddition", "classarm__compute_1_1_c_l_arithmetic_addition.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition" ]
     ] ],
+    [ "CLArithmeticDivision.h", "_c_l_arithmetic_division_8h.xhtml", [
+      [ "CLArithmeticDivision", "classarm__compute_1_1_c_l_arithmetic_division.xhtml", "classarm__compute_1_1_c_l_arithmetic_division" ]
+    ] ],
     [ "CLArithmeticSubtraction.h", "_c_l_arithmetic_subtraction_8h.xhtml", [
       [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction" ]
     ] ],
@@ -49,6 +52,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLColorConvert.h", "_c_l_color_convert_8h.xhtml", [
       [ "CLColorConvert", "classarm__compute_1_1_c_l_color_convert.xhtml", "classarm__compute_1_1_c_l_color_convert" ]
+    ] ],
+    [ "CLConcatenateLayer.h", "_c_l_concatenate_layer_8h.xhtml", [
+      [ "CLConcatenateLayer", "classarm__compute_1_1_c_l_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_concatenate_layer" ]
     ] ],
     [ "CLConvertFullyConnectedWeights.h", "_c_l_convert_fully_connected_weights_8h.xhtml", [
       [ "CLConvertFullyConnectedWeights", "classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights" ]

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -157,9 +157,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acaa705664e19820e28eb86f7737a98ba"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#acaa705664e19820e28eb86f7737a98ba">~NEIm2ColKernel</a> ()=default</td></tr>
 <tr class="memdesc:acaa705664e19820e28eb86f7737a98ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#acaa705664e19820e28eb86f7737a98ba">More...</a><br /></td></tr>
 <tr class="separator:acaa705664e19820e28eb86f7737a98ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbd609f662a014d7f00717828465494a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#afbd609f662a014d7f00717828465494a">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected=false, bool is_flatten=false, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U))</td></tr>
-<tr class="memdesc:afbd609f662a014d7f00717828465494a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#afbd609f662a014d7f00717828465494a">More...</a><br /></td></tr>
-<tr class="separator:afbd609f662a014d7f00717828465494a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f5df3e50ada1015e1bdbcc921182d64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a8f5df3e50ada1015e1bdbcc921182d64">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U), unsigned int num_groups=1, bool is_fully_connected=false, bool is_flatten=false)</td></tr>
+<tr class="memdesc:a8f5df3e50ada1015e1bdbcc921182d64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#a8f5df3e50ada1015e1bdbcc921182d64">More...</a><br /></td></tr>
+<tr class="separator:a8f5df3e50ada1015e1bdbcc921182d64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,9 +186,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ace19fb90f6d725d8f1f32bc7249a77b0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#ace19fb90f6d725d8f1f32bc7249a77b0">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected, bool is_flatten=false, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U))</td></tr>
-<tr class="memdesc:ace19fb90f6d725d8f1f32bc7249a77b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>.  <a href="#ace19fb90f6d725d8f1f32bc7249a77b0">More...</a><br /></td></tr>
-<tr class="separator:ace19fb90f6d725d8f1f32bc7249a77b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed5d9c4893b2d863969dabd131b537d0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aed5d9c4893b2d863969dabd131b537d0">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U), unsigned int num_groups=1, bool is_fully_connected=false, bool is_flatten=false)</td></tr>
+<tr class="memdesc:aed5d9c4893b2d863969dabd131b537d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>.  <a href="#aed5d9c4893b2d863969dabd131b537d0">More...</a><br /></td></tr>
+<tr class="separator:aed5d9c4893b2d863969dabd131b537d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for the im2col reshape kernel. </p>
@@ -299,7 +299,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="afbd609f662a014d7f00717828465494a"></a>
+<a class="anchor" id="a8f5df3e50ada1015e1bdbcc921182d64"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -336,6 +336,18 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
+          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>is_fully_connected</em> = <code>false</code>, </td>
         </tr>
@@ -343,13 +355,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_flatten</em> = <code>false</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
-          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>&#160;</td>
+          <td class="paramname"><em>is_flatten</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -362,14 +368,15 @@ Static Public Member Functions</h2></td></tr>
 <p>Set the input and output of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dilation</td><td>(Optional) Dilation, in elements, across x and y. Defaults to (1, 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>(Optional) Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments </td></tr>
   </table>
   </dd>
 </dl>
@@ -406,7 +413,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_im2_col_kernel_8h_source.xhtml#l00060">60</a> of file <a class="el" href="_n_e_im2_col_kernel_8h_source.xhtml">NEIm2ColKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#afbd609f662a014d7f00717828465494a">NEIm2ColKernel::configure()</a>, <a class="el" href="_c_l_2_winograd_8cpp_source.xhtml#l00360">arm_compute::test::validation::conv_info</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aec5fb874227c941e8ac14de3d29e543b">NEIm2ColKernel::NEIm2ColKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a8f6d6c13a896535a381329b6145aeae8">NEIm2ColKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEIm2ColKernel::run()</a>, <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#ace19fb90f6d725d8f1f32bc7249a77b0">NEIm2ColKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#acaa705664e19820e28eb86f7737a98ba">NEIm2ColKernel::~NEIm2ColKernel()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a8f5df3e50ada1015e1bdbcc921182d64">NEIm2ColKernel::configure()</a>, <a class="el" href="_c_l_2_winograd_8cpp_source.xhtml#l00572">arm_compute::test::validation::conv_info</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aec5fb874227c941e8ac14de3d29e543b">NEIm2ColKernel::NEIm2ColKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a8f6d6c13a896535a381329b6145aeae8">NEIm2ColKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEIm2ColKernel::run()</a>, <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>, <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#aed5d9c4893b2d863969dabd131b537d0">NEIm2ColKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#acaa705664e19820e28eb86f7737a98ba">NEIm2ColKernel::~NEIm2ColKernel()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    {</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEIm2ColKernel&quot;</span>;</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -515,7 +522,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 
 </div>
 </div>
-<a class="anchor" id="ace19fb90f6d725d8f1f32bc7249a77b0"></a>
+<a class="anchor" id="aed5d9c4893b2d863969dabd131b537d0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -555,20 +562,26 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_fully_connected</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_flatten</em> = <code>false</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
-          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>&#160;</td>
+          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_fully_connected</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_flatten</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -586,14 +599,15 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dilation</td><td>(Optional) Dilation, in elements, across x and y. Defaults to (1, 1).</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilation</td><td>(Optional) Dilation, in elements, across x and y. Defaults to (1, 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>(Optional)Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments</td></tr>
   </table>
   </dd>
 </dl>
@@ -612,7 +626,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

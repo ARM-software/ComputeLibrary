@@ -36,31 +36,65 @@ namespace misc
 {
 namespace shape_calculator
 {
+inline TensorShape compute_vector_to_tensor_output_shape(const TensorShape &input, size_t conv_w, size_t conv_h, const DataLayout &data_layout)
+{
+    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    TensorShape output_shape(input);
+    output_shape.set(idx_w, conv_w);
+    output_shape.set(idx_h, conv_h);
+    output_shape.set(idx_c, input.x() / (conv_w * conv_h));
+
+    return output_shape;
+}
 inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, const PermutationVector &perm)
 {
     TensorShape output_shape = input.tensor_shape();
     permute(output_shape, perm);
     return output_shape;
 }
-inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false)
+inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false, unsigned int num_groups = 1)
 {
+    // Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.
+    ARM_COMPUTE_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_ERROR_ON(weights.data_layout() == DataLayout::NHWC && num_groups > 1);
+    ARM_COMPUTE_ERROR_ON((weights.dimension(3) % num_groups) != 0);
+
     // Calculate output shape
     TensorShape weights_reshaped{ weights.tensor_shape() };
+    weights_reshaped.set(3, weights_reshaped[3] / num_groups);
+
     weights_reshaped.collapse(3);
     const size_t tmp_dim = weights_reshaped[0];
     weights_reshaped.set(0, weights_reshaped[1]);
     weights_reshaped.set(1, tmp_dim + (has_bias ? 1 : 0));
+    if(weights.num_dimensions() < 5)
+    {
+        weights_reshaped.set(2, num_groups);
+    }
 
     return weights_reshaped;
 }
-inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1)
+inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height
     ARM_COMPUTE_ERROR_ON(mult_interleave4x4_height < 1);
     const int   interleave_width = 4 * mult_interleave4x4_height;
     TensorShape shape_interleaved_a{ a.tensor_shape() };
     shape_interleaved_a.set(0, a.dimension(0) * interleave_width);
-    shape_interleaved_a.set(1, std::ceil(a.dimension(1) / static_cast<float>(interleave_width)));
+    if(reinterpret_input_as_3d)
+    {
+        const int M      = a.dimension(1) * a.dimension(2);
+        const int height = std::ceil(M / static_cast<float>(interleave_width));
+        shape_interleaved_a.set(1, height);
+        shape_interleaved_a.remove_dimension(2);
+    }
+    else
+    {
+        shape_interleaved_a.set(1, std::ceil(a.dimension(1) / static_cast<float>(interleave_width)));
+    }
 
     return shape_interleaved_a;
 }
@@ -107,12 +141,19 @@ inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 
     return shape_vector_sum_row;
 }
-inline TensorShape compute_col2im_shape(const ITensorInfo &input, std::pair<unsigned int, unsigned int> convolved_dims)
+inline TensorShape compute_col2im_shape(const ITensorInfo &input, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1)
 {
+    ARM_COMPUTE_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_ERROR_ON(input.tensor_shape()[1] != (convolved_dims.first * convolved_dims.second));
+    ARM_COMPUTE_ERROR_ON((num_groups > 1) && input.tensor_shape()[2] != num_groups);
+
     TensorShape col2im_shape{ input.tensor_shape() };
     col2im_shape.set(0, convolved_dims.first);
     col2im_shape.set(1, convolved_dims.second);
-    col2im_shape.set(2, input.tensor_shape()[0]);
+    col2im_shape.set(2, input.tensor_shape()[0] * num_groups);
+
+    const unsigned int batch_idx = (num_groups == 1) ? 2 : 3;
+    col2im_shape.set(3, input.tensor_shape()[batch_idx]);
 
     return col2im_shape;
 }
@@ -158,9 +199,15 @@ inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigne
 
     return scale_out_shape;
 }
-inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,
+                                             unsigned int num_groups = 1)
 {
-    // The output shape will be the 2D shape used as input for GEMM [ out_channels * kernel_area, num_elems_per_out_channel ]
+    // The output shape will be the 3D shape [ out_channels * kernel_area, num_elems_per_out_channel, batches ]                           if batch_size_on_z == true
+    //                       or the 4D shape [ out_channels * kernel_area / num_groups, num_elems_per_out_channel, num_groups, batches ]  if batch_size_on_z == false
+
+    ARM_COMPUTE_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1 && input->data_layout() != DataLayout::NCHW);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1 && batch_size_on_z);
 
     TensorShape output_shape{ input->tensor_shape() };
 
@@ -170,32 +217,26 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
-    output_shape.set(0, (output_shape[channel_idx] * kernel_dims.area() + (has_bias ? 1 : 0)));
+    output_shape.set(0, (output_shape[channel_idx] / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
     output_shape.set(1, (out_dims.first * out_dims.second));
-    output_shape.set(2, 1);
+    if(batch_size_on_z && output_shape.num_dimensions() >= 3)
+    {
+        output_shape.remove_dimension(2);
+    }
+    else
+    {
+        output_shape.set(2, num_groups);
+    }
 
     return output_shape;
 }
-inline TensorShape compute_im2col_fc_shape(const ITensorInfo *input, const int num_input_dimensions = 3)
+inline TensorShape compute_flatten_shape(const ITensorInfo *input)
 {
-    TensorShape output_shape{ input->tensor_shape() };
-
-    output_shape.collapse(num_input_dimensions);
-
-    return output_shape;
-}
-inline TensorShape compute_im2col_flatten_shape(const ITensorInfo *input)
-{
-    // The output shape will be the flatten version of the input (i.e. [ width * height * channels, 1, 1, ... ] ). Used for FlattenLayer.
-
-    ARM_COMPUTE_ERROR_ON(input->num_dimensions() < 3);
+    // The output shape will be the flatten version of the input (i.e. [ width * height * channels, num_batches, ... ] ). Used for FlattenLayer and FullyConnectedLayer.
 
     TensorShape output_shape{ input->tensor_shape() };
 
-    const size_t flatten_shape = input->dimension(0) * input->dimension(1) * input->dimension(2);
-    output_shape.set(0, flatten_shape);
-    output_shape.remove_dimension(1);
-    output_shape.remove_dimension(1);
+    output_shape.collapse(3);
 
     return output_shape;
 }
@@ -250,12 +291,18 @@ inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &inp
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        input_tile_size  = Size2D(output_tile_size.width + kernel_size.width - 1, output_tile_size.height + kernel_size.height - 1);
 
-    // Compute height
-    const unsigned int num_tiles_x = std::ceil((input.tensor_shape().x() - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
-    const unsigned int num_tiles_y = std::ceil((input.tensor_shape().y() - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+    const size_t idx_w = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
 
-    const unsigned int width  = input.tensor_shape()[get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL)];
-    const unsigned int height = num_tiles_x * num_tiles_y;
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input.tensor_shape()[idx_w], input.tensor_shape()[idx_h]),
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
+
+    const unsigned int width  = input.tensor_shape()[idx_c];
+    const unsigned int height = num_tiles.area();
     const unsigned int depth  = input_tile_size.area();
 
     TensorShape output_shape{ input.tensor_shape() };
@@ -360,34 +407,82 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 }
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
-    TensorShape tensor_shape{ input0.tensor_shape() };
-    tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1.dimension(0));
-    tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0.dimension(1));
+    ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
+    ARM_COMPUTE_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The first input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
 
-    return tensor_shape;
+    const bool reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
+    const bool reinterpret_output_as_3d = reshape_info.depth_output_gemm3d() != 1;
+    const int  m                        = reshape_info.reinterpret_input_as_3d() ? input0.dimension(1) * input0.dimension(2) : input0.dimension(1);
+
+    // If the output of GEMM has to be reinterpreted as 3D, the number of input0 rows (M) is obtained collapsing the second and third
+    // dimension of the output tensor
+    const int dim0 = is_interleaved_transposed ? reshape_info.n() : input1.dimension(0);
+    const int dim1 = is_interleaved_transposed ? reshape_info.m() / reshape_info.depth_output_gemm3d() : m / reshape_info.depth_output_gemm3d();
+    const int dim2 = reinterpret_input_as_3d ? input0.tensor_shape()[3] : input0.tensor_shape()[2];
+    const int dim3 = reinterpret_input_as_3d ? 1 : input0.tensor_shape()[3];
+
+    TensorShape output_shape{ input0.tensor_shape() };
+
+    output_shape.set(0, dim0);
+    output_shape.set(1, dim1);
+    output_shape.set(2, reinterpret_output_as_3d ? reshape_info.depth_output_gemm3d() : dim2);
+    output_shape.set(3, reinterpret_output_as_3d ? dim2 : dim3);
+    output_shape.set(4, reinterpret_output_as_3d ? dim3 : 1);
+
+    return output_shape;
 }
 
 template <typename T>
-inline TensorShape get_shape_from_info(T *info)
+inline TensorShape extract_shape(T *data)
 {
-    return info->info()->tensor_shape();
+    return data->info()->tensor_shape();
 }
 
-inline TensorShape get_shape_from_info(ITensorInfo *info)
+inline TensorShape extract_shape(ITensorInfo *data)
 {
-    return info->tensor_shape();
+    return data->tensor_shape();
+}
+
+inline TensorShape extract_shape(const TensorShape *data)
+{
+    return *data;
+}
+
+template <typename T>
+inline TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vector)
+{
+    TensorShape out_shape = extract_shape(inputs_vector[0]);
+
+    size_t max_x = 0;
+    size_t max_y = 0;
+    size_t depth = 0;
+
+    for(const auto &tensor : inputs_vector)
+    {
+        ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+        const TensorShape shape = extract_shape(tensor);
+        max_x                   = std::max(shape.x(), max_x);
+        max_y                   = std::max(shape.y(), max_y);
+        depth += shape.z();
+    }
+
+    out_shape.set(0, max_x);
+    out_shape.set(1, max_y);
+    out_shape.set(2, depth);
+
+    return out_shape;
 }
 
 template <typename T>
 inline TensorShape calculate_width_concatenate_shape(const std::vector<T *> &inputs_vector)
 {
-    TensorShape out_shape = get_shape_from_info(inputs_vector[0]);
+    TensorShape out_shape = extract_shape(inputs_vector[0]);
 
     size_t width = 0;
     for(const auto &tensor : inputs_vector)
     {
         ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-        const TensorShape shape = get_shape_from_info(tensor);
+        const TensorShape shape = extract_shape(tensor);
         width += shape.x();
     }
 

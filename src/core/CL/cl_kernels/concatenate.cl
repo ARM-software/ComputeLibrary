@@ -23,9 +23,14 @@
  */
 #include "helpers.h"
 
+#if defined(DATA_TYPE)
+#if defined(WIDTH_OFFSET)
 /** This kernel concatenates the input tensor into the output tensor along the first dimension
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8, QASYMM8, QS16, F16, F32
+ * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
+ * @note The offset for the first spatial dimension has to be passed at compile time using -DWIDTH_OFFSET. i.e. -DWIDTH_OFFSET=128
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -45,8 +50,7 @@
  */
 __kernel void concatenate_width(
     TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
-    int offset)
+    TENSOR3D_DECLARATION(dst))
 {
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
@@ -55,12 +59,13 @@ __kernel void concatenate_width(
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
     VSTORE(VEC_SIZE)
-    (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offset));
+    (source_values, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
 }
+#endif // defined(WIDTH_OFFSET)
 
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8, QS16, F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -92,3 +97,4 @@ __kernel void concatenate_depth(
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offsets.z));
 }
+#endif // defined(DATA_TYPE)

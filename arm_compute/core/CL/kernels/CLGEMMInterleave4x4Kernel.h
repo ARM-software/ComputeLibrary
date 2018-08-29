@@ -64,20 +64,22 @@ public:
     CLGEMMInterleave4x4Kernel &operator=(CLGEMMInterleave4x4Kernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input                     Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in]  input                     Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output                    Output tensor. Data type supported: same as @p input
      * @param[in]  mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleave block
+     * @param[in]  reinterpret_input_as_3d   (Optional) True if the input has to be reinterpreted as 3D tensor
      */
-    void configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height = 1);
+    void configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMInterleave4x4Kernel
      *
-     * @param[in] input                     Input tensor info. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] input                     Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output                    Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] mult_interleave4x4_height Multiplication factor for the height of the 4x4 interleave block
+     * @param[in] reinterpret_input_as_3d   (Optional) True if the input has to be reinterpreted as 3D tensor
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int mult_interleave4x4_height);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int mult_interleave4x4_height, bool reinterpret_input_as_3d);
 
     // Inherited methods overridden
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -85,6 +87,7 @@ public:
 private:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    bool             _reinterpret_input_as_3d;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMINTERLEAVE4X4KERNEL_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "helpers.h"
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
-#pragma OPENCL EXTENSION cl_khr_int64_extended_atomics : enable
 
 /** This function calculates the sum and sum of squares of a given input image.
  *
@@ -81,4 +80,3 @@ __kernel void mean_stddev_accumulate(
 }
 
 #pragma OPENCL EXTENSION cl_khr_int64_base_atomics : disable
-#pragma OPENCL EXTENSION cl_khr_int64_extended_atomics : disable

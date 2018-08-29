@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -150,6 +150,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ad03c1c39d75226aecd5acd8e3959b02a"><td class="memItemLeft" align="right" valign="top">HarrisCornersParameters&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad03c1c39d75226aecd5acd8e3959b02a">harris_corners_parameters</a> ()</td></tr>
 <tr class="memdesc:ad03c1c39d75226aecd5acd8e3959b02a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate parameters for Harris Corners algorithm.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad03c1c39d75226aecd5acd8e3959b02a">More...</a><br /></td></tr>
 <tr class="separator:ad03c1c39d75226aecd5acd8e3959b02a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd7b375e25d1b41ff9da321024c829ce"><td class="memItemLeft" align="right" valign="top">CannyEdgeParameters&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#abd7b375e25d1b41ff9da321024c829ce">canny_edge_parameters</a> ()</td></tr>
+<tr class="memdesc:abd7b375e25d1b41ff9da321024c829ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate parameters for Canny edge algorithm.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#abd7b375e25d1b41ff9da321024c829ce">More...</a><br /></td></tr>
+<tr class="separator:abd7b375e25d1b41ff9da321024c829ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7">convert_from_asymmetric</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src)</td></tr>
 <tr class="memdesc:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert quantized simple tensor into float using tensor quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7">More...</a><br /></td></tr>
 <tr class="separator:ab24849be91cfb00a72f7a61a7e00fdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -166,8 +169,14 @@ Functions</h2></td></tr>
 <tr class="memitem:ab9399f3f1910e0f236cd6f4613bd4397"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab9399f3f1910e0f236cd6f4613bd4397">get_tile</a> (const SimpleTensor&lt; T &gt; &amp;in, SimpleTensor&lt; T &gt; &amp;tile, const Coordinates &amp;coord)</td></tr>
 <tr class="memdesc:ab9399f3f1910e0f236cd6f4613bd4397"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a 2D tile from a tensor.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab9399f3f1910e0f236cd6f4613bd4397">More...</a><br /></td></tr>
 <tr class="separator:ab9399f3f1910e0f236cd6f4613bd4397"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1e0de8172e8e875f08d040d03b164a5"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:af1e0de8172e8e875f08d040d03b164a5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af1e0de8172e8e875f08d040d03b164a5">zeros</a> (SimpleTensor&lt; T &gt; &amp;in, const Coordinates &amp;anchor, const TensorShape &amp;shape)</td></tr>
+<tr class="memdesc:af1e0de8172e8e875f08d040d03b164a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill with zeros the input tensor in the area defined by anchor and shape.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#af1e0de8172e8e875f08d040d03b164a5">More...</a><br /></td></tr>
+<tr class="separator:af1e0de8172e8e875f08d040d03b164a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7159671a452710595f7d01e69aef7a13"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7159671a452710595f7d01e69aef7a13">get_tile</a> (const SimpleTensor&lt; float &gt; &amp;in, SimpleTensor&lt; float &gt; &amp;roi, const Coordinates &amp;coord)</td></tr>
 <tr class="separator:a7159671a452710595f7d01e69aef7a13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab17c3c69a66d5ffed29f3aea46ef5d0d"><td class="memItemLeft" align="right" valign="top">template void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab17c3c69a66d5ffed29f3aea46ef5d0d">zeros</a> (SimpleTensor&lt; float &gt; &amp;in, const Coordinates &amp;anchor, const TensorShape &amp;shape)</td></tr>
+<tr class="separator:ab17c3c69a66d5ffed29f3aea46ef5d0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -175,7 +184,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="_helpers_8cpp.xhtml">Helpers.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -124,7 +124,6 @@ $(document).ready(function(){initNavTree('tests_2_utils_8h.xhtml','');});
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_coordinates_8h_source.xhtml">arm_compute/core/Coordinates.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="arm__compute_2core_2_fixed_point_8h_source.xhtml">arm_compute/core/FixedPoint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_h_o_g_info_8h_source.xhtml">arm_compute/core/HOGInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_pyramid_info_8h_source.xhtml">arm_compute/core/PyramidInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_size2_d_8h_source.xhtml">arm_compute/core/Size2D.h</a>&quot;</code><br />
@@ -237,6 +236,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a1177ef8061a8b46b5d79c1af93c12de1"><td class="memItemLeft" align="right" valign="top">ValidRegion&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1177ef8061a8b46b5d79c1af93c12de1">shape_to_valid_region_gaussian_pyramid_half</a> (const TensorShape &amp;a_shape, const ValidRegion &amp;a_valid_region, bool border_undefined=false)</td></tr>
 <tr class="memdesc:a1177ef8061a8b46b5d79c1af93c12de1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a valid region for Gaussian <a class="el" href="classarm__compute_1_1_pyramid.xhtml" title="Basic implementation of the pyramid interface. ">Pyramid</a> Half based on tensor shape and valid region at level "i - 1" and border mode.  <a href="namespacearm__compute_1_1test.xhtml#a1177ef8061a8b46b5d79c1af93c12de1">More...</a><br /></td></tr>
 <tr class="separator:a1177ef8061a8b46b5d79c1af93c12de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6dc99a4de397ceab182b6fd46fa55f47"><td class="memItemLeft" align="right" valign="top">ValidRegion&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a6dc99a4de397ceab182b6fd46fa55f47">shape_to_valid_region_laplacian_pyramid</a> (const TensorShape &amp;a_shape, const ValidRegion &amp;a_valid_region, bool border_undefined=false)</td></tr>
+<tr class="memdesc:a6dc99a4de397ceab182b6fd46fa55f47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a valid region for Laplacian <a class="el" href="classarm__compute_1_1_pyramid.xhtml" title="Basic implementation of the pyramid interface. ">Pyramid</a> based on tensor shape and valid region at level "i - 1" and border mode.  <a href="namespacearm__compute_1_1test.xhtml#a6dc99a4de397ceab182b6fd46fa55f47">More...</a><br /></td></tr>
+<tr class="separator:a6dc99a4de397ceab182b6fd46fa55f47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e6934e95738573214c2ce1d6648d116"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a1e6934e95738573214c2ce1d6648d116"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1e6934e95738573214c2ce1d6648d116">store_value_with_data_type</a> (void *ptr, T value, DataType data_type)</td></tr>
 <tr class="memdesc:a1e6934e95738573214c2ce1d6648d116"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the value after casting the pointer according to <code>data_type</code>.  <a href="namespacearm__compute_1_1test.xhtml#a1e6934e95738573214c2ce1d6648d116">More...</a><br /></td></tr>
@@ -254,10 +256,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a856b55fc20ddcbdbeb84c35ae27bedac"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a856b55fc20ddcbdbeb84c35ae27bedac">is_in_valid_region</a> (const ValidRegion &amp;valid_region, Coordinates coord)</td></tr>
 <tr class="memdesc:a856b55fc20ddcbdbeb84c35ae27bedac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a coordinate is within a valid region.  <a href="namespacearm__compute_1_1test.xhtml#a856b55fc20ddcbdbeb84c35ae27bedac">More...</a><br /></td></tr>
 <tr class="separator:a856b55fc20ddcbdbeb84c35ae27bedac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53c8a8429d0e6fd79a8acbd4aa4581fd"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a53c8a8429d0e6fd79a8acbd4aa4581fd"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a53c8a8429d0e6fd79a8acbd4aa4581fd">create_tensor</a> (const TensorShape &amp;shape, DataType data_type, int num_channels=1, int fixed_point_position=0, QuantizationInfo quantization_info=QuantizationInfo(), DataLayout data_layout=DataLayout::NCHW)</td></tr>
-<tr class="memdesc:a53c8a8429d0e6fd79a8acbd4aa4581fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and initialize a tensor of the given type.  <a href="namespacearm__compute_1_1test.xhtml#a53c8a8429d0e6fd79a8acbd4aa4581fd">More...</a><br /></td></tr>
-<tr class="separator:a53c8a8429d0e6fd79a8acbd4aa4581fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade9b3889d957ceeca403e2ab66deb672"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ade9b3889d957ceeca403e2ab66deb672"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ade9b3889d957ceeca403e2ab66deb672">create_tensor</a> (const TensorShape &amp;shape, DataType data_type, int num_channels=1, QuantizationInfo quantization_info=QuantizationInfo(), DataLayout data_layout=DataLayout::NCHW)</td></tr>
+<tr class="memdesc:ade9b3889d957ceeca403e2ab66deb672"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and initialize a tensor of the given type.  <a href="namespacearm__compute_1_1test.xhtml#ade9b3889d957ceeca403e2ab66deb672">More...</a><br /></td></tr>
+<tr class="separator:ade9b3889d957ceeca403e2ab66deb672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a1319867418814820134ec77cf09eed"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a1a1319867418814820134ec77cf09eed"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1a1319867418814820134ec77cf09eed">create_tensor</a> (const TensorShape &amp;shape, Format format)</td></tr>
 <tr class="memdesc:a1a1319867418814820134ec77cf09eed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and initialize a tensor of the given type.  <a href="namespacearm__compute_1_1test.xhtml#a1a1319867418814820134ec77cf09eed">More...</a><br /></td></tr>
@@ -274,6 +276,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a0c2176d85e729a5a5361181fd8119320"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a0c2176d85e729a5a5361181fd8119320">create_pyramid</a> (const PyramidInfo &amp;pyramid_info)</td></tr>
 <tr class="memdesc:a0c2176d85e729a5a5361181fd8119320"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create and initialize a <a class="el" href="classarm__compute_1_1_pyramid.xhtml" title="Basic implementation of the pyramid interface. ">Pyramid</a> of the given type.  <a href="namespacearm__compute_1_1test.xhtml#a0c2176d85e729a5a5361181fd8119320">More...</a><br /></td></tr>
 <tr class="separator:a0c2176d85e729a5a5361181fd8119320"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a5cc10c5cfc190c61b60d393c8ab566"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a9a5cc10c5cfc190c61b60d393c8ab566">init_conv</a> (int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)</td></tr>
+<tr class="memdesc:a9a5cc10c5cfc190c61b60d393c8ab566"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a convolution matrix.  <a href="namespacearm__compute_1_1test.xhtml#a9a5cc10c5cfc190c61b60d393c8ab566">More...</a><br /></td></tr>
+<tr class="separator:a9a5cc10c5cfc190c61b60d393c8ab566"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6e554d44ff4ae133f1a1433d8489e0c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ae6e554d44ff4ae133f1a1433d8489e0c">init_separable_conv</a> (int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)</td></tr>
+<tr class="memdesc:ae6e554d44ff4ae133f1a1433d8489e0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a separable convolution matrix.  <a href="namespacearm__compute_1_1test.xhtml#ae6e554d44ff4ae133f1a1433d8489e0c">More...</a><br /></td></tr>
+<tr class="separator:ae6e554d44ff4ae133f1a1433d8489e0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7324cc960068b65c558b7d25dfe2914"><td class="memItemLeft" align="right" valign="top">std::vector&lt; ROI &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ac7324cc960068b65c558b7d25dfe2914">generate_random_rois</a> (const TensorShape &amp;shape, const ROIPoolingLayerInfo &amp;pool_info, unsigned int num_rois, std::random_device::result_type seed)</td></tr>
 <tr class="memdesc:ac7324cc960068b65c558b7d25dfe2914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a vector of random ROIs.  <a href="namespacearm__compute_1_1test.xhtml#ac7324cc960068b65c558b7d25dfe2914">More...</a><br /></td></tr>
 <tr class="separator:ac7324cc960068b65c558b7d25dfe2914"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -305,7 +313,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="tests_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

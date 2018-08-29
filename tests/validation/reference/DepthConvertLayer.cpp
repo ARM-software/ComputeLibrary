@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,6 @@
  */
 #include "DepthConvertLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 #include "tests/Types.h"
@@ -36,44 +35,6 @@ namespace validation
 {
 namespace reference
 {
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&std::is_floating_point<T2>::value, int >::type >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
-{
-    ARM_COMPUTE_UNUSED(policy);
-    ARM_COMPUTE_UNUSED(shift);
-
-    using namespace fixed_point_arithmetic;
-    SimpleTensor<T2> result(src.shape(), dt_out);
-
-    const int fixed_point_position = src.fixed_point_position();
-
-    for(int i = 0; i < src.num_elements(); ++i)
-    {
-        result[i] = static_cast<float>(fixed_point<T1>(src[i], fixed_point_position, true));
-    }
-
-    return result;
-}
-
-template < typename T1, typename T2, typename std::enable_if < std::is_floating_point<T1>::value &&std::is_integral<T2>::value, int >::type >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
-{
-    ARM_COMPUTE_UNUSED(policy);
-    ARM_COMPUTE_UNUSED(shift);
-
-    using namespace fixed_point_arithmetic;
-    SimpleTensor<T2> result(src.shape(), dt_out, 1, src.fixed_point_position());
-
-    const int fixed_point_position = result.fixed_point_position();
-
-    for(int i = 0; i < src.num_elements(); ++i)
-    {
-        result[i] = fixed_point<T2>(src[i], fixed_point_position).raw();
-    }
-
-    return result;
-}
-
 template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&std::is_integral<T2>::value &&!std::is_same<T1, T2>::value, int >::type >
 SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
 {
@@ -99,45 +60,31 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     return result;
 }
 
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&std::is_integral<T2>::value &&std::is_same<T1, T2>::value, int >::type >
+template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&is_floating_point<T2>::value &&!std::is_same<T1, T2>::value, int >::type >
 SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
 {
-    ARM_COMPUTE_UNUSED(policy);
-
-    using namespace fixed_point_arithmetic;
-
     SimpleTensor<T2> result(src.shape(), dt_out);
 
-    bool is_in_place = (&src == &result);
+    const uint32_t scale = 1 << shift;
 
-    const int fixed_point_position_in  = src.fixed_point_position();
-    const int fixed_point_position_out = (is_in_place) ? static_cast<int>(shift) : result.fixed_point_position();
-
-    if(!is_in_place || (fixed_point_position_in != fixed_point_position_out))
+    // Up-casting
+    if(src.data_type() <= dt_out)
     {
         for(int i = 0; i < src.num_elements(); ++i)
         {
-            auto x = fixed_point<T2>(src[i], fixed_point_position_in, true);
-            x.resacle(fixed_point_position_out);
-            result[i] = x.raw();
+            result[i] = src[i] * static_cast<T2>(scale);
         }
     }
-
-    return result;
-}
-
-template < typename T1, typename T2, typename std::enable_if < std::is_floating_point<T1>::value &&is_floating_point<T2>::value, int >::type >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
-{
-    ARM_COMPUTE_UNUSED(policy);
-    ARM_COMPUTE_UNUSED(shift);
-
-    SimpleTensor<T2> result(src.shape(), dt_out);
-
-    for(int i = 0; i < src.num_elements(); ++i)
+    // Down-casting
+    else
     {
-        result[i] = static_cast<T2>(src[i]);
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            T1 val    = src[i] / static_cast<T1>(scale);
+            result[i] = (policy == ConvertPolicy::SATURATE) ? saturate_cast<T2>(val) : static_cast<T2>(val);
+        }
     }
+    return result;
 }
 
 template SimpleTensor<uint16_t> depth_convert(const SimpleTensor<uint8_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
@@ -147,10 +94,8 @@ template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<uint16_t> &src, 
 template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<uint16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<int16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int32_t> depth_convert(const SimpleTensor<int16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-template SimpleTensor<float> depth_convert(const SimpleTensor<int8_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-template SimpleTensor<float> depth_convert(const SimpleTensor<int16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-template SimpleTensor<int8_t> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-template SimpleTensor<int16_t> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<half> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<float> depth_convert(const SimpleTensor<half> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 } // namespace reference
 } // namespace validation
 } // namespace test

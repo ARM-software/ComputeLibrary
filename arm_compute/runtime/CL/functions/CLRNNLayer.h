@@ -69,6 +69,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup              _memory_group;
@@ -80,6 +81,7 @@ private:
     CLTensor                   _fully_connected_out;
     CLTensor                   _gemm_output;
     CLTensor                   _add_output;
+    bool                       _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_CLRNN_LAYER_H__ */

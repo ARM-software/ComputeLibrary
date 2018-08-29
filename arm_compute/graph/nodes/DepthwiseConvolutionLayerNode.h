@@ -39,7 +39,7 @@ public:
      * @param[in] info   Convolution layer attributes
      * @param[in] method Depthwise convolution method to use
      */
-    DepthwiseConvolutionLayerNode(PadStrideInfo info, DepthwiseConvolutionMethod method = DepthwiseConvolutionMethod::DEFAULT);
+    DepthwiseConvolutionLayerNode(PadStrideInfo info, DepthwiseConvolutionMethod method = DepthwiseConvolutionMethod::Default);
     /** Sets the depthwise convolution method to use
      *
      * @param[in] method Depthwise convolution method to use

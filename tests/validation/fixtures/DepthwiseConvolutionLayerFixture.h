@@ -115,10 +115,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, 0, quantization_info, data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, 0, quantization_info, data_layout);
-        TensorType biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, 0, quantization_info, data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, 0, quantization_info, data_layout);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, quantization_info, data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, quantization_info, data_layout);
+        TensorType biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, quantization_info, data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, quantization_info, data_layout);
 
         // Create Depthwise Convolution configure function
         FunctionType dwc;
@@ -155,9 +155,9 @@ protected:
                                       unsigned int   depth_multiplier,
                                       const DataType data_type, const DataType bias_data_type, const QuantizationInfo quantization_info)
     {
-        SimpleTensor<T>     src{ in_shape, data_type, 1, 0, quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, data_type, 1, 0, quantization_info };
-        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, 0, quantization_info };
+        SimpleTensor<T>     src{ in_shape, data_type, 1, quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, data_type, 1, quantization_info };
+        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, quantization_info };
 
         fill(src, 0);
         fill(weights, 1);

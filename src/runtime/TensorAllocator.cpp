@@ -138,7 +138,7 @@ void TensorAllocator::allocate()
 
     if(_associated_memory_group == nullptr)
     {
-        _memory = Memory(std::make_shared<MemoryRegion>(info().total_size()));
+        _memory = Memory(std::make_shared<MemoryRegion>(info().total_size(), alignment()));
     }
     else
     {

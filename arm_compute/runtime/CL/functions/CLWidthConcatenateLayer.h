@@ -50,14 +50,20 @@ public:
     CLWidthConcatenateLayer();
     /** Initialise the kernel's inputs vector and output.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[out]    output        Output tensor. Data types supported: Same as @p input.
+     * @param[in]  inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
+     *                           Dimensions of all the inputs should match apart for the width which can differ.
+     * @param[out] output        Output tensor. Data types supported: Same as @p input.
+     *                           Output tensor dimensions are the same with the inputs from the second dimension and above.
+     *                           The first dimension (width) is the sum of the input tensors' widths.
      */
     void configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConcatenateLayerKernel
      *
-     * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in] output        Output tensor info. Data types supported: Same as @p input.
+     * @param[in] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
+     *                          Dimensions of all the inputs should match apart for the width which can differ.
+     * @param[in] output        Output tensor. Data types supported: Same as @p input.
+     *                          Output tensor dimensions are the same with the inputs from the second dimension and above.
+     *                          The first dimension (width) is the sum of the input tensors' widths.
      *
      * @return a status
      */

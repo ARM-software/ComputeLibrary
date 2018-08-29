@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,40 +45,37 @@ class DeconvolutionLayerFixtureBase : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
-               const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type, int fractional_bits)
+               const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type)
     {
-        _fractional_bits = fractional_bits;
-        _data_type       = data_type;
+        _data_type = data_type;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, fractional_bits);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, fractional_bits);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        if(is_data_type_float(tensor.data_type()))
         {
-            case DataType::F32:
-            {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
-                library->fill(tensor, distribution, i);
-                break;
-            }
-            default:
-                library->fill_tensor_uniform(tensor, i);
+            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+            library->fill(tensor, distribution, i);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, i);
         }
     }
 
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                              const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type, int fixed_point_position)
+                              const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type)
     {
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, fixed_point_position);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, fixed_point_position);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1);
 
         // Create and configure function
         FunctionType conv;
@@ -112,12 +109,12 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                      const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> inner_border, DataType data_type, int fixed_point_position)
+                                      const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> inner_border, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, fixed_point_position };
-        SimpleTensor<T> weights{ weights_shape, data_type, 1, fixed_point_position };
-        SimpleTensor<T> bias{ bias_shape, data_type, 1, fixed_point_position };
+        SimpleTensor<T> src{ input_shape, data_type, 1 };
+        SimpleTensor<T> weights{ weights_shape, data_type, 1 };
+        SimpleTensor<T> bias{ bias_shape, data_type, 1 };
 
         // Fill reference
         fill(src, 0);
@@ -129,7 +126,6 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
     DataType        _data_type{};
 };
 
@@ -148,7 +144,7 @@ public:
         const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
         auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, inner_border.first, inner_border.second, sx, sy);
         TensorShape output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, 0);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type);
     }
 };
 

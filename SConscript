@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v18.05"
-SONAME_VERSION="11.0.0"
+VERSION = "v18.08"
+SONAME_VERSION="12.0.0"
 
 Import('env')
 Import('vars')
@@ -43,7 +43,7 @@ def build_library(name, sources, static=False, libs=[]):
             library_prefix = obj[0].path[:-(1 + len(SONAME_VERSION))]
             real_lib = "%s.%s" % (library_prefix, SONAME_VERSION)
 
-            for f in Glob("#%s*" % library_prefix):
+            for f in Glob("#%s.*" % library_prefix):
                 if str(f) != real_lib:
                     symlinks.append("%s/%s" % (directory,str(f)))
 
@@ -118,15 +118,16 @@ def create_version_file(target, source, env):
     except (OSError, subprocess.CalledProcessError):
         git_hash="unknown"
 
-    version_filename = "%s/arm_compute_version.embed" % Dir("src/core").path
     build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
 arm_compute_env = env.Clone()
+version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
+arm_compute_env.AlwaysBuild(version_file)
 
 # Generate embed files
-generate_embed = [ arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file) ]
+generate_embed = [ version_file ]
 if env['opencl'] and env['embed_kernels']:
     cl_files = Glob('src/core/CL/cl_kernels/*.cl')
     cl_files += Glob('src/core/CL/cl_kernels/*.h')
@@ -190,6 +191,7 @@ if env['opencl']:
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
 
@@ -209,6 +211,7 @@ if env['neon']:
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
 
 if env['gles_compute']:
     if env['os'] != 'android':

@@ -90,6 +90,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                            _memory_group;
@@ -100,7 +101,7 @@ private:
     Tensor                                 _input_im2col_reshaped;
     Tensor                                 _weights_reshaped;
     Tensor                                 _gemm_output;
-    bool                                   _is_first_run;
+    bool                                   _is_prepared;
     const ITensor                         *_original_weights;
 };
 }

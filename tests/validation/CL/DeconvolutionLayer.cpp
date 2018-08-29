@@ -43,7 +43,9 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<float>  tolerance_fp32(0.001f);               /**< Tolerance for floating point tests */
+RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's for DataType::F16 */
+constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
                      * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
@@ -101,33 +103,33 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Mismatching data type
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Invalid weights shape
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),   // Non supported data type
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 11),  // Invalid bias shape
-                                            TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32, 0), // Window shrink
-                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),   // Non supported data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),  // Invalid bias shape
+                                            TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32), // Window shrink
+                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                           }),
-    framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QS8, 5),
-                                            TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32, 11),
-                                            TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32, 0),
-                                              TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),
+    framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QASYMM8),
+                                            TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32),
+                                              TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 5),
-                                            TensorInfo(TensorShape(25U, 11U), 1, DataType::F32, 11),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
+    framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(4U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 5),
-                                            TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32, 0),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
@@ -169,10 +171,9 @@ template <typename T>
 using CLDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 1, 1>;
 
 TEST_SUITE(Float)
-
 TEST_SUITE(FP32)
-TEST_SUITE(W4x4)
 
+TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::ALL, combine(data4x4, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -181,7 +182,6 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(W3x3)
-
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(data3x3, framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -194,6 +194,34 @@ FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::Da
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END()
+
+TEST_SUITE_END()
+
+TEST_SUITE(FP16)
+
+TEST_SUITE(W4x4)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::ALL, combine(data4x4, framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(data3x3, framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(W1x1)
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::ALL, combine(data1x1, framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,18 +43,17 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMInterleave4x4ValidationFixedPointFixture : public framework::Fixture
+class GEMMInterleave4x4ValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(size_t x, size_t y, DataType data_type, int fractional_bits)
+    void setup(size_t x, size_t y, DataType data_type)
     {
-        _fractional_bits = fractional_bits;
-        _data_type       = data_type;
+        _data_type = data_type;
         const TensorShape shape_a(x, y);
         const TensorShape shape_b(static_cast<size_t>(x * 4.f), static_cast<size_t>(std::ceil(y / 4.f)));
-        _target    = compute_target(shape_a, shape_b, data_type, fractional_bits);
-        _reference = compute_reference(shape_a, shape_b, data_type, fractional_bits);
+        _target    = compute_target(shape_a, shape_b, data_type);
+        _reference = compute_reference(shape_a, shape_b, data_type);
     }
 
 protected:
@@ -76,11 +75,11 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, DataType data_type, int fixed_point_position)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, DataType data_type)
     {
         // Create tensors
-        TensorType a = create_tensor<TensorType>(shape_a, data_type, 1, fixed_point_position);
-        TensorType b = create_tensor<TensorType>(shape_b, data_type, 1, fixed_point_position);
+        TensorType a = create_tensor<TensorType>(shape_a, data_type, 1);
+        TensorType b = create_tensor<TensorType>(shape_b, data_type, 1);
 
         // Create and configure function
         FunctionType f;
@@ -105,11 +104,11 @@ protected:
         return b;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, DataType data_type, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> a{ shape_a, data_type, 1, fixed_point_position };
-        SimpleTensor<T> b{ shape_b, data_type, 1, fixed_point_position };
+        SimpleTensor<T> a{ shape_a, data_type, 1 };
+        SimpleTensor<T> b{ shape_b, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
@@ -120,21 +119,8 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
     DataType        _data_type{};
 };
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMInterleave4x4ValidationFixture : public GEMMInterleave4x4ValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(size_t x, size_t y, DataType data_type)
-    {
-        GEMMInterleave4x4ValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(x, y, data_type, 0);
-    }
-};
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

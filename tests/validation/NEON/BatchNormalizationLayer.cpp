@@ -48,9 +48,7 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 #endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-constexpr AbsoluteTolerance<float> tolerance_qs8(3.0f);  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
-constexpr AbsoluteTolerance<float> tolerance_qs16(6.0f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS16 */
-const auto                         act_infos = framework::dataset::make("ActivationInfo",
+const auto act_infos = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
@@ -66,13 +64,10 @@ using NEBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixtur
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                    combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
-                                                                           framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 })),
+                                                                           framework::dataset::make("DataType", { DataType::F32 })),
                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
-
     TensorShape src_dst_shapes = shape0;
     if(data_layout == DataLayout::NHWC)
     {
@@ -80,12 +75,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     }
 
     // Create tensors
-    Tensor src   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    Tensor dst   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    Tensor src   = create_tensor<Tensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    Tensor dst   = create_tensor<Tensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor var   = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1);
 
     // Create and Configure function
     NEBatchNormalizationLayer norm;
@@ -106,46 +101,30 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point position
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Fused activation with fixed point not supported
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Fused activation's a < b
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
-                                                       TensorInfo(),
                                                      })),
                framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F16),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(5U), 1, DataType::F32),
-                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
-                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                      TensorInfo(TensorShape(2U), 1, DataType::F32),
-                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
-                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                    })),
                framework::dataset::make("ActivationLayerInfo",{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f),
-                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f, 2.f),
-                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f, 2.f),
                                                      ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 6.f),
-                                                     ActivationLayerInfo(),
-                                                     ActivationLayerInfo(),
                                                    })),
-               framework::dataset::make("Expected", { true, false, false, false, false, false, false, false, true, true})),
+               framework::dataset::make("Expected", { true, false, false, false, false, false})),
                input_info, output_info, mvbg_info, act_info, expected)
 {
     const auto &mean_info = mvbg_info;
@@ -189,42 +168,6 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-TEST_SUITE_END()
-
-TEST_SUITE(Quantized)
-template <typename T>
-using NEBatchNormalizationLayerFixedPointFixture = BatchNormalizationLayerValidationFixedPointFixture<Tensor, Accessor, NEBatchNormalizationLayer, T>;
-
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                       framework::dataset::make("UseBeta", false)),
-                                                               framework::dataset::make("UseGamma", false)),
-                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                               framework::dataset::make("DataType", DataType::QS8)),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
-                               framework::dataset::make("FractionalBits", 1, 6)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qs8, 0);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                       framework::dataset::make("UseBeta", false)),
-                                                               framework::dataset::make("UseGamma", false)),
-                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                               framework::dataset::make("DataType", DataType::QS16)),
-                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
-                               framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qs16, 0);
-}
-TEST_SUITE_END()
-
 TEST_SUITE_END()
 
 TEST_SUITE_END()

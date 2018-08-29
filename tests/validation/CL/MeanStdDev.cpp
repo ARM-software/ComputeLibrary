@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,12 +39,17 @@ namespace
 {
 RelativeTolerance<float> tolerance_rel_high_error(0.05f);
 RelativeTolerance<float> tolerance_rel_low_error(0.0005f);
+AbsoluteTolerance<float> tolerance_rel_high_error_f32(0.01f);
+AbsoluteTolerance<float> tolerance_rel_low_error_f32(0.00001f);
+AbsoluteTolerance<float> tolerance_rel_high_error_f16(0.1f);
+AbsoluteTolerance<float> tolerance_rel_low_error_f16(0.01f);
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(MeanStdDev)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", { DataType::U8 })), shape,
+               data_type)
 {
     // Create tensors
     CLTensor src = create_tensor<CLTensor>(shape, data_type);
@@ -71,6 +76,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
 template <typename T>
 using CLMeanStdDevFixture = MeanStdDevValidationFixture<CLTensor, CLAccessor, CLMeanStdDev, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
                                                                                                           DataType::U8)))
 {
@@ -89,9 +95,43 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevFixture<uint8_t>, framework::Datase
     // Validate std_dev output
     validate(_target.second, _reference.second, tolerance_rel_high_error);
 }
+TEST_SUITE_END() // U8
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE(F16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                 DataType::F16)))
+{
+    // Validate mean output
+    validate(_target.first, _reference.first, tolerance_rel_low_error_f16);
+
+    // Validate std_dev output
+    validate(_target.second, _reference.second, tolerance_rel_high_error_f16);
+}
+TEST_SUITE_END() // F16
+
+TEST_SUITE(F32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLMeanStdDevFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                        DataType::F32)))
+{
+    // Validate mean output
+    validate(_target.first, _reference.first, tolerance_rel_low_error_f32);
+
+    // Validate std_dev output
+    validate(_target.second, _reference.second, tolerance_rel_high_error_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLMeanStdDevFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
+                                                                                                      DataType::F32)))
+{
+    // Validate mean output
+    validate(_target.first, _reference.first, tolerance_rel_low_error_f32);
+
+    // Validate std_dev output
+    validate(_target.second, _reference.second, tolerance_rel_high_error_f32);
+}
+TEST_SUITE_END() // F32
+
+TEST_SUITE_END() // MeanStdDev
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

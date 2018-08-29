@@ -49,7 +49,7 @@ void GCTransposeKernel::configure(const IGCTensor *input, IGCTensor *output)
     output_shape.set(1, h_out);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

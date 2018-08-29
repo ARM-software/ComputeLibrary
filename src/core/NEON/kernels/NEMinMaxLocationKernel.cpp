@@ -212,7 +212,7 @@ void NEMinMaxKernel::minmax_S16(Window win)
     execute_window_loop(win, [&](const Coordinates & id)
     {
         int        x      = x_start;
-        const auto in_ptr = reinterpret_cast<const int16_t *const>(input.ptr());
+        const auto in_ptr = reinterpret_cast<const int16_t *>(input.ptr());
 
         // Vector loop
         for(; x <= x_end - 16; x += 16)
@@ -271,7 +271,7 @@ void NEMinMaxKernel::minmax_F32(Window win)
     execute_window_loop(win, [&](const Coordinates & id)
     {
         int        x      = x_start;
-        const auto in_ptr = reinterpret_cast<const float *const>(input.ptr());
+        const auto in_ptr = reinterpret_cast<const float *>(input.ptr());
 
         // Vector loop
         for(; x <= x_end - 8; x += 8)

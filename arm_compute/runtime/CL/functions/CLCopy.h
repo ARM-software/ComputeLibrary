@@ -38,11 +38,19 @@ class CLCopy : public ICLSimpleFunction
 public:
     /** Initialise the function's source and destination.
      *
-     * @param[in]  input  Source tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32.
+     * @param[in]  input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      *
      */
     void configure(ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLCopy
+     *
+     * @param[in] input  Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] output Output tensor. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLCOPY_H__ */

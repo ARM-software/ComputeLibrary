@@ -1,4 +1,8 @@
 <map id="CLIm2ColKernel" name="CLIm2ColKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="26,80,106,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="34,5,98,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="5,81,85,108"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="13,5,77,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor. " alt="" coords="109,81,189,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor. " alt="" coords="116,5,183,32"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_pad_stride_info.xhtml" title="Padding and stride information class. " alt="" coords="213,81,320,108"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle. " alt="" coords="344,81,411,108"/>
 </map>

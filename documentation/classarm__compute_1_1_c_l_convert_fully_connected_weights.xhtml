@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -204,9 +204,9 @@ Static Public Member Functions</h2></td></tr>
 <p>Initialize the function. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/U32/S32/QS32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The converted weights tensor. Shape and Data Type: Same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). Must be in NCHW format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>The data layout the weights have been trained in. </td></tr>
   </table>
   </dd>
@@ -261,9 +261,9 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml">CLConvertFullyConnectedWeights</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/U32/S32/QS32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source weights tensor info to convert. Must be 2 dimensional. Data types supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The converted weights tensor info. Shape and Data Type: Same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). Must be in NCHW format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">original_input_shape</td><td>Shape of the original input tensor (the one entering fully connected layer). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>The data layout the weights have been trained in. </td></tr>
   </table>
   </dd>
@@ -280,7 +280,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml">CLConvertFullyConnectedWeights</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

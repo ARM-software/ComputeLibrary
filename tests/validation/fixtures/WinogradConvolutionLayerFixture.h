@@ -36,6 +36,7 @@
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/GEMM.h"
+#include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 #include "tests/validation/reference/Winograd.h"
 
@@ -54,7 +55,8 @@ class WinogradConvolutionLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataType data_type, ActivationLayerInfo act_info)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info)
     {
         ARM_COMPUTE_UNUSED(dilation);
 
@@ -83,7 +85,7 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info,
                               DataType data_type, ActivationLayerInfo act_info)
     {
         // Create tensors
@@ -158,11 +160,12 @@ class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixt
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataType data_type, ActivationLayerInfo act_info)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
+
     {
         ARM_COMPUTE_UNUSED(dilation);
-
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
     }
 
@@ -187,14 +190,21 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                              DataType data_type, ActivationLayerInfo act_info)
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info,
+                              DataType data_type, ActivationLayerInfo act_info, const DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -249,7 +259,18 @@ protected:
             fill(bias, 2, 0.f, 0.f);
         }
 
-        WinogradInfo winograd_info(Size2D(4U, 4U),
+        // Set output tile
+        Size2D output_tile(4U, 4U);
+        if(weights_shape[0] == 1)
+        {
+            output_tile.width = 1;
+        }
+        else if(weights_shape[1] == 1)
+        {
+            output_tile.height = 1;
+        }
+
+        WinogradInfo winograd_info(output_tile,
                                    Size2D(weights_shape[0], weights_shape[1]),
                                    Size2D(input_shape[0], input_shape[1]),
                                    info,
@@ -312,10 +333,15 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
+    TensorType compute_target(TensorShape input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo());
 
         // Create and configure function
         FunctionType transf;
@@ -343,7 +369,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo(), data_layout };
+        SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
@@ -390,11 +416,16 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
+    TensorType compute_target(TensorShape input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo());
 
         // Create and configure function
         FunctionType filter_transform;
@@ -421,7 +452,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo(), data_layout };
+        SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
@@ -440,10 +471,8 @@ public:
     template <typename...>
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataType data_type)
     {
-        TensorShape output_shape = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
-
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _target    = compute_target(input_shape, winograd_info, data_type);
+        _reference = compute_reference(input_shape, winograd_info, data_type);
     }
 
 protected:
@@ -467,43 +496,53 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape, const WinogradInfo &winograd_info, DataType data_type)
     {
+        TensorShape output_shape = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
+        TensorType src  = create_tensor<TensorType>(input_shape, data_type);
+        TensorType bias = create_tensor<TensorType>(output_shape[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)], data_type);
+        TensorType dst  = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
         // Create and configure function
         FunctionType output_transform;
-        output_transform.configure(&src, nullptr, &dst, winograd_info);
+        output_transform.configure(&src, &bias, &dst, winograd_info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
+        fill(AccessorType(bias), 1, -1.f, 1.f);
 
         output_transform.run();
 
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, WinogradInfo winograd_info, DataType data_type)
     {
+        winograd_info.output_data_layout = DataLayout::NCHW;
+        TensorShape output_shape         = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
+
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type };
         SimpleTensor<T> bias{ TensorShape(input_shape[0]), data_type };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
-        fill(bias, 1, 0.0f, 0.0f); // Fill with zeros as we validate just the output transform without bias contribution
+        fill(bias, 1, -1.f, 1.f);
 
         return reference::winograd_output_transform<T>(src, bias, output_shape, winograd_info);
     }

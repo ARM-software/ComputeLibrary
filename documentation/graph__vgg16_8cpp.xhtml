@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -121,9 +121,9 @@ $(document).ready(function(){initNavTree('graph__vgg16_8cpp.xhtml','');});
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="graph_8h_source.xhtml">arm_compute/graph.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_toolchain_support_8h_source.xhtml">support/ToolchainSupport.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_common_graph_options_8h_source.xhtml">utils/CommonGraphOptions.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_graph_utils_8h_source.xhtml">utils/GraphUtils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="utils_2_utils_8h_source.xhtml">utils/Utils.h</a>&quot;</code><br />
-<code>#include &lt;cstdlib&gt;</code><br />
 </div>
 <p><a href="graph__vgg16_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -159,16 +159,17 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Main program for VGG16. </p>
+<dl class="section note"><dt>Note</dt><dd>To list all the possible arguments execute the binary appended with the &ndash;help option</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">argc</td><td>Number of arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) ) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Arguments </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="graph__vgg16_8cpp_source.xhtml#l00262">262</a> of file <a class="el" href="graph__vgg16_8cpp_source.xhtml">graph_vgg16.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;{</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    <span class="keywordflow">return</span> arm_compute::utils::run_example&lt;GraphVGG16Example&gt;(argc, argv);</div><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="graph__vgg16_8cpp_source.xhtml#l00248">248</a> of file <a class="el" href="graph__vgg16_8cpp_source.xhtml">graph_vgg16.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;{</div><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordflow">return</span> arm_compute::utils::run_example&lt;GraphVGG16Example&gt;(argc, argv);</div><div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->
@@ -177,7 +178,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.xhtml">examples</a></li><li class="navelem"><a class="el" href="graph__vgg16_8cpp.xhtml">graph_vgg16.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:37 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

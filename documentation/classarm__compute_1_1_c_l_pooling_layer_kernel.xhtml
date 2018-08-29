@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -117,7 +117,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_pooling_laye
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
 <div class="title">CLPoolingLayerKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -130,7 +131,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_pooling_laye
 <div class="dynheader">
 Collaboration diagram for CLPoolingLayerKernel:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_c_l_pooling_layer_kernel__coll__graph.svg" width="170" height="187"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_c_l_pooling_layer_kernel__coll__graph.svg" width="463" height="218"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a target="top" href="graph_legend.xhtml">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -253,6 +254,19 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4b4a20e518c04e657839280cd486a85d">gws_from_window</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global work size given an execution window.  <a href="#a4b4a20e518c04e657839280cd486a85d">More...</a><br /></td></tr>
 <tr class="separator:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Data Fields</h2></td></tr>
+<tr class="memitem:a1acfeaa60695d4df61d8d4b5c905aa53"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">_input</a></td></tr>
+<tr class="separator:a1acfeaa60695d4df61d8d4b5c905aa53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62d192d931002b4866443cd7fc71419b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">_output</a></td></tr>
+<tr class="separator:a62d192d931002b4866443cd7fc71419b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a204c8ef37bc558c02542daffbaee06e2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a204c8ef37bc558c02542daffbaee06e2">_pool_info</a></td></tr>
+<tr class="separator:a204c8ef37bc558c02542daffbaee06e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e0cdcd6999269beea6b9512ad41f3d4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4">_border_size</a></td></tr>
+<tr class="separator:a2e0cdcd6999269beea6b9512ad41f3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fd589467d6c372b7b717d9cf8f961b1"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1">_num_elems_processed_per_iteration</a></td></tr>
+<tr class="separator:a8fd589467d6c372b7b717d9cf8f961b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for the pooling layer kernel. </p>
@@ -413,10 +427,9 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Set the input and output tensors. </p>
-<dl class="section note"><dt>Note</dt><dd>QS8 and QS16 are supported only for pool sizes 3, 5 and 7</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pool_info</td><td>Contains pooling operation information described in <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a>. </td></tr>
   </table>
@@ -564,13 +577,84 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">CLPoolingLayerKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data types supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pool_info</td><td>Contains pooling operation information described in <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a>.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="a2e0cdcd6999269beea6b9512ad41f3d4"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structarm__compute_1_1_border_size.xhtml">BorderSize</a> _border_size</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml#l00078">78</a> of file <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml">CLPoolingLayerKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a1acfeaa60695d4df61d8d4b5c905aa53"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a>* _input</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml#l00075">75</a> of file <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml">CLPoolingLayerKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8fd589467d6c372b7b717d9cf8f961b1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int _num_elems_processed_per_iteration</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml#l00079">79</a> of file <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml">CLPoolingLayerKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a62d192d931002b4866443cd7fc71419b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a>* _output</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml#l00076">76</a> of file <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml">CLPoolingLayerKernel.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a204c8ef37bc558c02542daffbaee06e2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> _pool_info</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml#l00077">77</a> of file <a class="el" href="_c_l_pooling_layer_kernel_8h_source.xhtml">CLPoolingLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -583,7 +667,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">CLPoolingLayerKernel</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

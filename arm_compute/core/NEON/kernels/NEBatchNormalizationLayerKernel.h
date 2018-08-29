@@ -57,7 +57,7 @@ public:
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
      *                          3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                          The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     *                          The rest are optional and used for representing batches. Data types supported: F16/F32.
      * @param[out]     output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in]      mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
@@ -72,7 +72,7 @@ public:
      *
      * @param[in] input    Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result.
      *                     3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     *                     The rest are optional and used for representing batches. Data types supported: F16/F32.
      * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
@@ -96,22 +96,7 @@ private:
     void configure_non_fused();
     /** Configure execution function in case of fused activation **/
     void configure_fused();
-    /** Template function to run batch normalization on 8-bit fixed point
-     *
-     * @tparam fused_activation Boolean that flags if its a fused activation or not
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <bool fused_activation>
-    void batch_normalization_qs8(const Window &window);
-    /** Template function to run batch normalization on 16-bit fixed point
-     *
-     * @tparam fused_activation Boolean that flags if its a fused activation or not
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <bool fused_activation>
-    void batch_normalization_qs16(const Window &window);
+
     /** Template function to run batch normalization on fp16
      *
      * @tparam fused_activation Boolean that flags if its a fused activation or not

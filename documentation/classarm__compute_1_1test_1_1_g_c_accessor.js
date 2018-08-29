@@ -7,7 +7,6 @@ var classarm__compute_1_1test_1_1_g_c_accessor =
     [ "data_layout", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c", null ],
     [ "data_type", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881", null ],
     [ "element_size", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23", null ],
-    [ "fixed_point_position", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b", null ],
     [ "format", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db", null ],
     [ "num_channels", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb", null ],
     [ "num_elements", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e", null ],

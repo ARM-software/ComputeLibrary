@@ -28,19 +28,16 @@
 
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -49,55 +46,47 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Function to reshape and perform 1xW transposition on the weights. This function calls the following kernels:
+/** Function to reshape the weights. This function calls the following kernel:
  * -# @ref NEWeightsReshapeKernel
- * -# @ref NEGEMMTranspose1xWKernel (executed in case GEMM is required for the operation)
  */
 class NEConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
-     * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F32.
-     * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[out] output       Destination tensor. Data types supported: Same as @p weights.
-     * @param[in]  transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
-     *                          Data types supported: Same as @p weights.
+     * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/F16/F32.
+     * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
      */
-    void configure(const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose1xW);
+    void configure(const ITensor *weights, const ITensor *biases, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayerReshapeWeights
      *
-     * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[in] output       Destination tensor. Data types supported: Same as @p weights.
-     * @param[in] transpose1xW True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise.
-     *                         Data types supported: Same as @p weights.
+     * @param[in] weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: QASYMM8/F16/F32.
+     * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
      *
      * @return an error status
      */
-    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose1xW);
+    static Status validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    MemoryGroup              _memory_group;
-    NEWeightsReshapeKernel   _weights_reshape_kernel;
-    NEGEMMTranspose1xWKernel _weights_transposed_kernel;
-    Tensor                   _weights_reshaped;
-    bool                     _transpose1xW;
+    NEWeightsReshapeKernel _weights_reshape_kernel;
 };
 
-/** Basic function to simulate a convolution layer. This function calls the following NEON kernels:
- * -# @ref NEWeightsReshapeKernel   (executed only once for each configuration)
+/** Basic function to compute the convolution layer. This function calls the following NEON kernels/functions:
+ *
  * -# @ref NEIm2ColKernel
- * -# @ref NEGEMMInterleave4x4Kernel (executed only in case GEMM is required for the operation)
- * -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
- * -# @ref NECol2ImKernel
- * -# @ref NEActivationLayer (executed only if the activation layer is enabled)
+ * -# @ref NEGEMM (if the data type is FP32 or FP16)
+ * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
+ * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
+ * -# @ref NEArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
+ * -# @ref NECol2ImKernel or @ref NEReshapeLayer (if NHWC and GEMM3D is not supported)
+ *
  */
 class NEGEMMConvolutionLayer : public IFunction
 {
@@ -116,7 +105,7 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QASYMM8/QS16/F32.
+     *                          Data types supported: QASYMM8/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -127,14 +116,15 @@ public:
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                         while every optional dimension from 4 and above represent a batch of inputs.
-     *                         Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     *                         Data types supported: QASYMM8/F16/F32.
      * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
      * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                         Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -145,58 +135,76 @@ public:
      *                         tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in] dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in] act_info     (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     * @param[in] num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param[in]  input          Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in]  weights        Weights tensor. Data type supported: Same as @p input.
-     * @param[out] output         Output tensor. Data types supported: Same as @p input,
-     *                            except for input of QASYMM8 type where output should be of S32 type.
-     * @param[in]  is_interleaved (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
-     * @param[in]  reshape_info   (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
+     * @param[in]  input         Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]  weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[out] output        Output tensor. Data types supported: Same as @p input,
+     *                           except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]  gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
      */
-    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, bool is_interleaved, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
+    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, int gemm_3d_depth = 1);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer matrix multiply routines
+     *
+     * @param[in] input         Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in] weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[in] output        Output tensor. Data types supported: Same as @p input,
+     *                          except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in] gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in] skip_im2col   (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
+     *
+     * @return a status
+     */
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
+    /** Static function to check if GEMM3D is supported in @ref NEGEMM or in @ref NEGEMMLowpMatrixMultiplyCore
+     *
+     * @param[in] data_type     Input data type
+     * @param[in] gemm_3d_depth Depth of GEMM 3D
+     * @param[in] skip_im2col   Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout
+     *
+     * @return a status
+     */
+    static Status validate_gemm3d(DataType data_type, int gemm_3d_depth, bool skip_im2col);
 
 private:
-    AssemblyKernelGlueF32                               _asm_glue;
     MemoryGroup                                         _memory_group;
-    NEIm2ColKernel                                      _input_im2col_kernel;
-    NEGEMMInterleave4x4Kernel                           _input_interleave_kernel;
     NEConvolutionLayerReshapeWeights                    _reshape_weights;
-    NEGEMMMatrixMultiplyKernel                          _mm_kernel;
+    NEIm2ColKernel                                      _im2col_kernel;
+    NEGEMM                                              _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    NECol2ImKernel                                      _output_col2im_kernel;
+    NECol2ImKernel                                      _col2im_kernel;
     NEActivationLayer                                   _activationlayer_function;
     NEArithmeticAdditionKernel                          _add_bias_kernel;
+    NEReshapeLayer                                      _reshape_layer;
 
     const ITensor *_original_weights;
 
-    Tensor _input_im2col_reshaped;
-    Tensor _input_interleaved_reshaped;
+    Tensor _im2col_output;
     Tensor _weights_reshaped;
     Tensor _gemm_output;
     Tensor _tmp_output;
-    Tensor _workspace;
-    Tensor _B_pretransposed;
 
     DataLayout _data_layout;
-    bool       _append_bias;
-    bool       _is_fully_connected_convolution;
-    bool       _are_weights_reshaped;
-    bool       _is_quantized;
-    bool       _is_interleaved;
-    bool       _is_activationlayer_enabled;
-    bool       _skip_im2col;
+
+    bool _append_bias;
+    bool _skip_im2col;
+    bool _skip_col2im;
+    bool _is_quantized;
+    bool _is_activationlayer_enabled;
+    bool _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

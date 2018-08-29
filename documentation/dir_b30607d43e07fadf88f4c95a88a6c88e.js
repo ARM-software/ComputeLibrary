@@ -6,17 +6,26 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "BatchNormalizationLayerNode.h", "_batch_normalization_layer_node_8h.xhtml", [
       [ "BatchNormalizationLayerNode", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node" ]
     ] ],
+    [ "ChannelShuffleLayerNode.h", "_channel_shuffle_layer_node_8h.xhtml", [
+      [ "ChannelShuffleLayerNode", "classarm__compute_1_1graph_1_1_channel_shuffle_layer_node.xhtml", "classarm__compute_1_1graph_1_1_channel_shuffle_layer_node" ]
+    ] ],
+    [ "ConcatenateLayerNode.h", "_concatenate_layer_node_8h.xhtml", [
+      [ "ConcatenateLayerNode", "classarm__compute_1_1graph_1_1_concatenate_layer_node.xhtml", "classarm__compute_1_1graph_1_1_concatenate_layer_node" ]
+    ] ],
     [ "ConstNode.h", "_const_node_8h.xhtml", [
       [ "ConstNode", "classarm__compute_1_1graph_1_1_const_node.xhtml", "classarm__compute_1_1graph_1_1_const_node" ]
     ] ],
     [ "ConvolutionLayerNode.h", "_convolution_layer_node_8h.xhtml", [
       [ "ConvolutionLayerNode", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_convolution_layer_node" ]
     ] ],
-    [ "DepthConcatenateLayerNode.h", "_depth_concatenate_layer_node_8h.xhtml", [
-      [ "DepthConcatenateLayerNode", "classarm__compute_1_1graph_1_1_depth_concatenate_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depth_concatenate_layer_node" ]
+    [ "DeconvolutionLayerNode.h", "_deconvolution_layer_node_8h.xhtml", [
+      [ "DeconvolutionLayerNode", "classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_deconvolution_layer_node" ]
     ] ],
     [ "DepthwiseConvolutionLayerNode.h", "_depthwise_convolution_layer_node_8h.xhtml", [
       [ "DepthwiseConvolutionLayerNode", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node" ]
+    ] ],
+    [ "DummyNode.h", "_dummy_node_8h.xhtml", [
+      [ "DummyNode", "classarm__compute_1_1graph_1_1_dummy_node.xhtml", "classarm__compute_1_1graph_1_1_dummy_node" ]
     ] ],
     [ "EltwiseLayerNode.h", "_eltwise_layer_node_8h.xhtml", [
       [ "EltwiseLayerNode", "classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml", "classarm__compute_1_1graph_1_1_eltwise_layer_node" ]
@@ -38,11 +47,17 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "OutputNode.h", "_output_node_8h.xhtml", [
       [ "OutputNode", "classarm__compute_1_1graph_1_1_output_node.xhtml", "classarm__compute_1_1graph_1_1_output_node" ]
     ] ],
+    [ "PermuteLayerNode.h", "_permute_layer_node_8h.xhtml", [
+      [ "PermuteLayerNode", "classarm__compute_1_1graph_1_1_permute_layer_node.xhtml", "classarm__compute_1_1graph_1_1_permute_layer_node" ]
+    ] ],
     [ "PoolingLayerNode.h", "_pooling_layer_node_8h.xhtml", [
       [ "PoolingLayerNode", "classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml", "classarm__compute_1_1graph_1_1_pooling_layer_node" ]
     ] ],
     [ "ReshapeLayerNode.h", "_reshape_layer_node_8h.xhtml", [
       [ "ReshapeLayerNode", "classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml", "classarm__compute_1_1graph_1_1_reshape_layer_node" ]
+    ] ],
+    [ "ResizeLayerNode.h", "_resize_layer_node_8h.xhtml", [
+      [ "ResizeLayerNode", "classarm__compute_1_1graph_1_1_resize_layer_node.xhtml", "classarm__compute_1_1graph_1_1_resize_layer_node" ]
     ] ],
     [ "SoftmaxLayerNode.h", "_softmax_layer_node_8h.xhtml", [
       [ "SoftmaxLayerNode", "classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer_node" ]

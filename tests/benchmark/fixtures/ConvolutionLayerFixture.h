@@ -46,16 +46,16 @@ public:
                int batches)
     {
         // Set batched in source and destination shapes
-        const unsigned int fixed_point_position = 4;
         src_shape.set(3 /* batch */, batches);
         dst_shape.set(3 /* batch */, batches);
-        DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        DataType               bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        const QuantizationInfo qinfo(2.f / 255.f, 127);
 
         // Create tensors
-        src     = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
-        weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position);
-        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, fixed_point_position);
-        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
+        src     = create_tensor<TensorType>(src_shape, data_type, 1, qinfo);
+        weights = create_tensor<TensorType>(weights_shape, data_type, 1, qinfo);
+        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1);
+        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, qinfo);
 
         // Create and configure function
         conv_layer.configure(&src, &weights, &biases, &dst, info, WeightsInfo(), dilation, act_info);

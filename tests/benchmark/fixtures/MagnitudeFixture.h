@@ -41,7 +41,7 @@ class MagnitudeFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape, Format format, MagnitudeType magnitude_type, bool use_fp16)
+    void setup(const TensorShape &shape, Format format, MagnitudeType magnitude_type)
     {
         // Create tensors
         src1 = create_tensor<TensorType>(shape, format);
@@ -49,7 +49,7 @@ public:
         dst  = create_tensor<TensorType>(shape, format);
 
         // Create and configure function
-        magnitude_func.configure(&src1, &src2, &dst, magnitude_type, use_fp16);
+        magnitude_func.configure(&src1, &src2, &dst, magnitude_type);
 
         // Allocate tensors
         src1.allocator()->allocate();

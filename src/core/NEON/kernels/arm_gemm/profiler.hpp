@@ -31,75 +31,65 @@
 #include <mutex>
 #endif
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 #ifndef NO_MULTI_THREADING
 extern std::mutex report_mutex;
 #endif
 
-class profiler
-{
+class profiler {
 private:
-    static const int maxevents         = 100000;
-    unsigned long    times[maxevents]  = {};
-    unsigned long    units[maxevents]  = {};
-    int              events[maxevents] = {};
-    int              currentevent      = 0;
-    int              countfd           = 0;
+    static const int maxevents = 100000;
+    unsigned long times[maxevents] = { };
+    unsigned long units[maxevents] = { };
+    int events[maxevents] = { };
+    int currentevent=0;
+    int countfd=0;
 
-    class ScopedProfilerClass
-    {
+    class ScopedProfilerClass {
     private:
         profiler &_parent;
-        bool      legal = false;
+        bool legal=false;
 
     public:
-        ScopedProfilerClass(profiler &prof, int i, unsigned long u)
-            : _parent(prof)
-        {
-            if(prof.currentevent == maxevents)
+        ScopedProfilerClass(profiler &prof, int i, unsigned long u) : _parent(prof) {
+            if (prof.currentevent==maxevents)
                 return;
 
-            prof.events[prof.currentevent] = i;
-            prof.units[prof.currentevent]  = u;
-            legal                          = true;
+            prof.events[prof.currentevent]=i;
+            prof.units[prof.currentevent]=u;
+            legal=true;
             start_counter(prof.countfd);
         }
 
-        ~ScopedProfilerClass()
-        {
-            if(!legal)
-                return;
+        ~ScopedProfilerClass() {
+            if (!legal) return;
 
-            long long cycs                        = stop_counter(_parent.countfd);
+            long long cycs = stop_counter(_parent.countfd);
             _parent.times[_parent.currentevent++] = cycs;
         }
     };
 
 public:
-    profiler()
-    {
-        countfd = open_cycle_counter();
+    profiler() {
+        countfd=open_cycle_counter();
     }
 
-    ~profiler()
-    {
+    ~profiler() {
         close(countfd);
-        int           tots[5];
+        int tots[5];
         unsigned long counts[5];
         unsigned long tunits[5];
-        const char   *descs[] = { "Prepare A", "Prepare B", "Kernel", "Merge" };
+        const char * descs[] = { "Prepare A", "Prepare B", "Kernel", "Merge" };
 
-        for(int i = 1; i < 5; i++)
-        {
-            tots[i]   = 0;
+        for (int i=1; i<5; i++) {
+            tots[i] = 0;
             counts[i] = 0;
             tunits[i] = 0;
         }
 
-        for(int i = 0; i < currentevent; i++)
-        {
-            //            printf("%10s: %ld\n", descs[events[i]-1], times[i]);
+        for (int i=0; i<currentevent; i++) {
+//            printf("%10s: %ld\n", descs[events[i]-1], times[i]);
             tots[events[i]]++;
             counts[events[i]] += times[i];
             tunits[events[i]] += units[i];
@@ -113,31 +103,26 @@ public:
 #endif
 
         printf("%20s  %9s %9s %9s %12s %9s\n", "", "Events", "Total", "Average", "Bytes/MACs", "Per cycle");
-        for(int i = 1; i < 5; i++)
-        {
-            printf("%20s: %9d %9ld %9ld %12lu %9.2f\n", descs[i - 1], tots[i], counts[i], counts[i] / tots[i], tunits[i], (float)tunits[i] / counts[i]);
+        for (int i=1; i<5; i++) {
+            printf("%20s: %9d %9ld %9ld %12lu %9.2f\n",descs[i-1],tots[i],counts[i],counts[i]/tots[i],tunits[i],(float)tunits[i]/counts[i]);
         }
     }
 
     template <typename T>
-    void operator()(int i, unsigned long u, T func)
-    {
-        if(currentevent == maxevents)
-        {
+    void operator() (int i, unsigned long u, T func) {
+        if (currentevent==maxevents) {
             func();
-        }
-        else
-        {
+        } else {
             events[currentevent] = i;
-            units[currentevent]  = u;
+            units[currentevent] = u;
             start_counter(countfd);
             func();
-            long long cycs        = stop_counter(countfd);
+            long long cycs = stop_counter(countfd);
             times[currentevent++] = cycs;
         }
     }
-    ScopedProfilerClass ScopedProfiler(int i, unsigned long u)
-    {
+
+    ScopedProfilerClass ScopedProfiler(int i, unsigned long u) {
         return ScopedProfilerClass(*this, i, u);
     }
 };

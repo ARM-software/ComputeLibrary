@@ -57,7 +57,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 
     // Validate function
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->tensor_shape().x() != 3 && weights->tensor_shape().y() != 3, "Unsupported depthwise convolution");
-    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::OPTIMIZED_3x3);
+    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Optimized3x3);
 
     return Status{};
 }
@@ -79,15 +79,13 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     const ConvolutionMethod   conv_algorithm = node.convolution_method();
 
     // Validate function
-    if(conv_algorithm == ConvolutionMethod::DIRECT)
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(node.num_groups() != 1, "Grouping is not supported by ConvolutionLayer!");
+    if(conv_algorithm == ConvolutionMethod::Direct)
     {
         bool is_square         = weights->tensor_shape().x() == weights->tensor_shape().y();
         bool is_direct         = (weights->tensor_shape().x() == 1) || (weights->tensor_shape().x() == 3) || (weights->tensor_shape().x() == 5);
         bool is_correct_stride = (conv_info.stride().first) <= 2 && (conv_info.stride().second <= 2);
-        if(!(is_square && is_direct && is_correct_stride))
-        {
-            node.set_convolution_method(ConvolutionMethod::DEFAULT);
-        }
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(is_square && is_direct && is_correct_stride), "Direct convolution is not supported for given configuration");
     }
 
     return Status{};
@@ -104,14 +102,18 @@ Status GCNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::ChannelShuffleLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ChannelShuffleLayer");
         case NodeType::ConvolutionLayer:
             return validate_convolution_layer(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return validate_depthwise_convolution_layer(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::FlattenLayer:
-            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation");
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : FlattenLayer");
+        case NodeType::PermuteLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PermuteLayer");
         case NodeType::ReshapeLayer:
-            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation");
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReshapeLayer");
         default:
             return Status{};
     }

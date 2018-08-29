@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
-#define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
+#ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
+#define __ARM_COMPUTE_TYPE_PRINTER_H__
 
 #include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -34,14 +35,30 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 
-#include "tests/Types.h"
-
 #include <ostream>
 #include <sstream>
 #include <string>
 
 namespace arm_compute
 {
+/** Formatted output if arg is not null
+ *
+ * @param[in] arg Object to print
+ *
+ * @return String representing arg.
+ */
+template <typename T>
+std::string to_string_if_not_null(T *arg)
+{
+    if(arg == nullptr)
+    {
+        return "nullptr";
+    }
+    else
+    {
+        return to_string(*arg);
+    }
+}
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -227,58 +244,6 @@ inline std::string to_string(const QuantizationInfo &quantization_info)
 {
     std::stringstream str;
     str << quantization_info;
-    return str.str();
-}
-
-/** Formatted output of the FixedPointOp type.
- *
- * @param[out] os Output stream.
- * @param[in]  op Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
-{
-    switch(op)
-    {
-        case FixedPointOp::ADD:
-            os << "ADD";
-            break;
-        case FixedPointOp::SUB:
-            os << "SUB";
-            break;
-        case FixedPointOp::MUL:
-            os << "MUL";
-            break;
-        case FixedPointOp::EXP:
-            os << "EXP";
-            break;
-        case FixedPointOp::LOG:
-            os << "LOG";
-            break;
-        case FixedPointOp::INV_SQRT:
-            os << "INV_SQRT";
-            break;
-        case FixedPointOp::RECIPROCAL:
-            os << "RECIPROCAL";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the FixedPointOp type.
- *
- * @param[in] op Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const FixedPointOp &op)
-{
-    std::stringstream str;
-    str << op;
     return str.str();
 }
 
@@ -509,6 +474,35 @@ inline std::string to_string(const arm_compute::DataLayout &data_layout)
     return str.str();
 }
 
+/** Formatted output of the DataLayoutDimension type.
+ *
+ * @param[out] os              Output stream.
+ * @param[in]  data_layout_dim Data layout dimension to print.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DataLayoutDimension &data_layout_dim)
+{
+    switch(data_layout_dim)
+    {
+        case DataLayoutDimension::WIDTH:
+            os << "WIDTH";
+            break;
+        case DataLayoutDimension::HEIGHT:
+            os << "HEIGHT";
+            break;
+        case DataLayoutDimension::CHANNEL:
+            os << "CHANNEL";
+            break;
+        case DataLayoutDimension::BATCHES:
+            os << "BATCHES";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
 /** Formatted output of the DataType type.
  *
  * @param[out] os        Output stream.
@@ -526,9 +520,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::U8:
             os << "U8";
             break;
-        case DataType::QS8:
-            os << "QS8";
-            break;
         case DataType::QASYMM8:
             os << "QASYMM8";
             break;
@@ -540,9 +531,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
             break;
         case DataType::S16:
             os << "S16";
-            break;
-        case DataType::QS16:
-            os << "QS16";
             break;
         case DataType::U32:
             os << "U32";
@@ -834,6 +822,20 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
 
 /** Formatted output of the TensorInfo type.
  *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
+{
+    os << "{Shape=" << info.tensor_shape() << ","
+       << "Type=" << info.data_type() << ","
+       << "Channels=" << info.num_channels() << "}";
+    return os;
+}
+/** Formatted output of the TensorInfo type.
+ *
  * @param[in] info Type to output.
  *
  * @return Formatted string.
@@ -841,10 +843,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
 inline std::string to_string(const TensorInfo &info)
 {
     std::stringstream str;
-    str << "{Shape=" << info.tensor_shape() << ","
-        << "Type=" << info.data_type() << ","
-        << "Channels=" << info.num_channels() << ","
-        << "FixedPointPos=" << info.fixed_point_position() << "}";
+    str << info;
     return str.str();
 }
 
@@ -898,6 +897,142 @@ inline std::string to_string(const Coordinates &coord)
 {
     std::stringstream str;
     str << coord;
+    return str.str();
+}
+
+/** Formatted output of the GEMMReshapeInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMReshapeInfo &info)
+{
+    os << "{m=" << info.m() << ",";
+    os << "n=" << info.n() << ",";
+    os << "k=" << info.k() << ",";
+    os << "mult_transpose1xW_width=" << info.mult_transpose1xW_width() << ",";
+    os << "mult_interleave4x4_height=" << info.mult_interleave4x4_height();
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the GEMMInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
+{
+    os << "{is_a_reshaped=" << info.is_a_reshaped() << ",";
+    os << "is_b_reshaped=" << info.is_b_reshaped() << ",";
+    os << "reshape_b_only_on_first_run=" << info.reshape_b_only_on_first_run() << ",";
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the Window::Dimension type.
+ *
+ * @param[out] os  Output stream.
+ * @param[in]  dim Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Window::Dimension &dim)
+{
+    os << "{start=" << dim.start() << ", end=" << dim.end() << ", step=" << dim.step() << "}";
+
+    return os;
+}
+/** Formatted output of the Window type.
+ *
+ * @param[out] os  Output stream.
+ * @param[in]  win Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Window &win)
+{
+    os << "{";
+    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; i++)
+    {
+        if(i > 0)
+        {
+            os << ", ";
+        }
+        os << win[i];
+    }
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the WeightsInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const WeightsInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMReshapeInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMReshapeInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the Window::Dimension type.
+ *
+ * @param[in] dim Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Window::Dimension &dim)
+{
+    std::stringstream str;
+    str << dim;
+    return str.str();
+}
+/** Formatted output of the Window type.
+ *
+ * @param[in] win Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Window &win)
+{
+    std::stringstream str;
+    str << win;
     return str.str();
 }
 
@@ -1204,46 +1339,6 @@ inline std::string to_string(const arm_compute::MagnitudeType &type)
     return str.str();
 }
 
-/** Formatted output of the GradientDimension type.
- *
- * @param[out] os  Output stream
- * @param[in]  dim Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &dim)
-{
-    switch(dim)
-    {
-        case GradientDimension::GRAD_X:
-            os << "GRAD_X";
-            break;
-        case GradientDimension::GRAD_Y:
-            os << "GRAD_Y";
-            break;
-        case GradientDimension::GRAD_XY:
-            os << "GRAD_XY";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the GradientDimension type.
- *
- * @param[in] type Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const arm_compute::GradientDimension &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
 /** Formatted output of the HOGNormType type.
  *
  * @param[out] os        Output stream
@@ -1429,8 +1524,8 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G51LIT:
             os << "G51LIT";
             break;
-        case GPUTarget::TNOX:
-            os << "TNOX";
+        case GPUTarget::G76:
+            os << "G76";
             break;
         case GPUTarget::TTRX:
             os << "TTRX";
@@ -1530,6 +1625,96 @@ inline std::string to_string(const Termination &termination)
     return str.str();
 }
 
+/** Formatted output of the CPUModel type.
+ *
+ * @param[out] os        Output stream
+ * @param[in]  cpu_model Model to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const CPUModel &cpu_model)
+{
+    switch(cpu_model)
+    {
+        case CPUModel::GENERIC:
+            os << "GENERIC";
+            break;
+        case CPUModel::GENERIC_FP16:
+            os << "GENERIC_FP16";
+            break;
+        case CPUModel::GENERIC_FP16_DOT:
+            os << "GENERIC_FP16_DOT";
+            break;
+        case CPUModel::A53:
+            os << "A53";
+            break;
+        case CPUModel::A55r0:
+            os << "A55r0";
+            break;
+        case CPUModel::A55r1:
+            os << "A55r1";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the CPUModel type.
+ *
+ * @param[in] cpu_model Model to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const CPUModel &cpu_model)
+{
+    std::stringstream str;
+    str << cpu_model;
+    return str.str();
+}
+/** Formatted output of a vector of objects.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  args Vector of objects to print
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
+{
+    os << "[";
+    bool first = true;
+    for(auto &arg : args)
+    {
+        if(first)
+        {
+            first = false;
+        }
+        else
+        {
+            os << ", ";
+        }
+        os << arg;
+    }
+    os << "]";
+    return os;
+}
+
+/** Formatted output of a vector of objects.
+ *
+ * @param[in] args Vector of objects to print
+ *
+ * @return String representing args.
+ */
+template <typename T>
+std::string to_string(const std::vector<T> &args)
+{
+    std::stringstream str;
+    str << args;
+    return str.str();
+}
+
 /** Formatted output of the WinogradInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
 {
@@ -1547,5 +1732,19 @@ inline std::string to_string(const WinogradInfo &type)
     str << type;
     return str.str();
 }
+
+/** Fallback method: try to use std::to_string:
+ *
+ * @param[in] val Value to convert to string
+ *
+ * @return String representing val.
+ */
+template <typename T>
+inline std::string to_string(const T &val)
+{
+    return support::cpp11::to_string(val);
+}
+
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */
+
+#endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */

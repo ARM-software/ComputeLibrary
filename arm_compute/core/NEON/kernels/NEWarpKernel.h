@@ -27,8 +27,8 @@
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 
+#include <array>
 #include <cstdint>
-
 namespace arm_compute
 {
 class ITensor;
@@ -52,10 +52,11 @@ public:
      * @param[in]  input                 Source tensor. Data type supported: U8.
      * @param[out] output                Destination tensor. Data type supported: U8.
      * @param[in]  matrix                The perspective or affine matrix to use. Must be 2x3 for affine and 3x3 for perspective of type float.
+     *                                   The matrix argument requires 9 values, for the affine case the last 3 values are ignored.
      * @param[in]  border_mode           Strategy to use for borders
      * @param[in]  constant_border_value Constant value used for filling the border.
      */
-    virtual void configure(const ITensor *input, ITensor *output, const float *matrix, BorderMode border_mode, uint8_t constant_border_value);
+    virtual void configure(const ITensor *input, ITensor *output, const std::array<float, 9> &matrix, BorderMode border_mode, uint8_t constant_border_value);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -88,7 +89,7 @@ protected:
     const ITensor *_input;                 /**< Input Tensor */
     ITensor       *_output;                /**< Output Tensor */
     uint8_t        _constant_border_value; /**< Constant value used for filling the border. This value is used for those pixels out of the ROI when the border mode is CONSTANT */
-    const float   *_matrix;                /**< The affine or perspective matrix. Must be 2x3 for warp affine or 3x3 for warp perspective of type float. */
+    std::array<float, 9> _matrix;          /**< The affine or perspective matrix. Must be 2x3 for warp affine or 3x3 for warp perspective of type float. */
 };
 
 /** Template interface for the kernel to compute warp affine

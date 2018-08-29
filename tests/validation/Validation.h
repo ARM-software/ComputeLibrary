@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_H__
 
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
@@ -448,7 +447,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
         const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
-                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");
         ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }
@@ -536,7 +535,7 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
         const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
-                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");
         ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }
@@ -615,7 +614,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
         const float   percent_mismatches        = static_cast<float>(num_mismatches) / num_elements * 100.f;
 
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
-                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number << "%)");
+                              << "%) mismatched (maximum tolerated " << std::setprecision(2) << tolerance_number * 100 << "%)");
         ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }

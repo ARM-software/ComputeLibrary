@@ -25,8 +25,10 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+#include "../std_transforms_fixed.hpp"
+
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_gemm_s16_asimd_12x8(const int16_t *, const int16_t *, int32_t *, int, int, int);
 
@@ -38,34 +40,32 @@ void a64_gemm_s16_asimd_12x8(const int16_t *, const int16_t *, int32_t *, int, i
 // All kernels in the family must share these characteristics.  The actual
 // kernel to be used can be chosen at runtime, based on the CPU_type
 // structure.
-class gemm_s16_12x8
-{
+class gemm_s16_12x8 {
 public:
     typedef int16_t operand_type;
     typedef int32_t result_type;
 
     typedef void (*kern_type)(const int16_t *, const int16_t *, int32_t *, int, int, int);
 
-    /* Describes the data layout for A input */
-    static const int A_interleave = 8;
-    static const int A_block      = 1;
-    static const int A_transpose  = 0;
-
-    /* Same for B input */
-    static const int B_interleave = 12;
-    static const int B_block      = 1;
-    static const int B_transpose  = 1;
-
     /* Kernel blocking parameters */
-    static const int out_width  = 12;
-    static const int out_height = 8;
-    static const int k_unroll   = 1;
+    static int out_width() {
+        return 12;
+    }
+
+    static int out_height() {
+        return 8;
+    }
+
+    static int k_unroll() {
+        return 1;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsFixed<operand_type, result_type, 8, 12> transforms = {};
 
     kern_type kernel = a64_gemm_s16_asimd_12x8;
 
-    gemm_s16_12x8(const CPUInfo *ci)
-    {
-    }
+    gemm_s16_12x8(const CPUInfo *ci) { }
 };
 
 } // namespace arm_gemm

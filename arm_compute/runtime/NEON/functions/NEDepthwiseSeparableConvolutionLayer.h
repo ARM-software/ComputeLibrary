@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,6 +70,7 @@ public:
 
     // Inherited methods overriden:
     void run() override;
+    void prepare() override;
 
 private:
     NEDepthwiseConvolutionLayer _depthwise_conv;

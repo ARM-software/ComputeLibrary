@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -238,7 +238,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_layers_8h_source.xhtml#l00058">58</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4bed63b35b24f8f44260237558e8a02b">GraphBuilder::add_input_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00064">StreamHints::target_hint</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4bed63b35b24f8f44260237558e8a02b">GraphBuilder::add_input_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00068">StreamHints::target_hint</a>.</p>
 <div class="fragment"><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    {</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        NodeParams common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4bed63b35b24f8f44260237558e8a02b">GraphBuilder::add_input_node</a>(s.graph(), common_params, _desc, std::move(_accessor));</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_a324e8c54c4c5161913681a1a52fef959"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#a324e8c54c4c5161913681a1a52fef959">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const </div><div class="ttdoc">Layer name accessor. </div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a4bed63b35b24f8f44260237558e8a02b"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a4bed63b35b24f8f44260237558e8a02b">arm_compute::graph::GraphBuilder::add_input_node</a></div><div class="ttdeci">static NodeID add_input_node(Graph &amp;g, NodeParams params, TensorDescriptor desc, ITensorAccessorUPtr accessor=nullptr)</div><div class="ttdoc">Adds an input layer node to the graph. </div></div>
 </div><!-- fragment -->
@@ -253,7 +253,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_input_layer.xhtml">InputLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:51 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

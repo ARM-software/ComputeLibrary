@@ -54,7 +54,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *min_max)
 {
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, DataType::U8, 0);
+    auto_init_if_empty(*output, input->tensor_shape(), 1, DataType::U8);
 
     constexpr unsigned int num_elems_processed_per_iteration = 4;
 
@@ -96,7 +96,7 @@ void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *out
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 Status CLQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)

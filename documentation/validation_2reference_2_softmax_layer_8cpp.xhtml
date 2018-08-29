@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,6 @@ $(document).ready(function(){initNavTree('validation_2reference_2_softmax_layer_
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_softmax_layer_8h_source.xhtml">SoftmaxLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">tests/validation/FixedPoint.h</a>&quot;</code><br />
 </div>
 <p><a href="validation_2reference_2_softmax_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -143,17 +142,12 @@ Functions</h2></td></tr>
 <tr class="memitem:aba4029949774b83ce30bfea5aaa34e93"><td class="memTemplParams" colspan="2">template&lt;typename T , typename std::enable_if&lt; is_floating_point&lt; T &gt;::value, int &gt;::type &gt; </td></tr>
 <tr class="memitem:aba4029949774b83ce30bfea5aaa34e93"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aba4029949774b83ce30bfea5aaa34e93">softmax_layer</a> (const SimpleTensor&lt; T &gt; &amp;src, float beta)</td></tr>
 <tr class="separator:aba4029949774b83ce30bfea5aaa34e93"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade02bbb223c02aefecc6768105625668"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
-<tr class="memitem:ade02bbb223c02aefecc6768105625668"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ade02bbb223c02aefecc6768105625668">softmax_layer&lt; uint8_t &gt;</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, float beta)</td></tr>
-<tr class="separator:ade02bbb223c02aefecc6768105625668"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8984e563924160ecea65aa892b4be71"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ad8984e563924160ecea65aa892b4be71">softmax_layer</a> (const SimpleTensor&lt; float &gt; &amp;src, float beta)</td></tr>
 <tr class="separator:ad8984e563924160ecea65aa892b4be71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefb314907fed7dbcdcc46d6ad41bdcaa"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#aefb314907fed7dbcdcc46d6ad41bdcaa">softmax_layer</a> (const SimpleTensor&lt; half &gt; &amp;src, float beta)</td></tr>
 <tr class="separator:aefb314907fed7dbcdcc46d6ad41bdcaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a07d2059535753a374d5d16405eac67fa"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a07d2059535753a374d5d16405eac67fa">softmax_layer</a> (const SimpleTensor&lt; qint8_t &gt; &amp;src, float beta)</td></tr>
-<tr class="separator:a07d2059535753a374d5d16405eac67fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2deaac842a3492320152445625d89742"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a2deaac842a3492320152445625d89742">softmax_layer</a> (const SimpleTensor&lt; qint16_t &gt; &amp;src, float beta)</td></tr>
-<tr class="separator:a2deaac842a3492320152445625d89742"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcec00db85185f8e35edda6680c95c49"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afcec00db85185f8e35edda6680c95c49">softmax_layer</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, float beta)</td></tr>
+<tr class="separator:afcec00db85185f8e35edda6680c95c49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -161,7 +155,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="validation_2reference_2_softmax_layer_8cpp.xhtml">SoftmaxLayer.cpp</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

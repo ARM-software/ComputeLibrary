@@ -110,18 +110,15 @@ inline size_t data_size_from_type(DataType data_type)
     {
         case DataType::U8:
         case DataType::S8:
-        case DataType::QS8:
         case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
         case DataType::F16:
-        case DataType::QS16:
             return 2;
         case DataType::F32:
         case DataType::U32:
         case DataType::S32:
-        case DataType::QS32:
             return 4;
         case DataType::F64:
         case DataType::U64:
@@ -185,18 +182,15 @@ inline size_t element_size_from_data_type(DataType dt)
     {
         case DataType::S8:
         case DataType::U8:
-        case DataType::QS8:
         case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
-        case DataType::QS16:
         case DataType::F16:
             return 2;
         case DataType::U32:
         case DataType::S32:
         case DataType::F32:
-        case DataType::QS32:
             return 4;
         default:
             ARM_COMPUTE_ERROR("Undefined element size for given data type");
@@ -522,20 +516,15 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::U16;
         case DataType::S8:
             return DataType::S16;
-        case DataType::QS8:
-            return DataType::QS16;
         case DataType::U16:
             return DataType::U32;
         case DataType::S16:
             return DataType::S32;
-        case DataType::QS16:
-            return DataType::QS32;
         case DataType::QASYMM8:
         case DataType::F16:
         case DataType::U32:
         case DataType::S32:
         case DataType::F32:
-        case DataType::QS32:
             ARM_COMPUTE_ERROR("Unsupported data type promotions!");
         default:
             ARM_COMPUTE_ERROR("Undefined data type!");
@@ -639,37 +628,6 @@ inline uint32_t calculate_matrix_scale(const int16_t *matrix, unsigned int matri
     const size_t size = matrix_size * matrix_size;
 
     return std::max(1, std::abs(std::accumulate(matrix, matrix + size, 0)));
-}
-
-/** Calculate the output shapes of the depth concatenate function.
- *
- * @param[in] inputs_vector The vector that stores all the pointers to input.
- *
- * @return the output shape
- */
-template <typename T>
-TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vector)
-{
-    TensorShape out_shape = inputs_vector[0]->info()->tensor_shape();
-
-    size_t max_x = 0;
-    size_t max_y = 0;
-    size_t depth = 0;
-
-    for(const auto &tensor : inputs_vector)
-    {
-        ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-        const TensorShape shape = tensor->info()->tensor_shape();
-        max_x                   = std::max(shape.x(), max_x);
-        max_y                   = std::max(shape.y(), max_y);
-        depth += shape.z();
-    }
-
-    out_shape.set(0, max_x);
-    out_shape.set(1, max_y);
-    out_shape.set(2, depth);
-
-    return out_shape;
 }
 
 /** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
@@ -1018,29 +976,7 @@ inline bool is_data_type_quantized(DataType dt)
 {
     switch(dt)
     {
-        case DataType::QS8:
         case DataType::QASYMM8:
-        case DataType::QS16:
-        case DataType::QS32:
-            return true;
-        default:
-            return false;
-    }
-}
-
-/** Check if a given data type is of fixed point type
- *
- * @param[in] dt Input data type.
- *
- * @return True if data type is of fixed point type, else false.
- */
-inline bool is_data_type_fixed_point(DataType dt)
-{
-    switch(dt)
-    {
-        case DataType::QS8:
-        case DataType::QS16:
-        case DataType::QS32:
             return true;
         default:
             return false;

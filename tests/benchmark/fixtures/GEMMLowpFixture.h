@@ -44,6 +44,7 @@ public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta)
     {
+        // However the interface for both GEMM and GEMMLowp should be reworked in order to accepts only the 3 dimensions M, N and K
         ARM_COMPUTE_UNUSED(shape_c);
         ARM_COMPUTE_UNUSED(alpha);
         ARM_COMPUTE_UNUSED(beta);
@@ -51,9 +52,9 @@ public:
         // Note: The offsets for matrix A and matrix B are set to 0 in order to skip the computation for the offset contribution
 
         // Create tensors
-        a = create_tensor<TensorType>(shape_a, DataType::QASYMM8, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
-        b = create_tensor<TensorType>(shape_b, DataType::QASYMM8, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
-        c = create_tensor<TensorType>(shape_dst, DataType::S32, 1, 0, QuantizationInfo(1.0f / 255.0f, 0));
+        a = create_tensor<TensorType>(shape_a, DataType::QASYMM8, 1, QuantizationInfo(1.0f / 255.0f, 0));
+        b = create_tensor<TensorType>(shape_b, DataType::QASYMM8, 1, QuantizationInfo(1.0f / 255.0f, 0));
+        c = create_tensor<TensorType>(shape_dst, DataType::S32, 1, QuantizationInfo(1.0f / 255.0f, 0));
 
         // Create and configure function
         gemmlowp.configure(&a, &b, &c);

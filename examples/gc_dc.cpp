@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ using namespace utils;
 class GCDCExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         ARM_COMPUTE_UNUSED(argc);
         ARM_COMPUTE_UNUSED(argv);
@@ -86,6 +86,8 @@ public:
             *reinterpret_cast<half_float::half *>(it.ptr()) = half_float::half(1.f);
         });
         src.unmap();
+
+        return true;
     }
     void do_run() override
     {

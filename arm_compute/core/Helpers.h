@@ -560,21 +560,19 @@ inline void permute(TensorShape &shape, const PermutationVector &perm)
     }
 }
 
-/** Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
+/** Auto initialize the tensor info (shape, number of channels and data type) if the current assignment is empty.
  *
- * @param[in,out] info                 Tensor info used to check and assign.
- * @param[in]     shape                New shape.
- * @param[in]     num_channels         New number of channels.
- * @param[in]     data_type            New data type
- * @param[in]     fixed_point_position New fixed point position
- * @param[in]     quantization_info    (Optional) New quantization info
+ * @param[in,out] info              Tensor info used to check and assign.
+ * @param[in]     shape             New shape.
+ * @param[in]     num_channels      New number of channels.
+ * @param[in]     data_type         New data type
+ * @param[in]     quantization_info (Optional) New quantization info
  *
  * @return True if the tensor info has been initialized
  */
 bool auto_init_if_empty(ITensorInfo       &info,
                         const TensorShape &shape,
                         int num_channels, DataType data_type,
-                        int              fixed_point_position,
                         QuantizationInfo quantization_info = QuantizationInfo());
 
 /** Auto initialize the tensor info using another tensor info.
@@ -625,16 +623,6 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  */
 bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
 
-/** Set the fixed point position to the specified value if
- * the current fixed point position is 0 and the data type is QS8 or QS16
- *
- * @param[in,out] info                 Tensor info used to check and assign.
- * @param[in]     fixed_point_position New fixed point position
- *
- * @return True if the fixed point position has been changed.
- */
-bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
-
 /** Set the quantization info to the specified value if
  * the current quantization info is empty and the data type of asymmetric quantized type
  *
@@ -684,6 +672,44 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord);
  * @return The int conversion of the requested data layout index.
  */
 inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
+
+/** Calculate the normalization dimension index for a given normalization type
+ *
+ * @param[in] layout Data layout of the input and output tensor
+ * @param[in] info   Normalization info
+ *
+ * @return Normalization dimension index
+ */
+inline unsigned int get_normalization_dimension_index(DataLayout layout, const NormalizationLayerInfo &info)
+{
+    const unsigned int width_idx   = get_data_layout_dimension_index(layout, DataLayoutDimension::WIDTH);
+    const unsigned int channel_idx = get_data_layout_dimension_index(layout, DataLayoutDimension::CHANNEL);
+
+    return info.is_in_map() ? width_idx : channel_idx;
+}
+
+/** Calculate the number of output tiles required by Winograd Convolution layer. This utility function can be used by the Winograd input transform
+ *  to know the number of tiles on the x and y direction
+ *
+ * @param[in] in_dims          Spatial dimensions of the input tensor of convolution layer
+ * @param[in] kernel_size      Kernel size
+ * @param[in] output_tile_size Size of a single output tile
+ * @param[in] conv_info        Convolution info (i.e. pad, stride,...)
+ *
+ * @return the number of output tiles along the x and y directions of size "output_tile_size"
+ */
+inline Size2D compute_winograd_convolution_tiles(const Size2D &in_dims, const Size2D &kernel_size, const Size2D &output_tile_size, const PadStrideInfo &conv_info)
+{
+    int num_tiles_x = std::ceil((in_dims.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
+    int num_tiles_y = std::ceil((in_dims.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+
+    // Clamp in case we provide paddings but we have 1D convolution
+    num_tiles_x = std::min(num_tiles_x, static_cast<int>(in_dims.width));
+    num_tiles_y = std::min(num_tiles_y, static_cast<int>(in_dims.height));
+
+    return Size2D(num_tiles_x, num_tiles_y);
+}
+
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

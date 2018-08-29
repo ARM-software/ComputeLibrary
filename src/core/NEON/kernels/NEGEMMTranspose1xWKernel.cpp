@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,17 +54,16 @@ TensorShape get_output_shape(const ITensorInfo *input)
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
-                                                         DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S8,
+                                                         DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), get_output_shape(input));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -102,7 +101,7 @@ void NEGEMMTranspose1xWKernel::configure(const ITensor *input, ITensor *output)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), get_output_shape(input->info()), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), get_output_shape(input->info()), 1, input->info()->data_type());
 
     // Perform validate step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));

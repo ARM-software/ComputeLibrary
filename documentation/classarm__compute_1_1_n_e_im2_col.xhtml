@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -139,9 +139,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6f08d8bba859372d8979b0e4b09ddb56"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a6f08d8bba859372d8979b0e4b09ddb56">NEIm2Col</a> ()</td></tr>
 <tr class="memdesc:a6f08d8bba859372d8979b0e4b09ddb56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a6f08d8bba859372d8979b0e4b09ddb56">More...</a><br /></td></tr>
 <tr class="separator:a6f08d8bba859372d8979b0e4b09ddb56"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a639936fcb4fa149a97e2dab2d9b759e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a639936fcb4fa149a97e2dab2d9b759e9">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected=false, bool is_flatten=false)</td></tr>
-<tr class="memdesc:a639936fcb4fa149a97e2dab2d9b759e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the im2col NEON kernel.  <a href="#a639936fcb4fa149a97e2dab2d9b759e9">More...</a><br /></td></tr>
-<tr class="separator:a639936fcb4fa149a97e2dab2d9b759e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f5df3e50ada1015e1bdbcc921182d64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a8f5df3e50ada1015e1bdbcc921182d64">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U), unsigned int num_groups=1, bool is_fully_connected=false, bool is_flatten=false)</td></tr>
+<tr class="memdesc:a8f5df3e50ada1015e1bdbcc921182d64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the im2col NEON kernel.  <a href="#a8f5df3e50ada1015e1bdbcc921182d64">More...</a><br /></td></tr>
+<tr class="separator:a8f5df3e50ada1015e1bdbcc921182d64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,9 +155,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a2703fe5b25ccbda5d53645242785cb13"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a2703fe5b25ccbda5d53645242785cb13">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected, bool is_flatten)</td></tr>
-<tr class="memdesc:a2703fe5b25ccbda5d53645242785cb13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a>.  <a href="#a2703fe5b25ccbda5d53645242785cb13">More...</a><br /></td></tr>
-<tr class="separator:a2703fe5b25ccbda5d53645242785cb13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed5d9c4893b2d863969dabd131b537d0"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#aed5d9c4893b2d863969dabd131b537d0">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;dilation=<a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U, 1U), unsigned int num_groups=1, bool is_fully_connected=false, bool is_flatten=false)</td></tr>
+<tr class="memdesc:aed5d9c4893b2d863969dabd131b537d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a>.  <a href="#aed5d9c4893b2d863969dabd131b537d0">More...</a><br /></td></tr>
+<tr class="separator:aed5d9c4893b2d863969dabd131b537d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>. </p>
@@ -182,7 +182,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a639936fcb4fa149a97e2dab2d9b759e9"></a>
+<a class="anchor" id="a8f5df3e50ada1015e1bdbcc921182d64"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -219,6 +219,18 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
+          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>is_fully_connected</em> = <code>false</code>, </td>
         </tr>
@@ -239,11 +251,13 @@ Static Public Member Functions</h2></td></tr>
 <p>Configure the im2col NEON kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilation</td><td>(Optional) Dilation, in elements, across x and y. Defaults to (1, 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>(Optional) Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments </td></tr>
   </table>
@@ -291,7 +305,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 </div>
 </div>
-<a class="anchor" id="a2703fe5b25ccbda5d53645242785cb13"></a>
+<a class="anchor" id="aed5d9c4893b2d863969dabd131b537d0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -331,14 +345,26 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_fully_connected</em>, </td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
+          <td class="paramname"><em>dilation</em> = <code><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>(1U,&#160;1U)</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_groups</em> = <code>1</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_flatten</em>&#160;</td>
+          <td class="paramname"><em>is_fully_connected</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_flatten</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -356,19 +382,21 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32 Note: QASYMM8 works only for has_bias = false </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilation</td><td>(Optional) Dilation, in elements, across x and y. Defaults to (1, 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups when performing a grouped convolution </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>(Optional) Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_flatten</td><td>(Optional) Determines whether this function will be called by <a class="el" href="classarm__compute_1_1_n_e_flatten_layer.xhtml">NEFlattenLayer</a> in order to validate the arguments</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p>Referenced by <a class="el" href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00051">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_n_e_o_n_2_im2_col_8cpp_source.xhtml#l00053">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -381,7 +409,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

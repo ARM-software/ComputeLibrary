@@ -16,6 +16,6 @@ var classarm__compute_1_1_l_s_t_m_params =
     [ "projection_weights", "classarm__compute_1_1_l_s_t_m_params.xhtml#abd553d9f4eb47989b0f9e43183251c0a", null ],
     [ "recurrent_to_input_weights", "classarm__compute_1_1_l_s_t_m_params.xhtml#ab09e516de7730aa737e2905630dfc644", null ],
     [ "set_cifg_params", "classarm__compute_1_1_l_s_t_m_params.xhtml#adac8095c0cd29d443206dfcaf67f3607", null ],
-    [ "set_peephole_params", "classarm__compute_1_1_l_s_t_m_params.xhtml#a89b6dc21fc7e0340789f2490c1a5da4b", null ],
+    [ "set_peephole_params", "classarm__compute_1_1_l_s_t_m_params.xhtml#a28c80440058d5c9b0bc1e1a4622c734a", null ],
     [ "set_projection_params", "classarm__compute_1_1_l_s_t_m_params.xhtml#aea777d30779bab2d14630ea7e8516615", null ]
 ];

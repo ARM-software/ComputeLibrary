@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_depth_conver
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLDepthConvertLayer Class Reference</div>  </div>
 </div><!--header-->
@@ -152,6 +153,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
 <tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
 <tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a499bfb6d894caa73e662803d87b70fda"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_depth_convert_layer.xhtml#a499bfb6d894caa73e662803d87b70fda">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, <a class="el" href="namespacearm__compute.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6f">ConvertPolicy</a> policy, uint32_t shift)</td></tr>
+<tr class="memdesc:a499bfb6d894caa73e662803d87b70fda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_convert_layer.xhtml">CLDepthConvertLayer</a>.  <a href="#a499bfb6d894caa73e662803d87b70fda">More...</a><br /></td></tr>
+<tr class="separator:a499bfb6d894caa73e662803d87b70fda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_c_l_depth_convert_layer_kernel.xhtml">CLDepthConvertLayerKernel</a>. </p>
@@ -198,24 +205,81 @@ Public Member Functions</h2></td></tr>
 <p>Input data type must be different than output data type.</p>
 <p>Valid conversions Input -&gt; Output :</p>
 <ul>
-<li>QS8 -&gt; F32</li>
-<li>QS16 -&gt; F32</li>
 <li>U8 -&gt; U16, S16, U32, S32</li>
 <li>U16 -&gt; U8, U32, S32</li>
 <li>S16 -&gt; U8, U32, S32</li>
 <li>U32 -&gt; U8, U16, S16</li>
 <li>S32 -&gt; U8, U16, S16</li>
-<li>F32 -&gt; QS8, QS16</li>
+<li>F16 -&gt; F32</li>
+<li>F32 -&gt; F16</li>
 </ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Data types supported: QS8/U8/U16/S16/Q16/U32/S32/F32. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: QS8/U8/U16/S16/QS16/U32/S32/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. Data types supported: U8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. Data types supported: U8/U16/S16/U32/S32/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Conversion policy. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>Value for down/up conversions. Must be 0 &lt;= shift &lt; 8. It is not used on fixed point conversion. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>Value for down/up conversions. Must be 0 &lt;= shift &lt; 8. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a499bfb6d894caa73e662803d87b70fda"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6f">ConvertPolicy</a>&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>shift</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_depth_convert_layer.xhtml">CLDepthConvertLayer</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: U8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: U8/U16/S16/U32/S32/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Conversion policy. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>Value for down/up conversions. Must be 0 &lt;= shift &lt; 8.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 </div>
 </div>
@@ -228,7 +292,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_depth_convert_layer.xhtml">CLDepthConvertLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

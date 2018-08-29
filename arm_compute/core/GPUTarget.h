@@ -45,7 +45,7 @@ enum class GPUTarget
     G51           = 0x230,
     G51BIG        = 0x231,
     G51LIT        = 0x232,
-    TNOX          = 0x240,
+    G76           = 0x240,
     TTRX          = 0x250,
     TBOX          = 0x260
 };

@@ -55,10 +55,10 @@ public:
     /** Set the accumulate buffer and the biases of the kernel.
      *
      * @param[in, out] input                        Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                                              Data type supported: QS16/QS32/F16/F32
+     *                                              Data type supported: F16/F32
      * @param[in]      bias                         (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[out]     output                       (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                                              Data type supported: QS8/QS16/F16/F32
+     *                                              Data type supported: F16/F32
      * @param[in]      result_fixedpoint_multiplier (Optional)Fixed point value to be multiplied to each element of the input matrix when once the result_offset has been add
      * @param[in]      result_shift                 (Optional)Integer value used to round to nearest division by a power-of-two the result after the fixed point multiplication
      * @param[in]      result_offset_after_shift    (Optional)Offset to be applied to result before converting it back to QASYMM8
@@ -68,10 +68,10 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerOutputStageKernel
      *
      * @param[in] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                   Data type supported: QS16/QS32/F16/F32
+     *                   Data type supported: F16/F32
      * @param[in] bias   (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[in] output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
-     *                         Data type supported: QS8/QS16/F16/F32
+     *                         Data type supported: F16/F32
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *bias = nullptr, const ITensorInfo *output = nullptr);

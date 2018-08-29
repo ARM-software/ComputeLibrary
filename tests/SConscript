@@ -53,6 +53,10 @@ Help(new_options.GenerateHelpText(test_env))
 Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
 
+# Remove -Wnoexcept from tests
+if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:
+    test_env['CXXFLAGS'].remove("-Wnoexcept")
+
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
@@ -61,6 +65,7 @@ if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     arm_compute_lib = arm_compute_graph_a
 else:
     Import("arm_compute_graph_so")
+    Import("arm_compute_core_a")
     test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_graph_so
 
@@ -72,10 +77,6 @@ common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
 files_benchmark = Glob('benchmark/*.cpp')
-files_validation_framework = [test_env.Object(f) for f in Glob('validation/*.cpp')]
-
-# Always compile reference for validation
-files_validation_framework += [ test_env.Object(f) for f in Glob('validation/reference/*.cpp')]
 
 # Add unit tests
 files_validation = Glob('validation/UNIT/*/*.cpp')
@@ -126,7 +127,12 @@ if test_env['benchmark_tests']:
     Export('arm_compute_benchmark')
 
 if test_env['validation_tests']:
-    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation_framework + files_validation + common_objects)
+    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework, arm_compute_core_a])
+    Depends(arm_compute_validation_framework , arm_compute_test_framework)
+    Depends(arm_compute_validation_framework , arm_compute_core_a)
+
+    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'])
+    Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)
 

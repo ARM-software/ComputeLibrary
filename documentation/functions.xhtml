@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -160,17 +160,15 @@ $(document).ready(function(){initNavTree('functions.xhtml','');});
 <div class="textblock">Here is a list of all struct and union fields with links to the structures/unions they belong to:</div>
 
 <h3><a class="anchor" id="index__"></a>- _ -</h3><ul>
-<li>_a
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a3c56e995d4dc7abbe0dc428c91677f5a">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
-</li>
-<li>_b
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#afbd52c7bb890e7e1b516ca458abe423e">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
-</li>
 <li>_biases
 : <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a95ba9da2ab49208dfa0d4642c8f7b23b">CLDirectConvolutionLayerKernel</a>
 </li>
 <li>_border_size
 : <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4">CLDirectConvolutionLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a2e0cdcd6999269beea6b9512ad41f3d4">CLPoolingLayerKernel</a>
+</li>
+<li>_conv_info
+: <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a118b70265d99428bf7d068d686d0cb80">CLIm2ColKernel</a>
 </li>
 <li>_conv_stride_x
 : <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#aeebcff33f13042b2527755e294f5d53e">CLDirectConvolutionLayerKernel</a>
@@ -178,32 +176,64 @@ $(document).ready(function(){initNavTree('functions.xhtml','');});
 <li>_conv_stride_y
 : <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a862a2fc55a07b4d6a7e4e23cb11ff323">CLDirectConvolutionLayerKernel</a>
 </li>
-<li>_d
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a795e046c4103b68ac2d3977d903a15d4">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
-</li>
-<li>_gemm_kernel_asm
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#add93daba36f239482945a1b2428f35fc">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
+<li>_convolved_dims
+: <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml#a4215b3b7076338a7834c0bbff11aefb2">CLCol2ImKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a4215b3b7076338a7834c0bbff11aefb2">CLIm2ColKernel</a>
 </li>
 <li>_input
-: <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLDirectConvolutionLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLCol2ImKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLDirectConvolutionLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_flatten_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLFlattenLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1acfeaa60695d4df61d8d4b5c905aa53">CLPoolingLayerKernel</a>
+</li>
+<li>_input0
+: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a1ab65df01f310bf054323607cd09956e">CLGEMMMatrixMultiplyKernel</a>
+</li>
+<li>_input1
+: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a6590f81ae0c9f3e01546c73eb31a43c8">CLGEMMMatrixMultiplyKernel</a>
+</li>
+<li>_interpolationPolicy
+: <a class="el" href="classarm__compute_1_1_c_l_scale_kernel.xhtml#a8639ae30eec16840f9d0ae0549eeaf3e">CLScaleKernel</a>
+</li>
+<li>_kernel_dims
+: <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#af153c85a143d20108f35f4575ac9eb22">CLIm2ColKernel</a>
 </li>
 <li>_Known_bound
 : <a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if_3_01_t[_n]_4.xhtml#a344694425c9a8cf20c0869bdc4c675b6">_Unique_if&lt; T[N]&gt;</a>
 </li>
-<li>_optimised_kernel
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a25380d912475d0de9f812208470ed658">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
+<li>_num_elems_processed_per_iteration
+: <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1">CLIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a8fd589467d6c372b7b717d9cf8f961b1">CLPoolingLayerKernel</a>
+</li>
+<li>_num_groups
+: <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a98cef52489d010f16f5d9761bbc9424f">CLIm2ColKernel</a>
 </li>
 <li>_output
-: <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLDirectConvolutionLayerKernel</a>
+: <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLCol2ImKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLDirectConvolutionLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_flatten_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLFlattenLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLGEMMMatrixMultiplyKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a62d192d931002b4866443cd7fc71419b">CLPoolingLayerKernel</a>
 </li>
-<li>_pretranspose
-: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a5bdfad560ce4bc3d80c8c5182eba0f47">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
+<li>_pool_info
+: <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a204c8ef37bc558c02542daffbaee06e2">CLPoolingLayerKernel</a>
 </li>
 <li>_reference
 : <a class="el" href="structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml#a9cdfbe0f92ba33d9d5c84bc06600640c">compare_base&lt; T &gt;</a>
 </li>
+<li>_reinterpret_input_as_3d
+: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#aa71ec02f998e1dcfd49ef944ec8cf23e">CLGEMMMatrixMultiplyKernel</a>
+</li>
+<li>_reinterpret_output_as_3d
+: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a7d222bcf0d803c0647a4b93061daa56c">CLGEMMMatrixMultiplyKernel</a>
+</li>
 <li>_Single_object
 : <a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if.xhtml#a110afbff84e3935821a5dd174781da73">_Unique_if&lt; T &gt;</a>
+</li>
+<li>_slide_matrix_b
+: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml#a170f236fd8751c4e1675873b496f7cf8">CLGEMMMatrixMultiplyKernel</a>
 </li>
 <li>_ssbo_name
 : <a class="el" href="classarm__compute_1_1_g_l_buffer_wrapper.xhtml#abec44e011c6cd1fd66abdd649d446ca4">GLBufferWrapper</a>
@@ -226,7 +256,7 @@ $(document).ready(function(){initNavTree('functions.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed May 23 2018 11:36:45 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:58 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

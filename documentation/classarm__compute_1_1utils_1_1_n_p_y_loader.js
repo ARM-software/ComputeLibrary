@@ -5,5 +5,5 @@ var classarm__compute_1_1utils_1_1_n_p_y_loader =
     [ "init_tensor", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a6e3c7f7584c89bfed519597f40c08528", null ],
     [ "is_fortran", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a8aa067630bcfd267bf3389ae27e70e76", null ],
     [ "is_open", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a2f57f54d8c03b615bb31eee091d8a88a", null ],
-    [ "open", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a5988c0b8edbcd872e79d72cd47a8c18b", null ]
+    [ "open", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a739fd000f9e30bbc875cb48a9c6edab1", null ]
 ];

@@ -32,16 +32,6 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-namespace
-{
-void printf_callback(const char *buffer, unsigned int len, size_t complete, void *user_data)
-{
-    printf("%.*s", len, buffer);
-}
-}
-#endif /* defined(ARM_COMPUTE_DEBUG_ENABLED) */
-
 namespace arm_compute
 {
 class ICLKernel;
@@ -68,43 +58,7 @@ public:
      *
      * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
      */
-    void default_init(ICLTuner *cl_tuner = nullptr)
-    {
-        if(!_is_initialised)
-        {
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-            bool is_cl_arm_printf_supported = false;
-
-            //query devices in the context for cl_arm_printf support
-            std::vector<cl::Device> def_platform_devices;
-            cl::Platform::getDefault().getDevices(CL_DEVICE_TYPE_DEFAULT, &def_platform_devices);
-            is_cl_arm_printf_supported = device_supports_extension(def_platform_devices[0], "cl_arm_printf");
-
-            if(is_cl_arm_printf_supported)
-            {
-                // Create a cl_context with a printf_callback and user specified buffer size.
-                cl_context_properties properties[] =
-                {
-                    // Enable a printf callback function for this context.
-                    CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
-                    // Request a minimum printf buffer size of 4MB for devices in the
-                    // context that support this extension.
-                    CL_PRINTF_BUFFERSIZE_ARM, static_cast<cl_context_properties>(0x100000),
-                    CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
-                    0
-                };
-                cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT, properties));
-            }
-#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
-
-            CLKernelLibrary::get().init("./cl_kernels/", cl::Context::getDefault(), cl::Device::getDefault());
-            init(cl::Context::getDefault(), cl::CommandQueue::getDefault(), cl::Device::getDefault(), cl_tuner);
-        }
-        else
-        {
-            _cl_tuner = cl_tuner;
-        }
-    }
+    void default_init(ICLTuner *cl_tuner = nullptr);
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.
@@ -120,8 +74,7 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
      *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
      */
-    void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
-              cl::Device device = cl::Device::getDefault(), ICLTuner *cl_tuner = nullptr)
+    void init(cl::Context context, cl::CommandQueue queue, cl::Device device, ICLTuner *cl_tuner = nullptr)
     {
         set_context(context);
         _queue          = std::move(queue);
@@ -137,16 +90,8 @@ public:
     cl::Context &context()
     {
         ARM_COMPUTE_ERROR_ON(!_is_initialised);
-        return CLKernelLibrary::get().context();
-    }
-
-    /** Accessor to set the CL context to be used by the scheduler.
-     *
-     * @param[in] context A CL context.
-     */
-    void set_context(cl::Context context)
-    {
-        CLKernelLibrary::get().set_context(context);
+        _context = CLKernelLibrary::get().context();
+        return _context;
     }
 
     /** Accessor for the associated CL command queue.
@@ -168,6 +113,16 @@ public:
         return _target;
     }
 
+    /** Accessor to set the CL context to be used by the scheduler.
+     *
+     * @param[in] context A CL context.
+     */
+    void set_context(cl::Context context)
+    {
+        _context = std::move(context);
+        CLKernelLibrary::get().set_context(_context);
+    }
+
     /** Accessor to set the CL command queue to be used by the scheduler.
      *
      * @param[in] queue A CL command queue.
@@ -184,6 +139,15 @@ public:
     void set_target(GPUTarget target)
     {
         _target = target;
+    }
+
+    /** Accessor to set the CL tuner to be used by the scheduler.
+     *
+     * @param[in] tuner A CL tuner
+     */
+    void set_tuner(ICLTuner *tuner)
+    {
+        _cl_tuner = tuner;
     }
 
     /** Blocks until all commands in the associated command queue have finished. */
@@ -225,10 +189,12 @@ private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 
-    cl::CommandQueue _queue;
-    GPUTarget        _target;
-    bool             _is_initialised;
-    ICLTuner        *_cl_tuner;
+    cl::Context               _context;
+    cl::CommandQueue          _queue;
+    GPUTarget                 _target;
+    bool                      _is_initialised;
+    ICLTuner                 *_cl_tuner;
+    std::unique_ptr<ICLTuner> _cl_default_static_tuner;
 };
 }
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

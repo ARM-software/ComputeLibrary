@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -200,14 +200,14 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>Activation layer parameters. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00114">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00091">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -252,7 +252,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QASYMM8/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>Activation layer information.</td></tr>
   </table>
@@ -260,7 +260,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00161">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00135">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -273,7 +273,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

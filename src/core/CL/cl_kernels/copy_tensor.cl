@@ -25,24 +25,35 @@
 
 /** Performs a copy of input tensor to the output tensor.
  *
- * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8.
- * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
- * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per work item (in bytes)
- * @param[in]  in_offset_first_element_in_bytes  Offset of the first element in the source image
- * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8.
- * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per work item (in bytes)
- * @param[in]  out_offset_first_element_in_bytes Offset of the first element in the destination image
+ * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  in_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  in_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  in_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  in_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  in_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  in_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: same as @p in_ptr
+ * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  out_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  out_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  out_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void copy_tensor(
-    VECTOR_DECLARATION(in),
-    VECTOR_DECLARATION(out))
+    TENSOR3D_DECLARATION(in),
+    TENSOR3D_DECLARATION(out))
 {
-    Vector in  = CONVERT_TO_VECTOR_STRUCT(in);
-    Vector out = CONVERT_TO_VECTOR_STRUCT(out);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-    VEC_DATA_TYPE(DATA_TYPE, 16)
-    data = vload16(0, (__global DATA_TYPE *)in.ptr);
+    // Load data
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
 
-    vstore16(data, 0, (__global DATA_TYPE *)out.ptr);
+    // Store result
+    VSTORE(VEC_SIZE)
+    (data, 0, (__global DATA_TYPE *)out.ptr);
 }

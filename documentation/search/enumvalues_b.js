@@ -6,5 +6,5 @@ var searchData=
   ['median',['MEDIAN',['../namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858a8ab0c3a037e882577dec378985477074',1,'arm_compute']]],
   ['midgard',['MIDGARD',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3afa362f4daec88442a387ff7cda411a38',1,'arm_compute']]],
   ['min',['MIN',['../namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858ace31e2a082d17e038fcc6e3006166653',1,'arm_compute']]],
-  ['mul',['MUL',['../namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4a2cdf52a55876063ec93b7d18bc741f6c',1,'arm_compute::graph::MUL()'],['../namespacearm__compute.xhtml#afa20b6a7f4383003babd690f026f22dca2cdf52a55876063ec93b7d18bc741f6c',1,'arm_compute::MUL()']]]
+  ['mul',['Mul',['../namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4a62b6d55816cf737bfc6f42e60df1a3f2',1,'arm_compute::graph']]]
 ];

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.05</span>
+   &#160;<span id="projectnumber">18.08</span>
    </div>
   </td>
  </tr>
@@ -216,10 +216,10 @@ Static Public Member Functions</h2></td></tr>
 <p>Initialise the kernel's inputs, output and convertion policy. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/QS8/S16/F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input1</td><td>An input tensor. Data types supported: U8/S16/F16/F32. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">input2</td><td>An input tensor. Data types supported: same as <code>input1</code>. The input tensor is [in, out] because its <a class="el" href="classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">TensorInfo</a> might be modified inside the kernel in case of broadcasting of dimension 0. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8/QS8/S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Scale to apply after multiplication. Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. For QS8 and QS16 scale must be 1. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Scale to apply after multiplication. Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">overflow_policy</td><td>Overflow policy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rounding_policy</td><td>Rounding policy. </td></tr>
   </table>
@@ -287,9 +287,9 @@ Static Public Member Functions</h2></td></tr>
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml">NEPixelWiseMultiplication</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor info input. Data types supported: U8/QS8/S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor info input. Data types supported: U8/QS8/S16/F16/F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8/QS8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>First tensor info input. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input2</td><td>Second tensor info input. Data types supported: U8/S16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data types supported: U8/S16/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>Scale to apply after multiplication. Must be positive. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">overflow_policy</td><td>Overflow policy. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rounding_policy</td><td>Rounding policy.</td></tr>
@@ -298,7 +298,7 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p>Referenced by <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00128">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00124">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -311,7 +311,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml">NEPixelWiseMultiplication</a></li>
-    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
+    <li class="footer">Generated on Wed Aug 29 2018 15:31:49 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

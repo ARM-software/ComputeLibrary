@@ -70,16 +70,13 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    ActivationFunctionsDataset),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     auto bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
     // Create tensors
-    GCTensor src     = create_tensor<GCTensor>(input_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    GCTensor weights = create_tensor<GCTensor>(weights_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    GCTensor bias    = create_tensor<GCTensor>(bias_shape, bias_data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    GCTensor dst     = create_tensor<GCTensor>(output_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    GCTensor src     = create_tensor<GCTensor>(input_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    GCTensor weights = create_tensor<GCTensor>(weights_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    GCTensor bias    = create_tensor<GCTensor>(bias_shape, bias_data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    GCTensor dst     = create_tensor<GCTensor>(output_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -107,6 +104,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     // Validate QuantizationInfo
     ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
+
+    //Validate padding
 }
 
 template <typename T>

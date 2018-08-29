@@ -39,7 +39,7 @@ using namespace utils;
 class CLSGEMMExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         NPYLoader npy0, npy1, npy2;
         alpha = 1.0f;
@@ -164,6 +164,8 @@ public:
 
         // Dummy run for CLTuner
         sgemm.run();
+
+        return true;
     }
     void do_run() override
     {

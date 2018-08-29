@@ -25,13 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
@@ -63,7 +62,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_UNUSED(input, output, beta);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
@@ -87,19 +87,7 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     _output = output;
 
     std::ostringstream ma_arguments;
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ?
-                                      sqcvt_qs8_f32(beta, input->info()->fixed_point_position()) :
-                                      sqcvt_qs16_f32(beta, input->info()->fixed_point_position()))
-                     << " ";
-        ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
-    }
-    else
-    {
-        ma_arguments << "-DBETA=" << beta;
-    }
-
+    ma_arguments << "-DBETA=" << beta;
     std::set<std::string> build_opts;
     build_opts.emplace(ma_arguments.str());
 
@@ -110,7 +98,7 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLGEMMMatrixAdditionKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float beta)
@@ -125,14 +113,14 @@ void CLGEMMMatrixAdditionKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_2D();
+    Window slice = window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, slice);
-        add_2D_tensor_argument(idx, _output, slice);
+        add_3D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

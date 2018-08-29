@@ -80,38 +80,6 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END()
 
-TEST_SUITE(Quantized)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunTiny, NEFlattenLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Tiny3DShapes(), datasets::Tiny4DShapes()),
-                                                                                                    framework::dataset::make("DataType", DataType::QS8)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                         framework::dataset::make("DataType", DataType::QS8)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunTiny, NEFlattenLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Tiny3DShapes(), datasets::Tiny4DShapes()),
-                                                                                                     framework::dataset::make("DataType", DataType::QS16)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                          framework::dataset::make("DataType", DataType::QS16)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

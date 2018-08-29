@@ -1,7 +1,6 @@
 var dir_65e289039e1347f87d412b0a1b1a312c =
 [
     [ "functions", "dir_345bd7154d1542d1e03fd2836959a19d.xhtml", "dir_345bd7154d1542d1e03fd2836959a19d" ],
-    [ "AssemblyHelper.h", "_assembly_helper_8h.xhtml", "_assembly_helper_8h" ],
     [ "INESimpleFunction.h", "_i_n_e_simple_function_8h.xhtml", [
       [ "INESimpleFunction", "classarm__compute_1_1_i_n_e_simple_function.xhtml", "classarm__compute_1_1_i_n_e_simple_function" ]
     ] ],

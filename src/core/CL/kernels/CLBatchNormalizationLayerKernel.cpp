@@ -25,12 +25,11 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include "support/ToolchainSupport.h"
@@ -45,29 +44,28 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
                           float epsilon, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_UNUSED(epsilon);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) != mean->dimension(0));
     if(beta != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, beta);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, beta);
     }
     if(gamma != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, gamma);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, gamma);
     }
 
     if(act_info.enabled())
     {
         ActivationLayerInfo::ActivationFunction act = act_info.activation();
         ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32 && input->data_type() != DataType::F16);
-        ARM_COMPUTE_RETURN_ERROR_ON(act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+        ARM_COMPUTE_RETURN_ERROR_ON(act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU
+                                    && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
                                     && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
         ARM_COMPUTE_RETURN_ERROR_ON(act_info.b() > act_info.a());
     }
@@ -77,7 +75,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -167,7 +164,6 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
     build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
     build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
-    build_opts.add_option_if(is_data_type_fixed_point(input->info()->data_type()), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     build_opts.add_option_if(beta == nullptr, "-DUSE_DEFAULT_BETA");
     build_opts.add_option_if(gamma == nullptr, "-DUSE_DEFAULT_GAMMA");
 
@@ -193,7 +189,7 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
                                                     (beta != nullptr) ? beta->info() : nullptr,
                                                     (gamma != nullptr) ? gamma->info() : nullptr);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     _config_id = "batch_normalization_layer_";
     _config_id += string_from_data_layout(input->info()->data_layout());
@@ -205,6 +201,8 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
 Status CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
@@ -254,7 +252,7 @@ void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue
         {
             add_3D_tensor_argument(idx, _output, slice);
         }
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }

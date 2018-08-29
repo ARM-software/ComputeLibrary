@@ -25,24 +25,11 @@
 
 #if defined(VEC_SIZE) && defined(DATA_TYPE)
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE)
-#define SUB_OP(a, b) SUB_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND((a), (b), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define INVSQRT_OP(a) INVSQRT_OP_EXPAND((a), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define SQCVT_SAT(a) SQCVT_SAT_OP_EXPAND((a), DATA_TYPE, FIXED_POINT_POSITION)
-
-#else /* FIXED_POINT_POSITION */
-
 #define ADD_OP(a, b) ((a) + (b))
 #define SUB_OP(a, b) ((a) - (b))
 #define MUL_OP(a, b) ((a) * (b))
 #define INVSQRT_OP(a) rsqrt((a))
 #define SQCVT_SAT(a) (a)
-
-#endif /* FIXED_POINT_POSITION */
 
 #if defined(FUSED_ACTIVATION)
 #include "activation_layer.cl"
@@ -53,7 +40,7 @@
 
 /** Apply batch normalization.
  *
- * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
@@ -163,7 +150,7 @@ __kernel void batchnormalization_layer_nchw(TENSOR3D_DECLARATION(input),
 
 /** Apply batch normalization on tensors with NHWC format.
  *
- * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)

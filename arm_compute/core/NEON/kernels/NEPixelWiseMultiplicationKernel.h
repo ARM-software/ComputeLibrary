@@ -55,11 +55,10 @@ public:
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
-     *       For QS8/QS16 scale = 1 is the only supported value.
      *
-     * @param[in]  input1          An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in]  input2          An input tensor. Data types supported: U8, QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in]  input1          An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in]  input2          An input tensor. Data types supported: U8, S16/F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[out] output          The output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in]  scale           Scale to apply after multiplication.
      *                             Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in]  overflow_policy Overflow policy.
@@ -70,11 +69,10 @@ public:
      *
      * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
      *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
-     *       For QS8/QS16 scale = 1 is the only supported value.
      *
-     * @param[in] input1          An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in] input2          An input tensor. Data types supported: U8, QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
-     * @param[in] output          The output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in] input1          An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in] input2          An input tensor. Data types supported: U8, S16/F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[in] output          The output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in] scale           Scale to apply after multiplication.
      *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
      * @param[in] overflow_policy Overflow policy.
@@ -96,15 +94,6 @@ private:
      * @param[out] output_ptr Pointer to the output tensor.
      */
     using MulFunctionInt = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int scale);
-    /** Common signature for all the specialised multiplication functions with fixed-point values
-     *
-     * @param[in]  input1_ptr           Pointer to the first input tensor.
-     * @param[in]  input2_ptr           Pointer to the second input tensor.
-     * @param[in]  scale                Scaling factor.
-     * @param[in]  fixed_point_position Fixed-point position that expresses the number of bits for the fractional part of the number.
-     * @param[out] output_ptr           Pointer to the output tensor.
-     */
-    using MulFunctionQInt = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int scale, int fixed_point_position);
     /** Common signature for all the specialised multiplication functions with float scaling factor
      *
      * @param[in]  input1_ptr Pointer to the first input tensor.
@@ -115,7 +104,6 @@ private:
 
     MulFunctionFloat *_func_float;
     MulFunctionInt   *_func_int;
-    MulFunctionQInt *_func_q_int;
 
 private:
     const ITensor *_input1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,7 +121,7 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_a_reduction(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLGEMMLowpMatrixAReductionKernel::validate(const ITensorInfo *mtx_a, const ITensorInfo *vector_sum_row)
@@ -175,7 +175,7 @@ void CLGEMMLowpMatrixBReductionKernel::configure(const ICLTensor *mtx_b, ICLTens
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_b_reduction(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLGEMMLowpMatrixBReductionKernel::validate(const ITensorInfo *mtx_b, const ITensorInfo *vector_sum_col)

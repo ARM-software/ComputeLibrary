@@ -14,7 +14,7 @@ var _g_p_u_target_8h =
       [ "G51", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a0a2d4856ae75ec5a7b78851f6e5875f0", null ],
       [ "G51BIG", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3afc99dd3bc5650c5116886eefd3d18988", null ],
       [ "G51LIT", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a9d0acedfece9dfaf5cc3e63bfbeecf2f", null ],
-      [ "TNOX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a9a42105c81f05fa4a58cb8fd532e739e", null ],
+      [ "G76", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3aa46ce37da51477a1af33a8810e0ed04d", null ],
       [ "TTRX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3ab39f7e42574174cf9ee7da726bdb13b4", null ],
       [ "TBOX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a53e518b6393904e797819c7a941f9ddc", null ]
     ] ],
