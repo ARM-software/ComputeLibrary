@@ -327,7 +327,13 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+
+        if(is_data_type_quantized_asymmetric(b_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
     // Create convolution node and connect
