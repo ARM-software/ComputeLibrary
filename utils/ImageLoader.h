@@ -33,7 +33,6 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #pragma GCC diagnostic pop
 
