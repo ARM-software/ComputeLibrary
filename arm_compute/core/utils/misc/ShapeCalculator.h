@@ -646,6 +646,20 @@ inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const 
 
     return output_shape;
 }
+inline TensorShape compute_prior_box_shape(const ITensorInfo &input, const PriorBoxLayerInfo &info)
+{
+    DataLayout   data_layout = input.data_layout();
+    const size_t idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    const int num_priors = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
+
+    TensorShape output_shape{};
+    output_shape.set(0, input.dimension(idx_w) * input.dimension(idx_h) * num_priors * 4);
+    output_shape.set(1, 2);
+
+    return output_shape;
+}
 
 inline TensorShape compute_padded_shape(const TensorShape &input_shape, const PaddingList &padding)
 {

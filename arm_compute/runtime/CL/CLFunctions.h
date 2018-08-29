@@ -102,6 +102,7 @@
 #include "arm_compute/runtime/CL/functions/CLPhase.h"
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPriorBoxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"

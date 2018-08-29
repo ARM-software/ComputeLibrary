@@ -799,6 +799,128 @@ struct FullyConnectedLayerInfo
     }
 };
 
+/** PriorBox layer info */
+class PriorBoxLayerInfo final
+{
+public:
+    /** Default Constructor */
+    PriorBoxLayerInfo()
+        : _min_sizes(),
+          _variances(),
+          _offset(),
+          _flip(true),
+          _clip(false),
+          _max_sizes(),
+          _aspect_ratios(),
+          _img_size(),
+          _steps()
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] min_sizes     Min sizes vector.
+     * @param[in] variances     Variances vector. Size must be equal to 4.
+     * @param[in] offset        Offset value.
+     * @param[in] flip          (Optional) Flip the aspect ratios.
+     * @param[in] clip          (Optional) Clip coordinates so that they're within [0,1].
+     * @param[in] max_sizes     (Optional) Max sizes vector.
+     * @param[in] aspect_ratios (Optional) Aspect ratios of the boxes.
+     * @param[in] img_size      (Optional) Image size.
+     * @param[in] steps         (Optional) Step values.
+     */
+    PriorBoxLayerInfo(const std::vector<float> &min_sizes, const std::vector<float> &variances, float offset, bool flip = true, bool clip = false,
+    const std::vector<float> &max_sizes = {}, const std::vector<float> &aspect_ratios = {}, const Coordinates2D &img_size = Coordinates2D{ 0, 0 }, const std::array<float, 2> &steps = { { 0.f, 0.f } })
+        : _min_sizes(min_sizes),
+          _variances(variances),
+          _offset(offset),
+          _flip(flip),
+          _clip(clip),
+          _max_sizes(max_sizes),
+          _aspect_ratios(aspect_ratios),
+          _img_size(img_size),
+          _steps(steps)
+    {
+        _aspect_ratios.push_back(1.);
+        for(unsigned int i = 0; i < aspect_ratios.size(); ++i)
+        {
+            float ar            = aspect_ratios[i];
+            bool  already_exist = false;
+            for(auto ar_new : _aspect_ratios)
+            {
+                if(fabs(ar - ar_new) < 1e-6)
+                {
+                    already_exist = true;
+                    break;
+                }
+            }
+            if(!already_exist)
+            {
+                _aspect_ratios.push_back(ar);
+                if(flip)
+                {
+                    _aspect_ratios.push_back(1.f / ar);
+                }
+            }
+        }
+    }
+    /** Get min sizes. */
+    std::vector<float> min_sizes() const
+    {
+        return _min_sizes;
+    }
+    /** Get min variances. */
+    std::vector<float> variances() const
+    {
+        return _variances;
+    }
+    /** Get the step coordinates */
+    std::array<float, 2> steps() const
+    {
+        return _steps;
+    }
+    /** Get the image size coordinates */
+    Coordinates2D img_size() const
+    {
+        return _img_size;
+    }
+    /** Get the offset */
+    float offset() const
+    {
+        return _offset;
+    }
+    /** Get the flip value */
+    bool flip() const
+    {
+        return _flip;
+    }
+    /** Get the clip value */
+    bool clip() const
+    {
+        return _clip;
+    }
+    /** Get max sizes. */
+    std::vector<float> max_sizes() const
+    {
+        return _max_sizes;
+    }
+    /** Get aspect ratios. */
+    std::vector<float> aspect_ratios() const
+    {
+        return _aspect_ratios;
+    }
+
+private:
+    std::vector<float> _min_sizes;
+    std::vector<float> _variances;
+    float              _offset;
+    bool               _flip;
+    bool               _clip;
+    std::vector<float> _max_sizes;
+    std::vector<float> _aspect_ratios;
+    Coordinates2D      _img_size;
+    std::array<float, 2> _steps;
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {

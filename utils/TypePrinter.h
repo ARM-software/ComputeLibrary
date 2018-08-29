@@ -1324,6 +1324,30 @@ inline std::string to_string(const PoolingLayerInfo &info)
     return str.str();
 }
 
+/** Formatted output of the PriorBoxLayerInfo.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PriorBoxLayerInfo &info)
+{
+    std::stringstream str;
+    str << "{";
+    str << "Clip:" << info.clip()
+        << "Flip:" << info.flip()
+        << "StepX:" << info.steps()[0]
+        << "StepY:" << info.steps()[1]
+        << "MinSizes:" << info.min_sizes().size()
+        << "MaxSizes:" << info.max_sizes().size()
+        << "ImgSizeX:" << info.img_size().x
+        << "ImgSizeY:" << info.img_size().y
+        << "Offset:" << info.offset()
+        << "Variances:" << info.variances().size();
+    str << "}";
+    return str.str();
+}
+
 /** Formatted output of the KeyPoint type.
  *
  * @param[out] os    Output stream
@@ -1777,6 +1801,29 @@ inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args
         os << arg;
     }
     os << "]";
+    return os;
+}
+
+/** Formatted output of @ref PriorBoxLayerInfo.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PriorBoxLayerInfo &info)
+{
+    os << "Clip:" << info.clip()
+       << "Flip:" << info.flip()
+       << "StepX:" << info.steps()[0]
+       << "StepY:" << info.steps()[1]
+       << "MinSizes:" << info.min_sizes()
+       << "MaxSizes:" << info.max_sizes()
+       << "ImgSizeX:" << info.img_size().x
+       << "ImgSizeY:" << info.img_size().y
+       << "Offset:" << info.offset()
+       << "Variances:" << info.variances();
+
     return os;
 }
 
