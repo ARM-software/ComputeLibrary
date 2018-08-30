@@ -1,0 +1,4 @@
+<map id="CLSubTensor" name="CLSubTensor">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor. " alt="" coords="17,80,97,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor. " alt="" coords="24,5,91,32"/>
+</map>

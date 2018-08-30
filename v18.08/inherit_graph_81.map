@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters. " alt="" coords="5,56,123,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_access_window_auto_padding.xhtml" title="Dummy access window. " alt="" coords="171,5,365,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_access_window_rectangle.xhtml" title="Implementation of a rectangular access pattern. " alt="" coords="180,56,356,83"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_access_window_static.xhtml" title="Implementation of a static rectangular access pattern. " alt="" coords="193,107,343,133"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_access_window_horizontal.xhtml" title="Implementation of a row access pattern. " alt="" coords="413,5,592,32"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_access_window_transpose.xhtml" title="Implementation of a XY&#45;transpose access pattern. " alt="" coords="413,56,592,83"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_access_window_vertical.xhtml" title="Implementation of a column access pattern. " alt="" coords="422,107,583,133"/>
+</map>

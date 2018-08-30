@@ -1,0 +1,5 @@
+<map id="CLGEMMLowpMatrixAReductionKernel" name="CLGEMMLowpMatrixAReductionKernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_g_e_m_m_lowp_reduction_kernel.xhtml" title="Common interface for all OpenCL reduction kernels. " alt="" coords="8,155,223,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="75,80,155,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="83,5,147,32"/>
+</map>
