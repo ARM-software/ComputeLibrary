@@ -509,7 +509,7 @@ v17.04 Public bug fixes release
  -  @ref NEFillArrayKernel
  -  @ref NEGaussianPyramidHorKernel
  -  @ref NEGaussianPyramidVertKernel
- -  @ref NEHarrisScoreFP16Kernel
+ -  NEHarrisScoreFP16Kernel
  -  @ref NEHarrisScoreKernel
  -  @ref NEHOGDetectorKernel
  -  @ref NELogits1DMaxKernel

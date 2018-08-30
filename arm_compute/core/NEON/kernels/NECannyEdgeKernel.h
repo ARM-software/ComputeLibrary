@@ -85,24 +85,6 @@ protected:
     ITensor          *_phase;     /**< Destination tensor - Quantized phase */
 };
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/** NEON kernel to perform Gradient computation for FP16 datatype
- */
-class NEGradientFP16Kernel : public NEGradientKernel
-{
-public:
-    const char *name() const override
-    {
-        return "NEGradientFP16Kernel";
-    }
-    // Inherited methods overriden:
-    void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type) override;
-};
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-/** NEON kernel to perform Gradient computation for FP16 datatype */
-using NEGradientFP16Kernel = NEGradientKernel;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
 /** NEON kernel to perform Non-Maxima suppression for Canny Edge.
  *
  * @note This kernel is meant to be used alongside CannyEdge and performs a non-maxima suppression using magnitude and phase of input

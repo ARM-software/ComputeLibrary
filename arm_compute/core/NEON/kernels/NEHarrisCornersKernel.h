@@ -102,34 +102,5 @@ private:
     /** Harris Score function to use for the particular image types passed to configure() */
     HarrisScoreFunction *_func;
 };
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/** Interface for the accumulate Weighted kernel using F16 */
-template <int32_t block_size>
-class NEHarrisScoreFP16Kernel : public INEHarrisScoreKernel
-{
-public:
-    const char *name() const override
-    {
-        return "NEHarrisScoreFP16Kernel";
-    }
-    /** Default constructor */
-    NEHarrisScoreFP16Kernel();
-    // Inherited methods overridden:
-    void configure(const IImage *input1, const IImage *input2, IImage *output, float norm_factor, float strength_thresh, float sensitivity, bool border_undefined) override;
-    BorderSize border_size() const override;
-    void run(const Window &window, const ThreadInfo &info) override;
-
-private:
-    using HarrisScoreFunction = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, int32_t input_stride,
-                                     float norm_factor, float sensitivity, float strength_thresh);
-    /** Harris Score function to use for the particular image types passed to configure() */
-    HarrisScoreFunction *_func;
-};
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-/** Interface for the accumulate Weighted kernel using FP16 */
-template <int32_t block_size>
-using NEHarrisScoreFP16Kernel = NEHarrisScoreKernel<block_size>;
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEHARRISCORNERSKERNEL_H__ */

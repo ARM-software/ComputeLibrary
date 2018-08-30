@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,8 +38,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-std::vector<KeyPoint> harris_corner_detector(const SimpleTensor<T> &src, float threshold, float min_dist, float sensitivity, int gradient_size, int block_size, BorderMode border_mode,
-                                             T constant_border_value = 0);
+std::vector<KeyPoint> harris_corner_detector(const SimpleTensor<T> &src,
+                                             float threshold, float min_dist, float sensitivity, int gradient_size, int block_size,
+                                             BorderMode border_mode, T constant_border_value = 0);
 } // namespace reference
 } // namespace validation
 } // namespace test

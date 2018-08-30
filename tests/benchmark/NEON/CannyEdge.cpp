@@ -42,10 +42,9 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-const auto use_fp16           = framework::dataset::make("UseFP16", { false });
 const auto canny_edge_dataset = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }),
                                 combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }),
-                                combine(datasets::BorderModes(), use_fp16)));
+                                        datasets::BorderModes()));
 } // namespace
 
 using NECannyEdgeFixture = CannyEdgeFixture<Tensor, NECannyEdge, Accessor>;
