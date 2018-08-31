@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,17 @@
 #include "arm_compute/core/NEON/kernels/NEFloorKernel.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEFloor::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEFloorKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+Status NEFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEFloorKernel::validate(input, output);
+}
+} // namespace arm_compute

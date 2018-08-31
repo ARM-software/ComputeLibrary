@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,17 @@
 #include "arm_compute/core/CL/kernels/CLFloorKernel.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLFloor::configure(const ICLTensor *input, ICLTensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLFloorKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+Status CLFloor::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLFloorKernel::validate(input, output);
+}
+} // namespace arm_compute

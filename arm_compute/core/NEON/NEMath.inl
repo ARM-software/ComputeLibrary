@@ -175,6 +175,15 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 /** Exponent polynomial coefficients */
 /** Logarithm polynomial coefficients */
 #ifndef DOXYGEN_SKIP_THIS
+inline float16x8_t vfloorq_f16(float16x8_t val)
+{
+    static const float16x8_t CONST_1 = vdupq_n_f16(1.f);
+
+    const int16x8_t   z = vcvtq_s16_f16(val);
+    const float16x8_t r = vcvtq_f16_s16(z);
+
+    return vbslq_f16(vcgtq_f16(r, val), vsubq_f16(r, CONST_1), r);
+}
 inline float16x4_t vinvsqrt_f16(float16x4_t x)
 {
     float16x4_t sqrt_reciprocal = vrsqrte_f16(x);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,7 @@ SimpleTensor<T> floor_layer(const SimpleTensor<T> &src)
     return dst;
 }
 
+template SimpleTensor<half> floor_layer(const SimpleTensor<half> &src);
 template SimpleTensor<float> floor_layer(const SimpleTensor<float> &src);
 } // namespace reference
 } // namespace validation

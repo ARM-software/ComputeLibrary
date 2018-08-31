@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -33,7 +34,42 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+
+    // Validate in case of configured output
+    if(output->total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    auto_init_if_empty(*output, *input);
+
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, input->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 
 CLFloorKernel::CLFloorKernel()
     : _input(nullptr), _output(nullptr)
@@ -47,14 +83,13 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     // Auto initialize output
     auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    // Validate
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
+    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
     // Create kernel
     std::set<std::string> build_opts;
@@ -63,13 +98,17 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("floor_layer", build_opts));
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->info()->valid_region());
+    auto win_config = validate_and_configure_window(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure_internal(win_config.second);
+}
 
-    ICLKernel::configure_internal(win);
+Status CLFloorKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+
+    return Status{};
 }
 
 void CLFloorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -89,3 +128,4 @@ void CLFloorKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(collapsed.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute
