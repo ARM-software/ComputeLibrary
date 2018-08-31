@@ -232,7 +232,7 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     initialize_matrix_transform(matrix, output_tile_size, kernel_size, WinogradTransformType::INPUT);
 
     // Transpose matrix
-    transpose_matrix(matrix, matrix_transposed);
+    transpose_matrix<T>(matrix, matrix_transposed);
 
     const int in_w        = in.shape().x();
     const int in_h        = in.shape().y();
@@ -293,14 +293,14 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
                     int yi = y * step_y - conv_info.pad_top();
 
                     // Get the tile from the input tensor
-                    get_tile(in, src_tile, Coordinates(xi, yi, z, b));
+                    get_tile<T>(in, src_tile, Coordinates(xi, yi, z, b));
 
                     // Fill partially with zeros in case of 1D convolution
-                    zeros(src_tile, anchor_zeros, shape_zeros);
+                    zeros<T>(src_tile, anchor_zeros, shape_zeros);
 
                     // Compute the transformation
-                    matrix_multiply(matrix, src_tile, tmp_tile);
-                    matrix_multiply(tmp_tile, matrix_transposed, dst_tile);
+                    matrix_multiply<T>(matrix, src_tile, tmp_tile);
+                    matrix_multiply<T>(tmp_tile, matrix_transposed, dst_tile);
 
                     // Store the output tile across the channels
                     for(int i = 0; i < out_d; ++i)
@@ -358,7 +358,7 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
     initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::FILTER);
 
     // Transpose the transformation matrix
-    transpose_matrix(trans_matrix, trans_matrix_transposed);
+    transpose_matrix<T>(trans_matrix, trans_matrix_transposed);
 
     const int num_channels = in.shape()[2];
     const int num_filters  = in.shape()[3];
@@ -374,13 +374,13 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
             for(int z = 0; z < num_channels; ++z)
             {
                 // Load the tile from the input tensor
-                get_tile(in, input_tile, Coordinates(0, 0, z, w, n));
+                get_tile<T>(in, input_tile, Coordinates(0, 0, z, w, n));
 
                 // First transformation
-                matrix_multiply(trans_matrix, input_tile, tmp_tile);
+                matrix_multiply<T>(trans_matrix, input_tile, tmp_tile);
 
                 // Second transformation
-                matrix_multiply(tmp_tile, trans_matrix_transposed, transf_tile);
+                matrix_multiply<T>(tmp_tile, trans_matrix_transposed, transf_tile);
 
                 // Store the output tile across the channels
                 const int output_offset = w + z * num_filters;
@@ -451,7 +451,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::OUTPUT);
 
     // Transpose the transformation matrix
-    transpose_matrix(trans_matrix, trans_matrix_transposed);
+    transpose_matrix<T>(trans_matrix, trans_matrix_transposed);
 
     const int w_in        = in.shape()[0];
     const int h_in        = in.shape()[1];
@@ -487,7 +487,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const int step_y_transf_tile = kernel_size.width == 1 ? 1 : output_tile.shape()[0];
 
     // Initialize with zeros the input tile
-    zeros(input_tile, Coordinates(0, 0), input_tile.shape());
+    zeros<T>(input_tile, Coordinates(0, 0), input_tile.shape());
 
     for(int n = 0; n < num_batches; ++n)
     {
@@ -502,10 +502,10 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
                 }
 
                 // First transformation
-                matrix_multiply(trans_matrix, input_tile, tmp_tile);
+                matrix_multiply<T>(trans_matrix, input_tile, tmp_tile);
 
                 // Second transformation
-                matrix_multiply(tmp_tile, trans_matrix_transposed, output_tile);
+                matrix_multiply<T>(tmp_tile, trans_matrix_transposed, output_tile);
 
                 // Store the output tile
                 const int xo = (y % num_tiles_x) * out_tile_w;
@@ -538,6 +538,10 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
 template SimpleTensor<float> winograd_filter_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 template SimpleTensor<float> winograd_input_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 template SimpleTensor<float> winograd_output_transform(const SimpleTensor<float> &in, const SimpleTensor<float> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<half> winograd_filter_transform(const SimpleTensor<half> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<half> winograd_input_transform(const SimpleTensor<half> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<half> winograd_output_transform(const SimpleTensor<half> &in, const SimpleTensor<half> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+
 } // namespace reference
 } // namespace validation
 } // namespace test

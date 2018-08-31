@@ -237,7 +237,8 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
  * @param[out] out Output tensor
  *
  */
-void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
+template <typename T>
+void matrix_multiply(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &out);
 
 /** Transpose matrix
  *
@@ -245,7 +246,8 @@ void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b,
  * @param[out] out Output tensor
  *
  */
-void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
+template <typename T>
+void transpose_matrix(const SimpleTensor<T> &in, SimpleTensor<T> &out);
 
 /** Get a 2D tile from a tensor
  *

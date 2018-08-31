@@ -59,7 +59,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout) or [IFM, kernel_x, kernel_y, OFM] (NHWC data layout). Data types supported: F32.
+     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout) or [IFM, kernel_x, kernel_y, OFM] (NHWC data layout). Data types supported: F16/F32.
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      */
@@ -77,7 +77,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout) or [IFM, kernel_x, kernel_y, OFM] (NHWC data layout). Data types supported: F32.
+     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout) or [IFM, kernel_x, kernel_y, OFM] (NHWC data layout). Data types supported: F16/F32.
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      *

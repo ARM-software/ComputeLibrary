@@ -70,6 +70,7 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);
@@ -175,6 +176,7 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);
@@ -318,6 +320,7 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);
@@ -401,6 +404,7 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);
@@ -481,6 +485,7 @@ protected:
     {
         switch(tensor.data_type())
         {
+            case DataType::F16:
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);

@@ -62,25 +62,25 @@ using CLWinogradLayerFixture = WinogradConvolutionLayerFixture<CLTensor, CLWinog
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1WinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1WinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4WinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4WinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetWinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, CLGEMMConvolutionLayerFixture, framework::DatasetMode::ALL,
@@ -163,25 +163,25 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, CLGEMMConvolutionLayerFi
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1WinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1WinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4WinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4WinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetWinogradLayerDataset(),
                                                                                                                     framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
-                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()
