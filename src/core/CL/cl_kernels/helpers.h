@@ -38,7 +38,7 @@
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
-#endif defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
+#endif // defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 
 #define EXPAND(x) x
 
