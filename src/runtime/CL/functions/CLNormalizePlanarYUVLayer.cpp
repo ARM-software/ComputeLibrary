@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,33 +22,34 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCNormalizePlanarYUVLayer.h"
+#include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 
-using namespace arm_compute;
-
-GCNormalizePlanarYUVLayer::GCNormalizePlanarYUVLayer()
+namespace arm_compute
+{
+CLNormalizePlanarYUVLayer::CLNormalizePlanarYUVLayer()
     : _norm_kernel()
 {
 }
 
-void GCNormalizePlanarYUVLayer::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std)
+void CLNormalizePlanarYUVLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std)
 {
     _norm_kernel.configure(input, output, mean, std);
 }
 
-Status GCNormalizePlanarYUVLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
+Status CLNormalizePlanarYUVLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
                                            const ITensorInfo *mean, const ITensorInfo *std)
 {
-    return GCNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
+    return CLNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
 }
 
-void GCNormalizePlanarYUVLayer::run()
+void CLNormalizePlanarYUVLayer::run()
 {
-    GCScheduler::get().dispatch(_norm_kernel, true);
+    CLScheduler::get().enqueue(_norm_kernel, true);
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,47 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE__H__
-#define __ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYERKERNEL_H__
+#ifndef __ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYERKERNEL_H__
+#define __ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYERKERNEL_H__
 
-#include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
-class IGCTensor;
+class ICLTensor;
 
-/** Interface for the NormalizePlanarYUV layer kernel.
- */
-class GCNormalizePlanarYUVLayerKernel : public IGCKernel
+/** Interface for the NormalizePlanarYUV layer kernel. */
+class CLNormalizePlanarYUVLayerKernel : public ICLKernel
 {
 public:
     /** Constructor */
-    GCNormalizePlanarYUVLayerKernel();
+    CLNormalizePlanarYUVLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    GCNormalizePlanarYUVLayerKernel(const GCNormalizePlanarYUVLayerKernel &) = delete;
+    CLNormalizePlanarYUVLayerKernel(const CLNormalizePlanarYUVLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    GCNormalizePlanarYUVLayerKernel &operator=(const GCNormalizePlanarYUVLayerKernel &) = delete;
+    CLNormalizePlanarYUVLayerKernel &operator=(const CLNormalizePlanarYUVLayerKernel &) = delete;
     /** Default Move Constructor. */
-    GCNormalizePlanarYUVLayerKernel(GCNormalizePlanarYUVLayerKernel &&) = default;
+    CLNormalizePlanarYUVLayerKernel(CLNormalizePlanarYUVLayerKernel &&) = default;
     /** Default move assignment operator */
-    GCNormalizePlanarYUVLayerKernel &operator=(GCNormalizePlanarYUVLayerKernel &&) = default;
+    CLNormalizePlanarYUVLayerKernel &operator=(CLNormalizePlanarYUVLayerKernel &&) = default;
     /** Default destructor */
-    ~GCNormalizePlanarYUVLayerKernel() = default;
+    ~CLNormalizePlanarYUVLayerKernel() = default;
 
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: F16.
+     *                    Data types supported: F16/F32.
      * @param[out] output Destination tensor. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
-     * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the feature maps [FM].
+     * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
      *                    Data types supported: same as @p input
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std);
-    /** Static function to check if given info will lead to a valid configuration of @ref GCNormalizePlanarYUVLayerKernel
+    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayerKernel
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: F16.
+     *                    Data types supported: F16/F32.
      * @param[out] output Destination tensor info. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
      * @param[in]  std    Standard deviation values tensor info. 1 dimension with size equal to the number of input channels.
@@ -72,13 +71,13 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
 
     // Inherited methods overridden:
-    void run(const Window &window) override;
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const IGCTensor *_input;
-    IGCTensor       *_output;
-    const IGCTensor *_mean;
-    const IGCTensor *_std;
+    const ICLTensor *_input;
+    ICLTensor       *_output;
+    const ICLTensor *_mean;
+    const ICLTensor *_std;
 };
-}
-#endif /*__ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYERKERNEL_H__ */
+} // namespace arm_compute
+#endif /*__ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYERKERNEL_H__ */

@@ -93,6 +93,7 @@
 #include "arm_compute/runtime/CL/functions/CLNonLinearFilter.h"
 #include "arm_compute/runtime/CL/functions/CLNonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/CL/functions/CLNormalizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLNormalizePlanarYUVLayer.h"
 #include "arm_compute/runtime/CL/functions/CLOpticalFlow.h"
 #include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLPhase.h"

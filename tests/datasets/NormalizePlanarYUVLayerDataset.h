@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ public:
             description << "In=" << *_tensor_it << ":";
             description << "Out=" << *_tensor_it << ":";
             description << "Mean=" << *_param_it << ":";
-            description << "Sd=" << *_param_it << ":";
+            description << "Std=" << *_param_it << ":";
             return description.str();
         }
 

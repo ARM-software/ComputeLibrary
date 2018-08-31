@@ -308,6 +308,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "non_max_suppression", "nonmax.cl" },
     { "normalization_layer_cross_map", "normalization_layer.cl" },
     { "normalization_layer_in_map", "normalization_layer.cl" },
+    { "normalize_planar_yuv_layer_nchw", "normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_nhwc", "normalize_planar_yuv_layer.cl" },
     { "NV12_to_IYUV_bt709", "color_convert.cl" },
     { "NV12_to_RGB888_bt709", "color_convert.cl" },
     { "NV12_to_RGBA8888_bt709", "color_convert.cl" },
@@ -672,6 +674,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "normalization_layer.cl",
 #include "./cl_kernels/normalization_layer.clembed"
+    },
+    {
+        "normalize_planar_yuv_layer.cl",
+#include "./cl_kernels/normalize_planar_yuv_layer.clembed"
     },
     {
         "batchnormalization_layer.cl",

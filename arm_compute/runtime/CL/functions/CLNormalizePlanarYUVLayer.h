@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,45 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYER_H__
-#define __ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYER_H__
+#ifndef __ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H__
+#define __ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H__
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizePlanarYUVLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
-class IGCTensor;
+class ICLTensor;
 
-/** Basic function to run @ref GCNormalizePlanarYUVLayerKernel
+/** Basic function to run @ref CLNormalizePlanarYUVLayerKernel
  *
  *  @note The function simulates a NormalizePlanarYUV layer.
  */
-class GCNormalizePlanarYUVLayer : public IFunction
+class CLNormalizePlanarYUVLayer : public IFunction
 {
 public:
     /** Default constructor */
-    GCNormalizePlanarYUVLayer();
+    CLNormalizePlanarYUVLayer();
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: F16.
-     * @param[out] output Destination tensor. Data type supported: same as @p input
-     * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
+     *                    Data types supported: F16/F32.
+     * @param[out] output Destinationfeature tensor. Data type supported: same as @p input
+     * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: Same as @p input
      * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
-     *                    Data types supported: same as @p input
+     *                    Data types supported: Same as @p input
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std);
+    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *std);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayer
      *
-     * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
+     * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, FM].
      *                    Data types supported: F16/F32.
      * @param[out] output Destination tensor info. Data type supported: same as @p input
-     * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
+     * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: Same as @p input
      * @param[in]  std    Standard deviation values tensor info. 1 dimension with size equal to the number of input channels.
-     *                    Data types supported: same as @p input
+     *                    Data types supported: Same as @p input
      *
      * @return a status
      */
@@ -69,7 +69,7 @@ public:
     void run() override;
 
 private:
-    GCNormalizePlanarYUVLayerKernel _norm_kernel; /**< NormalizePlanarYUV layer kernel to run */
+    CLNormalizePlanarYUVLayerKernel _norm_kernel; /**< NormalizePlanarYUV layer kernel to run */
 };
-}
-#endif /* __ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYER_H__ */
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_CLNORMALIZEPLANARYUVLAYER_H__ */

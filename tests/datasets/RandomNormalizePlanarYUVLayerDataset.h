@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,8 @@ public:
         add_config(TensorShape(21U, 11U, 12U, 1U), TensorShape(12U));
         add_config(TensorShape(7U, 3U, 6U, 1U), TensorShape(6U));
         add_config(TensorShape(7U, 2U, 3U, 1U), TensorShape(3U));
+        add_config(TensorShape(7U, 2U, 3U, 3U), TensorShape(3U));
+        add_config(TensorShape(21U, 11U, 12U, 3U), TensorShape(12U));
     }
 };
 } // namespace datasets
