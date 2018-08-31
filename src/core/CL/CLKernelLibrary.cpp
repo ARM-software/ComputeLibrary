@@ -153,6 +153,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "arithmetic_add", "arithmetic_op.cl" },
     { "arithmetic_sub", "arithmetic_op.cl" },
     { "arithmetic_div", "arithmetic_op.cl" },
+    { "batch_to_space", "batch_to_space.cl" },
+    { "batch_to_space_static", "batch_to_space.cl" },
     { "batchnormalization_layer_nchw", "batchnormalization_layer.cl" },
     { "batchnormalization_layer_nhwc", "batchnormalization_layer.cl" },
     { "bitwise_or", "bitwise_op.cl" },
@@ -454,6 +456,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "arithmetic_op_quantized.cl",
 #include "./cl_kernels/arithmetic_op_quantized.clembed"
+    },
+    {
+        "batch_to_space.cl",
+#include "./cl_kernels/batch_to_space.clembed"
     },
     {
         "bitwise_op.cl",

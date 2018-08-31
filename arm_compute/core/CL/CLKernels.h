@@ -32,6 +32,7 @@
 #include "arm_compute/core/CL/kernels/CLArithmeticDivisionKernel.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticSubtractionKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseAndKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseNotKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseOrKernel.h"

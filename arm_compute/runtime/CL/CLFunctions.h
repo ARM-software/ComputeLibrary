@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/CL/functions/CLArithmeticDivision.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticSubtraction.h"
 #include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLBatchToSpaceLayer.h"
 #include "arm_compute/runtime/CL/functions/CLBitwiseAnd.h"
 #include "arm_compute/runtime/CL/functions/CLBitwiseNot.h"
 #include "arm_compute/runtime/CL/functions/CLBitwiseOr.h"

@@ -433,7 +433,6 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 
     return output_shape;
 }
-
 inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
                                                const Coordinates &starts, const Coordinates &ends, const Coordinates &strides,
                                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
@@ -448,6 +447,16 @@ inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
     const Coordinates ends_abs      = strided_slice_absolute_end_coords(input_shape, starts_abs, ends, final_strides, end_mask, shrink_axis_mask);
 
     return compute_strided_slice_output_shape(input_shape, starts_abs, ends_abs, final_strides);
+}
+inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)
+{
+    ARM_COMPUTE_ERROR_ON(block_x <= 0 || block_y <= 0);
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(0, input->tensor_shape()[0] * block_x);
+    output_shape.set(1, input->tensor_shape()[1] * block_y);
+    output_shape.set(3, input->tensor_shape()[3] / (block_x * block_y));
+
+    return output_shape;
 }
 
 template <typename T>
