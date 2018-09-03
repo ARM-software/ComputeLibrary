@@ -50,3 +50,9 @@ void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy
     }
     _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
 }
+
+Status CLScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+{
+    ARM_COMPUTE_UNUSED(constant_border_value);
+    return CLScaleKernel::validate(input, output, policy, border_mode, sampling_policy);
+}
