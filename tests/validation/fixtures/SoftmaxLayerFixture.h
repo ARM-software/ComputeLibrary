@@ -47,12 +47,12 @@ class SoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta)
+    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
         _quantization_info = quantization_info;
 
-        _target    = compute_target(shape, data_type, quantization_info, beta);
-        _reference = compute_reference(shape, data_type, quantization_info, beta);
+        _target    = compute_target(shape, data_type, quantization_info, beta, axis);
+        _reference = compute_reference(shape, data_type, quantization_info, beta, axis);
     }
 
 protected:
@@ -72,7 +72,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape, DataType data_type,
-                              QuantizationInfo quantization_info, float beta)
+                              QuantizationInfo quantization_info, float beta, size_t axis)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
@@ -80,7 +80,7 @@ protected:
 
         // Create and configure function
         FunctionType smx_layer;
-        smx_layer.configure(&src, &dst, beta);
+        smx_layer.configure(&src, &dst, beta, axis);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -102,7 +102,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type,
-                                      QuantizationInfo quantization_info, float beta)
+                                      QuantizationInfo quantization_info, float beta, size_t axis)
     {
         // Create reference
         SimpleTensor<T> src{ shape, data_type, 1, quantization_info };
@@ -110,7 +110,7 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::softmax_layer<T>(src, beta);
+        return reference::softmax_layer<T>(src, beta, axis);
     }
 
     TensorType       _target{};
@@ -123,12 +123,13 @@ class SoftmaxValidationFixture : public SoftmaxValidationGenericFixture<TensorTy
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, float beta)
+    void setup(TensorShape shape, DataType data_type, float beta, size_t axis)
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
                                                                                           data_type,
                                                                                           QuantizationInfo(),
-                                                                                          beta);
+                                                                                          beta,
+                                                                                          axis);
     }
 };
 
@@ -137,12 +138,13 @@ class SoftmaxValidationQuantizedFixture : public SoftmaxValidationGenericFixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta)
+    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, float beta, size_t axis)
     {
         SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
                                                                                           data_type,
                                                                                           quantization_info,
-                                                                                          beta);
+                                                                                          beta,
+                                                                                          axis);
     }
 };
 } // namespace validation

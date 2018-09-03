@@ -52,9 +52,14 @@ public:
      *
      * @param[in]  input  Source tensor. Data types supported: F16/F32
      * @param[out] output Destination tensor. Data types supported: same as @p input
-     * @param[in]  beta   (Optional) A scaling factor for the exponent. Only beta = 1 is supported.
+     * @param[in]  beta   (Optional) A scaling factor for the exponent. Only beta = 1 is supported
+     * @param[in]  axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
+     *                    dimensions together. For instance, given a [4x4x4x4] image,
+     *                    when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     *
+     * @note The value of @p axis must be always 1 for GLES
      */
-    void configure(const IGCTensor *input, IGCTensor *output, float beta = 1.0f);
+    void configure(const IGCTensor *input, IGCTensor *output, float beta = 1.0f, size_t axis = 1);
 
     // Inherited methods overridden:
     void run() override;

@@ -275,6 +275,38 @@ inline TensorShape compute_flatten_shape(const ITensorInfo *input)
     return output_shape;
 }
 
+inline TensorShape compute_softmax_shape(const ITensorInfo *input, size_t axis = 1)
+{
+    // The output shape will be a 2D version of the input. For instance:
+    // - [x,y,z] and axis 1 will return [x, y*z]
+    // - [x,y,z,w] and axis 2 will return [x*y, w*z]
+    // - [x,y,z,w] and axis 3 will return [x*y*z, w]
+    TensorShape shape2D = input->tensor_shape();
+
+    if(axis < input->num_dimensions())
+    {
+        // Collapse from axis onward (this changes the shape)
+        shape2D.collapse_from(axis);
+
+        // Collapse the rest (collapse is inclusive)
+        shape2D.collapse(shape2D.num_dimensions() - 1);
+    }
+    else
+    {
+        // Collapse everything
+        shape2D.collapse(shape2D.num_dimensions());
+    }
+
+    if(axis == 0)
+    {
+        // If axis is zero the first dim should be one. Since
+        // collapse is an inclusive operation we need to shift
+        shape2D.shift_right(1);
+    }
+
+    return shape2D;
+}
+
 inline TensorShape compute_interleave_custom_shape(const TensorShape &input, const int x_interleave, const int y_interleave)
 {
     TensorShape output_shape{ input };
