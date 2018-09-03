@@ -29,22 +29,7 @@
 namespace winograd
 {
 
-using Transform = WinogradGEMM<2, 2, 3, 3>::InputTransform<float>;
-
-/******************************************************************************
- * Cost methods for the input transform.
- * =====================================
- */
-template <>
-template <>
-int Transform::ops_performed(const Tensor4DShape &input_shape)
-{
-  // NOTE: Cost in FLOPs rather than instructions or uops.
-  const int tile_M = iceildiv(input_shape.n_rows, inner_tile_rows);
-  const int tile_N = iceildiv(input_shape.n_cols, inner_tile_cols);
-  return 16 * 16 * tile_M * tile_N * input_shape.n_channels;
-}
-/*****************************************************************************/
+using Transform = InputTransformImpl<3, 3, 4, 4, float>;
 
 /*****************************************************************************
 * F(2x2, 3x3) implies the use of a 4x4 input tile. Such tiles can require a
@@ -99,7 +84,6 @@ int Transform::ops_performed(const Tensor4DShape &input_shape)
 *     Padding bottom in {0, 1, 2}
 *     Padding right in {0, 1, 2}
 */
-template <>
 template <>
 template <int pad_top, int pad_left, int pad_bottom, int pad_right>
 void Transform::process_tile(
@@ -328,7 +312,6 @@ void Transform::process_tile(
 }
 
 template <>
-template <>
 const Transform::TileFn Transform::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
 {
   {
@@ -405,5 +388,5 @@ const Transform::TileFn Transform::tile_fns[n_pad_top][n_pad_left][n_pad_bottom]
   }
 };
 
-template struct WinogradGEMM<2, 2, 3, 3>::InputTransform<float>;
+template class InputTransform<3, 3, 4, 4, float>;
 }  // namespace winograd

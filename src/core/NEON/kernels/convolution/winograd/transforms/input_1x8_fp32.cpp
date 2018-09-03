@@ -26,24 +26,11 @@
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
 
-
-namespace winograd
+namespace
 {
 
-using Transform = WinogradGEMM<1, 6, 1, 3>::InputTransform<float>;
-
-template <>
-template <>
-int Transform::ops_performed(const Tensor4DShape &input_shape)
-{
-  (void) input_shape;
-  return 0;  // TODO
-}
-
-template <>
-template <>
 template <int pad_top, int pad_left, int pad_bottom, int pad_right>
-void Transform::process_tile(
+void winograd_input_transform_1x8_fp32_process_tile(
   int n_channels,
   const float* const input_base,
   const int input_row_stride,
@@ -53,23 +40,23 @@ void Transform::process_tile(
 )
 {
   (void) input_row_stride;  // No rows over which to stride
-  constexpr int inner_tile_j = 8;
-  constexpr int cells_j = inner_tile_j - pad_right;
+  constexpr int inner_tile_cols = 8;
+  constexpr int cells_j = inner_tile_cols - pad_right;
 
   float *outptr = matrix_base;
 
   // Get pointers into the input tile
-  const float *x_ptrs[inner_tile_j];
+  const float *x_ptrs[inner_tile_cols];
   for (int j = pad_left, xj = 0; j < cells_j; j++, xj++)
   {
     x_ptrs[j] = input_base + xj*input_col_stride;
   }
 
   // Vectors used/computed in this kernel.
-  float x[inner_tile_j];
-  float U[inner_tile_j];
+  float x[inner_tile_cols];
+  float U[inner_tile_cols];
 
-  for (int j = 0; j < inner_tile_j; j++)
+  for (int j = 0; j < inner_tile_cols; j++)
   {
     x[j] = 0.0f;
   }
@@ -80,7 +67,7 @@ void Transform::process_tile(
 #ifdef __arm_any__
   for (; channels_remaining >= 4; channels_remaining -= 4)
   {
-    float32x4_t x[inner_tile_j], U[inner_tile_j];
+    float32x4_t x[inner_tile_cols], U[inner_tile_cols];
     for (int j = 0; j < inner_tile_cols; j++)
     {
       x[j] = vdupq_n_f32(0.0f);
@@ -104,16 +91,15 @@ void Transform::process_tile(
     U[7] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(x[7], 1), x[3], 49), x[5], -14), x[1], -36);
 
     // Store the transformed vector
-    for (int j = 0; j < inner_tile_j; j++)
+    for (int j = 0; j < inner_tile_cols; j++)
     {
       vst1q_f32(outptr + j*matrix_stride, U[j]);
     }
     outptr += 4;
   }
-
   for (; channels_remaining >= 2; channels_remaining -= 2)
   {
-    float32x2_t x[inner_tile_j], U[inner_tile_j];
+    float32x2_t x[inner_tile_cols], U[inner_tile_cols];
     for (int j = 0; j < inner_tile_cols; j++)
     {
       x[j] = vdup_n_f32(0.0f);
@@ -137,7 +123,7 @@ void Transform::process_tile(
     U[7] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(x[7], 1), x[3], 49), x[5], -14), x[1], -36);
 
     // Store the transformed vector
-    for (int j = 0; j < inner_tile_j; j++)
+    for (int j = 0; j < inner_tile_cols; j++)
     {
       vst1_f32(outptr + j*matrix_stride, U[j]);
     }
@@ -163,7 +149,7 @@ void Transform::process_tile(
     U[7] = x[1]*-36 + x[5]*-14 + x[3]*49 + x[7]*1;
 
     // Store the transformed vector
-    for (int j = 0; j < inner_tile_j; j++)
+    for (int j = 0; j < inner_tile_cols; j++)
     {
       *(outptr + j*matrix_stride) = U[j];
     }
@@ -171,56 +157,118 @@ void Transform::process_tile(
   }
 }
 
+}
+
+namespace winograd
+{
+template <int x>
+using Transform = InputTransformImpl<1, x, 1, 8, float>;
+
 template <>
-template <>
-const Transform::TileFn Transform::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
+const Transform<3>::TileFn
+  Transform<3>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
 {
   {
     {
       {
-        Transform::template process_tile<0, 0, 0, 0>,
-        Transform::template process_tile<0, 0, 0, 1>,
-        Transform::template process_tile<0, 0, 0, 2>,
-        Transform::template process_tile<0, 0, 0, 3>,
-        Transform::template process_tile<0, 0, 0, 4>,
-        Transform::template process_tile<0, 0, 0, 5>,
-        Transform::template process_tile<0, 0, 0, 6>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 6>,
       }
     },
     {
       {
-        Transform::template process_tile<0, 1, 0, 0>,
-        Transform::template process_tile<0, 1, 0, 1>,
-        Transform::template process_tile<0, 1, 0, 2>,
-        Transform::template process_tile<0, 1, 0, 3>,
-        Transform::template process_tile<0, 1, 0, 4>,
-        Transform::template process_tile<0, 1, 0, 5>,
-        Transform::template process_tile<0, 1, 0, 6>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 6>,
       }
     }
   }
 };
 
-template <int x, int y>
-using TransformTransposed = typename WinogradGEMM<x, 1, y, 1>::template InputTransform<float>;
+template <>
+const Transform<5>::TileFn
+  Transform<5>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
+{
+  {
+    {
+      {
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 6>,
+      }
+    },
+    {
+      {
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 2, 0, 6>,
+      }
+    }
+  }
+};
 
 template <>
-template <>
-const TransformTransposed<6, 3>::TileFn
-  TransformTransposed<6, 3>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] = {};
+const Transform<7>::TileFn
+  Transform<7>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
+{
+  {
+    {
+      {
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 0, 0, 6>,
+      }
+    },
+    {
+      {
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 1, 0, 6>,
+      }
+    },
+    {
+      {
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 0>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 1>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 2>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 3>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 4>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 5>,
+        winograd_input_transform_1x8_fp32_process_tile<0, 3, 0, 6>,
+      }
+    }
+  }
+};
 
-template <>
-template <>
-const TransformTransposed<4, 5>::TileFn
-  TransformTransposed<4, 5>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] = {};
-
-template <>
-template <>
-const TransformTransposed<2, 7>::TileFn
-  TransformTransposed<2, 7>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] = {};
-
-
-
-template struct WinogradGEMM<1, 6, 1, 3>::InputTransform<float>;
-template struct WinogradGEMM<6, 1, 3, 1>::InputTransform<float>;
+template class InputTransform<1, 3, 1, 8, float>;
+template class InputTransform<3, 1, 8, 1, float>;
+template class InputTransform<1, 5, 1, 8, float>;
+template class InputTransform<5, 1, 8, 1, float>;
+template class InputTransform<1, 7, 1, 8, float>;
+template class InputTransform<7, 1, 8, 1, float>;
 }  // namespace winograd
