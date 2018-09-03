@@ -217,7 +217,7 @@ namespace winograd
       _matrix_base + start_channel,
       _matrix_stride,
       _matrix_row_stride,
-      (_biases)?(_biases + start_channel):(nullptr),
+      (_biases != nullptr) ? _biases + start_channel : nullptr,
       _outptr + start_channel
     );
   }
