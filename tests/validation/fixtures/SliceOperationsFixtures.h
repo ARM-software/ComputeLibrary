@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_STRIDED_SLICE_FIXTURE
-#define ARM_COMPUTE_TEST_STRIDED_SLICE_FIXTURE
+#ifndef ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
+#define ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -179,4 +179,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_STRIDED_SLICE_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_SLICE_OPERATIONS_FIXTURE */

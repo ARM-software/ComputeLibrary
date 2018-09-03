@@ -51,12 +51,14 @@ inline TensorShape compute_vector_to_tensor_output_shape(const TensorShape &inpu
 
     return output_shape;
 }
+
 inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, const PermutationVector &perm)
 {
     TensorShape output_shape = input.tensor_shape();
     permute(output_shape, perm);
     return output_shape;
 }
+
 inline TensorShape compute_reorg_output_shape(const ITensorInfo &input, int32_t stride)
 {
     ARM_COMPUTE_ERROR_ON(stride <= 0);
@@ -73,6 +75,7 @@ inline TensorShape compute_reorg_output_shape(const ITensorInfo &input, int32_t 
 
     return output_shape;
 }
+
 inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false, unsigned int num_groups = 1)
 {
     // Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.
@@ -95,6 +98,7 @@ inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bo
 
     return weights_reshaped;
 }
+
 inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height
@@ -116,6 +120,7 @@ inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_inte
 
     return shape_interleaved_a;
 }
+
 inline TensorShape compute_transpose1xW_shape(const ITensorInfo &b)
 {
     // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
@@ -125,6 +130,7 @@ inline TensorShape compute_transpose1xW_shape(const ITensorInfo &b)
 
     return shape_transposed1xW_b;
 }
+
 inline TensorShape compute_transpose1xW_with_element_size_shape(const ITensorInfo &b, int mult_transpose1xW_width = 1)
 {
     // Note: mult_transpose1xW_width expresses the number of chunks with size 1x(W) we want to store on the same row
@@ -138,6 +144,7 @@ inline TensorShape compute_transpose1xW_with_element_size_shape(const ITensorInf
 
     return shape_transposed1xW_b;
 }
+
 inline TensorShape compute_reductionA_shape(const ITensorInfo &b)
 {
     TensorShape shape_vector_sum_col{ b.tensor_shape() };
@@ -148,6 +155,7 @@ inline TensorShape compute_reductionA_shape(const ITensorInfo &b)
 
     return shape_vector_sum_col;
 }
+
 inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 {
     TensorShape shape_vector_sum_row{ a.tensor_shape() };
@@ -159,6 +167,7 @@ inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 
     return shape_vector_sum_row;
 }
+
 inline TensorShape compute_col2im_shape(const ITensorInfo &input, const Size2D &convolved_dims, bool batch_size_on_z, unsigned int num_groups = 1)
 {
     ARM_COMPUTE_ERROR_ON(num_groups == 0);
@@ -175,6 +184,7 @@ inline TensorShape compute_col2im_shape(const ITensorInfo &input, const Size2D &
 
     return col2im_shape;
 }
+
 inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 {
     TensorShape shape_transposed{ input.tensor_shape() };
@@ -184,6 +194,7 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 
     return shape_transposed;
 }
+
 inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info, unsigned int depth_multiplier)
 {
     const TensorShape input_shape{ input.tensor_shape() };
@@ -207,6 +218,7 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
 
     return output_shape;
 }
+
 inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top, const PadStrideInfo &info)
 {
     TensorShape        scale_out_shape(input.tensor_shape());
@@ -217,6 +229,7 @@ inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigne
 
     return scale_out_shape;
 }
+
 inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,
                                              unsigned int num_groups = 1)
 {
@@ -248,6 +261,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
 
     return output_shape;
 }
+
 inline TensorShape compute_flatten_shape(const ITensorInfo *input)
 {
     // The output shape will be the flatten version of the input (i.e. [ width * height * channels, num_batches, ... ] ). Used for FlattenLayer and FullyConnectedLayer.
@@ -258,6 +272,7 @@ inline TensorShape compute_flatten_shape(const ITensorInfo *input)
 
     return output_shape;
 }
+
 inline TensorShape compute_interleave_custom_shape(const TensorShape &input, const int x_interleave, const int y_interleave)
 {
     TensorShape output_shape{ input };
@@ -267,6 +282,7 @@ inline TensorShape compute_interleave_custom_shape(const TensorShape &input, con
 
     return output_shape;
 }
+
 inline TensorShape compute_fully_connected_reshaped_weights_shape(const ITensorInfo *input, bool transpose_weights, bool is_batched_fc_layer, const int interleave)
 {
     TensorShape output_shape{ input->tensor_shape() };
@@ -302,6 +318,7 @@ inline TensorShape compute_winograd_filter_transform_shape(const ITensorInfo &in
 
     return tensor_shape;
 }
+
 inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &input, const WinogradInfo &winograd_info)
 {
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
@@ -330,6 +347,7 @@ inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &inp
 
     return output_shape;
 }
+
 inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &input, const WinogradInfo &winograd_info)
 {
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
@@ -356,6 +374,7 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
 
     return tensor_shape;
 }
+
 inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
 {
     const TensorShape input_shape{ input.tensor_shape() };
@@ -381,6 +400,7 @@ inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, cons
 
     return output_shape;
 }
+
 inline TensorShape compute_min_max_shape(const ITensorInfo *input)
 {
     TensorShape output_shape{ input->tensor_shape() };
@@ -423,6 +443,7 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 
     return output_shape;
 }
+
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
@@ -449,6 +470,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 
     return output_shape;
 }
+
 inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
                                                const Coordinates &starts, const Coordinates &ends, const Coordinates &strides,
                                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
@@ -464,6 +486,7 @@ inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
 
     return compute_strided_slice_output_shape(input_shape, starts_abs, ends_abs, final_strides);
 }
+
 inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)
 {
     ARM_COMPUTE_ERROR_ON(block_x <= 0 || block_y <= 0);
@@ -473,6 +496,31 @@ inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const 
     output_shape.set(3, input->tensor_shape()[3] / (block_x * block_y));
 
     return output_shape;
+}
+
+inline TensorShape compute_split_shape(const ITensorInfo *input, unsigned int axis, unsigned int num_splits)
+{
+    TensorShape empty_shape;
+    empty_shape.set(0, 0);
+
+    TensorShape out_shape{ input->tensor_shape() };
+
+    // Return empty shape if axis is invalid
+    if(axis > input->tensor_shape().num_dimensions())
+    {
+        return empty_shape;
+    }
+
+    size_t axis_size = out_shape[axis];
+
+    // Return empty shape if num_split is not valid
+    if(axis_size % num_splits)
+    {
+        return empty_shape;
+    }
+
+    out_shape[axis] = axis_size / num_splits;
+    return out_shape;
 }
 
 template <typename T>
