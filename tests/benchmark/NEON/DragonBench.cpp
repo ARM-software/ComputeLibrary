@@ -46,9 +46,14 @@ namespace benchmark
 {
 namespace
 {
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
 // Common DragonBench parameters
-auto CommonParams = combine(combine(framework::dataset::make("DataType", { DataType::F32 }),
-                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+auto CommonParams = combine(combine(data_types, framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                             framework::dataset::make("HasBias", { true, false }));
 } // namespace
 
