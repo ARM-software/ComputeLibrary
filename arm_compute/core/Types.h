@@ -847,7 +847,7 @@ public:
     /** Constructor
      *
      * @param[in] min_sizes     Min sizes vector.
-     * @param[in] variances     Variances vector. Size must be equal to 4.
+     * @param[in] variances     Variances vector.
      * @param[in] offset        Offset value.
      * @param[in] flip          (Optional) Flip the aspect ratios.
      * @param[in] clip          (Optional) Clip coordinates so that they're within [0,1].
@@ -864,7 +864,7 @@ public:
           _flip(flip),
           _clip(clip),
           _max_sizes(max_sizes),
-          _aspect_ratios(aspect_ratios),
+          _aspect_ratios(),
           _img_size(img_size),
           _steps(steps)
     {

@@ -99,6 +99,7 @@
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"

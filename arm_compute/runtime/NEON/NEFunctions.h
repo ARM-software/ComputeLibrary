@@ -99,6 +99,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPhase.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"

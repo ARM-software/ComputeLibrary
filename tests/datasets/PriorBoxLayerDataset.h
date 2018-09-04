@@ -110,7 +110,6 @@ public:
         std::vector<float> max_val      = { 60.f };
         std::vector<float> aspect_ratio = { 2.f };
         std::array<float, 2> steps = { 8.f, 8.f };
-
         add_config(TensorShape(4U, 4U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio, Coordinates2D{ 8, 8 }, steps));
     }
 };
