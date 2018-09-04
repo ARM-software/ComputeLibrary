@@ -47,6 +47,14 @@ static constexpr unsigned int max_cl_vector_width = 16;
  */
 std::string get_cl_type_from_data_type(const DataType &dt);
 
+/** Translates a tensor data type to the appropriate OpenCL select type.
+ *
+ * @param[in] dt @ref DataType to be translated to OpenCL select type.
+ *
+ * @return The string specifying the OpenCL select type to be used.
+ */
+std::string get_cl_select_type_from_data_type(const DataType &dt);
+
 /** Get the size of a data type in number of bits.
  *
  * @param[in] dt @ref DataType.

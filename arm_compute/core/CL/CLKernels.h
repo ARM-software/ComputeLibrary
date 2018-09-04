@@ -123,6 +123,7 @@
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
+#include "arm_compute/core/CL/kernels/CLYOLOLayerKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 #endif /* __ARM_COMPUTE_CLKERNELS_H__ */

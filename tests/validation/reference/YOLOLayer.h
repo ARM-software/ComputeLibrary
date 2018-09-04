@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ActivationLayer.h"
+#ifndef __ARM_COMPUTE_TEST_YOLO_LAYER_H__
+#define __ARM_COMPUTE_TEST_YOLO_LAYER_H__
 
-#include "arm_compute/core/Types.h"
+#include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -34,36 +35,13 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
-{
-    // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
+SimpleTensor<T> yolo_layer(const SimpleTensor<T> &src, const ActivationLayerInfo &info, int32_t num_classes);
 
-    // Compute reference
-    const T a(info.a());
-    const T b(info.b());
-
-    for(int i = 0; i < src.num_elements(); ++i)
-    {
-        dst[i] = activate_float<T>(src[i], a, b, info.activation());
-    }
-
-    return dst;
-}
-
-template <>
-SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src, ActivationLayerInfo info)
-{
-    SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
-    SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
-    return dst;
-}
-
-template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info);
-template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info);
+template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+SimpleTensor<T> yolo_layer(const SimpleTensor<T> &src, const ActivationLayerInfo &info, int32_t num_classes);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_YOLO_LAYER_H__ */

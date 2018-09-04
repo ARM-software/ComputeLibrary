@@ -428,6 +428,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "winograd_output_transform_4x4_5x5_nhwc", "winograd_output_transform.cl" },
     { "winograd_output_transform_4x1_5x1_nhwc", "winograd_output_transform.cl" },
     { "winograd_output_transform_1x4_1x5_nhwc", "winograd_output_transform.cl" },
+    { "yolo_layer_nchw", "yolo_layer.cl" },
+    { "yolo_layer_nhwc", "yolo_layer.cl" },
     { "YUYV422_to_IYUV_bt709", "color_convert.cl" },
     { "YUYV422_to_NV12_bt709", "color_convert.cl" },
     { "YUYV422_to_RGB888_bt709", "color_convert.cl" },
@@ -796,6 +798,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "winograd_output_transform.cl",
 #include "./cl_kernels/winograd_output_transform.clembed"
+    },
+    {
+        "yolo_layer.cl",
+#include "./cl_kernels/yolo_layer.clembed"
     },
 #endif /* EMBEDDED_KERNELS */
 };

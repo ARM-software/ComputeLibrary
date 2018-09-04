@@ -173,7 +173,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _border_size                        = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
-    ;
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");

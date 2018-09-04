@@ -846,6 +846,38 @@ public:
     {
     }
 };
+
+/** Data set containing small YOLO tensor shapes. */
+class SmallYOLOShapes final : public ShapeDataset
+{
+public:
+    SmallYOLOShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 11U, 11U, 270U },
+                     TensorShape{ 27U, 13U, 90U },
+                     TensorShape{ 128U, 64U, 45U, 2U },
+                     TensorShape{ 11U, 11U, 45U, 3U }
+    })
+    {
+    }
+};
+
+/** Data set containing large YOLO tensor shapes. */
+class LargeYOLOShapes final : public ShapeDataset
+{
+public:
+    LargeYOLOShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 24U, 23U, 270U },
+                     TensorShape{ 51U, 63U, 90U, 2U },
+                     TensorShape{ 76U, 91U, 45U, 3U }
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

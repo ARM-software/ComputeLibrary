@@ -1011,6 +1011,12 @@ inline std::string float_to_string_with_full_precision(float val)
     std::stringstream ss;
     ss.precision(std::numeric_limits<float>::digits10 + 1);
     ss << val;
+
+    if(val != static_cast<int>(val))
+    {
+        ss << "f";
+    }
+
     return ss.str();
 }
 

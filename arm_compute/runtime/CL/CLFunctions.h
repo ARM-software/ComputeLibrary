@@ -123,5 +123,6 @@
 #include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
+#include "arm_compute/runtime/CL/functions/CLYOLOLayer.h"
 
 #endif /* __ARM_COMPUTE_CLFUNCTIONS_H__ */

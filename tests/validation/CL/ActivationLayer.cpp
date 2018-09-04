@@ -202,14 +202,7 @@ TEST_SUITE_END()
 template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
-/** Input data sets. */
-const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                                                                                                  ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
-                                                                                                });
-
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), QuantizedActivationFunctionsDataset),
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctionsQuantized()),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)

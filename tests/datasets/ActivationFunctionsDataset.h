@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,21 @@ public:
                             ActivationLayerInfo::ActivationFunction::SQRT,
                             ActivationLayerInfo::ActivationFunction::SQUARE,
                             ActivationLayerInfo::ActivationFunction::TANH
+    })
+    {
+    }
+};
+
+class ActivationFunctionsQuantized final : public framework::dataset::ContainerDataset<std::vector<ActivationLayerInfo::ActivationFunction>>
+{
+public:
+    ActivationFunctionsQuantized()
+        : ContainerDataset("ActivationFunctionQuantized",
+    {
+        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                            ActivationLayerInfo::ActivationFunction::RELU,
+                            ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                            ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
     })
     {
     }
