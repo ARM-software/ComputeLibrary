@@ -52,7 +52,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *accum, ITen
                                                         unsigned int &num_elems_processed_per_iteration)
 {
     // Select the vector size to use (8 for Bifrost; 16 for Midgard).
-    num_elems_processed_per_iteration = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) ? 8 : 16;
+    bool is_gpu_bifrost = gpu_target_is_in(gpu_target,
+                                           GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
+                                           GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
+                                           GPUTarget::G52, GPUTarget::G52LIT);
+    num_elems_processed_per_iteration = is_gpu_bifrost ? 8 : 16;
 
     // Configure kernel window
     Window win = calculate_max_window(*accum, Steps(num_elems_processed_per_iteration));

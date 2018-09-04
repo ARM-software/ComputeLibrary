@@ -93,8 +93,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 inline bool can_run_optimized_kernel_for_bifrost(GPUTarget gpu_target, unsigned int conv_stride_x, unsigned int conv_stride_y, unsigned int kernel_size,
                                                  DataType data_type, DataLayout data_layout)
 {
-    return gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && (kernel_size <= 5)
-           && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32) && (data_layout == DataLayout::NCHW);
+    return gpu_target_is_in(gpu_target,
+                            GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
+                            GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
+                            GPUTarget::G52, GPUTarget::G52LIT)
+           && (kernel_size <= 5)
+           && (conv_stride_x == 1) && (conv_stride_y == 1)
+           && (data_type == DataType::F32)
+           && (data_layout == DataLayout::NCHW);
 }
 
 inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsigned int &num_elems_read_per_iteration_y,
