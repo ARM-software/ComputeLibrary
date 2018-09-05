@@ -68,7 +68,7 @@ void calculate_cum_dist_and_lut(CLDistribution1D &dist, CLDistribution1D &cum_di
     }
     else
     {
-        const float diff = image_size - 1;
+        const float diff = image_size - num_lowest_pixels;
 
         for(size_t i = 0; i < 256; ++i)
         {
