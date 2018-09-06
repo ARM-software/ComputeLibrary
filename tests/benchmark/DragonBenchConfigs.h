@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "dragonbench/silverwing/conv2d.hpp"
+#include "dragonbench/conv2d.hpp"
 
 namespace arm_compute
 {

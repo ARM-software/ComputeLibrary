@@ -32,7 +32,7 @@ namespace test
 {
 namespace benchmark
 {
-#include "dragonbench/silverwing/conv2d.hpp"
+#include "dragonbench/conv2d.hpp"
 
 #include "dragonbench/silverwing/silverwing_configs.hpp"
 #include "dragonbench/sunfyre/sunfyre_configs.hpp"
