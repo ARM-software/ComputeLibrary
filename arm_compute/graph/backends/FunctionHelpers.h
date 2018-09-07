@@ -259,7 +259,9 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
 
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+
+    if(is_quantized)
     {
         biases->info()->set_data_type(DataType::S32);
     }
@@ -304,12 +306,18 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     }
 
     // Log info
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Input QuantInfo: " << input->info()->quantization_info()
+            << " Weights QuantInfo: " << weights->info()->quantization_info()
+            << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Target " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Groups: " << num_groups
-                               << " Input QuantInfo: " << input->info()->quantization_info()
-                               << " Weights QuantInfo: " << weights->info()->quantization_info()
+                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -380,7 +388,9 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
 
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+
+    if(is_quantized)
     {
         biases->info()->set_data_type(DataType::S32);
     }
@@ -405,11 +415,17 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     }
 
     // Log info
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Input QuantInfo: " << input->info()->quantization_info()
+            << " Weights QuantInfo: " << weights->info()->quantization_info()
+            << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Target " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
-                               << " Input QuantInfo: " << input->info()->quantization_info()
-                               << " Weights QuantInfo: " << weights->info()->quantization_info()
+                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -543,12 +559,20 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
     func->configure(input, weights, biases, output, fc_info);
 
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+
     // Log info
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Input QuantInfo: " << input->info()->quantization_info()
+            << " Weights QuantInfo: " << weights->info()->quantization_info()
+            << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
                                << " Target " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
-                               << " Input QuantInfo: " << input->info()->quantization_info()
-                               << " Weights QuantInfo: " << weights->info()->quantization_info()
+                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
