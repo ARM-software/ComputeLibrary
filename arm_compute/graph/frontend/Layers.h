@@ -589,6 +589,31 @@ private:
     PoolingLayerInfo _pool_info;
 };
 
+/** Reorg Layer */
+class ReorgLayer final : public ILayer
+{
+public:
+    /** Construct a reorg layer.
+     *
+     * @param[in] stride Stride value to use for reorganizing the values in the output tensor.
+     *                   It defines the spatial distance between 2 consecutive pixels in the x and y direction
+     */
+    ReorgLayer(int stride)
+        : _stride(stride)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_reorg_node(s.graph(), common_params, input, _stride);
+    }
+
+private:
+    int _stride;
+};
+
 /** Reshape Layer */
 class ReshapeLayer final : public ILayer
 {

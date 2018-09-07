@@ -163,15 +163,26 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
                                                 unsigned int depth_multiplier)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
     if(biases != nullptr)
     {
+        const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(3));
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
-    return NEDepthwiseConvolutionLayer3x3Kernel::validate(input, weights, output, conv_info, depth_multiplier);
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+    TensorInfo accumulator  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseConvolutionLayer3x3Kernel::validate(input, weights, is_quantized ? &accumulator : output, conv_info, depth_multiplier));
+
+    if(is_quantized)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output));
+    }
+
+    return Status{};
 }
 
 void NEDepthwiseConvolutionLayer3x3::run()
@@ -359,7 +370,10 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
                                              unsigned int depth_multiplier)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+
+    const unsigned int width_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const unsigned int height_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
     // Clone output to use auto init
     auto output_clone = output->clone();
@@ -391,8 +405,8 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     const size_t       weights_w    = weights_to_use->dimension(0);
     const size_t       weights_h    = weights_to_use->dimension(1);
     const size_t       weights_z    = weights_to_use->dimension(2);
-    const unsigned int conv_w       = output_shape.x();
-    const unsigned int conv_h       = output_shape.y();
+    const unsigned int conv_w       = output_shape[width_idx];
+    const unsigned int conv_h       = output_shape[height_idx];
     const size_t       patch_size   = weights_w * weights_h + (append_bias ? 1 : 0);
     const size_t       conv_size    = conv_w * conv_h;
 

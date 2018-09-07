@@ -143,6 +143,7 @@ enum class NodeType
     NormalizationLayer,
     PermuteLayer,
     PoolingLayer,
+    ReorgLayer,
     ReshapeLayer,
     ResizeLayer,
     SoftmaxLayer,

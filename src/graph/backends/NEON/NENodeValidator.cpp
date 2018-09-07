@@ -59,6 +59,8 @@ Status NENodeValidator::validate(INode *node)
                    NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<NEPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::validate_reorg_layer<NEReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
         default:
             return Status{};
     }

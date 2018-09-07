@@ -433,6 +433,11 @@ NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
 }
 
+NodeID GraphBuilder::add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride)
+{
+    return create_simple_single_input_output_node<ReorgLayerNode>(g, params, input, stride);
+}
+
 NodeID GraphBuilder::add_reshape_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
 {
     return create_simple_single_input_output_node<ReshapeLayerNode>(g, params, input, shape);

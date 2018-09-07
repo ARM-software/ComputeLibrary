@@ -165,7 +165,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
 
-        ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (output->data_type() != DataType::S32));
+        //ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (output->data_type() != DataType::S32));
         ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_float(input->data_type()) && (output->data_type() != DataType::F32));
     }
 

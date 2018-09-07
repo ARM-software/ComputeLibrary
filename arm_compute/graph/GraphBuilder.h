@@ -261,6 +261,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info);
+    /** Adds a reorg layer node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the reorg layer node as a NodeID-Index pair
+     * @param[in] stride Stride value to use for reorganizing the values in the output tensor.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride);
     /** Adds a reshape layer node to the graph
      *
      * @param[in] g      Graph to add the node to

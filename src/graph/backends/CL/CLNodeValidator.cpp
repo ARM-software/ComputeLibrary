@@ -59,6 +59,8 @@ Status CLNodeValidator::validate(INode *node)
                    CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::validate_reorg_layer<CLReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
         default:
             return Status{};
     }

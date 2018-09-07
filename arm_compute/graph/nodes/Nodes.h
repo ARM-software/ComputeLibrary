@@ -41,6 +41,7 @@
 #include "arm_compute/graph/nodes/OutputNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
+#include "arm_compute/graph/nodes/ReorgLayerNode.h"
 #include "arm_compute/graph/nodes/ReshapeLayerNode.h"
 #include "arm_compute/graph/nodes/ResizeLayerNode.h"
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"

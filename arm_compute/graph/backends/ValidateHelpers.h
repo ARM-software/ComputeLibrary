@@ -201,6 +201,29 @@ Status validate_permute_layer(PermuteLayerNode &node)
 
     return PermuteLayer::validate(input, output, perm);
 }
+
+/** Validates a Reorg layer node
+ *
+ * @tparam ReorgLayer Reorg layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ReorgLayer>
+Status validate_reorg_layer(ReorgLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReorgLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return ReorgLayer::validate(input, output, node.stride());
+}
 } // namespace detail
 } // namespace backends
 } // namespace graph
