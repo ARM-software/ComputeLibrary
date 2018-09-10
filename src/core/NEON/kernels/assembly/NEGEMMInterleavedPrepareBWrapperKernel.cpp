@@ -89,7 +89,6 @@ unsigned int get_B_pretransposed_array_size(unsigned int N, unsigned int K, cons
     // Calculate the total size of the buffer:
     size_t total = num_full_k * normal_k_size * (num_full_x * normal_x_size + left_over_x_size);
     total += left_over_k_size * (left_over_x_size + num_full_x * normal_x_size);
-    total *= sizeof(To);
     return total;
 }
 
