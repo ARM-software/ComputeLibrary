@@ -28,7 +28,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
-#include "tests/validation/reference/ArithmeticAddition.h"
+#include "tests/validation/reference/ArithmeticOperations.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/GEMM.h"
 
@@ -132,7 +132,7 @@ protected:
         SimpleTensor<T> out_w{ out_shape, data_type };
         SimpleTensor<T> fully_connected = reference::fully_connected_layer(input, weights, bias, out_shape);
         SimpleTensor<T> gemm            = reference::gemm(hidden_state, recurrent_weights, out_w, 1.f, 0.f);
-        SimpleTensor<T> add_res         = reference::arithmetic_addition(fully_connected, gemm, data_type, ConvertPolicy::SATURATE);
+        SimpleTensor<T> add_res         = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, fully_connected, gemm, data_type, ConvertPolicy::SATURATE);
         return reference::activation_layer(add_res, info);
     }
 

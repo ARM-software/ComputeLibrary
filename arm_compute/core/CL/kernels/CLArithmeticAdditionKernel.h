@@ -51,7 +51,7 @@ public:
     CLArithmeticAdditionKernel &operator=(CLArithmeticAdditionKernel &&) = default;
     /** Default destructor */
     ~CLArithmeticAdditionKernel() = default;
-    /** Initialise the kernel's inputs, output and convertion policy.
+    /** Initialise the kernel's inputs, output and conversion policy.
      *
      * @param[in]  input1 First tensor input. Data types supported: U8/QASYMM8/S16/F16/F32.
      * @param[in]  input2 Second tensor input. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16/F16/F32.

@@ -152,6 +152,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "arithmetic_add_quantized", "arithmetic_op_quantized.cl" },
     { "arithmetic_add", "arithmetic_op.cl" },
     { "arithmetic_sub", "arithmetic_op.cl" },
+    { "arithmetic_sub_quantized", "arithmetic_op_quantized.cl" },
     { "arithmetic_div", "arithmetic_op.cl" },
     { "batch_to_space_nchw", "batch_to_space.cl" },
     { "batch_to_space_static_nchw", "batch_to_space.cl" },

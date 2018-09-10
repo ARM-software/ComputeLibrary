@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_H__
-#define __ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_H__
+#ifndef __ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H__
+#define __ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H__
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -35,10 +35,20 @@ namespace validation
 {
 namespace reference
 {
-template <typename T1, typename T2, typename T3>
-SimpleTensor<T3> arithmetic_subtraction(const SimpleTensor<T1> &src1, const SimpleTensor<T2> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+/** Arithmetic operation types */
+enum class ArithmeticOperation
+{
+    ADD,
+    SUB
+};
+
+template <typename T>
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy);
+
+template <typename T>
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_ARITHMETIC_SUBTRACTION_H__ */
+#endif /* __ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H__ */

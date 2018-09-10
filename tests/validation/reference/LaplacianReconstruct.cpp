@@ -24,7 +24,7 @@
 #include "LaplacianReconstruct.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/reference/ArithmeticAddition.h"
+#include "tests/validation/reference/ArithmeticOperations.h"
 #include "tests/validation/reference/DepthConvertLayer.h"
 #include "tests/validation/reference/Scale.h"
 
@@ -45,7 +45,7 @@ SimpleTensor<U> laplacian_reconstruct(const std::vector<SimpleTensor<T>> &pyrami
     const DataType data_type  = low_res.data_type();
 
     // input + L(n-1)
-    tmp_pyramid[last_level] = reference::arithmetic_addition(low_res, pyramid[last_level], data_type, ConvertPolicy::SATURATE);
+    tmp_pyramid[last_level] = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, low_res, pyramid[last_level], data_type, ConvertPolicy::SATURATE);
 
     // Scale levels n-1 to 1, and add levels n-2 to 0
     for(size_t i = last_level; i-- > 0;)
@@ -56,7 +56,7 @@ SimpleTensor<U> laplacian_reconstruct(const std::vector<SimpleTensor<T>> &pyrami
         tmp_pyramid[i] = reference::scale(tmp_pyramid[i + 1], scale_x, scale_y, InterpolationPolicy::NEAREST_NEIGHBOR,
                                           border_mode, constant_border_value, SamplingPolicy::CENTER, false);
 
-        tmp_pyramid[i] = reference::arithmetic_addition(tmp_pyramid[i], pyramid[i], data_type, ConvertPolicy::SATURATE);
+        tmp_pyramid[i] = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, tmp_pyramid[i], pyramid[i], data_type, ConvertPolicy::SATURATE);
     }
 
     return reference::depth_convert<T, U>(tmp_pyramid[0], DataType::U8, ConvertPolicy::SATURATE, 0);

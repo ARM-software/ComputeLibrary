@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE
-#define ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE
+#ifndef ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE
+#define ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -32,7 +32,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
-#include "tests/validation/reference/ArithmeticAddition.h"
+#include "tests/validation/reference/ArithmeticOperations.h"
 
 namespace arm_compute
 {
@@ -41,13 +41,15 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionGenericFixture : public framework::Fixture
+class ArithmeticOperationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+    void setup(reference::ArithmeticOperation op, const TensorShape &shape0, const TensorShape &shape1,
+               DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
     {
+        _op        = op;
         _target    = compute_target(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, qinfo0, qinfo1, qinfo_out);
         _reference = compute_reference(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, qinfo0, qinfo1, qinfo_out);
     }
@@ -68,8 +70,8 @@ protected:
         TensorType dst      = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, qinfo_out);
 
         // Create and configure function
-        FunctionType add;
-        add.configure(&ref_src1, &ref_src2, &dst, convert_policy);
+        FunctionType arith_op;
+        arith_op.configure(&ref_src1, &ref_src2, &dst, convert_policy);
 
         ARM_COMPUTE_EXPECT(ref_src1.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(ref_src2.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -89,7 +91,7 @@ protected:
         fill(AccessorType(ref_src2), 1);
 
         // Compute function
-        add.run();
+        arith_op.run();
 
         return dst;
     }
@@ -107,39 +109,40 @@ protected:
         fill(ref_src1, 0);
         fill(ref_src2, 1);
 
-        return reference::arithmetic_addition<T>(ref_src1, ref_src2, ref_dst, convert_policy);
+        return reference::arithmetic_operation<T>(_op, ref_src1, ref_src2, ref_dst, convert_policy);
     }
 
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
+    TensorType                     _target{};
+    SimpleTensor<T>                _reference{};
+    reference::ArithmeticOperation _op{ reference::ArithmeticOperation::ADD };
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionBroadcastValidationFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticAdditionBroadcastValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1,
-                                                                                           output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape0, shape1, data_type0, data_type1,
+                                                                                            output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticAdditionValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1,
-                                                                                           output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape, shape, data_type0, data_type1,
+                                                                                            output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationQuantizedFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticAdditionValidationQuantizedFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
@@ -147,11 +150,52 @@ public:
                QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
 
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1,
-                                                                                           output_data_type, convert_policy, qinfo0, qinfo1, qinfo_out);
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::ADD, shape, shape, data_type0, data_type1,
+                                                                                            output_data_type, convert_policy, qinfo0, qinfo1, qinfo_out);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticSubtractionBroadcastValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
+    {
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape0, shape1,
+                                                                                            data_type0, data_type1, output_data_type, convert_policy,
+                                                                                            QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticSubtractionValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
+    {
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape, shape,
+                                                                                            data_type0, data_type1, output_data_type, convert_policy,
+                                                                                            QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ArithmeticSubtractionValidationQuantizedFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+
+    {
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape, shape,
+                                                                                            data_type0, data_type1, output_data_type,
+                                                                                            convert_policy, qinfo0, qinfo1, qinfo_out);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_ADDITION_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_FIXTURE */
