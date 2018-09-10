@@ -47,7 +47,7 @@ namespace benchmark
 namespace
 {
 // Common DragonBench parameters
-auto CommonParams = combine(combine(framework::dataset::make("DataType", { DataType::F16, DataType::F32 }),
+auto CommonParams = combine(combine(framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 }),
                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                             framework::dataset::make("HasBias", { true, false }));
 } // namespace

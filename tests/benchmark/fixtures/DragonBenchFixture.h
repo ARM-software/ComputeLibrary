@@ -68,13 +68,14 @@ public:
         }
 
         // Determine bias data type
-        DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        DataType               bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        const QuantizationInfo q_info(2.f, 10);
 
         // Create tensors
-        src     = create_tensor<TensorType>(src_shape, data_type, 1, QuantizationInfo(), data_layout);
-        weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
-        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, QuantizationInfo(), data_layout);
-        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, QuantizationInfo(), data_layout);
+        src     = create_tensor<TensorType>(src_shape, data_type, 1, q_info, data_layout);
+        weights = create_tensor<TensorType>(weights_shape, data_type, 1, q_info, data_layout);
+        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, q_info, data_layout);
+        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, q_info, data_layout);
 
         // Create and configure function
         conv_layer.configure(&src, &weights, has_bias ? &biases : nullptr, &dst, info);
