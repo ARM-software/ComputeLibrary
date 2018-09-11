@@ -47,48 +47,58 @@ struct Kernel
 {
 };
 
+#define DEFINE_STRATEGY_SUFFIX(strat, suffix)            \
+    using strategy                    = arm_gemm::strat; \
+    static constexpr const char *name = #strat suffix;
+
+#define DEFINE_STRATEGY(strat) \
+    DEFINE_STRATEGY_SUFFIX(strat, "")
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <>
 struct Kernel<float16_t, false>
 {
-    using strategy = arm_gemm::hgemm_24x8;
+    DEFINE_STRATEGY(hgemm_24x8)
 };
 #endif /*__ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 #ifdef __aarch64__
 template <>
 struct Kernel<float, false>
 {
-    using strategy = arm_gemm::sgemm_12x8;
+    DEFINE_STRATEGY(sgemm_12x8)
 };
 template <>
 struct Kernel<int8_t, false>
 {
-    using strategy = arm_gemm::gemm_s8_4x4;
+    DEFINE_STRATEGY(gemm_s8_4x4)
 };
 template <>
 struct Kernel<uint8_t, false>
 {
-    using strategy = arm_gemm::gemm_u8_4x4;
+    DEFINE_STRATEGY(gemm_u8_4x4)
 };
 
 //Use different strategies for 8bit dot product:
 template <>
 struct Kernel<int8_t, true>
 {
-    using strategy = arm_gemm::gemm_s8_12x8;
+    DEFINE_STRATEGY_SUFFIX(gemm_s8_12x8, "_dot")
 };
 template <>
 struct Kernel<uint8_t, true>
 {
-    using strategy = arm_gemm::gemm_u8_12x8;
+    DEFINE_STRATEGY_SUFFIX(gemm_u8_12x8, "_dot")
 };
 #else
 template <>
 struct Kernel<float, false>
 {
-    using strategy = arm_gemm::sgemm_8x6;
+    DEFINE_STRATEGY(sgemm_8x6)
 };
 #endif /* __aarch64__ */
+
+#undef DEFINE_STRATEGY
+#undef DEFINE_STRATEGY_SUFFIX
 
 } // namespace
 } // namespace arm_compute

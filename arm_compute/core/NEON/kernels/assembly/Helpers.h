@@ -38,6 +38,28 @@ struct BlockSizes
     unsigned int strategy_out_height{ 0 }; /**< Number of rows (M) processed by the selected strategy */
 };
 
+/** Calculate the recommended block sizes to use based on the CPU cache sizes and data type
+ *
+ * @param[in] ci         CPU information
+ * @param[in] M          M dimension.
+ * @param[in] N          N dimension.
+ * @param[in] K          K dimension.
+ * @param[in] input_type Input data type
+ * @param[in] use_dot    (Optional) If data_type is QASYMM8/U8/S8, then use the dot product instruction ?
+ *
+ * @return Recommeded block sizes to use for the given M, N, K dimensions.
+ */
+BlockSizes calculate_block_sizes_from_data_type(const CPUInfo &ci, unsigned int M, unsigned int N, unsigned int K, DataType input_type, bool use_dot = false);
+
+/** Get the name of the GEMM strategy which will be used for a given input type
+ *
+ * @param[in] input_type Input data type
+ * @param[in] use_dot    (Optional) If data_type is QASYMM8/U8/S8, then use the dot product instruction ?
+ *
+ * @return The name of the strategy that will be used
+ */
+const char *get_strategy_name(DataType input_type, bool use_dot = false);
+
 /** Calculate the recommended block sizes to use based on the CPU cache sizes and the strategy which will be used
  *
  * @param[in] ci CPU information
