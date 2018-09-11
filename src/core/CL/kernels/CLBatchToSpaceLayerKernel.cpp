@@ -58,10 +58,15 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
     // Validate output if initialized
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[0] != (block_shape_x * output->tensor_shape()[0]));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[1] != (block_shape_x * output->tensor_shape()[1]));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[2] != output->tensor_shape()[2]);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[3] % (block_shape_x * block_shape_y) != 0);
+        const DataLayout data_layout = input->data_layout();
+        const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+        const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+        const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+        const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_width] != (block_shape_x * output->tensor_shape()[idx_width]));
+        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_height] != (block_shape_x * output->tensor_shape()[idx_height]));
+        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -84,12 +89,14 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const ICLTenso
     _block_shape = block_shape;
     _output      = output;
 
+    const int idx_width = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(input->info()->dimension(3)));
-    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(0)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space", build_opts.options()));
+    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -108,14 +115,16 @@ void CLBatchToSpaceLayerKernel::configure(const ICLTensor *input, const int32_t 
     _input  = input;
     _output = output;
 
+    const int idx_width = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(input->info()->dimension(3)));
     build_opts.add_option("-DBLOCK_SHAPE_X=" + support::cpp11::to_string(block_shape_x));
     build_opts.add_option("-DBLOCK_SHAPE_Y=" + support::cpp11::to_string(block_shape_y));
-    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(0)));
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space_static", build_opts.options()));
+    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batch_to_space_static_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());

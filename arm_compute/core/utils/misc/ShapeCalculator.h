@@ -524,10 +524,16 @@ inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
 inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)
 {
     ARM_COMPUTE_ERROR_ON(block_x <= 0 || block_y <= 0);
+
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
     TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(0, input->tensor_shape()[0] * block_x);
-    output_shape.set(1, input->tensor_shape()[1] * block_y);
-    output_shape.set(3, input->tensor_shape()[3] / (block_x * block_y));
+    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x);
+    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y);
+    output_shape.set(3, input->tensor_shape()[idx_channel] / (block_x * block_y));
 
     return output_shape;
 }
