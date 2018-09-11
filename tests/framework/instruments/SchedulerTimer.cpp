@@ -76,17 +76,24 @@ public:
         _kernels.push_back(std::move(info));
     }
 
-    void run_workloads(std::vector<Workload> &workloads) override
+    void run_tagged_workloads(std::vector<Workload> &workloads, const char *tag) override
     {
         _timer.start();
-        _real_scheduler.run_workloads(workloads);
+        _real_scheduler.run_tagged_workloads(workloads, tag);
         _timer.stop();
 
         SchedulerTimer::kernel_info info;
-        info.name         = "Unknown";
+        info.name         = tag != nullptr ? tag : "Unknown";
         info.prefix       = _prefix;
         info.measurements = _timer.measurements();
         _kernels.push_back(std::move(info));
+    }
+
+protected:
+    void run_workloads(std::vector<Workload> &workloads) override
+    {
+        ARM_COMPUTE_UNUSED(workloads);
+        ARM_COMPUTE_ERROR("Can't be reached");
     }
 
 private:

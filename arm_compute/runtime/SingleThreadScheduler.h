@@ -54,6 +54,7 @@ public:
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
 
+protected:
     /** Will run the workloads sequentially and in order.
      *
      * @param[in] workloads Workloads to run

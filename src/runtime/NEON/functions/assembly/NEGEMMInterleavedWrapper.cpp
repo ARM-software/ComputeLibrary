@@ -42,7 +42,7 @@ void NEGEMMInterleavedWrapper::run()
     prepare();
 
     _memory_group.acquire();
-    NEScheduler::get().run_workloads(_workloads);
+    NEScheduler::get().run_tagged_workloads(_workloads, "NEGEMMInterleavedWrapper");
     _memory_group.release();
 }
 
