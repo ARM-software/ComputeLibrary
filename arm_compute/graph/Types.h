@@ -141,6 +141,7 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     NormalizationLayer,
+    NormalizePlanarYUVLayer,
     PermuteLayer,
     PoolingLayer,
     ReorgLayer,

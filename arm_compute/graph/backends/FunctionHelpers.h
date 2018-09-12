@@ -621,6 +621,44 @@ std::unique_ptr<IFunction> create_normalization_layer(NormalizationLayerNode &no
     return std::move(func);
 }
 
+/** Create a backend normalize planar YUV layer function
+ *
+ * @tparam NormalizePlanarYUVLayerFunction Backend normalize planar YUV function
+ * @tparam TargetInfo                      Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend normalize plnar YUV layer function
+ */
+template <typename NormalizePlanarYUVLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *mean   = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *std    = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(mean == nullptr);
+    ARM_COMPUTE_ERROR_ON(std == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<NormalizePlanarYUVLayerFunction>();
+    func->configure(input, output, mean, std);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend permute layer function
  *
  * @tparam PermuteLayerFunction Backend permute function

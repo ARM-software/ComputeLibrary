@@ -179,6 +179,30 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     return status;
 }
 
+/** Validates a NormalizePlanarYUV layer node
+ *
+ * @tparam NormalizePlanarYUVLayer layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename NormalizePlanarYUVLayer>
+Status validate_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating NormalizePlanarYUVLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *mean   = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *std    = detail::get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return NormalizePlanarYUVLayer::validate(input, output, mean, std);
+}
 /** Validates a permute layer node
  *
  * @tparam PermuteLayer Permute layer type

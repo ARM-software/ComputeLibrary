@@ -239,6 +239,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info);
+    /** Adds a normalize planar YUV layer node to the graph
+     *
+     * @param[in] g             Graph to add the node to
+     * @param[in] params        Common node parameters
+     * @param[in] input         Input to the normalize planar YUV layer node as a NodeID-Index pair
+     * @param[in] mean_accessor Const Node ID that contains the mean values
+     * @param[in] std_accessor  Const Node ID that contains the variance values
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_normalize_planar_yuv_node(Graph &g, NodeParams params, NodeIdxPair input,
+                                                ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr std_accessor = nullptr);
     /** Adds a permute layer node to the graph
      *
      * @param[in] g      Graph to add the node to

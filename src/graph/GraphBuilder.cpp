@@ -132,7 +132,7 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
     TensorDescriptor common_desc = input_tensor_desc;
     common_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
 
-    // Create mean and nodes
+    // Create mean and var nodes
     auto mean_nid = add_const_node_with_name(g, params, "Mean", common_desc, std::move(mean_accessor));
     auto var_nid  = add_const_node_with_name(g, params, "Variance", common_desc, std::move(var_accessor));
 
@@ -421,6 +421,32 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
 NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)
 {
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);
+}
+
+NodeID GraphBuilder::add_normalize_planar_yuv_node(Graph &g, NodeParams params, NodeIdxPair input,
+                                                   ITensorAccessorUPtr mean_accessor, ITensorAccessorUPtr std_accessor)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Calculate Common Descriptor
+    TensorDescriptor common_desc = input_tensor_desc;
+    common_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
+
+    // Create mean and std nodes
+    auto mean_nid = add_const_node_with_name(g, params, "Mean", common_desc, std::move(mean_accessor));
+    auto std_nid  = add_const_node_with_name(g, params, "Std", common_desc, std::move(std_accessor));
+
+    // Create normalize planar YUV node and add connections
+    NodeID norm_planar_yuv_nid = g.add_node<NormalizePlanarYUVLayerNode>();
+    g.add_connection(input.node_id, input.index, norm_planar_yuv_nid, 0);
+    g.add_connection(mean_nid, 0, norm_planar_yuv_nid, 1);
+    g.add_connection(std_nid, 0, norm_planar_yuv_nid, 2);
+    set_node_params(g, norm_planar_yuv_nid, params);
+
+    return norm_planar_yuv_nid;
 }
 
 NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)

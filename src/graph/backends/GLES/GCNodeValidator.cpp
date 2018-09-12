@@ -111,8 +111,12 @@ Status GCNodeValidator::validate(INode *node)
             return validate_depthwise_convolution_layer(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::FlattenLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : FlattenLayer");
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::validate_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PermuteLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PermuteLayer");
+        case NodeType::ReorgLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReorgLayer");
         case NodeType::ReshapeLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReshapeLayer");
         default:

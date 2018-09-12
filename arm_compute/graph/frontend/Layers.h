@@ -538,6 +538,37 @@ private:
     NormalizationLayerInfo _norm_info;
 };
 
+/** Normalize planar YUV Layer */
+class NormalizePlanarYUVLayer final : public ILayer
+{
+public:
+    /** Construct a normalize planar YUV layer.
+     *
+     * @param[in] mean Accessor to get mean tensor data from.
+     * @param[in] std  Accessor to get std tensor data from.
+     */
+    NormalizePlanarYUVLayer(ITensorAccessorUPtr mean,
+                            ITensorAccessorUPtr std)
+        : _mean(std::move(mean)), _std(std::move(std))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        ARM_COMPUTE_ERROR_ON(_mean == nullptr);
+        ARM_COMPUTE_ERROR_ON(_std == nullptr);
+
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_normalize_planar_yuv_node(s.graph(), common_params, input,
+                                                           std::move(_mean), std::move(_std));
+    }
+
+private:
+    ITensorAccessorUPtr _mean;
+    ITensorAccessorUPtr _std;
+};
+
 /** Permute Layer */
 class PermuteLayer final : public ILayer
 {

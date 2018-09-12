@@ -21,38 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH_NORMALIZE_PLANAR_YUV_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_NORMALIZE_PLANAR_YUV_LAYER_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
+/** Batch Normalization Layer node */
+class NormalizePlanarYUVLayerNode final : public INode
+{
+public:
+    /** Constructor */
+    NormalizePlanarYUVLayerNode();
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_NORMALIZE_PLANAR_YUV_LAYER_NODE_H__ */

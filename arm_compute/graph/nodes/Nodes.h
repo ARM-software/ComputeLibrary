@@ -38,6 +38,7 @@
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
+#include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"

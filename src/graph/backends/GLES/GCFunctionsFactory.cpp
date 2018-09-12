@@ -278,6 +278,8 @@ std::unique_ptr<IFunction> GCFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<GCFullyConnectedLayer, GCTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<GCNormalizationLayer, GCTargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::create_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer, GCTargetInfo>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<GCPoolingLayer, GCTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::ResizeLayer:
