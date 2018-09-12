@@ -62,7 +62,7 @@ inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input,
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
@@ -170,6 +170,8 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     float hr = 0.f;
     std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info());
 
+    const bool call_quantized_kernel = is_data_type_quantized_asymmetric(input->info()->data_type()) && policy == InterpolationPolicy::BILINEAR;
+
     DataLayout data_layout = input->info()->data_layout();
     const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -200,11 +202,18 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
     build_opts.add_option_if(border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
     build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
+    if(call_quantized_kernel)
+    {
+        build_opts.add_option("-DSCALE=" + support::cpp11::to_string(input->info()->quantization_info().scale));
+        build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset));
+    }
 
     std::string interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
-    std::string kernel_name = "scale_" + interpolation_name + "_" + lower_string(string_from_data_layout(data_layout));
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    std::string kernel_name = "scale_" + interpolation_name;
+    kernel_name += call_quantized_kernel ? "_quantized_" : "_";
+    kernel_name += lower_string(string_from_data_layout(data_layout));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     unsigned int idx = data_layout == DataLayout::NHWC ? 2 * num_arguments_per_3D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 
