@@ -329,6 +329,17 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_softmax_node(Graph &g, NodeParams params, NodeIdxPair input, float beta = 1.f);
+    /** Adds a slice node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the slice layer node as a NodeID-Index pair
+     * @param[in] starts The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] ends   The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends);
     /** Adds a split node to the graph
      *
      * @param[in] g          Graph to add the node to

@@ -148,6 +148,7 @@ enum class NodeType
     ReshapeLayer,
     ResizeLayer,
     SoftmaxLayer,
+    SliceLayer,
     SplitLayer,
     YOLOLayer,
 

@@ -718,6 +718,32 @@ private:
     ITensorAccessorUPtr _add_w;
 };
 
+/** Slice Layer */
+class SliceLayer final : public ILayer
+{
+public:
+    /** Construct a slice layer.
+     *
+     * @param[in] starts The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     * @param[in] ends   The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
+     */
+    SliceLayer(Coordinates &starts, Coordinates &ends)
+        : _starts(starts), _ends(ends)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_slice_node(s.graph(), common_params, input, _starts, _ends);
+    }
+
+private:
+    Coordinates _starts;
+    Coordinates _ends;
+};
+
 /** Softmax Layer */
 class SoftmaxLayer final : public ILayer
 {

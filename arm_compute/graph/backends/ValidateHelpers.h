@@ -249,6 +249,30 @@ Status validate_reorg_layer(ReorgLayerNode &node)
     return ReorgLayer::validate(input, output, node.stride());
 }
 
+/** Validates a Slice layer node
+ *
+ * @tparam SliceLayer Slice layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename SliceLayer>
+Status validate_slice_layer(SliceLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating Slice node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input  = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+    const Coordinates         starts = node.starts();
+    const Coordinates         ends   = node.ends();
+
+    return SliceLayer::validate(input, output, starts, ends);
+}
+
 /** Validates a YOLO layer node
  *
  * @tparam YOLOLayer YOLO layer type

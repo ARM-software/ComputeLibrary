@@ -509,6 +509,11 @@ NodeID GraphBuilder::add_softmax_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<SoftmaxLayerNode>(g, params, input, beta);
 }
 
+NodeID GraphBuilder::add_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends)
+{
+    return create_simple_single_input_output_node<SliceLayerNode>(g, params, input, starts, ends);
+}
+
 NodeID GraphBuilder::add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis)
 {
     return create_simple_single_input_output_node<SplitLayerNode>(g, params, input, num_splits, axis);

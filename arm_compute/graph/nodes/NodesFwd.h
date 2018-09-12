@@ -52,6 +52,7 @@ class ReorgLayerNode;
 class ReshapeLayerNode;
 class ResizeLayerNode;
 class SoftmaxLayerNode;
+class SliceLayerNode;
 class SplitLayerNode;
 class YOLOLayerNode;
 } // namespace graph

@@ -45,6 +45,7 @@
 #include "arm_compute/graph/nodes/ReorgLayerNode.h"
 #include "arm_compute/graph/nodes/ReshapeLayerNode.h"
 #include "arm_compute/graph/nodes/ResizeLayerNode.h"
+#include "arm_compute/graph/nodes/SliceLayerNode.h"
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"

@@ -735,7 +735,7 @@ std::unique_ptr<IFunction> create_pooling_layer(PoolingLayerNode &node)
 
 /** Create a backend reorg layer function
  *
- * @tparam ReorgLayerFunction Backend reshape function
+ * @tparam ReorgLayerFunction Backend reorg function
  * @tparam TargetInfo         Target-specific information
  *
  * @param[in] node Node to create the backend function for
@@ -835,6 +835,41 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
                                << " Interpolation: " << policy
+                               << std::endl);
+
+    return std::move(func);
+}
+
+/** Create a backend slice layer function
+ *
+ * @tparam SliceLayerFunction Backend slice function
+ * @tparam TargetInfo         Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend slice layer function
+ */
+template <typename SliceLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_slice_layer(SliceLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<SliceLayerFunction>();
+    func->configure(input, output, node.starts(), node.ends());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
                                << std::endl);
 
     return std::move(func);

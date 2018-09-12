@@ -116,6 +116,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::SoftmaxLayer:
             os << "SoftmaxLayer";
             break;
+        case NodeType::SliceLayer:
+            os << "SliceLayer";
+            break;
         case NodeType::SplitLayer:
             os << "SplitLayer";
             break;
