@@ -47,8 +47,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>       rel_tolerance_f32(0.01f);  /**< Relative tolerance for FP32 types */
-const AbsoluteTolerance<float> abs_tolerance_f32(0.002f); /**< Absolute tolerance for FP32 types */
+RelativeTolerance<float>       rel_tolerance_f32(0.01f);       /**< Relative tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);      /**< Absolute tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f); /**< Absolute tolerance for FP32 types */
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
@@ -138,7 +140,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, frame
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, abs_tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
 }
 
 TEST_SUITE_END() // Conv1x3
@@ -160,7 +162,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, frame
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, abs_tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
 }
 
 TEST_SUITE_END() // Conv3x1
@@ -182,7 +184,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, frame
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, abs_tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
 }
 
 TEST_SUITE_END() // Conv1x5
@@ -204,7 +206,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, frame
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, abs_tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
 }
 
 TEST_SUITE_END() // Conv5x1
