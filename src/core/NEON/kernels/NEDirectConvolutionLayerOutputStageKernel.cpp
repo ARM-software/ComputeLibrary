@@ -451,6 +451,13 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     {
         switch(input->info()->data_type())
         {
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+            case DataType::F16:
+            {
+                _func = (output == nullptr) ? &output_stage_nhwc<float16_t, float16_t, true, true> : &output_stage_nhwc<float16_t, float16_t, false, true>;
+                break;
+            }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
             {
                 _func = (output == nullptr) ? &output_stage_nhwc<float, float, true, true> : &output_stage_nhwc<float, float, false, true>;

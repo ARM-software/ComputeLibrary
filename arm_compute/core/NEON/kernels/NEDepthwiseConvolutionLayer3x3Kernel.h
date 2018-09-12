@@ -55,7 +55,7 @@ public:
      *
      * @note Supported data layouts: NCHW and NHWC
      *
-     * @param[in]  input            Source tensor. DataType supported: QASYMM8, F32.
+     * @param[in]  input            Source tensor. DataType supported: QASYMM8/F16/F32.
      * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM] for NCHW or [IFM, 3, 3] if NHWC data layout. Data type supported: Same as @p input.
      * @param[out] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
@@ -81,7 +81,7 @@ public:
      *
      * @note Supported data layouts: NCHW and NHWC
      *
-     * @param[in] input            Source tensor. DataType supported: QASYMM8, F32.
+     * @param[in] input            Source tensor. DataType supported: QASYMM8/F16/F32.
      * @param[in] weights          Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM] for NCHW or [IFM, 3, 3] if NHWC data layout. Data type supported: Same as @p input.
      * @param[in] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.

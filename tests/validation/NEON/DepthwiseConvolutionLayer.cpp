@@ -45,8 +45,9 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-constexpr RelativeTolerance<float>   tolerance_f32(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
+RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.001)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 
 const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 3 });
 } // namespace
@@ -209,7 +210,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<float>, fram
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // Generic
 
 TEST_SUITE(W3x3)
 template <typename T>
@@ -238,10 +239,43 @@ FIXTURE_DATA_TEST_CASE(RunOptimized, NEDepthwiseConvolutionLayerFixture3x3<float
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // W3x3
+TEST_SUITE_END() // F32
 
-TEST_SUITE_END()
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(F16)
+TEST_SUITE(W3x3)
+template <typename T>
+using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                   depth_multipliers),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F16)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       depth_multipliers),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunOptimized, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::OptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // W3x3
+TEST_SUITE_END() // FP16
+#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+TEST_SUITE_END() // Float
 
 template <typename T>
 using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;

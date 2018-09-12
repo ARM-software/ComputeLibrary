@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/impl_fp32_fp32.hpp"
+#include "impl_fp32_fp32.hpp"
 
 namespace depthwise
 {
