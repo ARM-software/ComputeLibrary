@@ -198,8 +198,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             output_shape.set(1, convolver->output_size(output_shape.y(), same_padding)); // Set width
             output_shape.set(2, convolver->output_size(output_shape.z(), same_padding)); // Set height
 
+            const DataType output_dt = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
+
             // Output auto inizialitation if not yet initialized
-            auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+            auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt));
 
             // Configure window (optimised)
             // Set padding in channels
@@ -324,7 +326,7 @@ bool NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(Tenso
     }
 
     // Check supported data type
-    bool supported_datatype = is_data_type_float(dt);
+    bool supported_datatype = is_data_type_float(dt) || is_data_type_quantized(dt);
 
     // Check for supported strides
     const auto &strides           = conv_info.stride();
@@ -345,11 +347,15 @@ bool NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(Tenso
 
 void NEDepthwiseConvolutionLayer3x3Kernel::generate_convolver()
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(_input, _weights);
     ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(1) != 3 || _weights->info()->dimension(2) != 3);
 
     _convolver = create_convolver_object(_conv_info, _weights, _input, _output, true);
+    if(_convolver)
+    {
+        _convolver->set_offsets(-_input->info()->quantization_info().offset, -_weights->info()->quantization_info().offset);
+    }
 }
 
 void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
@@ -433,6 +439,31 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> NEDepthwiseConvolutionLayer3x3
     const auto stride_x = conv_info.stride().first;
     switch(dt)
     {
+        case DataType::QASYMM8:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<4, 4, 3, 3, 1, 1, uint8_t, int32_t>>(
+                               n_batches, in_rows, in_cols, n_channels, padding_same,
+                               reinterpret_cast<const uint8_t *>(w->ptr_to_element(Coordinates())),
+                               in->ptr_to_element(Coordinates()),
+                               reinterpret_cast<int32_t *>(out->ptr_to_element(Coordinates())), weight_col_stride,
+                               weight_row_stride, input_col_stride, input_row_stride, input_batch_stride,
+                               output_col_stride, output_row_stride, output_batch_stride);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<4, 4, 3, 3, 2, 2, uint8_t, int32_t>>(
+                               n_batches, in_rows, in_cols, n_channels, padding_same,
+                               reinterpret_cast<const uint8_t *>(w->ptr_to_element(Coordinates())),
+                               in->ptr_to_element(Coordinates()),
+                               reinterpret_cast<int32_t *>(out->ptr_to_element(Coordinates())), weight_col_stride,
+                               weight_row_stride, input_col_stride, input_row_stride, input_batch_stride,
+                               output_col_stride, output_row_stride, output_batch_stride);
+                default:
+                    return nullptr;
+            }
+            break;
+        }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {

@@ -204,6 +204,7 @@ public:
         // Stride 1
         add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(7U, 7U, 21U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(28U, 28U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(28U, 28U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
         // Stride 2
@@ -211,6 +212,7 @@ public:
         add_config(TensorShape(7U, 7U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(8U, 8U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::FLOOR));
         add_config(TensorShape(8U, 8U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(8U, 8U, 33U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(64U, 64U, 128U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
     }
 };

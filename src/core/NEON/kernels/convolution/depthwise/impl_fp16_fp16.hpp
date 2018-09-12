@@ -75,7 +75,9 @@ struct DepthwiseConvolutionImpl<OutputTileRows, OutputTileCols, KernelRows, Kern
     const int in_pad_bottom=0,
     const int in_pad_right=0,
     const int out_pad_bottom=0,
-    const int out_pad_right=0
+    const int out_pad_right=0,
+    const int input_offset=0,
+    const int weights_offset=0
   );
 };
 
@@ -102,7 +104,9 @@ void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, float16_t, float16_t>::p
   const int _in_pad_bottom,
   const int _in_pad_right,
   const int _out_pad_bottom,
-  const int _out_pad_right
+  const int _out_pad_right,
+  const int _input_offset,
+  const int _weights_offset
 )
 {
   constexpr auto inner_tile_rows = DWC::inner_tile_rows;

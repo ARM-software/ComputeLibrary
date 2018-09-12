@@ -183,6 +183,12 @@ private:
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
 
+        // Add model path to data path
+        if(!data_path.empty())
+        {
+            data_path += "/cnn_data/mobilenet_qasymm8_model/";
+        }
+
         // Quantization info taken from the AndroidNN QASYMM8 MobileNet example
         const QuantizationInfo in_quant_info  = QuantizationInfo(0.0078125f, 128);
         const QuantizationInfo mid_quant_info = QuantizationInfo(0.0784313753247f, 128);
@@ -228,14 +234,15 @@ private:
         };
 
         graph << InputLayer(input_descriptor.set_quantization_info(in_quant_info),
-                            get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/" + common_params.image))
+                            get_weights_accessor(data_path, common_params.image))
               << ConvolutionLayer(
                   3U, 3U, 32U,
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/Conv2d_0_weights.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/Conv2d_0_bias.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_bias.npy"),
                   PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR),
                   1, conv_weights_quant_info.at(0), mid_quant_info)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f));
+              .set_name("Conv2d_0")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
         graph << get_dwsc_node_qasymm(data_path, "Conv2d_1", 64U, PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(0), point_weights_quant_info.at(0));
         graph << get_dwsc_node_qasymm(data_path, "Conv2d_2", 128U, PadStrideInfo(2U, 2U, 0U, 1U, 0U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(1),
                                       point_weights_quant_info.at(1));
@@ -261,12 +268,14 @@ private:
                                       point_weights_quant_info.at(11));
         graph << get_dwsc_node_qasymm(data_path, "Conv2d_13", 1024U, PadStrideInfo(1U, 1U, 1U, 1U, 1U, 1U, DimensionRoundingType::FLOOR), PadStrideInfo(1U, 1U, 0U, 0U), depth_weights_quant_info.at(12),
                                       point_weights_quant_info.at(12))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
+              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("Logits/AvgPool_1a")
               << ConvolutionLayer(
                   1U, 1U, 1001U,
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/Logits_Conv2d_1c_1x1_weights.npy"),
-                  get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/Logits_Conv2d_1c_1x1_bias.npy"),
-                  PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1));
+                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
+                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_bias.npy"),
+                  PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1))
+              .set_name("Logits/Conv2d_1c_1x1");
+        ;
     }
 
     ConcatLayer get_dwsc_node_float(const std::string &data_path, std::string &&param_path,
@@ -312,7 +321,7 @@ private:
                                      PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info,
                                      QuantizationInfo depth_weights_quant_info, QuantizationInfo point_weights_quant_info)
     {
-        std::string total_path = "/cnn_data/mobilenet_qasymm8_model/" + param_path + "_";
+        std::string total_path = param_path + "_";
         SubStream   sg(graph);
 
         sg << DepthwiseConvolutionLayer(
@@ -320,13 +329,15 @@ private:
                get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
                dwc_pad_stride_info, depth_weights_quant_info)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f))
+           .set_name(total_path + "depthwise/depthwise")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_bias.npy"),
                conv_pad_stride_info, 1, point_weights_quant_info)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f));
+           .set_name(total_path + "pointwise/Conv2D")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
 
         return ConcatLayer(std::move(sg));
     }

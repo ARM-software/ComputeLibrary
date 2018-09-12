@@ -304,6 +304,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+FIXTURE_DATA_TEST_CASE(RunOptimized, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::OptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::QASYMM8)),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                        depth_multipliers),

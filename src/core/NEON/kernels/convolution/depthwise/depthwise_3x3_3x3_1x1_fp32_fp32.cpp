@@ -43,7 +43,7 @@ void ConvImpl::process_tile<true, 0, 0, 0, 0, 0, 0>(
   float* const outptr,
   const int out_row_stride,
   const int out_col_stride,
-  const int, const int, const int, const int, const int, const int
+  const int, const int, const int, const int, const int, const int, const int, const int
 )
 {
   // Copy pointers

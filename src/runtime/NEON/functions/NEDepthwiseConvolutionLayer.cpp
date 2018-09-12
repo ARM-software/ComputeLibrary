@@ -59,8 +59,25 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     _is_nchw              = input->info()->data_layout() == DataLayout::NCHW;
     _permute              = _is_optimized == _is_nchw;
 
+    // Initialize the intermediate accumulator tensor in case of quantized input
+    if(_is_quantized)
+    {
+        TensorShape accum_shape  = output->info()->tensor_shape();
+        DataLayout  accum_layout = output->info()->data_layout();
+        if(!_is_optimized && !_is_nchw)
+        {
+            permute(accum_shape, PermutationVector(1U, 2U, 0U));
+            accum_layout = DataLayout::NCHW;
+        }
+
+        _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, input->info()->quantization_info()));
+        _accumulator.info()->set_data_layout(accum_layout);
+        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+    }
+
     if(_is_optimized)
     {
+        ITensor *optimized_output = (_is_quantized) ? &_accumulator : output;
         if(_is_nchw)
         {
             // Configure the function to transform the input tensor from NCHW -> NHWC
@@ -75,8 +92,8 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
             _dwc_kernel.configure(&_permuted_input, &_permuted_weights, &_permuted_output, conv_info, depth_multiplier, DataLayout::NHWC);
 
             // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
-            _permute_output.configure(&_permuted_output, output, PermutationVector(1U, 2U, 0U));
-            _permuted_output.info()->set_data_layout(DataLayout::NCHW);
+            _permuted_output.info()->set_data_layout(DataLayout::NHWC);
+            _permute_output.configure(&_permuted_output, optimized_output, PermutationVector(1U, 2U, 0U));
 
             // Allocate tensors
             _permuted_input.allocator()->allocate();
@@ -85,26 +102,11 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
         }
         else
         {
-            _dwc_kernel.configure(input, weights, output, conv_info, depth_multiplier, DataLayout::NHWC);
+            _dwc_kernel.configure(input, weights, optimized_output, conv_info, depth_multiplier, DataLayout::NHWC);
         }
     }
     else
     {
-        // Allocate the intermediate accumulator tensor in case of quantized input
-        if(_is_quantized)
-        {
-            TensorShape accum_shape = output->info()->tensor_shape();
-
-            if(!_is_nchw)
-            {
-                permute(accum_shape, PermutationVector(1U, 2U, 0U));
-            }
-
-            _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32));
-            _accumulator.info()->set_quantization_info(input->info()->quantization_info());
-            zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
-        }
-
         if(!_is_nchw)
         {
             // Configure the function to transform the input tensor from NHWC -> NCHW
@@ -143,7 +145,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
         float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, output_quant_info.offset);
+        _output_stage_kernel.configure(&_accumulator, biases, (_is_nchw || _is_optimized) ? output : &_permuted_output, output_multiplier, output_shift, output_quant_info.offset);
         _accumulator.allocator()->allocate();
     }
     else if(_has_bias)
