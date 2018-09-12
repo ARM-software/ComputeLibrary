@@ -45,6 +45,7 @@ namespace
 {
 constexpr RelativeTolerance<float> tolerance_f16(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 } // namespace
 
 TEST_SUITE(CL)
@@ -131,6 +132,22 @@ FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerFixture<float>, framewor
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLNormalizePlanarYUVLayerQuantizedFixture = NormalizePlanarYUVLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLNormalizePlanarYUVLayer, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(Random, CLNormalizePlanarYUVLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomNormalizePlanarYUVLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, 0);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

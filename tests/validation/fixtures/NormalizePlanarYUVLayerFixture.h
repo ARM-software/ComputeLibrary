@@ -41,15 +41,15 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class NormalizePlanarYUVLayerValidationFixture : public framework::Fixture
+class NormalizePlanarYUVLayerValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout)
+    void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         _data_type = dt;
-        _target    = compute_target(shape0, shape1, dt, data_layout);
-        _reference = compute_reference(shape0, shape1, dt);
+        _target    = compute_target(shape0, shape1, dt, data_layout, quantization_info);
+        _reference = compute_reference(shape0, shape1, dt, quantization_info);
     }
 
 protected:
@@ -67,9 +67,15 @@ protected:
             library->fill(mean_tensor, distribution, 1);
             library->fill(std_tensor, distribution_std, 2);
         }
+        else if(is_data_type_quantized_asymmetric(src_tensor.data_type()))
+        {
+            library->fill_tensor_uniform(src_tensor, 0);
+            library->fill_tensor_uniform(mean_tensor, 1);
+            library->fill_tensor_uniform(std_tensor, 2);
+        }
     }
 
-    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, DataType dt, DataLayout data_layout)
+    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, DataType dt, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -77,10 +83,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src  = create_tensor<TensorType>(shape0, dt, 1, QuantizationInfo(), data_layout);
-        TensorType dst  = create_tensor<TensorType>(shape0, dt, 1, QuantizationInfo(), data_layout);
-        TensorType mean = create_tensor<TensorType>(shape1, dt, 1);
-        TensorType std  = create_tensor<TensorType>(shape1, dt, 1);
+        TensorType src  = create_tensor<TensorType>(shape0, dt, 1, quantization_info, data_layout);
+        TensorType mean = create_tensor<TensorType>(shape1, dt, 1, quantization_info);
+        TensorType std  = create_tensor<TensorType>(shape1, dt, 1, quantization_info);
+        TensorType dst;
 
         // Create and configure function
         FunctionType norm;
@@ -111,12 +117,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType dt)
+    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType dt, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape0, dt, 1 };
-        SimpleTensor<T> ref_mean{ shape1, dt, 1 };
-        SimpleTensor<T> ref_std{ shape1, dt, 1 };
+        SimpleTensor<T> ref_src{ shape0, dt, 1, quantization_info };
+        SimpleTensor<T> ref_mean{ shape1, dt, 1, quantization_info };
+        SimpleTensor<T> ref_std{ shape1, dt, 1, quantization_info };
 
         // Fill reference
         fill(ref_src, ref_mean, ref_std);
@@ -127,6 +133,28 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class NormalizePlanarYUVLayerValidationFixture : public NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout)
+    {
+        NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, dt, data_layout, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class NormalizePlanarYUVLayerValidationQuantizedFixture : public NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape0, TensorShape shape1, DataType dt, DataLayout data_layout, QuantizationInfo quantization_info)
+    {
+        NormalizePlanarYUVLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, dt, data_layout, quantization_info);
+    }
 };
 } // namespace validation
 } // namespace test

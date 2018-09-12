@@ -316,6 +316,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "normalization_layer_in_map", "normalization_layer.cl" },
     { "normalize_planar_yuv_layer_nchw", "normalize_planar_yuv_layer.cl" },
     { "normalize_planar_yuv_layer_nhwc", "normalize_planar_yuv_layer.cl" },
+    { "normalize_planar_yuv_layer_q8_nchw", "normalize_planar_yuv_layer_quantized.cl" },
+    { "normalize_planar_yuv_layer_q8_nhwc", "normalize_planar_yuv_layer_quantized.cl" },
     { "NV12_to_IYUV_bt709", "color_convert.cl" },
     { "NV12_to_RGB888_bt709", "color_convert.cl" },
     { "NV12_to_RGBA8888_bt709", "color_convert.cl" },
@@ -696,6 +698,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "normalize_planar_yuv_layer.cl",
 #include "./cl_kernels/normalize_planar_yuv_layer.clembed"
+    },
+    {
+        "normalize_planar_yuv_layer_quantized.cl",
+#include "./cl_kernels/normalize_planar_yuv_layer_quantized.clembed"
     },
     {
         "batchnormalization_layer.cl",

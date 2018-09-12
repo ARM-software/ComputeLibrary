@@ -50,7 +50,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: F16/F32.
+     *                    Data types supported: QASYMM8/F16/F32.
      * @param[out] output Destination tensor. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
      * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the number of input channels.
@@ -60,7 +60,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizePlanarYUVLayerKernel
      *
      * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
-     *                    Data types supported: F16/F32.
+     *                    Data types supported: QASYMM8/F16/F32.
      * @param[out] output Destination tensor info. Data type supported: same as @p input
      * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
      * @param[in]  std    Standard deviation values tensor info. 1 dimension with size equal to the number of input channels.

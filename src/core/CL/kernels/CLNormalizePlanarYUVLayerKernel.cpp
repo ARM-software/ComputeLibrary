@@ -42,7 +42,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, std);
@@ -111,15 +111,25 @@ void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTenso
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const unsigned int channel_idx                       = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
+    const DataType     dt                                = input->info()->data_type();
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
     build_opts.add_option(("-DNUM_CHANNELS=" + support::cpp11::to_string(input->info()->dimension(channel_idx))));
 
+    std::string kernel_name = "normalize_planar_yuv_layer_";
+    if(is_data_type_quantized(dt))
+    {
+        build_opts.add_option(("-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset)));
+        build_opts.add_option(("-DSCALE=" + support::cpp11::to_string(input->info()->quantization_info().scale)));
+        kernel_name += "q8_";
+    }
+
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("normalize_planar_yuv_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
+    kernel_name += lower_string(string_from_data_layout(input->info()->data_layout()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), mean->info(), std->info());
@@ -130,7 +140,7 @@ void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTenso
     _config_id = "normalize_planar_yuv_layer_";
     _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
     _config_id += "_";
-    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += lower_string(string_from_data_type(dt));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
