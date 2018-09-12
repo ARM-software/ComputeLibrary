@@ -218,7 +218,7 @@ private:
                          unsigned int filter_size)
     {
         std::string total_path  = "/cnn_data/yolov3_model/";
-        std::string param_path2 = std::to_string(std::stoi(param_path) + 1);
+        std::string param_path2 = arm_compute::support::cpp11::to_string(arm_compute::support::cpp11::stoi(param_path) + 1);
         SubStream   i_a(graph);
         SubStream   i_b(graph);
         i_a << ConvolutionLayer(
