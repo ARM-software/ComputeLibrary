@@ -167,6 +167,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "channel_combine_UYVY422", "channel_combine.cl" },
     { "channel_combine_YUYV422", "channel_combine.cl" },
     { "channel_shuffle_nchw", "channel_shuffle.cl" },
+    { "channel_shuffle_nhwc", "channel_shuffle.cl" },
     { "channel_extract_NV12", "channel_extract.cl" },
     { "channel_extract_NV21", "channel_extract.cl" },
     { "channel_extract_RGB888", "channel_extract.cl" },

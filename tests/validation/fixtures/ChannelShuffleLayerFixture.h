@@ -46,9 +46,9 @@ class ChannelShuffleLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, unsigned int num_groups, DataType data_type)
+    void setup(TensorShape shape, unsigned int num_groups, DataType data_type, DataLayout data_layout)
     {
-        _target    = compute_target(shape, data_type, num_groups);
+        _target    = compute_target(shape, data_type, num_groups, data_layout);
         _reference = compute_reference(shape, data_type, num_groups);
     }
 
@@ -59,11 +59,17 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type, unsigned int num_groups)
+    TensorType compute_target(TensorShape shape, DataType data_type, unsigned int num_groups, DataLayout data_layout)
     {
+        // Note: The input shape passed to the function is always in NCHW
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type);
-        TensorType dst = create_tensor<TensorType>(shape, data_type);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst;
 
         // Create and configure function
         FunctionType channel_shuffle_func;
