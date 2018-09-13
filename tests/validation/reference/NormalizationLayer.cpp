@@ -33,7 +33,7 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+template <typename T>
 SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLayerInfo info)
 {
     // Create reference

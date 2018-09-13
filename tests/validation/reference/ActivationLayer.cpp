@@ -34,7 +34,7 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+template <typename T>
 SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
 {
     // Create reference

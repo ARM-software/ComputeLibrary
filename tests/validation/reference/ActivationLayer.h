@@ -83,10 +83,7 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
     return ret;
 }
 
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info);
-
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+template <typename T>
 SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info);
 } // namespace reference
 } // namespace validation

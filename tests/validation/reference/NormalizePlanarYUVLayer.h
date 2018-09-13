@@ -35,7 +35,7 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type * = nullptr>
+template <typename T>
 SimpleTensor<T> normalize_planar_yuv_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &std);
 } // namespace reference
 } // namespace validation
