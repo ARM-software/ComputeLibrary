@@ -46,8 +46,12 @@ namespace arm_compute
  * specified value where a < stride - 1 that increases the padding top and right of the input image.
  *
  *  The relation between input to output is as follows:
- *       width_output = round((width_input − 1) ∗ (stride_x - 1) − 2 ∗ padding_x + kernel_x + inner_border_right )
- *       height_output = round((height_input − 1) ∗ (stride_y - 1) − 2 ∗ padding_y + kernel_y + inner_border_top )
+ *  \f[
+ *       width\_output = (width\_input - 1) \cdot stride\_x - 2 \cdot padding\_x + kernel\_x
+ *  \f]
+ *  \f[
+ *       height\_output = (height\_input - 1) \cdot stride\_y - 2 \cdot padding\_y + kernel\_y
+ *  \f]
  *
  *  where
  *      width is the size of the first input dimension.
@@ -55,12 +59,15 @@ namespace arm_compute
  *      width_output is the size of the first output dimension.
  *      height_output is the size of the second output dimension.
  *      kernel_x and kernel_y are the convolution sizes in x and y.
- *      inner_border_right and inner_border_top the number of zeros added to the top and right edges of the input.
  *      stride_x and stride_y is the input stride of the first and second dimension.
  *
- *  This function calls the following NEON kernels:
+ * The weights used by Deconvolution are supposed to be the same as the ones used for Convolution. Therefore, it will be necessary to use the weights in the
+ * reverse order to perform an actual convolution. This is achieved by using the @ref CPPFlipWeightsKernel.
  *
- * -# @ref NEDirectConvolutionLayer
+ * This function calls the following NEON kernels/functions:
+ *
+ * -# @ref CPPUpsample
+ * -# @ref NEConvolutionLayer
  *
  */
 class NEDeconvolutionLayer : public IFunction

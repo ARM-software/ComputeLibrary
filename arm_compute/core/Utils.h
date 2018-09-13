@@ -815,16 +815,6 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
  */
 PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info);
 
-/** Returns expected shape for the deconvolution output tensor.
- *
- * @param[in] out_dims widht and height of the output tensor, these values can be obtained with the function deconvolution_output_dimensions.
- * @param[in] input    Shape of the input tensor.
- * @param[in] weights  Shape of the weights tensor.
- *
- * @return Deconvolution output tensor shape.
- */
-TensorShape deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights);
-
 /** Returns expected width and height of the deconvolution's output tensor.
  *
  * @param[in] in_width      Width of input tensor (Number of columns)

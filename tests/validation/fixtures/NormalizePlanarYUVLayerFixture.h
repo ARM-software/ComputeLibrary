@@ -68,11 +68,10 @@ protected:
         }
         else if(is_data_type_quantized_asymmetric(_data_type))
         {
-            const QuantizationInfo          quant_info = src_tensor.quantization_info();
-            const int                       min_bound  = quant_info.quantize(-1.f, RoundingPolicy::TO_NEAREST_UP);
-            const int                       max_bound  = quant_info.quantize(1.f, RoundingPolicy::TO_NEAREST_UP);
-            std::uniform_int_distribution<> distribution(min_bound, max_bound);
-            std::uniform_int_distribution<> distribution_std(quant_info.quantize(0.1f, RoundingPolicy::TO_NEAREST_UP), max_bound);
+            const QuantizationInfo quant_info = src_tensor.quantization_info();
+            std::pair<int, int> bounds = get_quantized_bounds(quant_info, -1.f, 1.0f);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
+            std::uniform_int_distribution<> distribution_std(quant_info.quantize(0.1f, RoundingPolicy::TO_NEAREST_UP), bounds.second);
             library->fill(src_tensor, distribution, 0);
             library->fill(mean_tensor, distribution, 1);
             library->fill(std_tensor, distribution_std, 2);

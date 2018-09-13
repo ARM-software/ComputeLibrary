@@ -32,6 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ReductionOperation.h"
 #include "tests/validation/reference/ReshapeLayer.h"
 
@@ -63,10 +64,8 @@ protected:
         }
         else
         {
-            const QuantizationInfo          quant_info = tensor.quantization_info();
-            const int                       min_bound  = quant_info.quantize(-1.f, RoundingPolicy::TO_NEAREST_UP);
-            const int                       max_bound  = quant_info.quantize(1.f, RoundingPolicy::TO_NEAREST_UP);
-            std::uniform_int_distribution<> distribution(min_bound, max_bound);
+            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
 
             library->fill(tensor, distribution, 0);
         }

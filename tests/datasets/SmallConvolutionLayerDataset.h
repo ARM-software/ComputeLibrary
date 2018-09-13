@@ -164,6 +164,9 @@ public:
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(10U, 11U, 16U, 5U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(10U, 11U, 16U, 5U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        // TODO (micgio01) - COMPMID-1604: investigate issue in GLES and re-enable the following dataset
+        // Single output channel
+        //add_config(TensorShape(5U, 4U, 3U, 2U), TensorShape(4U, 4U, 3U, 1U), TensorShape(1U), TensorShape(2U, 1U, 1U, 2U), PadStrideInfo(1, 1, 0, 0, 0, 0, DimensionRoundingType::FLOOR));
     }
 };
 

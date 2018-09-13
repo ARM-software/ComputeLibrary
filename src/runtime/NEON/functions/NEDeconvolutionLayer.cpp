@@ -76,15 +76,17 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
-        const TensorShape output_shape = deconvolution_output_shape(out_dims, input->tensor_shape(), weights->tensor_shape());
+        const TensorShape output_shape = compute_deconvolution_output_shape(out_dims, *input, *weights);
+
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimX) != output_shape.x(), "Output's width is invalid.");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimY) != output_shape.y(), "Output's height is invalid.");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimZ) != output_shape.z(), "Output's depth is invalid.");
     }
 
-    TensorInfo scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_deconvolution_shape(*input, *weights, stride_x, stride_y, inner_border_right,
-                                                                                                      inner_border_top,
-                                                                                                      out_dims)));
+    unsigned int        padx            = 0;
+    unsigned int        pady            = 0;
+    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, inner_border_right, inner_border_top, out_dims, padx, pady);
+    TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
@@ -116,7 +118,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     auto out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
                                                     info.pad().first, info.pad().second, stride_x, stride_y);
 
-    const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
+    const TensorShape output_shape = compute_deconvolution_output_shape(out_dims, *input->info(), *weights->info());
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
@@ -125,19 +127,11 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     _memory_group.manage(&_scaled_output);
 
-    // Find the upsampled dimensions
-    unsigned int out_x = (input->info()->dimension(0) - 1) * stride_x + inner_border_right + 1;
-    unsigned int out_y = (input->info()->dimension(1) - 1) * stride_y + inner_border_top + 1;
+    // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
+    unsigned int      padx            = 0;
+    unsigned int      pady            = 0;
+    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, inner_border_right, inner_border_top, out_dims, padx, pady);
 
-    // Find the padding needed for the convolution with stride 1 in order to match output shape
-    unsigned int padx = out_dims.first - (out_x - weights->info()->dimension(0) + 1);
-    unsigned int pady = out_dims.second - (out_y - weights->info()->dimension(1) + 1);
-    out_x += padx;
-    out_y += pady;
-
-    TensorShape scale_out_shape(input->info()->tensor_shape());
-    scale_out_shape.set(0, out_x);
-    scale_out_shape.set(1, out_y);
     TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
     _scaled_output.allocator()->init(scale_out_info);
 

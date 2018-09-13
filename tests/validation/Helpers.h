@@ -231,6 +231,14 @@ void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinate
  */
 template <typename T>
 void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &shape);
+
+/** Helper function to compute quantized min and max bounds
+ *
+ * @param[in] quant_info Quantization info to be used for conversion
+ * @param[in] min        Floating point minimum value to be quantized
+ * @param[in] max        Floating point maximum value to be quantized
+ */
+std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

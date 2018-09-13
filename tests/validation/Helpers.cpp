@@ -302,6 +302,15 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
     }
 }
 
+std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
+
+    const int min_bound = quant_info.quantize(min, RoundingPolicy::TO_NEAREST_UP);
+    const int max_bound = quant_info.quantize(max, RoundingPolicy::TO_NEAREST_UP);
+    return std::pair<int, int>(min_bound, max_bound);
+}
+
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<half> &in, SimpleTensor<half> &roi, const Coordinates &coord);
 template void zeros(SimpleTensor<float> &in, const Coordinates &anchor, const TensorShape &shape);

@@ -229,24 +229,47 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     return output_shape;
 }
 
-inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top,
-                                               std::pair<unsigned int, unsigned int> &out_dims)
+inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy, unsigned int inner_border_right,
+                                                         unsigned int inner_border_top,
+                                                         std::pair<unsigned int, unsigned int> &out_dims, unsigned int &padx, unsigned int &pady)
 {
+    const DataLayout data_layout = input.data_layout();
+    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
     // Find the upsampled dimensions
-    unsigned int out_x = (input.dimension(0) - 1) * sx + inner_border_right + 1;
-    unsigned int out_y = (input.dimension(1) - 1) * sy + inner_border_top + 1;
+    unsigned int out_x = (input.dimension(idx_w) - 1) * sx + inner_border_right + 1;
+    unsigned int out_y = (input.dimension(idx_h) - 1) * sy + inner_border_top + 1;
 
     // Find the padding needed for the convolution with stride 1 in order to match output shape
-    unsigned int padx = out_dims.first - (out_x - weights.dimension(0) + 1);
-    unsigned int pady = out_dims.second - (out_y - weights.dimension(1) + 1);
+    padx = out_dims.first - (out_x - weights.dimension(idx_w) + 1);
+    pady = out_dims.second - (out_y - weights.dimension(idx_h) + 1);
     out_x += padx;
     out_y += pady;
 
     TensorShape scale_out_shape(input.tensor_shape());
-    scale_out_shape.set(0, out_x);
-    scale_out_shape.set(1, out_y);
+    scale_out_shape.set(idx_w, out_x);
+    scale_out_shape.set(idx_h, out_y);
 
     return scale_out_shape;
+}
+
+inline TensorShape compute_deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, const ITensorInfo &input, const ITensorInfo &weights)
+{
+    const TensorShape input_shape{ input.tensor_shape() };
+    const TensorShape weights_shape{ weights.tensor_shape() };
+
+    const DataLayout data_layout = input.data_layout();
+    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const int        batch_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+
+    TensorShape out_shape{ input_shape };
+    out_shape.set(width_idx, out_dims.first);
+    out_shape.set(height_idx, out_dims.second);
+    out_shape.set(channel_idx, weights_shape[batch_idx]);
+    return out_shape;
 }
 
 inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,

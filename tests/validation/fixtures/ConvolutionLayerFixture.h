@@ -77,7 +77,8 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint8_t> distribution(0, 3);
+                std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
             }

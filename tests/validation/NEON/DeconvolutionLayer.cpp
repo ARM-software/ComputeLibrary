@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
@@ -53,6 +54,7 @@ const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
 
+const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -68,7 +70,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
     const TensorShape  weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
     const TensorShape  bias_shape(num_kernels);
     auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 1, 1);
-    TensorShape        output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
+    TensorShape        output_shape = compute_deconvolution_output_shape(out_dim, TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type));
 
     // Create tensors
     Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1);
@@ -172,7 +174,7 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 TEST_SUITE(W4x4)
 
-FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::ALL, combine(data4x4, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::ALL, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -181,7 +183,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(W3x3)
 
-FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(data3x3, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
@@ -189,7 +191,7 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture3x3<float>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::ALL, combine(data1x1, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::ALL, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);

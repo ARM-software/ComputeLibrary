@@ -53,7 +53,7 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to flip. Data types supported: QASYMM8/F16/F32
+     * @param[in]  input  The input tensor to flip. Data types supported: QASYMM8/F16/F32. Data layouts supported: NCHW/NHWC.
      * @param[out] output The output tensor. Data types supported: Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
@@ -64,17 +64,15 @@ public:
     /** Function to perform flipping.
      *
      * @param[in] window_input Input region on which to execute the kernel.
-     * @param[in] window       Output region on which to execute the kernel.
      */
     template <typename T>
-    void flip_weights(const Window &window_input, const Window &window);
+    void flip_weights(const Window &window_input);
 
     /** Common signature for all the specialised Flip functions
      *
      * @param[in] window_input Input region on which to execute the kernel.
-     * @param[in] window       Output region on which to execute the kernel.
      */
-    using FlipWeightsFunction = void (CPPFlipWeightsKernel::*)(const Window &window_input, const Window &window);
+    using FlipWeightsFunction = void (CPPFlipWeightsKernel::*)(const Window &window_input);
 
 private:
     const ITensor      *_input;
