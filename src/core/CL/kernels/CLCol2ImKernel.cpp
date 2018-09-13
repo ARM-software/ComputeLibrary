@@ -106,7 +106,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.width));
-    build_opts.add_option_if(num_groups > 1, "-DGROUPING");
+    build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts.options()));
 
@@ -143,22 +143,26 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
+    bool is_collapsed     = false;
+    bool is_collapsed_out = false;
+
     Window out_window;
     out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
-    Window slice     = window.first_slice_window_3D();
-    Window slice_out = out_window.first_slice_window_3D();
+    Window collapsed     = window.collapse_if_possible(ICLKernel::window(), Window::DimZ, &is_collapsed);
+    Window collapsed_out = out_window.collapse_if_possible(out_window, 3, &is_collapsed_out);
 
-    unsigned int idx = 2 * num_arguments_per_3D_tensor();
-    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
+    ARM_COMPUTE_ERROR_ON(is_collapsed != is_collapsed_out);
 
+    Window slice     = collapsed.first_slice_window_3D();
+    Window slice_out = collapsed_out.first_slice_window_4D();
     do
     {
         // Set inputs
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice_out);
+        add_4D_tensor_argument(idx, _output, slice_out);
         enqueue(queue, *this, slice, lws_hint());
     }
-    while(window.slide_window_slice_3D(slice) && out_window.slide_window_slice_3D(slice_out));
+    while(collapsed.slide_window_slice_3D(slice) && collapsed_out.slide_window_slice_4D(slice_out));
 }

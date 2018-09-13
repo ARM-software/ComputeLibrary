@@ -168,7 +168,8 @@ void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
+    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    Window slice     = collapsed.first_slice_window_3D();
 
     do
     {
@@ -176,5 +177,5 @@ void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _tensor, slice);
         enqueue(queue, *this, slice, cl::NullRange);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(collapsed.slide_window_slice_3D(slice));
 }

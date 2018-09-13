@@ -225,8 +225,17 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     _conv_pad_top  = conv_info.pad_top();
     _border_size   = BorderSize(_conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), _conv_pad_left);
 
+    // Configure kernel window
+    std::string     kernel_name;
+    const GPUTarget gpu_target = get_target();
+
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure_internal(win_config.second);
+
     // Set build options
     CLBuildOptions build_opts;
+    build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(_output->info()->tensor_shape().z()));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -273,15 +282,6 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
             }
         }
     }
-
-    // Configure kernel window
-    std::string     kernel_name;
-    const GPUTarget gpu_target = get_target();
-
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure_internal(win_config.second);
-
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set config_id for enabling LWS tuning
@@ -316,15 +316,17 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::Com
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    // Create input window and adjust
-    Window win_in = window;
-    win_in.adjust(Window::DimX, -_conv_pad_left, true);
-    win_in.adjust(Window::DimY, -_conv_pad_top, true);
-    win_in.set_dimension_step(Window::DimX, window.x().step() * _conv_stride_x);
-    win_in.set_dimension_step(Window::DimY, window.y().step() * _conv_stride_y);
+    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
 
-    Window slice_in      = win_in.first_slice_window_3D();
-    Window slice_out     = window.first_slice_window_3D();
+    // Create input window and adjust
+    Window collapsed_in = collapsed;
+    collapsed_in.adjust(Window::DimX, -_conv_pad_left, true);
+    collapsed_in.adjust(Window::DimY, -_conv_pad_top, true);
+    collapsed_in.set_dimension_step(Window::DimX, collapsed_in.x().step() * _conv_stride_x);
+    collapsed_in.set_dimension_step(Window::DimY, collapsed_in.y().step() * _conv_stride_y);
+
+    Window slice_in      = collapsed_in.first_slice_window_3D();
+    Window slice_out     = collapsed.first_slice_window_3D();
     Window slice_weights = window.first_slice_window_3D();
     slice_weights.set_dimension_step(Window::DimX, 0);
     slice_weights.set_dimension_step(Window::DimY, 0);
@@ -347,5 +349,5 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::Com
 
         enqueue(queue, *this, slice_out, lws_hint());
     }
-    while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
+    while(collapsed.slide_window_slice_3D(slice_out) && collapsed_in.slide_window_slice_3D(slice_in));
 }

@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 
-#if defined(DEPTH_MULTIPLIER)
+#if defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
 #if defined(CONV_STRIDE_X)
 
 #if CONV_STRIDE_X == 1
@@ -188,23 +188,28 @@ __kernel void depthwise_convolution_3x3(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 #if defined(HAS_BIAS)
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif //defined(HAS_BIAS)
 
-    src.ptr -= (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Extract channel and linearized batch indices
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
+    // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
     uchar3 offset          = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
-    float3 weights_values0 = vload3(0, (__global float *)(weights.ptr + offset.s0));
-    float3 weights_values1 = vload3(0, (__global float *)(weights.ptr + offset.s1));
-    float3 weights_values2 = vload3(0, (__global float *)(weights.ptr + offset.s2));
+    float3 weights_values0 = vload3(0, (__global float *)(weights_addr + offset.s0));
+    float3 weights_values1 = vload3(0, (__global float *)(weights_addr + offset.s1));
+    float3 weights_values2 = vload3(0, (__global float *)(weights_addr + offset.s2));
 
     float2 pixels = convolution3x3(&src, weights_values0.s0, weights_values0.s1, weights_values0.s2,
                                    weights_values1.s0, weights_values1.s1, weights_values1.s2,
                                    weights_values2.s0, weights_values2.s1, weights_values2.s2);
 #if defined(HAS_BIAS)
-    pixels += (float2)(*((__global float *)(biases.ptr + get_global_id(2) * biases_stride_x)));
+    pixels += (float2)(*((__global float *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
     vstore2(pixels, 0, (__global float *)dst.ptr);
@@ -307,15 +312,19 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
     float2 pixels0 = 0.0f;
     float2 pixels1 = 0.0f;
     float2 pixels2 = 0.0f;
     float2 pixels3 = 0.0f;
 
-    __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = src.ptr - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Extract channel and linearized batch indices
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
+    // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
+    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -346,7 +355,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    float bias = *((__global float *)(vector_offset(&biases, get_global_id(2))));
+    float bias = *((__global float *)(vector_offset(&biases, channel)));
 
     pixels0 += (float2)bias;
     pixels1 += (float2)bias;
@@ -404,13 +413,17 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 
     float2 pixels0 = 0.0f;
     float2 pixels1 = 0.0f;
 
-    __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = src.ptr - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Extract channel and linearized batch indices
+    const int channel            = get_global_id(2) % DST_CHANNELS;
+    const int batch              = get_global_id(2) / DST_CHANNELS;
+    // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
+    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -439,7 +452,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    float bias = *((__global float *)(vector_offset(&biases, get_global_id(2))));
+    float bias = *((__global float *)(vector_offset(&biases, channel)));
 
     pixels0 += (float2)bias;
     pixels1 += (float2)bias;
@@ -449,7 +462,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     vstore2(pixels1, 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
 }
 
-#endif // defined(DEPTH_MULTIPLIER)
+#endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
 
 #if defined(NCHW)
 #define in_stride_x src_stride_x
@@ -617,7 +630,7 @@ __kernel void depthwise_vector_to_tensor(
 
 #endif //defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 
-#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER)
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
 #if defined(CONV_STRIDE_X)
 #if CONV_STRIDE_X == 1
 #define convolution1x3_f16 convolution1x3_stride_1_f16
@@ -781,23 +794,28 @@ __kernel void depthwise_convolution_3x3_f16(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
 #if defined(HAS_BIAS)
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif //defined(HAS_BIAS)
 
-    src.ptr -= (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Extract channel and linearized batch indices
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
+    // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    src.ptr -= batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z + (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
 
     uchar3 offset         = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
-    half3 weights_values0 = vload3(0, (__global half *)(weights.ptr + offset.s0));
-    half3 weights_values1 = vload3(0, (__global half *)(weights.ptr + offset.s1));
-    half3 weights_values2 = vload3(0, (__global half *)(weights.ptr + offset.s2));
+    half3 weights_values0 = vload3(0, (__global half *)(weights_addr + offset.s0));
+    half3 weights_values1 = vload3(0, (__global half *)(weights_addr + offset.s1));
+    half3 weights_values2 = vload3(0, (__global half *)(weights_addr + offset.s2));
 
     half4 pixels = convolution3x3_f16(&src, weights_values0.s0, weights_values0.s1, weights_values0.s2,
                                       weights_values1.s0, weights_values1.s1, weights_values1.s2,
                                       weights_values2.s0, weights_values2.s1, weights_values2.s2);
 #if defined(HAS_BIAS)
-    pixels += (half4)(*((__global half *)(biases.ptr + get_global_id(2) * biases_stride_x)));
+    pixels += (half4)(*((__global half *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
     vstore4(pixels, 0, (__global half *)dst.ptr);
@@ -849,12 +867,16 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
+
+    // Extract channel and linearized batch indices
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
 
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    half bias = *((__global half *)(vector_offset(&biases, get_global_id(2))));
+    half bias = *((__global half *)(vector_offset(&biases, channel)));
 #endif /* defined(HAS_BIAS) */
 
     half4 pixels0 = 0.0f;
@@ -862,8 +884,9 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     half4 pixels2 = 0.0f;
     half4 pixels3 = 0.0f;
 
-    __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
+    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -948,19 +971,24 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
 {
     Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
     Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
-    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(weights);
+
+    // Extract channel and linearized batch indices
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
 
 #ifdef HAS_BIAS
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    half bias = *((__global half *)(vector_offset(&biases, get_global_id(2))));
+    half bias = *((__global half *)(vector_offset(&biases, channel)));
 #endif /* defined(HAS_BIAS) */
 
     half4 pixels0 = 0.0f;
     half4 pixels1 = 0.0f;
 
-    __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+    // Load relevant input and weights data ( Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
+    __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
+    __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
 
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -994,7 +1022,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
     vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
-#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER)
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
 
 #if defined(VEC_SIZE) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT) && defined(DATA_TYPE)
 
