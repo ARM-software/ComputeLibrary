@@ -220,6 +220,19 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
     return os;
 }
 
+/** Formatted output of the ROIPoolingInfo type.
+ *
+ * @param[in] pool_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
+{
+    std::stringstream str;
+    str << pool_info;
+    return str.str();
+}
+
 /** Formatted output of the QuantizationInfo type.
  *
  * @param[out] os                Output stream.

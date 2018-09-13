@@ -808,17 +808,18 @@ private:
 };
 
 /** ROI Pooling Layer Information class */
-class ROIPoolingLayerInfo
+class ROIPoolingLayerInfo final
 {
 public:
-    /** Default Constructor
+    /** Constructor
      *
-     * @param[in] pooled_width  Pooled width of the layer.
-     * @param[in] pooled_height Pooled height of the layer.
-     * @param[in] spatial_scale Spatial scale to be applied to the ROI coordinates and dimensions.
+     * @param[in] pooled_width   Pooled width of the layer.
+     * @param[in] pooled_height  Pooled height of the layer.
+     * @param[in] spatial_scale  Spatial scale to be applied to the ROI coordinates and dimensions.
+     * @param[in] sampling_ratio Number of samples to include in each pooling region (if set to zero, a ceil(roi_dims/pooling_dims))
      */
-    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale)
-        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale)
+    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale, unsigned int sampling_ratio = 0)
+        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale), _sampling_ratio(sampling_ratio)
     {
     }
     /** Get the pooled width of the layer */
@@ -836,11 +837,17 @@ public:
     {
         return _spatial_scale;
     }
+    /** Get sampling ratio */
+    unsigned int sampling_ratio() const
+    {
+        return _sampling_ratio;
+    }
 
 private:
     unsigned int _pooled_width;
     unsigned int _pooled_height;
     float        _spatial_scale;
+    unsigned int _sampling_ratio;
 };
 
 /** Activation Layer Information class */
