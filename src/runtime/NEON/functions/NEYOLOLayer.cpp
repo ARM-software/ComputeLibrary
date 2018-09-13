@@ -21,20 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
-#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#include "arm_compute/runtime/NEON/functions/NEYOLOLayer.h"
 
-#include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/min.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mla.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mul.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/neg.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
+#include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */
+namespace arm_compute
+{
+void NEYOLOLayer::configure(ITensor *input, ITensor *output, const ActivationLayerInfo &act_info, int32_t num_classes)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEYOLOLayerKernel>();
+    k->configure(input, output, act_info, num_classes);
+    _kernel = std::move(k);
+}
+
+Status NEYOLOLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info, int32_t num_classes)
+{
+    return NEYOLOLayerKernel::validate(input, output, act_info, num_classes);
+}
+} // namespace arm_compute

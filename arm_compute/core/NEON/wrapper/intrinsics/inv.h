@@ -21,20 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
-#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#ifndef __ARM_COMPUTE_WRAPPER_INV_H__
+#define __ARM_COMPUTE_WRAPPER_INV_H__
 
-#include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/min.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mla.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mul.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/neg.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
+#include "arm_compute/core/NEON/NEMath.h"
+#include <arm_neon.h>
 
-#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */
+namespace arm_compute
+{
+namespace wrapper
+{
+#define VINV_IMPL(vtype, prefix, postfix) \
+    inline vtype vinv(const vtype &a)     \
+    {                                     \
+        return prefix##_##postfix(a);     \
+    }
+
+VINV_IMPL(float32x2_t, vinv, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VINV_IMPL(float16x4_t, vinv, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+VINV_IMPL(float32x4_t, vinvq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VINV_IMPL(float16x8_t, vinvq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VINV_IMPL
+} // namespace wrapper
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_WRAPPER_INV_H__ */

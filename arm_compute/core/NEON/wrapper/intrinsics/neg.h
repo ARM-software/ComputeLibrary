@@ -21,20 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
-#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#ifndef __ARM_COMPUTE_WRAPPER_NEG_H__
+#define __ARM_COMPUTE_WRAPPER_NEG_H__
 
-#include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/min.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mla.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/mul.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/neg.h"
-#include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
+#include <arm_neon.h>
 
-#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */
+namespace arm_compute
+{
+namespace wrapper
+{
+#define VNEG_IMPL(vtype, postfix)     \
+    inline vtype vneg(const vtype &a) \
+    {                                 \
+        return vneg_##postfix(a);     \
+    }
+
+VNEG_IMPL(int8x8_t, s8)
+VNEG_IMPL(int16x4_t, s16)
+VNEG_IMPL(int32x2_t, s32)
+VNEG_IMPL(float32x2_t, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VNEG_IMPL(float16x4_t, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VNEG_IMPL
+#define VNEGQ_IMPL(vtype, postfix)     \
+    inline vtype vnegq(const vtype &a) \
+    {                                  \
+        return vnegq_##postfix(a);     \
+    }
+
+VNEGQ_IMPL(int8x16_t, s8)
+VNEGQ_IMPL(int16x8_t, s16)
+VNEGQ_IMPL(int32x4_t, s32)
+VNEGQ_IMPL(float32x4_t, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VNEGQ_IMPL(float16x8_t, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VNEGQ_IMPL
+} // namespace wrapper
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_WRAPPER_NEG_H__ */
