@@ -741,6 +741,32 @@ public:
 private:
     float _beta;
 };
+
+/** YOLO Layer */
+class YOLOLayer final : public ILayer
+{
+public:
+    /** Construct a YOLO layer.
+     *
+     * @param[in] act_info    Activation info
+     * @param[in] num_classes Number of classes to activate
+     */
+    YOLOLayer(ActivationLayerInfo act_info, int32_t num_classes)
+        : _act_info(act_info), _num_classes(num_classes)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_yolo_node(s.graph(), common_params, input, _act_info, _num_classes);
+    }
+
+private:
+    ActivationLayerInfo _act_info;
+    int32_t             _num_classes;
+};
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute

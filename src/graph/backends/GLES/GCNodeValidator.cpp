@@ -119,6 +119,8 @@ Status GCNodeValidator::validate(INode *node)
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReorgLayer");
         case NodeType::ReshapeLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReshapeLayer");
+        case NodeType::YOLOLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : YOLOLayer");
         default:
             return Status{};
     }

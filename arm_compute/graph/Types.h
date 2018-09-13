@@ -149,6 +149,7 @@ enum class NodeType
     ResizeLayer,
     SoftmaxLayer,
     SplitLayer,
+    YOLOLayer,
 
     Input,
     Output,

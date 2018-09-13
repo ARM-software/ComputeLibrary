@@ -876,6 +876,46 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
 
     return std::move(func);
 }
+/** Create a backend YOLO layer function
+ *
+ * @tparam YoloLayerFunction Backend YOLO function
+ * @tparam TargetInfo        Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend YOLO layer function
+ */
+template <typename YOLOlayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_yolo_layer(YOLOLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input       = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output      = get_backing_tensor<TargetInfo>(node.output(0));
+    const ActivationLayerInfo        act_info    = node.activation_info();
+    const int32_t                    num_classes = node.num_classes();
+    ARM_COMPUTE_ERROR_ON(num_classes <= 0);
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<YOLOlayerFunction>();
+    func->configure(input, output, act_info, num_classes);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Activation function: " << act_info.activation()
+                               << " Num classes: " << num_classes
+                               << std::endl);
+
+    return std::move(func);
+}
 } // namespace detail
 } // namespace backends
 } // namespace graph

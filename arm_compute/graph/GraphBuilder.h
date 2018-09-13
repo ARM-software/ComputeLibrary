@@ -340,6 +340,17 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
+    /** Adds a yolo layer to the graph
+     *
+     * @param[in] g           Graph to add the node to
+     * @param[in] params      Common node parameters
+     * @param[in] input       Input to the yolo layer node as a NodeID-Index pair
+     * @param[in] act_info    Activation layer parameters
+     * @param[in] num_classes Number of classes to activate
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, int32_t num_classes);
 };
 } // namespace graph
 } // namespace arm_compute

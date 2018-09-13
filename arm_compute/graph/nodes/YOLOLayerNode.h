@@ -21,39 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH_YOLO_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_YOLO_LAYER_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
-class YOLOLayerNode;
+/** YOLO Layer node */
+class YOLOLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] act_info    Activation info
+     * @param[in] num_classes Number of classes to activate
+     */
+    YOLOLayerNode(ActivationLayerInfo act_info, int32_t num_classes);
+    /** Activation metadata accessor
+     *
+     * @return The activation info of the layer
+     */
+    ActivationLayerInfo activation_info() const;
+    /** Number of classes metadata accessor
+     *
+     * @return The number of classes to activate of the layer
+     */
+    int32_t num_classes() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    ActivationLayerInfo _act_info;
+    int32_t             _num_classes;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_YOLO_LAYER_NODE_H__ */
