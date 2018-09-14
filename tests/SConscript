@@ -184,33 +184,34 @@ if test_env['validation_tests']:
 #FIXME: Remove before release!
 if test_env['benchmark_examples']:
     files_benchmark_examples = test_env.Object('benchmark_examples/RunExample.cpp')
-    arm_compute_benchmark_examples = []
-    if test_env['neon']:
-        for file in Glob("../examples/neon_*.cpp"):
-            example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-            arm_compute_benchmark_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples) ]
-    if test_env['opencl']:
-        cl_examples = []
-        files = Glob("../examples/cl_*.cpp")
-        if test_env['neon']:
-            files += Glob("../examples/neoncl_*.cpp")
-        for file in files:
-            example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-            cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples, LIBS = test_env["LIBS"]) ]
-        arm_compute_benchmark_examples += cl_examples
-
-    # Graph examples
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
     graph_params = test_env.Object(source="../utils/CommonGraphOptions.cpp", target="CommonGraphOptions")
-    for file in Glob("../examples/graph_*.cpp"):
-        example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-        if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-            prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
-            arm_compute_benchmark_examples += [ prog ]
-        else:
-            #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
-            prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
-            arm_compute_benchmark_examples += [ prog ]
+    arm_compute_benchmark_examples = []
+    for examples_folder in [ "../examples", "../3rdparty/examples"]:
+        if test_env['neon']:
+            for file in Glob("%s/neon_*.cpp" % examples_folder):
+                example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+                arm_compute_benchmark_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples) ]
+        if test_env['opencl']:
+            cl_examples = []
+            files = Glob("%s/cl_*.cpp" % examples_folder)
+            if test_env['neon']:
+                files += Glob("%s/neoncl_*.cpp" % examples_folder)
+            for file in files:
+                example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+                cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_benchmark_examples, LIBS = test_env["LIBS"]) ]
+            arm_compute_benchmark_examples += cl_examples
+
+        # Graph examples
+        for file in Glob("%s/graph_*.cpp" % examples_folder ):
+            example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
+            if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
+                arm_compute_benchmark_examples += [ prog ]
+            else:
+                #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+                prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+                arm_compute_benchmark_examples += [ prog ]
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)
     Depends(arm_compute_benchmark_examples, arm_compute_lib)
     Default(arm_compute_benchmark_examples)
