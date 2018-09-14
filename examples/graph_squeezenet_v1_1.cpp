@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API */
 class GraphSqueezenet_v1_1Example : public Example
 {
 public:
