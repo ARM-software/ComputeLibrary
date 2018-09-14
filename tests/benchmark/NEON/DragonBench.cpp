@@ -53,8 +53,10 @@ const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 // Common DragonBench parameters
-auto CommonParams = combine(combine(data_types, framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                            framework::dataset::make("HasBias", { true, false }));
+auto CommonParamsNoBias = combine(combine(data_types, framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                  framework::dataset::make("HasBias", { false }));
+auto CommonParamsBias = combine(combine(data_types, framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                framework::dataset::make("HasBias", { true }));
 } // namespace
 
 using NEDragonBenchConv2DFixture = DragonBenchConv2DFixture<Tensor, NEConvolutionLayer, Accessor, Conv2D>;
@@ -66,21 +68,38 @@ TEST_SUITE(Conv2D)
 REGISTER_FIXTURE_DATA_TEST_CASE(SilverWing,
                                 NEDragonBenchConv2DFixture,
                                 framework::DatasetMode::ALL,
-                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(silverwing_cfgs), CommonParams));
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(silverwing_cfgs), CommonParamsNoBias));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SunFyre,
                                 NEDragonBenchConv2DFixture,
                                 framework::DatasetMode::ALL,
-                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(sunfyre_cfgs), CommonParams));
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(sunfyre_cfgs), CommonParamsNoBias));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(Syrax,
                                 NEDragonBenchConv2DFixture,
                                 framework::DatasetMode::ALL,
-                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(syrax_cfgs), CommonParams));
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(syrax_cfgs), CommonParamsNoBias));
 
-TEST_SUITE_END()
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE(Nightly)
+REGISTER_FIXTURE_DATA_TEST_CASE(SilverWing,
+                                NEDragonBenchConv2DFixture,
+                                framework::DatasetMode::NIGHTLY,
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(silverwing_cfgs), CommonParamsBias));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(SunFyre,
+                                NEDragonBenchConv2DFixture,
+                                framework::DatasetMode::NIGHTLY,
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(sunfyre_cfgs), CommonParamsBias));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(Syrax,
+                                NEDragonBenchConv2DFixture,
+                                framework::DatasetMode::NIGHTLY,
+                                combine(datasets::DragonBenchDataset<Conv2D_Configs, Conv2D>(syrax_cfgs), CommonParamsBias));
+TEST_SUITE_END() // Nightly
+
+TEST_SUITE_END() // Conv2D
+TEST_SUITE_END() // DragonBench
+TEST_SUITE_END() // NEON
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
