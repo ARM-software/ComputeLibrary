@@ -118,6 +118,7 @@
 #include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
 #include "arm_compute/core/CL/kernels/CLThresholdKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
+#include "arm_compute/core/CL/kernels/CLUpsampleLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpAffineKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpPerspectiveKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"

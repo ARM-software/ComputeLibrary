@@ -120,6 +120,7 @@
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
 #include "arm_compute/runtime/CL/functions/CLThreshold.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
+#include "arm_compute/runtime/CL/functions/CLUpsampleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWarpAffine.h"
 #include "arm_compute/runtime/CL/functions/CLWarpPerspective.h"
 #include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"

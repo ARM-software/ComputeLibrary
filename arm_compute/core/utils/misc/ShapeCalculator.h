@@ -597,6 +597,21 @@ inline TensorShape compute_padded_shape(const TensorShape &input_shape, const Pa
     return padded_shape;
 }
 
+inline TensorShape compute_upsample_shape(const ITensorInfo &input, const Size2D &info)
+{
+    const DataLayout data_layout = input.data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    TensorShape        scale_out_shape(input.tensor_shape());
+    const unsigned int out_x = input.dimension(idx_width) * info.x();
+    const unsigned int out_y = input.dimension(idx_height) * info.y();
+    scale_out_shape.set(idx_width, out_x);
+    scale_out_shape.set(idx_height, out_y);
+
+    return scale_out_shape;
+}
+
 template <typename T>
 inline TensorShape extract_shape(T *data)
 {
