@@ -40,9 +40,9 @@ class SpaceToBatchLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape, DataType data_type)
+    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape, DataType data_type, DataLayout data_layout)
     {
-        _target    = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type);
+        _target    = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout);
         _reference = compute_reference(input_shape, block_shape_shape, paddings_shape, output_shape, data_type);
     }
 
@@ -59,14 +59,20 @@ protected:
         std::uniform_int_distribution<> distribution(0, 0);
         library->fill(tensor, distribution, i);
     }
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape, const TensorShape &output_shape,
-                              DataType data_type)
+    TensorType compute_target(TensorShape input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape, TensorShape output_shape,
+                              DataType data_type, DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType input       = create_tensor<TensorType>(input_shape, data_type);
+        TensorType input       = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
         TensorType block_shape = create_tensor<TensorType>(block_shape_shape, DataType::S32);
         TensorType paddings    = create_tensor<TensorType>(paddings_shape, DataType::S32);
-        TensorType output      = create_tensor<TensorType>(output_shape, data_type);
+        TensorType output      = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType space_to_batch;
@@ -92,10 +98,11 @@ protected:
         fill(AccessorType(input), 0);
         fill_pad(AccessorType(paddings), 0);
         {
-            auto block_shape_data = AccessorType(block_shape);
+            auto      block_shape_data = AccessorType(block_shape);
+            const int idx_width        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
             for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
             {
-                static_cast<int32_t *>(block_shape_data.data())[i] = input_shape[i] / output_shape[i];
+                static_cast<int32_t *>(block_shape_data.data())[i] = input_shape[i + idx_width] / output_shape[i + idx_width];
             }
         }
         // Compute function

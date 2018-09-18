@@ -124,14 +124,16 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                            DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)),
+                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                          DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -139,14 +141,16 @@ FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<float>, framework::Data
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                           DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Small, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                   DataType::F16)),
+                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
-                                                                                                         DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Large, CLSpaceToBatchLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeSpaceToBatchLayerDataset(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F16)),
+                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

@@ -528,12 +528,12 @@ inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const 
     const DataLayout data_layout = input->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
     TensorShape output_shape{ input->tensor_shape() };
     output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x);
     output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y);
-    output_shape.set(3, input->tensor_shape()[idx_channel] / (block_x * block_y));
+    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
 
     return output_shape;
 }
@@ -566,9 +566,15 @@ inline TensorShape compute_split_shape(const ITensorInfo *input, unsigned int ax
 inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const int block_x, const int block_y, const Size2D &padding_left, const Size2D &padding_right)
 {
     TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(0, input->tensor_shape()[0] * block_x + padding_left.x() + padding_right.x());
-    output_shape.set(1, input->tensor_shape()[1] * block_y + padding_left.y() + padding_right.y());
-    output_shape.set(3, input->tensor_shape()[3] / (block_x * block_y));
+
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+
+    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_x + padding_left.x() + padding_right.x());
+    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_y + padding_left.y() + padding_right.y());
+    output_shape.set(idx_batch, input->tensor_shape()[idx_batch] / (block_x * block_y));
 
     return output_shape;
 }
