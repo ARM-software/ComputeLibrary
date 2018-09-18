@@ -242,7 +242,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             case DataType::F32:
                 if(is_nhwc)
                 {
-                    num_elems_processed_per_iteration = std::max(4, ceil_to_multiple<int>(input->dimension(0), 2));
+                    num_elems_processed_per_iteration = 4;
                     break;
                 }
                 switch(pool_size_x)
