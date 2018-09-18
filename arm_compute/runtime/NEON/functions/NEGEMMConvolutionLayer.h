@@ -188,7 +188,6 @@ private:
     NECol2ImKernel                                      _col2im_kernel;
     NEActivationLayer                                   _activationlayer_function;
     NEArithmeticAdditionKernel                          _add_bias_kernel;
-    NEReshapeLayer                                      _reshape_layer;
 
     const ITensor *_original_weights;
 
@@ -206,5 +205,5 @@ private:
     bool _is_activationlayer_enabled;
     bool _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

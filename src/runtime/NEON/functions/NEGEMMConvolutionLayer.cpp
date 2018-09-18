@@ -90,8 +90,8 @@ void NEConvolutionLayerReshapeWeights::run()
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _activationlayer_function(),
-      _add_bias_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false),
-      _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
+      _add_bias_kernel(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _skip_im2col(false),
+      _skip_col2im(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
@@ -265,7 +265,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         const DataType gemm_data_type = _is_quantized ? DataType::S32 : data_type;
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
-        info_gemm.set_quantization_info(output->info()->quantization_info());
+        info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
 
@@ -284,33 +284,29 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Configure output stage for quantized case
     if(_is_quantized)
     {
+        const bool             skip_reshape      = data_layout == DataLayout::NHWC;
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
 
         float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-        _memory_group.manage(&_tmp_output);
-        gemm_output_staged_to_use = &_tmp_output;
+        if(!skip_reshape)
+        {
+            _memory_group.manage(&_tmp_output);
+            gemm_output_staged_to_use = &_tmp_output;
+        }
 
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset);
+        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, 0, 0, skip_reshape ? conv_h : 1);
     }
 
-    if(!_skip_col2im)
+    if(!_skip_col2im && _data_layout == DataLayout::NCHW)
     {
-        if(_data_layout == DataLayout::NCHW)
-        {
-            // Configure col2im
-            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h));
-        }
-        else
-        {
-            // Configure reshape layer
-            _reshape_layer.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output);
-        }
+        // Configure col2im
+        _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h));
     }
 
-    if(_is_quantized)
+    if(_is_quantized && data_layout == DataLayout::NCHW)
     {
         _tmp_output.allocator()->allocate();
     }
@@ -452,7 +448,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type);
-        info_gemm.set_quantization_info(output->quantization_info());
+        info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
 
         gemm_output_to_use = &info_gemm;
     }
@@ -461,16 +457,20 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     if(is_quantized)
     {
-        float multiplier = input->quantization_info().scale * weights_to_use->quantization_info().scale / output->quantization_info().scale;
-        int   output_multiplier, output_shift;
+        const bool  skip_reshape = data_layout == DataLayout::NHWC;
+        const float multiplier   = input->quantization_info().scale * weights_to_use->quantization_info().scale / output->quantization_info().scale;
+        int         output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-        tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
-        tmp_info.set_quantization_info(output->quantization_info());
-        gemm_output_staged_to_use = &tmp_info;
+        if(!skip_reshape)
+        {
+            tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
+            tmp_info.set_quantization_info(output->quantization_info());
+            gemm_output_staged_to_use = &tmp_info;
+        }
 
         // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, output->quantization_info().offset);
+        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, 0, 0, skip_reshape ? conv_h : 1);
     }
 
     // Validate Col2Im/ReshapeLayer
@@ -524,16 +524,9 @@ void NEGEMMConvolutionLayer::run()
     }
 
     // Reshape output matrix
-    if(!_skip_col2im)
+    if(!_skip_col2im && _data_layout == DataLayout::NCHW)
     {
-        if(_data_layout == DataLayout::NCHW)
-        {
-            NEScheduler::get().schedule(&_col2im_kernel, Window::DimY);
-        }
-        else
-        {
-            _reshape_layer.run();
-        }
+        NEScheduler::get().schedule(&_col2im_kernel, Window::DimY);
     }
 
     if(_is_activationlayer_enabled)

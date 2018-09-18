@@ -513,6 +513,21 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
     return output_shape;
 }
 
+inline TensorShape compute_output_stage_shape(const ITensorInfo &input, unsigned int gemm_3d_depth = 1)
+{
+    ARM_COMPUTE_ERROR_ON(input.data_layout() != DataLayout::NHWC && gemm_3d_depth > 1);
+
+    TensorShape output_shape = input.tensor_shape();
+    if(gemm_3d_depth > 1)
+    {
+        output_shape.set(0, input.tensor_shape().x());
+        output_shape.set(1, input.tensor_shape().y() / gemm_3d_depth);
+        output_shape.set(2, gemm_3d_depth);
+    }
+
+    return output_shape;
+}
+
 inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
                                                const Coordinates &starts, const Coordinates &ends, const Coordinates &strides,
                                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
