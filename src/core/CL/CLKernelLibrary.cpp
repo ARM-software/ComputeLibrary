@@ -332,6 +332,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "permute_3201", "permute.cl" },
     { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
     { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
+    { "pixelwise_mul_quantized", "pixelwise_mul_int.cl" },
     { "pooling_layer_2", "pooling_layer.cl" },
     { "pooling_layer_3", "pooling_layer.cl" },
     { "pooling_layer_optimized_3", "pooling_layer.cl" },
