@@ -235,7 +235,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 } //namespace
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _asm_glue(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
+    : _memory_group(memory_manager), _gemm_function(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
       _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
       _is_prepared(false), _is_activationlayer_enabled(false)
 {
@@ -484,8 +484,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     }
 
     _weights_hwio.allocator()->allocate();
-
-    _asm_glue.configure(&_input_workspace, &_kernel_storage, &_output_workspace, 1.0f, 0.f, false);
+    _gemm_function.configure(&_input_workspace, &_kernel_storage, nullptr, &_output_workspace, 1.0f, 0.f);
     _input_workspace.allocator()->allocate();
     _kernel_storage.allocator()->allocate();
     _output_workspace.allocator()->allocate();
@@ -525,7 +524,7 @@ void NEWinogradConvolutionLayer::run()
     NEScheduler::get().schedule(_transform_input_kernel.get(), Window::DimX);
 
     //Run 16 GEMMs in multiple threads, each kernel runs one or more GEMMs
-    _asm_glue.run();
+    _gemm_function.run();
     // Transform output tensor to the spatial domain
     NEScheduler::get().schedule(_transform_output_kernel.get(), Window::DimX);
 

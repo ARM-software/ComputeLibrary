@@ -31,7 +31,8 @@
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
+
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -103,7 +104,7 @@ public:
 
 private:
     MemoryGroup                _memory_group;
-    NEGEMMAssemblyDispatch     _asm_glue;
+    NEGEMM                     _gemm_function;
     std::unique_ptr<INEKernel> _transform_input_kernel;
     std::unique_ptr<INEKernel> _transform_output_kernel;
     std::unique_ptr<INEKernel> _transform_weights_kernel;
