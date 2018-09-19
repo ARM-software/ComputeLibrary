@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CPPFUNCTIONS_H__
 
 /* Header regrouping all the CPP functions */
+#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 

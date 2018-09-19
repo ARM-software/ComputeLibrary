@@ -574,6 +574,82 @@ enum class PoolingType
     L2   /**< L2 Pooling */
 };
 
+/** Available non maxima suppression types */
+enum class NMSType
+{
+    LINEAR,   /**< Linear NMS */
+    GAUSSIAN, /**< Gaussian NMS */
+    ORIGINAL  /**< Original NMS */
+};
+
+/** BoxWithNonMaximaSuppressionLimit Information class */
+class BoxNMSLimitInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] score_thresh             (Optional) Score threshold.
+     * @param[in] nms                      (Optional) NMS value
+     * @param[in] detections               (Optional) Number of detections
+     * @param[in] soft_nms_enabled         (Optional) Enable SoftNMS
+     * @param[in] soft_nms_method          (Optional) Soft NMS method
+     * @param[in] soft_nms_sigma           (Optional) Soft NMS sigma value
+     * @param[in] soft_nms_min_score_thres (Optional) Soft NMS minimum score threshold
+     */
+    BoxNMSLimitInfo(float score_thresh = 0.05f, float nms = 0.3f,
+                    int detections = 100, bool soft_nms_enabled = false,
+                    NMSType soft_nms_method = NMSType::LINEAR,
+                    float soft_nms_sigma = 0.5f, float soft_nms_min_score_thres = 0.001f)
+        : _score_thresh(score_thresh), _nms(nms), _detections_per_im(detections), _soft_nms_enabled(soft_nms_enabled), _soft_nms_method(soft_nms_method), _soft_nms_sigma(soft_nms_sigma),
+          _soft_nms_min_score_thres(soft_nms_min_score_thres)
+    {
+    }
+    /** Get the score threshold */
+    float score_thresh() const
+    {
+        return _score_thresh;
+    }
+    /** Get the NMS */
+    float nms() const
+    {
+        return _nms;
+    }
+    /** Get the number of detections */
+    int detections_per_im() const
+    {
+        return _detections_per_im;
+    }
+    /** Check if soft NMS is enabled */
+    bool soft_nms_enabled() const
+    {
+        return _soft_nms_enabled;
+    }
+    /** Get soft NMS method */
+    NMSType soft_nms_method() const
+    {
+        return _soft_nms_method;
+    }
+    /** Get soft NMS sigma */
+    float soft_nms_sigma() const
+    {
+        return _soft_nms_sigma;
+    }
+    /** Get soft nms min score threshold */
+    float soft_nms_min_score_thres() const
+    {
+        return _soft_nms_min_score_thres;
+    }
+
+private:
+    float   _score_thresh;
+    float   _nms;
+    int     _detections_per_im;
+    bool    _soft_nms_enabled;
+    NMSType _soft_nms_method;
+    float   _soft_nms_sigma;
+    float   _soft_nms_min_score_thres;
+};
+
 /** Padding and stride information class */
 class PadStrideInfo
 {

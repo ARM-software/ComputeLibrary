@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPKERNELS_H__
-#define __ARM_COMPUTE_CPPKERNELS_H__
+#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
 
-/* Header regrouping all the CPP kernels */
 #include "arm_compute/core/CPP/kernels/CPPBoxWithNonMaximaSuppressionLimitKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPCornerCandidatesKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
-#include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
+#include "support/ToolchainSupport.h"
 
-#endif /* __ARM_COMPUTE_CPPKERNELS_H__ */
+using namespace arm_compute;
+
+void CPPBoxWithNonMaximaSuppressionLimit::configure(const ITensor *scores_in, const ITensor *boxes_in, const ITensor *batch_splits_in, ITensor *scores_out, ITensor *boxes_out, ITensor *classes,
+                                                    ITensor *batch_splits_out, ITensor *keeps, ITensor *keeps_size, const BoxNMSLimitInfo info)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CPPBoxWithNonMaximaSuppressionLimitKernel>();
+    k->configure(scores_in, boxes_in, batch_splits_in, scores_out, boxes_out, classes, batch_splits_out, keeps, keeps_size, info);
+    _kernel = std::move(k);
+}
