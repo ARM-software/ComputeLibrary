@@ -122,6 +122,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::SplitLayer:
             os << "SplitLayer";
             break;
+        case NodeType::UpsampleLayer:
+            os << "UpsampleLayer";
+            break;
         case NodeType::YOLOLayer:
             os << "YOLOLayer";
             break;

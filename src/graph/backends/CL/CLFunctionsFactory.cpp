@@ -117,6 +117,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_slice_layer<CLSlice, CLTargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<CLSoftmaxLayer, CLTargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+        case NodeType::UpsampleLayer:
+            return detail::create_upsample_layer<CLUpsampleLayer, CLTargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
         case NodeType::YOLOLayer:
             return detail::create_yolo_layer<CLYOLOLayer, CLTargetInfo>(*polymorphic_downcast<YOLOLayerNode *>(node), ctx);
         default:

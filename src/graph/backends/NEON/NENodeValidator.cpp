@@ -65,6 +65,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_reorg_layer<NEReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::SliceLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::UpsampleLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : UpsampleLayer");
         case NodeType::YOLOLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : YOLOLayer");
         default:

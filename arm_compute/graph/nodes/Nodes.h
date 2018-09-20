@@ -48,6 +48,7 @@
 #include "arm_compute/graph/nodes/SliceLayerNode.h"
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
+#include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"
 
 #endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */

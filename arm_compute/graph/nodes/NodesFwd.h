@@ -54,6 +54,7 @@ class ResizeLayerNode;
 class SoftmaxLayerNode;
 class SliceLayerNode;
 class SplitLayerNode;
+class UpsampleLayerNode;
 class YOLOLayerNode;
 } // namespace graph
 } // namespace arm_compute

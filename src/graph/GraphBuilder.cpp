@@ -519,6 +519,11 @@ NodeID GraphBuilder::add_split_node(Graph &g, NodeParams params, NodeIdxPair inp
     return create_simple_single_input_output_node<SplitLayerNode>(g, params, input, num_splits, axis);
 }
 
+NodeID GraphBuilder::add_upsample_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D info, InterpolationPolicy upsampling_policy)
+{
+    return create_simple_single_input_output_node<UpsampleLayerNode>(g, params, input, info, upsampling_policy);
+}
+
 NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, int32_t num_classes)
 {
     return create_simple_single_input_output_node<YOLOLayerNode>(g, params, input, act_info, num_classes);

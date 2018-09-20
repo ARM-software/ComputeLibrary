@@ -150,6 +150,7 @@ enum class NodeType
     SoftmaxLayer,
     SliceLayer,
     SplitLayer,
+    UpsampleLayer,
     YOLOLayer,
 
     Input,

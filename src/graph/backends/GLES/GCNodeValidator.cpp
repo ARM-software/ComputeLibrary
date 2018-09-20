@@ -121,6 +121,8 @@ Status GCNodeValidator::validate(INode *node)
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReshapeLayer");
         case NodeType::SliceLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::UpsampleLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : UpsampleLayer");
         case NodeType::YOLOLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : YOLOLayer");
         default:
