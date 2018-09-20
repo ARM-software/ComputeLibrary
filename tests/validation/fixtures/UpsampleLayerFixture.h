@@ -45,12 +45,12 @@ class UpsampleLayerFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape input_shape, DataType data_type, DataLayout data_layout,
-               Size2D info, const InterpolationPolicy &upsampling_policy)
+               Size2D info, const InterpolationPolicy &policy)
     {
         _data_type = data_type;
 
-        _target    = compute_target(input_shape, info, upsampling_policy, data_type, data_layout);
-        _reference = compute_reference(input_shape, info, upsampling_policy, data_type);
+        _target    = compute_target(input_shape, info, policy, data_type, data_layout);
+        _reference = compute_reference(input_shape, info, policy, data_type);
     }
 
 protected:
@@ -61,7 +61,7 @@ protected:
     }
 
     TensorType compute_target(TensorShape   input_shape,
-                              const Size2D &info, const InterpolationPolicy &upsampling_policy, DataType data_type, DataLayout data_layout)
+                              const Size2D &info, const InterpolationPolicy &policy, DataType data_type, DataLayout data_layout)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -74,7 +74,7 @@ protected:
 
         // Create and configure function
         FunctionType upsample;
-        upsample.configure(&src, &dst, info, upsampling_policy);
+        upsample.configure(&src, &dst, info, policy);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -96,7 +96,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape,
-                                      const Size2D &info, const InterpolationPolicy &upsampling_policy, DataType data_type)
+                                      const Size2D &info, const InterpolationPolicy &policy, DataType data_type)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type };
@@ -104,7 +104,7 @@ protected:
         // Fill reference
         fill(src, 0);
 
-        return reference::upsample_layer<T>(src, info, upsampling_policy);
+        return reference::upsample_layer<T>(src, info, policy);
     }
 
     TensorType      _target{};

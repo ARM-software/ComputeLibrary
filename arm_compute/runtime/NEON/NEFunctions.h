@@ -115,6 +115,7 @@
 #include "arm_compute/runtime/NEON/functions/NETableLookup.h"
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
+#include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
 #include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"

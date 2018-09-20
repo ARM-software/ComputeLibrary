@@ -35,10 +35,10 @@ namespace reference
 {
 template <typename T>
 SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src,
-                               const Size2D &info, const InterpolationPolicy upsampling_policy)
+                               const Size2D &info, const InterpolationPolicy policy)
 {
-    ARM_COMPUTE_ERROR_ON(upsampling_policy != InterpolationPolicy::NEAREST_NEIGHBOR);
-    ARM_COMPUTE_UNUSED(upsampling_policy);
+    ARM_COMPUTE_ERROR_ON(policy != InterpolationPolicy::NEAREST_NEIGHBOR);
+    ARM_COMPUTE_UNUSED(policy);
 
     TensorShape output_shape = src.shape();
     output_shape.set(0, src.shape().x() * info.x());
@@ -77,9 +77,11 @@ SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src,
 }
 
 template SimpleTensor<float> upsample_layer(const SimpleTensor<float> &src,
-                                            const Size2D &info, const InterpolationPolicy upsampling_policy);
+                                            const Size2D &info, const InterpolationPolicy policy);
 template SimpleTensor<half> upsample_layer(const SimpleTensor<half> &src,
-                                           const Size2D &info, const InterpolationPolicy upsampling_policy);
+                                           const Size2D &info, const InterpolationPolicy policy);
+template SimpleTensor<uint8_t> upsample_layer(const SimpleTensor<uint8_t> &src,
+                                              const Size2D &info, const InterpolationPolicy policy);
 } // namespace reference
 } // namespace validation
 } // namespace test

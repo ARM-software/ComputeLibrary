@@ -21,25 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_UPSAMPLE_LAYER_H__
-#define __ARM_COMPUTE_TEST_UPSAMPLE_LAYER_H__
+#include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include "arm_compute/core/NEON/kernels/NEUpsampleLayerKernel.h"
 
 namespace arm_compute
 {
-namespace test
+NEUpsampleLayer::NEUpsampleLayer()
+    : _kernel(), _data_layout()
 {
-namespace validation
+}
+
+Status NEUpsampleLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &info,
+                                 const InterpolationPolicy &policy)
 {
-namespace reference
+    return NEUpsampleLayerKernel::validate(input, output, info, policy);
+}
+
+void NEUpsampleLayer::configure(const ITensor *input, ITensor *output, const Size2D &info, const InterpolationPolicy &policy)
 {
-template <typename T>
-SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src,
-                               const Size2D &info, const InterpolationPolicy policy);
-} // namespace reference
-} // namespace validation
-} // namespace test
+    _data_layout = input->info()->data_layout();
+    _kernel.configure(input, output, info, policy);
+}
+
+void NEUpsampleLayer::run()
+{
+    const auto win = (_data_layout == DataLayout::NCHW) ? Window::DimZ : Window::DimX;
+    NEScheduler::get().schedule(&_kernel, win);
+}
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_UPSAMPLE_LAYER_H__ */
