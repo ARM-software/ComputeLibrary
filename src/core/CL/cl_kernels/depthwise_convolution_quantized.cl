@@ -138,7 +138,7 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 #if defined(HAS_BIAS)
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 
-    int bias_value = *((__global int *)(vector_offset(&biases, channel));
+    int bias_value = *((__global int *)(vector_offset(&biases, channel)));
 #endif //defined(HAS_BIAS)
 
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
