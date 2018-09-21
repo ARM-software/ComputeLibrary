@@ -271,7 +271,6 @@ private:
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_bias.npy"),
                   PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1))
               .set_name("Logits/Conv2d_1c_1x1");
-        ;
     }
 
     ConcatLayer get_dwsc_node_float(const std::string &data_path, std::string &&param_path,

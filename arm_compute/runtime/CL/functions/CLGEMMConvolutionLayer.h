@@ -91,7 +91,7 @@ private:
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
  * -# @ref CLArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
- * -# @ref CLCol2ImKernel (if NCHW data layout) or @ref CLReshapeLayer (if NHWC with QASYMM8)
+ * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
 {
@@ -187,7 +187,6 @@ private:
     CLCol2ImKernel                                      _col2im_kernel;
     CLActivationLayer                                   _activationlayer_function;
     CLArithmeticAdditionKernel                          _add_bias_kernel;
-    CLReshapeLayer                                      _reshape_layer;
 
     const ICLTensor *_original_weights;
 
@@ -200,6 +199,7 @@ private:
 
     bool _append_bias;
     bool _skip_im2col;
+    bool _skip_col2im;
     bool _is_quantized;
     bool _is_activationlayer_enabled;
     bool _is_prepared;

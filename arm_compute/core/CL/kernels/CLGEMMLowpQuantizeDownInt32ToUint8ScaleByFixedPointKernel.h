@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,21 +67,25 @@ public:
      * @param[in]  min                          (Optional) Min value used to saturate down the output result before converting back to QASYMM8
      * @param[in]  max                          (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
      *                                          Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     * @param[in]  output_3d_depth              (Optional) Depth of output in 3D (Defaults to 1)
      */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift, int min = 0, int max = 0);
+    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
+                   int min = 0, int max = 0, unsigned int output_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel
      *
-     * @param[in] input  Input tensor. Data type supported: S32
-     * @param[in] bias   Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
-     *                   Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
-     * @param[in] output Output tensor. Data type supported: Data type supported: QASYMM8
-     * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8
-     * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     * @param[in] input           Input tensor. Data type supported: S32
+     * @param[in] bias            Biases tensor. Only shared biases supported and it can be a nullptr if the biases addition is not required.
+     *                            Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p input.
+     * @param[in] output          Output tensor. Data type supported: Data type supported: QASYMM8
+     * @param[in] min             (Optional) Min value used to saturate down the output result before converting back to QASYMM8
+     * @param[in] max             (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
+     *                            Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     * @param[in] output_3d_depth (Optional)  Depth of output in 3D (Defaults to 1)
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min = 0, int max = 0);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                           int min = 0, int max = 0, unsigned int output_3d_depth = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -90,7 +94,7 @@ private:
     const ICLTensor *_input;
     const ICLTensor *_bias;
     ICLTensor       *_output;
+    bool             _reinterpret_as_3d;
 };
 } // namespace arm_compute
-
 #endif /* __ARM_COMPUTE_CLGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEBYFIXEDPOINTKERNEL_H__ */

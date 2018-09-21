@@ -92,8 +92,8 @@ void CLConvolutionLayerReshapeWeights::run()
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _activationlayer_function(),
-      _add_bias_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false),
-      _skip_im2col(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
+      _add_bias_kernel(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _skip_im2col(false),
+      _skip_col2im(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
@@ -101,6 +101,9 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), output->info(), gemm_3d_depth, _skip_im2col));
+
+    const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
+                                         gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
 
     if(_is_quantized)
     {
@@ -112,7 +115,7 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
-        _mm_gemmlowp.configure(input, weights, output, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
+        _mm_gemmlowp.configure(input, weights, output, gemm_info);
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(input_quantization_info);
@@ -121,8 +124,7 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
     else
     {
         // Configure matrix multiply function
-        _mm_gemm.configure(input, weights, nullptr, output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, gemm_3d_depth,
-                                                                                 _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */));
+        _mm_gemm.configure(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
     }
 }
 
@@ -130,10 +132,11 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
 
+    const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
+                                         gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
+
     if(is_quantized)
     {
-        const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */);
-
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
         const QuantizationInfo input_quantization_info   = input->quantization_info();
@@ -149,8 +152,6 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     }
     else
     {
-        const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */, gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
-
         // Perform validation step on Matrix multiply function
         return CLGEMM::validate(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
     }
@@ -175,6 +176,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     const DataLayout data_layout = input->info()->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     const int        idx_kernels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
@@ -184,14 +186,14 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
     _data_layout      = data_layout;
-    _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1) && !_is_quantized;
+    _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    _skip_col2im      = data_layout == DataLayout::NHWC;
     _append_bias      = (biases != nullptr) && (!_is_quantized);
 
     // Set the GPU target for im2col and col2im
     _im2col_kernel.set_target(CLScheduler::get().target());
     _col2im_kernel.set_target(CLScheduler::get().target());
 
-    bool             is_nhwc                   = _data_layout == DataLayout::NHWC;
     const ICLTensor *gemm_input_to_use         = input;
     ICLTensor       *gemm_output_to_use        = output;
     ICLTensor       *gemm_output_staged_to_use = output;
@@ -241,18 +243,27 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     }
 
     // Create GEMM output tensor
-    if(!is_nhwc || _is_quantized)
+    if(!_skip_col2im || _is_quantized)
     {
-        // Calculate GEMM output shape
-        TensorShape shape_gemm = _im2col_output.info()->tensor_shape();
-        shape_gemm.set(0, mat_weights_cols);
-        shape_gemm.set(1, conv_w * conv_h);
-
+        TensorShape shape_gemm;
+        if(_skip_col2im)
+        {
+            shape_gemm = input->info()->tensor_shape();
+            shape_gemm.set(idx_width, conv_w);
+            shape_gemm.set(idx_height, conv_h);
+            shape_gemm.set(idx_channel, mat_weights_cols);
+        }
+        else
+        {
+            shape_gemm = _im2col_output.info()->tensor_shape();
+            shape_gemm.set(0, mat_weights_cols);
+            shape_gemm.set(1, conv_w * conv_h);
+        }
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         const DataType gemm_data_type = _is_quantized ? DataType::S32 : data_type;
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
-        info_gemm.set_quantization_info(output->info()->quantization_info());
+        info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
 
@@ -277,30 +288,29 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-        _memory_group.manage(&_tmp_output);
-        gemm_output_staged_to_use = &_tmp_output;
+        if(!_skip_col2im)
+        {
+            _memory_group.manage(&_tmp_output);
+            gemm_output_staged_to_use = &_tmp_output;
+        }
 
         _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset);
     }
 
-    if(!is_nhwc || _is_quantized)
+    if(!_skip_col2im)
     {
-        if(input->info()->data_layout() == DataLayout::NCHW)
-        {
-            // Configure and tune Col2Im
-            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
-            CLScheduler::get().tune_kernel_static(_col2im_kernel);
-        }
-        else
-        {
-            // Configure reshape layer
-            _reshape_layer.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output);
-        }
+        // Configure and tune Col2Im
+        _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
+        CLScheduler::get().tune_kernel_static(_col2im_kernel);
     }
 
-    if(!is_nhwc || _is_quantized)
+    if(!_skip_col2im)
     {
         _tmp_output.allocator()->allocate();
+    }
+
+    if(!_skip_col2im || _is_quantized)
+    {
         _gemm_output.allocator()->allocate();
     }
 
@@ -346,10 +356,10 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const ITensorInfo *gemm_output_staged_to_use = output;
     const ITensorInfo *weights_to_use            = weights;
 
-    const bool is_nhwc      = data_layout == DataLayout::NHWC;
     const bool is_quantized = is_data_type_quantized_asymmetric(data_type);
-    const bool skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1) && !is_quantized;
     const bool append_bias  = (biases != nullptr) && (!is_quantized);
+    const bool skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    const bool skip_col2im  = data_layout == DataLayout::NHWC;
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * num_groups) != input->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -411,19 +421,30 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     // Create GEMM output tensor
-    if(!is_nhwc || is_quantized)
+    if(!skip_col2im || is_quantized)
     {
-        TensorShape shape_gemm = gemm_input_to_use->tensor_shape();
-        shape_gemm.set(0, mat_weights_cols);
-        shape_gemm.set(1, conv_w * conv_h);
         const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
+        TensorShape    shape_gemm;
+        if(skip_col2im)
+        {
+            shape_gemm = input->tensor_shape();
+            shape_gemm.set(idx_width, conv_w);
+            shape_gemm.set(idx_height, conv_h);
+            shape_gemm.set(idx_channel, mat_weights_cols);
+        }
+        else
+        {
+            shape_gemm = gemm_input_to_use->tensor_shape();
+            shape_gemm.set(0, mat_weights_cols);
+            shape_gemm.set(1, conv_w * conv_h);
+        }
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type);
-        info_gemm.set_quantization_info(output->quantization_info());
+        info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
         gemm_output_to_use = &info_gemm;
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, (data_layout == DataLayout::NHWC) ? conv_h : 1, skip_im2col));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, skip_col2im ? conv_h : 1, skip_im2col));
 
     if(is_quantized)
     {
@@ -431,23 +452,22 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-        tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
-        tmp_info.set_quantization_info(output->quantization_info());
-        gemm_output_staged_to_use = &tmp_info;
+        if(!skip_col2im)
+        {
+            tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
+            tmp_info.set_quantization_info(output->quantization_info());
+            gemm_output_staged_to_use = &tmp_info;
+        }
 
         // Validate output stage for quantized case
-        CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, output->quantization_info().offset);
+        CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use);
     }
 
     // Validate Col2Im
-    if(!is_nhwc || is_quantized)
+    if(!skip_col2im)
     {
-        if(input->data_layout() == DataLayout::NCHW)
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
-                                                                 output,
-                                                                 Size2D(conv_w, conv_h), num_groups));
-        }
+        ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output,
+                                                             Size2D(conv_w, conv_h), num_groups));
     }
 
     //Validate Activation Layer
@@ -492,16 +512,9 @@ void CLGEMMConvolutionLayer::run()
     }
 
     // Reshape output matrix
-    if(_data_layout == DataLayout::NCHW || _is_quantized)
+    if(!_skip_col2im)
     {
-        if(_data_layout == DataLayout::NCHW)
-        {
-            CLScheduler::get().enqueue(_col2im_kernel, false);
-        }
-        else
-        {
-            _reshape_layer.run();
-        }
+        CLScheduler::get().enqueue(_col2im_kernel, false);
     }
 
     //Run Activation Layer if enabled

@@ -2222,17 +2222,29 @@ __kernel void gemmlowp_output_stage_quantize_down(TENSOR3D_DECLARATION(src),
  * @param[in]  dst_step_y                           dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                         Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                         Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                           src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination tensor
  */
 __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATION(src),
 #if defined(ADD_BIAS)
                                                              VECTOR_DECLARATION(biases),
 #endif // defined(ADD_BIAS)
+#if defined(DST_HEIGHT)
+                                                             TENSOR4D_DECLARATION(dst))
+#else  // defined(DST_HEIGHT)
                                                              TENSOR3D_DECLARATION(dst))
+#endif // defined(DST_HEIGHT)
 {
     // Compute source and destination addresses
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+#if defined(DST_HEIGHT)
+    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst, 1);
+    dst.ptr += get_global_id(0) * dst_step_x + (get_global_id(1) % DST_HEIGHT) * dst_step_y + (get_global_id(1) / DST_HEIGHT) * dst_step_z + get_global_id(2) * dst_step_w;
+#else  // defined(DST_HEIGHT)
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+#endif // defined(DST_HEIGHT)
+
 #if defined(ADD_BIAS)
     Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
 #endif // defined(ADD_BIAS)

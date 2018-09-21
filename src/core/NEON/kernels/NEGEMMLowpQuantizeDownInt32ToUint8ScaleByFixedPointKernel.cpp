@@ -28,6 +28,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -43,9 +44,8 @@ using namespace arm_compute;
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                          int min, int max, unsigned int gemm_3d_depth)
+                          int min, int max, unsigned int output_3d_depth)
 {
-    ARM_COMPUTE_UNUSED(gemm_3d_depth);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
     ARM_COMPUTE_RETURN_ERROR_ON(min < 0 || min > max);
@@ -60,21 +60,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     if(output->total_size() != 0)
     {
-        const TensorShape ref_shape    = output->tensor_shape();
-        const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input, gemm_3d_depth);
-        // Check in case of mismatching dimensions when permuting, usually in case of 1x1xC input shapes
-        if(output_shape.num_dimensions() != ref_shape.num_dimensions() && ref_shape.num_dimensions() < 4)
-        {
-            for(unsigned int i = output_shape.num_dimensions(); i < ref_shape.num_dimensions(); ++i)
-            {
-                ARM_COMPUTE_RETURN_ERROR_ON(ref_shape[i] != 1);
-            }
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape() != output_shape);
-        }
+        const TensorShape output_shape       = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input, output_3d_depth);
+        const TensorInfo  tensor_info_output = output->clone()->set_tensor_shape(output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
     }
 
     return Status{};
@@ -160,7 +149,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     const int          window_step_x  = 16;
     const auto         window_start_x = static_cast<int>(window.x().start());
     const auto         window_end_x   = static_cast<int>(window.x().end());
-    const unsigned int gemm_3d_height = _input->info()->tensor_shape().y() / _gemm_3d_depth;
+    const unsigned int gemm_3d_height = _input->info()->tensor_shape().y() / _output_3d_depth;
 
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -177,7 +166,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         {
             // Calculate output coordinates
             Coordinates out_coords = id;
-            if(_gemm_3d_depth != 1)
+            if(_output_3d_depth != 1)
             {
                 out_coords.set(Window::DimY, id.y() % gemm_3d_height);
                 out_coords.set(Window::DimZ, id.y() / gemm_3d_height);
@@ -240,10 +229,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         {
             // Calculate output coordinates
             Coordinates out_coords = id;
-            if(_gemm_3d_depth != 1)
+            if(_output_3d_depth != 1)
             {
-                out_coords.set(Window::DimY, id.y() % _gemm_3d_depth);
-                out_coords.set(Window::DimZ, id.y() / _gemm_3d_depth);
+                out_coords.set(Window::DimY, id.y() % _output_3d_depth);
+                out_coords.set(Window::DimZ, id.y() / _output_3d_depth);
                 out_coords.set(3, id.z());
             }
             uint8_t *out_ptr = _output->ptr_to_element(out_coords);
@@ -279,22 +268,22 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
 }
 
 NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0), _min(0), _max(0), _gemm_3d_depth(1)
+    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0), _min(0), _max(0), _output_3d_depth(1)
 {
 }
 
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                          int result_offset_after_shift, int min, int max, unsigned int gemm_3d_depth)
+                                                                          int result_offset_after_shift, int min, int max, unsigned int output_3d_depth)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input->info(), gemm_3d_depth);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input->info(), output_3d_depth);
     auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8).set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
-                                                  min, max, gemm_3d_depth));
+                                                  min, max, output_3d_depth));
 
     _input                        = input;
     _bias                         = bias;
@@ -304,7 +293,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _result_offset_after_shift    = result_offset_after_shift;
     _min                          = min;
     _max                          = max;
-    _gemm_3d_depth                = gemm_3d_depth;
+    _output_3d_depth              = output_3d_depth;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
@@ -316,10 +305,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<false>;
 }
 
-Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max, unsigned int gemm_3d_depth)
+Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max, unsigned int output_3d_depth)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max, gemm_3d_depth));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max, output_3d_depth));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               (bias != nullptr) ? bias->clone().get() : nullptr,
                                                               output->clone().get())

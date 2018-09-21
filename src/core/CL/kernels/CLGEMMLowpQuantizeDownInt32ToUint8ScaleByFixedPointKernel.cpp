@@ -27,9 +27,12 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -38,7 +41,8 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                          int min, int max, unsigned int output_3d_depth)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
@@ -54,8 +58,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     if(output->total_size() != 0)
     {
+        const TensorShape output_shape       = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input, output_3d_depth, true);
+        const TensorInfo  tensor_info_output = output->clone()->set_tensor_shape(output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
     }
 
     return Status{};
@@ -66,7 +72,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
@@ -75,8 +81,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(output->total_size() != 0)
     {
+        Window                 win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
         AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_result_access);
+        window_changed = window_changed || update_window_and_padding(win_out, output_result_access);
 
         output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
@@ -96,14 +103,15 @@ class Coordinates;
 } // namespace arm_compute
 
 CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
-    : _input(nullptr), _bias(nullptr), _output(nullptr)
+    : _input(nullptr), _bias(nullptr), _output(nullptr), _reinterpret_as_3d(false)
 {
 }
 
-Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                                                                           int min, int max, unsigned int output_3d_depth)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max, output_3d_depth));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               (bias != nullptr) ? bias->clone().get() : nullptr,
                                                               output->clone().get())
@@ -112,24 +120,24 @@ Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const
     return Status{};
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                          int result_offset_after_shift, int min, int max)
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                          int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
+                                                                          int min, int max, unsigned int output_3d_depth)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input->info(), output_3d_depth, true);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8).set_tensor_shape(output_shape));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
-                                                  (bias != nullptr) ? bias->info() : nullptr,
-                                                  output->info(),
-                                                  min,
-                                                  max));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
+                                                  min, max, output_3d_depth));
 
-    _input  = input;
-    _bias   = bias;
-    _output = output;
+    _input             = input;
+    _bias              = bias;
+    _output            = output;
+    _reinterpret_as_3d = output_3d_depth > 1;
 
     // Set the arguments to pass at compile time
     CLBuildOptions build_opts;
@@ -139,6 +147,7 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
     build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
+    build_opts.add_option_if(_reinterpret_as_3d, "-DDST_HEIGHT=" + support::cpp11::to_string(input->info()->tensor_shape().y() / output_3d_depth));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_output_stage_quantize_down_fixedpoint", build_opts.options()));
@@ -154,9 +163,11 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    // Create input window
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
 
+    // Setup bias slice
     unsigned int idx1 = num_arguments_per_3D_tensor();
     if(_bias != nullptr)
     {
@@ -166,12 +177,32 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         add_1D_tensor_argument(idx1, _bias, biases_slice);
     }
 
-    do
+    if(_reinterpret_as_3d)
     {
-        unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx1, _output, slice);
-        enqueue(queue, *this, slice);
+        // Create output window
+        Window window_out;
+        window_out.use_tensor_dimensions(_output->info()->tensor_shape());
+        Window collapsed_out = window_out.collapse_if_possible(window_out, 3);
+        Window slice_out     = collapsed.first_slice_window_4D();
+
+        do
+        {
+            unsigned int idx = 0;
+            add_3D_tensor_argument(idx, _input, slice);
+            add_4D_tensor_argument(idx1, _output, slice_out);
+            enqueue(queue, *this, slice);
+        }
+        while(collapsed.slide_window_slice_3D(slice) && collapsed_out.slide_window_slice_4D(slice_out));
     }
-    while(collapsed.slide_window_slice_3D(slice));
+    else
+    {
+        do
+        {
+            unsigned int idx = 0;
+            add_3D_tensor_argument(idx, _input, slice);
+            add_3D_tensor_argument(idx1, _output, slice);
+            enqueue(queue, *this, slice);
+        }
+        while(collapsed.slide_window_slice_3D(slice));
+    }
 }

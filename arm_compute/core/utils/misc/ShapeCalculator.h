@@ -162,7 +162,7 @@ inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 {
     TensorShape shape_vector_sum_row{ a.tensor_shape() };
     shape_vector_sum_row.set(Window::DimX, a.dimension(1));
-    if(a.num_dimensions() > 1)
+    if(shape_vector_sum_row.num_dimensions() > 1)
     {
         shape_vector_sum_row.remove_dimension(1);
     }
@@ -513,13 +513,17 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
     return output_shape;
 }
 
-inline TensorShape compute_output_stage_shape(const ITensorInfo &input, unsigned int gemm_3d_depth = 1)
+inline TensorShape compute_output_stage_shape(const ITensorInfo &input, unsigned int gemm_3d_depth = 1, bool batch_size_on_z = false)
 {
     ARM_COMPUTE_ERROR_ON(input.data_layout() != DataLayout::NHWC && gemm_3d_depth > 1);
 
     TensorShape output_shape = input.tensor_shape();
     if(gemm_3d_depth > 1)
     {
+        if(batch_size_on_z)
+        {
+            output_shape.shift_right(1);
+        }
         output_shape.set(0, input.tensor_shape().x());
         output_shape.set(1, input.tensor_shape().y() / gemm_3d_depth);
         output_shape.set(2, gemm_3d_depth);
