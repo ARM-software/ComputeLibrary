@@ -36,7 +36,7 @@ class PixelValue
 public:
     /** Default constructor: value initialized to 0 */
     PixelValue()
-        : value{ { uint64_t(0) } }
+        : value{ uint64_t(0) }
     {
     }
     /** Initialize the union with a U8 pixel value
@@ -135,6 +135,8 @@ public:
      */
     union
         {
+            uint64_t u64;     /**< Single channel U64 */
+            int64_t  s64;     /**< Single channel S64 */
             uint8_t  rgb[3];  /**< 3 channels: RGB888 */
             uint8_t  yuv[3];  /**< 3 channels: Any YUV format */
             uint8_t  rgbx[4]; /**< 4 channels: RGBX8888 */
@@ -147,8 +149,6 @@ public:
             int16_t  s16;     /**< Single channel S16 */
             uint32_t u32;     /**< Single channel U32 */
             int32_t  s32;     /**< Single channel S32 */
-            uint64_t u64;     /**< Single channel U64 */
-            int64_t  s64;     /**< Single channel S64 */
         } value;
     /** Interpret the pixel value as a U8
      *
