@@ -130,9 +130,10 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
 
-    const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */, gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
     if(is_quantized)
     {
+        const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */);
+
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
         const QuantizationInfo input_quantization_info   = input->quantization_info();
@@ -148,6 +149,8 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     }
     else
     {
+        const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */, gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
+
         // Perform validation step on Matrix multiply function
         return CLGEMM::validate(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
     }

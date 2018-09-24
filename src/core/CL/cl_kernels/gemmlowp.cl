@@ -40,6 +40,12 @@
  * @note The transposition width step (mult_transpose1xW_width * 4) must be passed at compile time using -DTRANSPOSE1XW_WIDTH_STEP (i.e. -DTRANSPOSE1XW_WIDTH_STEP=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
+ * @note In case the output has to be reinterpreted as a 3D tensor (i.e. output of convolution layer), the following information must be passed at compile time:
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -58,13 +64,26 @@
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  cross_plane_pad                    (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_interleaved_transposed_midgard(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
-                                                         IMAGE_DECLARATION(dst))
+                                                         IMAGE_DECLARATION(dst),
+                                                         uint src0_stride_z,
+                                                         uint src1_stride_z,
+                                                         uint dst_stride_z
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                                         ,
+                                                         uint cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                                        )
 {
-    int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
-    int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
+    const int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int z = get_global_id(2);
 
     // Offset
     const int offset_row_a = (get_global_id(1) % MULT_INTERLEAVE4X4_HEIGHT) * 4;
@@ -74,6 +93,13 @@ __kernel void gemmlowp_mm_interleaved_transposed_midgard(IMAGE_DECLARATION(src0)
     // src_addr_b = address of matrix B
     __global uchar *src_addr_a = (__global uchar *)(src0_ptr + y * src0_stride_y + src0_offset_first_element_in_bytes);
     __global uchar *src_addr_b = (__global uchar *)(src1_ptr + x * src1_stride_y + src1_offset_first_element_in_bytes);
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr_b += (z % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr_b += z * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     // Compute end row address for matrix B
     __global uchar *src_end_addr_b = src_addr_b + COLS_B;
@@ -122,11 +148,49 @@ __kernel void gemmlowp_mm_interleaved_transposed_midgard(IMAGE_DECLARATION(src0)
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
+    uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store 4x4 block
-    vstore4(c00, 0, (__global int *)(offset(&dst, 0, 0)));
-    vstore4(c10, 0, (__global int *)(offset(&dst, 0, 1)));
-    vstore4(c20, 0, (__global int *)(offset(&dst, 0, 2)));
-    vstore4(c30, 0, (__global int *)(offset(&dst, 0, 3)));
+    vstore4(c00, 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
+    vstore4(c10, 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
+    vstore4(c20, 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
+    vstore4(c30, 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
+
+#else  // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store 4x4 block
+    vstore4(c00, 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(c10, 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(c20, 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+    vstore4(c30, 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 
 /** This OpenCL kernel is optimized for Bifrost and computes the matrix multiplication between matrix A (src0) and matrix B (src1)
@@ -135,6 +199,12 @@ __kernel void gemmlowp_mm_interleaved_transposed_midgard(IMAGE_DECLARATION(src0)
  * @attention The number of matrix B columns needs to be passed at compile time using -DCOLS_B
  * @note The transposition width step (mult_transpose1xW_width * 4) must be passed at compile time using -DTRANSPOSE1XW_WIDTH_STEP (i.e. -DTRANSPOSE1XW_WIDTH_STEP=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
+ *
+ * @note In case the output has to be reinterpreted as a 3D tensor (i.e. output of convolution layer), the following information must be passed at compile time:
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -154,13 +224,26 @@ __kernel void gemmlowp_mm_interleaved_transposed_midgard(IMAGE_DECLARATION(src0)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  cross_plane_pad                    (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
-                                                         IMAGE_DECLARATION(dst))
+                                                         IMAGE_DECLARATION(dst),
+                                                         uint src0_stride_z,
+                                                         uint src1_stride_z,
+                                                         uint dst_stride_z
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                                         ,
+                                                         uint cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                                        )
 {
-    int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
-    int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
+    const int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int z = get_global_id(2);
 
     // Offset
     const int offset_row_a = (get_global_id(1) % MULT_INTERLEAVE4X4_HEIGHT) * 4;
@@ -170,6 +253,13 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0)
     // src_addr_b = address of matrix B
     __global uchar *src_addr_a = (__global uchar *)(src0_ptr + y * src0_stride_y + src0_offset_first_element_in_bytes);
     __global uchar *src_addr_b = (__global uchar *)(src1_ptr + x * src1_stride_y + src1_offset_first_element_in_bytes);
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr_b += (z % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr_b += z * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     // Compute end row address for matrix B
     __global uchar *src_end_addr_b = src_addr_b + COLS_B;
@@ -416,11 +506,49 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0)
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
+    uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store 4x4 block
-    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(offset(&dst, 0, 0)));
-    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(offset(&dst, 0, 1)));
-    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(offset(&dst, 0, 2)));
-    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(offset(&dst, 0, 3)));
+    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
+    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
+    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
+    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
+
+#else  // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store 4x4 block
+    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
@@ -430,6 +558,12 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0)
  * @attention The number of matrix B columns needs to be passed at compile time using -DCOLS_B
  * @note The transposition width step (mult_transpose1xW_width * 4) must be passed at compile time using -DTRANSPOSE1XW_WIDTH_STEP (i.e. -DTRANSPOSE1XW_WIDTH_STEP=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
+ *
+ * @note In case the output has to be reinterpreted as a 3D tensor (i.e. output of convolution layer), the following information must be passed at compile time:
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -449,13 +583,26 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0)
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  cross_plane_pad                    (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(src0),
                                                               IMAGE_DECLARATION(src1),
-                                                              IMAGE_DECLARATION(dst))
+                                                              IMAGE_DECLARATION(dst),
+                                                              uint src0_stride_z,
+                                                              uint src1_stride_z,
+                                                              uint dst_stride_z
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                                              ,
+                                                              uint cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                                             )
 {
-    int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
-    int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int x = get_global_id(0) / TRANSPOSE1XW_WIDTH_STEP;
+    const int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    const int z = get_global_id(2);
 
     // Offset
     const int offset_row_a = (get_global_id(1) % MULT_INTERLEAVE4X4_HEIGHT) * 4;
@@ -465,6 +612,13 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
     // src_addr_b = address of matrix B
     __global uchar *src_addr_a = (__global uchar *)(src0_ptr + y * src0_stride_y + src0_offset_first_element_in_bytes);
     __global uchar *src_addr_b = (__global uchar *)(src1_ptr + x * src1_stride_y + src1_offset_first_element_in_bytes);
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr_b += (z % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr_b += z * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     // Compute end row address for matrix B
     __global uchar *src_end_addr_b = src_addr_b + COLS_B;
@@ -581,11 +735,49 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
+    uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store 4x4 block
-    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(offset(&dst, 0, 0)));
-    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(offset(&dst, 0, 1)));
-    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(offset(&dst, 0, 2)));
-    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(offset(&dst, 0, 3)));
+    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
+    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
+    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
+    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
+
+#else  // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store 4x4 block
+    vstore4((int4)(c00, c01, c02, c03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+    vstore4((int4)(c10, c11, c12, c13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+    vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+    vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
@@ -598,6 +790,13 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
+ *
+ * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
+ *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -617,10 +816,27 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  src_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the input tensor (only if defined REINTERPRET_INPUT_AS_3D)
+ * @param[in]  dst_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the output tensor (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
                                   IMAGE_DECLARATION(src1),
-                                  IMAGE_DECLARATION(dst))
+                                  IMAGE_DECLARATION(dst),
+                                  uint src0_stride_z,
+                                  uint src1_stride_z,
+                                  uint dst_stride_z
+#if defined(REINTERPRET_INPUT_AS_3D)
+                                  ,
+                                  uint src_cross_plane_pad
+#endif // REINTERPRET_INPUT_AS_3D
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                  ,
+                                  uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                 )
 {
     int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
@@ -632,6 +848,47 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
 
     // Update address for the matrix B
     src_addr.s1 += idx;
+
+#if defined(REINTERPRET_INPUT_AS_3D)
+    // Since we load a 2D input tile from a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zin) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
+    zin       = min(DEPTH_GEMM3D - 1, zin);
+
+    // Add offset due to the cross plane paddings
+    zin *= (src_cross_plane_pad * src0_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply src0_stride_z by DEPTH_GEMM3D
+    src_addr.s0 += get_global_id(2) * src0_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    src_addr.s0 += get_global_id(2) * src0_stride_z;
+
+#endif // defined(REINTERPRET_INPUT_AS_3D)
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr.s1 += (get_global_id(2) % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr.s1 += get_global_id(2) * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     int end_row_vec_a = src_addr.s0 + COLS_A;
 
@@ -725,33 +982,94 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     }
 
+    const int z = get_global_id(2);
+
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint8 zout = ((uint8)(0, 1, 2, 3, 4, 5, 6, 7) + (uint8)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint8)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (dst_cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store the result
     VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
-    (CONVERT(acc0, VECTOR_INT), 0, (__global int *)(offset(&dst, 0, 0)));
+    (CONVERT(acc0, VECTOR_INT), 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
     VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
-    (CONVERT(acc1, VECTOR_INT), 0, (__global int *)(offset(&dst, 0, 1)));
+    (CONVERT(acc1, VECTOR_INT), 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
     VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
-    (CONVERT(acc2, VECTOR_INT), 0, (__global int *)(offset(&dst, 0, 2)));
+    (CONVERT(acc2, VECTOR_INT), 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
     VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
-    (CONVERT(acc3, VECTOR_INT), 0, (__global int *)(offset(&dst, 0, 3)));
+    (CONVERT(acc3, VECTOR_INT), 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
-    (CONVERT(acc4, VECTOR_INT), 0, (__global int *)(offset(&dst, 0, 4)));
+    (CONVERT(acc4, VECTOR_INT), 0, (__global int *)(dst.ptr + 4 * dst_stride_y + zout.s4));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store the result
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (CONVERT(acc0, VECTOR_INT), 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (CONVERT(acc1, VECTOR_INT), 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (CONVERT(acc2, VECTOR_INT), 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (CONVERT(acc3, VECTOR_INT), 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+    VSTORE(NUM_ELEMS_PROCESSED_PER_THREAD_X)
+    (CONVERT(acc4, VECTOR_INT), 0, (__global int *)(dst.ptr + 4 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 
 /** OpenCL kernel optimized for Bifrost architectures that computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
+ *
+ * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
+ *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -771,10 +1089,27 @@ __kernel void gemmlowp_mm_midgard(IMAGE_DECLARATION(src0),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  src_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the input tensor (only if defined REINTERPRET_INPUT_AS_3D)
+ * @param[in]  dst_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the output tensor (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_bifrost(IMAGE_DECLARATION(src0),
                                   IMAGE_DECLARATION(src1),
-                                  IMAGE_DECLARATION(dst))
+                                  IMAGE_DECLARATION(dst),
+                                  uint src0_stride_z,
+                                  uint src1_stride_z,
+                                  uint dst_stride_z
+#if defined(REINTERPRET_INPUT_AS_3D)
+                                  ,
+                                  uint src_cross_plane_pad
+#endif // REINTERPRET_INPUT_AS_3D
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                  ,
+                                  uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                 )
 {
     int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
@@ -786,6 +1121,47 @@ __kernel void gemmlowp_mm_bifrost(IMAGE_DECLARATION(src0),
 
     // Update address for the matrix B
     src_addr.s1 += idx;
+
+#if defined(REINTERPRET_INPUT_AS_3D)
+    // Since we load a 2D input tile from a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zin) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
+    zin       = min(DEPTH_GEMM3D - 1, zin);
+
+    // Add offset due to the cross plane paddings
+    zin *= (src_cross_plane_pad * src0_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply src0_stride_z by DEPTH_GEMM3D
+    src_addr.s0 += get_global_id(2) * src0_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    src_addr.s0 += get_global_id(2) * src0_stride_z;
+
+#endif // defined(REINTERPRET_INPUT_AS_3D)
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr.s1 += (get_global_id(2) % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr.s1 += get_global_id(2) * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     int end_row_vec_a = src_addr.s0 + COLS_A;
 
@@ -1075,29 +1451,85 @@ __kernel void gemmlowp_mm_bifrost(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     }
 
+    const int z = get_global_id(2);
+
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint8 zout = ((uint8)(0, 1, 2, 3, 4, 5, 6, 7) + (uint8)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint8)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (dst_cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store the result
-    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(offset(&dst, 0, 0)));
+    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(offset(&dst, 0, 1)));
+    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(offset(&dst, 0, 2)));
+    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(offset(&dst, 0, 3)));
+    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(offset(&dst, 0, 4)));
+    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(dst.ptr + 4 * dst_stride_y + zout.s4));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store the result
+    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(dst.ptr + 4 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 /** OpenCL kernel optimized to use dot product that computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
+ *
+ * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
+ *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data type: QASYMM8
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -1117,10 +1549,27 @@ __kernel void gemmlowp_mm_bifrost(IMAGE_DECLARATION(src0),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  src_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the input tensor (only if defined REINTERPRET_INPUT_AS_3D)
+ * @param[in]  dst_cross_plane_pad                (Optional) Bottom paddings in unit of elements for the output tensor (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
                                        IMAGE_DECLARATION(src1),
-                                       IMAGE_DECLARATION(dst))
+                                       IMAGE_DECLARATION(dst),
+                                       uint src0_stride_z,
+                                       uint src1_stride_z,
+                                       uint dst_stride_z
+#if defined(REINTERPRET_INPUT_AS_3D)
+                                       ,
+                                       uint src_cross_plane_pad
+#endif // REINTERPRET_INPUT_AS_3D
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                       ,
+                                       uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D)
+                                      )
 {
     int idx = get_global_id(0) * NUM_ELEMS_PROCESSED_PER_THREAD_X;
 
@@ -1132,6 +1581,47 @@ __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
 
     // Update address for the matrix B
     src_addr.s1 += idx;
+
+#if defined(REINTERPRET_INPUT_AS_3D)
+    // Since we load a 2D input tile from a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zin) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint4 zin = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
+    zin       = min(DEPTH_GEMM3D - 1, zin);
+
+    // Add offset due to the cross plane paddings
+    zin *= (src_cross_plane_pad * src0_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply src0_stride_z by DEPTH_GEMM3D
+    src_addr.s0 += get_global_id(2) * src0_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    src_addr.s0 += get_global_id(2) * src0_stride_z;
+
+#endif // defined(REINTERPRET_INPUT_AS_3D)
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src_addr.s1 += (get_global_id(2) % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src_addr.s1 += get_global_id(2) * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
 
     int end_row_vec_a = src_addr.s0 + COLS_A;
 
@@ -1321,23 +1811,72 @@ __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
     }
 
+    const int z = get_global_id(2);
+
     // Compute destination address
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
+    uint8 zout = ((uint8)(0, 1, 2, 3, 4, 5, 6, 7) + (uint8)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint8)HEIGHT_GEMM3D;
+    zout       = min(DEPTH_GEMM3D - 1, zout);
+
+    // Add offset due to the cross plane paddings
+    zout *= (dst_cross_plane_pad * dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst.ptr += z * dst_stride_z * DEPTH_GEMM3D;
+
     // Store the result
-    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(offset(&dst, 0, 0)));
+    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y + zout.s0));
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
-    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(offset(&dst, 0, 1)));
+    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y + zout.s1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(offset(&dst, 0, 2)));
+    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y + zout.s2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
-    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(offset(&dst, 0, 3)));
+    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y + zout.s3));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
-    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(offset(&dst, 0, 4)));
+    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(dst.ptr + 4 * dst_stride_y + zout.s4));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+    // Add offset for batched GEMM
+    dst.ptr += z * dst_stride_z;
+
+    // Store the result
+    vstore4((int4)(acc00, acc01, acc02, acc03), 0, (__global int *)(dst.ptr + 0 * dst_stride_y));
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    vstore4((int4)(acc10, acc11, acc12, acc13), 0, (__global int *)(dst.ptr + 1 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    vstore4((int4)(acc20, acc21, acc22, acc23), 0, (__global int *)(dst.ptr + 2 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    vstore4((int4)(acc30, acc31, acc32, acc33), 0, (__global int *)(dst.ptr + 3 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+    vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(dst.ptr + 4 * dst_stride_y));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
 }
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
@@ -1480,26 +2019,26 @@ __kernel void gemmlowp_matrix_b_reduction(TENSOR3D_DECLARATION(src),
  *                   (sum_row[i] * B_OFFSET) +
  *                   (K_OFFSET)
  *
- * @param[in] mm_result_ptr                                Pointer to the source tensor. Supported data type: S32
- * @param[in] mm_result_stride_x                           Stride of the source tensor in X dimension (in bytes)
- * @param[in] mm_result_step_x                             mm_result_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] mm_result_stride_y                           Stride of the source tensor in Y dimension (in bytes)
- * @param[in] mm_result_step_y                             mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] mm_result_stride_z                           Stride of the source tensor in Z dimension (in bytes)
- * @param[in] mm_result_step_z                             mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in] mm_result_offset_first_element_in_bytes      The offset of the first element in the source tensor
- * @param[in] sum_col_result_ptr                           Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in] sum_col_result_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in] sum_col_result_step_x                        sum_col_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] sum_col_result_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in] sum_col_result_step_y                        sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] sum_col_result_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] sum_row_result_ptr                           Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
- * @param[in] sum_row_result_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in] sum_row_result_step_x                        sum_row_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] sum_row_result_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in] sum_row_result_step_y                        sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] sum_row_result_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[in] mm_result_ptr                           Pointer to the source tensor. Supported data type: S32
+ * @param[in] mm_result_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in] mm_result_step_x                        mm_result_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] mm_result_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] mm_result_step_y                        mm_result_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] mm_result_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] mm_result_step_z                        mm_result_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in] mm_result_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[in] sum_col_ptr                             Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in] sum_col_stride_x                        Stride of the source tensor in X dimension (in bytes)
+ * @param[in] sum_col_step_x                          sum_col_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] sum_col_stride_y                        Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] sum_col_step_y                          sum_col_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] sum_col_offset_first_element_in_bytes   The offset of the first element in the source tensor
+ * @param[in] sum_row_ptr                             Pointer to the source tensor. Supported data type: same as @p mm_result_ptr
+ * @param[in] sum_row_stride_x                        Stride of the source tensor in X dimension (in bytes)
+ * @param[in] sum_row_step_x                          sum_row_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] sum_row_stride_y                        Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] sum_row_step_y                          sum_row_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] sum_row_offset_first_element_in_bytes   The offset of the first element in the source tensor
  */
 __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
 #if defined(A_OFFSET)
@@ -1514,15 +2053,23 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
 {
     Tensor3D mm_result = CONVERT_TO_TENSOR3D_STRUCT(mm_result);
 
+    const int y = get_global_id(1);
+    const int z = get_global_id(2);
+
     int4 a_offset_s32 = (int4)0;
     int4 b_offset_s32 = (int4)0;
+
+    int batch_id = z;
+#if defined(DEPTH_INPUT3D)
+    batch_id /= (int)DEPTH_INPUT3D;
+#endif // defined(DEPTH_INPUT3D)
 
 #if defined(A_OFFSET)
     Image sum_col = CONVERT_TO_IMAGE_STRUCT(sum_col);
 
     // Compute the offset contribution due to A_OFFSET
 #if defined(SUM_COL_HAS_BATCHES)
-    a_offset_s32 = vload4(0, (__global int *)(sum_col.ptr + get_global_id(2) * sum_col_stride_y));
+    a_offset_s32 = vload4(0, (__global int *)(sum_col.ptr + batch_id * sum_col_stride_y));
 #else  // defined(MATRIX_B_HAS_BATCHES)
     a_offset_s32 = vload4(0, (__global int *)(sum_col.ptr));
 #endif // defined(MATRIX_B_HAS_BATCHES)
@@ -1534,7 +2081,11 @@ __kernel void gemmlowp_offset_contribution(TENSOR3D_DECLARATION(mm_result)
     Image sum_row = CONVERT_TO_IMAGE_STRUCT(sum_row);
 
     // Compute the offset contribution due to B_OFFSET
-    b_offset_s32 = (int4) * (((__global int *)(sum_row.ptr + get_global_id(2) * sum_row_stride_y)) + get_global_id(1));
+#if defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
+    b_offset_s32 = (int4) * (((__global int *)(sum_row.ptr + batch_id * sum_row_stride_y)) + (z % (int)DEPTH_INPUT3D) * (int)HEIGHT_INPUT3D + y);
+#else  // defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
+    b_offset_s32 = (int4) * (((__global int *)(sum_row.ptr + batch_id * sum_row_stride_y)) + y);
+#endif // defined(HEIGHT_INPUT3D) && defined(DEPTH_INPUT3D)
     b_offset_s32 *= (int4)B_OFFSET;
 #endif // defined(B_OFFSET)
 

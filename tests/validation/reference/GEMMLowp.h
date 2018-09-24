@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,13 +38,13 @@ namespace reference
 template <typename T>
 SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min = 0, int32_t max = 0);
 template <typename T1, typename T2>
-SimpleTensor<T1> gemmlowp_matrix_multiply_core(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b, int32_t a_offset, int32_t b_offset);
+SimpleTensor<T1> gemmlowp_matrix_multiply_core(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
 
 template <typename T>
 SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, int32_t result_offset, int32_t result_mult_int, int32_t result_shift);
 
 template <typename T1, typename T2>
-SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b);
+SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T2> &b, TensorShape shape_c);
 
 template <typename T>
 SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_offset, int32_t result_mult_int, int32_t result_shift,

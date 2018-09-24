@@ -196,8 +196,8 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
     Window slice_out = collapsed.first_slice_window_2D();
     Window slice_in  = slice_out;
 
-    slice_in.set(Window::DimY, Window::Dimension(0, 1, 1));
-    slice_in.set(Window::DimZ, Window::Dimension(0, 1, 1));
+    slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+    slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     do
     {

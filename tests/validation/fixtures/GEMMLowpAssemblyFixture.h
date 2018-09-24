@@ -128,7 +128,7 @@ protected:
             fill(b, 1, 0, 255);
         }
 
-        return reference::gemmlowp<int32_t, T2>(a, b);
+        return reference::gemmlowp<int32_t, T2>(a, b, shape_c);
     }
 
     TensorType            _target{};

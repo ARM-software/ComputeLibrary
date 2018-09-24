@@ -285,7 +285,7 @@ public:
                 fill(ref_src0, 0);
                 fill(ref_src1, 1);
 
-                SimpleTensor<int32_t> ref_tmp_dst = reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(ref_src0, ref_src1, offset_src0, offset_src1);
+                SimpleTensor<int32_t> ref_tmp_dst = reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(ref_src0, ref_src1, TensorShape(N, M), offset_src0, offset_src1);
 
                 if(add_bias)
                 {

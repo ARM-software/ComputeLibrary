@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType>
+template <typename TensorType, typename AccessorType, typename FunctionType, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false>
 class GEMMLowpMatrixMultiplyCoreValidationFixture : public framework::Fixture
 {
 public:
@@ -62,8 +62,7 @@ protected:
         library->fill(tensor, distribution, i);
     }
 
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-                              int32_t a_offset, int32_t b_offset)
+    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, int32_t a_offset, int32_t b_offset)
     {
         // Create tensors
         TensorType a = create_tensor<TensorType>(shape_a, DataType::QASYMM8, 1);
@@ -74,8 +73,9 @@ protected:
         b.info()->set_quantization_info(QuantizationInfo(1.0f / 255, b_offset));
 
         // Create and configure function
+        // The GEMMinfo includes the values of the depth in case of reinterpreted 3d input/output
         FunctionType gemmlowp;
-        gemmlowp.configure(&a, &b, &c);
+        gemmlowp.configure(&a, &b, &c, GEMMInfo(false, false, false, (reinterpret_output_as_3d ? shape_c[2] : 1), reinterpret_input_as_3d));
 
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -99,18 +99,24 @@ protected:
         return c;
     }
 
-    SimpleTensor<int32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-                                            int32_t a_offset, int32_t b_offset)
+    SimpleTensor<int32_t> compute_reference(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, int32_t a_offset, int32_t b_offset)
     {
+        TensorShape shape_a_to_use = shape_a;
+        if(reinterpret_input_as_3d)
+        {
+            // Collapse the second and third dimension if the input is 3D
+            shape_a_to_use.collapse(2U, 1U);
+        }
+
         // Create reference
-        SimpleTensor<uint8_t> a{ shape_a, DataType::QASYMM8, 1 };
+        SimpleTensor<uint8_t> a{ shape_a_to_use, DataType::QASYMM8, 1 };
         SimpleTensor<uint8_t> b{ shape_b, DataType::QASYMM8, 1 };
 
         // Fill reference
         fill(a, 0);
         fill(b, 1);
 
-        return reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(a, b, a_offset, b_offset);
+        return reference::gemmlowp_matrix_multiply_core<int32_t, uint8_t>(a, b, shape_c, a_offset, b_offset);
     }
 
     TensorType            _target{};

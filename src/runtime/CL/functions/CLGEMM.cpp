@@ -72,8 +72,18 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 } // namespace
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr), _is_interleaved_transposed(false),
-      _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)),
+      _interleave_kernel(),
+      _transpose_kernel(),
+      _mm_kernel(),
+      _ma_kernel(),
+      _tmp_a(),
+      _tmp_b(),
+      _original_b(nullptr),
+      _is_interleaved_transposed(false),
+      _run_addition(false),
+      _reshape_b_only_on_first_run(false),
+      _is_prepared(false)
 {
 }
 
@@ -146,8 +156,9 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     }
 
     // Configure and tune matrix multiply kernel
-    _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d,
-                                                                                                        reinterpret_input_as_3d));
+    _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
+                                                                                                        mult_transpose1xW_width, mult_interleave4x4_height,
+                                                                                                        depth_output_gemm3d, reinterpret_input_as_3d));
     CLScheduler::get().tune_kernel_static(_mm_kernel);
 
     if(_is_interleaved_transposed)
