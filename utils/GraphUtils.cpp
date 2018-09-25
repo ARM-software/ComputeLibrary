@@ -511,7 +511,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
     {
         for(size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
         {
-            const T value                                    = distribution(gen);
+            const auto value                                 = static_cast<T>(distribution(gen));
             *reinterpret_cast<T *>(tensor.buffer() + offset) = value;
         }
     }
@@ -523,7 +523,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const T value                                     = distribution(gen);
+            const auto value                                  = static_cast<T>(distribution(gen));
             *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value;
         });
     }
@@ -584,7 +584,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         case DataType::F16:
         {
             std::uniform_real_distribution<float> distribution_f16(_lower.get<float>(), _upper.get<float>());
-            fill<float>(tensor, distribution_f16);
+            fill<half>(tensor, distribution_f16);
             break;
         }
         case DataType::F32:
