@@ -155,15 +155,15 @@ namespace winograd
       T* const outptr = matrix_base + tile_j*matrix_row_stride;
 
       // Apply the specific tile processing function
-      const int f_pad_top = iceildiv(pad_top, 2);
-      const int f_pad_left = iceildiv(t_pad_left, 2);
-      tile_fns[f_pad_top][f_pad_left][pad_bottom][t_pad_right](
+      const typename Tiles::TileFn tilefn = Tiles::get_tile_specialization(
+        pad_top, t_pad_left, pad_bottom, t_pad_right
+      );
+
+      tilefn(
         n_channels,
-        input_base_col,
-        input_row_stride,
-        input_col_stride,
-        outptr,
-        matrix_stride
+        input_base_col, input_row_stride, input_col_stride,
+        outptr, matrix_stride,
+        pad_top, t_pad_left, pad_bottom, t_pad_right
       );
     }
   }
@@ -264,4 +264,86 @@ namespace winograd
       matrix_stride, matrix_batch_stride, matrix_row_stride
     );
   }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  typename InputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::TileFn
+    InputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::
+      get_tile_specialization(
+        const int pad_top,
+        const int pad_left,
+        const int pad_bottom,
+        const int pad_right
+      )
+  {
+    if (!(pad_top || pad_left || pad_bottom || pad_right))
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else if (pad_top && !(pad_left || pad_bottom || pad_right))
+    {
+      // Top padding only
+      const int index = (pad_top - min_pad_top) / (InnerTileRows - overlap_rows);
+      return tilefn_top_padded[index];
+    }
+    else if (!(pad_top) && pad_left && !(pad_bottom || pad_right))
+    {
+      // Left padding only
+      const int index = (pad_left - min_pad_left) / (InnerTileCols - overlap_cols);
+      return tilefn_left_padded[index];
+    }
+    else if (!(pad_top || pad_left) && pad_bottom && !(pad_right))
+    {
+      // Bottom padding only
+      return tilefn_bottom_padded[pad_bottom - 1];
+    }
+    else if (!(pad_top || pad_left || pad_bottom) && pad_right)
+    {
+      // Right padding only
+      return tilefn_right_padded[pad_right - 1];
+    }
+    else
+    {
+      // Combination of paddings, return an unspecialised method
+      return tilefn_generic;
+    }
+  }
+
+  template <int KernelCols, int InnerTileCols, typename T>
+  typename InputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::TileFn
+    InputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::
+      get_tile_specialization(
+        const int pad_top,
+        const int pad_left,
+        const int pad_bottom,
+        const int pad_right
+      )
+  {
+    (void) pad_top;
+    (void) pad_bottom;
+
+    if (!(pad_left || pad_right))
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else if (pad_left && !pad_right)
+    {
+      // Left padding only
+      const int index = (pad_left - min_pad_left) / (InnerTileCols - overlap_cols);
+      return tilefn_left_padded[index];
+    }
+    else if (!pad_left && pad_right)
+    {
+      // Right padding only
+      return tilefn_right_padded[pad_right - 1];
+    }
+    else
+    {
+      // Combination of paddings, return an unspecialised method
+      return tilefn_generic;
+    }
+  }
 }
+
+

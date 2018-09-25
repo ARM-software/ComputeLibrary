@@ -29,75 +29,36 @@
 namespace winograd
 {
 
-using Transform = InputTransformImpl<3, 3, 4, 4, float>;
+using Tiles = InputTransformImplTiles<3, 3, 4, 4, float>;
 
-/*****************************************************************************
-* F(2x2, 3x3) implies the use of a 4x4 input tile. Such tiles can require a
-* variety of padding types. For example, tiles at the top and left of an image
-* can require one row or column of padding on their top and left sides if the
-* padding type is SAME (where X represents a padded value):
-*
-*      _______    _______
-*     |X X X X|  |X X X X|
-*     |X      |  |       |   . . .
-*     |X      |  |       |
-*     |X______|  |_______|
-*      _______
-*     |X      |             .
-*     |X      |   . . .       .
-*     |X      |                 .
-*     |X______|
-*
-* For tiles near the right or bottom of the image it is more complicated.  Such
-* tiles might require padding by 0 or 1 rows or columns if the padding type is
-* VALID or 1 or 2 rows or columns if the padding type is SAME:
-*
-*      _______    _______    _______    _______
-*     |X X X X|  |X X X X|  |X X X X|  |X X X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X______|  |_______|  |______X|  |____X_X|
-*      _______    _______    _______    _______
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X______|  |_______|  |______X|  |____X_X|
-*      _______    _______    _______    _______
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X_X_X_X|  |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*      _______    _______    _______    _______
-*     |X      |  |       |  |      X|  |    X X|
-*     |X      |  |       |  |      X|  |    X X|
-*     |X X X X|  |X X X X|  |X X X X|  |X X X X|
-*     |X_X_X_X|  |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-* Additional tiles are required for especially small input images.
-*
-* Build an array of the specialised methods that deal with each of the
-* different padding combinations which may be required. These padding
-* constraints are the space:
-*
-*     Padding top in {0, 1}
-*     Padding left in {0, 1}
-*     Padding bottom in {0, 1, 2}
-*     Padding right in {0, 1, 2}
-*/
-template <>
-template <int pad_top, int pad_left, int pad_bottom, int pad_right>
-void Transform::process_tile(
+namespace
+{
+
+
+template <bool Specialized, int PadTop=0, int PadLeft=0, int PadBottom=0, int PadRight=0>
+void winograd_input_transform_4x4_fp32_process_tile(
   int n_channels,
   const float* const input_base,
   const int input_row_stride,
   const int input_col_stride,
   float* const matrix_base,
-  const int matrix_stride
-)
+    const int matrix_stride,
+     const int _pad_top,
+     const int _pad_left,
+     const int _pad_bottom,
+     const int _pad_right
+  )
 {
+const int pad_top = Specialized ? PadTop : _pad_top;
+  const int pad_left = Specialized ? PadLeft : _pad_left;
+  const int pad_bottom = Specialized ? PadBottom : _pad_bottom;
+  const int pad_right = Specialized ? PadRight : _pad_right;
+
   constexpr int inner_tile_i = 4, inner_tile_j = 4;
-  constexpr int cells_i = inner_tile_i - pad_bottom;
-  constexpr int cells_j = inner_tile_i - pad_right;
+  const int cells_i = inner_tile_i - pad_bottom;
+  const int cells_j = inner_tile_i - pad_right;
+
+
 
   float *outptr = matrix_base;
 
@@ -311,81 +272,39 @@ void Transform::process_tile(
   }
 }
 
+}  // namespace (anonymous)
+
 template <>
-const Transform::TileFn Transform::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
-{
-  {
-    {
-      {
-        Transform::template process_tile<0, 0, 0, 0>,  // No padding
-        Transform::template process_tile<0, 0, 0, 1>,  // Right
-        Transform::template process_tile<0, 0, 0, 2>,  // Right
-      },
-      {
-        Transform::template process_tile<0, 0, 1, 0>,  // Bottom
-        Transform::template process_tile<0, 0, 1, 1>,  // Bottom-right
-        Transform::template process_tile<0, 0, 1, 2>,  // Bottom-right
-      },
-      {
-        Transform::template process_tile<0, 0, 2, 0>,  // Bottom
-        Transform::template process_tile<0, 0, 2, 1>,  // Bottom-right
-        Transform::template process_tile<0, 0, 2, 2>,  // Bottom-right
-      }
-    },
-    {
-      {
-        Transform::template process_tile<0, 1, 0, 0>,  // Left
-        Transform::template process_tile<0, 1, 0, 1>,  // Left AND right
-        Transform::template process_tile<0, 1, 0, 2>,  // Left AND right
-      },
-      {
-        Transform::template process_tile<0, 1, 1, 0>,  // Left-bottom
-        Transform::template process_tile<0, 1, 1, 1>,  // Left, bottom AND right
-        Transform::template process_tile<0, 1, 1, 2>,  // Left, bottom AND right
-      },
-      {
-        Transform::template process_tile<0, 1, 2, 0>,  // Left-bottom
-        Transform::template process_tile<0, 1, 2, 1>,  // Left, bottom AND right
-        Transform::template process_tile<0, 1, 2, 2>,  // Left, bottom AND right
-      }
-    },
-  },
-  {
-    {
-      {
-        Transform::template process_tile<1, 0, 0, 0>,  // Top
-        Transform::template process_tile<1, 0, 0, 1>,  // Top-right
-        Transform::template process_tile<1, 0, 0, 2>,  // Top-right
-      },
-      {
-        Transform::template process_tile<1, 0, 1, 0>,  // Top AND bottom
-        Transform::template process_tile<1, 0, 1, 1>,  // Top, bottom AND right
-        Transform::template process_tile<1, 0, 1, 2>,  // Top, bottom AND right
-      },
-      {
-        Transform::template process_tile<1, 0, 2, 0>,  // Top AND bottom
-        Transform::template process_tile<1, 0, 2, 1>,  // Top, bottom AND right
-        Transform::template process_tile<1, 0, 2, 2>,  // Top, bottom AND right
-      }
-    },
-    {
-      {
-        Transform::template process_tile<1, 1, 0, 0>,  // Top-left
-        Transform::template process_tile<1, 1, 0, 1>,  // Top, left AND right
-        Transform::template process_tile<1, 1, 0, 2>,  // Top, left AND right
-      },
-      {
-        Transform::template process_tile<1, 1, 1, 0>,  // Top, left AND bottom
-        Transform::template process_tile<1, 1, 1, 1>,  // All padded
-        Transform::template process_tile<1, 1, 1, 2>,  // All padded
-      },
-      {
-        Transform::template process_tile<1, 1, 2, 0>,  // Top, left AND bottom
-        Transform::template process_tile<1, 1, 2, 1>,  // All padded
-        Transform::template process_tile<1, 1, 2, 2>,  // All padded
-      }
-    }
-  }
+const Tiles::TileFn Tiles::tilefn_generic = winograd_input_transform_4x4_fp32_process_tile<false>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_unpadded = winograd_input_transform_4x4_fp32_process_tile<true>;
+
+
+template <>
+const Tiles::TileFn Tiles::tilefn_top_padded[n_pad_top] = {
+  winograd_input_transform_4x4_fp32_process_tile<true, 1, 0, 0, 0>,
+};
+
+template <>
+const Tiles::TileFn Tiles::tilefn_left_padded[n_pad_left] = {
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 1, 0, 0>,
+};
+
+template <>
+const Tiles::TileFn Tiles::tilefn_bottom_padded[n_pad_bottom] = {
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 1, 0>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 2, 0>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 3, 0>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 4, 0>,
+};
+
+template <>
+const Tiles::TileFn Tiles::tilefn_right_padded[n_pad_right] = {
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 0, 1>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 0, 2>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 0, 3>,
+  winograd_input_transform_4x4_fp32_process_tile<true, 0, 0, 0, 4>,
 };
 
 template class InputTransform<3, 3, 4, 4, float>;

@@ -29,20 +29,30 @@
 namespace
 {
 
-template <int pad_top, int pad_left, int pad_bottom, int pad_right>
+template <bool Specialized, int PadTop=0, int PadLeft=0, int PadBottom=0, int PadRight=0>
 void winograd_input_transform_6x6_fp32_process_tile(
   int n_channels,
   const float* const input_base,
   const int input_row_stride,
   const int input_col_stride,
   float* const matrix_base,
-  const int matrix_stride
+const int matrix_stride,
+     const int _pad_top,
+     const int _pad_left,
+     const int _pad_bottom,
+     const int _pad_right
 )
 {
-  constexpr int inner_tile_rows = 6;
+  const int pad_top = Specialized ? PadTop : _pad_top;
+  const int pad_left = Specialized ? PadLeft : _pad_left;
+  const int pad_bottom = Specialized ? PadBottom : _pad_bottom;
+  const int pad_right = Specialized ? PadRight : _pad_right;
+
+ constexpr int inner_tile_rows = 6;
   constexpr int inner_tile_cols = 6;
-  constexpr int cells_i = inner_tile_rows - pad_bottom;
-  constexpr int cells_j = inner_tile_cols - pad_right;
+
+  const int cells_i = inner_tile_rows - pad_bottom;
+  const int cells_j = inner_tile_cols - pad_right;
 
   float *outptr = matrix_base;
 
@@ -285,322 +295,80 @@ void winograd_input_transform_6x6_fp32_process_tile(
 namespace winograd
 {
 template <int k>
-using Transform = InputTransformImpl<k, k, 6, 6, float>;
+using Tiles = InputTransformImplTiles<k, k, 6, 6, float>;
 
 template <>
-const Transform<3>::TileFn
-  Transform<3>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
-{
-  {
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 0>,  // No padding
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 1>,  // Right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 2>,  // "   "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 3>,  // "   "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 4>,  // "   "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 4>,  // "          "
-      }
-    },
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 0, 0>,  // Left
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 0, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 0, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 0, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 0, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 1, 0>,  // Bottom left
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 2, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 3, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 4, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 1, 4, 4>,
-      }
-    }
-  },
-  {
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 0, 0>,  // Top
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 0, 1>,  // Top right
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 0, 2>,  // "       "
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 0, 3>,  // "       "
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 0, 4>,  // "       "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 1, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 2, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 3, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 4, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 0, 4, 4>,
-      },
-    },
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 0, 0>,  // Top left
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 0, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 0, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 0, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 0, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 1, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 2, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 3, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 4, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<1, 1, 4, 4>,
-      }
-    }
-  }
+const Tiles<3>::TileFn Tiles<3>::tilefn_generic = winograd_input_transform_6x6_fp32_process_tile<false>;
+
+template <>
+const Tiles<3>::TileFn Tiles<3>::tilefn_unpadded = winograd_input_transform_6x6_fp32_process_tile<true>;
+
+template <>
+const Tiles<3>::TileFn Tiles<3>::tilefn_top_padded[n_pad_top] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 1, 0, 0, 0>,
 };
 
 template <>
-const Transform<5>::TileFn
-  Transform<5>::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
-{
-  {
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 0>,  // No padding
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 1>,  // Right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 2>,  // "   "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 3>,  // "   "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 0, 4>,  // "   "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 1, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 2, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 3, 4>,  // "          "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 0>,  // Bottom
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 1>,  // Bottom right
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 2>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 3>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 0, 4, 4>,  // "          "
-      }
-    },
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 0, 0>,  // Left
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 0, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 0, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 0, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 0, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 1, 0>,  // Bottom left
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 2, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 3, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 4, 0>,  // "          "
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<0, 2, 4, 4>,
-      }
-    }
-  },
-  {
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 0, 0>,  // Top
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 0, 1>,  // Top right
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 0, 2>,  // "       "
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 0, 3>,  // "       "
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 0, 4>,  // "       "
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 1, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 2, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 3, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 4, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 0, 4, 4>,
-      },
-    },
-    {
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 0, 0>,  // Top left
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 0, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 0, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 0, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 0, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 1, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 1, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 1, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 1, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 1, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 2, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 2, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 2, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 2, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 2, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 3, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 3, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 3, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 3, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 3, 4>,
-      },
-      {
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 4, 0>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 4, 1>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 4, 2>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 4, 3>,
-        winograd_input_transform_6x6_fp32_process_tile<2, 2, 4, 4>,
-      }
-    }
-  }
+const Tiles<3>::TileFn Tiles<3>::tilefn_left_padded[n_pad_left] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 1, 0, 0>,
+};
+
+template <>
+const Tiles<3>::TileFn Tiles<3>::tilefn_bottom_padded[n_pad_bottom] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 1, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 2, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 3, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 4, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 5, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 6, 0>,
+};
+
+template <>
+const Tiles<3>::TileFn Tiles<3>::tilefn_right_padded[n_pad_right] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 1>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 2>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 3>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 4>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 5>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 6>,
+};
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_generic = winograd_input_transform_6x6_fp32_process_tile<false>;
+
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_unpadded = winograd_input_transform_6x6_fp32_process_tile<true>;
+
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_top_padded[n_pad_top] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 2, 0, 0, 0>,
+};
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_left_padded[n_pad_left] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 2, 0, 0>,
+};
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_bottom_padded[n_pad_bottom] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 1, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 2, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 3, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 4, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 5, 0>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 6, 0>,
+};
+
+template <>
+const Tiles<5>::TileFn Tiles<5>::tilefn_right_padded[n_pad_right] = {
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 1>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 2>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 3>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 4>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 5>,
+  winograd_input_transform_6x6_fp32_process_tile<true, 0, 0, 0, 6>,
 };
 
 template class InputTransform<3, 3, 6, 6, float>;

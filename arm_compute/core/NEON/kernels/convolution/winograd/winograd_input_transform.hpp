@@ -31,6 +31,109 @@ namespace
 {
 
 template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+class InputTransformImplTiles
+{
+  public:
+    /** Method to transform a tile of the input tensor into the Winograd domain. */
+    typedef void (*TileFn)(
+      const int n_channels,        /** @param[in] Number of channels in the tensor. */
+      const T* const inptr_base,   /** @param[in] Pointer to the base of the input tile. */
+      const int input_row_stride,  /** @param[in] Stride between rows of the input tensor. */
+      const int input_col_stride,  /** @param[in] Stride between columns of the input tensor. */
+      T* const mptr_base,          /** @param[out] Base pointer to transformed input matrices. */
+      const int matrix_stride,     /** @param[in] Stride between matrices in the input space. */
+      const int _pad_top,          /** @param[in] Top padding for unspecialised tiles. */
+      const int _pad_left,         /** @param[in] Left padding for unspecialised tiles. */
+      const int _pad_bottom,       /** @param[in] Bottom padding for unspecialised tiles. */
+      const int _pad_right         /** @param[in] Right padding for unspecialised tiles. */
+    );
+
+    static TileFn get_tile_specialization(
+      const int pad_top,
+      const int pad_left,
+      const int pad_bottom,
+      const int pad_right
+    );
+
+    // Tile overlaps
+    static constexpr int overlap_rows = KernelRows - 1;
+    static constexpr int overlap_cols = KernelCols - 1;
+
+  private:
+
+    // Maximum padding and number of distinct paddings
+    static constexpr int max_pad_top = KernelRows / 2;
+    static constexpr int min_pad_top = KernelRows % (InnerTileRows - overlap_rows);
+    static constexpr int n_pad_top = iceildiv(max_pad_top, InnerTileRows - overlap_rows);
+
+    static constexpr int max_pad_left = KernelCols / 2;
+    static constexpr int min_pad_left = KernelCols % (InnerTileCols - overlap_cols);
+    static constexpr int n_pad_left = iceildiv(max_pad_left, InnerTileCols - overlap_cols);
+
+    static constexpr int n_pad_bottom = InnerTileRows;
+    static constexpr int n_pad_right = InnerTileCols;
+
+    // Pointers to methods implementing a generically padded tile and a totally unpadded tile.
+    static const TileFn tilefn_generic;   /** Generic tile processing function. */
+    static const TileFn tilefn_unpadded;  /** Tile processor for unpadded tiles. */
+
+    // Arrays of methods covering tiles which are padded only on a single side.
+    static const TileFn tilefn_top_padded[n_pad_top];
+    static const TileFn tilefn_left_padded[n_pad_left];
+    static const TileFn tilefn_bottom_padded[n_pad_bottom];
+    static const TileFn tilefn_right_padded[n_pad_right];
+};
+
+
+template < int KernelCols, int InnerTileCols, typename T>
+class InputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>
+{
+  public:
+    /** Method to transform a tile of the input tensor into the Winograd domain. */
+    typedef void (*TileFn)(
+      const int n_channels,        /** @param[in] Number of channels in the tensor. */
+      const T* const inptr_base,   /** @param[in] Pointer to the base of the input tile. */
+      const int input_row_stride,  /** @param[in] Stride between rows of the input tensor. */
+      const int input_col_stride,  /** @param[in] Stride between columns of the input tensor. */
+      T* const mptr_base,          /** @param[out] Base pointer to transformed input matrices. */
+      const int matrix_stride,     /** @param[in] Stride between matrices in the input space. */
+      const int _pad_top,          /** @param[in] Top padding for unspecialised tiles. */
+      const int _pad_left,         /** @param[in] Left padding for unspecialised tiles. */
+      const int _pad_bottom,       /** @param[in] Bottom padding for unspecialised tiles. */
+      const int _pad_right         /** @param[in] Right padding for unspecialised tiles. */
+    );
+
+    static TileFn get_tile_specialization(
+      const int pad_top,
+      const int pad_left,
+      const int pad_bottom,
+      const int pad_right
+    );
+
+    // Tile overlaps
+    static constexpr int overlap_rows = 0;
+    static constexpr int overlap_cols = KernelCols - 1;
+
+  private:
+    // Maximum padding and number of distinct paddings
+    static constexpr int max_pad_left = KernelCols / 2;
+    static constexpr int min_pad_left = KernelCols % (InnerTileCols - overlap_cols);
+    static constexpr int n_pad_left = iceildiv(max_pad_left, InnerTileCols - overlap_cols);
+
+    static constexpr int n_pad_right = InnerTileCols;
+
+    // Pointers to methods implementing a generically padded tile and a totally unpadded tile.
+    static const TileFn tilefn_generic;   /** Generic tile processing function. */
+    static const TileFn tilefn_unpadded;  /** Tile processor for unpadded tiles. */
+
+    // Arrays of methods covering tiles which are padded only on a single side.
+    static const TileFn tilefn_left_padded[n_pad_left];
+    static const TileFn tilefn_right_padded[n_pad_right];
+};
+
+
+
+template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
 class InputTransformImpl
 {
   public:
@@ -69,29 +172,13 @@ class InputTransformImpl
       const int n_cols
     );
 
-    // Tile overlaps
-    static constexpr int overlap_rows = KernelRows - 1;
-    static constexpr int overlap_cols = KernelCols - 1;
+    using Tiles = InputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>;
 
-    // Maximum padding and number of distinct paddings
-    static constexpr int max_pad_top = KernelRows / 2;
-    static constexpr int n_pad_top = 1 + iceildiv(max_pad_top, InnerTileRows - overlap_rows);
+    static constexpr int overlap_rows = Tiles::overlap_rows;
+    static constexpr int overlap_cols = Tiles::overlap_cols;
 
-    static constexpr int max_pad_left = KernelCols / 2;
-    static constexpr int n_pad_left = 1 + iceildiv(max_pad_left, InnerTileCols - overlap_cols);
 
-    static constexpr int n_pad_bottom = InnerTileRows;
-    static constexpr int n_pad_right = InnerTileCols;
-
-    /** Process a single tile of the input tensor. */
-    template <int pad_top, int pad_left, int pad_bottom, int pad_right>
-    static void process_tile(int, const T*, int, int, T*, int);
-
-    // Array of methods to transform tiles of the input tensor.
-    typedef void (*TileFn)(int, const T*, int, int, T*, int);
-    static const TileFn
-      tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right];
-};
+    };
 
 
 template <int KernelRows, int InnerTileRows, typename T>
