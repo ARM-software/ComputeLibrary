@@ -58,20 +58,24 @@ protected:
     {
         if(is_data_type_float(_data_type))
         {
-            float min_bound = 0.f;
-            float max_bound = 0.f;
-            std::tie(min_bound, max_bound) = get_normalize_planar_yuv_layer_test_bounds<T>();
+            const float                      min_bound = -1.f;
+            const float                      max_bound = 1.f;
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
             std::uniform_real_distribution<> distribution_std(0.1, max_bound);
             library->fill(src_tensor, distribution, 0);
             library->fill(mean_tensor, distribution, 1);
             library->fill(std_tensor, distribution_std, 2);
         }
-        else if(is_data_type_quantized_asymmetric(src_tensor.data_type()))
+        else if(is_data_type_quantized_asymmetric(_data_type))
         {
-            library->fill_tensor_uniform(src_tensor, 0);
-            library->fill_tensor_uniform(mean_tensor, 1);
-            library->fill_tensor_uniform(std_tensor, 2);
+            const QuantizationInfo          quant_info = src_tensor.quantization_info();
+            const int                       min_bound  = quant_info.quantize(-1.f, RoundingPolicy::TO_NEAREST_UP);
+            const int                       max_bound  = quant_info.quantize(1.f, RoundingPolicy::TO_NEAREST_UP);
+            std::uniform_int_distribution<> distribution(min_bound, max_bound);
+            std::uniform_int_distribution<> distribution_std(quant_info.quantize(0.1f, RoundingPolicy::TO_NEAREST_UP), max_bound);
+            library->fill(src_tensor, distribution, 0);
+            library->fill(mean_tensor, distribution, 1);
+            library->fill(std_tensor, distribution_std, 2);
         }
     }
 

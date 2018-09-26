@@ -176,43 +176,6 @@ void fill_lookuptable(T &&table)
     }
 }
 
-/** Helper function to get the testing range for batch normalization layer.
- *
- * @return A pair containing the lower upper testing bounds.
- */
-template <typename T>
-std::pair<T, T> get_batchnormalization_layer_test_bounds()
-{
-    const bool is_float = std::is_floating_point<T>::value;
-    std::pair<T, T> bounds;
-
-    // Set initial values
-    if(is_float)
-    {
-        bounds = std::make_pair(-1.f, 1.f);
-    }
-    else
-    {
-        bounds = std::make_pair(1, 1);
-    }
-
-    return bounds;
-}
-
-/** Helper function to get the testing range for NormalizePlanarYUV layer.
- *
- * @return A pair containing the lower upper testing bounds.
- */
-template <typename T>
-std::pair<T, T> get_normalize_planar_yuv_layer_test_bounds()
-{
-    std::pair<T, T> bounds;
-
-    bounds = std::make_pair(-1.f, 1.f);
-
-    return bounds;
-}
-
 /** Convert quantized simple tensor into float using tensor quantization information.
  *
  * @param[in] src Quantized tensor.

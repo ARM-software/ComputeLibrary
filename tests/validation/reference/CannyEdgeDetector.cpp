@@ -31,8 +31,6 @@
 #include "tests/validation/reference/Phase.h"
 #include "tests/validation/reference/Sobel.h"
 
-#include "tests/SimpleTensorPrinter.h"
-
 #include <cmath>
 #include <stack>
 
