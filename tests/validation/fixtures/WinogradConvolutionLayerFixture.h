@@ -263,7 +263,17 @@ protected:
 
         // Set output tile
         Size2D output_tile(4U, 4U);
-        if(weights_shape[0] == 1)
+        if(weights_shape[0] == 7 && weights_shape[1] == 1)
+        {
+            output_tile.width  = 2;
+            output_tile.height = 1;
+        }
+        else if(weights_shape[0] == 1 && weights_shape[1] == 7)
+        {
+            output_tile.width  = 1;
+            output_tile.height = 2;
+        }
+        else if(weights_shape[0] == 1)
         {
             output_tile.width = 1;
         }

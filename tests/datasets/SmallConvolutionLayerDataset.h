@@ -112,6 +112,26 @@ public:
     }
 };
 
+class SmallWinogradConvolutionLayer7x1Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer7x1Dataset()
+    {
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(7U, 1U, 2U, 1U), TensorShape(1U), TensorShape(8U, 14U, 1U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(7U, 1U, 2U), TensorShape(1U), TensorShape(14U, 14U, 1U), PadStrideInfo(1, 1, 3, 0));
+    }
+};
+
+class SmallWinogradConvolutionLayer1x7Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer1x7Dataset()
+    {
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U, 1U), TensorShape(1U), TensorShape(14U, 8U, 1U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U), TensorShape(1U), TensorShape(14U, 14U, 1U), PadStrideInfo(1, 1, 0, 3));
+    }
+};
+
 class SmallConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
