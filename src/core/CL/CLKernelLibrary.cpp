@@ -352,6 +352,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "RGB888_to_IYUV_bt709", "color_convert.cl" },
     { "RGB888_to_NV12_bt709", "color_convert.cl" },
     { "RGB888_to_RGBA8888_bt709", "color_convert.cl" },
+    { "RGB888_to_U8_bt709", "color_convert.cl" },
     { "RGB888_to_YUV444_bt709", "color_convert.cl" },
     { "RGBA8888_to_IYUV_bt709", "color_convert.cl" },
     { "RGBA8888_to_NV12_bt709", "color_convert.cl" },

@@ -64,6 +64,54 @@ __kernel void RGB888_to_RGBA8888_bt709(
     vstore16(rgba_3, 0, out.ptr + 48);
 }
 
+/** Convert an RGB888 image to U8
+ *
+ * Global Workgroup Size [ DIV_CEIL(width, 16), height ]
+ * No offset.
+ *
+ * @param[in]  input_ptr                            Pointer to the source image. Supported Format: RGB888
+ * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source image
+ * @param[out] output_ptr                           Pointer to the destination image. Supported Format: U8
+ * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
+ */
+__kernel void RGB888_to_U8_bt709(
+    IMAGE_DECLARATION(input),
+    IMAGE_DECLARATION(output))
+{
+    Image in  = CONVERT_TO_IMAGE_STRUCT(input);
+    Image out = CONVERT_TO_IMAGE_STRUCT(output);
+
+    // handle 16 pixels every time
+    const uchar16 rgb_0 = vload16(0, in.ptr);
+    const uchar16 rgb_1 = vload16(0, in.ptr + 16);
+    const uchar16 rgb_2 = vload16(0, in.ptr + 32);
+
+    //Resequence values from a sequence of 16 RGB values to sequence of 16 R, 16 G, 16 B values
+    const uchar16 rgb_r = (uchar16)(rgb_0.s0369, rgb_0.scf, rgb_1.s258b, rgb_1.se, rgb_2.s147a, rgb_2.sd);
+    const uchar16 rgb_g = (uchar16)(rgb_0.s147a, rgb_0.sd, rgb_1.s0369, rgb_1.scf, rgb_2.s258b, rgb_2.se);
+    const uchar16 rgb_b = (uchar16)(rgb_0.s258b, rgb_0.se, rgb_1.s147a, rgb_1.sd, rgb_2.s0369, rgb_2.scf);
+
+    const float16 rgb2u8_red_coef_bt709   = 0.2126f;
+    const float16 rgb2u8_green_coef_bt709 = 0.7152f;
+    const float16 rgb2u8_blue_coef_bt709  = 0.0722f;
+
+    //Computation of 16 greyscale values in float
+    const float16 greyscale_f_0 = rgb2u8_red_coef_bt709 * convert_float16(rgb_r) + rgb2u8_green_coef_bt709 * convert_float16(rgb_g) + rgb2u8_blue_coef_bt709 * convert_float16(rgb_b);
+
+    //Convert it to 16 grayscale uchar values
+    const uchar16 greyscale_u8_0 = convert_uchar16_sat_rtz(greyscale_f_0);
+
+    vstore16(greyscale_u8_0, 0, out.ptr);
+}
+
 /** Convert an RGB888 image to RGBX8888
  *
  * Global Workgroup Size [ DIV_CEIL(width, 16), height ]

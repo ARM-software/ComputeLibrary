@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,8 @@ public:
      *
      * @param[in]  input  Source tensor. Formats supported: RGBA8888/UYVY422/YUYV422/RGB888
      * @param[out] output Destination tensor. Formats supported: RGB888 (if the formats of @p input are RGBA8888/UYVY422/YUYV422),
-     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/)
+     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/),
+     *                                                          U8 (if the formats of @p input is RGB888)
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Initialize the function's source, destination

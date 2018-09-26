@@ -61,6 +61,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
                     num_elems_processed_per_iteration = 16;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -75,6 +76,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
                     num_elems_processed_per_iteration = 8;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -84,9 +86,11 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
             switch(output->info()->format())
             {
                 case Format::RGBA8888:
+                case Format::U8:
                     num_elems_processed_per_iteration = 16;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -143,6 +147,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
                     num_elems_processed_per_iteration = 4;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -220,6 +225,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
                     num_elems_read_per_iteration_x    = 16;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -235,6 +241,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
                     num_elems_read_per_iteration_x    = 8;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -303,6 +310,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
                     num_elems_processed_per_iteration = 16;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
@@ -316,6 +324,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
                     num_elems_processed_per_iteration = 16;
                     break;
                 default:
+                    ARM_COMPUTE_ERROR("Not supported");
                     break;
             }
             break;
