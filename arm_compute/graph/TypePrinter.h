@@ -98,6 +98,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::NormalizePlanarYUVLayer:
             os << "NormalizePlanarYUVLayer";
             break;
+        case NodeType::PadLayer:
+            os << "PadLayer";
+            break;
         case NodeType::PermuteLayer:
             os << "PermuteLayer";
             break;

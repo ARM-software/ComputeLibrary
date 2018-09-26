@@ -113,6 +113,8 @@ Status GCNodeValidator::validate(INode *node)
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : FlattenLayer");
         case NodeType::NormalizePlanarYUVLayer:
             return detail::validate_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
+        case NodeType::PadLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PadLayer");
         case NodeType::PermuteLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PermuteLayer");
         case NodeType::ReorgLayer:

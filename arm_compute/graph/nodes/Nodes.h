@@ -40,6 +40,7 @@
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
 #include "arm_compute/graph/nodes/OutputNode.h"
+#include "arm_compute/graph/nodes/PadLayerNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
 #include "arm_compute/graph/nodes/ReorgLayerNode.h"

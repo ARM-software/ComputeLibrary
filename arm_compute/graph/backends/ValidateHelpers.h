@@ -203,6 +203,30 @@ Status validate_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
     // Validate function
     return NormalizePlanarYUVLayer::validate(input, output, mean, std);
 }
+
+/** Validates a pad layer node
+ *
+ * @tparam PadLayer Pad layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename PadLayer>
+Status validate_pad_layer(PadLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PadLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input   = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
+    const PaddingList        &padding = node.padding();
+
+    return PadLayer::validate(input, output, padding);
+}
+
 /** Validates a permute layer node
  *
  * @tparam PermuteLayer Permute layer type

@@ -569,6 +569,31 @@ private:
     ITensorAccessorUPtr _std;
 };
 
+/** Pad Layer */
+class PadLayer final : public ILayer
+{
+public:
+    /** Construct a pad layer.
+     *
+     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                    specifies the front and the end padding in the i-th dimension.
+     */
+    PadLayer(PaddingList padding)
+        : _padding(padding)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_pad_node(s.graph(), common_params, input, _padding);
+    }
+
+private:
+    PaddingList _padding;
+};
+
 /** Permute Layer */
 class PermuteLayer final : public ILayer
 {

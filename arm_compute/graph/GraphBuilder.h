@@ -251,6 +251,17 @@ public:
      */
     static NodeID add_normalize_planar_yuv_node(Graph &g, NodeParams params, NodeIdxPair input,
                                                 ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr std_accessor = nullptr);
+    /** Adds a pad layer node to the graph
+     *
+     * @param[in] g       Graph to add the node to
+     * @param[in] params  Common node parameters
+     * @param[in] input   Input to the reshape layer node as a NodeID-Index pair
+     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                    specifies the front and the end padding in the i-th dimension.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, PaddingList padding);
     /** Adds a permute layer node to the graph
      *
      * @param[in] g      Graph to add the node to
