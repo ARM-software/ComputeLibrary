@@ -65,6 +65,7 @@
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLFloorKernel.h"
+#include "arm_compute/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"

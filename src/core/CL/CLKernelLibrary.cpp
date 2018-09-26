@@ -237,6 +237,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
+    { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "floor_layer", "floor.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },

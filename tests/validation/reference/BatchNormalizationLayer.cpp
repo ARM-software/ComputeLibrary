@@ -77,7 +77,6 @@ template SimpleTensor<float> batch_normalization_layer(const SimpleTensor<float>
 template SimpleTensor<half> batch_normalization_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &mean, const SimpleTensor<half> &var,
                                                       const SimpleTensor<half> &beta,
                                                       const SimpleTensor<half> &gamma, float epsilon, ActivationLayerInfo act_info);
-
 } // namespace reference
 } // namespace validation
 } // namespace test
