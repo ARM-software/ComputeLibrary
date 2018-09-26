@@ -47,6 +47,9 @@ const auto ColorConvert_RGBA_to_RGB = combine(framework::dataset::make("FormatTy
 const auto ColorConvert_RGB_to_RGBA = combine(framework::dataset::make("FormatType", { Format::RGB888 }),
                                               framework::dataset::make("FormatType", { Format::RGBA8888 }));
 
+const auto ColorConvert_RGB_to_U8 = combine(framework::dataset::make("FormatType", { Format::RGB888 }),
+                                            framework::dataset::make("FormatType", { Format::U8 }));
+
 const auto ColorConvert_YUYVDataset_to_RGBDataset = combine(YUYVDataset,
                                                             RGBDataset);
 
@@ -80,6 +83,13 @@ TEST_SUITE(RGB)
 // clang-format off
 REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA));
 REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvert_RGB_to_RGBA));
+TEST_SUITE_END()
+
+TEST_SUITE(RGBtoU8)
+// *INDENT-OFF*
+// clang-format off
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvert_RGB_to_U8));
 TEST_SUITE_END()
 
 TEST_SUITE(YUYV)

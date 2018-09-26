@@ -46,6 +46,7 @@ inline std::vector<SimpleTensor<T>> create_image_planes(const TensorShape &shape
 
     switch(format)
     {
+        case Format::U8:
         case Format::RGB888:
         case Format::RGBA8888:
         case Format::YUYV422:
@@ -101,6 +102,9 @@ std::vector<SimpleTensor<T>> color_convert(const TensorShape &shape, const std::
             {
                 case Format::RGBA8888:
                     colorconvert_helper::detail::colorconvert_rgb_to_rgbx(tensor_planes[0], dst[0]);
+                    break;
+                case Format::U8:
+                    colorconvert_helper::detail::colorconvert_rgb_to_u8(tensor_planes[0], dst[0]);
                     break;
                 case Format::NV12:
                     colorconvert_helper::detail::colorconvert_rgb_to_nv12(tensor_planes[0], dst);
