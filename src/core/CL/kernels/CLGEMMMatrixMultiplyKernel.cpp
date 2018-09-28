@@ -384,7 +384,7 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
 
     if(_reinterpret_input_as_3d)
     {
-        // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
+        // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3;
         const unsigned int total_cross_plane_pad = _input0->info()->padding().top + _input0->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));

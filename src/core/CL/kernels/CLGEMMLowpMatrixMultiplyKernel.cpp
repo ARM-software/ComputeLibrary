@@ -325,8 +325,15 @@ void CLGEMMLowpMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    if(_input1->info()->num_dimensions() < 3)
+    {
+        // The stride_z for matrix B must be zero if we do not slice
+        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
+    }
+
     Window slice          = window.first_slice_window_3D();
     Window slice_matrix_b = slice;
+
     slice_matrix_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice_matrix_b.set(Window::DimY, Window::Dimension(0, 1, 1));
 
@@ -350,8 +357,8 @@ void CLGEMMLowpMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue 
     {
         Window slice_b = slice;
         // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
-        // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
-        if(_slide_matrix_b)
+        // This scenario can happen when the matrix multiplication is used to perform a convolution operation
+        if(!_slide_matrix_b)
         {
             slice_b = slice_matrix_b;
         }
