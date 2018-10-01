@@ -120,8 +120,12 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         reinterpret_output_as_3d = false;
     }
 
+    const GEMMReshapeInfo reshape_info_to_use(reshape_info.m(), reshape_info.n(), reshape_info.k(), reshape_info.mult_transpose1xW_width(),
+                                              reshape_info.mult_interleave4x4_height(), reinterpret_output_as_3d ? reshape_info.depth_output_gemm3d() : 1, reinterpret_input_as_3d);
+
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input0->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, is_interleaved_transposed, reshape_info)));
+    auto_init_if_empty(*output, input0->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, is_interleaved_transposed,
+                                                                                   reshape_info_to_use)));
 
     TensorInfo tmp_info(*output);
 
@@ -137,7 +141,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     if(is_interleaved_transposed)
     {
         // reinterpret_input_as_3d is not supported if is_interleaved_transposed is set
-        ARM_COMPUTE_ERROR_ON(reshape_info.reinterpret_input_as_3d());
+        ARM_COMPUTE_ERROR_ON(reinterpret_input_as_3d);
 
         // Configure kernel window
         num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
