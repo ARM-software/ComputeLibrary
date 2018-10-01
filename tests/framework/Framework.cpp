@@ -23,6 +23,7 @@
  */
 #include "Framework.h"
 
+#include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -41,6 +42,7 @@ namespace framework
 {
 Framework::Framework()
 {
+    print_cpu_info(std::cout);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
@@ -138,6 +140,18 @@ void Framework::clear_test_info()
 bool Framework::has_test_info() const
 {
     return !_test_info.empty();
+}
+
+void Framework::print_cpu_info(std::ostream &os) const
+{
+    const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
+    const unsigned int          num_cpus = cpu_info.get_cpu_num();
+    os << "cpu_has_fp16 : " << cpu_info.has_fp16() << " cpu_has_dotprod : " << cpu_info.has_dotprod() << std::endl;
+    for(unsigned int j = 0; j < num_cpus; ++j)
+    {
+        const CPUModel model = cpu_info.get_cpu_model(j);
+        os << "CPU" << j << " : " << cpu_model_to_string(model) << std::endl;
+    }
 }
 
 void Framework::print_test_info(std::ostream &os) const

@@ -24,6 +24,9 @@
 #ifndef __ARM_COMPUTE_CPP_TYPES_H__
 #define __ARM_COMPUTE_CPP_TYPES_H__
 
+#include "arm_compute/core/Error.h"
+
+#include <string>
 #include <vector>
 
 namespace arm_compute
@@ -42,6 +45,48 @@ enum class CPUModel
     A55r0,
     A55r1
 };
+
+/** Convert a cpumodel value to a string
+ *
+ * @param val CPUModel value to be converted
+ *
+ * @return String representing the corresponding CPUModel.
+ */
+inline std::string cpu_model_to_string(CPUModel val)
+{
+    switch(val)
+    {
+        case CPUModel::GENERIC:
+        {
+            return std::string("GENERIC");
+        }
+        case CPUModel::GENERIC_FP16:
+        {
+            return std::string("GENERIC_FP16");
+        }
+        case CPUModel::GENERIC_FP16_DOT:
+        {
+            return std::string("GENERIC_FP16_DOT");
+        }
+        case CPUModel::A53:
+        {
+            return std::string("A53");
+        }
+        case CPUModel::A55r0:
+        {
+            return std::string("A55r0");
+        }
+        case CPUModel::A55r1:
+        {
+            return std::string("A55r1");
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Invalid CPUModel.");
+            return std::string("GENERIC");
+        }
+    }
+}
 
 class CPUInfo final
 {
