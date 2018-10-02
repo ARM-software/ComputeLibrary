@@ -46,8 +46,18 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                        && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                        "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
 
@@ -133,14 +143,14 @@ CLWinogradOutputTransformKernel::CLWinogradOutputTransformKernel()
 {
 }
 
-void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info)
+void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input->info(), winograd_info)));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info, act_info));
 
     _input  = input;
     _bias   = bias;
@@ -161,6 +171,21 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
 
     // Set build options
     CLBuildOptions build_opts;
+    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
+    build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
+
+    if((output_tile_size.x() == 2) || (output_tile_size.x() == 1 && output_tile_size.y() == 2))
+    {
+        build_opts.add_option("-DVEC_SIZE=2");
+    }
+    else if((output_tile_size.x() == 4) || (output_tile_size.x() == 1 && output_tile_size.y() == 4))
+    {
+        build_opts.add_option("-DVEC_SIZE=4");
+    }
+
+    build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
+
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
@@ -195,9 +220,9 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     _config_id += lower_string(string_from_data_layout(winograd_info.output_data_layout));
 }
 
-Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
+Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, (bias != nullptr ? bias->clone().get() : nullptr), output, winograd_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, (bias != nullptr ? bias->clone().get() : nullptr), output, winograd_info, act_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (bias != nullptr ? bias->clone().get() : nullptr), output->clone().get(), winograd_info.output_tile_size).first);
 
     return Status{};

@@ -84,8 +84,8 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 } // namespace
 
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(), _output_transform(), _activationlayer_function(), _input0(), _input1(), _batched_mm_output(),
-      _original_weights(nullptr), _is_prepared(false), _is_activationlayer_enabled(false)
+    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(), _output_transform(), _input0(), _input1(), _batched_mm_output(), _original_weights(nullptr),
+      _is_prepared(false)
 {
 }
 
@@ -133,14 +133,7 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
                                                                                                  (input->info()->data_type() == DataType::F16)));
 
     // Configure output transform
-    _output_transform.configure(&_batched_mm_output, biases, output, winograd_info);
-
-    // Configure activation layer
-    _is_activationlayer_enabled = act_info.enabled();
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.configure(output, nullptr, act_info);
-    }
+    _output_transform.configure(&_batched_mm_output, biases, output, winograd_info, act_info);
 
     // Allocate temporary tensors
     _input0.allocator()->allocate();
@@ -215,11 +208,6 @@ void CLWinogradConvolutionLayer::run()
 
     // Run output transform
     CLScheduler::get().enqueue(_output_transform);
-
-    if(_is_activationlayer_enabled)
-    {
-        _activationlayer_function.run();
-    }
 
     _memory_group.release();
 }
