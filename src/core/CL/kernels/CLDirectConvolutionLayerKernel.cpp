@@ -421,8 +421,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
     else
     {
-        bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
-
+        const bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
         build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
         build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
         build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));

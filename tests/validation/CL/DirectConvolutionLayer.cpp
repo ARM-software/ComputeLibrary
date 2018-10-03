@@ -44,23 +44,20 @@ namespace validation
 namespace
 {
 // COMPMID-517 Invesitgate the mismatch to see whether it is a real bug
-RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
-constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
+RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
+constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance for quantized tests */
+const auto data_strides     = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
+const auto data_ksize_one   = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_three = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
+const auto data_ksize_five  = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
+const auto data_all_kernels = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
 
 /** Direct convolution data set. */
 const auto data = combine(datasets::SmallDirectConvolutionShapes(),
-                          combine(framework::dataset::make("StrideX", 1, 3),
-                                  combine(framework::dataset::make("StrideY", 1, 3),
-                                          combine(concat(combine(framework::dataset::make("PadX", 0, 1),
-                                                                 combine(framework::dataset::make("PadY", 0, 1),
-                                                                         framework::dataset::make("KernelSize", 1))),
-                                                         combine(framework::dataset::make("PadX", 0, 2),
-                                                                 combine(framework::dataset::make("PadY", 0, 2),
-                                                                         framework::dataset::make("KernelSize", { 3, 5 })))),
-                                                  framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+                          combine(data_strides, combine(data_all_kernels, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }))));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -174,7 +171,6 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::D
                                                                                                                  ActivationFunctionsDataset),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
-    // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END()
