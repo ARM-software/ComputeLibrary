@@ -261,6 +261,58 @@ inline std::string to_string(const BoundingBoxTransformInfo &bbox_info)
     return str.str();
 }
 
+/** Formatted output of the ComputeAnchorsInfo type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  anchors_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ComputeAnchorsInfo &anchors_info)
+{
+    os << "(" << anchors_info.feat_width() << "x" << anchors_info.feat_height() << ")~" << anchors_info.spatial_scale();
+    return os;
+}
+
+/** Formatted output of the ComputeAnchorsInfo type.
+ *
+ * @param[in] anchors_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ComputeAnchorsInfo &anchors_info)
+{
+    std::stringstream str;
+    str << anchors_info;
+    return str.str();
+}
+
+/** Formatted output of the GenerateProposalsInfo type.
+ *
+ * @param[out] os             Output stream.
+ * @param[in]  proposals_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GenerateProposalsInfo &proposals_info)
+{
+    os << "(" << proposals_info.im_width() << "x" << proposals_info.im_height() << ")~" << proposals_info.im_scale();
+    return os;
+}
+
+/** Formatted output of the GenerateProposalsInfo type.
+ *
+ * @param[in] proposals_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GenerateProposalsInfo &proposals_info)
+{
+    std::stringstream str;
+    str << proposals_info;
+    return str.str();
+}
+
 /** Formatted output of the QuantizationInfo type.
  *
  * @param[out] os                Output stream.

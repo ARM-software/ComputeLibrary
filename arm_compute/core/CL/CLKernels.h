@@ -83,6 +83,7 @@
 #include "arm_compute/core/CL/kernels/CLGaussian3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"
+#include "arm_compute/core/CL/kernels/CLGenerateProposalsLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"

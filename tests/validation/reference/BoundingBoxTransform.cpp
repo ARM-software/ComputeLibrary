@@ -84,10 +84,10 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
             const T pred_h     = T(std::exp(dh)) * height;
 
             // Store the prediction into the output tensor
-            pred_boxes_ptr[start_delta]     = scale * utility::clamp<T>(pred_ctr_x - T(0.5) * pred_w, T(0), T(img_w));
-            pred_boxes_ptr[start_delta + 1] = scale * utility::clamp<T>(pred_ctr_y - T(0.5) * pred_h, T(0), T(img_h));
-            pred_boxes_ptr[start_delta + 2] = scale * utility::clamp<T>(pred_ctr_x + T(0.5) * pred_w, T(0), T(img_w));
-            pred_boxes_ptr[start_delta + 3] = scale * utility::clamp<T>(pred_ctr_y + T(0.5) * pred_h, T(0), T(img_h));
+            pred_boxes_ptr[start_delta]     = scale * utility::clamp<T>(pred_ctr_x - T(0.5) * pred_w, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 1] = scale * utility::clamp<T>(pred_ctr_y - T(0.5) * pred_h, T(0), T(img_h - 1));
+            pred_boxes_ptr[start_delta + 2] = scale * utility::clamp<T>(pred_ctr_x + T(0.5) * pred_w, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 3] = scale * utility::clamp<T>(pred_ctr_y + T(0.5) * pred_h, T(0), T(img_h - 1));
         }
     }
     return pred_boxes;
