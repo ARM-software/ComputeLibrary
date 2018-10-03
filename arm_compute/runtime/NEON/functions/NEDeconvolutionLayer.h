@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 
+#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -111,12 +112,14 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup        _memory_group;
-    NEConvolutionLayer _conv_f;
-    CPPUpsample        _upsample_f;
-    Tensor             _scaled_output;
-    ITensor           *_input;
-    PadStrideInfo      _info;
+    MemoryGroup          _memory_group;
+    NEConvolutionLayer   _conv_f;
+    CPPUpsample          _upsample_f;
+    CPPFlipWeightsKernel _flip_weights;
+    Tensor               _scaled_output;
+    Tensor               _weights_flipped;
+    ITensor             *_input;
+    PadStrideInfo        _info;
     std::pair<unsigned int, unsigned int> _inner_border;
     bool _is_prepared;
 };

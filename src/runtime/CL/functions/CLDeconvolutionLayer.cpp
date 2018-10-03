@@ -27,6 +27,8 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CPP/CPPScheduler.h"
 
 #include <memory>
 #include <tuple>
@@ -38,7 +40,10 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
     : _memory_group(std::move(memory_manager)),
       _scale_f(),
       _conv_f(),
+      _flip_weights(),
       _scaled_output(),
+      _weights(),
+      _weights_flipped(),
       _is_prepared(false)
 {
 }
@@ -59,7 +64,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(inner_border_top > stride_y - 1, "inner_border_top must be smaller than stride_y");
 
     auto out_dims = deconvolution_output_dimensions(input->dimension(0), input->dimension(1), weights->dimension(0), weights->dimension(1),
-                                                    info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
+                                                    info.pad().first, info.pad().second, stride_x, stride_y);
 
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->tensor_shape(), weights->tensor_shape());
 
@@ -81,8 +86,9 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimY) != output_shape.y(), "Output's height is invalid.");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimZ) != output_shape.z(), "Output's depth is invalid.");
 
-    TensorInfo scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_deconvolution_shape(*input, stride_x, stride_y, inner_border_right, inner_border_top,
-                                                                                                      info)));
+    TensorInfo scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_deconvolution_shape(*input, *weights, stride_x, stride_y, inner_border_right,
+                                                                                                      inner_border_top,
+                                                                                                      out_dims)));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(inner_border_right, inner_border_top), info));
@@ -91,7 +97,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
+void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
                                      unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -99,8 +105,12 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
 
+    _weights = weights;
+    _weights_flipped.allocator()->init(TensorInfo(weights->info()->tensor_shape(), 1, weights->info()->data_type()));
+    _flip_weights.configure(weights, &_weights_flipped);
+
     auto out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
-                                                    info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
+                                                    info.pad().first, info.pad().second, stride_x, stride_y);
 
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
 
@@ -113,22 +123,31 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     _is_prepared = false;
 
     _memory_group.manage(&_scaled_output);
+    _memory_group.manage(&_weights_flipped);
 
-    // configure scale function
-    // Init and allocate intermediate tensor for output, same size as input but the first two axis are the same as the output tensor
-    TensorShape        scale_out_shape(input->info()->tensor_shape());
-    const unsigned int out_x = input->info()->dimension(0) + (input->info()->dimension(0) - 1) * (stride_x - 1) + inner_border_right + 2 * info.pad().first;
-    const unsigned int out_y = input->info()->dimension(1) + (input->info()->dimension(1) - 1) * (stride_y - 1) + inner_border_top + 2 * info.pad().second;
+    // Find the upsampled dimensions
+    unsigned int out_x = (input->info()->dimension(0) - 1) * stride_x + inner_border_right + 1;
+    unsigned int out_y = (input->info()->dimension(1) - 1) * stride_y + inner_border_top + 1;
+
+    // Find the padding needed for the convolution with stride 1 in order to match output shape
+    unsigned int padx = out_dims.first - (out_x - weights->info()->dimension(0) + 1);
+    unsigned int pady = out_dims.second - (out_y - weights->info()->dimension(1) + 1);
+    out_x += padx;
+    out_y += pady;
+
+    TensorShape scale_out_shape(input->info()->tensor_shape());
     scale_out_shape.set(0, out_x);
     scale_out_shape.set(1, out_y);
     TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
     _scaled_output.allocator()->init(scale_out_info);
 
-    _scale_f.configure(input, &_scaled_output, BorderSize(inner_border_top, inner_border_right), info);
+    // configure scale function
+    const PadStrideInfo upsample_info(stride_x, stride_y, padx / 2, pady / 2);
+    _scale_f.configure(input, &_scaled_output, BorderSize(inner_border_top, inner_border_right), upsample_info);
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info, weights_info);
+    _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info, weights_info);
     _scaled_output.allocator()->allocate();
 }
 
@@ -148,7 +167,14 @@ void CLDeconvolutionLayer::prepare()
 {
     if(!_is_prepared)
     {
+        _weights_flipped.allocator()->allocate();
+        _weights_flipped.map(true);
+        _weights->map(CLScheduler::get().queue(), true);
+        CPPScheduler::get().schedule(&_flip_weights, Window::DimZ);
+        _weights_flipped.unmap();
+        _weights->unmap(CLScheduler::get().queue());
         _conv_f.prepare();
+
         _is_prepared = true;
     }
 }

@@ -55,14 +55,12 @@ public:
      * @param[in] input_descriptor   Input descriptor
      * @param[in] weights_descriptor Weights descriptor
      * @param[in] info               Convolution operation attributes
-     * @param[in] inner_border       Inner border (right, top)
      *
      * @return Output descriptor
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                       const TensorDescriptor &weights_descriptor,
-                                                      const PadStrideInfo    &info,
-                                                      const Size2D           &inner_border);
+                                                      const PadStrideInfo    &info);
 
     // Inherited overridden methods:
     NodeType         type() const override;

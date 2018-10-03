@@ -160,7 +160,7 @@ public:
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
         const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
-        auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, inner_border.first, inner_border.second, sx, sy);
+        auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
         TensorShape output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
         DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, QuantizationInfo());
     }
@@ -179,7 +179,7 @@ public:
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
         const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
-        auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, inner_border.first, inner_border.second, sx, sy);
+        auto        out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
         TensorShape output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
         DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, quantization_info);
     }

@@ -827,22 +827,20 @@ TensorShape deconvolution_output_shape(const std::pair<unsigned int, unsigned in
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *
- * @param[in] in_width           Width of input tensor (Number of columns)
- * @param[in] in_height          Height of input tensor (Number of rows)
- * @param[in] kernel_width       Kernel width.
- * @param[in] kernel_height      Kernel height.
- * @param[in] padx               X axis padding.
- * @param[in] pady               Y axis padding.
- * @param[in] inner_border_right The number of zeros added to right edge of the input.
- * @param[in] inner_border_top   The number of zeros added to top edge of the input.
- * @param[in] stride_x           X axis input stride.
- * @param[in] stride_y           Y axis input stride.
+ * @param[in] in_width      Width of input tensor (Number of columns)
+ * @param[in] in_height     Height of input tensor (Number of rows)
+ * @param[in] kernel_width  Kernel width.
+ * @param[in] kernel_height Kernel height.
+ * @param[in] padx          X axis padding.
+ * @param[in] pady          Y axis padding.
+ * @param[in] stride_x      X axis input stride.
+ * @param[in] stride_y      Y axis input stride.
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
 const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
                                                                             unsigned int kernel_width, unsigned int kernel_height,
-                                                                            unsigned int padx, unsigned int pady, unsigned int inner_border_right, unsigned int inner_border_top,
+                                                                            unsigned int padx, unsigned int pady,
                                                                             unsigned int stride_x, unsigned int stride_y);
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.

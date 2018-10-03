@@ -27,6 +27,8 @@
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
 
+#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
+
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -62,6 +64,14 @@ class CLDeconvolutionLayer : public IFunction
 public:
     /** Constructor */
     CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDeconvolutionLayer(const CLDeconvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLDeconvolutionLayer(CLDeconvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDeconvolutionLayer &operator=(const CLDeconvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLDeconvolutionLayer &operator=(CLDeconvolutionLayer &&) = default;
     /** Set the input, weights, biases and output tensors.
      *
      * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
@@ -74,7 +84,7 @@ public:
      * @param[in]     weights_info       (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
      *
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
+    void configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
                    unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
@@ -100,7 +110,10 @@ private:
     CLMemoryGroup                _memory_group;
     CLDeconvolutionLayerUpsample _scale_f;
     CLConvolutionLayer           _conv_f;
+    CPPFlipWeightsKernel         _flip_weights;
     CLTensor                     _scaled_output;
+    ICLTensor                   *_weights;
+    CLTensor                     _weights_flipped;
     bool                         _is_prepared;
 };
 }

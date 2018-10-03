@@ -67,7 +67,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
     const unsigned int num_kernels   = 1;
     const TensorShape  weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
     const TensorShape  bias_shape(num_kernels);
-    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 0, 0, 1, 1);
+    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 1, 1);
     TensorShape        output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
 
     // Create tensors

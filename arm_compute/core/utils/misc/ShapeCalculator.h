@@ -229,11 +229,20 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     return output_shape;
 }
 
-inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top, const PadStrideInfo &info)
+inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top,
+                                               std::pair<unsigned int, unsigned int> &out_dims)
 {
-    TensorShape        scale_out_shape(input.tensor_shape());
-    const unsigned int out_x = input.dimension(0) + (input.dimension(0) - 1) * (sx - 1) + inner_border_right + 2 * info.pad().first;
-    const unsigned int out_y = input.dimension(1) + (input.dimension(1) - 1) * (sy - 1) + inner_border_top + 2 * info.pad().second;
+    // Find the upsampled dimensions
+    unsigned int out_x = (input.dimension(0) - 1) * sx + inner_border_right + 1;
+    unsigned int out_y = (input.dimension(1) - 1) * sy + inner_border_top + 1;
+
+    // Find the padding needed for the convolution with stride 1 in order to match output shape
+    unsigned int padx = out_dims.first - (out_x - weights.dimension(0) + 1);
+    unsigned int pady = out_dims.second - (out_y - weights.dimension(1) + 1);
+    out_x += padx;
+    out_y += pady;
+
+    TensorShape scale_out_shape(input.tensor_shape());
     scale_out_shape.set(0, out_x);
     scale_out_shape.set(1, out_y);
 

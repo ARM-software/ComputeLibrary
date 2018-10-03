@@ -48,7 +48,7 @@ RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< T
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
-const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
+const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 5) * framework::dataset::make("StrideY", 1, 5) * framework::dataset::make("PadX", 0, 3)
                      * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
 
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
@@ -71,7 +71,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
     const unsigned int num_kernels   = 1;
     const TensorShape  weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
     const TensorShape  bias_shape(num_kernels);
-    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 0, 0, 1, 1);
+    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 1, 1);
     TensorShape        output_shape = deconvolution_output_shape(out_dim, input_shape, weights_shape);
 
     // Create tensors
