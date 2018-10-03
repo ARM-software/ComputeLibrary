@@ -215,7 +215,6 @@ CPPScheduler::CPPScheduler()
     : _num_threads(num_threads_hint()),
       _threads(_num_threads - 1)
 {
-    get_cpu_configuration(_cpu_info);
 }
 
 void CPPScheduler::set_num_threads(unsigned int num_threads)

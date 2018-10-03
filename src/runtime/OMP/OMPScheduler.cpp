@@ -42,7 +42,6 @@ OMPScheduler &OMPScheduler::get()
 OMPScheduler::OMPScheduler() // NOLINT
     : _num_threads(omp_get_max_threads())
 {
-    get_cpu_configuration(_cpu_info);
 }
 
 unsigned int OMPScheduler::num_threads() const

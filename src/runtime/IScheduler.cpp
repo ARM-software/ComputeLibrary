@@ -31,6 +31,7 @@ namespace arm_compute
 IScheduler::IScheduler()
     : _cpu_info()
 {
+    get_cpu_configuration(_cpu_info);
     // Work out the best possible number of execution threads
     _num_threads_hint = get_threads_hint();
 }
