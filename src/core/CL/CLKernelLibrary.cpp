@@ -164,6 +164,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "bitwise_and", "bitwise_op.cl" },
     { "bitwise_xor", "bitwise_op.cl" },
     { "bitwise_not", "bitwise_op.cl" },
+    { "bounding_box_transform", "bounding_box_transform.cl" },
     { "channel_combine_NV", "channel_combine.cl" },
     { "channel_combine_RGB888", "channel_combine.cl" },
     { "channel_combine_RGBA8888", "channel_combine.cl" },
@@ -495,6 +496,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "bitwise_op.cl",
 #include "./cl_kernels/bitwise_op.clembed"
+    },
+    {
+        "bounding_box_transform.cl",
+#include "./cl_kernels/bounding_box_transform.clembed"
     },
     {
         "canny.cl",

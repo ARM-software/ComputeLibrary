@@ -37,6 +37,7 @@
 #include "arm_compute/core/CL/kernels/CLBitwiseNotKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseOrKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseXorKernel.h"
+#include "arm_compute/core/CL/kernels/CLBoundingBoxTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLBox3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
 #include "arm_compute/core/CL/kernels/CLChannelCombineKernel.h"

@@ -233,6 +233,34 @@ inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
     return str.str();
 }
 
+/** Formatted output of the BoundingBoxTransformInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  bbox_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
+{
+    auto weights = bbox_info.weights();
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights = {" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
+       "})";
+    return os;
+}
+
+/** Formatted output of the BoundingBoxTransformInfo type.
+ *
+ * @param[in] bbox_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const BoundingBoxTransformInfo &bbox_info)
+{
+    std::stringstream str;
+    str << bbox_info;
+    return str.str();
+}
+
 /** Formatted output of the QuantizationInfo type.
  *
  * @param[out] os                Output stream.

@@ -851,6 +851,64 @@ private:
     unsigned int _sampling_ratio;
 };
 
+/** Bounding Box Transform information class */
+class BoundingBoxTransformInfo
+{
+public:
+    /** Constructor
+     *
+     * @param[in] img_width       Width of the original image
+     * @param[in] img_height      Height, of the original image
+     * @param[in] scale           Scale of the original image
+     * @param[in] apply_scale     (Optional)Re-apply scaling after transforming the boxes. Defaults to false
+     * @param[in] weights         (Optional)Weights [wx, wy, ww, wh] for the deltas. Defaults to all ones
+     * @param[in] bbox_xform_clip (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
+     */
+    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { 1.0, 1.0, 1.0, 1.0 }, float bbox_xform_clip =
+                                 4.135166556742356)
+        : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
+    {
+    }
+
+    std::array<float, 4> weights() const
+    {
+        return _weights;
+    }
+
+    float bbox_xform_clip() const
+    {
+        return _bbox_xform_clip;
+    }
+
+    float img_height() const
+    {
+        return _img_height;
+    }
+
+    float img_width() const
+    {
+        return _img_width;
+    }
+
+    float scale() const
+    {
+        return _scale;
+    }
+
+    bool apply_scale() const
+    {
+        return _apply_scale;
+    }
+
+private:
+    float _img_width;
+    float _img_height;
+    float _scale;
+    bool  _apply_scale;
+    std::array<float, 4> _weights;
+    float _bbox_xform_clip;
+};
+
 /** Activation Layer Information class */
 class ActivationLayerInfo
 {
