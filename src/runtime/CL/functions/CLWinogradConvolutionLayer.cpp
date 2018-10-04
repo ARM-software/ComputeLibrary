@@ -158,6 +158,10 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const Size2D kernel_size = Size2D(weights->tensor_shape()[idx_width], weights->tensor_shape()[idx_height]);
     const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, input->data_layout());
 
+    //FP16 implementation of winograd is slower than direct convolution.
+    //The following check needs to be removed when fp16 winograd is faster than direct convolution (COMPMID-1266)
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
     {

@@ -834,7 +834,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
 TEST_SUITE_END() // Conv1x5
 TEST_SUITE_END() // FP32
 
-
+#ifdef WINOGRAD_F16_SUPPORT //to be reintroduced after COMPMID-1266 is resolved
 TEST_SUITE(FP16)
 
 using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, half>;
@@ -977,7 +977,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
 TEST_SUITE_END() // Conv1x5
 
 TEST_SUITE_END() // FP16
-
+#endif /*#ifdef WINOGRAD_F16_SUPPORT*/
 TEST_SUITE_END() // ConvolutionLayer
 TEST_SUITE_END() // Winograd
 TEST_SUITE_END() // CL
