@@ -91,7 +91,7 @@ FIXTURE_DATA_TEST_CASE(SmallROIAlignLayer, CLROIAlignLayerFixture<float>, framew
                                                    framework::dataset::make("Batches", { 1, 4, 8 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, relative_tolerance_f32, 0.f, absolute_tolerance_f32);
+    validate(CLAccessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
