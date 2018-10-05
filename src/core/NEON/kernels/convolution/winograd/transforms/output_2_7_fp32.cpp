@@ -23,38 +23,33 @@
  */
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/output.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_output_transform.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
 
-namespace winograd
+namespace
 {
 
-using Transform = WinogradGEMM<1, 2, 1, 7>::OutputTransform<float>;
-using TransformTransposed = WinogradGEMM<2, 1, 7, 1>::OutputTransform<float>;
-
-template <>
-template <>
-int Transform::ops_performed(const Tensor4DShape &shape)
-{
-  (void) shape;
-  return 0;  // TODO
-}
-
-template <>
-template <>
-template <int pad_bottom, int pad_right>
-void Transform::process_tile(
+template <bool Specialized, int PadRight=0>
+void winograd_output_transform_2_7_fp32_process_tile(
   const int n_channels,
   const float* const matrix_base,
   const int matrix_stride,
   const float* const biases,
   float* const output,
   const int output_row_stride,
-  const int output_col_stride
+  const int output_col_stride,
+  const int _pad_bottom,
+  const int _pad_right
 )
 {
   (void) output_row_stride;
-  constexpr int cells_j = output_tile_cols - pad_right;
+  (void) _pad_bottom;
+  constexpr int output_tile_cols = 2;
+  constexpr int inner_tile_cols = 8;
+
+  const int pad_right = Specialized ? PadRight : _pad_right;
+  const int cells_j = output_tile_cols - pad_right;
+
 
   // Construct a map to the output cells
   float *outptrs[cells_j];
@@ -149,22 +144,20 @@ void Transform::process_tile(
     }
   }
 }
+}  // namespace (anonymous)
+
+namespace winograd
+{
+using Tiles = OutputTransformImplTiles<1, 7, 1, 8, float>;
 
 template <>
+const Tiles::TileFn Tiles::tilefn_unpadded = winograd_output_transform_2_7_fp32_process_tile<true>;
+
 template <>
-const Transform::TileFn Transform::tile_fns[max_pad_bottom][max_pad_right] =
-{
-  {
-    Transform::template process_tile<0, 0>,
-    Transform::template process_tile<0, 1>,
-  },
+const Tiles::TileFn Tiles::tilefn_right_padded[n_pad_right] = {
+  winograd_output_transform_2_7_fp32_process_tile<true, 1>
 };
 
-
-template <>
-template <>
-const TransformTransposed::TileFn TransformTransposed::tile_fns[max_pad_bottom][max_pad_right] = {};
-
-template struct WinogradGEMM<1, 2, 1, 7>::OutputTransform<float>;
-template struct WinogradGEMM<2, 1, 7, 1>::OutputTransform<float>;
+template class OutputTransform<1, 7, 1, 8, float>;
+template class OutputTransform<7, 1, 8, 1, float>;
 }  // namespace winograd

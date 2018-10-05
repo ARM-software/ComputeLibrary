@@ -27,10 +27,10 @@
 
 namespace winograd
 {
-  template <int output_tile_rows, int output_tile_cols,
-            int kernel_rows, int kernel_cols>
-  template <typename T>
-  void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::OutputTransform<T>::execute(
+/***************************************************************************/
+  /* Instance-less API */
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void OutputTransformImpl<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::execute(
     const int n_batches,
     const int output_batch_stride,
     const int n_rows,
@@ -45,28 +45,12 @@ namespace winograd
     T* const output
   )
   {
-    // If an Nx1 kernel then transpose and redirect to the 1xN implementation.
-    if (kernel_cols == 1)
-    {
-      WinogradGEMM<output_tile_cols, output_tile_rows, kernel_cols, kernel_rows>::
-        template OutputTransform<T>::execute(
-          n_batches,
-          output_batch_stride,
-          n_cols, output_col_stride,
-          n_rows, output_row_stride,
-          n_channels,
-          matrix_base, matrix_stride, matrix_row_stride,
-          biases, output
-        );
-      return;
-    }
-
     // Compute the number of tiles and hence the padding required on the bottom
     // and right of the image.
-    const int tile_M = iceildiv(n_rows, output_tile_rows);
-    const int tile_N = iceildiv(n_cols, output_tile_cols);
-    const int pad_bottom = output_tile_rows*tile_M - n_rows;
-    const int pad_right = output_tile_cols*tile_N - n_cols;
+    const int tile_M = iceildiv(n_rows, OutputTileRows);
+    const int tile_N = iceildiv(n_cols, OutputTileCols);
+    const int pad_bottom = OutputTileRows*tile_M - n_rows;
+    const int pad_right = OutputTileCols*tile_N - n_cols;
 
     const int matrix_tile_row_stride = tile_N * matrix_row_stride;
     const int matrix_batch_stride = tile_M * matrix_tile_row_stride;
@@ -84,7 +68,7 @@ namespace winograd
         // Compute properties of this row of output tiles
         const int row_pad_bottom = (tile_i < tile_M - 1) ? 0: pad_bottom;
         const T* const matrix_tile_row = matrix_batch + tile_i * matrix_tile_row_stride;
-        T* const outptr_row = outptr_batch + output_tile_rows*tile_i*output_row_stride;
+        T* const outptr_row = outptr_batch + OutputTileRows*tile_i*output_row_stride;
 
         // Process the row
         process_tile_row(
@@ -97,10 +81,36 @@ namespace winograd
     }
   }
 
-  template <int output_tile_rows, int output_tile_cols,
-            int kernel_rows, int kernel_cols>
-  template <typename T>
-  void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::OutputTransform<T>::process_tile_row(
+template <int KernelRows, int InnerTileRows, typename T>
+  void OutputTransformImpl<KernelRows, 1, InnerTileRows, 1, T>::execute(
+    const int n_batches,
+    const int output_batch_stride,
+    const int n_rows,
+    const int output_row_stride,
+    const int n_cols,
+    const int output_col_stride,
+    const int n_channels,
+    const T* const matrix_base,
+    const int matrix_stride,
+    const int matrix_row_stride,
+    const T* const biases,
+    T* const output
+  )
+  {
+    // If an Nx1 kernel then transpose and redirect to the 1xN implementation.
+    OutputTransformImpl<1, KernelRows, 1, InnerTileRows, T>::execute(
+        n_batches,
+        output_batch_stride,
+        n_cols, output_col_stride,
+        n_rows, output_row_stride,
+        n_channels,
+        matrix_base, matrix_stride, matrix_row_stride,
+        biases, output
+      );
+  }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void OutputTransformImpl<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::process_tile_row(
     const int tile_N,
     const int n_channels,
     const T* const matrix_base,
@@ -114,48 +124,27 @@ namespace winograd
     const int row_pad_right
   )
   {
-    if (kernel_cols == 1)
-    {
-      // If an Nx1 implementation then this should never be reached.
-      return;
-    }
-
     // Loop over columns of tiles
     for (int tile_j = 0; tile_j < tile_N; tile_j++)
     {
       // Properties of this tile
       const int tile_pad_right = (tile_j < tile_N - 1) ? 0 : row_pad_right;
       const T* const matrix_row = matrix_base + tile_j * matrix_row_stride;
-      T* const outptr = output + output_tile_cols*tile_j*output_col_stride;
+      T* const outptr = output + OutputTileCols *tile_j*output_col_stride;
 
       // Perform the output transformation
-      tile_fns[row_pad_bottom][tile_pad_right](
+      const typename Tiles::TileFn tilefn = Tiles::get_tile_specialization(row_pad_bottom, tile_pad_right);
+      tilefn(
         n_channels, matrix_row, matrix_stride, biases,
-        outptr, output_row_stride, output_col_stride
+        outptr, output_row_stride, output_col_stride,
+        row_pad_bottom, tile_pad_right
       );
     }
   }
 
-  template <int output_tile_rows, int output_tile_cols, int kr, int kc>
-  template <typename T>
-  size_t WinogradGEMM<output_tile_rows, output_tile_cols, kr, kc>::OutputTransform<T>::bytes_read(const Tensor4DShape &shape)
-  {
-    const int M = iceildiv(shape.n_rows, output_tile_rows) *
-                  iceildiv(shape.n_cols, output_tile_cols);
-    const int N = shape.n_channels;
-    return inner_tile_rows * inner_tile_cols * M * N * sizeof(T);
-  }
-
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  size_t WinogradGEMM<otr, otc, kr, kc>::OutputTransform<T>::bytes_written(const Tensor4DShape &shape)
-  {
-    return shape.size() * sizeof(T);
-  }
-
-  template <int output_tile_rows, int output_tile_cols, int kr, int kc>
-  template <typename T>
-  WinogradGEMM<output_tile_rows, output_tile_cols, kr, kc>::OutputTransform<T>::OutputTransform(
+/***************************************************************************/
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  OutputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::OutputTransform(
     const T* const matrix_base,
     const int matrix_stride,
     const int matrix_row_stride,
@@ -171,26 +160,24 @@ namespace winograd
   ) : _matrix_base(matrix_base), _biases(biases),
       _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
       _outptr(output), _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols),
-      _n_channels(n_channels), _tile_M(iceildiv(n_rows, output_tile_rows)),
-      _tile_N(iceildiv(n_cols, output_tile_cols)),
+      _n_channels(n_channels), _tile_M(iceildiv(n_rows, OutputTileRows)),
+      _tile_N(iceildiv(n_cols, OutputTileCols)),
       _out_col_stride(out_col_stride ? out_col_stride : n_channels),
       _out_row_stride(out_row_stride ? out_row_stride : n_cols * _out_col_stride),
       _out_batch_stride(out_batch_stride ? out_batch_stride : n_rows * _out_row_stride)
   {
   }
 
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  unsigned int WinogradGEMM<otr, otc, kr, kc>::OutputTransform<T>::get_window() const
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  unsigned int OutputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::get_window() const
   {
     // The final window includes the tail, all other windows will be a multiple
     // of the window block in size.
     return iceildiv(_n_channels, WINDOW_BLOCK);
   }
 
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  void WinogradGEMM<otr, otc, kr, kc>::OutputTransform<T>::run(
+template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void OutputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::run(
     const unsigned int start, const unsigned int stop
   )
   {
@@ -220,5 +207,72 @@ namespace winograd
       (_biases != nullptr) ? _biases + start_channel : nullptr,
       _outptr + start_channel
     );
+  }
+
+ template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void OutputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::execute(
+    const int n_batches,
+    const int out_batch_stride,
+    const int n_rows,
+    const int out_row_stride,
+    const int n_cols,
+    const int out_col_stride,
+    const int n_channels,
+    const T* const matrix_base,
+    const int matrix_stride,
+    const int matrix_row_stride,
+    const T* const biases,
+    T* const output
+  )
+  {
+    Transform::execute(
+      n_batches, out_batch_stride,
+      n_rows, out_row_stride,
+      n_cols, out_col_stride, n_channels,
+      matrix_base, matrix_stride, matrix_row_stride,
+      biases, output
+    );
+  }
+
+  template <int KernelCols, int InnerTileCols, typename T>
+  typename OutputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::TileFn
+    OutputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::
+      get_tile_specialization(const int pad_bottom, const int pad_right)
+  {
+    (void) pad_bottom;
+
+    if (!pad_right)
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else
+    {
+      return tilefn_right_padded[pad_right - 1];
+    }
+  }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  typename OutputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::TileFn
+    OutputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::
+      get_tile_specialization(const int pad_bottom, const int pad_right)
+  {
+    if (!(pad_bottom || pad_right))
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else if (pad_bottom && !pad_right)
+    {
+      return tilefn_bottom_padded[pad_bottom - 1];
+    }
+    else if (!pad_bottom && pad_right)
+    {
+      return tilefn_right_padded[pad_right - 1];
+    }
+    else
+    {
+      return tilefn_generic;
+    }
   }
 }  // namespace winograd

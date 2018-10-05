@@ -23,73 +23,34 @@
  */
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/output.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_output_transform.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
 
-namespace winograd
+namespace
 {
 
-using Transform = WinogradGEMM<4, 4, 3, 3>::OutputTransform<float>;
-
-template <>
-template <>
-int Transform::ops_performed(const Tensor4DShape &shape)
-{
-  // NOTE: Cost in FLOPs rather than instructions or uops.
-  const int tile_M = iceildiv(shape.n_rows, 4);
-  const int tile_N = iceildiv(shape.n_cols, 4);
-  return 170 * tile_M * tile_N * shape.n_channels;
-}
-
-/* F(4x4, 3x3) constructs 4x4 output tiles from a 3x3 convolution. Since we use
- * enough tiles to cover the output space each output tile may contain up to 3
- * padded values to the right and bottom columns or rows of the tile, e.g.:
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |_______|   |______X|  |____X_X|  |__X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*      ________    ________   ________   ________
-*     |       |   |      X|  |    X X|  |  X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X X X X|   |X X X X|  |X X X X|  |X X X X|
-*     |X_X_X_X|   |X_X_X_X|  |X_X_X_X|  |X_X_X_X|
-*
-*
-* We provide a specialised output transform for each of these instances.
-*/
-template <>
-template <>
-template <int pad_bottom, int pad_right>
-void Transform::process_tile(
+template <bool Specialized, int PadBottom=0, int PadRight=0>
+void winograd_output_transform_4x4_3x3_fp32_process_tile(
   const int n_channels,
   const float* const matrix_base,
   const int matrix_stride,
   const float* const biases,
   float* const output,
   const int output_row_stride,
-  const int output_col_stride
+  const int output_col_stride,
+  const int _pad_bottom,
+  const int _pad_right
 )
 {
-  constexpr int cells_i = 4 - pad_bottom;
-  constexpr int cells_j = 4 - pad_right;
+  const int pad_bottom = Specialized ? PadBottom : _pad_bottom;
+  const int pad_right = Specialized ? PadRight : _pad_right;
+  constexpr int TileRows = 4, TileCols = 4;
+
+  const int cells_i = TileRows - pad_bottom;
+  const int cells_j = TileCols - pad_right;
 
   // Construct a map to the output cells
-  float *outptrs[cells_i][cells_j];
+  float *outptrs[TileRows][TileCols];
   for (int i = 0; i < cells_i; i++)
   {
     for (int j = 0; j < cells_j; j++)
@@ -437,35 +398,31 @@ void Transform::process_tile(
   }
 }
 
-template <>
-template <>
-const Transform::TileFn Transform::tile_fns[max_pad_bottom][max_pad_right] =
+}  // namespace (anonymous)
+
+namespace winograd
 {
-  {
-    Transform::template process_tile<0, 0>,
-    Transform::template process_tile<0, 1>,
-    Transform::template process_tile<0, 2>,
-    Transform::template process_tile<0, 3>,
-  },
-  {
-    Transform::template process_tile<1, 0>,
-    Transform::template process_tile<1, 1>,
-    Transform::template process_tile<1, 2>,
-    Transform::template process_tile<1, 3>,
-  },
-  {
-    Transform::template process_tile<2, 0>,
-    Transform::template process_tile<2, 1>,
-    Transform::template process_tile<2, 2>,
-    Transform::template process_tile<2, 3>,
-  },
-  {
-    Transform::template process_tile<3, 0>,
-    Transform::template process_tile<3, 1>,
-    Transform::template process_tile<3, 2>,
-    Transform::template process_tile<3, 3>,
-  }
+using Tiles = OutputTransformImplTiles<3, 3, 6, 6, float>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_generic = winograd_output_transform_4x4_3x3_fp32_process_tile<false>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_unpadded = winograd_output_transform_4x4_3x3_fp32_process_tile<true>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_bottom_padded[n_pad_bottom] = {
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 1, 0>,
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 2, 0>,
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 3, 0>,
 };
 
-template struct WinogradGEMM<4, 4, 3, 3>::OutputTransform<float>;
+template <>
+const Tiles::TileFn Tiles::tilefn_right_padded[n_pad_right] = {
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 0, 1>,
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 0, 2>,
+  winograd_output_transform_4x4_3x3_fp32_process_tile<true, 0, 3>,
+};
+
+template class OutputTransform<3, 3, 6, 6, float>;
 }  // namespace winograd
