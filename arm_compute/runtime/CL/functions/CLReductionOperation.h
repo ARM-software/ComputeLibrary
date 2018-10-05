@@ -53,7 +53,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F16/F32. Data layouts supported: NCHW.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in]  op     Reduction operation to perform.
@@ -62,7 +62,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperation.
      *
-     * @param[in] input  Source tensor info. Data types supported: F16/F32. Data layouts supported: NCHW.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
      * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in] op     Reduction operation to perform.
@@ -80,6 +80,8 @@ private:
     std::unique_ptr<CLReductionOperationKernel[]> _reduction_kernels_vector{ nullptr };
     std::unique_ptr<CLFillBorderKernel[]>         _border_handlers_vector{ nullptr };
     unsigned int                                  _num_of_stages;
+    unsigned int                                  _reduction_axis;
+    bool                                          _is_quantized;
 };
 }
 #endif /*__ARM_COMPUTE_CLREDUCTIONOPERATION_H__ */

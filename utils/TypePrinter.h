@@ -1220,8 +1220,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
 {
     switch(op)
     {
+        case ReductionOperation::SUM:
+            os << "SUM";
+            break;
         case ReductionOperation::SUM_SQUARE:
             os << "SUM_SQUARE";
+            break;
+        case ReductionOperation::MEAN_SUM:
+            os << "MEAN_SUM";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

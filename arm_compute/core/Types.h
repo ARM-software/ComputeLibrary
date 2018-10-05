@@ -522,6 +522,7 @@ enum class ReductionOperation
 {
     SUM_SQUARE, /**< Sum of squares */
     SUM,        /**< Sum */
+    MEAN_SUM,   /**< Mean of sum */
 };
 
 /** The normalization type used for the normalization layer */
