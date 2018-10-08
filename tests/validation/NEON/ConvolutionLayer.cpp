@@ -47,9 +47,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>       rel_tolerance_f32(0.01f);       /**< Relative tolerance for FP32 types */
-const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);      /**< Absolute tolerance for FP32 types */
-const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f); /**< Absolute tolerance for FP32 types */
+const RelativeTolerance<float> rel_tolerance_f32(0.01f);              /**< Relative tolerance for FP32 types */
+const RelativeTolerance<float> rel_tolerance_winograd_3x3_f32(0.05f); /**< Relative tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);             /**< Absolute tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f);        /**< Absolute tolerance for FP32 types */
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
@@ -274,7 +275,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, frame
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, abs_tolerance_f32);
+    // floating point arithmetic the Winograd results will not be exactly the same as direct convolution, especially for big shapes
+    validate(Accessor(_target), _reference, rel_tolerance_winograd_3x3_f32, 0.f, float(abs_tolerance_f32));
 }
 TEST_SUITE_END() // Conv3x3
 
