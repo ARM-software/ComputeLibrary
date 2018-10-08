@@ -42,7 +42,9 @@ namespace framework
 {
 Framework::Framework()
 {
+#if defined(__linux__) && !defined(__ANDROID__)
     print_cpu_info(std::cout);
+#endif /*#if defined(__linux__) && !defined(__ANDROID__)*/
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
@@ -142,6 +144,7 @@ bool Framework::has_test_info() const
     return !_test_info.empty();
 }
 
+#if defined(__linux__) && !defined(__ANDROID__)
 void Framework::print_cpu_info(std::ostream &os) const
 {
     const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
@@ -153,6 +156,7 @@ void Framework::print_cpu_info(std::ostream &os) const
         os << "CPU" << j << " : " << cpu_model_to_string(model) << std::endl;
     }
 }
+#endif /*#if defined(__linux__) && !defined(__ANDROID__)*/
 
 void Framework::print_test_info(std::ostream &os) const
 {
