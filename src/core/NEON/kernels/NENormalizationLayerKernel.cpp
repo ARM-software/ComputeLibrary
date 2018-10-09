@@ -195,7 +195,6 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
     // We account padding across X only and we iterate over rows
     const int min_left   = (dim == 2) ? 0 : -static_cast<int>(border_size().left);
     const int max_right  = (dim == 2) ? total_size : total_size + border_size().left;
-    const int min_top    = 0;
     const int max_bottom = _input->info()->dimension(dim_y) - 1;
 
     if(dt == DataType::F32)
@@ -209,7 +208,7 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
             // Get range to normalize
             const int current_row   = do_2D_norm ? id[dim_y] : 0;
             const int current_slice = id[dim];
-            const int first_row     = do_2D_norm ? std::max(current_row - radius, min_top) : 0;
+            const int first_row     = do_2D_norm ? std::max(current_row - radius, 0) : 0;
             const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
             const int first_slice   = std::max(current_slice - radius, min_left);
             const int last_slice    = std::min(current_slice + radius, max_right);
@@ -246,7 +245,7 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
             // Get range to normalize
             const int current_row   = do_2D_norm ? id[dim_y] : 0;
             const int current_slice = id[dim];
-            const int first_row     = do_2D_norm ? std::max(current_row - radius, min_top) : 0;
+            const int first_row     = do_2D_norm ? std::max(current_row - radius, 0) : 0;
             const int last_row      = do_2D_norm ? std::min(current_row + radius, max_bottom) : 0;
             const int first_slice   = std::max(current_slice - radius, min_left);
             const int last_slice    = std::min(current_slice + radius, max_right);
