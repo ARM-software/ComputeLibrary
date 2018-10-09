@@ -320,10 +320,12 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
         hwcaps_fp16_support = true;
     }
 
+#if defined(__aarch64__)
     if((hwcaps & HWCAP_ASIMDDP) != 0)
     {
         hwcaps_dot_support = true;
     }
+#endif /* defined(__aarch64__) */
 
     const unsigned int max_cpus = get_max_cpus();
     cpuinfo.set_cpu_num(max_cpus);
