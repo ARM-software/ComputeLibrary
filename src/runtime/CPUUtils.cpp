@@ -339,17 +339,18 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
         populate_models_cpuinfo(percpu);
     }
     int j(0);
-    // Update dot product and FP16 support if all CPUs support these features:
-    bool all_support_dot  = true;
-    bool all_support_fp16 = true;
+    // Update dot product and FP16 support if one of the CPUs support these features
+    // We assume that the system does not have mixed architectures
+    bool one_supports_dot  = false;
+    bool one_supports_fp16 = false;
     for(const auto &v : percpu)
     {
-        all_support_dot &= model_supports_dot(v);
-        all_support_fp16 &= model_supports_fp16(v);
+        one_supports_dot |= model_supports_dot(v);
+        one_supports_fp16 |= model_supports_fp16(v);
         cpuinfo.set_cpu_model(j++, v);
     }
-    cpuinfo.set_dotprod(all_support_dot || hwcaps_dot_support);
-    cpuinfo.set_fp16(all_support_fp16 || hwcaps_fp16_support);
+    cpuinfo.set_dotprod(one_supports_dot || hwcaps_dot_support);
+    cpuinfo.set_fp16(one_supports_fp16 || hwcaps_fp16_support);
 #else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
