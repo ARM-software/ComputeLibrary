@@ -161,12 +161,6 @@ public:
      */
     bool has_test_info() const;
 
-    /** Print CPU info
-     *
-     * @param[out] os Output stream.
-     */
-    void print_cpu_info(std::ostream &os) const;
-
     /** Print test info.
      *
      * @param[out] os Output stream.
