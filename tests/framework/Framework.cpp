@@ -333,6 +333,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const FileNotFound &error)
         {
+            profiler.test_stop();
             if(_error_on_missing_assets)
             {
                 if(_log_level >= LogLevel::ERRORS)
@@ -366,6 +367,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
+            profiler.test_stop();
             if(_log_level >= error.level())
             {
                 func_on_all_printers([&](Printer * p)
@@ -384,6 +386,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 std::stringstream stream;
@@ -405,6 +408,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 func_on_all_printers([&](Printer * p)
@@ -422,6 +426,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(...)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 func_on_all_printers([&](Printer * p)
