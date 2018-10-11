@@ -53,6 +53,16 @@ public:
      * @param[in] pool Pool to be managed
      */
     virtual void register_pool(std::unique_ptr<IMemoryPool> pool) = 0;
+    /** Releases a free pool from the managed pools
+     *
+     * @return The released pool in case a free pool existed else nullptr
+     */
+    virtual std::unique_ptr<IMemoryPool> release_pool() = 0;
+    /** Clears all pools managed by the pool manager
+     *
+     *  @pre All pools must be unoccupied
+     */
+    virtual void clear_pools() = 0;
     /** Returns the total number of pools managed by the pool manager
      *
      * @return Number of managed pools

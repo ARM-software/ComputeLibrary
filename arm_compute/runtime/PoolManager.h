@@ -56,7 +56,9 @@ public:
     IMemoryPool *lock_pool() override;
     void unlock_pool(IMemoryPool *pool) override;
     void register_pool(std::unique_ptr<IMemoryPool> pool) override;
-    size_t num_pools() const override;
+    std::unique_ptr<IMemoryPool> release_pool() override;
+    void                         clear_pools() override;
+    size_t                       num_pools() const override;
 
 private:
     std::list<std::unique_ptr<IMemoryPool>> _free_pools;     /**< List of free pools */

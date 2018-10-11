@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@
 
 namespace arm_compute
 {
+// Forward declarations
+class IAllocator;
 class IMemoryGroup;
 
 /** Memory manager interface to handle allocations of backing memory */
@@ -49,8 +51,19 @@ public:
      * @return The pool manager
      */
     virtual IPoolManager *pool_manager() = 0;
-    /** Finalize memory manager */
-    virtual void finalize() = 0;
+    /** Populates the pool manager with the given number of pools
+     *
+     * @pre Pool manager must be empty
+     *
+     * @param[in] allocator Allocator to use for the backing allocations
+     * @param[in] num_pools Number of pools to create
+     */
+    virtual void populate(IAllocator &allocator, size_t num_pools) = 0;
+    /** Clears the pool manager
+     *
+     * @pre All pools must be unoccupied
+     */
+    virtual void clear() = 0;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_IMEMORYMANAGER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,23 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MEMORYMANAGERONDEMAND_H__
-#define __ARM_COMPUTE_MEMORYMANAGERONDEMAND_H__
+#ifndef __ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__
+#define __ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__
 
 #include "arm_compute/runtime/IMemoryManager.h"
 
-#include "IAllocator.h"
 #include "arm_compute/runtime/ILifetimeManager.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
 #include "arm_compute/runtime/IPoolManager.h"
 
 #include <memory>
-#include <set>
 
 namespace arm_compute
 {
-class IAllocator;
-
 /** On-demand memory manager */
 class MemoryManagerOnDemand : public IMemoryManager
 {
@@ -52,33 +48,16 @@ public:
     MemoryManagerOnDemand(MemoryManagerOnDemand &&) = default;
     /** Allow instances of this class to be moved */
     MemoryManagerOnDemand &operator=(MemoryManagerOnDemand &&) = default;
-    /** Sets the number of pools to create
-     *
-     * @param[in] num_pools Number of pools
-     */
-    void set_num_pools(unsigned int num_pools);
-    /** Sets the allocator to be used for configuring the pools
-     *
-     * @param[in] allocator Allocator to use
-     */
-    void set_allocator(IAllocator *allocator);
-    /** Checks if the memory manager has been finalized
-     *
-     * @return True if the memory manager has been finalized else false
-     */
-    bool is_finalized() const;
 
     // Inherited methods overridden:
     ILifetimeManager *lifetime_manager() override;
     IPoolManager     *pool_manager() override;
-    void              finalize() override;
+    void populate(IAllocator &allocator, size_t num_pools) override;
+    void clear() override;
 
 private:
     std::shared_ptr<ILifetimeManager> _lifetime_mgr; /**< Lifetime manager */
     std::shared_ptr<IPoolManager>     _pool_mgr;     /**< Memory pool manager */
-    IAllocator                       *_allocator;    /**< Allocator used for backend allocations */
-    bool                              _is_finalized; /**< Flag that notes if the memory manager has been finalized */
-    unsigned int                      _num_pools;    /**< Number of pools to create */
 };
 } // arm_compute
-#endif /*__ARM_COMPUTE_MEMORYMANAGERONDEMAND_H__ */
+#endif /*__ARM_COMPUTE_MEMORY_MANAGER_ON_DEMAND_H__ */

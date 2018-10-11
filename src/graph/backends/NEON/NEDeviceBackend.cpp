@@ -86,6 +86,7 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
         mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
         mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
+        mm_ctx.allocator   = &_allocator;
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
@@ -155,8 +156,6 @@ std::shared_ptr<arm_compute::IMemoryManager> NEDeviceBackend::create_memory_mana
     }
     auto pool_mgr = std::make_shared<PoolManager>();
     auto mm       = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
-
-    mm->set_allocator(&_allocator);
 
     return mm;
 }

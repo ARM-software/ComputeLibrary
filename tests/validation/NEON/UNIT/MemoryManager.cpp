@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,10 +74,8 @@ TEST_CASE(BlobMemoryManagerSimpleWithinFunctionLevel, framework::DatasetMode::AL
     ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Finalize memory manager
-    mm->set_allocator(&allocator);
-    mm->set_num_pools(1);
-    mm->finalize();
-    ARM_COMPUTE_EXPECT(mm->is_finalized(), framework::LogLevel::ERRORS);
+    mm->populate(allocator, 1 /* num_pools */);
+    ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
 
     // Fill tensors
@@ -86,6 +84,10 @@ TEST_CASE(BlobMemoryManagerSimpleWithinFunctionLevel, framework::DatasetMode::AL
     // Compute functions
     norm_layer_1.run();
     norm_layer_2.run();
+
+    // Clear manager
+    mm->clear();
+    ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 0, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END()
