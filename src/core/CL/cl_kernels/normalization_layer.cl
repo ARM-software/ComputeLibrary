@@ -92,6 +92,7 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
     STORE_OP(normalized_pixel, 0, (__global DATA_TYPE *)out.ptr);
 }
 
+#if defined(WIDTH_SIZE)
 /** Apply in-map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
@@ -133,7 +134,7 @@ __kernel void normalization_layer_in_map(TENSOR3D_DECLARATION(input),
 
     const int current_col = get_global_id(0) << 2;
     const int left_pos    = max(-(int)RADIUS, -3 - current_col);
-    const int right_pos   = min((int)RADIUS, (int)((get_global_size(0) << 2) + 3 - 1 - current_col));
+    const int right_pos   = min((int)RADIUS, (int)WIDTH_SIZE - 1 - current_col);
 
 #if defined(IN_MAP_2D)
     const int current_row = get_global_id(1);
@@ -168,3 +169,4 @@ __kernel void normalization_layer_in_map(TENSOR3D_DECLARATION(input),
 
     STORE_OP(normalized_pixel, 0, (__global DATA_TYPE *)out.ptr);
 }
+#endif // defined(WIDTH_SIZE)

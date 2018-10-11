@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -61,29 +62,39 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *input_squ
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *input_squared, ITensorInfo *output, const NormalizationLayerInfo &norm_info)
 {
-    unsigned int       num_elems_processed_per_iteration = 16 / input->element_size();
-    const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
-    const unsigned int norm_idx                          = get_normalization_dimension_index(input->data_layout(), norm_info);
-    const unsigned int num_rows                          = (norm_info.type() == NormType::IN_MAP_2D) ? norm_info.norm_size() : 1;
-    const unsigned int border_width                      = (norm_idx == 2) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
-    BorderSize         border_size                       = BorderSize(0, border_width);
-    bool               window_changed                    = false;
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, *input->clone());
+
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+
+    const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
+    const bool         is_norm_accross_width = norm_idx == 0;
+
+    const unsigned int border_width = is_norm_accross_width ? num_elems_processed_per_iteration - 1 : 0;
+    const BorderSize   border_size  = BorderSize(0, border_width);
 
     // Configure window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    bool   window_changed = false;
 
-    AccessWindowRectangle input_access(input, -border_size.left, 0, num_elems_read_per_iteration, num_rows);
-    AccessWindowRectangle input_squared_access(input_squared, -border_size.left, 0, num_elems_read_per_iteration, num_rows);
+    if(is_norm_accross_width)
+    {
+        AccessWindowStatic input_access(input, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
+        AccessWindowStatic input_squared_access(input_squared, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
+        window_changed = window_changed || update_window_and_padding(win, input_access, input_squared_access);
+    }
+    else
+    {
+        AccessWindowHorizontal input_access(input, -border_size.left, num_elems_processed_per_iteration);
+        AccessWindowHorizontal input_squared_access(input_squared, -border_size.left, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, input_access, input_squared_access);
+    }
 
     if(output->total_size() != 0)
     {
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = update_window_and_padding(win, input_access, input_squared_access, output_access);
+        window_changed = window_changed || update_window_and_padding(win, output_access);
         output_access.set_valid_region(win, input->valid_region());
-    }
-    else
-    {
-        window_changed = update_window_and_padding(win, input_access, input_squared_access);
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -110,8 +121,11 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), input_squared->info(), output->info(), norm_info));
 
-    const unsigned int norm_idx     = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
-    const unsigned int border_width = (norm_idx == 2) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
+    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
+
+    const unsigned int norm_idx              = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
+    const bool         is_norm_accross_width = norm_idx == 0;
+    const unsigned int border_width          = is_norm_accross_width ? num_elems_processed_per_iteration - 1 : 0;
 
     _input         = input;
     _input_squared = input_squared;
@@ -190,11 +204,10 @@ void NENormalizationLayerKernel::normalize_float(const Window &window)
 
     const int dim_y                = 1;
     const int radius               = _norm_info.norm_size() / 2;
-    const int total_size           = _input->info()->dimension(dim) - 1;
     const int input_squared_stride = _input_squared->info()->strides_in_bytes()[dim];
     // We account padding across X only and we iterate over rows
     const int min_left   = (dim == 2) ? 0 : -static_cast<int>(border_size().left);
-    const int max_right  = (dim == 2) ? total_size : total_size + border_size().left;
+    const int max_right  = _input->info()->dimension(dim) - 1;
     const int max_bottom = _input->info()->dimension(dim_y) - 1;
 
     if(dt == DataType::F32)
