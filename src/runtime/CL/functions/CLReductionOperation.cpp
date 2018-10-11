@@ -119,7 +119,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
         for(unsigned int i = 0; i < _num_of_stages - 1; i++)
         {
             shape.set(0, ceil(shape.x() / 128.f));
-            _sums_vector[i].allocator()->init(TensorInfo(shape, input->info()->num_channels(), input->info()->data_type()));
+            _sums_vector[i].allocator()->init(input->info()->clone()->set_tensor_shape(shape));
         }
 
         // Apply ReductionOperation only on first kernel

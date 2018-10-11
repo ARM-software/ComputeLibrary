@@ -189,7 +189,12 @@ __kernel void reduction_operation_y(
 
     for(unsigned int y = 0; y < HEIGHT; ++y)
     {
-        res += CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
+        in = CONVERT(vload16(0, (__global DATA_TYPE *)offset(&src, 0, y)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+#if defined(SUM_SQUARE)
+        in *= in;
+#endif // SQRSUM
+        res += in;
     }
 
 #if defined(MEAN)
@@ -236,7 +241,12 @@ __kernel void reduction_operation_z(
 
     for(unsigned int z = 0; z < DEPTH; ++z)
     {
-        res += CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
+        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+#if defined(SUM_SQUARE)
+        in *= in;
+#endif // SQRSUM
+        res += in;
     }
 
 #if defined(MEAN)
@@ -288,7 +298,12 @@ __kernel void reduction_operation_w(
 
     for(unsigned int w = 0; w < BATCH; ++w)
     {
-        res += CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
+        in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, 0, 0, w)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+#if defined(SUM_SQUARE)
+        in *= in;
+#endif // SQRSUM
+        res += in;
     }
 
 #if defined(MEAN)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ SimpleTensor<T> l2_normalize(const SimpleTensor<T> &src, unsigned int axis, floa
         {
             const T *src_row_ptr         = src.data() + du * elems;
             T       *dst_row_ptr         = dst.data() + du * elems;
-            const T  normalization_value = std::sqrt(std::max(sum[du], epsilon));
+            const T  normalization_value = sqrt(std::max(sum[du], static_cast<T>(epsilon)));
             std::transform(src_row_ptr, src_row_ptr + elems, dst_row_ptr, [normalization_value](T val)
             {
                 return val / normalization_value;
@@ -82,6 +82,7 @@ SimpleTensor<T> l2_normalize(const SimpleTensor<T> &src, unsigned int axis, floa
 }
 
 template SimpleTensor<float> l2_normalize(const SimpleTensor<float> &src, unsigned int axis, float epsilon);
+template SimpleTensor<half> l2_normalize(const SimpleTensor<half> &src, unsigned int axis, float epsilon);
 } // namespace reference
 } // namespace validation
 } // namespace test

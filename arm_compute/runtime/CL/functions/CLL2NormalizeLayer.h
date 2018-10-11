@@ -53,18 +53,18 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW/NCHW.
      * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.
-     * @param[in]  axis    Axis along which to reduce. Supported reduction axis : 0
+     * @param[in]  axis    Axis along which to reduce. Supported reduction axis : 0, 2
      * @param[in]  epsilon (Optional) Lower bound value for the normalization.
      */
     void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, float epsilon = 1e-12);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayer.
      *
-     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW/NCHW.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: Same as @p input.
-     * @param[in] axis    Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] axis    Axis along which to reduce. Supported reduction axis : 0, 2,
      * @param[in] epsilon (Optional) Lower bound value for the normalization.
      *
      * @return a status

@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-/** This kernel performs reduction given an operation.
+/** This kernel performs l2 normalization. (NCHW)
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The data size must be passed at compile time using -DDATA_SIZE e.g. -DDATA_SIZE=32
@@ -42,7 +42,7 @@
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  epsilon                           Epsilon value
  */
-__kernel void l2_normalize(
+__kernel void l2_normalize_nchw(
     VECTOR_DECLARATION(src),
     VECTOR_DECLARATION(sum),
     VECTOR_DECLARATION(dst),
@@ -55,7 +55,53 @@ __kernel void l2_normalize(
     VEC_DATA_TYPE(DATA_TYPE, 16)
     in = vload16(0, (__global DATA_TYPE *)src.ptr);
     VEC_DATA_TYPE(DATA_TYPE, 16)
-    normalize_value = (VEC_DATA_TYPE(DATA_TYPE, 16))native_rsqrt(fmax(((__global DATA_TYPE *)sum.ptr)[0], epsilon));
+    normalize_value = (VEC_DATA_TYPE(DATA_TYPE, 16))rsqrt(fmax(((__global DATA_TYPE *)sum.ptr)[0], epsilon));
+
+    vstore16(in * normalize_value, 0, (__global DATA_TYPE *)dst.ptr);
+}
+
+/** This kernel performs l2 normalization. (NHWC)
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data size must be passed at compile time using -DDATA_SIZE e.g. -DDATA_SIZE=32
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[in]  sum_ptr                           Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  sum_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  sum_step_x                        sum_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  sum_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  sum_step_y                        sum_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  sum_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  epsilon                           Epsilon value
+ */
+__kernel void l2_normalize_nhwc(
+    IMAGE_DECLARATION(src),
+    IMAGE_DECLARATION(sum),
+    IMAGE_DECLARATION(dst),
+    DATA_TYPE epsilon)
+{
+    Image src = CONVERT_TO_IMAGE_STRUCT(src);
+    Image sum = CONVERT_TO_IMAGE_STRUCT(sum);
+    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    in = vload16(0, (__global DATA_TYPE *)src.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    sums = vload16(0, (__global DATA_TYPE *)sum.ptr);
+
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    normalize_value = (VEC_DATA_TYPE(DATA_TYPE, 16))rsqrt(fmax(sums, epsilon));
 
     vstore16(in * normalize_value, 0, (__global DATA_TYPE *)dst.ptr);
 }

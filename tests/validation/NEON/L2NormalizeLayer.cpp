@@ -85,14 +85,18 @@ using NEL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<Tensor, Acce
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                       framework::dataset::make("Axis", { 0 })),
+                               framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                       framework::dataset::make("Axis", { 0 })),
+                               framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

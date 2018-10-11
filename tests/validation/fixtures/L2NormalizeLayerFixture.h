@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,10 @@ class L2NormalizeLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, unsigned int axis, float epsilon)
+    void setup(TensorShape shape, DataType data_type, DataLayout data_layout, unsigned int axis, float epsilon)
     {
-        _target    = compute_target(shape, data_type, axis, epsilon);
-        _reference = compute_reference(shape, data_type, axis, epsilon);
+        _target    = compute_target(shape, data_type, data_layout, axis, epsilon);
+        _reference = compute_reference(shape, data_type, data_layout, axis, epsilon);
     }
 
 protected:
@@ -58,11 +58,16 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type, unsigned int axis, float epsilon)
+    TensorType compute_target(TensorShape shape, DataType data_type, DataLayout data_layout, unsigned int axis, float epsilon)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type);
-        TensorType dst = create_tensor<TensorType>(shape, data_type);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType l2_norm_func;
@@ -87,8 +92,25 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, unsigned int axis, float epsilon)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, DataLayout data_layout, unsigned int axis, float epsilon)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            switch(axis)
+            {
+                case 0:
+                    axis = 2;
+                    break;
+                case 1:
+                    axis = 0;
+                    break;
+                case 2:
+                    axis = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
         // Create reference
         SimpleTensor<T> src{ shape, data_type };
 

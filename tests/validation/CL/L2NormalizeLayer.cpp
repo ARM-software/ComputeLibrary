@@ -44,6 +44,10 @@ namespace
 {
 /** Tolerance for float operations */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
+constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);
+
+auto data = concat(combine(framework::dataset::make("DataLayout", { DataLayout::NCHW }), framework::dataset::make("Axis", { 0 })), combine(framework::dataset::make("DataLayout", { DataLayout::NHWC }),
+                   framework::dataset::make("Axis", { 1 })));
 
 } // namespace
 
@@ -58,7 +62,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
-                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 0
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 3
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
     framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
@@ -69,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            })),
-    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 1U, 0U })),
+    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 4U, 0U })),
     framework::dataset::make("Expected",   { false, false, false, false, false, false, true })),
     input_info, output_info, axis, expected)
 {
@@ -87,22 +91,36 @@ using CLL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<CLTensor, CL
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), data), framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), framework::dataset::make("Epsilon", { 1e-12 })))
+                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), data), framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), data), framework::dataset::make("Epsilon", { 1e-6 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), data), framework::dataset::make("Epsilon", { 1e-6 })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // L2NormalizeLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

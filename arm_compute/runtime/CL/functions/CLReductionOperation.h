@@ -53,18 +53,18 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/F16/F32.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
-     * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
+     * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
      * @param[in]  op     Reduction operation to perform.
      */
     void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperation.
      *
-     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/F16/F32.
      * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
-     * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0, 1, 2, 3
      * @param[in] op     Reduction operation to perform.
      *
      * @return a status

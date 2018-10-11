@@ -39,36 +39,39 @@ namespace reference
 namespace
 {
 template <typename T>
-struct square
+T reduce_operation(T *ptr, int reduce_elements, ReductionOperation op, int stride)
 {
-    T operator()(const T &lhs, const T &rhs) const
-    {
-        return (lhs + rhs * rhs);
-    }
-};
+    using type = typename std::remove_cv<T>::type;
+    auto res   = type(0);
 
-template <typename T>
-struct sum
-{
-    T operator()(const T &lhs, const T &rhs) const
+    if(std::is_integral<type>::value)
     {
-        return (lhs + rhs);
+        uint32_t int_res = 0;
+        for(int i = 0; i < reduce_elements; ++i)
+        {
+            auto elem = static_cast<uint32_t>(*(ptr + stride * i));
+            int_res += (op == ReductionOperation::SUM_SQUARE) ? elem * elem : elem;
+        }
+        if(op == ReductionOperation::MEAN_SUM && reduce_elements > 0)
+        {
+            int_res /= reduce_elements;
+        }
+        res = saturate_cast<type>(int_res);
     }
-};
+    else
+    {
+        for(int i = 0; i < reduce_elements; ++i)
+        {
+            auto elem = *(ptr + stride * i);
+            res += (op == ReductionOperation::SUM_SQUARE) ? elem * elem : elem;
+        }
+        if(op == ReductionOperation::MEAN_SUM && reduce_elements > 0)
+        {
+            res /= reduce_elements;
+        }
+    }
 
-template <typename T>
-T reduce_operation(T *ptr, int reduce_elements, ReductionOperation op)
-{
-    switch(op)
-    {
-        case ReductionOperation::SUM_SQUARE:
-            return std::accumulate(ptr, ptr + reduce_elements, static_cast<T>(0), square<T>());
-        case ReductionOperation::SUM:
-        case ReductionOperation::MEAN_SUM:
-            return std::accumulate(ptr, ptr + reduce_elements, static_cast<T>(0), sum<T>());
-        default:
-            ARM_COMPUTE_ERROR("Unsupported reduction operation");
-    }
+    return res;
 }
 } // namespace
 
@@ -77,44 +80,22 @@ SimpleTensor<T> reduction_operation(const SimpleTensor<T> &src, const TensorShap
 {
     // Create reference
     SimpleTensor<T>    dst{ dst_shape, src.data_type(), 1, src.quantization_info() };
-    const unsigned int src_width  = src.shape().x();
-    const unsigned int src_height = src.shape().y();
-    const unsigned int src_depth  = src.shape().z();
-    const unsigned int src_batch  = src.shape()[3];
-    const bool         mean       = op == ReductionOperation::MEAN_SUM;
+    const unsigned int src_width    = src.shape().x();
+    const unsigned int src_height   = src.shape().y();
+    const unsigned int src_depth    = src.shape().z();
+    const unsigned int src_batch    = src.shape()[3];
+    const int          reduce_elems = src.shape()[axis];
 
     switch(axis)
     {
         case 0:
         {
-            const int          reduce_elems = src.shape()[axis];
-            const unsigned int upper_dims   = src.shape().total_size_upper(1);
+            const unsigned int upper_dims = src.shape().total_size_upper(1);
             for(unsigned int du = 0; du < upper_dims; ++du)
             {
-                if(std::is_integral<T>::value)
-                {
-                    uint32_t res = 0;
-                    for(unsigned int x = 0; x < src_width; ++x)
-                    {
-                        res += static_cast<uint32_t>(src[du * src_width + x]);
-                    }
-                    if(mean && src_width > 0)
-                    {
-                        res /= src_width;
-                    }
-                    dst[du] = saturate_cast<uint8_t>(res);
-                }
-                else
-                {
-                    const T *src_row_ptr = src.data() + du * reduce_elems;
-
-                    auto res = reduce_operation(src_row_ptr, reduce_elems, op);
-                    if(mean && src_width > 0)
-                    {
-                        res /= src_width;
-                    }
-                    dst[du] = res;
-                }
+                const T *src_row_ptr = src.data() + du * reduce_elems;
+                auto     res         = reduce_operation(src_row_ptr, reduce_elems, op, 1);
+                dst[du]              = res;
             }
         }
         break;
@@ -125,32 +106,11 @@ SimpleTensor<T> reduction_operation(const SimpleTensor<T> &src, const TensorShap
             {
                 for(unsigned int x = 0; x < src_width; ++x)
                 {
-                    if(std::is_integral<T>::value)
-                    {
-                        uint32_t res = 0;
-                        for(unsigned int y = 0; y < src_height; ++y)
-                        {
-                            res += static_cast<uint32_t>(src[du * src_height * src_width + y * src_width + x]);
-                        }
-                        if(mean && src_height > 0)
-                        {
-                            res /= src_height;
-                        }
-                        dst[du * src_width + x] = saturate_cast<uint8_t>(res);
-                    }
-                    else
-                    {
-                        auto res = T(0);
-                        for(unsigned int y = 0; y < src_height; ++y)
-                        {
-                            res += src[du * src_height * src_width + y * src_width + x];
-                        }
-                        if(mean && src_height > 0)
-                        {
-                            res /= src_height;
-                        }
-                        dst[du * src_width + x] = res;
-                    }
+                    const int in_offset   = du * src_height * src_width + x;
+                    const int out_offset  = du * src_width + x;
+                    const T *src_row_ptr = src.data() + in_offset;
+                    auto      res         = reduce_operation(src_row_ptr, reduce_elems, op, src_width);
+                    dst[out_offset]       = res;
                 }
             }
         }
@@ -164,32 +124,11 @@ SimpleTensor<T> reduction_operation(const SimpleTensor<T> &src, const TensorShap
                 {
                     for(unsigned int y = 0; y < src_height; ++y)
                     {
-                        if(std::is_integral<T>::value)
-                        {
-                            uint32_t res = T(0);
-                            for(unsigned int z = 0; z < src_depth; ++z)
-                            {
-                                res += static_cast<uint32_t>(src[du * src_depth * src_height * src_width + z * src_height * src_width + y * src_width + x]);
-                            }
-                            if(mean && src_depth > 0)
-                            {
-                                res /= src_depth;
-                            }
-                            dst[du * src_width * src_height + y * src_width + x] = saturate_cast<uint8_t>(res);
-                        }
-                        else
-                        {
-                            auto res = T(0);
-                            for(unsigned int z = 0; z < src_depth; ++z)
-                            {
-                                res += src[du * src_depth * src_height * src_width + z * src_height * src_width + y * src_width + x];
-                            }
-                            if(mean && src_depth > 0)
-                            {
-                                res /= src_depth;
-                            }
-                            dst[du * src_width * src_height + y * src_width + x] = res;
-                        }
+                        const int in_offset   = du * src_depth * src_height * src_width + y * src_width + x;
+                        const int out_offset  = du * src_width * src_height + y * src_width + x;
+                        const T *src_row_ptr = src.data() + in_offset;
+                        auto      res         = reduce_operation(src_row_ptr, reduce_elems, op, src_height * src_width);
+                        dst[out_offset]       = res;
                     }
                 }
             }
@@ -206,34 +145,11 @@ SimpleTensor<T> reduction_operation(const SimpleTensor<T> &src, const TensorShap
                     {
                         for(unsigned int x = 0; x < src_width; ++x)
                         {
-                            if(std::is_integral<T>::value)
-                            {
-                                uint32_t res = 0;
-                                for(unsigned int w = 0; w < src_batch; ++w)
-                                {
-                                    res += static_cast<uint32_t>(src[du * src_batch * src_depth * src_height * src_width + w * src_width * src_height * src_depth + z * src_width * src_height + y * src_width + x]);
-                                }
-                                if(mean && src_batch > 0)
-                                {
-                                    res /= src_batch;
-                                }
-
-                                dst[du * src_depth * src_height * src_width + z * src_width * src_height + y * src_width + x] = saturate_cast<uint8_t>(res);
-                            }
-                            else
-                            {
-                                auto res = T(0);
-                                for(unsigned int w = 0; w < src_batch; ++w)
-                                {
-                                    res += src[du * src_batch * src_depth * src_height * src_width + w * src_width * src_height * src_depth + z * src_width * src_height + y * src_width + x];
-                                }
-                                if(mean && src_batch > 0)
-                                {
-                                    res /= src_batch;
-                                }
-
-                                dst[du * src_depth * src_height * src_width + z * src_width * src_height + y * src_width + x] = res;
-                            }
+                            const int in_offset   = du * src_batch * src_depth * src_height * src_width + z * src_width * src_height + y * src_width + x;
+                            const int out_offset  = du * src_depth * src_height * src_width + z * src_width * src_height + y * src_width + x;
+                            const T *src_row_ptr = src.data() + in_offset;
+                            auto      res         = reduce_operation(src_row_ptr, reduce_elems, op, src_width * src_height * src_depth);
+                            dst[out_offset]       = res;
                         }
                     }
                 }

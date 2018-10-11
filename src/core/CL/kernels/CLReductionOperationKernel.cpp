@@ -46,7 +46,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && axis != 0, "Not supported reduction operation for this axis");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
     ARM_COMPUTE_RETURN_ERROR_ON(op == ReductionOperation::MEAN_SUM && axis == 0 && width == 0 && input->data_type() != DataType::QASYMM8);
@@ -142,6 +142,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     }
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
+    build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE=");
     build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DMEAN");
 
     switch(op)
