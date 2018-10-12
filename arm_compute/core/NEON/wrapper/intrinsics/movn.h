@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_MUL_H__
-#define __ARM_COMPUTE_WRAPPER_MUL_H__
+#ifndef __ARM_COMPUTE_WRAPPER_MOVN_H__
+#define __ARM_COMPUTE_WRAPPER_MOVN_H__
 
 #include <arm_neon.h>
 
@@ -30,35 +30,33 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VMUL_IMPL(stype, vtype, prefix, postfix)      \
-    inline vtype vmul(const vtype &a, const vtype &b) \
-    {                                                 \
-        return prefix##_##postfix(a, b);              \
+#define VMOVN_IMPL(dtype, vtype, prefix, postfix) \
+    inline dtype vmovn(const vtype &a)            \
+    {                                             \
+        return prefix##_##postfix(a);             \
     }
 
-VMUL_IMPL(uint8x8_t, uint8x8_t, vmul, u8)
-VMUL_IMPL(int8x8_t, int8x8_t, vmul, s8)
-VMUL_IMPL(uint16x4_t, uint16x4_t, vmul, u16)
-VMUL_IMPL(int16x4_t, int16x4_t, vmul, s16)
-VMUL_IMPL(uint32x2_t, uint32x2_t, vmul, u32)
-VMUL_IMPL(int32x2_t, int32x2_t, vmul, s32)
-VMUL_IMPL(float32x2_t, float32x2_t, vmul, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VMUL_IMPL(float16_t, float16x4_t, vmul, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMOVN_IMPL(uint32x2_t, uint64x2_t, vmovn, u64)
+VMOVN_IMPL(int32x2_t, int64x2_t, vmovn, s64)
+VMOVN_IMPL(uint16x4_t, uint32x4_t, vmovn, u32)
+VMOVN_IMPL(int16x4_t, int32x4_t, vmovn, s32)
+VMOVN_IMPL(uint8x8_t, uint16x8_t, vmovn, u16)
+VMOVN_IMPL(int8x8_t, int16x8_t, vmovn, s16)
 
-VMUL_IMPL(uint8_t, uint8x16_t, vmulq, u8)
-VMUL_IMPL(int8_t, int8x16_t, vmulq, s8)
-VMUL_IMPL(uint16_t, uint16x8_t, vmulq, u16)
-VMUL_IMPL(int16_t, int16x8_t, vmulq, s16)
-VMUL_IMPL(uint32_t, uint32x4_t, vmulq, u32)
-VMUL_IMPL(int32_t, int32x4_t, vmulq, s32)
-VMUL_IMPL(float32x4_t, float32x4_t, vmulq, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VMUL_IMPL(float16_t, float16x8_t, vmulq, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#define VQMOVN_IMPL(dtype, vtype, prefix, postfix) \
+    inline dtype vqmovn(const vtype &a)            \
+    {                                              \
+        return prefix##_##postfix(a);              \
+    }
 
-#undef VMUL_IMPL
+VQMOVN_IMPL(uint32x2_t, uint64x2_t, vqmovn, u64)
+VQMOVN_IMPL(int32x2_t, int64x2_t, vqmovn, s64)
+VQMOVN_IMPL(uint16x4_t, uint32x4_t, vqmovn, u32)
+VQMOVN_IMPL(int16x4_t, int32x4_t, vqmovn, s32)
+VQMOVN_IMPL(uint8x8_t, uint16x8_t, vqmovn, u16)
+VQMOVN_IMPL(int8x8_t, int16x8_t, vqmovn, s16)
+
+#undef VMOVN_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_MUL_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_MOVN_H__ */

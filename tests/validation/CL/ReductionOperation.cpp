@@ -84,7 +84,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using CLReductionOperationFixture = ReductionOperationValidationFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
+using CLReductionOperationFixture = ReductionOperationFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

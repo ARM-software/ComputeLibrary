@@ -45,6 +45,9 @@ VLOAD_IMPL(int32_t, int32x2_t, s32)
 //VLOAD_IMPL(uint64_t, uint64x1_t, u64)
 //VLOAD_IMPL(int64_t, int64x1_t, s64)
 VLOAD_IMPL(float, float32x2_t, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VLOAD_IMPL(float16_t, float16x4_t, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #define VLOADQ_IMPL(stype, vtype, postfix) \
     inline vtype vloadq(const stype *ptr)  \
@@ -61,6 +64,9 @@ VLOADQ_IMPL(int32_t, int32x4_t, s32)
 //VLOAD_IMPL(uint64_t, uint64x1_t, u64)
 //VLOAD_IMPL(int64_t, int64x1_t, s64)
 VLOADQ_IMPL(float, float32x4_t, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VLOADQ_IMPL(float16_t, float16x8_t, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VLOAD_IMPL
 } // namespace wrapper

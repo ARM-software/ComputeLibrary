@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_STORE_H__
-#define __ARM_COMPUTE_WRAPPER_STORE_H__
+#ifndef __ARM_COMPUTE_WRAPPER_GET_HIGH_H__
+#define __ARM_COMPUTE_WRAPPER_GET_HIGH_H__
 
 #include <arm_neon.h>
 
@@ -30,39 +30,24 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VSTORE_IMPL(stype, vtype, prefix, postfix) \
-    inline void vstore(stype *ptr, vtype val)      \
-    {                                              \
-        prefix##_##postfix(ptr, val);              \
+#define VGETHIGH_IMPL(half_vtype, vtype, postfix) \
+    inline half_vtype vgethigh(const vtype val)   \
+    {                                             \
+        return vget_high_##postfix(val);          \
     }
 
-VSTORE_IMPL(uint8_t, uint8x8_t, vst1, u8)
-VSTORE_IMPL(int8_t, int8x8_t, vst1, s8)
-VSTORE_IMPL(uint16_t, uint16x4_t, vst1, u16)
-VSTORE_IMPL(int16_t, int16x4_t, vst1, s16)
-VSTORE_IMPL(uint32_t, uint32x2_t, vst1, u32)
-VSTORE_IMPL(int32_t, int32x2_t, vst1, s32)
-//VSTORE_IMPL(uint64_t, 1, vst1, u64)
-//VSTORE_IMPL(int64_t, 1, vst1, s64)
-VSTORE_IMPL(float, float32x2_t, vst1, f32)
+VGETHIGH_IMPL(uint8x8_t, uint8x16_t, u8)
+VGETHIGH_IMPL(int8x8_t, int8x16_t, s8)
+VGETHIGH_IMPL(uint16x4_t, uint16x8_t, u16)
+VGETHIGH_IMPL(int16x4_t, int16x8_t, s16)
+VGETHIGH_IMPL(uint32x2_t, uint32x4_t, u32)
+VGETHIGH_IMPL(int32x2_t, int32x4_t, s32)
+VGETHIGH_IMPL(float32x2_t, float32x4_t, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VSTORE_IMPL(float16_t, float16x4_t, vst1, f16)
+VGETHIGH_IMPL(float16x4_t, float16x8_t, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-VSTORE_IMPL(uint8_t, uint8x16_t, vst1q, u8)
-VSTORE_IMPL(int8_t, int8x16_t, vst1q, s8)
-VSTORE_IMPL(uint16_t, uint16x8_t, vst1q, u16)
-VSTORE_IMPL(int16_t, int16x8_t, vst1q, s16)
-VSTORE_IMPL(uint32_t, uint32x4_t, vst1q, u32)
-VSTORE_IMPL(int32_t, int32x4_t, vst1q, s32)
-//VSTORE_IMPL(uint64_t, 2, vst1q, u64)
-//VSTORE_IMPL(int64_t, 2, vst1q, s64)
-VSTORE_IMPL(float, float32x4_t, vst1q, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VSTORE_IMPL(float16_t, float16x8_t, vst1q, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-#undef VSTORE_IMPL
+#undef VGETHIGH_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_STORE_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_GET_HIGH_H__ */
