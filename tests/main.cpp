@@ -84,18 +84,6 @@ bool file_exists(const std::string &filename)
 #endif /* ARM_COMPUTE_CL */
 } //namespace
 
-void print_cpu_info(std::ostream &os)
-{
-    const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
-    const unsigned int          num_cpus = cpu_info.get_cpu_num();
-    os << "\ncpu_has_fp16 : " << cpu_info.has_fp16() << "\ncpu_has_dotprod : " << cpu_info.has_dotprod() << std::endl;
-    for(unsigned int j = 0; j < num_cpus; ++j)
-    {
-        const CPUModel model = cpu_info.get_cpu_model(j);
-        os << "CPU" << j << " : " << cpu_model_to_string(model) << std::endl;
-    }
-}
-
 int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
@@ -189,7 +177,6 @@ int main(int argc, char **argv)
 
         if(options.log_level->value() >= framework::LogLevel::CONFIG)
         {
-            std::stringstream ss;
             for(auto &p : printers)
             {
                 p->print_entry("Version", build_information());
@@ -205,8 +192,16 @@ int main(int argc, char **argv)
                     p->print_entry("CL_DEVICE_VERSION", "Unavailable");
                 }
 #endif /* ARM_COMPUTE_CL */
-                print_cpu_info(ss);
-                p->print_entry("CPU_INFO", ss.str());
+                const arm_compute::CPUInfo &cpu_info = Scheduler::get().cpu_info();
+                const unsigned int          num_cpus = cpu_info.get_cpu_num();
+                p->print_entry("cpu_has_fp16", support::cpp11::to_string(cpu_info.has_fp16()));
+                p->print_entry("cpu_has_dotprod", support::cpp11::to_string(cpu_info.has_dotprod()));
+
+                for(unsigned int j = 0; j < num_cpus; ++j)
+                {
+                    const CPUModel model = cpu_info.get_cpu_model(j);
+                    p->print_entry("CPU" + support::cpp11::to_string(j), cpu_model_to_string(model));
+                }
                 p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
                 p->print_entry("Threads", support::cpp11::to_string(threads->value()));
                 {
