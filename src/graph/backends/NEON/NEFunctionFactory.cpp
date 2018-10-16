@@ -97,8 +97,9 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo     conv_info      = node.convolution_info();
-    const ConvolutionMethod conv_algorithm = node.convolution_method();
+    const PadStrideInfo       conv_info      = node.convolution_info();
+    const ConvolutionMethod   conv_algorithm = node.convolution_method();
+    const ActivationLayerInfo fused_act      = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::NEON);
@@ -107,22 +108,22 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
     if(conv_algorithm == ConvolutionMethod::Direct)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEDirectConvolutionLayer>(
-                                        std::string("DirectConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("DirectConvolutionLayer"), mm, input, weights, biases, output, conv_info, fused_act);
     }
     else if(conv_algorithm == ConvolutionMethod::GEMM)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEGEMMConvolutionLayer>(
-                                        std::string("GEMMConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("GEMMConvolutionLayer"), mm, input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1, 1), fused_act);
     }
     else if(conv_algorithm == ConvolutionMethod::Winograd)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEWinogradConvolutionLayer>(
-                                        std::string("WinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("WinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info, fused_act);
     }
     else
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEConvolutionLayer>(
-                                        std::string("ConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("ConvolutionLayer"), mm, input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1, 1), fused_act);
     }
 
     // Log info
@@ -140,6 +141,7 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
 }

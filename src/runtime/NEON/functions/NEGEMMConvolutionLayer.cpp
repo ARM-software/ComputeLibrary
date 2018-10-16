@@ -32,6 +32,7 @@
 #include "support/ToolchainSupport.h"
 
 #include <cmath>
+#include <set>
 #include <tuple>
 
 using namespace arm_compute;
@@ -190,13 +191,14 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
     const unsigned int kernel_height = weights->info()->dimension(idx_height);
 
-    _is_prepared      = weights_info.retain_internal_weights();
-    _original_weights = weights;
-    _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _data_layout      = data_layout;
-    _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
-    _skip_col2im      = data_layout == DataLayout::NHWC;
-    _append_bias      = (biases != nullptr) && (!_is_quantized);
+    _is_prepared                = weights_info.retain_internal_weights();
+    _original_weights           = weights;
+    _is_quantized               = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _data_layout                = data_layout;
+    _skip_im2col                = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    _skip_col2im                = data_layout == DataLayout::NHWC;
+    _append_bias                = (biases != nullptr) && (!_is_quantized);
+    _is_activationlayer_enabled = act_info.enabled();
 
     const ITensor *gemm_input_to_use         = input;
     ITensor       *gemm_output_to_use        = output;
@@ -285,9 +287,10 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     if(_is_quantized)
     {
         const bool             skip_reshape      = data_layout == DataLayout::NHWC;
-        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+        const QuantizationInfo input_quant_info  = input->info()->quantization_info();
+        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input_quant_info : output->info()->quantization_info();
 
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        float multiplier = input_quant_info.scale * weights->info()->quantization_info().scale / output_quant_info.scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
@@ -297,7 +300,29 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             gemm_output_staged_to_use = &_tmp_output;
         }
 
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, 0, 0, skip_reshape ? conv_h : 1);
+        // Merge activation with output stage
+        uint8_t                                                 min            = 0;
+        uint8_t                                                 max            = 0;
+        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                                                                 };
+        if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
+        {
+            min = sqcvt_qasymm8_f32(act_info.b(), input_quant_info.scale, input_quant_info.offset);
+            max = sqcvt_qasymm8_f32(act_info.a(), input_quant_info.scale, input_quant_info.offset);
+            if(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                min = sqcvt_qasymm8_f32(0.f, input_quant_info.scale, input_quant_info.offset);
+            }
+            if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
+            {
+                max = 255;
+            }
+            _is_activationlayer_enabled = false;
+        }
+
+        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min, max, skip_reshape ? conv_h : 1);
     }
 
     if(!_skip_col2im && _data_layout == DataLayout::NCHW)
@@ -319,9 +344,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(idx_width) != conv_w) || (output->info()->dimension(idx_height) != conv_h),
                              "Output shape does not match the expected one");
 
-    //Configure Activation Layer
-    _is_activationlayer_enabled = act_info.enabled();
-
+    // Configure Activation Layer
     if(_is_activationlayer_enabled)
     {
         _activationlayer_function.configure(output, nullptr, act_info);
@@ -356,10 +379,11 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const ITensorInfo *gemm_output_staged_to_use = output;
     const ITensorInfo *weights_to_use            = weights;
 
-    const bool is_quantized = is_data_type_quantized_asymmetric(data_type);
-    const bool append_bias  = (biases != nullptr) && (!is_quantized);
-    bool       skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
-    bool       skip_col2im  = data_layout == DataLayout::NHWC;
+    const bool is_quantized          = is_data_type_quantized_asymmetric(data_type);
+    const bool append_bias           = (biases != nullptr) && (!is_quantized);
+    bool       skip_im2col           = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
+    bool       skip_col2im           = data_layout == DataLayout::NHWC;
+    bool       is_activation_enabled = act_info.enabled();
 
     // Get convolved dimensions
     unsigned int conv_w = 0;
@@ -457,9 +481,11 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     if(is_quantized)
     {
-        const bool  skip_reshape = data_layout == DataLayout::NHWC;
-        const float multiplier   = input->quantization_info().scale * weights_to_use->quantization_info().scale / output->quantization_info().scale;
-        int         output_multiplier, output_shift;
+        const bool             skip_reshape      = data_layout == DataLayout::NHWC;
+        const QuantizationInfo input_quant_info  = input->quantization_info();
+        const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input_quant_info : output->quantization_info();
+        const float            multiplier        = input_quant_info.scale * weights_to_use->quantization_info().scale / output_quant_info.scale;
+        int                    output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         if(!skip_reshape)
@@ -469,8 +495,30 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
             gemm_output_staged_to_use = &tmp_info;
         }
 
+        // Merge activation with output stage
+        uint8_t                                                 min            = 0;
+        uint8_t                                                 max            = 0;
+        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                                                                 };
+        if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
+        {
+            min = sqcvt_qasymm8_f32(act_info.b(), input_quant_info.scale, input_quant_info.offset);
+            max = sqcvt_qasymm8_f32(act_info.a(), input_quant_info.scale, input_quant_info.offset);
+            if(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+            {
+                min = sqcvt_qasymm8_f32(0.f, input_quant_info.scale, input_quant_info.offset);
+            }
+            if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
+            {
+                max = 255;
+            }
+            is_activation_enabled = false;
+        }
+
         // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, 0, 0, skip_reshape ? conv_h : 1);
+        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min, max, skip_reshape ? conv_h : 1);
     }
 
     // Validate Col2Im/ReshapeLayer
@@ -482,7 +530,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     //Validate Activation Layer
-    if(act_info.enabled())
+    if(is_activation_enabled)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
     }

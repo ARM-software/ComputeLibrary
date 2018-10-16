@@ -62,6 +62,9 @@ public:
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
 
+public:
+    static constexpr NodeType node_type = NodeType::BatchNormalizationLayer;
+
 private:
     float               _epsilon;
     ActivationLayerInfo _fused_activation;

@@ -37,7 +37,7 @@ ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo     info,
                                            ConvolutionMethod method,
                                            FastMathHint      fast_math_hint,
                                            QuantizationInfo  out_quant_info)
-    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info)
+    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -71,6 +71,16 @@ PadStrideInfo ConvolutionLayerNode::convolution_info() const
 unsigned int ConvolutionLayerNode::num_groups() const
 {
     return _num_groups;
+}
+
+ActivationLayerInfo ConvolutionLayerNode::fused_activation() const
+{
+    return _fused_activation;
+}
+
+void ConvolutionLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    _fused_activation = fused_activation;
 }
 
 TensorDescriptor ConvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
@@ -126,7 +136,7 @@ TensorDescriptor ConvolutionLayerNode::configure_output(size_t idx) const
 
 NodeType ConvolutionLayerNode::type() const
 {
-    return NodeType::ConvolutionLayer;
+    return ConvolutionLayerNode::node_type;
 }
 
 void ConvolutionLayerNode::accept(INodeVisitor &v)

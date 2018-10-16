@@ -148,7 +148,7 @@ struct QuantizationInfo
      *
      * @return True if the given quantization info is the same.
      */
-    bool operator==(const QuantizationInfo &other)
+    bool operator==(const QuantizationInfo &other) const
     {
         return scale == other.scale && offset == other.offset;
     }
@@ -159,7 +159,7 @@ struct QuantizationInfo
      *
      * @return True if the given quantization info is not the same.
      */
-    bool operator!=(const QuantizationInfo &other)
+    bool operator!=(const QuantizationInfo &other) const
     {
         return !(*this == other);
     }
