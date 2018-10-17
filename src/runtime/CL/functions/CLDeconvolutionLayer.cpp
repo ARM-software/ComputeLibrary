@@ -42,7 +42,7 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
       _conv_f(),
       _flip_weights(),
       _scaled_output(),
-      _weights(),
+      _original_weights(nullptr),
       _weights_flipped(),
       _is_prepared(false)
 {
@@ -120,7 +120,7 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    _weights = weights;
+    _original_weights = weights;
     _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
     _flip_weights.configure(weights, &_weights_flipped);
 
@@ -138,7 +138,6 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
     _is_prepared = false;
 
     _memory_group.manage(&_scaled_output);
-    _memory_group.manage(&_weights_flipped);
 
     // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int      padx            = 0;
@@ -175,13 +174,24 @@ void CLDeconvolutionLayer::prepare()
 {
     if(!_is_prepared)
     {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights flipping and mark original weights tensor as unused
         _weights_flipped.allocator()->allocate();
         _weights_flipped.map(true);
-        _weights->map(CLScheduler::get().queue(), true);
+        _original_weights->map(CLScheduler::get().queue(), true);
         CPPScheduler::get().schedule(&_flip_weights, Window::DimZ);
         _weights_flipped.unmap();
-        _weights->unmap(CLScheduler::get().queue());
+        _original_weights->unmap(CLScheduler::get().queue());
+        _original_weights->mark_as_unused();
+
+        // Prepare convolution
         _conv_f.prepare();
+
+        if(!_weights_flipped.is_used())
+        {
+            _weights_flipped.allocator()->free();
+        }
 
         _is_prepared = true;
     }

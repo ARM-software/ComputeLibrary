@@ -39,6 +39,7 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
       _flip_weights(),
       _scaled_output(),
       _weights_flipped(),
+      _original_weights(nullptr),
       _input(nullptr),
       _info(),
       _inner_border(),
@@ -104,10 +105,11 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
-    _input        = input;
-    _info         = info;
-    _inner_border = std::make_pair(inner_border_right, inner_border_top);
-    _is_prepared  = false;
+    _input            = input;
+    _original_weights = weights;
+    _info             = info;
+    _inner_border     = std::make_pair(inner_border_right, inner_border_top);
+    _is_prepared      = false;
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
@@ -160,9 +162,21 @@ void NEDeconvolutionLayer::prepare()
 {
     if(!_is_prepared)
     {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights flipping and mark original weights tensor as unused
         _weights_flipped.allocator()->allocate();
         CPPScheduler::get().schedule(&_flip_weights, Window::DimZ);
+        _original_weights->mark_as_unused();
+
+        // Prepare convolution
         _conv_f.prepare();
+
+        if(!_weights_flipped.is_used())
+        {
+            _weights_flipped.allocator()->free();
+        }
+
         _is_prepared = true;
     }
 }

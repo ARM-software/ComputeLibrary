@@ -125,6 +125,7 @@ private:
     CPPFlipWeightsKernel _flip_weights;
     Tensor               _scaled_output;
     Tensor               _weights_flipped;
+    const ITensor       *_original_weights;
     ITensor             *_input;
     PadStrideInfo        _info;
     std::pair<unsigned int, unsigned int> _inner_border;

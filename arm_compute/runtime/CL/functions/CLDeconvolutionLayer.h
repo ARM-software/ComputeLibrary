@@ -123,7 +123,7 @@ private:
     CLConvolutionLayer           _conv_f;
     CPPFlipWeightsKernel         _flip_weights;
     CLTensor                     _scaled_output;
-    ICLTensor                   *_weights;
+    ICLTensor                   *_original_weights;
     CLTensor                     _weights_flipped;
     bool                         _is_prepared;
 };
