@@ -927,6 +927,13 @@ const std::string &string_from_norm_type(NormType type);
  * @return The string describing the pooling type.
  */
 const std::string &string_from_pooling_type(PoolingType type);
+/** Translates a given GEMMLowp output stage to a string.
+ *
+ * @param[in] output_stage @ref GEMMLowpOutputStageInfo to be translated to string.
+ *
+ * @return The string describing the GEMMLowp output stage
+ */
+const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage);
 /** Convert a PixelValue to a string, represented through the specific data type
  *
  * @param[in] value     The PixelValue to convert

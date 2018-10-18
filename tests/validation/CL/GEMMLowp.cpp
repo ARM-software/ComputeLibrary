@@ -67,7 +67,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
 
     // Create and configure function
     CLGEMMLowpMatrixMultiplyCore gemmlowp_mm;
-    gemmlowp_mm.configure(&a, &b, &c);
+    // TODO (giaiod01) COMPMID-1672 - Extending the test to validate add bias in offset contribution
+    gemmlowp_mm.configure(&a, &b, nullptr, &c);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
@@ -155,7 +156,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 
@@ -238,7 +239,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 

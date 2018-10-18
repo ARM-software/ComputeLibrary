@@ -49,6 +49,7 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
         // Validate gemmlowp function
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyCore::validate(&input.clone()->set_quantization_info(input_quantization_info),
                                                                            &weights.clone()->set_quantization_info(weights_quantization_info),
+                                                                           nullptr,
                                                                            &output));
     }
     else
@@ -91,7 +92,7 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
         // Configure gemmlowp function
-        _mm_gemmlowp.configure(input, weights, output);
+        _mm_gemmlowp.configure(input, weights, nullptr, output);
 
         // Revert back QuantizatioInfo as input and weights could be used in other fully connected layers
         input->info()->set_quantization_info(input_quantization_info);

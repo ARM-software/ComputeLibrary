@@ -58,7 +58,7 @@ public:
         c = create_tensor<TensorType>(shape_dst, DataType::S32, 1, QuantizationInfo(1.0f / 255.0f, 0));
 
         // Create and configure function
-        gemmlowp.configure(&a, &b, &c);
+        gemmlowp.configure(&a, &b, nullptr, &c);
 
         // Allocate tensors
         a.allocator()->allocate();

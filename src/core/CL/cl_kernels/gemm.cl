@@ -84,7 +84,8 @@ __kernel void gemm_transpose1xW(TENSOR3D_DECLARATION(src),
 
 #if defined(MULT_INTERLEAVE4X4_HEIGHT) && defined(DATA_TYPE)
 
-/** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
+/** This OpenCL kernel reshapes the input matrix transposing each 4x4 block. If -DUNROLL_BLOCK is passed at compile time, the 4x4 block
+ * will be simply unrolled.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=float)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
@@ -187,6 +188,12 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
     a3 = vload4(0, (__global DATA_TYPE *)(input_ptr + 3 * src_stride_y));
 #endif // defined(REINTERPRET_INPUT_AS_3D)
 
+#if defined(UNROLL_BLOCK)
+    vstore4(a0, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 0 * MULT_INTERLEAVE4X4_HEIGHT));
+    vstore4(a1, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 4 * MULT_INTERLEAVE4X4_HEIGHT));
+    vstore4(a2, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 8 * MULT_INTERLEAVE4X4_HEIGHT));
+    vstore4(a3, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 12 * MULT_INTERLEAVE4X4_HEIGHT));
+#else // defined(UNROLL_BLOCK)
     VEC_DATA_TYPE(DATA_TYPE, 4)
     val0 = (VEC_DATA_TYPE(DATA_TYPE, 4))(a0.s0, a1.s0, a2.s0, a3.s0);
     vstore4(val0, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 0 * MULT_INTERLEAVE4X4_HEIGHT));
@@ -199,6 +206,7 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
 
     val0 = (VEC_DATA_TYPE(DATA_TYPE, 4))(a0.s3, a1.s3, a2.s3, a3.s3);
     vstore4(val0, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 12 * MULT_INTERLEAVE4X4_HEIGHT));
+#endif // defined(UNROLL_BLOCK)
 }
 #endif // defined(MULT_INTERLEAVE4X4_HEIGHT) && defined(DATA_TYPE)
 

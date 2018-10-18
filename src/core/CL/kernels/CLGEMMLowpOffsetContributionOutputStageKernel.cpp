@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -46,10 +46,14 @@ class Coordinates;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
-                          int32_t a_offset, int32_t b_offset)
+Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias, const ITensorInfo *output,
+                          int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.type == GEMMLowpOutputStageType::NONE);
+    ARM_COMPUTE_RETURN_ERROR_ON(bias == nullptr && a_offset == 0 && b_offset == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_max_bound > 255);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_stage.gemmlowp_min_bound < 0 || output_stage.gemmlowp_min_bound > output_stage.gemmlowp_max_bound);
 
     if(bias != nullptr)
     {
@@ -100,20 +104,32 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
         }
     }
 
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mm_result, output);
+    }
+
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias,
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row, ITensorInfo *bias, ITensorInfo *output,
                                                         int32_t a_offset, int32_t b_offset)
 {
     constexpr unsigned int num_elems_processed_per_iteration = 4;
     bool                   window_changed                    = false;
+
+    // Auto initialize the output
+    auto_init_if_empty(*output, mm_result->clone()->set_data_type(DataType::QASYMM8));
 
     // Configure kernel window
     Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal mm_result_access(mm_result, 0, num_elems_processed_per_iteration);
     window_changed = window_changed || update_window_and_padding(win, mm_result_access);
+
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win, output_access);
 
     if(a_offset != 0)
     {
@@ -137,26 +153,31 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, 
 }
 } // namespace
 
-CLGEMMLowpOffsetContributionKernel::CLGEMMLowpOffsetContributionKernel()
-    : _vector_sum_col(nullptr), _vector_sum_row(nullptr), _mm_result(nullptr), _bias(nullptr)
+CLGEMMLowpOffsetContributionOutputStageKernel::CLGEMMLowpOffsetContributionOutputStageKernel()
+    : _mm_result(nullptr), _vector_sum_col(nullptr), _vector_sum_row(nullptr), _bias(nullptr), _output(nullptr)
 {
 }
 
-void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, int32_t k, int32_t a_offset,
-                                                   int32_t b_offset)
+void CLGEMMLowpOffsetContributionOutputStageKernel::configure(const ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, const ICLTensor *bias, ICLTensor *output,
+                                                              int32_t k, int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage)
 {
     // Perform validate step
-    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(mm_result, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(mm_result->info(),
                                                   vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
                                                   vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
                                                   bias != nullptr ? bias->info() : nullptr,
-                                                  a_offset, b_offset)); // NOLINT
+                                                  output->info(),
+                                                  a_offset, b_offset, output_stage)); // NOLINT
+
+    const int min = output_stage.gemmlowp_min_bound;
+    const int max = output_stage.gemmlowp_max_bound;
 
     _vector_sum_col = vector_sum_col;
     _vector_sum_row = vector_sum_row;
     _mm_result      = mm_result;
     _bias           = bias;
+    _output         = output;
 
     // Check if input is a 3D reinterpretation
     const bool reinterpret_as_3d = vector_sum_row != nullptr
@@ -178,8 +199,23 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
     build_opts.add_option_if(reinterpret_as_3d, "-DHEIGHT_INPUT3D=" + support::cpp11::to_string(mm_result->info()->dimension(1)));
     build_opts.add_option_if(reinterpret_as_3d, "-DDEPTH_INPUT3D=" + support::cpp11::to_string(mm_result->info()->dimension(2)));
     build_opts.add_option_if(bias != nullptr, "-DADD_BIAS");
+    build_opts.add_option("-DRESULT_OFFSET=" + support::cpp11::to_string(output_stage.gemmlowp_offset));
+    build_opts.add_option("-DRESULT_MULTIPLIER=" + support::cpp11::to_string(output_stage.gemmlowp_multiplier));
+    build_opts.add_option("-DRESULT_SHIFT=" + support::cpp11::to_string(output_stage.gemmlowp_shift));
+    build_opts.add_option_if((min != 0) && (min != max), "-DMIN_BOUND=" + support::cpp11::to_string(min));
+    build_opts.add_option_if((max != 255) && (min != max), "-DMAX_BOUND=" + support::cpp11::to_string(max));
 
     std::string kernel_name("gemmlowp_offset_contribution");
+
+    // Fuse output stage
+    if(output_stage.type != GEMMLowpOutputStageType::NONE)
+    {
+        kernel_name += "_" + string_from_gemmlowp_output_stage(output_stage.type);
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("GEMMLowpOutputStage can not be NONE!");
+    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
@@ -189,6 +225,7 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
                                                     vector_sum_col != nullptr ? vector_sum_col->info() : nullptr,
                                                     vector_sum_row != nullptr ? vector_sum_row->info() : nullptr,
                                                     bias != nullptr ? bias->info() : nullptr,
+                                                    output->info(),
                                                     a_offset, b_offset); // NOLINT
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
@@ -202,21 +239,23 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
     _config_id += support::cpp11::to_string(mm_result->info()->dimension(2));
 }
 
-Status CLGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
-                                                    int32_t a_offset, int32_t b_offset)
+Status CLGEMMLowpOffsetContributionOutputStageKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, const ITensorInfo *bias,
+                                                               const ITensorInfo *output,
+                                                               int32_t a_offset, int32_t b_offset, const GEMMLowpOutputStageInfo &output_stage)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, a_offset, b_offset));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(mm_result, vector_sum_col, vector_sum_row, bias, output, a_offset, b_offset, output_stage));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(mm_result->clone().get(),
                                                               vector_sum_col != nullptr ? vector_sum_col->clone().get() : nullptr,
                                                               vector_sum_row != nullptr ? vector_sum_row->clone().get() : nullptr,
                                                               bias != nullptr ? bias->clone().get() : nullptr,
+                                                              output->clone().get(),
                                                               a_offset, b_offset)
                                 .first); // NOLINT
 
     return Status{};
 }
 
-void CLGEMMLowpOffsetContributionKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLGEMMLowpOffsetContributionOutputStageKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
@@ -255,6 +294,7 @@ void CLGEMMLowpOffsetContributionKernel::run(const Window &window, cl::CommandQu
         {
             add_1D_tensor_argument(idx, _bias, biases_slice);
         }
+        add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));

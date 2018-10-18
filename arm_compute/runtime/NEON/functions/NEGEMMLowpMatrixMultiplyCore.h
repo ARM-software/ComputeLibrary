@@ -75,22 +75,24 @@ public:
      *
      * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[out] output    Output tensor. Data type supported: Data type supported: S32
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should be executed only for the first run
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *output, const GEMMInfo &gemm_info = GEMMInfo());
+    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
      *
      * @param[in] a         First input tensor  (Matrix A). Data type supported: QASYMM8.
      * @param[in] b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in] c         Third input tensor  (Matrix C). It can be a nullptr. Data type supported: S32
      * @param[in] output    Output tensor. Data type supported: Data type supported: S32
      * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                      if the reshape of matrix B should be executed only for the first run
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden
     void run() override;

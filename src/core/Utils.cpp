@@ -252,6 +252,19 @@ const std::string &arm_compute::string_from_pooling_type(PoolingType type)
     return pool_type_map[type];
 }
 
+const std::string &arm_compute::string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
+{
+    static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =
+    {
+        { GEMMLowpOutputStageType::NONE, "" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN, "quantize_down" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, "quantize_down_fixedpoint" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT, "quantize_down_float" }
+    };
+
+    return output_stage_map[output_stage];
+}
+
 std::string arm_compute::string_from_pixel_value(const PixelValue &value, const DataType data_type)
 {
     std::stringstream ss;

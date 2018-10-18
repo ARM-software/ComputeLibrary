@@ -157,43 +157,48 @@ public:
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param[in]      input         Input tensor. Data types supported: QASYMM8/F16/F32.
-     * @param[in]      weights       Weights tensor. Data type supported: Same as @p input.
-     * @param[in, out] output        Output tensor. Data types supported: Same as @p input,
-     *                               except for input of QASYMM8 type where output should be of S32 type.
-     * @param[in]      gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in]      input                 Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in]      weights               Weights tensor. Data type supported: Same as @p input.
+     * @param[in]      biases                Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                                       Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     * @param[in, out] output                Output tensor. Data types supported: Same as @p input,
+     *                                       except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]      gemmlowp_output_stage GEMMLowp output stage info
+     * @param[in]      gemm_3d_depth         (Optional) Depth of GEMM 3D (Defaults to 1)
      */
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, int gemm_3d_depth = 1);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
-     * @param[in] input         Input tensor. Data types supported: QASYMM8/F16/F32.
-     * @param[in] weights       Weights tensor. Data type supported: Same as @p input.
-     * @param[in] output        Output tensor. Data types supported: Same as @p input,
-     *                          except for input of QASYMM8 type where output should be of S32 type.
-     * @param[in] gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
-     * @param[in] skip_im2col   (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
+     * @param[in] input                 Input tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[in] weights               Weights tensor. Data type supported: Same as @p input.
+     * @param[in] output                Output tensor. Data types supported: Same as @p input,
+     *                                  except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in] biases                Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                                  Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     * @param[in] gemmlowp_output_stage GEMMLowp output stage info
+     * @param[in] gemm_3d_depth         (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in] skip_im2col           (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
+                              int gemm_3d_depth = 1, bool skip_im2col = false);
 
 private:
-    CLMemoryGroup                                  _memory_group;
-    CLConvolutionLayerReshapeWeights               _reshape_weights;
-    CLIm2ColKernel                                 _im2col_kernel;
-    CLGEMM                                         _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore                   _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat _gemmlowp_output_stage;
-    CLCol2ImKernel                                 _col2im_kernel;
-    CLActivationLayer                              _activationlayer_function;
-    CLArithmeticAdditionKernel                     _add_bias_kernel;
+    CLMemoryGroup                    _memory_group;
+    CLConvolutionLayerReshapeWeights _reshape_weights;
+    CLIm2ColKernel                   _im2col_kernel;
+    CLGEMM                           _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore     _mm_gemmlowp;
+    CLCol2ImKernel                   _col2im_kernel;
+    CLActivationLayer                _activationlayer_function;
+    CLArithmeticAdditionKernel       _add_bias_kernel;
 
     const ICLTensor *_original_weights;
 
     CLTensor _im2col_output;
     CLTensor _weights_reshaped;
     CLTensor _gemm_output;
-    CLTensor _tmp_output;
 
     DataLayout _data_layout;
 

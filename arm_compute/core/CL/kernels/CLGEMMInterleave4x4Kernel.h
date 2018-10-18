@@ -68,14 +68,15 @@ public:
      * @param[out] output                    Output tensor. Data type supported: same as @p input
      * @param[in]  mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleave block
      * @param[in]  reinterpret_input_as_3d   (Optional) True if the input has to be reinterpreted as 3D tensor
+     * @param[in]  unroll_block              (Optional) True if the 4x4 block has to be unrolled rather than transposed
      */
-    void configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false);
+    void configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false, bool unroll_block = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMInterleave4x4Kernel
      *
      * @param[in] input                     Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output                    Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] mult_interleave4x4_height Multiplication factor for the height of the 4x4 interleave block
-     * @param[in] reinterpret_input_as_3d   (Optional) True if the input has to be reinterpreted as 3D tensor
+     * @param[in] reinterpret_input_as_3d   True if the input has to be reinterpreted as 3D tensor
      *
      * @return a status
      */

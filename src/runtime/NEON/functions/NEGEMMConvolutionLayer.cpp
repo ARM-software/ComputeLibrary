@@ -111,7 +111,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
-        _mm_gemmlowp.configure(input, weights, output, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
+        _mm_gemmlowp.configure(input, weights, nullptr, output, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(input_quantization_info);
@@ -143,7 +143,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
         // Perform validation step on GEMMLowp
-        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), output, gemm_info);
+        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), nullptr, output, gemm_info);
     }
     else
     {

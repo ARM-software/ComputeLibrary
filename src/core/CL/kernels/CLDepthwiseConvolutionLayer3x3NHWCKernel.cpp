@@ -159,8 +159,9 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     ARM_COMPUTE_ERROR_ON(conv_stride_x < 1 || conv_stride_x > 2);
     ARM_COMPUTE_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 1);
 
-    const bool is_qasymm   = is_data_type_quantized_asymmetric(input->info()->data_type());
-    const bool is_stride_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool is_qasymm         = is_data_type_quantized_asymmetric(input->info()->data_type());
+    const bool is_stride_1       = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
 
     _input                              = input;
     _output                             = output;
@@ -169,7 +170,14 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _conv_stride_y                      = conv_info.stride().second;
     _num_rows_processed_per_iteration   = is_stride_1 ? 2 : 1;
     _num_planes_processed_per_iteration = is_stride_1 ? 2 : 1;
-    _border_size                        = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
+
+    // If QASYMM8 and the 8 bit dot product is available, force _num_planes_processed_per_iteration to 1
+    if(is_dot8_supported && is_qasymm)
+    {
+        _num_planes_processed_per_iteration = 1;
+    }
+
+    _border_size = BorderSize(is_qasymm && is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
 
@@ -187,13 +195,12 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
         int   output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
+        build_opts.add_option("-DREAL_MULTIPLIER=" + support::cpp11::to_string(multiplier));
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
         build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-_input->info()->quantization_info().offset));
         build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-_weights->info()->quantization_info().offset));
         build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(_output->info()->quantization_info().offset));
         build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
-        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
-        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(act_info.enabled())
         {
@@ -240,9 +247,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     }
 
     // Create kernel
-    const bool  is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
-    std::string kernel_name       = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
-                                                                                                                          && is_stride_1 /* FIXME (COMPMID-1424) */) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
+    std::string kernel_name = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
+                                                                                                                    && is_stride_1) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 

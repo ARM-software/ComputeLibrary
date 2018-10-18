@@ -193,7 +193,7 @@ public:
             init_sgemm_output(tmp_dst, src0, src1, DataType::S32);
 
             // Configure GEMMlowp matrix multiply function
-            mm_gemmlowp.configure(&src0, &src1, &tmp_dst);
+            mm_gemmlowp.configure(&src0, &src1, nullptr, &tmp_dst);
 
             // Configure GEMMlowp output stage
             mm_gemmlowp_output_stage.configure(&tmp_dst, add_bias ? &biases : nullptr, &dst, dst_multiplier, dst_shift, offset_dst);
