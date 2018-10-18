@@ -44,8 +44,10 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float> tolerance_f32(0.00001f);
-AbsoluteTolerance<float> tolerance_f16(0.1f);
+AbsoluteTolerance<float> tolerance_f32(0.01f);
+RelativeTolerance<float> rel_tolerance_f32(0.00001f);
+AbsoluteTolerance<float> tolerance_f16(0.5f);
+RelativeTolerance<float> rel_tolerance_f16(0.2f);
 } // namespace
 
 TEST_SUITE(CL)
@@ -96,7 +98,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::D
                        combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
 }
 TEST_SUITE_END() // F16
 TEST_SUITE(FP32)
@@ -110,7 +112,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::
                        combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
 }
 TEST_SUITE_END() // F32
 TEST_SUITE_END() // Float
