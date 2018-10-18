@@ -54,12 +54,6 @@ public:
             return false;
         }
 
-        // Set default layout if needed
-        if(!common_opts.data_layout->is_set() && common_params.target == Target::NEON)
-        {
-            common_params.data_layout = DataLayout::NCHW;
-        }
-
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
 
