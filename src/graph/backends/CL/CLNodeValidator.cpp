@@ -69,6 +69,8 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::validate_reorg_layer<CLReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
+        case NodeType::ROIAlignLayer:
+            return detail::validate_roi_align_layer<CLROIAlignLayer>(*polymorphic_downcast<ROIAlignLayerNode *>(node));
         case NodeType::SliceLayer:
             return detail::validate_slice_layer<CLSlice>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::UpsampleLayer:

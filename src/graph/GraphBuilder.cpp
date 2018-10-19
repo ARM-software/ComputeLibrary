@@ -510,6 +510,20 @@ NodeID GraphBuilder::add_resize_node(Graph &g, NodeParams params, NodeIdxPair in
     return create_simple_single_input_output_node<ResizeLayerNode>(g, params, input, policy, width_scale, height_scale);
 }
 
+NodeID GraphBuilder::add_roi_align_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair rois, ROIPoolingLayerInfo pool_info)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+    CHECK_NODEIDX_PAIR(rois, g);
+
+    NodeID nid = g.add_node<ROIAlignLayerNode>(pool_info);
+
+    g.add_connection(input.node_id, input.index, nid, 0);
+    g.add_connection(rois.node_id, rois.index, nid, 1);
+
+    set_node_params(g, nid, params);
+    return nid;
+}
+
 NodeID GraphBuilder::add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor, ITensorAccessorUPtr add_accessor)
 {
     CHECK_NODEIDX_PAIR(input, g);

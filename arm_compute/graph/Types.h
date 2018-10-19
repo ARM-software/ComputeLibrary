@@ -144,6 +144,7 @@ enum class NodeType
     ReorgLayer,
     ReshapeLayer,
     ResizeLayer,
+    ROIAlignLayer,
     SoftmaxLayer,
     SliceLayer,
     SplitLayer,

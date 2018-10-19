@@ -795,6 +795,40 @@ private:
     float               _height_scale;
 };
 
+/** ROIAlign Layer */
+class ROIAlignLayer final : public ILayer
+{
+public:
+    /** Construct a RoiAlign layer.
+     *
+     * @param[in] sub_stream_input Graph sub-stream for the input
+     * @param[in] sub_stream_rois  Graph sub-stream for the rois
+     * @param[in] pool_info        Pooling information.
+     */
+    ROIAlignLayer(SubStream &&sub_stream_input, SubStream &&sub_stream_rois, ROIPoolingLayerInfo pool_info)
+        : _ss_input(sub_stream_input), _ss_rois(sub_stream_rois), _pool_info(pool_info)
+    {
+    }
+
+    /** Prevent instances of this class from being copy constructed */
+    ROIAlignLayer(const ROIAlignLayer &) = delete;
+    /** Prevent instances of this class from being copied */
+    ROIAlignLayer &operator=(const ROIAlignLayer &) = delete;
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { _ss_input.tail_node(), 0 };
+        NodeIdxPair rois          = { _ss_rois.tail_node(), 0 };
+        return GraphBuilder::add_roi_align_node(s.graph(), common_params, input, rois, _pool_info);
+    }
+
+private:
+    SubStream           _ss_input;
+    SubStream           _ss_rois;
+    ROIPoolingLayerInfo _pool_info;
+};
+
 /** Scale Layer */
 class ScaleLayer final : public ILayer
 {

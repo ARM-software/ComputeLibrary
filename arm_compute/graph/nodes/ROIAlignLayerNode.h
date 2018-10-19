@@ -21,45 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+
+#ifndef __ARM_COMPUTE_GRAPH_ROI_ALIGN_NODE_H__
+#define __ARM_COMPUTE_GRAPH_ROI_ALIGN_NODE_H__
+
+#include "arm_compute/core/Types.h"
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class BoundingBoxTransformLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class GenerateProposalsLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PadLayerNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class ROIAlignLayerNode;
-class SoftmaxLayerNode;
-class SliceLayerNode;
-class SplitLayerNode;
-class UpsampleLayerNode;
-class YOLOLayerNode;
+/** ROI Align node */
+class ROIAlignLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
+     */
+    ROIAlignLayerNode(ROIPoolingLayerInfo &pool_info);
+    /** Prevent instances of this class from being copy constructed */
+    ROIAlignLayerNode(const ROIAlignLayerNode &) = delete;
+    /** Prevent instances of this class from being copied */
+    ROIAlignLayerNode &operator=(const ROIAlignLayerNode &) = delete;
+
+    /** ROIPoolingLayerInfo accessor
+     *
+     * @return ROIPoolingLayerInfo
+     */
+    const ROIPoolingLayerInfo &pooling_info() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    ROIPoolingLayerInfo _pool_info;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_ROI_ALIGN_NODE_H__ */

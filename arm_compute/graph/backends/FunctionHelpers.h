@@ -966,6 +966,49 @@ std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
     return std::move(func);
 }
 
+/** Create a backend ROI align layer function
+ *
+ * @tparam ROIAlignLayerFunction    ROI Align function
+ * @tparam TargetInfo               Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return ROI Align layer function
+ */
+template <typename ROIAlignLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *rois   = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_ERROR_ON(rois == nullptr);
+
+    const ROIPoolingLayerInfo pool_info = node.pooling_info();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<ROIAlignLayerFunction>();
+
+    func->configure(input, rois, output, pool_info);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " ROIs shape: " << rois->info()->tensor_shape()
+                               << " ROIPooling width: " << pool_info.pooled_width()
+                               << " ROIPooling height: " << pool_info.pooled_height()
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend slice layer function
  *
  * @tparam SliceLayerFunction Backend slice function

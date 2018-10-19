@@ -324,6 +324,31 @@ Status validate_reorg_layer(ReorgLayerNode &node)
     return ReorgLayer::validate(input, output, node.stride());
 }
 
+/** Validates a ROI Align layer node
+ *
+ * @tparam ROIAlignLayer ROIAlign layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ROIAlignLayer>
+Status validate_roi_align_layer(ROIAlignLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ROIAlignLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input     = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *rois      = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *output    = detail::get_backing_tensor_info(node.output(0));
+    const ROIPoolingLayerInfo &pool_info = node.pooling_info();
+
+    // Validate function
+    return ROIAlignLayer::validate(input, rois, output, pool_info);
+}
+
 /** Validates a Slice layer node
  *
  * @tparam SliceLayer Slice layer function type

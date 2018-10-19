@@ -340,6 +340,17 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_resize_node(Graph &g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy, float width_scale, float height_scale);
+    /** Adds a ROI align layer node to the graph
+     *
+     * @param[in] g         Graph to add the node to
+     * @param[in] params    Common node parameters
+     * @param[in] input     Input to the reshape layer node as a NodeID-Index pair
+     * @param[in] rois      Input containing @ref ROI.
+     * @param[in] pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_roi_align_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair rois, ROIPoolingLayerInfo pool_info);
     /** Adds a scale layer node to the graph
      * This layer computes a product of the input with a scale (read from mul_accessor) and it applies an offset (read from add_accessor).
      * output = input * mul_w + add_w

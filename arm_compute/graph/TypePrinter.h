@@ -122,6 +122,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::ResizeLayer:
             os << "ResizeLayer";
             break;
+        case NodeType::ROIAlignLayer:
+            os << "ROIAlignLayer";
+            break;
         case NodeType::SoftmaxLayer:
             os << "SoftmaxLayer";
             break;

@@ -119,6 +119,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_reshape_layer<CLReshapeLayer, CLTargetInfo>(*polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<CLScale, CLTargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
+        case NodeType::ROIAlignLayer:
+            return detail::create_roi_align_layer<CLROIAlignLayer, CLTargetInfo>(*polymorphic_downcast<ROIAlignLayerNode *>(node));
         case NodeType::SliceLayer:
             return detail::create_slice_layer<CLSlice, CLTargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
