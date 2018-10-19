@@ -730,7 +730,8 @@ public:
     {
         TensorShape{ 232U, 65U, 3U },
                      TensorShape{ 432U, 65U, 3U },
-                     TensorShape{ 124U, 65U, 3U }
+                     TensorShape{ 124U, 65U, 3U },
+                     TensorShape{ 124U, 65U, 3U, 4U }
     })
     {
     }

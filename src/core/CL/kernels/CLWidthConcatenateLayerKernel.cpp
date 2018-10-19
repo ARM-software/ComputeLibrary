@@ -53,8 +53,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
     AccessWindowHorizontal output_access(output, width_offset, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
 
+    Window win_collapsed = win.collapse(win, Window::DimZ);
+
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(err, win_collapsed);
 }
 Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output)
 {
@@ -69,7 +71,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != output->dimension(i));
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
 
     return Status{};
 }
@@ -103,6 +105,7 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(_width_offset));
+    build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width", build_opts.options()));
@@ -119,14 +122,8 @@ void CLWidthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
-
-    do
-    {
-        unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
-    }
-    while(window.slide_window_slice_3D(slice));
+    unsigned int idx = 0;
+    add_4D_tensor_argument(idx, _input, window);
+    add_4D_tensor_argument(idx, _output, window);
+    enqueue(queue, *this, window);
 }

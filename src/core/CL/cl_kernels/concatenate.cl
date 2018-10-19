@@ -23,12 +23,15 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE)
-#if defined(WIDTH_OFFSET)
+#if defined(DATA_TYPE) && defined(VEC_SIZE)
+
+#if defined(WIDTH_OFFSET) && defined(DEPTH)
 /** This kernel concatenates the input tensor into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
+ * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  * @note The offset for the first spatial dimension has to be passed at compile time using -DWIDTH_OFFSET. i.e. -DWIDTH_OFFSET=128
+ * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH16
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -37,6 +40,8 @@
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -45,15 +50,17 @@
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  offset                            The offset to the first valid element of the output tensor in bytes
  */
 __kernel void concatenate_width(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst))
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, DEPTH);
+    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
@@ -61,9 +68,12 @@ __kernel void concatenate_width(
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
 }
-#endif // defined(WIDTH_OFFSET)
+#endif /* defined(WIDTH_OFFSET) && defined(DEPTH) */
 
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
+ *
+ * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
+ * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -97,4 +107,4 @@ __kernel void concatenate_depth(
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offsets.z));
 }
-#endif // defined(DATA_TYPE)
+#endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */
