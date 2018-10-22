@@ -720,7 +720,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
 
     Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     VSTORE(VEC_SIZE)
-    (res, 0, dst.ptr);
+    (ACTIVATION_FUNC(res), 0, dst.ptr);
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -953,18 +953,18 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
 
     VSTORE(VEC_SIZE)
-    (res0, 0, dst_addr + 0 * dst_stride_y);
+    (ACTIVATION_FUNC(res0), 0, dst_addr + 0 * dst_stride_y);
     VSTORE(VEC_SIZE)
-    (res1, 0, dst_addr + 1 * dst_stride_y);
+    (ACTIVATION_FUNC(res1), 0, dst_addr + 1 * dst_stride_y);
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
         VSTORE(VEC_SIZE)
-        (res2, 0, dst_addr + 0 * dst_stride_y + 1 * dst_stride_z);
+        (ACTIVATION_FUNC(res2), 0, dst_addr + 0 * dst_stride_y + 1 * dst_stride_z);
         VSTORE(VEC_SIZE)
-        (res3, 0, dst_addr + 1 * dst_stride_y + 1 * dst_stride_z);
+        (ACTIVATION_FUNC(res3), 0, dst_addr + 1 * dst_stride_y + 1 * dst_stride_z);
     }
 }
 
@@ -1159,18 +1159,18 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
 
     VSTORE(VEC_SIZE)
-    (res0, 0, dst_addr + 0 * dst_stride_y);
+    (ACTIVATION_FUNC(res0), 0, dst_addr + 0 * dst_stride_y);
     VSTORE(VEC_SIZE)
-    (res1, 0, dst_addr + 1 * dst_stride_y);
+    (ACTIVATION_FUNC(res1), 0, dst_addr + 1 * dst_stride_y);
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
         VSTORE(VEC_SIZE)
-        (res2, 0, dst_addr + 0 * dst_stride_y + 1 * dst_stride_z);
+        (ACTIVATION_FUNC(res2), 0, dst_addr + 0 * dst_stride_y + 1 * dst_stride_z);
         VSTORE(VEC_SIZE)
-        (res3, 0, dst_addr + 1 * dst_stride_y + 1 * dst_stride_z);
+        (ACTIVATION_FUNC(res3), 0, dst_addr + 1 * dst_stride_y + 1 * dst_stride_z);
     }
 }
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)

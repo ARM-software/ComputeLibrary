@@ -171,8 +171,10 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo              conv_info     = node.convolution_info();
-    const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
+    const PadStrideInfo              conv_info        = node.convolution_info();
+    const DepthwiseConvolutionMethod dwc_algorithm    = node.depthwise_convolution_method();
+    const unsigned int               depth_multiplier = 1;
+    const ActivationLayerInfo        fused_act        = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::unique_ptr<IFunction> func;
@@ -181,7 +183,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
     {
         std::tie(func, func_name) = create_named_function<GCDepthwiseConvolutionLayerFunctions::DepthwiseConvolutionLayer3x3>(
                                         std::string("DepthwiseConvolutionLayer3x3"),
-                                        input, weights, biases, output, conv_info);
+                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
     }
     else
     {
@@ -197,6 +199,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
 }

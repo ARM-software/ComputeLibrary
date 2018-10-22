@@ -39,12 +39,14 @@ namespace graph
 namespace detail
 {
 template <typename N>
-void fuse_node_with_activation(Graph &g, const std::set<Activation> &supported_fused_activations)
+void fuse_node_with_activation(Graph                              &g,
+                               const std::set<Activation>         &supported_fused_activations,
+                               std::function<bool(INode &)> const &prec)
 {
     // Not interested in the order of nodes
     for(auto &node : g.nodes())
     {
-        // Check if the node is batch norm and not a branching node
+        // Check if the node is of type N and not a branching node
         if(node && node->type() == N::node_type && node->output_edges().size() == 1)
         {
             auto output_edge_id = *node->output_edges().begin();
@@ -57,6 +59,11 @@ void fuse_node_with_activation(Graph &g, const std::set<Activation> &supported_f
 
                 ARM_COMPUTE_ERROR_ON(act_node->output(0) == nullptr || n_node->output(0) == nullptr);
 
+                // Check given precondition
+                if(!prec(*n_node))
+                {
+                    continue;
+                }
                 // Check if activation is supported for fusion
                 if(supported_fused_activations.count(act_node->activation_info().activation()) == 0)
                 {
@@ -110,8 +117,21 @@ void NodeFusionMutator::mutate(Graph &g)
     // Supported activations when fusing
     const std::set<Activation> supported_fused_activations = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU };
 
-    detail::fuse_node_with_activation<BatchNormalizationLayerNode>(g, supported_fused_activations);
-    detail::fuse_node_with_activation<ConvolutionLayerNode>(g, supported_fused_activations);
+    // Preconditions
+    auto empty_prec = [](INode & n)
+    {
+        return true;
+    };
+    auto qs8_prec = [](INode & n)
+    {
+        ARM_COMPUTE_ERROR_ON(n.output(0) == nullptr);
+        return n.output(0)->desc().data_type == DataType::QASYMM8;
+    };
+
+    // Fusion mutations
+    detail::fuse_node_with_activation<BatchNormalizationLayerNode>(g, supported_fused_activations, empty_prec);
+    detail::fuse_node_with_activation<ConvolutionLayerNode>(g, supported_fused_activations, empty_prec);
+    detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>(g, supported_fused_activations, qs8_prec);
 }
 } // namespace graph
 } // namespace arm_compute

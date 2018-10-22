@@ -36,12 +36,14 @@ using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
 
 NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
-    : _dwc_kernel(), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(), _accumulator(), _permuted_input(), _permuted_weights(), _permuted_output(),
-      _has_bias(false), _is_quantized(false), _is_optimized(false), _are_weights_reshaped(false), _is_nchw(true), _is_first_run(true), _permute(false)
+    : _dwc_kernel(), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(), _accumulator(), _permuted_input(),
+      _permuted_weights(), _permuted_output(), _has_bias(false), _is_quantized(false), _is_optimized(false), _are_weights_reshaped(false), _is_nchw(true), _is_first_run(true), _permute(false),
+      _is_activationlayer_enabled(false)
 {
 }
 
-void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier)
+void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                                               unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -159,10 +161,18 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
         _permute_output.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
         _permuted_output.allocator()->allocate();
     }
+
+    //Configure Activation Layer
+    _is_activationlayer_enabled = act_info.enabled();
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                unsigned int depth_multiplier)
+                                                unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
@@ -182,6 +192,12 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
     if(is_quantized)
     {
         ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output));
+    }
+
+    //Validate Activation Layer
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
     }
 
     return Status{};
@@ -235,16 +251,22 @@ void NEDepthwiseConvolutionLayer3x3::run()
     {
         _permute_output.run();
     }
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
 }
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
     : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _permute_input(),
-      _permute_weights(), _permute_output(), _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(), _permuted_input(), _permuted_weights(), _permuted_output(), _is_prepared(false),
-      _is_quantized(false), _is_nhwc(false), _original_weights(nullptr)
+      _permute_weights(), _permute_output(), _activationlayer_function(), _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(), _permuted_input(), _permuted_weights(),
+      _permuted_output(), _is_prepared(false), _is_quantized(false), _is_nhwc(false), _is_activationlayer_enabled(false), _original_weights(nullptr)
 {
 }
 
-void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier)
+void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                                            unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(channel_idx);
@@ -366,10 +388,18 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     // Allocate intermediate tensors
     _input_reshaped.allocator()->allocate();
     _v2mm_output.allocator()->allocate();
+
+    //Configure Activation Layer
+    _is_activationlayer_enabled = act_info.enabled();
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                             unsigned int depth_multiplier)
+                                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
@@ -454,6 +484,12 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
         ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output_to_use));
     }
 
+    // Validate Activation Layer
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
+    }
+
     return Status{};
 }
 
@@ -478,6 +514,11 @@ void NEDepthwiseConvolutionLayer::run()
     if(_is_nhwc)
     {
         _permute_output.run();
+    }
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
     }
 }
 

@@ -207,8 +207,7 @@ BorderSize CLDepthwiseConvolutionLayer3x3NCHWKernel::border_size() const
 }
 
 void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                                         unsigned int        depth_multiplier,
-                                                         ActivationLayerInfo act_info)
+                                                         unsigned int depth_multiplier, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info));
@@ -272,11 +271,11 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
                 const float s2 = output->info()->quantization_info().scale;
                 const int   o2 = output->info()->quantization_info().offset;
 
+                build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
+                build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
                 if(o1 != o2 || s1 != s2)
                 {
-                    build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
                     build_opts.add_option("-DS2_VAL=" + float_to_string_with_full_precision(s2));
-                    build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
                     build_opts.add_option("-DO2_VAL=" + support::cpp11::to_string(o2));
                 }
             }

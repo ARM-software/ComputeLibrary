@@ -33,7 +33,7 @@ namespace arm_compute
 namespace graph
 {
 DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, DepthwiseConvolutionMethod method)
-    : _info(std::move(info)), _method(method)
+    : _info(std::move(info)), _method(method), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -52,6 +52,16 @@ DepthwiseConvolutionMethod DepthwiseConvolutionLayerNode::depthwise_convolution_
 PadStrideInfo DepthwiseConvolutionLayerNode::convolution_info() const
 {
     return _info;
+}
+
+ActivationLayerInfo DepthwiseConvolutionLayerNode::fused_activation() const
+{
+    return _fused_activation;
+}
+
+void DepthwiseConvolutionLayerNode::set_fused_activation(ActivationLayerInfo fused_activation)
+{
+    _fused_activation = fused_activation;
 }
 
 TensorDescriptor DepthwiseConvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
@@ -100,7 +110,7 @@ TensorDescriptor DepthwiseConvolutionLayerNode::configure_output(size_t idx) con
 
 NodeType DepthwiseConvolutionLayerNode::type() const
 {
-    return NodeType::DepthwiseConvolutionLayer;
+    return DepthwiseConvolutionLayerNode::node_type;
 }
 
 void DepthwiseConvolutionLayerNode::accept(INodeVisitor &v)

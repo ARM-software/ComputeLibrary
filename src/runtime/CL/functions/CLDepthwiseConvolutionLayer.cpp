@@ -90,12 +90,13 @@ void CLDepthwiseConvolutionLayer3x3::run()
 }
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer()
-    : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _input_reshaped(),
-      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_prepared(false), _is_quantized(false), _original_weights(nullptr)
+    : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _activationlayer_function(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(),
+      _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_prepared(false), _is_quantized(false), _is_activationlayer_enabled(false), _original_weights(nullptr)
 {
 }
 
-void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier)
+void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                            unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -188,10 +189,18 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     // Allocate intermediate tensors
     _input_reshaped.allocator()->allocate();
     _v2mm_output.allocator()->allocate();
+
+    //Configure Activation Layer
+    _is_activationlayer_enabled = act_info.enabled();
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                             unsigned int depth_multiplier)
+                                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
@@ -238,6 +247,12 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
         ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output));
     }
 
+    // Validate Activation Layer
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
+    }
+
     return Status{};
 }
 
@@ -252,6 +267,10 @@ void CLDepthwiseConvolutionLayer::run()
     if(_is_quantized)
     {
         CLScheduler::get().enqueue(_output_stage_kernel);
+    }
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
     }
 }
 
