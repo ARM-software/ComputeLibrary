@@ -178,15 +178,15 @@ private:
     static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
 
 private:
-    CLMemoryGroup                                       _memory_group;
-    CLConvolutionLayerReshapeWeights                    _reshape_weights;
-    CLIm2ColKernel                                      _im2col_kernel;
-    CLGEMM                                              _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
-    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    CLCol2ImKernel                                      _col2im_kernel;
-    CLActivationLayer                                   _activationlayer_function;
-    CLArithmeticAdditionKernel                          _add_bias_kernel;
+    CLMemoryGroup                                  _memory_group;
+    CLConvolutionLayerReshapeWeights               _reshape_weights;
+    CLIm2ColKernel                                 _im2col_kernel;
+    CLGEMM                                         _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore                   _mm_gemmlowp;
+    CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat _gemmlowp_output_stage;
+    CLCol2ImKernel                                 _col2im_kernel;
+    CLActivationLayer                              _activationlayer_function;
+    CLArithmeticAdditionKernel                     _add_bias_kernel;
 
     const ICLTensor *_original_weights;
 

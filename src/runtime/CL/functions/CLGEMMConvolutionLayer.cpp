@@ -284,17 +284,14 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     {
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
 
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
         if(!_skip_col2im)
         {
             _memory_group.manage(&_tmp_output);
             gemm_output_staged_to_use = &_tmp_output;
         }
 
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset);
+        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, multiplier, output_quant_info.offset);
     }
 
     if(!_skip_col2im)
@@ -448,17 +445,12 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     if(is_quantized)
     {
-        float multiplier = input->quantization_info().scale * weights_to_use->quantization_info().scale / output->quantization_info().scale;
-        int   output_multiplier, output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
         if(!skip_col2im)
         {
             tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
             tmp_info.set_quantization_info(output->quantization_info());
             gemm_output_staged_to_use = &tmp_info;
         }
-
         // Validate output stage for quantized case
         CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use);
     }
