@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#if defined(SRC_DEPTH) && defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 2x2/2x1 or 1x2, the filter size 3x3/3x1 or 1x3 and the data layout is NCHW
  *
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
@@ -40,19 +40,23 @@
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_2x2_3x3_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -60,9 +64,9 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 )
 {
     // Each thread stores a 2x2/2x1 or 1x2 tile accordingly with the filter size
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
 
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 
     // Load the values across the 16 or 4 channels to compose the 4x4 or 4x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -119,6 +123,7 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+    int batch = get_global_id(2) / SRC_DEPTH;
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -131,7 +136,7 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 #endif // defined(HAS_BIAS)
 
     // Get output address
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -168,19 +173,23 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x4_3x3_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -188,9 +197,9 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 )
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
 
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 
     // Load the values across the channels to compose the 6x6 or 6x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -303,6 +312,7 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+    int batch = get_global_id(2) / SRC_DEPTH;
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -317,7 +327,7 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 #endif // defined(HAS_BIAS)
 
     // Get output address
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -369,29 +379,33 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  dst_size                          Size of the destination tensor, minus the last padding
  */
 __kernel void winograd_output_transform_4x4_3x3_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
     int dst_size)
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
 
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -505,6 +519,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     int x_out = get_global_id(0);
     int y_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int z_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
+    int batch = get_global_id(2) / SRC_DEPTH;
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -536,7 +551,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #endif // defined(HAS_BIAS)
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     // Store the 1x4 output tile
@@ -555,7 +570,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     *((__global DATA_TYPE *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = out03;
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Get output address
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
@@ -613,19 +628,23 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x4_5x5_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -633,17 +652,18 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 )
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
 
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 
     // Compute output address
     int y_in  = get_global_id(1);
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+    int batch = get_global_id(2) / SRC_DEPTH;
 
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
 
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -818,33 +838,38 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x4_5x5_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
     int dst_size)
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
 
-    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
 
     int y_in  = get_global_id(1);
     int x_out = get_global_id(0);
     int y_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int z_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
+    int batch = get_global_id(2) / SRC_DEPTH;
 
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -878,7 +903,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Get output address
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out00;
@@ -1006,7 +1031,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     out_col3 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
 #endif // defined(HAS_BIAS)
     // Get output address
-    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
@@ -1046,19 +1071,23 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_2x1_3x1_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1072,6 +1101,8 @@ __kernel void winograd_output_transform_2x1_3x1_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1080,6 +1111,8 @@ __kernel void winograd_output_transform_2x1_3x1_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1106,19 +1139,23 @@ __kernel void winograd_output_transform_2x1_3x1_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x1_3x1_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1132,6 +1169,8 @@ __kernel void winograd_output_transform_4x1_3x1_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1140,6 +1179,8 @@ __kernel void winograd_output_transform_4x1_3x1_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1166,19 +1207,23 @@ __kernel void winograd_output_transform_4x1_3x1_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x1_5x1_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1192,6 +1237,8 @@ __kernel void winograd_output_transform_4x1_5x1_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1200,6 +1247,8 @@ __kernel void winograd_output_transform_4x1_5x1_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1226,19 +1275,23 @@ __kernel void winograd_output_transform_4x1_5x1_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x1_3x1_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
@@ -1251,6 +1304,8 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1259,6 +1314,8 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes,
 #if defined(HAS_BIAS)
                                            bias_ptr,
@@ -1284,19 +1341,23 @@ __kernel void winograd_output_transform_4x1_3x1_nhwc(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_4x1_5x1_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
@@ -1309,6 +1370,8 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1317,6 +1380,8 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes,
 #if defined(HAS_BIAS)
                                            bias_ptr,
@@ -1344,19 +1409,23 @@ __kernel void winograd_output_transform_4x1_5x1_nhwc(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_1x2_1x3_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1370,6 +1439,8 @@ __kernel void winograd_output_transform_1x2_1x3_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1378,6 +1449,8 @@ __kernel void winograd_output_transform_1x2_1x3_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1404,19 +1477,23 @@ __kernel void winograd_output_transform_1x2_1x3_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_1x4_1x3_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1430,6 +1507,8 @@ __kernel void winograd_output_transform_1x4_1x3_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1438,6 +1517,8 @@ __kernel void winograd_output_transform_1x4_1x3_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1464,19 +1545,23 @@ __kernel void winograd_output_transform_1x4_1x3_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_1x4_1x5_nchw(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst)
 #if defined(HAS_BIAS)
     ,
     VECTOR_DECLARATION(bias)
@@ -1490,6 +1575,8 @@ __kernel void winograd_output_transform_1x4_1x5_nchw(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1498,6 +1585,8 @@ __kernel void winograd_output_transform_1x4_1x5_nchw(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes
 #if defined(HAS_BIAS)
                                            ,
@@ -1524,19 +1613,23 @@ __kernel void winograd_output_transform_1x4_1x5_nchw(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_1x4_1x3_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
@@ -1549,6 +1642,8 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1557,6 +1652,8 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes,
 #if defined(HAS_BIAS)
                                            bias_ptr,
@@ -1582,19 +1679,23 @@ __kernel void winograd_output_transform_1x4_1x3_nhwc(
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  dst_step_w                        dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void winograd_output_transform_1x4_1x5_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
@@ -1607,6 +1708,8 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            src_step_y,
                                            src_stride_z,
                                            src_step_z,
+                                           src_stride_w,
+                                           src_step_w,
                                            src_offset_first_element_in_bytes,
                                            dst_ptr,
                                            dst_stride_x,
@@ -1615,6 +1718,8 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            dst_step_y,
                                            dst_stride_z,
                                            dst_step_z,
+                                           dst_stride_w,
+                                           dst_step_w,
                                            dst_offset_first_element_in_bytes,
 #if defined(HAS_BIAS)
                                            bias_ptr,
@@ -1625,4 +1730,4 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            dst_size);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-#endif // defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#endif // defined(SRC_DEPTH) && defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)

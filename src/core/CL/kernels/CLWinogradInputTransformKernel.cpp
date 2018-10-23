@@ -116,6 +116,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
+    const DataLayout    data_layout      = input->info()->data_layout();
 
     const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
@@ -124,7 +125,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const int num_elements_x = input->info()->dimension(idx_w) - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
     const int num_elements_y = input->info()->dimension(idx_h) - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
 
-    if(input->info()->data_layout() == DataLayout::NCHW)
+    if(data_layout == DataLayout::NCHW)
     {
         // Check if we need to extend the right or bottom border
         const unsigned int extra_border_right  = ((num_elements_x % output_tile_size.width) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.width - 1);
@@ -164,11 +165,15 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
-
-    if(input->info()->data_layout() == DataLayout::NHWC)
+    if(data_layout == DataLayout::NHWC)
     {
+        build_opts.add_option("-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
         build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
+    }
+    else
+    {
+        build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     }
 
     // Create kernel
@@ -178,7 +183,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const unsigned int tile_max_dim = std::max(output_tile_size.width, output_tile_size.height);
 
     // Check optimized kernel if output_dims == 2x2
-    if((tile_max_dim == 2) && (input->info()->data_layout() == DataLayout::NCHW))
+    if((tile_max_dim == 2) && (data_layout == DataLayout::NCHW))
     {
         _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
     }
@@ -186,7 +191,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     // Append stepz and data layout
     kernel_name += "_stepz";
     kernel_name += support::cpp11::to_string(_step_z);
-    kernel_name += "_" + lower_string(string_from_data_layout(input->info()->data_layout()));
+    kernel_name += "_" + lower_string(string_from_data_layout(data_layout));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -223,16 +228,29 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    const size_t idx_w = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t idx_c = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL);
+    const DataLayout data_layout   = _input->info()->data_layout();
+    const size_t     idx_w         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t     idx_h         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const size_t     idx_c         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const size_t     total_batches = window.shape().total_size_upper(3);
 
-    Window slice = window.first_slice_window_3D();
+    // Collapse window
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+
+    Window slice = window_collapsed.first_slice_window_3D();
     slice.set(idx_w, Window::Dimension(0, _num_tiles_x, 1));
     slice.set(idx_h, Window::Dimension(0, _num_tiles_y, 1));
+    if(data_layout == DataLayout::NHWC)
+    {
+        slice.set(idx_h, Window::Dimension(0, _num_tiles_y * total_batches, 1));
+    }
 
     ARM_COMPUTE_ERROR_ON(((slice[idx_c].end() - slice[idx_c].start()) % _step_z) != 0);
     slice.set(idx_c, Window::Dimension(slice[idx_c].start(), slice[idx_c].end(), _step_z));
+
+    unsigned int idx = 2 * num_arguments_per_3D_tensor();
+    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
+    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
 
     do
     {
@@ -242,5 +260,5 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
 
         enqueue(queue, *this, slice, lws_hint());
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }

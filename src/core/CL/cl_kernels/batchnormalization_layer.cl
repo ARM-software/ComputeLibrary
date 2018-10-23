@@ -273,8 +273,8 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
  * @param[in]  conv_w_step_y                          input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  conv_w_stride_z                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  conv_w_step_z                          input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  conv_w__stride_w                       Stride of the source tensor in W dimension (in bytes)
- * @param[in]  conv_w__step_w                         input_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  conv_w_stride_w                        Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  conv_w_step_w                          input_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  conv_w_offset_first_element_in_bytes   The offset of the first element in the source tensor
  * @param[in]  bn_mean_ptr                            Pointer to the mean source tensor. Supported data types: same as @p input_ptr
  * @param[in]  bn_mean_stride_x                       Stride of the mean source tensor in X dimension (in bytes)
