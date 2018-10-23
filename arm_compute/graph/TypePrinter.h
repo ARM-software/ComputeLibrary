@@ -68,6 +68,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::BatchNormalizationLayer:
             os << "BatchNormalizationLayer";
             break;
+        case NodeType::BoundingBoxTransformLayer:
+            os << "BoundingBoxTransformLayer";
+            break;
         case NodeType::ChannelShuffleLayer:
             os << "ChannelShuffleLayer";
             break;

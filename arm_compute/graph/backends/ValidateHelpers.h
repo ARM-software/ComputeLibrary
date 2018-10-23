@@ -52,6 +52,30 @@ inline arm_compute::ITensorInfo *get_backing_tensor_info(arm_compute::graph::Ten
     return ((tensor == nullptr) || (tensor->handle() == nullptr)) ? nullptr : tensor->handle()->tensor().info();
 }
 
+/** Validates a Bounding Box Transform layer node
+ *
+ * @tparam BoundingBoxTransformLayer  Bounding Box Transform layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename BoundingBoxTransformLayer>
+Status validate_bounding_box_transform_layer(BoundingBoxTransformLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating BoundingBoxTransformLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo      *input     = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo      *deltas    = get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo      *output    = get_backing_tensor_info(node.output(0));
+    const BoundingBoxTransformInfo bbox_info = node.info();
+
+    return BoundingBoxTransformLayer::validate(input, output, deltas, bbox_info);
+}
+
 /** Validates a Channel Shuffle layer node
  *
  * @tparam ChannelShuffleLayer  Channel Shuffle layer function type

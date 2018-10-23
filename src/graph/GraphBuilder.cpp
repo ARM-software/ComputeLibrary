@@ -168,6 +168,20 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
     return batch_norm_nid;
 }
 
+NodeID GraphBuilder::add_bounding_box_transform_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair deltas, BoundingBoxTransformInfo info)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+    CHECK_NODEIDX_PAIR(deltas, g);
+
+    NodeID nid = g.add_node<BoundingBoxTransformLayerNode>(info);
+
+    g.add_connection(input.node_id, input.index, nid, 0);
+    g.add_connection(deltas.node_id, deltas.index, nid, 1);
+
+    set_node_params(g, nid, params);
+    return nid;
+}
+
 NodeID GraphBuilder::add_channel_shuffle_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_groups)
 {
     return create_simple_single_input_output_node<ChannelShuffleLayerNode>(g, params, input, num_groups);

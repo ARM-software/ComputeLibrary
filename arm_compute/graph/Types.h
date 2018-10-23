@@ -132,6 +132,7 @@ enum class NodeType
 {
     ActivationLayer,
     BatchNormalizationLayer,
+    BoundingBoxTransformLayer,
     ChannelShuffleLayer,
     ConcatenateLayer,
     ConvolutionLayer,

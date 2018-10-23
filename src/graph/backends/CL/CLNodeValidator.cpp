@@ -47,6 +47,8 @@ Status CLNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::BoundingBoxTransformLayer:
+            return detail::validate_bounding_box_transform_layer<CLBoundingBoxTransform>(*polymorphic_downcast<BoundingBoxTransformLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:
             return detail::validate_channel_shuffle_layer<CLChannelShuffleLayer>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:

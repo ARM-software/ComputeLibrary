@@ -154,6 +154,41 @@ private:
     float               _epsilon;
 };
 
+/** Bounding Box Transform Layer */
+class BoundingBoxTransformLayer final : public ILayer
+{
+public:
+    /** Construct a bounding box transform layer.
+     *
+     * @param[in] sub_stream_input  Graph sub-stream for the input
+     * @param[in] sub_stream_deltas Graph sub-stream for the deltas
+     * @param[in] info              Contains BoundingBox operation information described in @ref BoundingBoxTransformInfo.
+     */
+    BoundingBoxTransformLayer(SubStream &&sub_stream_input, SubStream &&sub_stream_deltas, BoundingBoxTransformInfo info)
+        : _ss_input(sub_stream_input), _ss_deltas(sub_stream_deltas), _bbox_info(info)
+    {
+    }
+
+    /** Create layer and add to the given stream.
+     *
+     * @param[in] s Stream to add layer to.
+     *
+     * @return ID of the created node.
+     */
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { _ss_input.tail_node(), 0 };
+        NodeIdxPair deltas        = { _ss_deltas.tail_node(), 0 };
+        return GraphBuilder::add_bounding_box_transform_node(s.graph(), common_params, input, deltas, _bbox_info);
+    }
+
+private:
+    SubStream                _ss_input;
+    SubStream                _ss_deltas;
+    BoundingBoxTransformInfo _bbox_info;
+};
+
 /** Channel Shuffle Layer */
 class ChannelShuffleLayer final : public ILayer
 {

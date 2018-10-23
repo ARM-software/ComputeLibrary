@@ -26,6 +26,7 @@
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
+#include "arm_compute/graph/nodes/BoundingBoxTransformLayerNode.h"
 #include "arm_compute/graph/nodes/ChannelShuffleLayerNode.h"
 #include "arm_compute/graph/nodes/ConcatenateLayerNode.h"
 #include "arm_compute/graph/nodes/ConstNode.h"

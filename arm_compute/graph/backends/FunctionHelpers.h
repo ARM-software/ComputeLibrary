@@ -159,6 +159,42 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
     return std::move(func);
 }
 
+/** Create a backend bounding box transform layer function
+ *
+ * @tparam BoundingBoxTransformLayerFunction    Backend bounding box transform function
+ * @tparam TargetInfo                           Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend bounding box transform layer function
+ */
+template <typename BoundingBoxTransformLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransformLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 2 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input     = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *deltas    = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *output    = get_backing_tensor<TargetInfo>(node.output(0));
+    const BoundingBoxTransformInfo   bbox_info = node.info();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<BoundingBoxTransformLayerFunction>();
+    func->configure(input, output, deltas, bbox_info);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
+                               << " BoundingBox Info img W: " << bbox_info.img_width() << " "
+                               << " BoundingBox Info img H: " << bbox_info.img_height() << " "
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend channel shuffle layer function
  *
  * @tparam ChannelShuffleLayerFunction Backend channel shuffle function

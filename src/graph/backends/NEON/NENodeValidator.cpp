@@ -47,6 +47,8 @@ Status NENodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::BoundingBoxTransformLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : BoundingBoxTransformLayer");
         case NodeType::ChannelShuffleLayer:
             return detail::validate_channel_shuffle_layer<NEChannelShuffleLayer>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:

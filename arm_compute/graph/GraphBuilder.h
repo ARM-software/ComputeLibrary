@@ -97,6 +97,17 @@ public:
     static NodeID add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
                                                ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr var_accessor = nullptr,
                                                ITensorAccessorUPtr beta_accessor = nullptr, ITensorAccessorUPtr gamma_accessor = nullptr);
+    /** Adds a bounding box transform layer node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the bounding box transform layer node as a NodeID-Index pair
+     * @param[in] deltas Deltas input to the bounding box transform layer node as a NodeID-Index pair
+     * @param[in] info   Bounding Box Transform information
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_bounding_box_transform_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair deltas, BoundingBoxTransformInfo info);
     /** Adds an channel shuffle layer node to the graph
      *
      * @param[in] g          Graph to add the node to

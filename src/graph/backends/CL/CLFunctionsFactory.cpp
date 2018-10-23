@@ -83,6 +83,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_activation_layer<CLActivationLayer, CLTargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return detail::create_batch_normalization_layer<CLBatchNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
+        case NodeType::BoundingBoxTransformLayer:
+            return detail::create_bounding_box_transform_layer<CLBoundingBoxTransform, CLTargetInfo>(*polymorphic_downcast<BoundingBoxTransformLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:
             return detail::create_channel_shuffle_layer<CLChannelShuffleLayer, CLTargetInfo>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:

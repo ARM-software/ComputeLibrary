@@ -21,43 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+
+#ifndef __ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H__
+#define __ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class BoundingBoxTransformLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PadLayerNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SliceLayerNode;
-class SplitLayerNode;
-class UpsampleLayerNode;
-class YOLOLayerNode;
+/** Bounding Box Transform Layer node */
+class BoundingBoxTransformLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] info Contains BoundingBox operation information described in @ref BoundingBoxTransformInfo.
+     */
+    BoundingBoxTransformLayerNode(BoundingBoxTransformInfo &info);
+    /** BoundingBoxTransformInfo accessor
+     *
+     * @return BoundingBoxTransformInfo
+     */
+    const BoundingBoxTransformInfo &info() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    BoundingBoxTransformInfo _bbox_info;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_BOUNDING_BOX_TRANSFORM_NODE_H__ */
