@@ -39,23 +39,46 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, size_t num_rois, const ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, rois);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
+    ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
-    ARM_COMPUTE_RETURN_ERROR_ON(num_rois == 0);
 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) || (output->dimension(1) != pool_info.pooled_height()));
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
-        ARM_COMPUTE_RETURN_ERROR_ON(num_rois != output->dimension(3));
+        ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
     }
 
     return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Output auto inizialitation if not yet initialized
+    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2), rois->dimension(1));
+    auto_init_if_empty((*output), output_shape, 1, input->data_type());
+
+    // Configure kernel window
+    const unsigned int num_elems_processed_per_iteration = 1;
+    Window             win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal input_access(input, input->valid_region().start(0), num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
 }
 } // namespace
 
@@ -64,13 +87,14 @@ CLROIAlignLayerKernel::CLROIAlignLayerKernel()
 {
 }
 
-void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, rois);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->num_values(), output->info(), pool_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), rois->info(), output->info(), pool_info));
 
-    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->info()->dimension(2), rois->num_values());
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), rois->info(), output->info(), pool_info);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input     = input;
     _output    = output;
@@ -78,46 +102,27 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLROIArray 
     _pool_info = pool_info;
 
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type())));
-    build_opts.emplace(("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(Window::DimX))));
-    build_opts.emplace(("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(Window::DimY))));
-    build_opts.emplace(("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(Window::DimZ))));
-    build_opts.emplace(("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width())));
-    build_opts.emplace(("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height())));
-    build_opts.emplace(("-DSPATIAL_SCALE=" + float_to_string_with_full_precision(pool_info.spatial_scale())));
-    if(pool_info.sampling_ratio() > 0)
-    {
-        build_opts.emplace(("-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio())));
-    }
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(Window::DimX)));
+    build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(Window::DimY)));
+    build_opts.add_option("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(Window::DimZ)));
+    build_opts.add_option("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width()));
+    build_opts.add_option("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height()));
+    build_opts.add_option("-DSPATIAL_SCALE=" + float_to_string_with_full_precision(pool_info.spatial_scale()));
+    build_opts.add_option_if(pool_info.sampling_ratio() > 0, "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
 
     // Create kernel
     std::string kernel_name = "roi_align_layer";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    // Set static kernel arguments
-    unsigned int idx = 2 * num_arguments_per_3D_tensor() + num_arguments_per_1D_array();
-    add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
-    add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
-
-    // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 1;
-    Window             window                            = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowStatic input_access(input->info(),
-                                    input->info()->valid_region().start(0),
-                                    input->info()->valid_region().start(1),
-                                    input->info()->valid_region().end(0),
-                                    input->info()->valid_region().end(1));
-    AccessWindowStatic output_access(output->info(), 0, 0, pool_info.pooled_width(), pool_info.pooled_height());
-
-    output_access.set_valid_region(window, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure_internal(window);
+    ICLKernel::configure_internal(win_config.second);
 }
 
-Status CLROIAlignLayerKernel::validate(const ITensorInfo *input, size_t num_rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status CLROIAlignLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, num_rois, output, pool_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, rois, output, pool_info));
     return Status{};
 }
 
@@ -126,16 +131,20 @@ void CLROIAlignLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
-    // Parallelize spatially and across the fourth dimension of the output tensor (also across ROIArray)
+    Window slice      = window.first_slice_window_3D();
+    Window slice_rois = slice;
+    // Parallelize spatially and across the fourth dimension of the output tensor (also across ROITensor)
+    slice_rois.set_dimension_step(Window::DimX, _rois->info()->dimension(0));
     slice.set(Window::DimZ, window[3]);
 
     // Set arguments
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, _input, slice);
-    add_1D_array_argument<ROI>(idx, _rois, Strides(sizeof(ROI)), 1U, slice);
+    add_2D_tensor_argument(idx, _rois, slice_rois);
     add_3D_tensor_argument(idx, _output, slice);
+    add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
+    add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
+
     enqueue(queue, *this, slice);
 }
-
 } // namespace arm_compute

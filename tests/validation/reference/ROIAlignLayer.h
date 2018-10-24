@@ -37,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const std::vector<ROI> &rois, const ROIPoolingLayerInfo &pool_info);
+SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &rois, const ROIPoolingLayerInfo &pool_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

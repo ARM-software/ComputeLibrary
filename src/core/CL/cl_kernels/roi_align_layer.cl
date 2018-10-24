@@ -97,38 +97,40 @@ inline DATA_TYPE roi_align_1x1(const Tensor3D *input, float region_start_x,
  * @note Sampling ratio (i.e., the number of samples in each bin) may be passed using -DSAMPLING_RATIO. If not defined each roi
  *       will have a default sampling ratio of roi_dims/pooling_dims
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16, F32
- * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: F16, F32
+ * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
+ * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the pooled region of the source image as specifed by ROI
- * @param[in]  rois_ptr                             Pointer to the rois array. Layout: {x, y, width, height, batch_indx}
- * @param[in]  rois_stride_x                        Stride of the rois array in X dimension (in bytes)
- * @param[in]  rois_step_x                          rois_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  rois_offset_first_element_in_bytes   The offset of the first element in the rois array
- * @param[out] output_ptr                           Pointer to the destination image. Supported data types: F16, F32
- * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the pooled region of the source tensor as specifed by ROI
+ * @param[in]  rois_ptr                             Pointer to the ROIs tensor. Layout: { batch_index, x1, y1, x2, y2 }. Supported data types: same as @p input_ptr
+ * @param[in]  rois_stride_x                        Stride of the ROIs tensor in X dimension (in bytes)
+ * @param[in]  rois_step_x                          Step of the ROIs tensor in X dimension (in bytes)
+ * @param[in]  rois_stride_y                        Stride of the ROIs tensor in Y dimension (in bytes)
+ * @param[in]  rois_step_y                          Step of the ROIs tensor in Y dimension (in bytes)
+ * @param[in]  rois_offset_first_element_in_bytes   The offset of the first element in the ROIs tensor
+ * @param[out] output_ptr                           Pointer to the destination tensor. Supported data types: Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  output_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
- * @param[in]  input_stride_w                       Stride of the source image in W dimension (in bytes)
- * @param[in]  output_stride_w                      Stride of the destination image in W dimension (in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  input_stride_w                       Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  output_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  */
 __kernel void roi_align_layer(
     TENSOR3D_DECLARATION(input),
-    VECTOR_DECLARATION(rois),
+    IMAGE_DECLARATION(rois),
     TENSOR3D_DECLARATION(output),
     unsigned int input_stride_w, unsigned int output_stride_w)
 {
     // Get pixels pointer
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
-    Vector   rois   = CONVERT_TO_VECTOR_STRUCT_NO_STEP(rois);
+    Image    rois   = CONVERT_TO_IMAGE_STRUCT_NO_STEP(rois);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
 
     const int px = get_global_id(0);
@@ -136,19 +138,19 @@ __kernel void roi_align_layer(
     const int pw = get_global_id(2);
 
     // Load roi parameters
-    // roi is laid out as follows:
-    // { x, y, width, height, batch_index }
-    const ushort4 roi       = vload4(0, (__global ushort *)vector_offset(&rois, pw));
-    const ushort roi_batch  = *((__global ushort *)vector_offset(&rois, pw) + 4);
+    // roi is laid out as follows { batch_index, x1, y1, x2, y2 }
+    const ushort roi_batch = (ushort) * ((__global DATA_TYPE *)offset(&rois, 0, pw));
+    const VEC_DATA_TYPE(DATA_TYPE, 4)
+    roi                 = vload4(0, (__global DATA_TYPE *)offset(&rois, 1, pw));
     const float2 roi_anchor = convert_float2(roi.s01) * convert_float(SPATIAL_SCALE);
-    const float2 roi_dims   = fmax(convert_float2(roi.s23) * convert_float(SPATIAL_SCALE), 1.f);
+    const float2 roi_dims   = fmax(convert_float2(roi.s23 - roi.s01) * convert_float(SPATIAL_SCALE), 1.f);
 
     // Calculate pooled region start and end
     const float2 spatial_indx     = (float2)(px, py);
     const float2 pooled_dims      = (float2)(POOLED_DIM_X, POOLED_DIM_Y);
     const float2 max_spatial_dims = (float2)(MAX_DIM_X, MAX_DIM_Y);
 
-    const float2 bin_size     = roi_dims / pooled_dims;
+    const float2 bin_size     = (float2)((roi_dims.s0 / (float)POOLED_DIM_X), (roi_dims.s1 / (float)POOLED_DIM_Y));
     float2       region_start = spatial_indx * bin_size + roi_anchor;
     float2       region_end   = (spatial_indx + 1) * bin_size + roi_anchor;
 
@@ -159,7 +161,7 @@ __kernel void roi_align_layer(
     const float2 roi_bin_grid = SAMPLING_RATIO;
 #else  // !defined(SAMPLING_RATIO)
     // Note that we subtract EPS_GRID before ceiling. This is to avoid situations where 1.000001 gets ceiled to 2.
-    const float2 roi_bin_grid = ceil(roi_dims / pooled_dims - EPS_GRID);
+    const float2 roi_bin_grid = ceil(bin_size - EPS_GRID);
 #endif // defined(SAMPLING_RATIO)
 
     // Move input and output pointer across the fourth dimension

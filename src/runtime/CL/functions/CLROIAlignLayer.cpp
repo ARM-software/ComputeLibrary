@@ -29,14 +29,14 @@
 
 namespace arm_compute
 {
-Status CLROIAlignLayer::validate(const ITensorInfo *input, size_t num_rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
+Status CLROIAlignLayer::validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLROIAlignLayerKernel::validate(input, num_rois, output, pool_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLROIAlignLayerKernel::validate(input, rois, output, pool_info));
 
     return Status{};
 }
 
-void CLROIAlignLayer::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIAlignLayer::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     // Configure ROI pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<CLROIAlignLayerKernel>();

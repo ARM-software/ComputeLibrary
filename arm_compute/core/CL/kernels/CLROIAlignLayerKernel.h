@@ -52,7 +52,8 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. Data types supported: F16/F32.
-     * @param[in]  rois      Array containing @ref ROI.
+     * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner
+     *                       as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ]. Data types supported: same as @p input
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
@@ -61,11 +62,11 @@ public:
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
      * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
      */
-    void configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
+    void configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLROIAlignLayerKernel
      *
      * @param[in]  input     Source tensor info. Data types supported: F16/F32.
-     * @param[in]  num_rois  Length of the array containing @ref ROI.
+     * @param[in]  rois      ROIs tensor info. Data types supported: same as @p input
      * @param[out] output    Destination tensor info. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
@@ -76,7 +77,7 @@ public:
      *
      * @return a Status
      */
-    static Status validate(const ITensorInfo *input, size_t num_rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *rois, ITensorInfo *output, const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue);
@@ -84,7 +85,7 @@ public:
 private:
     const ICLTensor    *_input;
     ICLTensor          *_output;
-    const ICLROIArray *_rois;
+    const ICLTensor    *_rois;
     ROIPoolingLayerInfo _pool_info;
 };
 } // namespace arm_compute
