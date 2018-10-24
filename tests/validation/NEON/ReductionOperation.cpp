@@ -44,7 +44,8 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float> tolerance_f32(0.00001f);
+AbsoluteTolerance<float> tolerance_f32(0.0001f);
+RelativeTolerance<float> rel_tolerance_f32(0.00001f);
 /** Tolerance for quantized operations */
 RelativeTolerance<float> tolerance_qasymm8(1);
 } // namespace
@@ -96,7 +97,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::
                        combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
