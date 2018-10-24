@@ -62,7 +62,14 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     if(run_optimised)
     {
-        _asm_glue.configure(a, b, d, alpha, beta, _reshape_b_only_on_first_run);
+        if(MEMInfo::get_policy() == MemoryPolicy::MINIMIZE)
+        {
+            _asm_glue.configure(a, b, d, alpha, beta, false);
+        }
+        else
+        {
+            _asm_glue.configure(a, b, d, alpha, beta, _reshape_b_only_on_first_run);
+        }
         ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
     }
     else

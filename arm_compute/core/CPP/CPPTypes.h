@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,19 @@ enum class CPUModel
     A53,
     A55r0,
     A55r1
+};
+
+/** Global memory policy.
+ * The functions in the runtime will use different strategies based on the policy currently set.
+ *
+ * MINIMIZE will try to reduce the amount allocated by the functions at the expense of performance normally.
+ * NORMAL won't try to save any memory and will favor speed over memory consumption
+ *
+ */
+enum class MemoryPolicy
+{
+    MINIMIZE,
+    NORMAL
 };
 
 /** Convert a cpumodel value to a string
@@ -178,6 +192,33 @@ private:
     bool                  _dotprod       = false;
     unsigned int          _L1_cache_size = 32768;
     unsigned int          _L2_cache_size = 262144;
+};
+
+class MEMInfo final
+{
+public:
+    MEMInfo();
+
+    /** Return the total amount of RAM memory in the system expressed in KB.
+     *
+     * @return Total memory
+     */
+    size_t get_total_in_kb() const;
+
+    static void set_policy(MemoryPolicy policy);
+    static MemoryPolicy get_policy();
+
+    /** Common memory sizes expressed in Kb to avoid having them
+     *  duplicated throughout the code.
+     */
+    static const size_t ONE_GB_IN_KB = { 1035842 };
+    static const size_t TWO_GB_IN_KB = { ONE_GB_IN_KB * 2 };
+
+private:
+    size_t              _total;
+    size_t              _free;
+    size_t              _buffer;
+    static MemoryPolicy _policy;
 };
 
 /** Information about executing thread and CPU. */

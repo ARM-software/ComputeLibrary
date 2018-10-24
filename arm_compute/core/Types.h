@@ -940,8 +940,8 @@ public:
      * @param[in] weights         (Optional)Weights [wx, wy, ww, wh] for the deltas. Defaults to all ones
      * @param[in] bbox_xform_clip (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
      */
-    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { 1.0, 1.0, 1.0, 1.0 }, float bbox_xform_clip =
-                                 4.135166556742356)
+    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { { 1.f, 1.f, 1.f, 1.f } }, float bbox_xform_clip =
+    4.135166556742356f)
         : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
     {
     }
