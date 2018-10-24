@@ -74,9 +74,14 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
     if(!keep_dims)
     {
         TensorShape out_shape = input->info()->tensor_shape();
+
+        // We have to sort the reduction axis vectors in order for remove_dimension
+        // to work properly
+        Coordinates axis_copy = reduction_axis;
+        std::sort(axis_copy.begin(), axis_copy.begin() + _reduction_ops);
         for(unsigned int i = 0; i < _reduction_ops; ++i)
         {
-            out_shape.remove_dimension(reduction_axis[i]);
+            out_shape.remove_dimension(axis_copy[i] - i);
         }
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(out_shape));
         _reshape.configure(_reduced_outs.get() + _reduction_ops - 1, output);
@@ -92,10 +97,10 @@ Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
     for(unsigned int i = 0; i < reduction_axis.num_dimensions(); ++i)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis[i] > 3);
-        if(output->total_size() > 0)
+        ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(reduction_axis[i]) > input->num_dimensions() - 1);
+        if(output->total_size() > 0 && keep_dims)
         {
             ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(reduction_axis[i]) != 1);
-            ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(reduction_axis[i]) > input->num_dimensions() - 1);
         }
 
         ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, output, reduction_axis[i], ReductionOperation::MEAN_SUM, 0));

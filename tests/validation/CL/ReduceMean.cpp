@@ -48,7 +48,7 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value
 
 const auto axis_keep = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1, 0), Coordinates(1, 2), Coordinates(0, 2), Coordinates(1, 3), Coordinates(0, 1, 2, 3) }),
                                framework::dataset::make("KeepDims", { true }));
-const auto axis_drop = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1), Coordinates(3) }), framework::dataset::make("KeepDims", { false }));
+const auto axis_drop = combine(framework::dataset::make("Axis", { Coordinates(0), Coordinates(1), Coordinates(3), Coordinates(1, 2), Coordinates(2, 1) }), framework::dataset::make("KeepDims", { false }));
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(ReduceMean)
