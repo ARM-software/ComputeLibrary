@@ -43,6 +43,7 @@ namespace validation
 {
 namespace
 {
+constexpr unsigned int num_elems_processed_per_iteration = 8;
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
                                                  DataType::U8));
@@ -110,7 +111,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
     validate(ref_src1.info()->padding(), padding);
     validate(ref_src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
@@ -146,7 +147,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
     validate(ref_src1.info()->padding(), padding);
     validate(ref_src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
@@ -186,7 +187,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
     validate(ref_src1.info()->padding(), padding);
     validate(ref_src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);
@@ -235,7 +236,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
     validate(ref_src1.info()->padding(), padding);
     validate(ref_src2.info()->padding(), padding);
     validate(dst.info()->padding(), padding);

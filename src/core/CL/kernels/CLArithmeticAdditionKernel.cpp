@@ -31,7 +31,7 @@ using namespace arm_compute;
 
 namespace
 {
-constexpr unsigned int num_elems_processed_per_iteration = 16;
+constexpr unsigned int num_elems_processed_per_iteration = 8;
 
 Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output, ConvertPolicy policy)
 {
@@ -140,6 +140,7 @@ void CLArithmeticAdditionKernel::configure(const ICLTensor *input1, const ICLTen
     build_opts.emplace("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->info()->data_type()));
     build_opts.emplace("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
     build_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+    build_opts.emplace("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     if(is_data_type_quantized_asymmetric(input1->info()->data_type()))
     {
         build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
@@ -155,6 +156,17 @@ void CLArithmeticAdditionKernel::configure(const ICLTensor *input1, const ICLTen
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     ICLKernel::configure_internal(win_config.second);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input1->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += (policy == ConvertPolicy::WRAP) ? "_wrap_" : "_saturate_";
+    _config_id += lower_string(string_from_data_layout(input1->info()->data_layout()));
 }
 
 Status CLArithmeticAdditionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)
@@ -176,8 +188,9 @@ void CLArithmeticAdditionKernel::run(const Window &window, cl::CommandQueue &que
     const TensorShape &in_shape2 = _input2->info()->tensor_shape();
     const TensorShape &out_shape = _output->info()->tensor_shape();
 
-    bool can_collapse = true;
-    if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1)
+    bool       can_collapse = true;
+    const bool is_vector    = in_shape1.num_dimensions() == 1 || in_shape2.num_dimensions() == 1;
+    if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1 && !is_vector)
     {
         can_collapse = (std::min(in_shape1.num_dimensions(), in_shape2.num_dimensions()) > Window::DimZ);
         for(size_t d = Window::DimZ; can_collapse && (d < out_shape.num_dimensions()); d++)
@@ -204,7 +217,7 @@ void CLArithmeticAdditionKernel::run(const Window &window, cl::CommandQueue &que
         add_3D_tensor_argument(idx, _input2, slice_input2);
         add_3D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
 
         collapsed.slide_window_slice_3D(slice_input1);
         collapsed.slide_window_slice_3D(slice_input2);

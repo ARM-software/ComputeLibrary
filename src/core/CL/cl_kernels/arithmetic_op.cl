@@ -33,11 +33,13 @@
 
 #define DIV(x, y) (x) / (y)
 
+#if defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE)
 /** This function adds two tensors.
  *
  * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN1, -DDATA_TYPE_IN2 and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short
  * @attention To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
+ * @attention Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -75,14 +77,16 @@ __kernel void arithmetic_add(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load values
-    VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    in_a = CONVERT(vload16(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
-    VEC_DATA_TYPE(DATA_TYPE_OUT, 16)
-    in_b = CONVERT(vload16(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, 16));
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN1 *)in1.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
+    VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)
+    in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN2 *)in2.ptr), VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE));
 
     // Calculate and store result
-    vstore16(ADD(in_a, in_b), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (ADD(in_a, in_b), 0, (__global DATA_TYPE_OUT *)out.ptr);
 }
+#endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_OUT) && defined(VEC_SIZE) */
 
 /** This function subtracts one tensor from another.
  *
