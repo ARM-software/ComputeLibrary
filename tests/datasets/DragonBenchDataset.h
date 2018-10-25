@@ -25,10 +25,6 @@
 #ifndef ARM_COMPUTE_DRAGONBENCH_DATASET
 #define ARM_COMPUTE_DRAGONBENCH_DATASET
 
-#include "utils/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
-
 namespace arm_compute
 {
 namespace test
@@ -55,28 +51,7 @@ public:
 
         std::string description() const
         {
-            std::stringstream description;
-            description << "network_name=" << _configs_it->network_name << ":";
-            description << "layer_name=" << _configs_it->layer_name << ":";
-            description << "id=" << _configs_it->id << ":";
-            description << "Input_NCHW="
-                        << _configs_it->ibatch << ','
-                        << _configs_it->ch_in << ','
-                        << _configs_it->dim_in_h << ','
-                        << _configs_it->dim_in_w << ":";
-            description << "Output_NCHW="
-                        << _configs_it->ibatch << ','
-                        << _configs_it->ch_out << ','
-                        << _configs_it->dim_out_h << ','
-                        << _configs_it->dim_out_w << ":";
-            description << "Weights_HW="
-                        << _configs_it->kern_h << ','
-                        << _configs_it->kern_w << ":";
-            description << "Stride_HW="
-                        << _configs_it->stride_h << ','
-                        << _configs_it->stride_w << ":";
-            description << "Padding=" << _configs_it->padding << ":";
-            return description.str();
+            return to_string(*_configs_it);
         }
 
         DragonBenchDataset::type operator*() const

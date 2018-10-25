@@ -32,11 +32,16 @@ namespace test
 {
 namespace benchmark
 {
-#include "dragonbench/conv2d.hpp"
+#include "dragonbench/conv2d/conv2d.hpp"
+#include "dragonbench/fully_connected/fully_connected.hpp"
 
-#include "dragonbench/silverwing/silverwing_configs.hpp"
-#include "dragonbench/sunfyre/sunfyre_configs.hpp"
-#include "dragonbench/syrax/syrax_configs.hpp"
+// Conv2D
+#include "dragonbench/conv2d/silverwing/silverwing_configs.hpp"
+#include "dragonbench/conv2d/sunfyre/sunfyre_configs.hpp"
+#include "dragonbench/conv2d/syrax/syrax_configs.hpp"
+
+// Fully Connected
+#include "dragonbench/fully_connected/dreamfyre/dreamfyre_configs.hpp"
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute

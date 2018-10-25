@@ -113,6 +113,67 @@ private:
     TensorType dst{};
     Function   conv_layer{};
 };
+
+/** Fixture that can be used for NEON and CL */
+template <typename TensorType, typename Function, typename Accessor, typename FullyConnectedConfig>
+class DragonBenchFCFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(FullyConnectedConfig config, DataType data_type, bool has_bias)
+    {
+        // Set tensor shapes in NCHW layout
+        TensorShape src_shape(config.k, config.m);
+        TensorShape weights_shape(config.k, config.n);
+        TensorShape biases_shape(config.n);
+        TensorShape dst_shape(config.n, config.m);
+
+        // Determine bias data type
+        DataType               bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
+        const QuantizationInfo q_info(2.f, 10);
+
+        // Create tensors
+        src     = create_tensor<TensorType>(src_shape, data_type, 1, q_info);
+        weights = create_tensor<TensorType>(weights_shape, data_type, 1, q_info);
+        biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, q_info);
+        dst     = create_tensor<TensorType>(dst_shape, data_type, 1, q_info);
+
+        // Create and configure function
+        fc_layer.configure(&src, &weights, has_bias ? &biases : nullptr, &dst);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        weights.allocator()->allocate();
+        biases.allocator()->allocate();
+        dst.allocator()->allocate();
+    }
+
+    void run()
+    {
+        fc_layer.run();
+    }
+
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
+    }
+
+    void teardown()
+    {
+        src.allocator()->free();
+        weights.allocator()->free();
+        biases.allocator()->free();
+        dst.allocator()->free();
+    }
+
+private:
+    TensorType src{};
+    TensorType weights{};
+    TensorType biases{};
+    TensorType dst{};
+    Function   fc_layer{};
+};
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
