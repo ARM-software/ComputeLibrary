@@ -60,12 +60,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                         TensorInfo(TensorShape(1U, 7U), 1, DataType::U8),              // invalid input size
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
                                                                                     }),
                                                 framework::dataset::make("OutputInfo", { 
                                                                                         TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),     
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
                                                                                         TensorInfo(TensorShape(5U, 7U), 1, DataType::U8),
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
+                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
                                                                                         TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
                                                                                         TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
                                                                                     })),
@@ -76,8 +80,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                                 PermutationVector(2U, 0U, 1U),
                                                                                                 PermutationVector(2U, 0U, 1U), 
                                                                                                 PermutationVector(1U, 2U, 0U),
+                                                                                                PermutationVector(3U, 2U, 0U, 1U),
+                                                                                                PermutationVector(2U, 3U, 1U, 0U)
                                                                                     })),
-                                                framework::dataset::make("Expected", { false, false, false, false, true, true })),
+                                                framework::dataset::make("Expected", { false, false, false, false, true, true, false, false })),
                                             input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);

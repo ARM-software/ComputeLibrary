@@ -93,17 +93,17 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     build_opts.emplace("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
 
     // Run [2, 0, 1] permute
-    if(_perm[0] == 2 && _perm[1] == 0 && _perm[2] == 1)
+    if(_perm == PermutationVector{ 2U, 0U, 1U })
     {
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_201", build_opts));
     }
     // Run [1, 2, 0] permute
-    else if(_perm[0] == 1 && _perm[1] == 2 && _perm[2] == 0)
+    else if(_perm == PermutationVector{ 1U, 2U, 0U })
     {
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_120", build_opts));
     }
     // Run [3, 2, 0, 1] permute
-    else if(_perm[0] == 3 && _perm[1] == 2 && _perm[2] == 0 && _perm[3] == 1)
+    else if(_perm == PermutationVector{ 3U, 2U, 0U, 1U })
     {
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_3201", build_opts));
     }
