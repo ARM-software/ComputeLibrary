@@ -183,7 +183,7 @@ typedef struct Tensor4D
  *
  * @return An image object
  */
-Vector inline update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x)
+inline Vector update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x)
 {
     Vector vector =
     {
@@ -206,7 +206,7 @@ Vector inline update_vector_workitem_ptr(__global uchar *ptr, uint offset_first_
  *
  * @return An image object
  */
-Image inline update_image_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y)
+inline Image update_image_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y)
 {
     Image img =
     {
@@ -232,7 +232,7 @@ Image inline update_image_workitem_ptr(__global uchar *ptr, uint offset_first_el
  *
  * @return A 3D tensor object
  */
-Image inline update_image_from_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+inline Image update_image_from_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
 {
     Image img =
     {
@@ -258,7 +258,7 @@ Image inline update_image_from_tensor3D_workitem_ptr(__global uchar *ptr, uint o
  *
  * @return A 3D tensor object
  */
-Tensor3D inline update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
+inline Tensor3D update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z)
 {
     Tensor3D tensor =
     {
@@ -272,7 +272,7 @@ Tensor3D inline update_tensor3D_workitem_ptr(__global uchar *ptr, uint offset_fi
     return tensor;
 }
 
-Tensor4D inline update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w,
+inline Tensor4D update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_first_element_in_bytes, uint stride_x, uint step_x, uint stride_y, uint step_y, uint stride_z, uint step_z, uint stride_w,
                                              uint step_w,
                                              uint mod_size)
 {
@@ -295,7 +295,7 @@ Tensor4D inline update_tensor4D_workitem_ptr(__global uchar *ptr, uint offset_fi
  * @param[in] vec Pointer to the starting position of the buffer
  * @param[in] x   Relative X position
  */
-__global inline const uchar *vector_offset(const Vector *vec, int x)
+inline __global const uchar *vector_offset(const Vector *vec, int x)
 {
     return vec->ptr + x * vec->stride_x;
 }
@@ -306,7 +306,7 @@ __global inline const uchar *vector_offset(const Vector *vec, int x)
  * @param[in] x   Relative X position
  * @param[in] y   Relative Y position
  */
-__global inline uchar *offset(const Image *img, int x, int y)
+inline __global uchar *offset(const Image *img, int x, int y)
 {
     return img->ptr + x * img->stride_x + y * img->stride_y;
 }
@@ -318,7 +318,7 @@ __global inline uchar *offset(const Image *img, int x, int y)
  * @param[in] y      Relative Y position
  * @param[in] z      Relative Z position
  */
-__global inline const uchar *tensor3D_offset(const Tensor3D *tensor, int x, int y, int z)
+inline __global const uchar *tensor3D_offset(const Tensor3D *tensor, int x, int y, int z)
 {
     return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z;
 }
@@ -331,7 +331,7 @@ __global inline const uchar *tensor3D_offset(const Tensor3D *tensor, int x, int 
  * @param[in] z      Relative Z position
  * @param[in] w      Relative W position
  */
-__global inline const uchar *tensor4D_offset(const Tensor4D *tensor, int x, int y, int z, int w)
+inline __global const uchar *tensor4D_offset(const Tensor4D *tensor, int x, int y, int z, int w)
 {
     return tensor->ptr + x * tensor->stride_x + y * tensor->stride_y + z * tensor->stride_z + w * tensor->stride_w;
 }
