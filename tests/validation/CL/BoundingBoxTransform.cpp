@@ -53,13 +53,13 @@ const auto BboxInfoDataset = framework::dataset::make("BboxInfo", { BoundingBoxT
                                                                     BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 })
                                                                   });
 
-const auto DeltaDataset = framework::dataset::make("DeltasShape", { TensorShape(4U, 1U),
-                                                                    TensorShape(4U, 2U),
-                                                                    TensorShape(8U, 2U),
-                                                                    TensorShape(36U, 1U),
-                                                                    TensorShape(36U, 20U),
-                                                                    TensorShape(36U, 100U),
-                                                                    TensorShape(36U, 200U)
+const auto DeltaDataset = framework::dataset::make("DeltasShape", { TensorShape(36U, 1U),
+                                                                    TensorShape(36U, 2U),
+                                                                    TensorShape(36U, 2U),
+                                                                    TensorShape(40U, 1U),
+                                                                    TensorShape(40U, 20U),
+                                                                    TensorShape(40U, 100U),
+                                                                    TensorShape(40U, 200U)
                                                                   });
 
 } // namespace
