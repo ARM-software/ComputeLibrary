@@ -103,7 +103,7 @@ Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
             ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(reduction_axis[i]) != 1);
         }
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, output, reduction_axis[i], ReductionOperation::MEAN_SUM, 0));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperation::validate(input, output, reduction_axis[i], ReductionOperation::MEAN_SUM));
     }
 
     return Status{};
