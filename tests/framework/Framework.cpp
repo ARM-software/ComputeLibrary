@@ -537,8 +537,8 @@ bool Framework::run()
         if(_test_filter.is_selected(test_info))
         {
 #ifdef ARM_COMPUTE_CL
-            // Every 5000 tests, reset the OpenCL context to release the allocated memory
-            if(opencl_is_available() && (id_run_test % 5000) == 0)
+            // Every 100 tests, reset the OpenCL context to release the allocated memory
+            if(opencl_is_available() && (id_run_test % 100) == 0)
             {
                 auto ctx_properties   = CLScheduler::get().context().getInfo<CL_CONTEXT_PROPERTIES>(nullptr);
                 auto queue_properties = CLScheduler::get().queue().getInfo<CL_QUEUE_PROPERTIES>(nullptr);
