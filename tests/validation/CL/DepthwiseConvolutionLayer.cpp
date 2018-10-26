@@ -42,10 +42,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.001)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
-constexpr float                      tolerance_num = 0.05f;                  /**< Tolerance number */
+RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.01)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
+constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
 const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 3 });
 } // namespace
