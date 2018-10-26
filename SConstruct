@@ -61,16 +61,23 @@ vars.AddVariables(
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
-env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+build_path = env['build_dir']
+# If build_dir is a relative path then add a #build/ prefix:
+if not env['build_dir'].startswith('/'):
+    SConsignFile('build/%s/.scons' % build_path)
+    build_path = "#build/%s" % build_path
+else:
+    SConsignFile('%s/.scons' % build_path)
+
+env.Append(LIBPATH = [build_path])
 Export('env')
 Export('vars')
 
-SConsignFile('build/.%s' % env['build_dir'])
 
 Help(vars.GenerateHelpText(env))
 
 if env['build'] == "embed_only":
-    SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+    SConscript('./SConscript', variant_dir=build_path, duplicate=0)
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
@@ -248,16 +255,16 @@ env.Append(CXXFLAGS = env['extra_cxx_flags'])
 Export('version_at_least')
 
 if env['opencl']:
-    SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
+    SConscript("./opencl-1.2-stubs/SConscript", variant_dir="%s/opencl-1.2-stubs" % build_path, duplicate=0)
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])
-    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="build/%s/opengles-3.1-stubs" % env['build_dir'], duplicate=0)
+    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="%s/opengles-3.1-stubs" % build_path, duplicate=0)
 
-SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
 if env['examples'] and env['os'] != 'bare_metal':
-    SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
+    SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
 if env['os'] != 'bare_metal':
-    SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)
+    SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)

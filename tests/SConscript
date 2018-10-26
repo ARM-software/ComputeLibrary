@@ -79,7 +79,6 @@ if env['internal_only']:
 
 test_env.Append(CPPPATH = ["#3rdparty/include"])
 test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
-test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
 
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
