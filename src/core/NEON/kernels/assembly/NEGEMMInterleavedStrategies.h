@@ -37,6 +37,10 @@
 #include "../arm_gemm/kernels/a64_gemm_u8_4x4.hpp"
 #include "../arm_gemm/kernels/a64_hgemm_24x8.hpp"
 #include "../arm_gemm/kernels/a64_sgemm_12x8.hpp"
+#include "../arm_gemm/kernels/sve_interleaved_fp16_mla_3VLx8.hpp"
+#include "../arm_gemm/kernels/sve_interleaved_fp32_mla_3VLx8.hpp"
+#include "../arm_gemm/kernels/sve_interleaved_s8s32_dot_3VLx8.hpp"
+#include "../arm_gemm/kernels/sve_interleaved_u8u32_dot_3VLx8.hpp"
 
 namespace arm_compute
 {
@@ -53,6 +57,29 @@ struct Kernel
 
 #define DEFINE_STRATEGY(strat) \
     DEFINE_STRATEGY_SUFFIX(strat, "")
+
+#ifdef __ARM_FEATURE_SVE
+template <>
+struct Kernel<float, false>
+{
+    DEFINE_STRATEGY(interleaved_fp32_mla_3VLx8)
+};
+template <>
+struct Kernel<float16_t, false>
+{
+    DEFINE_STRATEGY(interleaved_fp16_mla_3VLx8)
+};
+template <bool use_dot>
+struct Kernel<int8_t, use_dot>
+{
+    DEFINE_STRATEGY(interleaved_s8s32_dot_3VLx8)
+};
+template <bool use_dot>
+struct Kernel<uint8_t, use_dot>
+{
+    DEFINE_STRATEGY(interleaved_u8u32_dot_3VLx8)
+};
+#else /* __ARM_FEATURE_SVE */
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <>
@@ -96,6 +123,7 @@ struct Kernel<float, false>
     DEFINE_STRATEGY(sgemm_8x6)
 };
 #endif /* __aarch64__ */
+#endif /* __ARM_FEATURE_SVE */
 
 #undef DEFINE_STRATEGY
 #undef DEFINE_STRATEGY_SUFFIX

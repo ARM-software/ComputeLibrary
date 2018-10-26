@@ -27,7 +27,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
@@ -166,7 +166,7 @@ void NEDeconvolutionLayer::prepare()
 
         // Run weights flipping and mark original weights tensor as unused
         _weights_flipped.allocator()->allocate();
-        CPPScheduler::get().schedule(&_flip_weights, Window::DimZ);
+        NEScheduler::get().schedule(&_flip_weights, Window::DimZ);
         _original_weights->mark_as_unused();
 
         // Prepare convolution

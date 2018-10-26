@@ -24,10 +24,12 @@
 #ifndef ARM_COMPUTE_TEST_INSTRUMENTS
 #define ARM_COMPUTE_TEST_INSTRUMENTS
 
+#if !defined(BARE_METAL)
 #include "MaliCounter.h"
 #include "OpenCLMemoryUsage.h"
 #include "OpenCLTimer.h"
 #include "PMUCounter.h"
+#endif /* !defined(BARE_METAL) */
 #include "SchedulerTimer.h"
 #include "WallClockTimer.h"
 

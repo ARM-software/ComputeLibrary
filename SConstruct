@@ -40,7 +40,7 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
-    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
+    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
@@ -58,6 +58,7 @@ vars.AddVariables(
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
+    ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
 )
 
@@ -174,17 +175,23 @@ elif env['arch'] == 'arm64-v8a':
         prefix = "aarch64-linux-android-"
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-no-integrated-as'])
-elif env['arch'] == 'arm64-v8.2-a':
-    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+elif 'arm64-v8.2-a' in env['arch']:
+    if env['arch'] == 'arm64-v8.2-a-sve':
+        if env['os'] != 'bare_metal':
+            print("Only bare metal SVE is supported at the moment")
+            Exit(1)
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+    else:
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        if env['os'] == 'linux':
+            prefix = "aarch64-linux-gnu-"
+        elif env['os'] == 'bare_metal':
+            prefix = "aarch64-elf-"
+        elif env['os'] == 'android':
+            prefix = "aarch64-linux-android-"
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-no-integrated-as'])
-    if env['os'] == 'linux':
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'bare_metal':
-        prefix = "aarch64-elf-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
 elif env['arch'] == 'x86_32':
     env.Append(CCFLAGS = ['-m32'])
     env.Append(LINKFLAGS = ['-m32'])
@@ -274,6 +281,7 @@ if env['logging']:
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
+env.Append(LINKFLAGS = env['extra_link_flags'])
 
 Default( install_include("arm_compute"))
 

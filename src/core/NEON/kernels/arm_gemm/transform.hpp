@@ -40,7 +40,7 @@ struct TransformImpl {
     static void Transform(TOut* out, const TIn* const in, const int stride,
                           const int y0, const int ymax, const int x0, const int xmax) {
         // For SVE cases we multiply the interleave factor by the vector length.
-        const unsigned int IntBy = tIntBy * (sve ? get_vector_length<TOut>() : 1);
+        const unsigned int IntBy = tIntBy * (sve ? get_vector_length<TOut>() / BlockBy : 1);
 
         const int n_whole_y_blocks = (ymax - y0) / IntBy;
         const int y_remainders = (ymax - y0) % IntBy;

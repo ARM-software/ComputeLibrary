@@ -210,6 +210,8 @@ if env['neon']:
 
     if "arm64-v8" in env['arch']:
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
+        if "sve" in env['arch']:
+             core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')

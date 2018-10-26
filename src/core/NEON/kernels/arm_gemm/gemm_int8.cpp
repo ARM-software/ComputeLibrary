@@ -31,8 +31,20 @@
 #include "kernels/a64_gemm_s16_12x8.hpp"
 #include "kernels/a64_gemm_s8_12x8.hpp"
 #include "kernels/a64_gemm_s8_4x4.hpp"
+#include "kernels/sve_interleaved_s8s32_dot_3VLx8.hpp"
 
 namespace arm_gemm {
+
+#ifdef __ARM_FEATURE_SVE
+class GemmImpl_gemm_s8_interleaved_dot : public GemmImplementation<int8_t, int32_t> {
+public:
+    UniqueGemmCommon<int8_t, int32_t> instantiate(const GemmArgs<int32_t> &args) override {
+        return UniqueGemmCommon<int8_t, int32_t>(new GemmInterleaved<interleaved_s8s32_dot_3VLx8, int8_t, int32_t>(args));
+    }
+
+    GemmImpl_gemm_s8_interleaved_dot() : GemmImplementation<int8_t, int32_t>(GemmMethod::GEMM_INTERLEAVED_DOT) { }
+};
+#else
 
 class GemmImpl_gemm_s8_interleaved_dot : public GemmImplementation<int8_t, int32_t> {
 public:
@@ -46,6 +58,8 @@ public:
 
     GemmImpl_gemm_s8_interleaved_dot() : GemmImplementation<int8_t, int32_t>(GemmMethod::GEMM_INTERLEAVED_DOT) { }
 };
+
+#endif
 
 class GemmImpl_gemm_s8_interleaved : public GemmImplementation<int8_t, int32_t> {
 public:

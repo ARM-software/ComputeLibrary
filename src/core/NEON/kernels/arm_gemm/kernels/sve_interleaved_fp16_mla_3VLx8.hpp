@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,21 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "a32_interleave_6way_32bit.hpp"
-#include "a32_transpose_interleave_8way_32bit.hpp"
+#pragma once
+
 #ifdef __ARM_FEATURE_SVE
-#include "sve_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_block2_16bit.hpp"
-#include "sve_interleave_8way_block2_32bit.hpp"
-#include "sve_interleave_8way_block4_16bit.hpp"
-#include "sve_interleave_8way_block4_8bit.hpp"
-#else
-#include "a64_interleave_8way_32bit.hpp"
-#endif
-#include "a64_block16_interleave4_8bit.hpp"
-#include "a64_interleave_8way_16bit.hpp"
-#include "a64_interleave_8way_half_to_float.hpp"
-#include "a64_transpose_interleave_12way_16bit.hpp"
-#include "a64_transpose_interleave_12way_half_to_float.hpp"
-#include "a64_transpose_interleave_24way_16bit.hpp"
-#include "transpose_interleave_common.hpp"
+
+
+#include "../std_transforms_sve.hpp"
+
+namespace arm_gemm {
+
+// Actual kernel implementations
+void sve_interleaved_fp16_mla_3VLx8(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
+
+class interleaved_fp16_mla_3VLx8 {
+public:
+    typedef __fp16 operand_type;
+    typedef __fp16 result_type;
+
+    typedef void (*kern_type)(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
+
+    /* Kernel blocking parameters */
+    static int out_width()
+    {
+        return svcnth() * 3;
+    }
+
+    static int out_height()
+    {
+        return 8;
+    }
+
+    static int k_unroll()
+    {
+        return 1;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1> transforms = {};
+
+    kern_type kernel=sve_interleaved_fp16_mla_3VLx8;
+
+    interleaved_fp16_mla_3VLx8(const CPUInfo *ci)
+    {
+
+    }
+};
+
+} // namespace arm_gemm
+
+#endif // __ARM_FEATURE_SVE

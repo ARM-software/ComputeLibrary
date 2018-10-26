@@ -34,10 +34,22 @@
 #include "kernels/a64_hgemm_24x8.hpp"
 #include "kernels/a64_sgemm_12x8.hpp"
 #include "kernels/a32_sgemm_8x6.hpp"
+#include "kernels/sve_interleaved_fp16_mla_3VLx8.hpp"
 
 namespace arm_gemm {
 
-#ifdef __aarch64__
+#ifdef __ARM_FEATURE_SVE
+class GemmImpl_gemm_fp16_interleaved_fp16 : public GemmImplementation<__fp16, __fp16> {
+public:
+
+    UniqueGemmCommon<__fp16, __fp16> instantiate(const GemmArgs<__fp16> &args) override {
+        return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<interleaved_fp16_mla_3VLx8, __fp16, __fp16>(args));
+    }
+
+    GemmImpl_gemm_fp16_interleaved_fp16() : GemmImplementation<__fp16, __fp16>(GemmMethod::GEMM_INTERLEAVED_FP16) { }
+};
+
+#elif defined(__aarch64__)
 
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) || defined(FP16_KERNELS)
 class GemmImpl_gemm_fp16_interleaved_fp16 : public GemmImplementation<__fp16, __fp16> {
@@ -73,13 +85,13 @@ public:
     GemmImpl_gemm_fp16_interleaved() : GemmImplementation<__fp16, __fp16>(GemmMethod::GEMM_INTERLEAVED) { }
 };
 
-#if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
+#if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS) || defined(__ARM_FEATURE_SVE))
 static GemmImpl_gemm_fp16_interleaved_fp16 gemm_fp16_interleaved_fp16_impl{};
 #endif
 static GemmImpl_gemm_fp16_interleaved gemm_fp16_interleaved_impl{};
 
 static std::vector<GemmImplementation<__fp16, __fp16> *> gemm_fp16_methods = {
-#if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
+#if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS) || defined(__ARM_FEATURE_SVE))
     &gemm_fp16_interleaved_fp16_impl,
 #endif
     &gemm_fp16_interleaved_impl

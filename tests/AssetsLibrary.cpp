@@ -416,7 +416,7 @@ RawTensor AssetsLibrary::load_image(const std::string &name) const
 
 const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format) const
 {
-    std::lock_guard<std::mutex> guard(_format_lock);
+    std::lock_guard<arm_compute::Mutex> guard(_format_lock);
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format));
 
@@ -440,7 +440,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 
 const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const
 {
-    std::lock_guard<std::mutex> guard(_channel_lock);
+    std::lock_guard<arm_compute::Mutex> guard(_channel_lock);
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format, channel));
 

@@ -124,7 +124,7 @@ if env['gles_compute']:
 
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-else:
+elif env['os'] != 'bare_metal':
     test_env.Append(LIBS = ["rt"])
 
 if test_env['benchmark_tests']:
