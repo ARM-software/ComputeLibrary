@@ -44,7 +44,6 @@
     })
 
 #if defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
-#if defined(SRC_DEPTH)
 /** This OpenCL kernel computes the input transform when the kernel size is 3x3/3x1 or 1x3 and the output tile is 2x2/2x1 or 1x2
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -82,11 +81,19 @@ __kernel void winograd_input_transform_2x2_3x3_stepz1_nchw(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(SRC_DEPTH)
     const int z = get_global_id(2) % SRC_DEPTH;
     const int b = get_global_id(2) / SRC_DEPTH;
+#else  /* defined(SRC_DEPTH) */
+    const int z = get_global_id(2);
+#endif /* defined(SRC_DEPTH) */
 
     // Compute input address
+#if defined(SRC_DEPTH)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z + b * src_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z;
+#endif /* defined(SRC_DEPTH) */
 
     src_addr = src_addr - ((int)PAD_LEFT * sizeof(DATA_TYPE)) - ((int)PAD_TOP * src_stride_y);
 
@@ -146,7 +153,11 @@ __kernel void winograd_input_transform_2x2_3x3_stepz1_nchw(
     DATA_TYPE out33 = tmp3.s1 - tmp3.s3;
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y;
+#endif /* defined(SRC_DEPTH) */
 
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_z)) = out00; // in_row0.s0; out00;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_z)) = out01; // in_row0.s1; out01;
@@ -206,12 +217,19 @@ __kernel void winograd_input_transform_2x2_3x3_stepz2_nchw(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(SRC_DEPTH)
     const int z = (get_global_id(2) * 2) % SRC_DEPTH;
     const int b = (get_global_id(2) * 2) / SRC_DEPTH;
+#else  /* defined(SRC_DEPTH) */
+    const int z = get_global_id(2) * 2;
+#endif /* defined(SRC_DEPTH) */
 
     // Compute input address
+#if defined(SRC_DEPTH)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z + b * src_stride_w;
-
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z;
+#endif /* defined(SRC_DEPTH) */
     src_addr = src_addr - ((int)PAD_LEFT * sizeof(DATA_TYPE)) - ((int)PAD_TOP * src_stride_y);
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
@@ -317,7 +335,11 @@ __kernel void winograd_input_transform_2x2_3x3_stepz2_nchw(
     out33 = (VEC_DATA_TYPE(DATA_TYPE, 2))(tmp3.s1 - tmp3.s3, tmp7.s1 - tmp7.s3);
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y;
+#endif /* defined(SRC_DEPTH) */
 
     vstore2(out00, 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_z));
     vstore2(out01, 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_z));
@@ -377,11 +399,19 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nchw(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(SRC_DEPTH)
     const int z = get_global_id(2) % SRC_DEPTH;
     const int b = get_global_id(2) / SRC_DEPTH;
+#else  /* defined(SRC_DEPTH) */
+    const int z = get_global_id(2);
+#endif /* defined(SRC_DEPTH) */
 
     // Compute input address
+#if defined(SRC_DEPTH)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z + b * src_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z;
+#endif /* defined(SRC_DEPTH) */
 
     src_addr = src_addr - ((int)PAD_LEFT * sizeof(DATA_TYPE)) - ((int)PAD_TOP * src_stride_y);
 
@@ -462,7 +492,11 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nchw(
 #endif // #if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Compute destination address
+#if defined(SRC_DEPTH)
     __global DATA_TYPE *dst_addr = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w);
+#else  /* defined(SRC_DEPTH) */
+    __global DATA_TYPE *dst_addr = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y);
+#endif /* defined(SRC_DEPTH) */
 
     uint dst_plane_stride = dst_stride_z / sizeof(DATA_TYPE);
 
@@ -690,12 +724,19 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(SRC_DEPTH)
     const int z = get_global_id(2) % SRC_DEPTH;
     const int b = get_global_id(2) / SRC_DEPTH;
+#else  /* defined(SRC_DEPTH) */
+    const int z = get_global_id(2);
+#endif /* defined(SRC_DEPTH) */
 
     // Compute input address
+#if defined(SRC_DEPTH)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z + b * src_stride_w;
-
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(DATA_TYPE) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z;
+#endif /* defined(SRC_DEPTH) */
     src_addr = src_addr - ((int)PAD_LEFT * sizeof(DATA_TYPE)) - ((int)PAD_TOP * src_stride_y);
 
     // Load input tile
@@ -773,7 +814,11 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Store values across the channels
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(DATA_TYPE) + (x + y * (int)NUM_TILES_X) * dst_stride_y;
+#endif /* defined(SRC_DEPTH) */
 
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_z)) = out0.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_z)) = out0.s1;
@@ -843,9 +888,8 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     *((__global DATA_TYPE *)(dst_addr + 63 * dst_stride_z)) = out7.s7;
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
-#endif // defined(SRC_DEPTH)
 
-#if defined(NUM_TILES_Y) && defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#if defined(SRC_DIM_1) && defined(SRC_DIM_2)
 /** This OpenCL kernel computes the input transform when the output tile is 4x4, 4x1 or 1x4, the filter size 3x3, 3x1 or 1x3 and the data layout is NHWC
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -885,10 +929,18 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(NUM_TILES_Y)
     const int z = get_global_id(2) % NUM_TILES_Y;
     const int b = get_global_id(2) / NUM_TILES_Y;
+#else  /* defined(NUM_TILES_Y) */
+    const int z = get_global_id(2);
+#endif /* defined(NUM_TILES_Y) */
 
+#if defined(NUM_TILES_Y)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + b * src_stride_w;
+#else  /* defined(NUM_TILES_Y) */
+    __global uchar *src_addr  = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE);
+#endif /* defined(NUM_TILES_Y) */
 
     // Clamp coordinates. This clamp is valid for all rows
     int4 y_coord0 = (int4)(y * OUTPUT_TILE_W) + (int4)(0, 1, 2, 3) - (int4)PAD_LEFT;
@@ -1041,9 +1093,13 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Compute destination address
-    __global DATA_TYPE *dst_addr                              = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + (y + z *
-                                                                                       (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w);
-    uint                                     dst_plane_stride = dst_stride_z / sizeof(DATA_TYPE);
+#if defined(NUM_TILES_Y)
+    __global DATA_TYPE *dst_addr = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + (y + z * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w);
+#else  /* defined(NUM_TILES_Y) */
+    __global DATA_TYPE *dst_addr = (__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + (y + z * (int)NUM_TILES_X) * dst_stride_y);
+#endif /* defined(NUM_TILES_Y) */
+
+    uint dst_plane_stride = dst_stride_z / sizeof(DATA_TYPE);
 
     *((__global DATA_TYPE *)dst_addr) = out0;
     dst_addr += dst_plane_stride;
@@ -1273,11 +1329,19 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
+#if defined(NUM_TILES_Y)
     const int z = get_global_id(2) % NUM_TILES_Y;
     const int b = get_global_id(2) / NUM_TILES_Y;
+#else  /* defined(NUM_TILES_Y) */
+    const int z = get_global_id(2);
+#endif /* defined(NUM_TILES_Y) */
 
     // Compute input address
+#if defined(NUM_TILES_Y)
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + b * src_stride_w;
+#else  /* defined(NUM_TILES_Y) */
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE);
+#endif /* defined(NUM_TILES_Y) */
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
     // Clamp coordinates. This clamp is valid for all rows
@@ -1509,10 +1573,14 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     OUTPUT_ROW_4x4_5x5(out5, tmp5, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out6, tmp6, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out7, tmp7, comm_fact0);
-#endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Store values across the channels
+#if defined(NUM_TILES_Y)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + (y + z * (int)NUM_TILES_X) * dst_stride_y + b * dst_stride_w;
+#else  /* NUM_TILES_Y */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + (y + z * (int)NUM_TILES_X) * dst_stride_y;
+#endif /* NUM_TILES_Y */
 
     *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_z)) = out0.s0;
     *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_z)) = out0.s1;
@@ -1582,10 +1650,9 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     *((__global DATA_TYPE *)(dst_addr + 63 * dst_stride_z)) = out7.s7;
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
-#endif // defined(NUM_TILES_Y) && defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#endif // defined(SRC_DIM_1) && defined(SRC_DIM_2)
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
-#if defined(SRC_DEPTH)
 /** This OpenCL kernel computes the input transform when the kernel size is 3x1 and the output tile is 2x1
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -1801,9 +1868,8 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nchw(
                                                  src_stride_w,
                                                  dst_stride_w);
 }
-#endif // defined(SRC_DEPTH)
 
-#if defined(NUM_TILES_Y) && defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#if defined(SRC_DIM_1) && defined(SRC_DIM_2)
 /** This OpenCL kernel computes the input transform when the kernel size is 3x1 and the output tile is 4x1 for data layout NHWC
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -1919,7 +1985,6 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-#if defined(SRC_DEPTH)
 /** This OpenCL kernel computes the input transform when the kernel size is 1x3 and the output tile is 1x2
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -2135,9 +2200,8 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nchw(
                                                  src_stride_w,
                                                  dst_stride_w);
 }
-#endif // defined(SRC_DEPTH)
 
-#if defined(NUM_TILES_Y) && defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#if defined(SRC_DIM_1) && defined(SRC_DIM_2)
 /** This OpenCL kernel computes the input transform when the kernel size is 1x3 and the output tile is 1x4 for data layout NHWC
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
@@ -2249,6 +2313,6 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
                                                  src_stride_w,
                                                  dst_stride_w);
 }
-#endif // defined(NUM_TILES_Y) && defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#endif // defined(SRC_DIM_1) && defined(SRC_DIM_2)
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 #endif // defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)

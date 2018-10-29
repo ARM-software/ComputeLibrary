@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(SRC_DEPTH) && defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#if defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 /** This OpenCL kernel performs Winograd output transform when the output tile is 2x2/2x1 or 1x2, the filter size 3x3/3x1 or 1x3 and the data layout is NCHW
  *
  * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
@@ -64,9 +64,13 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 )
 {
     // Each thread stores a 2x2/2x1 or 1x2 tile accordingly with the filter size
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-
+#if defined(SRC_DEPTH)
+    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+#else  /* defined(SRC_DEPTH) */
+    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+#endif /* defined(SRC_DEPTH) */
 
     // Load the values across the 16 or 4 channels to compose the 4x4 or 4x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -123,7 +127,9 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+#if defined(SRC_DEPTH)
     int batch = get_global_id(2) / SRC_DEPTH;
+#endif /* defined(SRC_DEPTH) */
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -136,7 +142,11 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 #endif // defined(HAS_BIAS)
 
     // Get output address
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+#endif /* defined(SRC_DEPTH) */
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -197,9 +207,13 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 )
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-
+#if defined(SRC_DEPTH)
+    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+#else  /* defined(SRC_DEPTH) */
+    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+#endif /* defined(SRC_DEPTH) */
 
     // Load the values across the channels to compose the 6x6 or 6x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -312,7 +326,9 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+#if defined(SRC_DEPTH)
     int batch = get_global_id(2) / SRC_DEPTH;
+#endif /* defined(SRC_DEPTH) */
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -327,7 +343,11 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 #endif // defined(HAS_BIAS)
 
     // Get output address
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+#endif /* defined(SRC_DEPTH) */
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -403,9 +423,13 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     int dst_size)
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-
+#if defined(SRC_DEPTH)
+    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+#else  /* defined(SRC_DEPTH) */
+    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+#endif /* defined(SRC_DEPTH) */
 
     // Load the values across the 36 channels to compose the 6x6 or 6x1 tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -519,7 +543,9 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     int x_out = get_global_id(0);
     int y_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int z_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
+#if defined(SRC_DEPTH)
     int batch = get_global_id(2) / SRC_DEPTH;
+#endif /* defined(SRC_DEPTH) */
 
 #if defined(HAS_BIAS)
     // Add bias
@@ -551,8 +577,12 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #endif // defined(HAS_BIAS)
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
+#if defined(SRC_DEPTH)
     int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-    offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+#else /* defined(SRC_DEPTH) */
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+#endif /* defined(SRC_DEPTH) */
+    offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     // Store the 1x4 output tile
     *((__global DATA_TYPE *)(dst_ptr + offset.s0)) = out00;
@@ -570,7 +600,11 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     *((__global DATA_TYPE *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = out03;
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Get output address
+#if defined(SRC_DEPTH)
     int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
+#else  /* defined(SRC_DEPTH) */
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+#endif /* defined(SRC_DEPTH) */
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
@@ -652,18 +686,28 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 )
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-
+#if defined(SRC_DEPTH)
+    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+#else  /* defined(SRC_DEPTH) */
+    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+#endif /* defined(SRC_DEPTH) */
 
     // Compute output address
     int y_in  = get_global_id(1);
     int x_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int y_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
     int z_out = get_global_id(0);
+#if defined(SRC_DEPTH)
     int batch = get_global_id(2) / SRC_DEPTH;
+#endif /* defined(SRC_DEPTH) */
 
+#if defined(SRC_DEPTH)
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w;
+#else  /* defined(SRC_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
+#endif /* defined(SRC_DEPTH) */
 
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -705,14 +749,14 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    DATA_TYPE d10                                                           = *((__global DATA_TYPE *)(src_addr + 8 * src_stride_z));
-    DATA_TYPE d11                                                           = *((__global DATA_TYPE *)(src_addr + 9 * src_stride_z));
-    DATA_TYPE d12                                                           = *((__global DATA_TYPE *)(src_addr + 10 * src_stride_z));
-    DATA_TYPE d13                                                           = *((__global DATA_TYPE *)(src_addr + 11 * src_stride_z));
-    DATA_TYPE d14                                                           = *((__global DATA_TYPE *)(src_addr + 12 * src_stride_z));
-    DATA_TYPE d15                                                           = *((__global DATA_TYPE *)(src_addr + 13 * src_stride_z));
-    DATA_TYPE d16                                                           = *((__global DATA_TYPE *)(src_addr + 14 * src_stride_z));
-    DATA_TYPE d17                                                           = *((__global DATA_TYPE *)(src_addr + 15 * src_stride_z));
+    DATA_TYPE d10 = *((__global DATA_TYPE *)(src_addr + 8 * src_stride_z));
+    DATA_TYPE d11 = *((__global DATA_TYPE *)(src_addr + 9 * src_stride_z));
+    DATA_TYPE d12 = *((__global DATA_TYPE *)(src_addr + 10 * src_stride_z));
+    DATA_TYPE d13 = *((__global DATA_TYPE *)(src_addr + 11 * src_stride_z));
+    DATA_TYPE d14 = *((__global DATA_TYPE *)(src_addr + 12 * src_stride_z));
+    DATA_TYPE d15 = *((__global DATA_TYPE *)(src_addr + 13 * src_stride_z));
+    DATA_TYPE d16 = *((__global DATA_TYPE *)(src_addr + 14 * src_stride_z));
+    DATA_TYPE d17 = *((__global DATA_TYPE *)(src_addr + 15 * src_stride_z));
 
     DATA_TYPE d20 = *((__global DATA_TYPE *)(src_addr + 16 * src_stride_z));
     DATA_TYPE d21 = *((__global DATA_TYPE *)(src_addr + 17 * src_stride_z));
@@ -861,15 +905,21 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     int dst_size)
 {
     // Each thread stores a 4x4/4x1 or 1x4 tile
-    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
-
+#if defined(SRC_DEPTH)
+    Tensor4D       src             = CONVERT_TO_TENSOR4D_STRUCT(src, SRC_DEPTH);
     const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+#else  /* defined(SRC_DEPTH) */
+    Tensor3D       src             = CONVERT_TO_TENSOR3D_STRUCT(src);
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+#endif /* defined(SRC_DEPTH) */
 
     int y_in  = get_global_id(1);
     int x_out = get_global_id(0);
     int y_out = (y_in % NUM_TILES_X) * OUTPUT_TILE_W;
     int z_out = (y_in / NUM_TILES_X) * OUTPUT_TILE_H;
+#if defined(SRC_DEPTH)
     int batch = get_global_id(2) / SRC_DEPTH;
+#endif /* defined(SRC_DEPTH) */
 
     // Load the values across the channels to compose the input tile
     DATA_TYPE d00 = *((__global DATA_TYPE *)(src_addr + 0 * src_stride_z));
@@ -903,8 +953,12 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Get output address
+#if defined(SRC_DEPTH)
     int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
-    offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+#else                                                                               /* defined(SRC_DEPTH) */
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+#endif                                                                              /* defined(SRC_DEPTH) */
+    offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out00;
     *(__global DATA_TYPE *)(dst_ptr + offset.s1) = out01;
@@ -1031,7 +1085,11 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     out_col3 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
 #endif // defined(HAS_BIAS)
     // Get output address
+#if defined(SRC_DEPTH)
     int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z + batch * dst_stride_w);
+#else  /* defined(SRC_DEPTH) */
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z);
+#endif /* defined(SRC_DEPTH) */
     offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
@@ -1730,4 +1788,4 @@ __kernel void winograd_output_transform_1x4_1x5_nhwc(
                                            dst_size);
 }
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-#endif // defined(SRC_DEPTH) && defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
+#endif // defined(NUM_TILES_X) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)

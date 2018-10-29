@@ -155,6 +155,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_ON(_num_tiles_x * _num_tiles_y != static_cast<int>(output->info()->dimension(1)));
+    const size_t total_batches = input->info()->tensor_shape().total_size_upper(3);
 
     CLBuildOptions build_opts;
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
@@ -167,13 +168,13 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
     if(data_layout == DataLayout::NHWC)
     {
-        build_opts.add_option("-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
+        build_opts.add_option_if(total_batches > 1, "-DNUM_TILES_Y=" + support::cpp11::to_string(_num_tiles_y));
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
         build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
     }
     else
     {
-        build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
+        build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     }
 
     // Create kernel

@@ -157,6 +157,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
                                                                 kernel_size,
                                                                 output_tile_size,
                                                                 conv_info);
+    const size_t total_batches = output->info()->tensor_shape().total_size_upper(3);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -165,7 +166,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
     build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
+    build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
 
