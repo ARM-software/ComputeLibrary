@@ -448,6 +448,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     // Configure the InputTransform
     _memory_group.manage(&_input_workspace);
+    _memory_group.manage(&_output_workspace);
+
     if(data_layout == DataLayout::NCHW)
     {
         // configure the kernel to transform the input tensor from NCHW -> NHWC
@@ -455,46 +457,33 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _input_nhwc.allocator()->allocate();
         transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
                                           &_input_workspace, input_matrix_stride);
-    }
-    else
-    {
-        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          &_input_workspace, input_matrix_stride);
-    }
 
-    // Configure WeightsTransform
-    if(data_layout == DataLayout::NCHW)
-    {
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
 
         transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
-    }
-    else
-    {
-        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
-        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
 
-        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
-    }
-    _weights_hwio.allocator()->allocate();
-
-    // Configure OutputTransform
-    //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
-
-    _memory_group.manage(&_output_workspace);
-    if(data_layout == DataLayout::NCHW)
-    {
+        //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
         transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, &_output_nhwc,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
     else
     {
+        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          &_input_workspace, input_matrix_stride);
+
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
+
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
+
         transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, _output,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
+
+    _weights_hwio.allocator()->allocate();
 
     _asm_glue.configure(&_input_workspace, &_kernel_storage, &_output_workspace, 1.0f, 0.f, false);
     _input_workspace.allocator()->allocate();
