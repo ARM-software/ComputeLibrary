@@ -87,14 +87,14 @@
 
 /** This function computes the depthwise convolution quantized.
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: QASYMM8
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -319,14 +319,14 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 #endif /* CONV_STRIDE_X */
 /** This function computes the depthwise convolution quantized using dot product when the data layout is NCHW.
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: QASYMM8
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -644,14 +644,16 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -659,6 +661,8 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -675,8 +679,8 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
  * @param[in] max_offset                            Max offset for the input tensor
  */
 __kernel void depthwise_convolution_3x3_quantized_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(biases),
@@ -685,11 +689,20 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
 {
     const int x = get_global_id(0); // channels
     const int y = get_global_id(1); // spatial coordinate x
-    const int z = get_global_id(2); // spatial coordinate y
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else  /* defined(DST_DEPTH) */
+    int z = get_global_id(2); // spatial coordinate y
+#endif /* defined(DST_DEPTH) */
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
+#if defined(DST_DEPTH)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE + b * src_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE;
+#endif /* defined(DST_DEPTH) */
 
     int  z_coord = 0;
     int4 offset  = 0;
@@ -799,9 +812,14 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
     VEC_UCHAR res = CONVERT_SAT(acc, VEC_UCHAR);
     res           = CLAMP(res, (VEC_UCHAR)0, (VEC_UCHAR)255);
 
-    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z + b * dst_stride_w;
+#else  /* defined(DST_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z;
+#endif /* defined(DST_DEPTH) */
+
     VSTORE(VEC_SIZE)
-    (ACTIVATION_FUNC(res), 0, dst.ptr);
+    (ACTIVATION_FUNC(res), 0, dst_addr);
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -815,14 +833,16 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1).
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -830,6 +850,8 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -847,8 +869,8 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
  */
 
 __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(biases),
@@ -857,11 +879,20 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
 {
     int x = get_global_id(0);
     int y = get_global_id(1);
-    int z = get_global_id(2);
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else  /* defined(DST_DEPTH) */
+    int z = get_global_id(2); // spatial coordinate y
+#endif /* defined(DST_DEPTH) */
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
+#if defined(DST_DEPTH)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE + b * src_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE;
+#endif /* defined(DST_DEPTH) */
 
     int  z_coord = 0;
     int4 offset  = 0;
@@ -1050,7 +1081,11 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     res2 = CLAMP(res2, (VEC_UCHAR)0, (VEC_UCHAR)255);
     res3 = CLAMP(res3, (VEC_UCHAR)0, (VEC_UCHAR)255);
 
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z + b * dst_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
+#endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
     (ACTIVATION_FUNC(res0), 0, dst_addr + 0 * dst_stride_y);
@@ -1080,14 +1115,16 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
  * @note If REAL_MULTIPLIER is passed at compile time (i.e. -DREAL_MULTIPLIER=1.355f), the final quantization is performed using a floating point multiplication.
  *       If not, the quantization will be performed using a fixed point multiplication
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: QASYMM8
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: QASYMM8
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1095,6 +1132,8 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -1112,8 +1151,8 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
  */
 
 __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(biases),
@@ -1122,11 +1161,20 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
 {
     int x = get_global_id(0);
     int y = get_global_id(1);
-    int z = get_global_id(2);
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else /* defined(DST_DEPTH) */
+    int z = get_global_id(2); // spatial coordinate y
+#endif /* defined(DST_DEPTH) */
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
+#if defined(DST_DEPTH)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE + b * src_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * VEC_SIZE;
+#endif /* defined(DST_DEPTH) */
 
     int  z_coord = 0;
     int4 offset  = 0;
@@ -1249,7 +1297,11 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
     res0 = CLAMP(res0, (VEC_UCHAR)0, (VEC_UCHAR)255);
     res1 = CLAMP(res1, (VEC_UCHAR)0, (VEC_UCHAR)255);
 
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z + b * dst_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z;
+#endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
     (ACTIVATION_FUNC(res0), 0, dst_addr + 0 * dst_stride_y);

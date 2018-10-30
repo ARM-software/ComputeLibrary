@@ -245,6 +245,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
         build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(conv_stride_x));
         build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(_conv_stride_y));
     }
+    build_opts.add_option_if(_input->info()->tensor_shape().total_size_upper(3) > 1,
+                             "-DDST_DEPTH=" + support::cpp11::to_string(static_cast<int>(std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)))));
 
     // Create kernel
     std::string kernel_name = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
@@ -291,8 +293,12 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window win = window;
-    win.set(Window::DimZ, Window::Dimension(0, std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)), 1));
+    // Collapse window
+    Window       window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    const size_t total_batches    = _input->info()->tensor_shape().total_size_upper(3);
+
+    Window win = window_collapsed;
+    win.set(Window::DimZ, Window::Dimension(0, std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)) * total_batches, 1));
 
     // Create input window and adjust
     Window win_in = win;
@@ -301,10 +307,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
 
     ARM_COMPUTE_ERROR_ON((win_in.y().step() < window.y().step()) || (win_in.z().step() < window.z().step()));
 
-    Window slice_in  = win_in.first_slice_window_3D();
-    Window slice_out = win.first_slice_window_3D();
+    Window slice_in  = win_in.first_slice_window_4D();
+    Window slice_out = win.first_slice_window_4D();
 
-    unsigned int idx = 3 * num_arguments_per_3D_tensor();
+    unsigned int idx = 2 * num_arguments_per_4D_tensor() + num_arguments_per_3D_tensor();
 
     if(_biases != nullptr)
     {
@@ -321,11 +327,11 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice_in);
-        add_3D_tensor_argument(idx, _output, slice_out);
+        add_4D_tensor_argument(idx, _input, slice_in);
+        add_4D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_out);
 
         enqueue(queue, *this, slice_out, lws_hint());
     }
-    while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
+    while(win.slide_window_slice_4D(slice_out) && win_in.slide_window_slice_4D(slice_in));
 }

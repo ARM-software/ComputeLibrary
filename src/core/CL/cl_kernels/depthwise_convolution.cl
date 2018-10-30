@@ -147,12 +147,12 @@ inline float2 convolution3x3(
 
 /** This OpenCL kernel computes the depthwise convolution 3x3
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F32
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: F32
@@ -271,12 +271,12 @@ __kernel void depthwise_convolution_3x3(
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 1
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F32
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: F32
@@ -372,12 +372,12 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 2
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F32
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: F32
@@ -419,8 +419,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     float2 pixels1 = 0.0f;
 
     // Extract channel and linearized batch indices
-    const int channel            = get_global_id(2) % DST_CHANNELS;
-    const int batch              = get_global_id(2) / DST_CHANNELS;
+    const int channel = get_global_id(2) % DST_CHANNELS;
+    const int batch   = get_global_id(2) / DST_CHANNELS;
     // Load relevant input and weights data (Accounts depth multiplier when indexing input, OFM = IFM * DEPTH_MULTIPLIER)
     __global uchar *weights_addr = weights.ptr + get_global_id(0) * weights_step_x + get_global_id(1) * weights_step_y + channel * weights_step_z;
     __global uchar *src_addr     = src.ptr - batch * (DST_CHANNELS / DEPTH_MULTIPLIER) * (DEPTH_MULTIPLIER - 1) * src_step_z - (channel - (channel / DEPTH_MULTIPLIER)) * src_step_z;
@@ -753,14 +753,14 @@ inline half4 convolution3x3_f16(
 
 /** This OpenCL kernel computes the depthwise convolution 3x3
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -826,14 +826,14 @@ __kernel void depthwise_convolution_3x3_f16(
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the 16bit floating point depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 1
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -930,14 +930,14 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
 /** This OpenCL kernel is optimized for Bifrost architectures and computes 16bit floating point the depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 2
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1043,14 +1043,16 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: FP32
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: FP32
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1058,6 +1060,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -1074,8 +1078,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
 __kernel void depthwise_convolution_3x3_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(biases),
@@ -1084,11 +1088,20 @@ __kernel void depthwise_convolution_3x3_nhwc(
 {
     int x = get_global_id(0); // channels
     int y = get_global_id(1); // spatial coordinate x
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else /* defined(DST_DEPTH) */
     int z = get_global_id(2); // spatial coordinate y
+#endif /* defined(DST_DEPTH) */
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
+#if defined(DST_DEPTH)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE + b * src_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE;
+#endif /* defined(DST_DEPTH) */
 
     int  z_coord  = 0;
     int4 offset   = 0;
@@ -1158,9 +1171,14 @@ __kernel void depthwise_convolution_3x3_nhwc(
     acc += bias_values;
 #endif // defined(HAS_BIAS)
 
-    Image dst = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z + b * dst_stride_w;
+#else  /* defined(DST_DEPTH) */
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + z * dst_step_z;
+#endif /* defined(DST_DEPTH) */
+
     VSTORE(VEC_SIZE)
-    (acc, 0, (__global DATA_TYPE *)(dst.ptr));
+    (acc, 0, (__global DATA_TYPE *)(dst_addr));
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
@@ -1174,14 +1192,16 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  *
- * @param[in] src_ptr                               Pointer to the source image. Supported data types: FP32
- * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: FP32
+ * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_step_z                            src_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in] src_stride_w                          Stride of the source tensor in W dimension (in bytes)
+ * @param[in] src_step_w                            src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source tensor
  * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1189,6 +1209,8 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
+ * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
  * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
@@ -1205,8 +1227,8 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
 __kernel void depthwise_convolution_3x3_nhwc_stride1(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights),
 #if defined(HAS_BIAS)
     VECTOR_DECLARATION(biases),
@@ -1215,11 +1237,20 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 {
     int x = get_global_id(0); // channels
     int y = get_global_id(1); // spatial coordinate x
+#if defined(DST_DEPTH)
+    int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
+    int b = get_global_id(2) / (int)DST_DEPTH; // batch
+#else /* defined(DST_DEPTH) */
     int z = get_global_id(2); // spatial coordinate y
+#endif /* defined(DST_DEPTH) */
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
+#if defined(DST_DEPTH)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE + b * src_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) * VEC_SIZE;
+#endif /* defined(DST_DEPTH) */
 
     int  z_coord  = 0;
     int4 offset   = 0;
@@ -1340,7 +1371,11 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     acc3 += bias_values;
 #endif // defined(HAS_BIAS)
 
+#if defined(DST_DEPTH)
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z + b * dst_stride_w;
+#else  /* defined(DST_DEPTH) */
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * dst_step_x + y * dst_step_y + (z * NUM_PLANES_PROCESSED) * dst_step_z;
+#endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
     (acc0, 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
