@@ -129,7 +129,7 @@ int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int u
 #if defined(DST_DEPTH)
     int start_y = (get_global_id(2) % DST_DEPTH) * stride_y - pad_y;
 #else  /* defined(DST_DEPTH) */
-    int  start_y = get_global_id(2) * stride_y - pad_y;
+    int            start_y    = get_global_id(2) * stride_y - pad_y;
 #endif /* defined(DST_DEPTH) */
 
     const int end_x = min(start_x + pool_size_x, upper_bound_w);
@@ -180,8 +180,8 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DST_DEPTH);
     Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
 #else  /* defined(DST_DEPTH) */
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+    Tensor3D       input      = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D       output     = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* defined(DST_DEPTH) */
 
     int8 vdata = 0;
@@ -190,21 +190,21 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
 #if defined(DST_DEPTH)
     const int idx_height = (get_global_id(2) % DST_DEPTH) * STRIDE_Y;
 #else  /* defined(DST_DEPTH) */
-    const int idx_height = get_global_id(2) * STRIDE_Y;
+    const int      idx_height = get_global_id(2) * STRIDE_Y;
 #endif /* defined(DST_DEPTH) */
 
     for(int y = 0; y < POOL_SIZE_Y; ++y)
     {
-        int y1 = select(y, PAD_Y - idx_height, y + idx_height < PAD_Y || y + idx_height > MAX_HEIGHT);
+        int y1 = select(y, PAD_Y - idx_height, y + idx_height - PAD_Y < 0 || y + idx_height - PAD_Y >= MAX_HEIGHT);
         for(int x = 0; x < POOL_SIZE_X; ++x)
         {
-            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width < PAD_X || x + idx_width > MAX_WIDTH);
+            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width - PAD_X < 0 || x + idx_width - PAD_X >= MAX_WIDTH);
             x1     = select(x1, PAD_X - idx_width - 1, y != y1);
 
 #if defined(DST_DEPTH)
             uchar8 data = vload8(0, (__global uchar *)tensor4D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y, 0));
 #else  /* defined(DST_DEPTH) */
-            uchar8 data = vload8(0, (__global uchar *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
+            uchar8 data       = vload8(0, (__global uchar *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
 #endif /* defined(DST_DEPTH) */
 
             int8 data0 = convert_int8(data);

@@ -50,8 +50,10 @@ const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingType
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for asymmetric data type */
-const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(5, 7), Size2D(8, 9) })),
-                                                        framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
+const auto PoolingLayerDatasetQASYMM8 = combine(concat(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(5, 7), Size2D(8, 9) })),
+                                                               framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
+                                                       combine(combine(framework::dataset::make("PoolingType", { PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(10, 10) })),
+                                                               framework::dataset::make("PadStride", { PadStrideInfo(5, 5, 5, 5) }))),
                                                 framework::dataset::make("ExcludePadding", { true }));
 
 constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
