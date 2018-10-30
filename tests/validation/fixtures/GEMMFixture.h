@@ -42,29 +42,27 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool reinterpret_input_as_3d = false, bool reinterpret_ouput_as_3d = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_ouput_as_3d = false>
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, DataType data_type)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape output_shape, float alpha, float beta, bool pretranspose, DataType data_type)
     {
-        _data_type = data_type;
-
-        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
+        _target    = compute_target(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose, data_type);
         _reference = compute_reference(shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type);
     }
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i)
+    void fill(U &&tensor, int i, float lo = -1.f, float hi = 1.f)
     {
         switch(tensor.data_type())
         {
             case DataType::F16:
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<> distribution(lo, hi);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -74,7 +72,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c, const TensorShape &output_shape, float alpha, float beta,
-                              DataType data_type)
+                              bool pretranspose, DataType data_type)
     {
         // Create tensors
         TensorType a   = create_tensor<TensorType>(shape_a, data_type, 1);
@@ -87,7 +85,7 @@ protected:
         // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
         // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 0),
         // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
-        gemm.configure(&a, &b, &c, &dst, alpha, beta, GEMMInfo(false, false, false, (reinterpret_ouput_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d));
+        gemm.configure(&a, &b, (disable_c) ? nullptr : &c, &dst, alpha, beta, GEMMInfo(false, false, false, (reinterpret_ouput_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d));
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -107,7 +105,10 @@ protected:
         // Fill tensors
         fill(AccessorType(a), 0);
         fill(AccessorType(b), 1);
-        fill(AccessorType(c), 2);
+        if(!disable_c)
+        {
+            fill(AccessorType(c), 2);
+        }
 
         // Compute GEMM function
         gemm.run();
@@ -133,14 +134,21 @@ protected:
         // Fill reference
         fill(a, 0);
         fill(b, 1);
-        fill(c, 2);
-
-        return reference::gemm<T>(a, b, c, alpha, beta);
+        if(!disable_c)
+        {
+            fill(c, 2);
+            return reference::gemm<T>(a, b, c, alpha, beta);
+        }
+        else
+        {
+            // Setting beta to 0 will effectively disable C for the
+            // computation of the reference: alpha * A * B + 0 * C
+            return reference::gemm<T>(a, b, c, alpha, 0.f);
+        }
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    DataType        _data_type{};
 };
 
 } // namespace validation
