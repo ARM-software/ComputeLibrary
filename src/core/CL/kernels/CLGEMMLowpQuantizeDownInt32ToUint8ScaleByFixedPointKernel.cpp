@@ -69,6 +69,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     constexpr unsigned int num_elems_processed_per_iteration = 4;
 
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
+
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
@@ -124,10 +127,6 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
                                                   min, max));
 

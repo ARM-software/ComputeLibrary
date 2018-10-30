@@ -710,7 +710,7 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
     {
         // Load values from matrix A (interleaved) and matrix B (transposed)
         uchar16 a0 = vload16(0, src_addr_a + (i_left_over % 4) + ((i_left_over / 4) * 16));
-        uchar4 b0  = vload4(0, src_addr_b);
+        uchar4  b0 = vload4(0, src_addr_b);
 
         c00 += a0.s0 * b0.s0;
         c01 += a0.s0 * b0.s1;
@@ -3225,40 +3225,38 @@ __kernel void gemmlowp_output_stage_quantize_down_float(TENSOR3D_DECLARATION(src
 #endif // defined(DST_HEIGHT)
 {
     // Compute source and destination addresses
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-#if defined(DST_HEIGHT)
-    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(dst, 1);
-    dst.ptr += get_global_id(0) * dst_step_x + (get_global_id(1) % DST_HEIGHT) * dst_step_y + (get_global_id(1) / DST_HEIGHT) * dst_step_z + get_global_id(2) * dst_step_w;
-#else  // defined(DST_HEIGHT)
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-#endif // defined(DST_HEIGHT)
+    int x = get_global_id(0) * 4;
+    int y = get_global_id(1);
+    int z = get_global_id(2);
 
-#if defined(ADD_BIAS)
-    Vector biases = CONVERT_TO_VECTOR_STRUCT(biases);
-#endif // defined(ADD_BIAS)
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
 
-    int16 input_values = vload16(0, (__global int *)src.ptr);
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x + y * dst_stride_y + z * dst_stride_z;
+
+    int4 input_values = vload4(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
-    const int16 biases_values = vload16(0, (__global int *)biases.ptr);
-    input_values += (int16)biases_values;
+    __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
+
+    int4 biases_values = vload4(0, (__global int *)bias_addr);
+    input_values += (int4)biases_values;
 #endif // defined(ADD_BIAS)
 
     // Convert to float
-    float16 input_values_f = convert_float16(input_values);
+    float16 input_values_f = convert_float4(input_values);
     input_values_f         = round(input_values_f * (float)REAL_MULTIPLIER + (float)OUTPUT_OFFSET);
 
-    uchar16 res = convert_uchar16_sat(input_values_f);
+    uchar4 res = convert_uchar4_sat(input_values_f);
 
 #if defined(MIN_BOUND)
-    res = max(res, (uchar16)MIN_BOUND);
+    res = max(res, (uchar4)MIN_BOUND);
 #endif // defined(MIN_BOUND)
 #if defined(MAX_BOUND)
-    res = min(res, (uchar16)MAX_BOUND);
+    res = min(res, (uchar4)MAX_BOUND);
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore16(res, 0, dst.ptr);
+    vstore4(res, 0, dst_addr);
 }
 #endif // defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)

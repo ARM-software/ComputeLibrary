@@ -60,16 +60,16 @@ Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(const ITens
 
 void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
                                                                float multiplier, int offset,
-                                                               int min, int max, unsigned int output_3d_depth)
+                                                               int min, int max)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel>();
-    k->configure(input, bias, output, multiplier, offset, min, max, output_3d_depth);
+    k->configure(input, bias, output, multiplier, offset, min, max);
     _kernel = std::move(k);
 }
 
 Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                                                                int min, int max, unsigned int output_3d_depth)
+                                                                int min, int max)
 {
-    return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::validate(input, bias, output, min, max, output_3d_depth);
+    return CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloatKernel::validate(input, bias, output, min, max);
 }
 } // namespace arm_compute
