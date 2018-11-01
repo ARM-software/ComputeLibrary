@@ -31,7 +31,17 @@
 #define SUB(x, y) (x) - (y)
 #endif /* SATURATE */
 
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
+
 #if defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT)
+
+#if defined(VEC_SIZE)
+
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+
 /** This function adds two tensors.
  *
  * @note The quantization offset of the first operand must be passed at compile time using -DOFFSET_IN1, i.e. -DOFFSET_IN1=10
@@ -41,6 +51,7 @@
  * @note The quantization scale of the second operand must be passed at compile time using -DSCALE_IN2, i.e. -DSCALE_IN2=10
  * @note The quantization scale of the output must be passed at compile time using -DSCALE_OUT, i.e. -DSCALE_OUT=10
  * @note To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -77,20 +88,23 @@ __kernel void arithmetic_add_quantized(
     Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-    int16 in_a = CONVERT(vload16(0, (__global uchar *)in1.ptr), int16);
-    int16 in_b = CONVERT(vload16(0, (__global uchar *)in2.ptr), int16);
+    VEC_INT in_a = CONVERT(VLOAD(VEC_SIZE)(0, (__global uchar *)in1.ptr), VEC_INT);
+    VEC_INT in_b = CONVERT(VLOAD(VEC_SIZE)(0, (__global uchar *)in2.ptr), VEC_INT);
 
-    in_a = SUB(in_a, (int16)((int)OFFSET_IN1));
-    in_b = SUB(in_b, (int16)((int)OFFSET_IN2));
+    in_a = SUB(in_a, (VEC_INT)((int)OFFSET_IN1));
+    in_b = SUB(in_b, (VEC_INT)((int)OFFSET_IN2));
 
-    const float16 in1f32  = convert_float16(in_a) * (float16)((float)SCALE_IN1);
-    const float16 in2f32  = convert_float16(in_b) * (float16)((float)SCALE_IN2);
-    const float16 qresf32 = (in1f32 + in2f32) / ((float16)(float)SCALE_OUT) + ((float16)((float16)OFFSET_OUT));
-    const uchar16 res     = convert_uchar16_sat(convert_int16_rte(qresf32));
+    const VEC_FLOAT in1f32 = CONVERT(in_a, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN1);
+    const VEC_FLOAT in2f32 = CONVERT(in_b, VEC_FLOAT) * (VEC_FLOAT)((float)SCALE_IN2);
+
+    const VEC_FLOAT qresf32 = (in1f32 + in2f32) / ((VEC_FLOAT)(float)SCALE_OUT) + ((VEC_FLOAT)((float)OFFSET_OUT));
+    const VEC_UCHAR res     = CONVERT_SAT(CONVERT_DOWN(qresf32, VEC_INT), VEC_UCHAR);
 
     // Store result
-    vstore16(res, 0, (__global uchar *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (res, 0, (__global uchar *)out.ptr);
 }
+#endif /* defined(VEC_SIZE) */
 
 /** This function subtracts two tensors.
  *
