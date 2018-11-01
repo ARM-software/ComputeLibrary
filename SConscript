@@ -29,6 +29,7 @@ SONAME_VERSION="1.0.0"
 
 Import('env')
 Import('vars')
+Import('install_lib')
 
 def build_library(name, sources, static=False, libs=[]):
     if static:
@@ -53,6 +54,7 @@ def build_library(name, sources, static=False, libs=[]):
         else:
             obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
+    obj = install_lib(obj)
     Default(obj)
     return obj
 

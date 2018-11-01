@@ -54,6 +54,7 @@ vars.AddVariables(
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
+    PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -69,10 +70,32 @@ if not env['build_dir'].startswith('/'):
 else:
     SConsignFile('%s/.scons' % build_path)
 
+install_path = env['install_dir']
+#If the install_dir is a relative path then assume it's from inside build_dir
+if not env['install_dir'].startswith('/') and install_path != "":
+    install_path = "%s/%s" % (build_path, install_path)
+
 env.Append(LIBPATH = [build_path])
 Export('env')
 Export('vars')
 
+def install_lib( lib ):
+    # If there is no install folder, then there is nothing to do:
+    if install_path == "":
+        return lib
+    return env.Install( "%s/lib/" % install_path, lib)
+def install_bin( bin ):
+    # If there is no install folder, then there is nothing to do:
+    if install_path == "":
+        return bin
+    return env.Install( "%s/bin/" % install_path, bin)
+def install_include( inc ):
+    if install_path == "":
+        return inc
+    return env.Install( "%s/include/" % install_path, inc)
+
+Export('install_lib')
+Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
 
@@ -251,6 +274,8 @@ if env['logging']:
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
+
+Default( install_include("arm_compute"))
 
 Export('version_at_least')
 

@@ -24,6 +24,7 @@ import os.path
 
 Import('env')
 Import('vars')
+Import('install_bin')
 
 SConscript('./framework/SConscript', duplicate=0)
 
@@ -128,6 +129,7 @@ else:
 
 if test_env['benchmark_tests']:
     arm_compute_benchmark = test_env.Program('arm_compute_benchmark', files_benchmark + common_objects)
+    arm_compute_benchmark = install_bin(arm_compute_benchmark)
     Depends(arm_compute_benchmark, arm_compute_test_framework)
     Depends(arm_compute_benchmark, arm_compute_lib)
     Default(arm_compute_benchmark)
@@ -139,6 +141,7 @@ if test_env['validation_tests']:
     Depends(arm_compute_validation_framework , arm_compute_core_a)
 
     arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'])
+    arm_compute_validation = install_bin(arm_compute_validation)
     Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)
@@ -174,6 +177,7 @@ if test_env['validation_tests']:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
                         prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph", arm_compute_validation_framework], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
                         arm_compute_validate_examples += [ prog ]
+        arm_compute_validate_examples = install_bin(arm_compute_validate_examples)
         Depends(arm_compute_validate_examples, arm_compute_validation_framework)
         Depends(arm_compute_validate_examples, arm_compute_test_framework)
         Depends(arm_compute_validate_examples, arm_compute_lib)
@@ -211,6 +215,7 @@ if test_env['benchmark_examples']:
                 #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
                 prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils, graph_params]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
                 arm_compute_benchmark_examples += [ prog ]
+    arm_compute_benchmark_examples = install_bin(arm_compute_benchmark_examples)
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)
     Depends(arm_compute_benchmark_examples, arm_compute_lib)
     Default(arm_compute_benchmark_examples)
