@@ -55,6 +55,9 @@ const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
                      * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
 
+const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
+                               * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
 
@@ -171,59 +174,75 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::ALL, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::NIGHTLY, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                            data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::PRECOMMIT, combine(combine(data3x3_precommit, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                   data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 data_layouts_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::ALL, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<float>, framework::DatasetMode::NIGHTLY, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                            data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W1x1
 
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::ALL, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data3x3_precommit, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                  data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                data_layouts_dataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::ALL, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)), data_layouts_dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W1x1
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLDeconvolutionLayerQuantizedFixture4x4 = DeconvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 4, 4>;
@@ -238,40 +257,51 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
 TEST_SUITE(W4x4)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(data4x4, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   data_layouts_dataset),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType",
+                                                                                                                       DataType::QASYMM8)),
+                                                                                                                       data_layouts_dataset),
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W4x4
 
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(data3x3, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   data_layouts_dataset),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       data_layouts_dataset),
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       data_layouts_dataset),
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W3x3
 
 TEST_SUITE(W1x1)
-FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(data1x1, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   data_layouts_dataset),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType",
+                                                                                                                       DataType::QASYMM8)),
+                                                                                                                       data_layouts_dataset),
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // W1x1
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // DeconvolutionLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
