@@ -52,7 +52,7 @@ public:
     {
         // Create input shapes
         std::mt19937                    gen(library->seed());
-        std::uniform_int_distribution<> num_dis(2, 4);
+        std::uniform_int_distribution<> num_dis(2, 8);
         const int                       num_tensors = num_dis(gen);
 
         std::vector<TensorShape>         shapes(num_tensors, shape);
