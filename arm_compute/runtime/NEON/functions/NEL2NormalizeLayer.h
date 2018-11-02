@@ -55,7 +55,7 @@ public:
      * @param[in]      axis    Dimension along which to reduce. Supported reduction axis : 0
      * @param[in]      epsilon (Optional) Lower bound value for the normalization.
      */
-    void configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon = 1e-12);
+    void configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon = 1e-12f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayer.
      *
@@ -66,7 +66,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon = 1e-12);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon = 1e-12f);
 
     // Inherited methods overridden:
     void run() override;

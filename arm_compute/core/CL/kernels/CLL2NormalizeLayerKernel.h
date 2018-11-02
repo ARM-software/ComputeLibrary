@@ -50,7 +50,7 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW/NHWC.
      * @param[in]  sum     Sum values tensor. Data types supported: same as @p input.
      *                     Sum will have the same number of dimensions as input.
      * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.
@@ -62,7 +62,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayerKernel.
      *
-     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW/NHWC.
      * @param[in] sum     Sum values tensor info. Data types supported: same as @p input.
      *                    Sum will have the same number of dimensions as input.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: Same as @p input.
