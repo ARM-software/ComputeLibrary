@@ -688,7 +688,7 @@ std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U las
 
     if(check_mismatches)
     {
-        ARM_COMPUTE_TEST_INFO("Checking for mismatches: ref count = " << std::distance(first1, last1) << " \ttarget count = " << std::distance(first2, last2));
+        ARM_COMPUTE_TEST_INFO("Checking for mismatches: ref count = " << std::distance(first1, last1) << " target count = " << std::distance(first2, last2));
     }
 
     int64_t num_missing    = 0;
