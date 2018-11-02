@@ -39,6 +39,7 @@
 #include "arm_compute/runtime/NEON/functions/NECannyEdge.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelCombine.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
+#include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NECol2Im.h"
 #include "arm_compute/runtime/NEON/functions/NEColorConvert.h"
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"

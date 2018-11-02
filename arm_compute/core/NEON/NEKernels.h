@@ -39,6 +39,7 @@
 #include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEChannelCombineKernel.h"
 #include "arm_compute/core/NEON/kernels/NEChannelExtractKernel.h"
+#include "arm_compute/core/NEON/kernels/NEChannelShuffleLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "arm_compute/core/NEON/kernels/NEColorConvertKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
