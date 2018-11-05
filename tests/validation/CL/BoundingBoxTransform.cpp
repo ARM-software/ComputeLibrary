@@ -115,7 +115,7 @@ FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<half>, framewo
                        combine(combine(DeltaDataset, BboxInfoDataset), framework::dataset::make("DataType", { DataType::F16 })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, relative_tolerance_f16, 0.01f, absolute_tolerance_f16);
+    validate(CLAccessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
