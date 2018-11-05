@@ -276,14 +276,16 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     {
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
 
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
+        const float multiplier  = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         int min_activation = 0;
         int max_activation = 0;
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
                                                                                  };
 
@@ -308,7 +310,10 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     }
 
     // Configure and tune GEMM
-    configure_mm(gemm_input_to_use, &_weights_reshaped, biases, gemm_output_to_use, gemmlowp_output_stage, (data_layout == DataLayout::NHWC) ? conv_h : 1);
+    // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
+    const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
+
+    configure_mm(gemm_input_to_use, &_weights_reshaped, biases, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth);
 
     if(!_skip_im2col)
     {
@@ -454,9 +459,11 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     {
         const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input->quantization_info() : output->quantization_info();
 
-        float multiplier = input->quantization_info().scale * weights->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        const float multiplier  = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 
         int min_activation = 0;
         int max_activation = 0;
@@ -485,17 +492,20 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
             // If the activation layer is RELU, BOUNDED_RELU or LU_BOUNDED_RELU, we can use the GEMMLowp output stage to perform this operation
             is_activationlayer_enabled = false;
-
-            // Set the GEMMLowp output stage info
-            gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;
-            gemmlowp_output_stage.gemmlowp_multiplier = output_multiplier;
-            gemmlowp_output_stage.gemmlowp_shift      = output_shift;
-            gemmlowp_output_stage.gemmlowp_min_bound  = min_activation;
-            gemmlowp_output_stage.gemmlowp_max_bound  = max_activation;
         }
+
+        // Set the GEMMLowp output stage info
+        gemmlowp_output_stage.gemmlowp_offset     = output_quant_info.offset;
+        gemmlowp_output_stage.gemmlowp_multiplier = output_multiplier;
+        gemmlowp_output_stage.gemmlowp_shift      = output_shift;
+        gemmlowp_output_stage.gemmlowp_min_bound  = min_activation;
+        gemmlowp_output_stage.gemmlowp_max_bound  = max_activation;
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases, gemm_output_to_use, gemmlowp_output_stage, skip_col2im ? conv_h : 1, skip_im2col));
+    // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
+    const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
+
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, skip_im2col));
 
     // Validate Col2Im
     if(!skip_col2im)

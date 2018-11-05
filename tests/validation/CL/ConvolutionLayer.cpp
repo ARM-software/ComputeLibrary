@@ -268,11 +268,18 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
+const auto QuantizationData = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(0.5f, 10),
+    QuantizationInfo(0.3f, 3),
+    QuantizationInfo(1.f, 10),
+});
+
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       QuantizationData),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -282,7 +289,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 0) })),
+                       QuantizationData),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output

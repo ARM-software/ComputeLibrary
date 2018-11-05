@@ -276,7 +276,9 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
 
     // Configure GEMM
-    configure_mm(gemm_input_to_use, &_weights_reshaped, gemm_output_to_use, _skip_col2im ? conv_h : 1);
+    // In case we need to skip col2im, GEMM3D (gemm_3d_depth != 0) must be called in order to avoid reshaping the output matrix
+    const unsigned int gemm_3d_depth = _skip_col2im ? conv_h : 0;
+    configure_mm(gemm_input_to_use, &_weights_reshaped, gemm_output_to_use, gemm_3d_depth);
 
     if(!_skip_im2col)
     {
@@ -477,7 +479,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         gemm_output_to_use = &info_gemm;
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, skip_col2im ? conv_h : 1, skip_im2col));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, skip_col2im ? conv_h : 0, skip_im2col));
 
     if(is_quantized)
     {
@@ -518,7 +520,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         }
 
         // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min, max, skip_reshape ? conv_h : 1);
+        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min, max, skip_reshape ? conv_h : 0);
     }
 
     // Validate Col2Im/ReshapeLayer

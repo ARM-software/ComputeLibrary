@@ -101,7 +101,7 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
     else
     {
         // Configure matrix multiply kernel
-        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */, 1, false, retain_internal_weights));
+        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */, 0, false, retain_internal_weights));
     }
 }
 

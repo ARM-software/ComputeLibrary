@@ -110,7 +110,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool           reinterpret_input_as_3d             = reshape_info.reinterpret_input_as_3d();
-    bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 1);
+    bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 0);
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -227,7 +227,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _input1                   = input1;
     _output                   = output;
     _reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
-    _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 1);
+    _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 0);
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.

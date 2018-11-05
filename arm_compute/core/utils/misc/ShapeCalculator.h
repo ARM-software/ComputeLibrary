@@ -532,13 +532,14 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
     ARM_COMPUTE_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The first input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
 
     const bool reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
-    const bool reinterpret_output_as_3d = reshape_info.depth_output_gemm3d() != 1;
+    const bool reinterpret_output_as_3d = reshape_info.depth_output_gemm3d() != 0;
+    const int  depth_output_gemm3d      = reinterpret_output_as_3d ? reshape_info.depth_output_gemm3d() : 1;
     const int  m                        = reshape_info.reinterpret_input_as_3d() ? input0.dimension(1) * input0.dimension(2) : input0.dimension(1);
 
     // If the output of GEMM has to be reinterpreted as 3D, the number of input0 rows (M) is obtained collapsing the second and third
     // dimension of the output tensor
     const int dim0 = is_interleaved_transposed ? reshape_info.n() : input1.dimension(0);
-    const int dim1 = is_interleaved_transposed ? reshape_info.m() / reshape_info.depth_output_gemm3d() : m / reshape_info.depth_output_gemm3d();
+    const int dim1 = is_interleaved_transposed ? reshape_info.m() / depth_output_gemm3d : m / depth_output_gemm3d;
     const int dim2 = reinterpret_input_as_3d ? input0.tensor_shape()[3] : input0.tensor_shape()[2];
     const int dim3 = reinterpret_input_as_3d ? 1 : input0.tensor_shape()[3];
 
@@ -546,7 +547,7 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 
     output_shape.set(0, dim0);
     output_shape.set(1, dim1);
-    output_shape.set(2, reinterpret_output_as_3d ? reshape_info.depth_output_gemm3d() : dim2);
+    output_shape.set(2, reinterpret_output_as_3d ? depth_output_gemm3d : dim2);
     output_shape.set(3, reinterpret_output_as_3d ? dim2 : dim3);
     output_shape.set(4, reinterpret_output_as_3d ? dim3 : 1);
 

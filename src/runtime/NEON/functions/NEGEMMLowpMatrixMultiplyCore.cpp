@@ -198,7 +198,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the input tensor as 3D");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 1, "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the output tensor as 3D");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 0, "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the output tensor as 3D");
 
     int32_t a_offset                         = a->quantization_info().offset;
     int32_t b_offset                         = b->quantization_info().offset;
