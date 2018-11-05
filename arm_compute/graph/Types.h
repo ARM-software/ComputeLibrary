@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/strong_type/StrongType.h"
-#include "arm_compute/core/utils/strong_type/StrongTypeAttributes.h"
 
 #include <limits>
 #include <string>
@@ -56,15 +54,11 @@ using arm_compute::PoolingType;
 using arm_compute::DimensionRoundingType;
 using arm_compute::InterpolationPolicy;
 
-/** TODO (geopin01): Make ids strongly typed */
+using GraphID    = unsigned int;
 using TensorID   = unsigned int;
 using NodeID     = unsigned int;
 using EdgeID     = unsigned int;
 using Activation = arm_compute::ActivationLayerInfo::ActivationFunction;
-
-/**< GraphID strong type */
-using GraphID = strong_type::StrongType<unsigned int, struct graph_id_t, strong_type::Comparable>;
-/* TODO (geopin01): Strong types for NodeID */
 
 /**< Constant TensorID specifying an equivalent of null tensor */
 constexpr TensorID NullTensorID = std::numeric_limits<TensorID>::max();
