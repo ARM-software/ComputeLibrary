@@ -42,9 +42,19 @@ namespace framework
 {
 Framework::Framework()
 {
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::TIME_MS),
+                                   Instrument::make_instrument<WallClockTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::TIME_S),
+                                   Instrument::make_instrument<WallClockTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::TIME_MS),
+                                   Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::TIME_S),
+                                   Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::NONE), Instrument::make_instrument<SchedulerTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_S>);
@@ -59,6 +69,10 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1M>);
 #endif /* MALI_ENABLED */
 #ifdef ARM_COMPUTE_CL
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_US>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);

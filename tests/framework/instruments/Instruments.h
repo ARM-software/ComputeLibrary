@@ -54,6 +54,9 @@ enum class InstrumentType : unsigned int
     OPENCL_TIMER            = 0x0400,
     SCHEDULER_TIMER         = 0x0500,
     OPENCL_MEMORY_USAGE     = 0x0600,
+    WALL_CLOCK_TIMESTAMPS   = 0x0700,
+    OPENCL_TIMESTAMPS       = 0x0800,
+    SCHEDULER_TIMESTAMPS    = 0x0900,
 };
 
 using InstrumentsDescription = std::pair<InstrumentType, ScaleFactor>;
@@ -72,6 +75,22 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
 {
     switch(instrument.first)
     {
+        case InstrumentType::WALL_CLOCK_TIMESTAMPS:
+            switch(instrument.second)
+            {
+                case ScaleFactor::NONE:
+                    stream << "WALL_CLOCK_TIMESTAMPS";
+                    break;
+                case ScaleFactor::TIME_MS:
+                    stream << "WALL_CLOCK_TIMESTAMPS_MS";
+                    break;
+                case ScaleFactor::TIME_S:
+                    stream << "WALL_CLOCK_TIMESTAMPS_S";
+                    break;
+                default:
+                    throw std::invalid_argument("Unsupported instrument scale");
+            }
+            break;
         case InstrumentType::WALL_CLOCK_TIMER:
             switch(instrument.second)
             {
@@ -83,6 +102,22 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
                     break;
                 case ScaleFactor::TIME_S:
                     stream << "WALL_CLOCK_TIMER_S";
+                    break;
+                default:
+                    throw std::invalid_argument("Unsupported instrument scale");
+            }
+            break;
+        case InstrumentType::SCHEDULER_TIMESTAMPS:
+            switch(instrument.second)
+            {
+                case ScaleFactor::NONE:
+                    stream << "SCHEDULER_TIMESTAMPS";
+                    break;
+                case ScaleFactor::TIME_MS:
+                    stream << "SCHEDULER_TIMESTAMPS_MS";
+                    break;
+                case ScaleFactor::TIME_S:
+                    stream << "SCHEDULER_TIMESTAMPS_S";
                     break;
                 default:
                     throw std::invalid_argument("Unsupported instrument scale");
@@ -137,6 +172,25 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
                     break;
                 case ScaleFactor::SCALE_1M:
                     stream << "MALI_M";
+                    break;
+                default:
+                    throw std::invalid_argument("Unsupported instrument scale");
+            }
+            break;
+        case InstrumentType::OPENCL_TIMESTAMPS:
+            switch(instrument.second)
+            {
+                case ScaleFactor::NONE:
+                    stream << "OPENCL_TIMESTAMPS";
+                    break;
+                case ScaleFactor::TIME_US:
+                    stream << "OPENCL_TIMESTAMPS_US";
+                    break;
+                case ScaleFactor::TIME_MS:
+                    stream << "OPENCL_TIMESTAMPS_MS";
+                    break;
+                case ScaleFactor::TIME_S:
+                    stream << "OPENCL_TIMESTAMPS_S";
                     break;
                 default:
                     throw std::invalid_argument("Unsupported instrument scale");

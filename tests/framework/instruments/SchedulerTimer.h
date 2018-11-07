@@ -37,19 +37,26 @@ namespace test
 namespace framework
 {
 /** Instrument creating measurements based on the information returned by clGetEventProfilingInfo for each OpenCL kernel executed*/
-class SchedulerTimer : public Instrument
+template <bool output_timestamps>
+class SchedulerClock : public Instrument
 {
 public:
     /** Construct a Scheduler timer.
      *
      * @param[in] scale_factor Measurement scale factor.
      */
-    SchedulerTimer(ScaleFactor scale_factor);
+    SchedulerClock(ScaleFactor scale_factor);
 
     /** Prevent instances of this class from being copy constructed */
-    SchedulerTimer(const SchedulerTimer &) = delete;
+    SchedulerClock(const SchedulerClock &) = delete;
     /** Prevent instances of this class from being copied */
-    SchedulerTimer &operator=(const SchedulerTimer &) = delete;
+    SchedulerClock &operator=(const SchedulerClock &) = delete;
+    /** Use the default move assignment operator */
+    SchedulerClock &operator=(SchedulerClock &&) = default;
+    /** Use the default move constructor */
+    SchedulerClock(SchedulerClock &&) = default;
+    /** Use the default destructor */
+    ~SchedulerClock() = default;
 
     std::string                 id() const override;
     void                        test_start() override;
@@ -73,6 +80,10 @@ private:
     ScaleFactor                                  _scale_factor;
     std::shared_ptr<IScheduler>                  _interceptor;
 };
+
+using SchedulerTimer      = SchedulerClock<false>;
+using SchedulerTimestamps = SchedulerClock<true>;
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

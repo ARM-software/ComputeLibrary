@@ -41,14 +41,15 @@ namespace test
 namespace framework
 {
 /** Instrument creating measurements based on the information returned by clGetEventProfilingInfo for each OpenCL kernel executed*/
-class OpenCLTimer : public Instrument
+template <bool output_timestamps>
+class OpenCLClock : public Instrument
 {
 public:
     /** Construct an OpenCL timer.
      *
      * @param[in] scale_factor Measurement scale factor.
      */
-    OpenCLTimer(ScaleFactor scale_factor);
+    OpenCLClock(ScaleFactor scale_factor);
     std::string     id() const override;
     void            test_start() override;
     void            start() override;
@@ -60,7 +61,7 @@ private:
 #ifdef ARM_COMPUTE_CL
     struct kernel_info
     {
-        cl::Event   event{}; /**< OpenCL event associated to the kernel enqueue */
+        ::cl::Event event{}; /**< OpenCL event associated to the kernel enqueue */
         std::string name{};  /**< OpenCL Kernel name */
     };
     std::list<kernel_info>                          _kernels;
@@ -73,6 +74,10 @@ private:
 private:
     float _scale_factor{};
 };
+
+using OpenCLTimer      = OpenCLClock<false>;
+using OpenCLTimestamps = OpenCLClock<true>;
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

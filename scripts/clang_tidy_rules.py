@@ -4,7 +4,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "include/linux include . 3rdparty/include kernels computer_vision".split()
+    return "include/linux include . 3rdparty/include kernels".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
@@ -20,10 +20,6 @@ def filter_files( list_files ):
     to_check = []
     for f in list_files:
         if os.path.splitext(f)[1] != ".cpp":
-            continue
-        if "computer_vision" in f:
-            continue
-        if "openvx-arm_compute" in f:
             continue
         # Skip OMPScheduler as it causes problems in clang
         if "OMPScheduler.cpp" in f:
