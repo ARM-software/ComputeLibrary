@@ -236,6 +236,11 @@ private:
 
 /** Main program for VGG16
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1409.1556
+ *      "Very Deep Convolutional Networks for Large-Scale Image Recognition"
+ *      Karen Simonyan, Andrew Zisserman
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

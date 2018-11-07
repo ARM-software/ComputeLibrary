@@ -571,6 +571,11 @@ private:
 
 /** Main program for YOLOv3
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1804.02767
+ *      "YOLOv3: An Incremental Improvement"
+ *      Joseph Redmon, Ali Farhadi
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

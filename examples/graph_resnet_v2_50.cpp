@@ -231,6 +231,11 @@ private:
 
 /** Main program for ResNetV2_50
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1603.05027
+ *      "Identity Mappings in Deep Residual Networks"
+ *      Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

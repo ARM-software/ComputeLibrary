@@ -236,6 +236,11 @@ private:
 
 /** Main program for ResNetV1_50
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1512.03385
+ *      "Deep Residual Learning for Image Recognition"
+ *      Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

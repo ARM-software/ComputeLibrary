@@ -186,6 +186,11 @@ private:
 
 /** Main program for ResNeXt50
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1611.05431
+ *      "Aggregated Residual Transformations for Deep Neural Networks"
+ *      Saining Xie, Ross Girshick, Piotr Dollar, Zhuowen Tu, Kaiming He
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

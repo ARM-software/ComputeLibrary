@@ -237,6 +237,11 @@ private:
 
 /** Main program for MobileNetV2
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1801.04381
+ *      "MobileNetV2: Inverted Residuals and Linear Bottlenecks"
+ *      Mark Sandler, Andrew Howard, Menglong Zhu, Andrey Zhmoginov, Liang-Chieh Chen
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

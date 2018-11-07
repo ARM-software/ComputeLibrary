@@ -240,6 +240,11 @@ private:
 
 /** Main program for ShuffleNet
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1707.01083
+ *      "ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices"
+ *      Xiangyu Zhang, Xinyu Zhou, Mengxiao Lin, Jian Sun
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

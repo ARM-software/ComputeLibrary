@@ -199,6 +199,11 @@ private:
 
 /** Main program for Googlenet
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1409.4842
+ *      "Going deeper with convolutions"
+ *      Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke, Andrew Rabinovich
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

@@ -783,6 +783,11 @@ private:
 
 /** Main program for Inception ResNet V2
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1602.07261
+ *      "Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning"
+ *      Christian Szegedy, Sergey Ioffe, Vincent Vanhoucke, Alex Alemi
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

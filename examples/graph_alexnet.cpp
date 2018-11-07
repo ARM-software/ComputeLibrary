@@ -171,6 +171,11 @@ private:
 
 /** Main program for AlexNet
  *
+ * Model is based on:
+ *      https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks
+ *      "ImageNet Classification with Deep Convolutional Neural Networks"
+ *      Alex Krizhevsky and Sutskever, Ilya and Hinton, Geoffrey E
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

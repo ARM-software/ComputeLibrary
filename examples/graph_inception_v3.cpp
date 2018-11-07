@@ -847,6 +847,11 @@ private:
 
 /** Main program for Inception V3
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1512.00567
+ *      "Rethinking the Inception Architecture for Computer Vision"
+ *      Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, Zbigniew Wojna
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

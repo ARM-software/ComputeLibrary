@@ -340,6 +340,11 @@ private:
 
 /** Main program for MobileNetV1
  *
+ * Model is based on:
+ *      https://arxiv.org/abs/1704.04861
+ *      "MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications"
+ *      Andrew G. Howard, Menglong Zhu, Bo Chen, Dmitry Kalenichenko, Weijun Wang, Tobias Weyand, Marco Andreetto, Hartwig Adam
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments
