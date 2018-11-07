@@ -35,7 +35,7 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
     uint16_t *outptr = (uint16_t *)out;
     const uint16_t *inptr = (const uint16_t *)in;
 
-    uint16_t zerobuff[24];
+    uint16_t zerobuff[16]; // 8 for asm loop plus up to 7 for overflow loop
 
     for (int y=y0; y<ymax; y+=8) {
         const uint16_t *inptr0 = inptr + y * ldin + k0;
@@ -147,7 +147,7 @@ void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int
                 : [skippf] "r" (skippf)
                 : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12",
                   "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24",
-                  "v25", "v26", "v27", "v28", "v29", "v30", "v31"
+                  "v25", "v26", "v27", "v28", "v29", "v30", "v31", "memory"
             );
         }
 

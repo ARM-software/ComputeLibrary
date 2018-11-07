@@ -35,7 +35,7 @@ inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const
     float *outptr = out;
     const __fp16 *inptr = in;
 
-    __fp16 zerobuff[8];
+    __fp16 zerobuff[16]; // 8 for asm loop plus up to 7 for overflow loop
 
     for (int y=y0; y<ymax; y+=8) {
         const __fp16 *inptr0 = inptr + y * ldin + k0;
@@ -172,7 +172,7 @@ inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const
                   [inptr4] "+r" (inptr4), [inptr5] "+r" (inptr5), [inptr6] "+r" (inptr6), [inptr7] "+r" (inptr7), [outptr] "+r" (outptr)
                 :
                 : "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12",
-                  "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23"
+                  "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "memory"
             );
         }
 

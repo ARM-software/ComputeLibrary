@@ -35,7 +35,7 @@ inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *
     uint32_t *outptr = reinterpret_cast<uint32_t *>(out);
     const uint32_t *inptr = reinterpret_cast<const uint32_t *>(in);
 
-    uint32_t zerobuff[8];
+    uint32_t zerobuff[16]; // 8 for asm loop plus up to 7 for overflow loop
 
     for (int y=y0; y<ymax; y+=6) {
         const uint32_t *inptr0 = inptr + y * ldin + k0;
@@ -137,7 +137,7 @@ inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *
                 : [inptr0] "+r" (inptr0), [inptr1] "+r" (inptr1), [inptr2] "+r" (inptr2), [inptr3] "+r" (inptr3),
                   [inptr4] "+r" (inptr4), [inptr5] "+r" (inptr5), [outptr] "+r" (outptr)
                 :
-                : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12"
+                : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "memory"
             );
         }
 
