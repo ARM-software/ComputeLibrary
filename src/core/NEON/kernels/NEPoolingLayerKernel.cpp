@@ -1828,8 +1828,7 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
         // Calculate square-root in case of l2 pooling
         if(pooling_type == PoolingType::L2)
         {
-            float32x4_t sqrt_reciprocal = vrsqrteq_f32(vres);
-            vres                        = vmulq_f32(vres, vmulq_f32(vrsqrtsq_f32(vmulq_f32(vres, sqrt_reciprocal), sqrt_reciprocal), sqrt_reciprocal));
+            vres = vmulq_f32(vres, vinvsqrtq_f32(vres));
         }
 
         // Store result
