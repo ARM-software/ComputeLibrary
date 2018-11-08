@@ -25,9 +25,7 @@
 #include "a32_transpose_interleave_8way_32bit.hpp"
 #ifdef __ARM_FEATURE_SVE
 #include "sve_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_block2_16bit.hpp"
 #include "sve_interleave_8way_block2_32bit.hpp"
-#include "sve_interleave_8way_block4_16bit.hpp"
 #include "sve_interleave_8way_block4_8bit.hpp"
 #else
 #include "a64_interleave_8way_32bit.hpp"
