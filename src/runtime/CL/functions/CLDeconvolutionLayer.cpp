@@ -135,7 +135,7 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info, inner_border_right, inner_border_top));
 
-    _is_prepared = false;
+    _is_prepared = weights_info.retain_internal_weights();
 
     _memory_group.manage(&_scaled_output);
 
