@@ -291,10 +291,10 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
         if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = input->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = input->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
 
-            min_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? input->info()->quantization_info().offset : b_const_int;
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
             max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
 
             // If the activation layer is RELU, BOUNDED_RELU or LU_BOUNDED_RELU, we can use the GEMMLowp output stage to perform this operation
@@ -475,20 +475,11 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         if(is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = input->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = input->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
 
-            min_activation = b_const_int;
-            max_activation = a_const_int;
-
-            if(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-            {
-                min_activation = input->quantization_info().offset;
-            }
-            if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
-            {
-                max_activation = 255;
-            }
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
 
             // If the activation layer is RELU, BOUNDED_RELU or LU_BOUNDED_RELU, we can use the GEMMLowp output stage to perform this operation
             is_activationlayer_enabled = false;

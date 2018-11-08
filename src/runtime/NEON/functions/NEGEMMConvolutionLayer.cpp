@@ -303,28 +303,26 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         }
 
         // Merge activation with output stage
-        uint8_t                                                 min            = 0;
-        uint8_t                                                 max            = 0;
+        int min_activation = 0;
+        int max_activation = 0;
+
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
                                                                                  };
         if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            min = sqcvt_qasymm8_f32(act_info.b(), input_quant_info.scale, input_quant_info.offset);
-            max = sqcvt_qasymm8_f32(act_info.a(), input_quant_info.scale, input_quant_info.offset);
-            if(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-            {
-                min = sqcvt_qasymm8_f32(0.f, input_quant_info.scale, input_quant_info.offset);
-            }
-            if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
-            {
-                max = 255;
-            }
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+
             _is_activationlayer_enabled = false;
         }
 
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min, max, skip_reshape ? conv_h : 1);
+        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min_activation, max_activation,
+                                         skip_reshape ? conv_h : 1);
     }
 
     if(!_skip_col2im && _data_layout == DataLayout::NCHW)
@@ -498,29 +496,27 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         }
 
         // Merge activation with output stage
-        uint8_t                                                 min            = 0;
-        uint8_t                                                 max            = 0;
+        int min_activation = 0;
+        int max_activation = 0;
+
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
                                                                                  };
+
         if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            min = sqcvt_qasymm8_f32(act_info.b(), input_quant_info.scale, input_quant_info.offset);
-            max = sqcvt_qasymm8_f32(act_info.a(), input_quant_info.scale, input_quant_info.offset);
-            if(act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-            {
-                min = sqcvt_qasymm8_f32(0.f, input_quant_info.scale, input_quant_info.offset);
-            }
-            if(act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU)
-            {
-                max = 255;
-            }
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+
             is_activation_enabled = false;
         }
 
         // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min, max, skip_reshape ? conv_h : 0);
+        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min_activation, max_activation, skip_reshape ? conv_h : 0);
     }
 
     // Validate Col2Im/ReshapeLayer
