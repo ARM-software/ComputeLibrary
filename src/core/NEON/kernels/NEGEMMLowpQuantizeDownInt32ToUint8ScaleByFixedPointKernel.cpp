@@ -43,8 +43,7 @@ using namespace arm_compute;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
-                          int min, int max, unsigned int output_3d_depth)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
@@ -60,10 +59,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape       = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input, output_3d_depth);
-        const TensorInfo  tensor_info_output = output->clone()->set_tensor_shape(output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, input);
     }
 
     return Status{};
@@ -75,6 +72,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // However, since we use a left-over for loop, we cannot have any read or write out of memory
     // For this reason num_elems_processed_per_iteration is set to 1
     constexpr unsigned int num_elems_processed_per_iteration = 1;
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
 
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -146,15 +146,15 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     ARM_COMPUTE_UNUSED(min_u8);
     ARM_COMPUTE_UNUSED(max_u8);
 
-    const int          window_step_x  = 16;
-    const auto         window_start_x = static_cast<int>(window.x().start());
-    const auto         window_end_x   = static_cast<int>(window.x().end());
-    const unsigned int gemm_3d_height = _input->info()->tensor_shape().y() / _output_3d_depth;
+    const int  window_step_x  = 16;
+    const auto window_start_x = static_cast<int>(window.x().start());
+    const auto window_end_x   = static_cast<int>(window.x().end());
 
     Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
     win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator in(_input, win_collapsed);
+    Iterator out(_output, win_collapsed);
     if(_bias != nullptr)
     {
         Window win_biases;
@@ -164,16 +164,6 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         Iterator bias(_bias, win_biases);
         execute_window_loop(win_collapsed, [&](const Coordinates & id)
         {
-            // Calculate output coordinates
-            Coordinates out_coords = id;
-            if(_output_3d_depth != 1)
-            {
-                out_coords.set(Window::DimY, id.y() % gemm_3d_height);
-                out_coords.set(Window::DimZ, id.y() / gemm_3d_height);
-                out_coords.set(3, id.z());
-            }
-            uint8_t *out_ptr = _output->ptr_to_element(out_coords);
-
             // Compute 16 elements per iteration
             int x = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
@@ -204,7 +194,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 in_s32.val[2] = vaddq_s32(in_s32.val[2], bias_s32.val[2]);
                 in_s32.val[3] = vaddq_s32(in_s32.val[3], bias_s32.val[3]);
 
-                vst1q_u8(out_ptr + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
+                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
             }
 
             // Compute left-over elements
@@ -217,26 +207,16 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 in_value += bias_value;
 
                 // Finalize and store the result
-                *(out_ptr + x) = finalize_quantization<is_bounded_relu>(vdupq_n_s32(in_value), _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min),
-                                                                        static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(vdupq_n_s32(in_value), _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min),
+                                                                          static_cast<uint8_t>(_max));
             }
         },
-        in, bias);
+        in, out, bias);
     }
     else
     {
         execute_window_loop(win_collapsed, [&](const Coordinates & id)
         {
-            // Calculate output coordinates
-            Coordinates out_coords = id;
-            if(_output_3d_depth != 1)
-            {
-                out_coords.set(Window::DimY, id.y() % _output_3d_depth);
-                out_coords.set(Window::DimZ, id.y() / _output_3d_depth);
-                out_coords.set(3, id.z());
-            }
-            uint8_t *out_ptr = _output->ptr_to_element(out_coords);
-
             // Compute 16 elements per iteration
             int x = window_start_x;
             for(; x <= (window_end_x - window_step_x); x += window_step_x)
@@ -251,7 +231,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                     }
                 };
 
-                vst1q_u8(out_ptr + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
+                vst1q_u8(out.ptr() + x, finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, min_u8, max_u8));
             }
 
             // Compute left-over elements
@@ -260,30 +240,24 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                 const int32x4_t in_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x);
 
                 // Finalize and store the result
-                *(out_ptr + x) = finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
             }
         },
-        in);
+        in, out);
     }
 }
 
 NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel()
-    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0), _min(0), _max(0), _output_3d_depth(1)
+    : _func(nullptr), _input(nullptr), _bias(nullptr), _output(nullptr), _result_fixedpoint_multiplier(0), _result_shift(0), _result_offset_after_shift(0), _min(0), _max(0)
 {
 }
 
 void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ITensor *input, const ITensor *bias, ITensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                          int result_offset_after_shift, int min, int max, unsigned int output_3d_depth)
+                                                                          int result_offset_after_shift, int min, int max)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_output_stage_shape(*input->info(), output_3d_depth);
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8).set_tensor_shape(output_shape));
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
-                                                  min, max, output_3d_depth));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), min, max));
 
     _input                        = input;
     _bias                         = bias;
@@ -293,7 +267,6 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _result_offset_after_shift    = result_offset_after_shift;
     _min                          = min;
     _max                          = max;
-    _output_3d_depth              = output_3d_depth;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
@@ -305,10 +278,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _func                      = is_bounded_relu ? &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<true> : &NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run<false>;
 }
 
-Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max, unsigned int output_3d_depth)
+Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max, output_3d_depth));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               (bias != nullptr) ? bias->clone().get() : nullptr,
                                                               output->clone().get())

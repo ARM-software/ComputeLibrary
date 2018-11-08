@@ -101,6 +101,9 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), output->info(), gemm_3d_depth, _skip_im2col));
 
+    const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
+                                         gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
+
     if(_is_quantized)
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
@@ -111,7 +114,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
-        _mm_gemmlowp.configure(input, weights, nullptr, output, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
+        _mm_gemmlowp.configure(input, weights, nullptr, output, gemm_info);
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(input_quantization_info);
@@ -120,8 +123,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     else
     {
         // Configure matrix multiply function
-        _mm_gemm.configure(input, weights, nullptr, output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, gemm_3d_depth,
-                                                                                 _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */));
+        _mm_gemm.configure(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
     }
 }
 
@@ -129,7 +131,8 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
 
-    const GEMMInfo gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */, gemm_3d_depth, skip_im2col);
+    const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
+                                         gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
     if(is_quantized)
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
@@ -256,15 +259,24 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
-    if(!_skip_col2im)
+    if(!_skip_col2im || _is_quantized)
     {
-        // Calculate GEMM output shape
-        TensorShape shape_gemm = _im2col_output.info()->tensor_shape();
-        shape_gemm.set(0, mat_weights_cols);
-        shape_gemm.set(1, conv_w * conv_h);
-
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         const DataType gemm_data_type = _is_quantized ? DataType::S32 : data_type;
+        TensorShape    shape_gemm;
+
+        if(_is_quantized && _skip_col2im)
+        {
+            shape_gemm = output->info()->tensor_shape();
+        }
+        else
+        {
+            // Calculate GEMM output shape
+            shape_gemm = _im2col_output.info()->tensor_shape();
+            shape_gemm.set(0, mat_weights_cols);
+            shape_gemm.set(1, conv_w * conv_h);
+        }
+
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
@@ -321,8 +333,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             _is_activationlayer_enabled = false;
         }
 
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min_activation, max_activation,
-                                         skip_reshape ? conv_h : 1);
+        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min_activation, max_activation);
     }
 
     if(!_skip_col2im && _data_layout == DataLayout::NCHW)
@@ -336,7 +347,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _tmp_output.allocator()->allocate();
     }
 
-    if(!_skip_col2im)
+    if(!_skip_col2im || _is_quantized)
     {
         _gemm_output.allocator()->allocate();
     }
@@ -464,18 +475,20 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
+    const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
     if(!skip_col2im)
     {
         TensorShape shape_gemm = gemm_input_to_use->tensor_shape();
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
-        const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
-        // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type);
-        info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
-
-        gemm_output_to_use = &info_gemm;
     }
+    else
+    {
+        info_gemm = TensorInfo(output->tensor_shape(), 1, gemm_data_type);
+    }
+    info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
+    gemm_output_to_use = &info_gemm;
 
     ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, skip_col2im ? conv_h : 0, skip_im2col));
 
@@ -516,7 +529,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         }
 
         // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min_activation, max_activation, skip_reshape ? conv_h : 0);
+        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min_activation, max_activation);
     }
 
     // Validate Col2Im/ReshapeLayer

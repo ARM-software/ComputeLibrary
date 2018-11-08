@@ -190,42 +190,68 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(c != nullptr, "Bias addition not supported in NEGEMMLowpMatrixMultiplyCore");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(0) != (b)->dimension(1),
                                     "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(1) != (output)->dimension(1),
-                                    "The output matrix must have the same number of rows as the matrix A");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((b)->dimension(0) != (output)->dimension(0),
-                                    "The output matrix must have the same number of columns as the matrix B");
-    ARM_COMPUTE_UNUSED(gemm_info);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the input tensor as 3D");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 0, "NEGEMMLowpMatrixMultiplyCore cannot reinterpret the output tensor as 3D");
 
-    int32_t a_offset                         = a->quantization_info().offset;
-    int32_t b_offset                         = b->quantization_info().offset;
-    bool    run_vector_matrix_multiplication = a->dimension(1) < 2;
+    int32_t    a_offset                    = a->quantization_info().offset;
+    int32_t    b_offset                    = b->quantization_info().offset;
+    const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
 
-    if(!run_vector_matrix_multiplication)
+    // Check if we need to run the optimized assembly kernel
+    const bool run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, output, 1.f, 0.f, reshape_b_only_on_first_run));
+
+    if(run_optimised)
     {
-        // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorShape shape_tmp_a = a->tensor_shape();
-        shape_tmp_a.set(0, a->dimension(0) * 4);
-        shape_tmp_a.set(1, std::ceil(a->dimension(1) / 4.f));
-
-        // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-        TensorShape shape_tmp_b = b->tensor_shape();
-        shape_tmp_b.set(0, b->dimension(1) * 16);
-        shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
-
-        TensorInfo info_a(shape_tmp_a, 1, a->data_type());
-        TensorInfo info_b(shape_tmp_b, 1, b->data_type());
-
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+        if(output->total_size() != 0)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(b->dimension(0) != output->dimension(0));
+            if(gemm_info.depth_output_gemm3d() != 0)
+            {
+                if(gemm_info.reinterpret_input_as_3d())
+                {
+                    ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != output->dimension(1));
+                    ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(2) != output->dimension(2));
+                }
+                else
+                {
+                    ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != output->dimension(1) * output->dimension(2));
+                }
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON(a->dimension(1) != output->dimension(1));
+            }
+        }
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(a, b, output));
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMM cannot reinterpret the input tensor as 3D");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 0, "NEGEMM cannot reinterpret the output tensor as 3D");
+
+        const bool run_vector_matrix_multiplication = a->dimension(1) < 2;
+        if(!run_vector_matrix_multiplication)
+        {
+            // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
+            TensorShape shape_tmp_a = a->tensor_shape();
+            shape_tmp_a.set(0, a->dimension(0) * 4);
+            shape_tmp_a.set(1, std::ceil(a->dimension(1) / 4.f));
+
+            // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
+            TensorShape shape_tmp_b = b->tensor_shape();
+            shape_tmp_b.set(0, b->dimension(1) * 16);
+            shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
+
+            TensorInfo info_a(shape_tmp_a, 1, a->data_type());
+            TensorInfo info_b(shape_tmp_b, 1, b->data_type());
+
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyKernel::validate(a, b, output));
+        }
     }
 
     TensorInfo info_vector_sum_col, info_vector_sum_row;
