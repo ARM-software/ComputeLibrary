@@ -45,6 +45,7 @@ std::unique_ptr<IFunction> create_function_all_types(arm_gemm::GemmMethod method
     //Note: It's safe to not check for FP16 support because this was already checked in NEGEMMAssemblyDispatch::configure()
     switch(method)
     {
+        case arm_gemm::GemmMethod::GEMM_INTERLEAVED_FP16:
         case arm_gemm::GemmMethod::GEMM_INTERLEAVED:
         {
             if(!pretranspose_hint)
