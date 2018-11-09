@@ -63,8 +63,8 @@ Status CLL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperation::validate(input, &sum_sq, axis, ReductionOperation::SUM_SQUARE));
 
-    // Reduce shape on axis (supported axis is 0)
-    shape.set(0, 1);
+    // Reduce shape on axis
+    shape.set(axis, 1);
     sum_sq.set_tensor_shape(shape);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLL2NormalizeLayerKernel::validate(input, &sum_sq, output, axis, epsilon));
