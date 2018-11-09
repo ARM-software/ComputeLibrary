@@ -56,6 +56,7 @@ public:
     void            stop() override;
     void            test_stop() override;
     MeasurementsMap measurements() const override;
+    MeasurementsMap test_measurements() const override;
 
 private:
 #ifdef ARM_COMPUTE_CL

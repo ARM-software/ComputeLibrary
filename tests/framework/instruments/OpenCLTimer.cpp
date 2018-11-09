@@ -202,6 +202,33 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
     return measurements;
 }
 
+template <bool              output_timestamps>
+Instrument::MeasurementsMap OpenCLClock<output_timestamps>::test_measurements() const
+{
+    MeasurementsMap measurements;
+
+    if(output_timestamps)
+    {
+        // The OpenCL clock and the wall clock are not in sync, so we use
+        // this trick to calculate the offset between the two clocks:
+        ::cl::Event event;
+        cl_ulong    now_gpu;
+
+        // Enqueue retrieve current CPU clock and enqueue a dummy marker
+        std::chrono::high_resolution_clock::time_point now_cpu = std::chrono::high_resolution_clock::now();
+        CLScheduler::get().queue().enqueueMarker(&event);
+
+        CLScheduler::get().queue().finish();
+        //Access the time at which the marker was enqueued:
+        event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &now_gpu);
+
+        measurements.emplace("Now Wall clock", Measurement(now_cpu.time_since_epoch().count() / 1000, "us"));
+        measurements.emplace("Now OpenCL", Measurement(now_gpu / static_cast<cl_ulong>(_scale_factor), _unit));
+    }
+
+    return measurements;
+}
+
 template class OpenCLClock<true>;
 template class OpenCLClock<false>;
 } // namespace framework
