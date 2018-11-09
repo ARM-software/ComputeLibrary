@@ -75,9 +75,9 @@ Instrument::MeasurementsMap WallClock<output_timestamps>::measurements() const
     return measurements;
 }
 
-template class WallClock<true>;
-template class WallClock<false>;
-
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+
+template class arm_compute::test::framework::WallClock<true>;
+template class arm_compute::test::framework::WallClock<false>;

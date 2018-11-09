@@ -212,8 +212,10 @@ Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() co
 
     return measurements;
 }
-template class SchedulerClock<true>;
-template class SchedulerClock<false>;
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+
+template class arm_compute::test::framework::SchedulerClock<true>;
+template class arm_compute::test::framework::SchedulerClock<false>;

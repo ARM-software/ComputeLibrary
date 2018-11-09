@@ -229,8 +229,9 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::test_measurements() 
     return measurements;
 }
 
-template class OpenCLClock<true>;
-template class OpenCLClock<false>;
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+
+template class arm_compute::test::framework::OpenCLClock<true>;
+template class arm_compute::test::framework::OpenCLClock<false>;
