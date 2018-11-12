@@ -73,13 +73,13 @@ void fuse_node_with_activation(Graph                              &g,
                 ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing node with ID : " << output_edge->producer_id()
                                               << " with Activation Layer node with ID : " << output_edge->consumer_id() << std::endl);
 
-                // Prevent fusion if batch normalization node has an output accessor
+                // Prevent fusion if fused node has an output accessor
                 if(n_node->output(0)->accessor() == nullptr)
                 {
                     // Get driving nodes of activation node
                     std::vector<NodeIdxPair> act_driving_nodes = get_driving_nodes(*act_node);
 
-                    // Set activation info to batch normalization
+                    // Set activation info to fused node
                     n_node->set_fused_activation(act_node->activation_info());
 
                     // Extract activation node accessor if any
@@ -88,13 +88,13 @@ void fuse_node_with_activation(Graph                              &g,
                     // Remove activation node
                     g.remove_node(act_node->id());
 
-                    // Update batch normalization node outputs
+                    // Update fused node outputs
                     for(auto &driving_node : act_driving_nodes)
                     {
                         g.add_connection(n_node->id(), 0, driving_node.node_id, driving_node.index);
                     }
 
-                    // Update accessor to batch normalization node
+                    // Update accessor to fused node
                     n_node->output(0)->set_accessor(std::move(act_node_accessor));
                 }
                 else
