@@ -90,18 +90,20 @@ void CLFlattenLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     _input  = input;
     _output = output;
 
-    CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
-
-    // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("flatten", build_opts.options()));
-
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
+
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+    build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option_if(output->info()->num_dimensions() > 2, "-DDST_DIM1=" + support::cpp11::to_string(output->info()->dimension(1)));
+
+    // Create kernel
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("flatten", build_opts.options()));
 
     // Set config_id for enabling LWS tuning
     _config_id = "flatten";
@@ -131,21 +133,15 @@ void CLFlattenLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
-    Window out_window;
-    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
+    Window collapsed_window = window.collapse(ICLKernel::window(), Window::DimZ);
 
-    Window out_slice = out_window.first_slice_window_1D();
-    Window in_slice  = window.first_slice_window_3D();
+    Window output_window;
+    output_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
     // Run kernel
-    do
-    {
-        // Set arguments
-        unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, in_slice);
-        add_1D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice, lws_hint());
-    }
-    while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
+    unsigned int idx = 0;
+    add_4D_tensor_argument(idx, _input, collapsed_window);
+    add_3D_tensor_argument(idx, _output, output_window);
+    enqueue(queue, *this, collapsed_window, lws_hint());
 }
 } // namespace arm_compute
