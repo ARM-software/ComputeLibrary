@@ -163,8 +163,8 @@ void populate_models_cpuid(std::vector<CPUModel> &cpusv)
             std::string line;
             if(bool(getline(file, line)))
             {
-                const unsigned long midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
-                c                        = midr_to_model(midr & 0xffffffff);
+                const uint32_t midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
+                c                   = midr_to_model(midr & 0xffffffff);
             }
         }
     }
@@ -173,11 +173,11 @@ void populate_models_cpuid(std::vector<CPUModel> &cpusv)
 void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 {
     // If "long-form" cpuinfo is present, parse that to populate models.
-    std::regex proc_regex("^processor.*(\\d+)$");
-    std::regex imp_regex("^CPU implementer.*0x(..)$");
-    std::regex var_regex("^CPU variant.*0x(.)$");
-    std::regex part_regex("^CPU part.*0x(...)$");
-    std::regex rev_regex("^CPU revision.*(\\d+)$");
+    std::regex proc_regex(R"(^processor.*(\d+)$)");
+    std::regex imp_regex(R"(^CPU implementer.*0x(..)$)");
+    std::regex var_regex(R"(^CPU variant.*0x(.)$)");
+    std::regex part_regex(R"(^CPU part.*0x(...)$)");
+    std::regex rev_regex(R"(^CPU revision.*(\d+)$)");
 
     std::ifstream file;
     file.open("/proc/cpuinfo", std::ios::in);
@@ -345,8 +345,8 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     bool one_supports_fp16 = false;
     for(const auto &v : percpu)
     {
-        one_supports_dot |= model_supports_dot(v);
-        one_supports_fp16 |= model_supports_fp16(v);
+        one_supports_dot  = one_supports_dot || model_supports_dot(v);
+        one_supports_fp16 = one_supports_fp16 || model_supports_fp16(v);
         cpuinfo.set_cpu_model(j++, v);
     }
     cpuinfo.set_dotprod(one_supports_dot || hwcaps_dot_support);
