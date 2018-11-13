@@ -622,6 +622,55 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     return std::move(func);
 }
 
+/** Create a backend generate proposals layer function
+ *
+ * @tparam GenerateProposalsLayerFunction Backend generate proposals function
+ * @tparam TargetInfo                     Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ * @param[in] ctx  Graph context
+ *
+ * @return Backend generate proposals layer function
+ */
+template <typename GenerateProposalsLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_generate_proposals_layer(GenerateProposalsLayerNode &node, GraphContext &ctx)
+{
+    validate_node<TargetInfo>(node, 3 /* expected inputs */, 3 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *scores              = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *deltas              = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *anchors             = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *proposals           = get_backing_tensor<TargetInfo>(node.output(0));
+    typename TargetInfo::TensorType *scores_out          = get_backing_tensor<TargetInfo>(node.output(1));
+    typename TargetInfo::TensorType *num_valid_proposals = get_backing_tensor<TargetInfo>(node.output(2));
+    const GenerateProposalsInfo      info                = node.info();
+
+    ARM_COMPUTE_ERROR_ON(scores == nullptr);
+    ARM_COMPUTE_ERROR_ON(deltas == nullptr);
+    ARM_COMPUTE_ERROR_ON(anchors == nullptr);
+    ARM_COMPUTE_ERROR_ON(proposals == nullptr);
+    ARM_COMPUTE_ERROR_ON(scores_out == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<GenerateProposalsLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
+    func->configure(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << scores->info()->data_type()
+                               << " Scores shape: " << scores->info()->tensor_shape()
+                               << " Deltas shape: " << deltas->info()->tensor_shape()
+                               << " Anchors shape: " << anchors->info()->tensor_shape()
+                               << " Proposals shape: " << proposals->info()->tensor_shape()
+                               << " Num valid proposals shape: " << num_valid_proposals->info()->tensor_shape()
+                               << " Scores Out shape: " << scores_out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend normalization layer function
  *
  * @tparam NormalizationLayerFunction Backend normalization function

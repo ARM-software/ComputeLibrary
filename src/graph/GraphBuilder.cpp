@@ -432,6 +432,22 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     return fc_nid;
 }
 
+NodeID GraphBuilder::add_generate_proposals_node(Graph &g, NodeParams params, NodeIdxPair scores, NodeIdxPair deltas, NodeIdxPair anchors, GenerateProposalsInfo info)
+{
+    CHECK_NODEIDX_PAIR(scores, g);
+    CHECK_NODEIDX_PAIR(deltas, g);
+    CHECK_NODEIDX_PAIR(anchors, g);
+
+    NodeID nid = g.add_node<GenerateProposalsLayerNode>(info);
+
+    g.add_connection(scores.node_id, scores.index, nid, 0);
+    g.add_connection(deltas.node_id, deltas.index, nid, 1);
+    g.add_connection(anchors.node_id, anchors.index, nid, 2);
+
+    set_node_params(g, nid, params);
+    return nid;
+}
+
 NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)
 {
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);

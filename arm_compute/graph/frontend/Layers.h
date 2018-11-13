@@ -531,6 +531,12 @@ public:
     {
     }
 
+    /** Create layer and add to the given stream.
+     *
+     * @param[in] s Stream to add layer to.
+     *
+     * @return ID of the created node.
+     */
     NodeID create_layer(IStream &s) override
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
@@ -547,6 +553,44 @@ private:
     const FullyConnectedLayerInfo _fc_info;
     const QuantizationInfo        _weights_quant_info;
     const QuantizationInfo        _out_quant_info;
+};
+
+/** Generate Proposals Layer */
+class GenerateProposalsLayer final : public ILayer
+{
+public:
+    /** Construct a generate proposals layer.
+     *
+     * @param[in] ss_scores  Graph sub-stream for the scores.
+     * @param[in] ss_deltas  Graph sub-stream for the deltas.
+     * @param[in] ss_anchors Graph sub-stream for the anchors.
+     * @param[in] info       Generate Proposals operation information.
+     */
+    GenerateProposalsLayer(SubStream &&ss_scores, SubStream &&ss_deltas, SubStream &&ss_anchors, GenerateProposalsInfo info)
+        : _ss_scores(std::move(ss_scores)), _ss_deltas(std::move(ss_deltas)), _ss_anchors(std::move(ss_anchors)), _info(info)
+    {
+    }
+
+    /** Create layer and add to the given stream.
+     *
+     * @param[in] s Stream to add layer to.
+     *
+     * @return ID of the created node.
+     */
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair scores        = { _ss_scores.tail_node(), 0 };
+        NodeIdxPair deltas        = { _ss_deltas.tail_node(), 0 };
+        NodeIdxPair anchors       = { _ss_anchors.tail_node(), 0 };
+        return GraphBuilder::add_generate_proposals_node(s.graph(), common_params, scores, deltas, anchors, _info);
+    }
+
+private:
+    SubStream             _ss_scores;
+    SubStream             _ss_deltas;
+    SubStream             _ss_anchors;
+    GenerateProposalsInfo _info;
 };
 
 /** Normalization Layer */

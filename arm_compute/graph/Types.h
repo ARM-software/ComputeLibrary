@@ -135,6 +135,7 @@ enum class NodeType
     EltwiseLayer,
     FlattenLayer,
     FullyConnectedLayer,
+    GenerateProposalsLayer,
     NormalizationLayer,
     NormalizePlanarYUVLayer,
     PadLayer,

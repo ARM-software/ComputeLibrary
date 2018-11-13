@@ -59,6 +59,8 @@ Status CLNodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer,
                    CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::GenerateProposalsLayer:
+            return detail::validate_generate_proposals_layer<CLGenerateProposalsLayer>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node));
         case NodeType::NormalizePlanarYUVLayer:
             return detail::validate_normalize_planar_yuv_layer<CLNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PadLayer:

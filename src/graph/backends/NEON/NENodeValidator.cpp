@@ -59,6 +59,8 @@ Status NENodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
                    NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::GenerateProposalsLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
         case NodeType::NormalizePlanarYUVLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : NormalizePlanarYUVLayer");
         case NodeType::PadLayer:
