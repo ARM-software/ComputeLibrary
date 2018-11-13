@@ -108,7 +108,7 @@ __kernel void bounding_box_transform(
     pred_box = pred_ctr.s0101 + sign * halfone * pred_dims.s0101;
     pred_box = CLAMP(pred_box, min_values, max_values);
 #ifdef SCALE // Possibly scale the predicted boxes
-    pred_box *= SCALE;
+    pred_box *= (VEC_DATA_TYPE(DATA_TYPE, 4))SCALE;
 #endif // Possibly scale the predicted boxes
 
     // Store them into the output
