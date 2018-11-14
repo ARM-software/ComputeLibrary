@@ -109,11 +109,28 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
     // Create kernel
-    const DataLayout data_layout = input->info()->data_layout();
-    _kernel                      = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize_" + lower_string(string_from_data_layout(data_layout)), build_opts));
+    std::string  kernel_name;
+    unsigned int idx = 0;
+    switch(axis)
+    {
+        case 0:
+            kernel_name = "x";
+            idx         = num_arguments_per_1D_tensor() * 3;
+            break;
+        case 1:
+            kernel_name = "y";
+            idx         = num_arguments_per_2D_tensor() * 3;
+            break;
+        case 2:
+            kernel_name = "z";
+            idx         = num_arguments_per_3D_tensor() * 3;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+    }
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize_" + kernel_name, build_opts));
 
     // Set epsilon argument
-    unsigned int idx = data_layout == DataLayout::NCHW ? num_arguments_per_1D_tensor() * 3 : num_arguments_per_2D_tensor() * 3;
     if(input->info()->data_type() == DataType::F32)
     {
         _kernel.setArg<cl_uint>(idx, _epsilon);
@@ -145,9 +162,9 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
 
     Window window_sum(window);
 
-    switch(_input->info()->data_layout())
+    switch(_axis)
     {
-        case DataLayout::NCHW:
+        case 0:
         {
             window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
             Window in_slice  = window.first_slice_window_1D();
@@ -163,7 +180,7 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
             while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
         }
         break;
-        case DataLayout::NHWC:
+        case 1:
         {
             window_sum.set(Window::DimY, Window::Dimension(0, 0, 0));
             Window in_slice  = window.first_slice_window_2D();
@@ -177,6 +194,22 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
                 enqueue(queue, *this, in_slice);
             }
             while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(sum_slice));
+        }
+        break;
+        case 2:
+        {
+            window_sum.set(Window::DimZ, Window::Dimension(0, 0, 0));
+            Window in_slice  = window.first_slice_window_3D();
+            Window sum_slice = window_sum.first_slice_window_3D();
+            do
+            {
+                unsigned int idx = 0;
+                add_3D_tensor_argument(idx, _input, in_slice);
+                add_3D_tensor_argument(idx, _sum, sum_slice);
+                add_3D_tensor_argument(idx, _output, in_slice);
+                enqueue(queue, *this, in_slice);
+            }
+            while(window.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(sum_slice));
         }
         break;
         default:
