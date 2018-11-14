@@ -282,7 +282,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
 
     // Vector for holding the tensors to store in scratch buffer
     std::vector<ICLTensor *> scratch_inputs;
-    if(lstm_params.has_cifg_opt())
+    if(!lstm_params.has_cifg_opt())
     {
         scratch_inputs.emplace_back(&_input_gate_out1);
     }
@@ -444,7 +444,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
 
     // Validate scratch concatenation
     std::vector<ITensorInfo *> inputs_vector_info_raw;
-    if(lstm_params.has_cifg_opt())
+    if(!lstm_params.has_cifg_opt())
     {
         inputs_vector_info_raw.push_back(&input_gate);
     }

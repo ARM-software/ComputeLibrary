@@ -100,7 +100,7 @@ protected:
         TensorType projection_w;
         TensorType projection_bias;
 
-        bool cifg_opt = scratch_shape.x() == cell_bias_shape.x() * 4 ? true : false;
+        bool cifg_opt = scratch_shape.x() == cell_bias_shape.x() * 4 ? false : true;
 
         FunctionParams lstm_params;
 
