@@ -188,6 +188,7 @@ private:
     NECol2ImKernel                                      _col2im_kernel;
     NEActivationLayer                                   _activationlayer_function;
     NEArithmeticAdditionKernel                          _add_bias_kernel;
+    NEReshapeLayer                                      _reshape_layer;
 
     const ITensor *_original_weights;
 
