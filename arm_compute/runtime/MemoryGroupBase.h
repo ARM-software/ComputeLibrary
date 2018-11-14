@@ -35,6 +35,9 @@
 
 namespace arm_compute
 {
+// Forward declarations
+class IMemory;
+
 /** Memory group */
 template <typename TensorType>
 class MemoryGroupBase : public IMemoryGroup
@@ -63,11 +66,12 @@ public:
      *
      * @note Manager must not be finalized
      *
-     * @param[in] obj    Object to request memory for
-     * @param[in] handle Handle to store the memory
-     * @param[in] size   Size of memory to allocate
+     * @param[in, out] obj        Object to request memory for
+     * @param[in, out] obj_memory Object's memory handling interface which can be used to alter the underlying memory
+     *                            that is used by the object.
+     * @param[in]      size       Size of memory to allocate
      */
-    void finalize_memory(TensorType *obj, void **handle, size_t size);
+    void finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size);
 
     // Inherited methods overridden:
     void            acquire() override;
@@ -112,16 +116,16 @@ inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 }
 
 template <typename TensorType>
-inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, void **handle, size_t size)
+inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size)
 {
     // TODO (geopin01) : Check size (track size in MemoryMappings)
     // Check if existing mapping is valid
-    ARM_COMPUTE_ERROR_ON(!_mappings.empty() && (_mappings.find(handle) == std::end(_mappings)));
+    ARM_COMPUTE_ERROR_ON(!_mappings.empty() && (_mappings.find(&obj_memory) == std::end(_mappings)));
 
     if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
-        _memory_manager->lifetime_manager()->end_lifetime(obj, handle, size);
+        _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IMemoryPool.h"
 
+#include "arm_compute/runtime/IMemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
@@ -75,9 +76,9 @@ private:
     void free_blobs();
 
 private:
-    IAllocator         *_allocator;  /**< Allocator to use for internal allocation */
-    std::vector<void *> _blobs;      /**< Vector holding all the memory blobs */
-    std::vector<size_t> _blob_sizes; /**< Sizes of each blob */
+    IAllocator                                 *_allocator;  /**< Allocator to use for internal allocation */
+    std::vector<std::unique_ptr<IMemoryRegion>> _blobs;      /**< Vector holding all the memory blobs */
+    std::vector<size_t>                         _blob_sizes; /**< Sizes of each blob */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */

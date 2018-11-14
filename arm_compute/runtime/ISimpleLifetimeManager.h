@@ -58,7 +58,7 @@ public:
     // Inherited methods overridden:
     void register_group(IMemoryGroup *group) override;
     void start_lifetime(void *obj) override;
-    void end_lifetime(void *obj, void **handle, size_t size) override;
+    void end_lifetime(void *obj, IMemory &obj_memory, size_t size) override;
     bool are_all_finalized() const override;
 
 protected:
@@ -69,14 +69,14 @@ protected:
     /** Element struct */
     struct Element
     {
-        Element(void *id_ = nullptr, void **handle_ = nullptr, size_t size_ = 0, bool status_ = false)
+        Element(void *id_ = nullptr, IMemory *handle_ = nullptr, size_t size_ = 0, bool status_ = false)
             : id(id_), handle(handle_), size(size_), status(status_)
         {
         }
-        void *id;      /**< Element id */
-        void **handle; /**< Element's memory handle */
-        size_t size;   /**< Element's size */
-        bool   status; /**< Lifetime status */
+        void    *id;     /**< Element id */
+        IMemory *handle; /**< Element's memory handle */
+        size_t   size;   /**< Element's size */
+        bool     status; /**< Lifetime status */
     };
 
     /** Blob struct */

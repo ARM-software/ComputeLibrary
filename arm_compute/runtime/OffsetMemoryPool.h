@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IMemoryPool.h"
 
+#include "arm_compute/runtime/IMemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
@@ -47,7 +48,7 @@ public:
      */
     OffsetMemoryPool(IAllocator *allocator, size_t blob_size);
     /** Default Destructor */
-    ~OffsetMemoryPool();
+    ~OffsetMemoryPool() = default;
     /** Prevent instances of this class to be copy constructed */
     OffsetMemoryPool(const OffsetMemoryPool &) = delete;
     /** Prevent instances of this class to be copy assigned */
@@ -64,9 +65,9 @@ public:
     std::unique_ptr<IMemoryPool> duplicate() override;
 
 private:
-    IAllocator *_allocator; /**< Allocator to use for internal allocation */
-    void       *_blob;      /**< Memory blob */
-    size_t      _blob_size; /**< Sizes of the allocated memory blob */
+    IAllocator                    *_allocator; /**< Allocator to use for internal allocation */
+    std::unique_ptr<IMemoryRegion> _blob;      /**< Memory blob */
+    size_t                         _blob_size; /**< Sizes of the allocated memory blob */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_OFFSETMEMORYPOOL_H__ */

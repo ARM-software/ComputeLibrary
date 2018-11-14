@@ -21,61 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/CLMemory.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemory.h"
 
-#include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Cast.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
 
 namespace arm_compute
 {
-CLMemory::CLMemory()
+GCMemory::GCMemory()
     : _region(nullptr), _region_owned(nullptr)
 {
 }
 
-CLMemory::CLMemory(std::shared_ptr<ICLMemoryRegion> memory)
+GCMemory::GCMemory(std::shared_ptr<IGCMemoryRegion> memory)
     : _region(nullptr), _region_owned(std::move(memory))
 {
     _region_owned = memory;
     _region       = _region_owned.get();
 }
 
-CLMemory::CLMemory(ICLMemoryRegion *memory)
+GCMemory::GCMemory(IGCMemoryRegion *memory)
     : _region(memory), _region_owned(nullptr)
 {
     _region = memory;
 }
 
-ICLMemoryRegion *CLMemory::cl_region()
+IGCMemoryRegion *GCMemory::gc_region()
 {
     return _region;
 }
 
-ICLMemoryRegion *CLMemory::cl_region() const
+IGCMemoryRegion *GCMemory::gc_region() const
 {
     return _region;
 }
 
-IMemoryRegion *CLMemory::region()
+IMemoryRegion *GCMemory::region()
 {
     return _region;
 }
 
-IMemoryRegion *CLMemory::region() const
+IMemoryRegion *GCMemory::region() const
 {
     return _region;
 }
 
-void CLMemory::set_region(IMemoryRegion *region)
+void GCMemory::set_region(IMemoryRegion *region)
 {
-    auto cl_region = utils::cast::polymorphic_downcast<ICLMemoryRegion *>(region);
+    auto gc_region = utils::cast::polymorphic_downcast<IGCMemoryRegion *>(region);
     _region_owned  = nullptr;
-    _region        = cl_region;
+    _region        = gc_region;
 }
 
-void CLMemory::set_owned_region(std::unique_ptr<IMemoryRegion> region)
+void GCMemory::set_owned_region(std::unique_ptr<IMemoryRegion> region)
 {
-    _region_owned = utils::cast::polymorphic_downcast_unique_ptr<ICLMemoryRegion>(std::move(region));
+    _region_owned = utils::cast::polymorphic_downcast_unique_ptr<IGCMemoryRegion>(std::move(region));
     _region       = _region_owned.get();
 }
 } // namespace arm_compute

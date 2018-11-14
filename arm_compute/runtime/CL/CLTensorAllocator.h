@@ -103,17 +103,13 @@ public:
     void free() override;
     /** Import an existing memory as a tensor's backing memory
      *
-     * @warning If the tensor is flagged to be managed by a memory manager,
-     *          this call will lead to an error.
-     * @warning Ownership of memory depends on the way the @ref CLMemory object was constructed
-     * @note    Calling free on a tensor with imported memory will just clear
-     *          the internal pointer value.
+     * @warning ownership of memory is not transferred
      *
-     * @param[in] memory Memory to import
+     * @param[in] buffer Buffer to import
      *
      * @return error status
      */
-    arm_compute::Status import_memory(CLMemory memory);
+    arm_compute::Status import_memory(cl::Buffer buffer);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with
@@ -130,8 +126,12 @@ protected:
     void unlock() override;
 
 private:
+    static const cl::Buffer _empty_buffer;
+
+private:
     CLMemoryGroup *_associated_memory_group; /**< Registered memory manager */
     CLMemory       _memory;                  /**< OpenCL memory */
+    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
     CLTensor      *_owner;                   /**< Owner of the allocator */
 };
 } // namespace arm_compute

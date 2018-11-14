@@ -30,17 +30,13 @@ namespace arm_compute
 Memory::Memory()
     : _region(nullptr), _region_owned(nullptr)
 {
-    create_empty_region();
 }
 
 Memory::Memory(std::shared_ptr<IMemoryRegion> memory)
     : _region(nullptr), _region_owned(std::move(memory))
 {
-    if(_region_owned == nullptr)
-    {
-        create_empty_region();
-    }
-    _region = _region_owned.get();
+    _region_owned = memory;
+    _region       = _region_owned.get();
 }
 
 Memory::Memory(IMemoryRegion *memory)
@@ -59,9 +55,15 @@ IMemoryRegion *Memory::region() const
     return _region;
 }
 
-void Memory::create_empty_region()
+void Memory::set_region(IMemoryRegion *region)
 {
-    _region_owned = std::make_shared<MemoryRegion>(0);
+    _region_owned = nullptr;
+    _region       = region;
+}
+
+void Memory::set_owned_region(std::unique_ptr<IMemoryRegion> region)
+{
+    _region_owned = std::move(region);
     _region       = _region_owned.get();
 }
 } // namespace arm_compute

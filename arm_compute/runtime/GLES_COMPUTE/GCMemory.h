@@ -21,30 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
-#define __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
+#ifndef __ARM_COMPUTE_RUNTIME_GLES_COMPUTE_GCMEMORY_H__
+#define __ARM_COMPUTE_RUNTIME_GLES_COMPUTE_GCMEMORY_H__
 
 #include "arm_compute/runtime/IMemory.h"
 
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLMemoryRegion.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
 
 #include <cstddef>
 #include <memory>
 
 namespace arm_compute
 {
-/** OpenCL implementation of memory object */
-class CLMemory : public IMemory
+/** GLES implementation of memory object */
+class GCMemory : public IMemory
 {
 public:
     /** Default Constructor */
-    CLMemory();
+    GCMemory();
     /** Default Constructor
      *
      * @param[in] memory Memory to be imported
      */
-    CLMemory(std::shared_ptr<ICLMemoryRegion> memory);
+    GCMemory(std::shared_ptr<IGCMemoryRegion> memory);
     /** Default Constructor
      *
      * @note Ownership of the memory is not transferred to this object.
@@ -52,25 +51,25 @@ public:
      *
      * @param[in] memory Memory to be imported
      */
-    CLMemory(ICLMemoryRegion *memory);
+    GCMemory(IGCMemoryRegion *memory);
     /** Allow instances of this class to be copied */
-    CLMemory(const CLMemory &) = default;
+    GCMemory(const GCMemory &) = default;
     /** Allow instances of this class to be copy assigned */
-    CLMemory &operator=(const CLMemory &) = default;
+    GCMemory &operator=(const GCMemory &) = default;
     /** Allow instances of this class to be moved */
-    CLMemory(CLMemory &&) noexcept = default;
+    GCMemory(GCMemory &&) noexcept = default;
     /** Allow instances of this class to be move assigned */
-    CLMemory &operator=(CLMemory &&) noexcept = default;
-    /** OpenCL Region accessor
+    GCMemory &operator=(GCMemory &&) noexcept = default;
+    /** GLES Region accessor
      *
      * @return Memory region
      */
-    ICLMemoryRegion *cl_region();
-    /** OpenCL Region accessor
+    IGCMemoryRegion *gc_region();
+    /** GLES Region accessor
      *
      * @return Memory region
      */
-    ICLMemoryRegion *cl_region() const;
+    IGCMemoryRegion *gc_region() const;
 
     // Inherited methods overridden:
     IMemoryRegion *region() final;
@@ -79,8 +78,8 @@ public:
     void set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
 
 private:
-    ICLMemoryRegion                 *_region;
-    std::shared_ptr<ICLMemoryRegion> _region_owned;
+    IGCMemoryRegion                 *_region;
+    std::shared_ptr<IGCMemoryRegion> _region_owned;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__ */
+#endif /* __ARM_COMPUTE_RUNTIME_GLES_COMPUTE_GCMEMORY_H__ */

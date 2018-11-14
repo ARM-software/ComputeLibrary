@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_RUNTIME_TYPES_H__
 #define __ARM_COMPUTE_RUNTIME_TYPES_H__
 
+#include "arm_compute/runtime/IMemory.h"
+
 #include <map>
 
 namespace arm_compute
@@ -40,7 +42,7 @@ enum class MappingType
  *
  * @note All objects are pre-pinned to specific buffers to avoid any relevant overheads
  */
-using MemoryMappings = std::map<void **, size_t>;
+using MemoryMappings = std::map<IMemory *, size_t>;
 
 /** A map of the groups and memory mappings */
 using GroupMappings = std::map<size_t, MemoryMappings>;

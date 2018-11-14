@@ -48,9 +48,10 @@ void *ICLMemoryRegion::buffer() const
     return _mapping;
 }
 
-void **ICLMemoryRegion::handle()
+std::unique_ptr<IMemoryRegion> ICLMemoryRegion::extract_subregion(size_t offset, size_t size)
 {
-    return reinterpret_cast<void **>(&_mem);
+    ARM_COMPUTE_UNUSED(offset, size);
+    return nullptr;
 }
 
 CLBufferMemoryRegion::CLBufferMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size)
@@ -60,6 +61,12 @@ CLBufferMemoryRegion::CLBufferMemoryRegion(cl::Context ctx, cl_mem_flags flags, 
     {
         _mem = cl::Buffer(_ctx, flags, _size);
     }
+}
+
+CLBufferMemoryRegion::CLBufferMemoryRegion(const cl::Buffer &buffer)
+    : ICLMemoryRegion(buffer.getInfo<CL_MEM_CONTEXT>(), buffer.getInfo<CL_MEM_SIZE>())
+{
+    _mem = buffer;
 }
 
 void *CLBufferMemoryRegion::ptr()

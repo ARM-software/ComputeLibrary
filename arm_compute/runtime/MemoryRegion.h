@@ -37,13 +37,13 @@ namespace arm_compute
 class MemoryRegion final : public IMemoryRegion
 {
 public:
-    /** Default constructor
+    /** Constructor
      *
      * @param[in] size      Region size
      * @param[in] alignment Alignment in bytes of the base pointer. Defaults to 0
      */
     MemoryRegion(size_t size, size_t alignment = 0)
-        : IMemoryRegion(size), _mem(nullptr), _alignment(alignment), _offset(0)
+        : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
     {
         if(size != 0)
         {
@@ -53,14 +53,23 @@ public:
             {
                 delete[] ptr;
             });
+            _ptr = _mem.get();
 
             // Calculate alignment offset
             if(alignment != 0)
             {
                 void *aligned_ptr = _mem.get();
                 support::cpp11::align(alignment, size, aligned_ptr, space);
-                _offset = reinterpret_cast<uintptr_t>(aligned_ptr) - reinterpret_cast<uintptr_t>(_mem.get());
+                _ptr = aligned_ptr;
             }
+        }
+    }
+    MemoryRegion(void *ptr, size_t size)
+        : IMemoryRegion(size), _mem(nullptr), _ptr(nullptr)
+    {
+        if(size != 0)
+        {
+            _ptr = ptr;
         }
     }
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -75,22 +84,27 @@ public:
     // Inherited methods overridden :
     void *buffer() final
     {
-        return reinterpret_cast<void *>(_mem.get() + _offset);
+        return _ptr;
     }
     void *buffer() const final
     {
-        // FIXME (COMPMID-1088) : Remove handle() and _offset when done
-        return reinterpret_cast<void *>(_mem.get() + _offset);
+        return _ptr;
     }
-    void **handle() final
+    std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) final
     {
-        return reinterpret_cast<void **>(&_mem);
+        if(_ptr != nullptr && (offset < _size) && (_size - offset >= size))
+        {
+            return support::cpp14::make_unique<MemoryRegion>(static_cast<uint8_t *>(_ptr) + offset, size);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
 
 protected:
     std::shared_ptr<uint8_t> _mem;
-    size_t                   _alignment;
-    size_t                   _offset;
+    void                    *_ptr;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_MEMORY_REGION_H__ */

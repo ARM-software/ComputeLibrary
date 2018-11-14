@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IAllocator.h"
 #include "arm_compute/runtime/IMemoryPool.h"
+#include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/Types.h"
 #include "support/ToolchainSupport.h"
 
@@ -37,14 +38,7 @@ OffsetMemoryPool::OffsetMemoryPool(IAllocator *allocator, size_t blob_size)
     : _allocator(allocator), _blob(), _blob_size(blob_size)
 {
     ARM_COMPUTE_ERROR_ON(!allocator);
-    _blob = _allocator->allocate(_blob_size, 0);
-}
-
-OffsetMemoryPool::~OffsetMemoryPool()
-{
-    ARM_COMPUTE_ERROR_ON(!_allocator);
-    _allocator->free(_blob);
-    _blob = nullptr;
+    _blob = _allocator->make_region(blob_size, 0);
 }
 
 void OffsetMemoryPool::acquire(MemoryMappings &handles)
@@ -55,7 +49,7 @@ void OffsetMemoryPool::acquire(MemoryMappings &handles)
     for(auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
-        *handle.first = reinterpret_cast<uint8_t *>(_blob) + handle.second;
+        handle.first->set_owned_region(_blob->extract_subregion(handle.second, _blob_size - handle.second));
     }
 }
 
@@ -64,7 +58,7 @@ void OffsetMemoryPool::release(MemoryMappings &handles)
     for(auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
-        *handle.first = nullptr;
+        handle.first->set_region(nullptr);
     }
 }
 

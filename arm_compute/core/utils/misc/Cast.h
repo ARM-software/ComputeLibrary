@@ -41,7 +41,7 @@ namespace cast
  *
  * @param[in] v Value to cast
  *
- * @return The casted type
+ * @return The casted value
  */
 template <typename Target, typename Source>
 inline Target polymorphic_cast(Source *v)
@@ -62,13 +62,56 @@ inline Target polymorphic_cast(Source *v)
  *
  * @param[in] v Value to cast
  *
- * @return The casted type
+ * @return The casted value
  */
 template <typename Target, typename Source>
 inline Target polymorphic_downcast(Source *v)
 {
     ARM_COMPUTE_ERROR_ON(dynamic_cast<Target>(v) != static_cast<Target>(v));
     return static_cast<Target>(v);
+}
+
+/** Polymorphic cast between two unique pointer types
+ *
+ * @warning Will throw an exception if cast cannot take place
+ *
+ * @tparam Target  Target to cast type
+ * @tparam Source  Source from cast type
+ * @tparam Deleter Deleter function type
+ *
+ * @param[in] v Value to cast
+ *
+ * @return The casted value
+ */
+template <typename Target, typename Source, typename Deleter>
+std::unique_ptr<Target, Deleter> polymorphic_cast_unique_ptr(std::unique_ptr<Source, Deleter> &&v)
+{
+    if(dynamic_cast<Target *>(v.get()) == nullptr)
+    {
+        throw std::bad_cast();
+    }
+    auto r = static_cast<Target *>(v.release());
+    return std::unique_ptr<Target, Deleter>(r, std::move(v.get_deleter()));
+}
+
+/** Polymorphic down cast between two unique pointer types
+ *
+ * @warning Will assert if cannot take place
+ *
+ * @tparam Target  Target to cast type
+ * @tparam Source  Source from cast type
+ * @tparam Deleter Deleter function type
+ *
+ * @param[in] v Value to cast
+ *
+ * @return The casted value
+ */
+template <typename Target, typename Source, typename Deleter>
+std::unique_ptr<Target, Deleter> polymorphic_downcast_unique_ptr(std::unique_ptr<Source, Deleter> &&v)
+{
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<Target *>(v.get()) != static_cast<Target *>(v.get()));
+    auto r = static_cast<Target *>(v.release());
+    return std::unique_ptr<Target, Deleter>(r, std::move(v.get_deleter()));
 }
 } // namespace cast
 } // namespace utils

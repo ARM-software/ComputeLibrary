@@ -21,39 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
+#ifndef __ARM_COMPUTE_IMEMORY_H__
+#define __ARM_COMPUTE_IMEMORY_H__
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
-
-#include <cstddef>
+#include "arm_compute/runtime/IMemoryRegion.h"
 
 namespace arm_compute
 {
-void *GCBufferAllocator::allocate(size_t size, size_t alignment)
+/** Memory interface*/
+class IMemory
 {
-    ARM_COMPUTE_UNUSED(alignment);
-
-    auto *gl_ssbo_name = new GLuint;
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, *gl_ssbo_name));
-    ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(size), nullptr, GL_STATIC_DRAW));
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
-
-    return reinterpret_cast<void *>(gl_ssbo_name);
-}
-
-void GCBufferAllocator::free(void *ptr)
-{
-    ARM_COMPUTE_ERROR_ON(ptr == nullptr);
-    auto *gl_ssbo_name = reinterpret_cast<GLuint *>(ptr);
-    ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, gl_ssbo_name));
-    delete gl_ssbo_name;
-}
-
-std::unique_ptr<IMemoryRegion> GCBufferAllocator::make_region(size_t size, size_t alignment)
-{
-    ARM_COMPUTE_UNUSED(alignment);
-    return arm_compute::support::cpp14::make_unique<GCBufferMemoryRegion>(size);
-}
+public:
+    /** Virtual default destructor */
+    virtual ~IMemory() = default;
+    /** Region accessor
+     *
+     * @return Memory region
+     */
+    virtual IMemoryRegion *region() = 0;
+    /** Region accessor
+     *
+     * @return Memory region
+     */
+    virtual IMemoryRegion *region() const = 0;
+    /** Sets a memory region
+     *
+     * @warning Ownership of the memory region remains to the caller
+     *
+     * @param region Memory region
+     */
+    virtual void set_region(IMemoryRegion *region) = 0;
+    /** Sets a memory region
+     *
+     * @warning Ownership of the memory region is transfered along
+     *
+     * @param region Memory region
+     */
+    virtual void set_owned_region(std::unique_ptr<IMemoryRegion> region) = 0;
+};
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_IMEMORY_H__ */

@@ -117,6 +117,7 @@ public:
     DECLARE_FUNCTION_PTR(clReleaseMemObject);
     DECLARE_FUNCTION_PTR(clGetDeviceInfo);
     DECLARE_FUNCTION_PTR(clGetDeviceIDs);
+    DECLARE_FUNCTION_PTR(clGetMemObjectInfo);
     DECLARE_FUNCTION_PTR(clRetainEvent);
     DECLARE_FUNCTION_PTR(clGetPlatformIDs);
     DECLARE_FUNCTION_PTR(clGetKernelWorkGroupInfo);
