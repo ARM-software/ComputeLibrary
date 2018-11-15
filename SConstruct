@@ -284,6 +284,7 @@ env.Append(CXXFLAGS = env['extra_cxx_flags'])
 env.Append(LINKFLAGS = env['extra_link_flags'])
 
 Default( install_include("arm_compute"))
+Default( install_include("support"))
 
 Export('version_at_least')
 
