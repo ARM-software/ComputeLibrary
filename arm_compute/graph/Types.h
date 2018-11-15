@@ -51,6 +51,7 @@ using arm_compute::FullyConnectedLayerInfo;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
+using arm_compute::PriorBoxLayerInfo;
 using arm_compute::DimensionRoundingType;
 using arm_compute::InterpolationPolicy;
 
@@ -141,6 +142,7 @@ enum class NodeType
     PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PriorBoxLayer,
     ReorgLayer,
     ReshapeLayer,
     ResizeLayer,

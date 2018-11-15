@@ -34,7 +34,7 @@ if __name__ == "__main__":
             elif i == 1:
                 outname = name + "_b"
             else:
-                pass
+                continue
 
             varname = outname
             if os.path.sep in varname:

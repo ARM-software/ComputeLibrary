@@ -45,6 +45,7 @@
 #include "arm_compute/graph/nodes/PadLayerNode.h"
 #include "arm_compute/graph/nodes/PermuteLayerNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
+#include "arm_compute/graph/nodes/PriorBoxLayerNode.h"
 #include "arm_compute/graph/nodes/ROIAlignLayerNode.h"
 #include "arm_compute/graph/nodes/ReorgLayerNode.h"
 #include "arm_compute/graph/nodes/ReshapeLayerNode.h"

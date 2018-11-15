@@ -51,6 +51,7 @@ class OutputNode;
 class PadLayerNode;
 class PermuteLayerNode;
 class PoolingLayerNode;
+class PriorBoxLayerNode;
 class ReorgLayerNode;
 class ReshapeLayerNode;
 class ResizeLayerNode;

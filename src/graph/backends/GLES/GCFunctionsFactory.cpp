@@ -94,7 +94,8 @@ std::unique_ptr<IFunction> create_concatenate_layer<GCDepthConcatenateLayer, GCT
     func->configure(inputs, output);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
                                << " Target " << GCTargetInfo::TargetType
                                << " Data Type: " << output->info()->data_type()
                                << " Shape: " << output->info()->tensor_shape()
@@ -143,7 +144,9 @@ std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions,
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
                                << " Data Type: " << input->info()->data_type()
                                << " Input QuantInfo: " << input->info()->quantization_info()
                                << " Weights QuantInfo: " << weights->info()->quantization_info()
@@ -191,7 +194,9 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
                                << " Target " << GCTargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input QuantInfo: " << input->info()->quantization_info()
@@ -246,11 +251,13 @@ std::unique_ptr<IFunction> create_eltwise_layer<GCEltwiseFunctions, GCTargetInfo
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << GCTargetInfo::TargetType
-                               << " Operation " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << GCTargetInfo::TargetType
+                               << " Operation: " << func_name
                                << " Data Type: " << input1->info()->data_type()
-                               << " Shape : " << input1->info()->tensor_shape()
+                               << " Shape: " << input1->info()->tensor_shape()
                                << std::endl);
 
     return func;

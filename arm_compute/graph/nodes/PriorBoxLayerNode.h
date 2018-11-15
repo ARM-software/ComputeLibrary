@@ -21,55 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/FlattenLayerNode.h"
+#ifndef __ARM_COMPUTE_GRAPH_PRIORBOX_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_PRIORBOX_LAYER_NODE_H__
 
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/INodeVisitor.h"
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-FlattenLayerNode::FlattenLayerNode()
+/** PriorBox Layer node */
+class PriorBoxLayerNode final : public INode
 {
-    _input_edges.resize(1, EmptyEdgeID);
-    _outputs.resize(1, NullTensorID);
-}
+public:
+    /** Constructor
+     *
+     * @param[in] prior_info PriorBox Layer information
+     */
+    PriorBoxLayerNode(PriorBoxLayerInfo prior_info);
+    /** PriorBox metadata accessor
+     *
+     * @return PriorBox Layer info
+     */
+    PriorBoxLayerInfo priorbox_info() const;
+    /** Computes priorbox output descriptor
+     *
+     * @param[in] input_descriptor Input descriptor
+     * @param[in] info             PriorBox operation attributes
+     *
+     * @return Output descriptor
+     */
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, const PriorBoxLayerInfo &info);
 
-bool FlattenLayerNode::forward_descriptors()
-{
-    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
-    {
-        Tensor *dst = output(0);
-        ARM_COMPUTE_ERROR_ON(dst == nullptr);
-        dst->desc() = configure_output(0);
-        return true;
-    }
-    return false;
-}
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
 
-TensorDescriptor FlattenLayerNode::configure_output(size_t idx) const
-{
-    ARM_COMPUTE_UNUSED(idx);
-    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
-
-    const Tensor *src = input(0);
-    ARM_COMPUTE_ERROR_ON(src == nullptr);
-
-    TensorDescriptor output_desc = src->desc();
-    output_desc.shape.collapse(3);
-
-    return output_desc;
-}
-
-NodeType FlattenLayerNode::type() const
-{
-    return NodeType::FlattenLayer;
-}
-
-void FlattenLayerNode::accept(INodeVisitor &v)
-{
-    v.visit(*this);
-}
+private:
+    PriorBoxLayerInfo _info;
+};
 } // namespace graph
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_PRIORBOX_LAYER_NODE_H__ */

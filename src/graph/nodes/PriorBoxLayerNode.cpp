@@ -21,22 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/FlattenLayerNode.h"
+#include "arm_compute/graph/nodes/PriorBoxLayerNode.h"
 
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
+#include "arm_compute/graph/Utils.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-FlattenLayerNode::FlattenLayerNode()
+PriorBoxLayerNode::PriorBoxLayerNode(PriorBoxLayerInfo prior_info)
+    : _info(std::move(prior_info))
 {
-    _input_edges.resize(1, EmptyEdgeID);
+    _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
-bool FlattenLayerNode::forward_descriptors()
+PriorBoxLayerInfo PriorBoxLayerNode::priorbox_info() const
+{
+    return _info;
+}
+
+TensorDescriptor PriorBoxLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                              const PriorBoxLayerInfo &info)
+{
+    const unsigned int layer_width  = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
+    const unsigned int layer_height = get_dimension_size(input_descriptor, DataLayoutDimension::HEIGHT);
+    const unsigned int num_priors   = info.aspect_ratios().size() * info.min_sizes().size() + info.max_sizes().size();
+
+    TensorDescriptor output_descriptor = input_descriptor;
+    output_descriptor.shape.set(0, layer_width * layer_height * num_priors * 4);
+    output_descriptor.shape.set(1, 2);
+    output_descriptor.shape.set(2, 1);
+
+    return output_descriptor;
+}
+
+bool PriorBoxLayerNode::forward_descriptors()
 {
     if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
@@ -48,26 +71,23 @@ bool FlattenLayerNode::forward_descriptors()
     return false;
 }
 
-TensorDescriptor FlattenLayerNode::configure_output(size_t idx) const
+TensorDescriptor PriorBoxLayerNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
     ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
 
-    const Tensor *src = input(0);
-    ARM_COMPUTE_ERROR_ON(src == nullptr);
+    const Tensor *input0 = input(0);
+    ARM_COMPUTE_ERROR_ON(input0 == nullptr);
 
-    TensorDescriptor output_desc = src->desc();
-    output_desc.shape.collapse(3);
-
-    return output_desc;
+    return compute_output_descriptor(input0->desc(), _info);
 }
 
-NodeType FlattenLayerNode::type() const
+NodeType PriorBoxLayerNode::type() const
 {
-    return NodeType::FlattenLayer;
+    return NodeType::PriorBoxLayer;
 }
 
-void FlattenLayerNode::accept(INodeVisitor &v)
+void PriorBoxLayerNode::accept(INodeVisitor &v)
 {
     v.visit(*this);
 }

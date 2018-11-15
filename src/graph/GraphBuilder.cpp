@@ -494,6 +494,21 @@ NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
 }
 
+NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info)
+{
+    CHECK_NODEIDX_PAIR(input0, g);
+    CHECK_NODEIDX_PAIR(input1, g);
+
+    // Create priorbox node and connect
+    NodeID prior_nid = g.add_node<PriorBoxLayerNode>(prior_info);
+    g.add_connection(input0.node_id, input0.index, prior_nid, 0);
+    g.add_connection(input1.node_id, input1.index, prior_nid, 1);
+
+    set_node_params(g, prior_nid, params);
+
+    return prior_nid;
+}
+
 NodeID GraphBuilder::add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride)
 {
     return create_simple_single_input_output_node<ReorgLayerNode>(g, params, input, stride);

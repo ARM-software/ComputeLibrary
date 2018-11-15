@@ -77,8 +77,8 @@ void TFPreproccessor::preprocess(ITensor &tensor)
     });
 }
 
-CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr)
-    : _mean(mean), _bgr(bgr)
+CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, float scale, bool bgr)
+    : _mean(mean), _scale(scale), _bgr(bgr)
 {
     if(_bgr)
     {
@@ -96,7 +96,7 @@ void CaffePreproccessor::preprocess(ITensor &tensor)
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id[channel_idx]];
-        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value * _scale;
     });
 }
 

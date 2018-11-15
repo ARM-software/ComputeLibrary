@@ -308,6 +308,17 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info);
+    /** Adds a priorbox layer node to the graph
+     *
+     * @param[in] g          Graph to add the node to
+     * @param[in] params     Common node parameters
+     * @param[in] input0     First input to the priorbox layer node as a NodeID-Index pair
+     * @param[in] input1     Second input to the priorbox layer node as a NodeID-Index pair
+     * @param[in] prior_info PriorBox parameters
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to

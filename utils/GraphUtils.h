@@ -63,14 +63,16 @@ public:
     /** Default Constructor
      *
      * @param mean Mean array in RGB ordering
+     * @param scale Scale value
      * @param bgr  Boolean specifying if the preprocessing should assume BGR format
      */
-    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, bool bgr = true);
+    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, float scale = 1.f, bool bgr = true);
     void preprocess(ITensor &tensor) override;
 
 private:
     std::array<float, 3> _mean;
-    bool _bgr;
+    float _scale;
+    bool  _bgr;
 };
 
 /** TF preproccessor */

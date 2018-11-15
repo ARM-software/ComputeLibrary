@@ -857,7 +857,8 @@ public:
      * @param[in] steps         (Optional) Step values.
      */
     PriorBoxLayerInfo(const std::vector<float> &min_sizes, const std::vector<float> &variances, float offset, bool flip = true, bool clip = false,
-    const std::vector<float> &max_sizes = {}, const std::vector<float> &aspect_ratios = {}, const Coordinates2D &img_size = Coordinates2D{ 0, 0 }, const std::array<float, 2> &steps = { { 0.f, 0.f } })
+                      const std::vector<float> &max_sizes = {}, const std::vector<float> &aspect_ratios = {},
+    const Coordinates2D &img_size = Coordinates2D{ 0, 0 }, const std::array<float, 2> &steps = { { 0.f, 0.f } })
         : _min_sizes(min_sizes),
           _variances(variances),
           _offset(offset),

@@ -607,7 +607,6 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 /** Template helper function to save a tensor image to a NPY file.
  *
  * @note Only F32 data type supported.
- * @note Only works with 2D tensors.
  * @note If the input tensor is a CLTensor, the function maps and unmaps the image
  *
  * @param[in] tensor        The tensor to save as NPY file
@@ -627,9 +626,9 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         std::vector<npy::ndarray_len_t> shape(tensor.info()->num_dimensions());
 
-        for(unsigned int i = 0; i < tensor.info()->num_dimensions(); ++i)
+        for(unsigned int i = 0, j = tensor.info()->num_dimensions() - 1; i < tensor.info()->num_dimensions(); ++i, --j)
         {
-            shape[i] = tensor.info()->tensor_shape()[i];
+            shape[i] = tensor.info()->tensor_shape()[!fortran_order ? j : i];
         }
 
         // Map buffer if creating a CLTensor
@@ -802,12 +801,13 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2)
 
     map(tensor1, true);
     map(tensor2, true);
+
     Iterator itensor1(&tensor1, window);
     Iterator itensor2(&tensor2, window);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > 0.00001)
+        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > 0.0001)
         {
             ++num_mismatches;
         }
