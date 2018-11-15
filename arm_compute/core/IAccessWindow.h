@@ -193,6 +193,8 @@ public:
 
     bool update_window_if_needed(Window &window) const override;
     bool update_padding_if_needed(const Window &window) override;
+protected:
+    PaddingSize get_needed_padding(const Window &window)const;
 
 protected:
     ITensorInfo *_info;

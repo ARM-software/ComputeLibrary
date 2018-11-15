@@ -102,6 +102,16 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
         return false;
     }
 
+    PaddingSize needed = get_needed_padding(window);
+    PaddingSize available = _info->padding();
+
+    if(needed.top <= available.top && needed.right <= available.right
+    && needed.bottom <= available.bottom
+    && needed.left <= available.left)
+    {
+        return false;
+    }
+
     const TensorShape &shape                = _info->tensor_shape();
     const Strides     &strides              = _info->strides_in_bytes();
     const size_t       offset_first_element = _info->offset_first_element_in_bytes();
@@ -206,7 +216,12 @@ bool AccessWindowRectangle::update_padding_if_needed(const Window &window)
     {
         return false;
     }
+    // Update strides in tensor info
+    return _info->extend_padding( get_needed_padding(window));
+}
 
+PaddingSize AccessWindowRectangle::get_needed_padding(const Window &window)const
+{
     ARM_COMPUTE_ERROR_ON(_scale_x == 0);
     ARM_COMPUTE_ERROR_ON(_scale_y == 0);
 
@@ -223,6 +238,5 @@ bool AccessWindowRectangle::update_padding_if_needed(const Window &window)
     padding.top    = std::max(0, -min_y);
     padding.bottom = std::max<int>(0, max_y - shape[1]);
 
-    // Update strides in tensor info
-    return _info->extend_padding(padding);
+    return padding;
 }
