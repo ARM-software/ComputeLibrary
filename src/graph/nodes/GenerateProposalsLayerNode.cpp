@@ -80,7 +80,8 @@ TensorDescriptor GenerateProposalsLayerNode::configure_output(size_t idx) const
             break;
         case 2:
             // Configure num_valid_proposals
-            output_desc.shape = TensorShape(1);
+            output_desc.shape     = TensorShape(1);
+            output_desc.data_type = DataType::U32;
             break;
         default:
             ARM_COMPUTE_ERROR("Unsupported output index");

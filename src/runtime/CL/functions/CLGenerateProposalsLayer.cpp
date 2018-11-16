@@ -57,6 +57,9 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
 void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTensor *deltas, const ICLTensor *anchors, ICLTensor *proposals, ICLTensor *scores_out, ICLTensor *num_valid_proposals,
                                          const GenerateProposalsInfo &info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
+    ARM_COMPUTE_ERROR_THROW_ON(CLGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
+
     const DataType data_type         = deltas->info()->data_type();
     const int      num_anchors       = scores->info()->dimension(2);
     const int      feat_width        = scores->info()->dimension(0);
@@ -109,7 +112,7 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     // Note that NMS needs outputs preinitialized.
     auto_init_if_empty(*scores_out->info(), TensorShape(scores_nms_size), 1, data_type);
     auto_init_if_empty(*_proposals_4_roi_values.info(), TensorShape(values_per_roi, scores_nms_size), 1, data_type);
-    auto_init_if_empty(*num_valid_proposals->info(), TensorShape(values_per_roi, scores_nms_size), 1, data_type);
+    auto_init_if_empty(*num_valid_proposals->info(), TensorShape(1), 1, DataType::U32);
 
     // Initialize temporaries (unused) outputs
     _classes_nms_unused.allocator()->init(TensorInfo(TensorShape(1, 1), 1, data_type));
@@ -137,7 +140,8 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
 Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITensorInfo *deltas, const ITensorInfo *anchors, const ITensorInfo *proposals, const ITensorInfo *scores_out,
                                           const ITensorInfo *num_valid_proposals, const GenerateProposalsInfo &info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(proposals, scores_out, num_valid_proposals);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW);
 
     const int num_anchors       = scores->dimension(2);
     const int feat_width        = scores->dimension(0);
@@ -161,7 +165,7 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(scores, &scores_permuted_info, PermutationVector{ 2, 0, 1 }));
 
     TensorInfo scores_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
-    TensorInfo proposals_4_roi_values(proposals->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
+    TensorInfo proposals_4_roi_values(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&scores_permuted_info, &scores_flattened_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLBoundingBoxTransformKernel::validate(&all_anchors_info, &proposals_4_roi_values, &deltas_flattened_info, BoundingBoxTransformInfo(info.im_width(), info.im_height(),
@@ -174,7 +178,7 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     {
         ARM_COMPUTE_RETURN_ERROR_ON(num_valid_proposals->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(num_valid_proposals->dimension(0) > 1);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(num_valid_proposals, DataType::U32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(num_valid_proposals, 1, DataType::U32);
     }
 
     if(proposals->total_size() > 0)

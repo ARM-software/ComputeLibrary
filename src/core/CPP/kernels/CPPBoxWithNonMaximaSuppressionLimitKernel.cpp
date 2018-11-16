@@ -328,7 +328,7 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()
                 {
                     *reinterpret_cast<T *>(_keeps->ptr_to_element(Coordinates(cur_start_idx + cur_out_idx + i))) = static_cast<T>(keeps[j].at(i));
                 }
-                *reinterpret_cast<T *>(_keeps_size->ptr_to_element(Coordinates(j + b * num_classes))) = static_cast<T>(keeps[j].size());
+                *reinterpret_cast<uint32_t *>(_keeps_size->ptr_to_element(Coordinates(j + b * num_classes))) = keeps[j].size();
                 cur_out_idx += keeps[j].size();
             }
         }
@@ -356,13 +356,14 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor *scores_
     ARM_COMPUTE_UNUSED(num_classes);
     ARM_COMPUTE_ERROR_ON_MSG((4 * num_classes) != boxes_in->info()->dimension(0), "First dimension of input boxes must be of size 4*num_classes");
     ARM_COMPUTE_ERROR_ON_MSG(scores_in->info()->dimension(1) != boxes_in->info()->dimension(1), "Input scores and input boxes must have the same number of rows");
+
     ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != boxes_out->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(boxes_out->info()->dimension(0) != 4);
     if(keeps != nullptr)
     {
         ARM_COMPUTE_ERROR_ON_MSG(keeps_size == nullptr, "keeps_size cannot be nullptr if keeps has to be provided as output");
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, keeps);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, keeps_size);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(keeps_size, 1, DataType::U32);
         ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != keeps->info()->dimension(0));
         ARM_COMPUTE_ERROR_ON(num_classes != keeps_size->info()->dimension(0));
     }
