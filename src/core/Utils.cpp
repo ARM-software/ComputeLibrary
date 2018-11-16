@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -395,7 +395,7 @@ const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsig
     return std::make_pair(w, h);
 }
 
-#ifdef ARM_COMPUTE_DEBUG_ENABLED
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {
     switch(dt)
@@ -456,4 +456,4 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
     }
     return 0;
 }
-#endif /* ARM_COMPUTE_DEBUG_ENABLED */
+#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
