@@ -50,7 +50,10 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
     const int img_h = floor(info.img_height() / info.scale() + 0.5f);
     const int img_w = floor(info.img_width() / info.scale() + 0.5f);
 
-    const T scale = (info.apply_scale() ? T(info.scale()) : T(1));
+    const auto scale_after  = (info.apply_scale() ? T(info.scale()) : T(1));
+    const auto scale_before = T(info.scale());
+    ARM_COMPUTE_ERROR_ON(scale_before <= 0);
+    const auto offset = (info.correct_transform_coords() ? T(1.f) : T(0.f));
 
     const size_t box_fields   = 4;
     const size_t class_fields = 4;
@@ -59,10 +62,10 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
     {
         // Extract ROI information
         const size_t start_box = box_fields * i;
-        const T      width     = boxes[start_box + 2] - boxes[start_box] + T(1.0);
-        const T      height    = boxes[start_box + 3] - boxes[start_box + 1] + T(1.0);
-        const T      ctr_x     = boxes[start_box] + T(0.5) * width;
-        const T      ctr_y     = boxes[start_box + 1] + T(0.5) * height;
+        const T      width     = (boxes[start_box + 2] / scale_before) - (boxes[start_box] / scale_before) + T(1.f);
+        const T      height    = (boxes[start_box + 3] / scale_before) - (boxes[start_box + 1] / scale_before) + T(1.f);
+        const T      ctr_x     = (boxes[start_box] / scale_before) + T(0.5f) * width;
+        const T      ctr_y     = (boxes[start_box + 1] / scale_before) + T(0.5f) * height;
 
         for(size_t j = 0; j < num_classes; ++j)
         {
@@ -84,10 +87,10 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
             const T pred_h     = T(std::exp(dh)) * height;
 
             // Store the prediction into the output tensor
-            pred_boxes_ptr[start_delta]     = scale * utility::clamp<T>(pred_ctr_x - T(0.5) * pred_w, T(0), T(img_w - 1));
-            pred_boxes_ptr[start_delta + 1] = scale * utility::clamp<T>(pred_ctr_y - T(0.5) * pred_h, T(0), T(img_h - 1));
-            pred_boxes_ptr[start_delta + 2] = scale * utility::clamp<T>(pred_ctr_x + T(0.5) * pred_w, T(0), T(img_w - 1));
-            pred_boxes_ptr[start_delta + 3] = scale * utility::clamp<T>(pred_ctr_y + T(0.5) * pred_h, T(0), T(img_h - 1));
+            pred_boxes_ptr[start_delta]     = scale_after * utility::clamp<T>(pred_ctr_x - T(0.5f) * pred_w, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 1] = scale_after * utility::clamp<T>(pred_ctr_y - T(0.5f) * pred_h, T(0), T(img_h - 1));
+            pred_boxes_ptr[start_delta + 2] = scale_after * utility::clamp<T>(pred_ctr_x + T(0.5f) * pred_w - offset, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 3] = scale_after * utility::clamp<T>(pred_ctr_y + T(0.5f) * pred_h - offset, T(0), T(img_h - 1));
         }
     }
     return pred_boxes;

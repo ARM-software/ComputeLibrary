@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS) // Check for compile time constants
+#if defined(DATA_TYPE) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS) && defined(SCALE_BEFORE) // Check for compile time constants
 
 /** Perform a padded copy of input tensor to the output tensor. Padding values are defined at compile time
  *
@@ -74,10 +74,12 @@ __kernel void bounding_box_transform(
     const DATA_TYPE halfone = (DATA_TYPE)0.5f;
 
     const int py = get_global_id(1); // box
+    const VEC_DATA_TYPE(DATA_TYPE, 4)
+    scale_before = (VEC_DATA_TYPE(DATA_TYPE, 4))SCALE_BEFORE;
     VEC_DATA_TYPE(DATA_TYPE, 4)
     delta = vload4(0, (__global DATA_TYPE *)deltas.ptr);
     const VEC_DATA_TYPE(DATA_TYPE, 4)
-    box = vload4(0, (__global DATA_TYPE *)vector_offset(&boxes, BOX_FIELDS * py));
+    box = vload4(0, (__global DATA_TYPE *)vector_offset(&boxes, BOX_FIELDS * py)) / scale_before;
 
     // Calculate width and centers of the old boxes
     const VEC_DATA_TYPE(DATA_TYPE, 2)
@@ -106,13 +108,16 @@ __kernel void bounding_box_transform(
     // Calculate the coordinates of the new boxes
     VEC_DATA_TYPE(DATA_TYPE, 4)
     pred_box = pred_ctr.s0101 + sign * halfone * pred_dims.s0101;
+#ifdef OFFSET // Possibly adjust the predicted boxes
+    pred_box.s23 -= one;
+#endif // Possibly adjust the predicted boxes
     pred_box = CLAMP(pred_box, min_values, max_values);
-#ifdef SCALE // Possibly scale the predicted boxes
-    pred_box *= (VEC_DATA_TYPE(DATA_TYPE, 4))SCALE;
+#ifdef SCALE_AFTER // Possibly scale the predicted boxes
+    pred_box *= (VEC_DATA_TYPE(DATA_TYPE, 4))SCALE_AFTER;
 #endif // Possibly scale the predicted boxes
 
     // Store them into the output
     vstore4(pred_box, 0, (__global DATA_TYPE *)pred_boxes.ptr);
 }
 
-#endif // defined(DATA_TYPE) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS)
+#endif // defined(DATA_TYPE) && defined(WEIGHT_X) && defined(WEIGHT_Y) && defined(WEIGHT_W) && defined(WEIGHT_H) && defined(IMG_WIDTH) && defined(IMG_HEIGHT) && defined(BOX_FIELDS) && defined(SCALE_BEFORE)

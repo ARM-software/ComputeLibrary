@@ -50,7 +50,8 @@ const auto BboxInfoDataset = framework::dataset::make("BboxInfo", { BoundingBoxT
                                                                     BoundingBoxTransformInfo(128U, 128U, 4U, true),
                                                                     BoundingBoxTransformInfo(800U, 600U, 1U, false),
                                                                     BoundingBoxTransformInfo(800U, 600U, 2U, true, { 1.0, 0.5, 1.5, 2.0 }),
-                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 })
+                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 }),
+                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 }, true)
                                                                   });
 
 const auto DeltaDataset = framework::dataset::make("DeltasShape", { TensorShape(36U, 1U),
@@ -74,22 +75,26 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(5U, 128U), 1, DataType::F32), // Wrong number of box fields
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F16), // Wrong data type
                                                        TensorInfo(TensorShape(4U, 128U), 1, DataType::F32), // Wrong number of classes
-                                                       TensorInfo(TensorShape(4U, 128U), 1, DataType::F32)}),  // Deltas and predicted boxes have different dimensions
+                                                       TensorInfo(TensorShape(4U, 128U), 1, DataType::F32),  // Deltas and predicted boxes have different dimensions
+                                                       TensorInfo(TensorShape(4U, 128U), 1, DataType::F32)}),  // Scaling is zero
                framework::dataset::make("PredBoxesInfo",{ TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                           TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
-                                                          TensorInfo(TensorShape(128U, 100U), 1, DataType::F32)})),
+                                                          TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
                framework::dataset::make("DeltasInfo", { TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(127U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 100U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(128U, 128U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(128U, 128U), 1, DataType::F32)})),
                framework::dataset::make("BoundingBoxTransofmInfo", { BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
                                                                      BoundingBoxTransformInfo(800.f, 600.f, 1.f),
-                                                                     BoundingBoxTransformInfo(800.f, 600.f, 1.f)})),
-               framework::dataset::make("Expected", { true, false, false, false, false })),
+                                                                     BoundingBoxTransformInfo(800.f, 600.f, 1.f),
+                                                                     BoundingBoxTransformInfo(800.f, 600.f, 0.f)})),
+               framework::dataset::make("Expected", { true, false, false, false, false, false})),
                boxes_info, pred_boxes_info, deltas_info, bbox_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLBoundingBoxTransform::validate(&boxes_info.clone()->set_is_resizable(true), &pred_boxes_info.clone()->set_is_resizable(true), &deltas_info.clone()->set_is_resizable(true), bbox_info)) == expected, framework::LogLevel::ERRORS);

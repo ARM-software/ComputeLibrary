@@ -1209,21 +1209,24 @@ private:
 };
 
 /** Bounding Box Transform information class */
-class BoundingBoxTransformInfo
+class BoundingBoxTransformInfo final
 {
 public:
     /** Constructor
      *
-     * @param[in] img_width       Width of the original image
-     * @param[in] img_height      Height, of the original image
-     * @param[in] scale           Scale of the original image
-     * @param[in] apply_scale     (Optional)Re-apply scaling after transforming the boxes. Defaults to false
-     * @param[in] weights         (Optional)Weights [wx, wy, ww, wh] for the deltas. Defaults to all ones
-     * @param[in] bbox_xform_clip (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
+     * @param[in] img_width                Width of the original image
+     * @param[in] img_height               Height, of the original image
+     * @param[in] scale                    Scale of the original image
+     * @param[in] apply_scale              (Optional)Re-apply scaling after transforming the boxes. Defaults to false
+     * @param[in] weights                  (Optional)Weights [wx, wy, ww, wh] for the deltas. Defaults to all ones
+     * @param[in] correct_transform_coords (Optional)Correct bounding box transform coordinates. Defaults to false
+     * @param[in] bbox_xform_clip          (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
      */
-    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { { 1.f, 1.f, 1.f, 1.f } }, float bbox_xform_clip =
-    4.135166556742356f)
-        : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
+    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { { 1.f, 1.f, 1.f, 1.f } }, bool correct_transform_coords =
+    false,
+    float bbox_xform_clip =
+        4.135166556742356f)
+        : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _correct_transform_coords(correct_transform_coords), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
     {
     }
 
@@ -1257,11 +1260,17 @@ public:
         return _apply_scale;
     }
 
+    bool correct_transform_coords() const
+    {
+        return _correct_transform_coords;
+    }
+
 private:
     float _img_width;
     float _img_height;
     float _scale;
     bool  _apply_scale;
+    bool  _correct_transform_coords;
     std::array<float, 4> _weights;
     float _bbox_xform_clip;
 };
