@@ -37,7 +37,7 @@ class CLScaleKernel : public ICLSimple2DKernel
 public:
     /** Initialise the kernel's inputs, output and interpolation policy
      *
-     * @param[in]  input           Source tensor. Data types supported: U8/S16/F16/F32
+     * @param[in]  input           Source tensor. Data types supported: U8/QASYMM8/S16/F16/F32
      * @param[out] output          Destination tensor. Data types supported: Same as @p input
      *                             All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  policy          Interpolation type to use
@@ -48,7 +48,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLScaleKernel
      *
-     * @param[in] input           Source tensor info. Data types supported: U8/S16/F16/F32
+     * @param[in] input           Source tensor info. Data types supported: U8/QASYMM8/S16/F16/F32
      * @param[in] output          Destination tensor info. Data types supported: Same as @p input
      *                            All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in] policy          Interpolation type to use

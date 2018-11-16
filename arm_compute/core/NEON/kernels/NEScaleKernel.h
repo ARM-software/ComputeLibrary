@@ -56,7 +56,7 @@ public:
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      *
-     * @param[in]  input           Source tensor. Data types supported: U8/S16/F32.
+     * @param[in]  input           Source tensor. Data types supported: U8/S16/F16/F32.
      * @param[in]  dx              Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
      * @param[in]  dy              Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
      * @param[in]  offsets         Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
@@ -71,7 +71,7 @@ public:
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      *
-     * @param[in] input           Source tensor. Data types supported: U8/S16/F32.
+     * @param[in] input           Source tensor. Data types supported: U8/S16/F16/F32.
      * @param[in] dx              Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
      * @param[in] dy              Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
      * @param[in] offsets         Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.

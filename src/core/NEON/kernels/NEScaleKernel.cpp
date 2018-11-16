@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -46,7 +47,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
                           const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
                           BorderMode border_mode, SamplingPolicy sampling_policy)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
@@ -463,6 +465,48 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             in, offsets, out);
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            float16x8x2_t tmp =
+            {
+                {
+                    vdupq_n_f16(0),
+                    vdupq_n_f16(0)
+                }
+            };
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+
+                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int offset_row = in_yi * input_stride;
+
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[2] + offset_row), tmp.val[0], 1);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[4] + offset_row), tmp.val[0], 2);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[6] + offset_row), tmp.val[0], 3);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[8] + offset_row), tmp.val[0], 4);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[10] + offset_row), tmp.val[0], 5);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[12] + offset_row), tmp.val[0], 6);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[14] + offset_row), tmp.val[0], 7);
+
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[1] + offset_row), tmp.val[1], 0);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[3] + offset_row), tmp.val[1], 1);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[5] + offset_row), tmp.val[1], 2);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[7] + offset_row), tmp.val[1], 3);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[9] + offset_row), tmp.val[1], 4);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[11] + offset_row), tmp.val[1], 5);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[13] + offset_row), tmp.val[1], 6);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[15] + offset_row), tmp.val[1], 7);
+
+                vst2q_f16(reinterpret_cast<__fp16 *>(out.ptr()), tmp);
+            },
+            in, offsets, out);
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             float32x4x4_t tmp =
@@ -515,7 +559,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
 
 void NEScaleKernel::scale_bilinear_nchw(const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
 
     // Compute the ratio between source height and destination height
     const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
@@ -626,6 +670,50 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
             in, offsets, dx, dy, out);
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
+                const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
+
+                const int in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+                const int offset_row = in_yi * in_stide_in_bytes;
+
+                float16x8x2_t tmp =
+                {
+                    {
+                        vdupq_n_f16(0),
+                        vdupq_n_f16(0)
+                    }
+                };
+
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), in_stride, dx_ptr[0], dy_ptr[0]), tmp.val[0], 0);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[2] + offset_row), in_stride, dx_ptr[2], dy_ptr[2]), tmp.val[0], 1);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[4] + offset_row), in_stride, dx_ptr[4], dy_ptr[4]), tmp.val[0], 2);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[6] + offset_row), in_stride, dx_ptr[6], dy_ptr[6]), tmp.val[0], 3);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[8] + offset_row), in_stride, dx_ptr[8], dy_ptr[8]), tmp.val[0], 4);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[10] + offset_row), in_stride, dx_ptr[10], dy_ptr[10]), tmp.val[0], 5);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[12] + offset_row), in_stride, dx_ptr[12], dy_ptr[12]), tmp.val[0], 6);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[14] + offset_row), in_stride, dx_ptr[14], dy_ptr[14]), tmp.val[0], 7);
+
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[1] + offset_row), in_stride, dx_ptr[1], dy_ptr[1]), tmp.val[1], 0);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[3] + offset_row), in_stride, dx_ptr[3], dy_ptr[3]), tmp.val[1], 1);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[5] + offset_row), in_stride, dx_ptr[5], dy_ptr[5]), tmp.val[1], 2);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[7] + offset_row), in_stride, dx_ptr[7], dy_ptr[7]), tmp.val[1], 3);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[9] + offset_row), in_stride, dx_ptr[9], dy_ptr[9]), tmp.val[1], 4);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[11] + offset_row), in_stride, dx_ptr[11], dy_ptr[11]), tmp.val[1], 5);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[13] + offset_row), in_stride, dx_ptr[13], dy_ptr[13]), tmp.val[1], 6);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[15] + offset_row), in_stride, dx_ptr[15], dy_ptr[15]), tmp.val[1], 7);
+
+                vst2q_f16(reinterpret_cast<__fp16 *>(out.ptr()), tmp);
+            },
+            in, offsets, dx, dy, out);
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -777,6 +865,22 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+            {
+                scale_nearest_nhwc_core<float16_t>(_input, _offsets, _output, hr,
+                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c);
+            }
+            else
+            {
+                scale_bilinear_nhwc_core<float16_t>(_input, _offsets, _dx, _dy, _output, hr,
+                                                    window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+            }
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
