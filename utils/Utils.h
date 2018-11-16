@@ -181,6 +181,8 @@ inline std::string get_typestring(DataType data_type)
             return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
         case DataType::S64:
             return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F16:
+            return endianness + "f" + support::cpp11::to_string(sizeof(half));
         case DataType::F32:
             return endianness + "f" + support::cpp11::to_string(sizeof(float));
         case DataType::F64:
@@ -274,6 +276,43 @@ inline void unmap(GCTensor &tensor)
     tensor.unmap();
 }
 #endif /* ARM_COMPUTE_GC */
+
+/** Specialized class to generate random non-zero FP16 values.
+ *  uniform_real_distribution<half> generates values that get rounded off to zero, causing
+ *  differences between ACL and reference implementation
+*/
+class uniform_real_distribution_fp16
+{
+    half                                   min{ 0.0f }, max{ 0.0f };
+    std::uniform_real_distribution<float>  neg{ min, -0.3f };
+    std::uniform_real_distribution<float>  pos{ 0.3f, max };
+    std::uniform_int_distribution<uint8_t> sign_picker{ 0, 1 };
+
+public:
+    using result_type = half;
+    /** Constructor
+     *
+     * @param[in] a Minimum value of the distribution
+     * @param[in] b Maximum value of the distribution
+     */
+    explicit uniform_real_distribution_fp16(half a = half(0.0), half b = half(1.0))
+        : min(a), max(b)
+    {
+    }
+
+    /** () operator to generate next value
+     *
+     * @param[in] gen an uniform random bit generator object
+     */
+    half operator()(std::mt19937 &gen)
+    {
+        if(sign_picker(gen))
+        {
+            return (half)neg(gen);
+        }
+        return (half)pos(gen);
+    }
+};
 
 /** Numpy data loader */
 class NPYLoader
@@ -416,6 +455,7 @@ public:
                 case arm_compute::DataType::QASYMM8:
                 case arm_compute::DataType::S32:
                 case arm_compute::DataType::F32:
+                case arm_compute::DataType::F16:
                 {
                     // Read data
                     if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty())
@@ -699,6 +739,18 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
 
     switch(tensor.info()->data_type())
     {
+        case arm_compute::DataType::F16:
+        {
+            std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                *reinterpret_cast<half *>(it.ptr()) = (half)dist(gen);
+            },
+            it);
+
+            break;
+        }
         case arm_compute::DataType::F32:
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);

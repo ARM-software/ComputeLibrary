@@ -155,7 +155,8 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     // Configure and tune matrix multiply kernel
     _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
                                                                                                         mult_transpose1xW_width, mult_interleave4x4_height,
-                                                                                                        depth_output_gemm3d, reinterpret_input_as_3d));
+                                                                                                        depth_output_gemm3d, reinterpret_input_as_3d),
+                         gemm_info.fp_mixed_precision());
     CLScheduler::get().tune_kernel_static(_mm_kernel);
 
     if(_is_interleaved_transposed)
@@ -236,7 +237,7 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Validate matrix multiply
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target, gemm_info.fp_mixed_precision()));
 
     if(beta != 0 && c != nullptr)
     {

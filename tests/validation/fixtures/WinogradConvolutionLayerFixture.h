@@ -39,6 +39,7 @@
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 #include "tests/validation/reference/Winograd.h"
+#include "utils/Utils.h"
 
 #include <random>
 
@@ -156,7 +157,7 @@ protected:
     SimpleTensor<T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool use_bias = true>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename T1 = T, bool use_bias = true>
 class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixture
 {
 public:
@@ -177,6 +178,11 @@ protected:
         switch(tensor.data_type())
         {
             case DataType::F16:
+            {
+                arm_compute::utils::uniform_real_distribution_fp16 distribution((half)min, (half)max);
+                library->fill(tensor, distribution, i);
+                break;
+            }
             case DataType::F32:
             {
                 std::uniform_real_distribution<> distribution(min, max);
@@ -245,21 +251,25 @@ protected:
                                       DataType data_type, ActivationLayerInfo act_info)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1 };
-        SimpleTensor<T> weights{ weights_shape, data_type, 1 };
-        SimpleTensor<T> bias{ bias_shape, data_type, 1 };
+        SimpleTensor<T> src_t{ input_shape, data_type, 1 };
+        SimpleTensor<T> weights_t{ weights_shape, data_type, 1 };
+        SimpleTensor<T> bias_t{ bias_shape, data_type, 1 };
 
         // Fill reference
-        fill(src, 0, -1.f, 1.f);
-        fill(weights, 1, -1.f, 1.f);
+        fill(src_t, 0, -1.f, 1.f);
+        SimpleTensor<T1> src_t1(copy_tensor<T1, T>(src_t));
+
+        fill(weights_t, 1, -1.f, 1.f);
+        SimpleTensor<T1> weights_t1(copy_tensor<T1, T>(weights_t));
         if(use_bias)
         {
-            fill(bias, 2, -1.f, 1.f);
+            fill(bias_t, 2, -1.f, 1.f);
         }
         else
         {
-            fill(bias, 2, 0.f, 0.f);
+            fill(bias_t, 2, 0.f, 0.f);
         }
+        SimpleTensor<T1> bias_t1(copy_tensor<T1, T>(bias_t));
 
         // Set output tile
         Size2D output_tile(4U, 4U);
@@ -286,7 +296,7 @@ protected:
                                    Size2D(weights_shape[0], weights_shape[1]),
                                    Size2D(input_shape[0], input_shape[1]),
                                    info,
-                                   src.data_layout());
+                                   src_t1.data_layout());
 
         // Compute tensor shapes for input, filter and output transforms
         TensorShape input_transform_shape  = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
@@ -296,15 +306,16 @@ protected:
         TensorShape output_transform_shape = compute_winograd_output_transform_shape(TensorInfo(batched_gemm_shape, 1, data_type), winograd_info);
 
         // Dummy matrix C to perform matrix multiplication
-        SimpleTensor<T> dummy_c{ batched_gemm_shape, data_type, 1 };
+        SimpleTensor<T1> dummy_c{ batched_gemm_shape, data_type, 1 };
 
         // Compute Winograd-based convolution
-        SimpleTensor<T> input_transform_out  = reference::winograd_input_transform<T>(src, input_transform_shape, winograd_info);
-        SimpleTensor<T> filter_transform_out = reference::winograd_filter_transform<T>(weights, filter_transform_shape, winograd_info);
-        SimpleTensor<T> batched_gemm         = reference::gemm<T>(input_transform_out, filter_transform_out, dummy_c, 1.0f, 0.0f);
-        SimpleTensor<T> conv_out             = reference::winograd_output_transform<T>(batched_gemm, bias, output_transform_shape, winograd_info);
+        SimpleTensor<T1> input_transform_out = reference::winograd_input_transform<T1>(src_t1, input_transform_shape, winograd_info);
 
-        return (act_info.enabled()) ? reference::activation_layer<T>(conv_out, act_info) : conv_out;
+        SimpleTensor<T1> filter_transform_out = reference::winograd_filter_transform<T1>(weights_t1, filter_transform_shape, winograd_info);
+        SimpleTensor<T1> batched_gemm         = reference::gemm<T1>(input_transform_out, filter_transform_out, dummy_c, 1.0f, 0.0f);
+        SimpleTensor<T1> conv_out             = reference::winograd_output_transform<T1>(batched_gemm, bias_t1, output_transform_shape, winograd_info);
+        SimpleTensor<T>  conv_out_t(std::move(copy_tensor<T, T1>(conv_out)));
+        return (act_info.enabled()) ? reference::activation_layer<T>(conv_out_t, act_info) : conv_out_t;
     }
 
     TensorType      _target{};

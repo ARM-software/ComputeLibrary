@@ -1593,7 +1593,8 @@ class GEMMInfo
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false), _gemmlowp_output_stage()
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false),
+          _gemmlowp_output_stage(), _fp_mixed_precision(false)
     {
     }
     /** Constructor
@@ -1607,12 +1608,13 @@ public:
      *                                        to perform 1x1 convolutions with the NHWC data layout)
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
+     * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      *
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo())
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false)
         : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage)
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage), _fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1673,6 +1675,14 @@ public:
     {
         return _gemmlowp_output_stage;
     };
+    /** Flag which specifies if a wider accumulator should be used.
+     *
+     * @return True if a wider accumulator has to be used
+     */
+    bool fp_mixed_precision() const
+    {
+        return _fp_mixed_precision;
+    };
 
 private:
     const bool                    _is_a_reshaped;
@@ -1682,6 +1692,7 @@ private:
     const bool                    _reinterpret_input_as_3d;
     const bool                    _retain_internal_weights;
     const GEMMLowpOutputStageInfo _gemmlowp_output_stage;
+    const bool                    _fp_mixed_precision;
 };
 
 /** Winograd information */

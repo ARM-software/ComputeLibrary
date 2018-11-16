@@ -58,6 +58,9 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
 const AbsoluteTolerance<half> tolerance_f16(half(0.5f));
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
+RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for FP16 data types */
+constexpr float                     tolerance_num   = 0.05f;  /**< Tolerance number */
+constexpr float                     abs_tolerance_convolution_layer_f16   = 2.5f;  /**< Tolerance number */
 
 // Input transform
 const auto SmallWinogradInputTransformDatasetNCHW =
@@ -834,10 +837,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
 TEST_SUITE_END() // Conv1x5
 TEST_SUITE_END() // FP32
 
-#ifdef WINOGRAD_F16_SUPPORT //to be reintroduced after COMPMID-1266 is resolved
+
 TEST_SUITE(FP16)
 
-using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, half>;
+using CLWinogradConvolutionLayerFastMathFixture16 = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, half, float>;
 TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
@@ -856,7 +859,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv3x3
 
@@ -878,7 +881,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv3x1
 
@@ -900,7 +903,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv1x3
 
@@ -924,7 +927,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv5x5
 
@@ -948,7 +951,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv5x1
 
@@ -972,12 +975,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture16, fr
 
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_convolution_layer_f16);
 }
 TEST_SUITE_END() // Conv1x5
 
 TEST_SUITE_END() // FP16
-#endif /*#ifdef WINOGRAD_F16_SUPPORT*/
+
 TEST_SUITE_END() // ConvolutionLayer
 TEST_SUITE_END() // Winograd
 TEST_SUITE_END() // CL

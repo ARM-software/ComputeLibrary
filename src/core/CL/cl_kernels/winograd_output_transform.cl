@@ -83,8 +83,8 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     // out00 = d00 + d01 + d02
     // out01 = d01 - d02 - d03
 
-    DATA_TYPE out00 = d00 + d01 + d02;
-    DATA_TYPE out01 = d01 - d02 - d03;
+    float out00 = d00 + d01 + d02;
+    float out01 = d01 - d02 - d03;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     DATA_TYPE d10 = *((__global DATA_TYPE *)(src_addr + 4 * src_stride_z));
     DATA_TYPE d11 = *((__global DATA_TYPE *)(src_addr + 5 * src_stride_z));
@@ -102,20 +102,20 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     DATA_TYPE d33 = *((__global DATA_TYPE *)(src_addr + 15 * src_stride_z));
 
     // Compute the 2x2 output tile
-    DATA_TYPE k0 = d01 + d11 + d21;
-    DATA_TYPE k1 = d02 + d12 + d22;
-    DATA_TYPE k2 = d11 - d21 - d31;
-    DATA_TYPE k3 = d12 - d22 - d32;
+    float k0 = d01 + d11 + d21;
+    float k1 = d02 + d12 + d22;
+    float k2 = d11 - d21 - d31;
+    float k3 = d12 - d22 - d32;
 
     // out00 = d00 + d10 + d20 + d01 + d11 + d21 + d02 + d12 + d22
     // out01 = d01 + d11 + d21 - (d02 + d12 + d22) - (d03 + d13 + d23)
     // out10 = d10 - d20 - d30 + (d11 - d21 - d31) + (d12 - d22 - d32)
     // out11 = d11 - d21 - d31 - (d12 - d22 - d32) - (d13 - d23 - d33)
 
-    DATA_TYPE out00 = d10;
-    DATA_TYPE out01 = -d13;
-    DATA_TYPE out10 = d10;
-    DATA_TYPE out11 = -d13;
+    float out00 = d10;
+    float out01 = -d13;
+    float out10 = d10;
+    float out11 = -d13;
 
     out00 += d00 + d20 + k0 + k1;
     out01 += k0 - k1 - (d03 + d23);
@@ -135,10 +135,10 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
 
-    out00 += (DATA_TYPE)b;
-    out01 += (DATA_TYPE)b;
+    out00 += (float)b;
+    out01 += (float)b;
 #endif // defined(HAS_BIAS)
 
     // Get output address
@@ -150,8 +150,8 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out00;
-    *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out01;
+    *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = (DATA_TYPE)out00;
+    *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = (DATA_TYPE)out01;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))(out00, out01), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -163,7 +163,7 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     out11 += (DATA_TYPE)b;
 #endif // defined(HAS_BIAS)
 
-    vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))(out10, out11), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    vstore2((VEC_DATA_TYPE(DATA_TYPE, 2))((DATA_TYPE)out10, (DATA_TYPE)out11), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
@@ -225,10 +225,10 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d00 + d01 + d02 + d03 + d04;
-    DATA_TYPE out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04;
-    DATA_TYPE out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04;
-    DATA_TYPE out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05;
+    float out00 = d00 + d01 + d02 + d03 + d04;
+    float out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04;
+    float out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04;
+    float out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     DATA_TYPE d10 = *((__global DATA_TYPE *)(src_addr + 6 * src_stride_z));
     DATA_TYPE d11 = *((__global DATA_TYPE *)(src_addr + 7 * src_stride_z));
@@ -266,13 +266,13 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     DATA_TYPE d55 = *((__global DATA_TYPE *)(src_addr + 35 * src_stride_z));
 
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out01 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out02 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out03 = d01 + d21 + d41 + d11 + d31;
+    float out00 = (float)d01 + (float)d21 + (float)d41 + (float)d11 + (float)d31;
+    float out01 = (float)d01 + (float)d21 + (float)d41 + (float)d11 + (float)d31;
+    float out02 = (float)d01 + (float)d21 + (float)d41 + (float)d11 + (float)d31;
+    float out03 = (float)d01 + d21 + (float)d41 + (float)d11 + (float)d31;
 
-    DATA_TYPE k0 = d03 + d04 + d13 + d14 + d23 + d24 + d33 + d34 + d43 + d44;
-    DATA_TYPE k1 = 2.0f * d03 - 2.0f * d04 + 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 2.0f * d33 - 2.0f * d34 + 2.0f * d43 - 2.0f * d44;
+    float k0 = d03 + d04 + d13 + d14 + d23 + d24 + d33 + d34 + d43 + d44;
+    float k1 = 2.0f * d03 - 2.0f * d04 + 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 2.0f * d33 - 2.0f * d34 + 2.0f * d43 - 2.0f * d44;
 
     out00 += k0 + d00 + d02 + d10 + d12 + d20 + d22 + d30 + d32 + d40 + d42;
     out01 += k1 - d02 - d12 - d22 - d32 - d42;
@@ -280,10 +280,10 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     out03 += 4.0f * k1 - d02 - d12 - d22 - d32 - d42 + d05 + d15 + d25 + d35 + d45;
 
     // Compute out10, out11, out12 and out13
-    DATA_TYPE out10 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out11 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out12 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out13 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out10 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out11 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out12 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out13 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
 
     k0 = d13 + d14 - d23 - d24 + 2.0f * d33 + 2.0f * d34 - 2.0f * d43 - 2.0f * d44;
     k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 4.0f * d33 - 4.0f * d34 - 4.0f * d43 + 4.0f * d44;
@@ -294,10 +294,10 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     out13 += 4.0f * k1 - d12 + d15 + d22 - d25 - 2.0f * d32 + 2.0f * d35 + 2.0f * d42 - 2.0f * d45;
 
     // Compute out20, out21, out22 and out23
-    DATA_TYPE out20 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out21 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out22 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out23 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out20 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out21 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out22 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out23 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
 
     k0 = d13 + d14 + d23 + d24 + 4.0f * d33 + 4.0f * d34 + 4.0f * d43 + 4.0f * d44;
     k1 = 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 8.0f * d33 - 8.0f * d34 + 8.0f * d43 - 8.0f * d44;
@@ -308,10 +308,10 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     out23 += 4.0f * k1 - d12 + d15 - d22 + d25 - 4.0f * d32 + 4.0f * d35 - 4.0f * d42 + 4.0f * d45;
 
     // Compute out30, out31, out32 and out33
-    DATA_TYPE out30 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out31 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out32 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out33 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out30 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out31 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out32 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out33 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
 
     k0 = d13 + d14 - d23 - d24 + 8.0f * d33 + 8.0f * d34 - 8.0f * d43 - 8.0f * d44 + d53 + d54;
     k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 16.0f * d33 - 16.0f * d34 - 16.0f * d43 + 16.0f * d44 + 2.0f * d53 - 2.0f * d54;
@@ -334,12 +334,12 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
 
-    out00 += (DATA_TYPE)b;
-    out01 += (DATA_TYPE)b;
-    out02 += (DATA_TYPE)b;
-    out03 += (DATA_TYPE)b;
+    out00 += (float)b;
+    out01 += (float)b;
+    out02 += (float)b;
+    out03 += (float)b;
 #endif // defined(HAS_BIAS)
 
     // Get output address
@@ -351,35 +351,35 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
 
     // Store the output tile
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = out00;
-    *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = out01;
-    *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = out02;
-    *((__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y)) = out03;
+    *((__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y)) = (DATA_TYPE)out00;
+    *((__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y)) = (DATA_TYPE)out01;
+    *((__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y)) = (DATA_TYPE)out02;
+    *((__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y)) = (DATA_TYPE)out03;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out00, out01, out02, out03), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out00, (DATA_TYPE)out01, (DATA_TYPE)out02, (DATA_TYPE)out03), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #if !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 #if defined(HAS_BIAS)
     // Add bias
-    out10 += (DATA_TYPE)b;
-    out11 += (DATA_TYPE)b;
-    out12 += (DATA_TYPE)b;
-    out13 += (DATA_TYPE)b;
+    out10 += (float)b;
+    out11 += (float)b;
+    out12 += (float)b;
+    out13 += (float)b;
 
-    out20 += (DATA_TYPE)b;
-    out21 += (DATA_TYPE)b;
-    out22 += (DATA_TYPE)b;
-    out23 += (DATA_TYPE)b;
+    out20 += (float)b;
+    out21 += (float)b;
+    out22 += (float)b;
+    out23 += (float)b;
 
-    out30 += (DATA_TYPE)b;
-    out31 += (DATA_TYPE)b;
-    out32 += (DATA_TYPE)b;
-    out33 += (DATA_TYPE)b;
+    out30 += (float)b;
+    out31 += (float)b;
+    out32 += (float)b;
+    out33 += (float)b;
 #endif // defined(HAS_BIAS)
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out10, out11, out12, out13), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out20, out21, out22, out23), 0, (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out30, out31, out32, out33), 0, (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out10, (DATA_TYPE)out11, (DATA_TYPE)out12, (DATA_TYPE)out13), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out20, (DATA_TYPE)out21, (DATA_TYPE)out22, (DATA_TYPE)out23), 0, (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out30, (DATA_TYPE)out31, (DATA_TYPE)out32, (DATA_TYPE)out33), 0, (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
@@ -441,10 +441,10 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d00 + d01 + d02 + d03 + d04;
-    DATA_TYPE out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04;
-    DATA_TYPE out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04;
-    DATA_TYPE out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05;
+    float out00 = d00 + d01 + d02 + d03 + d04;
+    float out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04;
+    float out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04;
+    float out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
     DATA_TYPE d10 = *((__global DATA_TYPE *)(src_addr + 6 * src_stride_z));
@@ -483,13 +483,13 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     DATA_TYPE d55 = *((__global DATA_TYPE *)(src_addr + 35 * src_stride_z));
 
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out01 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out02 = d01 + d21 + d41 + d11 + d31;
-    DATA_TYPE out03 = d01 + d21 + d41 + d11 + d31;
+    float out00 = d01 + d21 + d41 + d11 + d31;
+    float out01 = d01 + d21 + d41 + d11 + d31;
+    float out02 = d01 + d21 + d41 + d11 + d31;
+    float out03 = d01 + d21 + d41 + d11 + d31;
 
-    DATA_TYPE k0 = d03 + d04 + d13 + d14 + d23 + d24 + d33 + d34 + d43 + d44;
-    DATA_TYPE k1 = 2.0f * d03 - 2.0f * d04 + 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 2.0f * d33 - 2.0f * d34 + 2.0f * d43 - 2.0f * d44;
+    float k0 = d03 + d04 + d13 + d14 + d23 + d24 + d33 + d34 + d43 + d44;
+    float k1 = 2.0f * d03 - 2.0f * d04 + 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 2.0f * d33 - 2.0f * d34 + 2.0f * d43 - 2.0f * d44;
 
     out00 += k0 + d00 + d02 + d10 + d12 + d20 + d22 + d30 + d32 + d40 + d42;
     out01 += k1 - d02 - d12 - d22 - d32 - d42;
@@ -497,10 +497,10 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     out03 += 4.0f * k1 - d02 - d12 - d22 - d32 - d42 + d05 + d15 + d25 + d35 + d45;
 
     // Compute out10, out11, out12 and out13
-    DATA_TYPE out10 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out11 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out12 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
-    DATA_TYPE out13 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out10 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out11 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out12 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
+    float out13 = d11 - d21 + 2.0f * d31 - 2.0f * d41;
 
     k0 = d13 + d14 - d23 - d24 + 2.0f * d33 + 2.0f * d34 - 2.0f * d43 - 2.0f * d44;
     k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 4.0f * d33 - 4.0f * d34 - 4.0f * d43 + 4.0f * d44;
@@ -511,10 +511,10 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     out13 += 4.0f * k1 - d12 + d15 + d22 - d25 - 2.0f * d32 + 2.0f * d35 + 2.0f * d42 - 2.0f * d45;
 
     // Compute out20, out21, out22 and out23
-    DATA_TYPE out20 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out21 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out22 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
-    DATA_TYPE out23 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out20 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out21 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out22 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
+    float out23 = d11 + d21 + 4.0f * d31 + 4.0f * d41;
 
     k0 = d13 + d14 + d23 + d24 + 4.0f * d33 + 4.0f * d34 + 4.0f * d43 + 4.0f * d44;
     k1 = 2.0f * d13 - 2.0f * d14 + 2.0f * d23 - 2.0f * d24 + 8.0f * d33 - 8.0f * d34 + 8.0f * d43 - 8.0f * d44;
@@ -525,10 +525,10 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     out23 += 4.0f * k1 - d12 + d15 - d22 + d25 - 4.0f * d32 + 4.0f * d35 - 4.0f * d42 + 4.0f * d45;
 
     // Compute out30, out31, out32 and out33
-    DATA_TYPE out30 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out31 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out32 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
-    DATA_TYPE out33 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out30 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out31 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out32 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
+    float out33 = d11 - d21 + 8.0f * d31 - 8.0f * d41 + d51;
 
     k0 = d13 + d14 - d23 - d24 + 8.0f * d33 + 8.0f * d34 - 8.0f * d43 - 8.0f * d44 + d53 + d54;
     k1 = 2.0f * d13 - 2.0f * d14 - 2.0f * d23 + 2.0f * d24 + 16.0f * d33 - 16.0f * d34 - 16.0f * d43 + 16.0f * d44 + 2.0f * d53 - 2.0f * d54;
@@ -585,19 +585,19 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
     // Store the 1x4 output tile
-    *((__global DATA_TYPE *)(dst_ptr + offset.s0)) = out00;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s1)) = out01;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s2)) = out02;
-    *((__global DATA_TYPE *)(dst_ptr + offset.s3)) = out03;
+    *((__global DATA_TYPE *)(dst_ptr + offset.s0)) = (DATA_TYPE)out00;
+    *((__global DATA_TYPE *)(dst_ptr + offset.s1)) = (DATA_TYPE)out01;
+    *((__global DATA_TYPE *)(dst_ptr + offset.s2)) = (DATA_TYPE)out02;
+    *((__global DATA_TYPE *)(dst_ptr + offset.s3)) = (DATA_TYPE)out03;
 #elif defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Store the 4x1 output tile
     int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
     int mult_y = min(dst_size - offset, 1);
 
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 0 * dst_stride_y + offset)) = out00;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 1 * dst_stride_y + offset)) = out01;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 2 * dst_stride_y + offset)) = out02;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = out03;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y * 0 * dst_stride_y + offset)) = (DATA_TYPE)out00;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y * 1 * dst_stride_y + offset)) = (DATA_TYPE)out01;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y * 2 * dst_stride_y + offset)) = (DATA_TYPE)out02;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = (DATA_TYPE)out03;
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Get output address
 #if defined(SRC_DEPTH)
@@ -609,22 +609,22 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
     // Store the 4x4 output tile
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s0)) = out00;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0)) = out01;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s0)) = out02;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s0)) = out03;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * dst_stride_y + offset.s1)) = out10;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * dst_stride_y + offset.s1)) = out11;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * dst_stride_y + offset.s1)) = out12;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * dst_stride_y + offset.s1)) = out13;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * dst_stride_y + offset.s2)) = out20;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * dst_stride_y + offset.s2)) = out21;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * dst_stride_y + offset.s2)) = out22;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * dst_stride_y + offset.s2)) = out23;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * dst_stride_y + offset.s3)) = out30;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * dst_stride_y + offset.s3)) = out31;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * dst_stride_y + offset.s3)) = out32;
-    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * dst_stride_y + offset.s3)) = out33;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s0)) = (DATA_TYPE)out00;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0)) = (DATA_TYPE)out01;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s0)) = (DATA_TYPE)out02;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s0)) = (DATA_TYPE)out03;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * dst_stride_y + offset.s1)) = (DATA_TYPE)out10;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * dst_stride_y + offset.s1)) = (DATA_TYPE)out11;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * dst_stride_y + offset.s1)) = (DATA_TYPE)out12;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * dst_stride_y + offset.s1)) = (DATA_TYPE)out13;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * dst_stride_y + offset.s2)) = (DATA_TYPE)out20;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * dst_stride_y + offset.s2)) = (DATA_TYPE)out21;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * dst_stride_y + offset.s2)) = (DATA_TYPE)out22;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * dst_stride_y + offset.s2)) = (DATA_TYPE)out23;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * dst_stride_y + offset.s3)) = (DATA_TYPE)out30;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * dst_stride_y + offset.s3)) = (DATA_TYPE)out31;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * dst_stride_y + offset.s3)) = (DATA_TYPE)out32;
+    *((__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * dst_stride_y + offset.s3)) = (DATA_TYPE)out33;
 
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
 }
@@ -721,16 +721,16 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d00 + d01 + d02 + d03 + d04 + 8.0f * d05 + 8.0f * d06;
-    DATA_TYPE out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04 + 4.0f * d05 - 4.0f * d06;
-    DATA_TYPE out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04 + 2.0f * d05 + 2.0f * d06;
-    DATA_TYPE out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05 - d06 + d07;
+    float out00 = d00 + d01 + d02 + d03 + d04 + 8.0f * d05 + 8.0f * d06;
+    float out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04 + 4.0f * d05 - 4.0f * d06;
+    float out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04 + 2.0f * d05 + 2.0f * d06;
+    float out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05 - d06 + d07;
 
 #if defined(HAS_BIAS)
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
 
     out00 += (DATA_TYPE)b;
     out01 += (DATA_TYPE)b;
@@ -813,9 +813,9 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
     DATA_TYPE d77 = *((__global DATA_TYPE *)(src_addr + 63 * src_stride_z));
 
     // Compute the 8x4 intermediate tensor
-    VEC_DATA_TYPE(DATA_TYPE, 4)
+    VEC_DATA_TYPE(float, 4)
     comm_fact0, comm_fact1, comm_fact2;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
+    VEC_DATA_TYPE(float, 4)
     tmp_col0, tmp_col1, tmp_col2, tmp_col3, tmp_col4, tmp_col5, tmp_col6, tmp_col7;
 
     COMPUTE_TMP_COL(tmp_col0, d00, d10, d20, d30, d40, d50, d60, d70, comm_fact0);
@@ -832,37 +832,37 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
     comm_fact1 = tmp_col3 + tmp_col4;
     comm_fact2 = tmp_col5 + tmp_col6;
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col0 = comm_fact0 + comm_fact1 + (DATA_TYPE)8.f * comm_fact2 + tmp_col0;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col2 = comm_fact0 + (DATA_TYPE)4.f * comm_fact1 + (DATA_TYPE)2.f * comm_fact2;
+    VEC_DATA_TYPE(float, 4)
+    out_col0 = comm_fact0 + comm_fact1 + (float)8.f * comm_fact2 + tmp_col0;
+    VEC_DATA_TYPE(float, 4)
+    out_col2 = comm_fact0 + (float)4.f * comm_fact1 + (float)2.f * comm_fact2;
 
     comm_fact0 = tmp_col1 - tmp_col2;
     comm_fact1 = tmp_col3 - tmp_col4;
     comm_fact2 = tmp_col5 - tmp_col6;
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col1 = comm_fact0 + (DATA_TYPE)2.f * comm_fact1 + (DATA_TYPE)4.f * comm_fact2;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col3 = comm_fact0 + (DATA_TYPE)8.f * comm_fact1 + comm_fact2 + tmp_col7;
+    VEC_DATA_TYPE(float, 4)
+    out_col1 = comm_fact0 + (float)2.f * comm_fact1 + (float)4.f * comm_fact2;
+    VEC_DATA_TYPE(float, 4)
+    out_col3 = comm_fact0 + (float)8.f * comm_fact1 + comm_fact2 + tmp_col7;
 
 #if defined(HAS_BIAS)
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, z_out)));
 
-    out_col0 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col1 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col2 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col3 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
+    out_col0 += (VEC_DATA_TYPE(float, 4))b;
+    out_col1 += (VEC_DATA_TYPE(float, 4))b;
+    out_col2 += (VEC_DATA_TYPE(float, 4))b;
+    out_col3 += (VEC_DATA_TYPE(float, 4))b;
 #endif // defined(HAS_BIAS)
 
     // Store the output tile
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s0, out_col1.s0, out_col2.s0, out_col3.s0), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s1, out_col1.s1, out_col2.s1, out_col3.s1), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s2, out_col1.s2, out_col2.s2, out_col3.s2), 0, (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
-    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))(out_col0.s3, out_col1.s3, out_col2.s3, out_col3.s3), 0, (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out_col0.s0, (DATA_TYPE)out_col1.s0, (DATA_TYPE)out_col2.s0, (DATA_TYPE)out_col3.s0), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out_col0.s1, (DATA_TYPE)out_col1.s1, (DATA_TYPE)out_col2.s1, (DATA_TYPE)out_col3.s1), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out_col0.s2, (DATA_TYPE)out_col1.s2, (DATA_TYPE)out_col2.s2, (DATA_TYPE)out_col3.s2), 0, (__global DATA_TYPE *)(dst_addr + 2 * dst_stride_y));
+    vstore4((VEC_DATA_TYPE(DATA_TYPE, 4))((DATA_TYPE)out_col0.s3, (DATA_TYPE)out_col1.s3, (DATA_TYPE)out_col2.s3, (DATA_TYPE)out_col3.s3), 0, (__global DATA_TYPE *)(dst_addr + 3 * dst_stride_y));
 #endif // !defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
@@ -933,21 +933,21 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 
 #if defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Compute out00, out01, out02 and out03
-    DATA_TYPE out00 = d00 + d01 + d02 + d03 + d04 + 8.0f * d05 + 8.0f * d06;
-    DATA_TYPE out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04 + 4.0f * d05 - 4.0f * d06;
-    DATA_TYPE out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04 + 2.0f * d05 + 2.0f * d06;
-    DATA_TYPE out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05 - d06 + d07;
+    float out00 = d00 + d01 + d02 + d03 + d04 + 8.0f * d05 + 8.0f * d06;
+    float out01 = d01 - d02 + 2.0f * d03 - 2.0f * d04 + 4.0f * d05 - 4.0f * d06;
+    float out02 = d01 + d02 + 4.0f * d03 + 4.0f * d04 + 2.0f * d05 + 2.0f * d06;
+    float out03 = d01 - d02 + 8.0f * d03 - 8.0f * d04 + d05 - d06 + d07;
 
 #if defined(HAS_BIAS)
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, x_out)));
+    float b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, x_out)));
 
-    out00 += (DATA_TYPE)b;
-    out01 += (DATA_TYPE)b;
-    out02 += (DATA_TYPE)b;
-    out03 += (DATA_TYPE)b;
+    out00 += (float)b;
+    out01 += (float)b;
+    out02 += (float)b;
+    out03 += (float)b;
 #endif // defined(HAS_BIAS)
 
     // Store the output tile
@@ -960,18 +960,18 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
 #endif                                                                              /* defined(SRC_DEPTH) */
     offset = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, (int4)dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
 
-    *(__global DATA_TYPE *)(dst_ptr + offset.s0) = out00;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s1) = out01;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s2) = out02;
-    *(__global DATA_TYPE *)(dst_ptr + offset.s3) = out03;
+    *(__global DATA_TYPE *)(dst_ptr + offset.s0) = (DATA_TYPE)out00;
+    *(__global DATA_TYPE *)(dst_ptr + offset.s1) = (DATA_TYPE)out01;
+    *(__global DATA_TYPE *)(dst_ptr + offset.s2) = (DATA_TYPE)out02;
+    *(__global DATA_TYPE *)(dst_ptr + offset.s3) = (DATA_TYPE)out03;
 #else  // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
     // Get output address
     int offset = dst_offset_first_element_in_bytes + x_out * sizeof(DATA_TYPE) + y_out * dst_stride_y + z_out * dst_stride_z;
 
-    *(__global DATA_TYPE *)(dst_ptr + 0 * dst_stride_y + offset) = out00;
-    *(__global DATA_TYPE *)(dst_ptr + 1 * dst_stride_y + offset) = out01;
-    *(__global DATA_TYPE *)(dst_ptr + 2 * dst_stride_y + offset) = out02;
-    *(__global DATA_TYPE *)(dst_ptr + 3 * dst_stride_y + offset) = out03;
+    *(__global DATA_TYPE *)(dst_ptr + 0 * dst_stride_y + offset) = (DATA_TYPE)out00;
+    *(__global DATA_TYPE *)(dst_ptr + 1 * dst_stride_y + offset) = (DATA_TYPE)out01;
+    *(__global DATA_TYPE *)(dst_ptr + 2 * dst_stride_y + offset) = (DATA_TYPE)out02;
+    *(__global DATA_TYPE *)(dst_ptr + 3 * dst_stride_y + offset) = (DATA_TYPE)out03;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
@@ -1040,9 +1040,9 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     DATA_TYPE d77 = *((__global DATA_TYPE *)(src_addr + 63 * src_stride_z));
 
     // Compute the 8x4 intermediate tensor
-    VEC_DATA_TYPE(DATA_TYPE, 4)
+    VEC_DATA_TYPE(float, 4)
     comm_fact0, comm_fact1, comm_fact2;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
+    VEC_DATA_TYPE(float, 4)
     tmp_col0, tmp_col1, tmp_col2, tmp_col3, tmp_col4, tmp_col5, tmp_col6, tmp_col7;
 
     COMPUTE_TMP_COL(tmp_col0, d00, d10, d20, d30, d40, d50, d60, d70, comm_fact0);
@@ -1059,30 +1059,30 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     comm_fact1 = tmp_col3 + tmp_col4;
     comm_fact2 = tmp_col5 + tmp_col6;
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col0 = comm_fact0 + comm_fact1 + (DATA_TYPE)8.f * comm_fact2 + tmp_col0;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col2 = comm_fact0 + (DATA_TYPE)4.f * comm_fact1 + (DATA_TYPE)2.f * comm_fact2;
+    VEC_DATA_TYPE(float, 4)
+    out_col0 = comm_fact0 + comm_fact1 + 8.f * comm_fact2 + tmp_col0;
+    VEC_DATA_TYPE(float, 4)
+    out_col2 = comm_fact0 + 4.f * comm_fact1 + 2.f * comm_fact2;
 
     comm_fact0 = tmp_col1 - tmp_col2;
     comm_fact1 = tmp_col3 - tmp_col4;
     comm_fact2 = tmp_col5 - tmp_col6;
 
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col1 = comm_fact0 + (DATA_TYPE)2.f * comm_fact1 + (DATA_TYPE)4.f * comm_fact2;
-    VEC_DATA_TYPE(DATA_TYPE, 4)
-    out_col3 = comm_fact0 + (DATA_TYPE)8.f * comm_fact1 + comm_fact2 + tmp_col7;
+    VEC_DATA_TYPE(float, 4)
+    out_col1 = comm_fact0 + 2.f * comm_fact1 + 4.f * comm_fact2;
+    VEC_DATA_TYPE(float, 4)
+    out_col3 = comm_fact0 + 8.f * comm_fact1 + comm_fact2 + tmp_col7;
 
 #if defined(HAS_BIAS)
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    DATA_TYPE b = (DATA_TYPE) * ((__global DATA_TYPE *)(vector_offset(&bias, x_out)));
+    DATA_TYPE b = (float) * ((__global DATA_TYPE *)(vector_offset(&bias, x_out)));
 
-    out_col0 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col1 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col2 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
-    out_col3 += (VEC_DATA_TYPE(DATA_TYPE, 4))b;
+    out_col0 += (VEC_DATA_TYPE(float, 4))b;
+    out_col1 += (VEC_DATA_TYPE(float, 4))b;
+    out_col2 += (VEC_DATA_TYPE(float, 4))b;
+    out_col3 += (VEC_DATA_TYPE(float, 4))b;
 #endif // defined(HAS_BIAS)
     // Get output address
 #if defined(SRC_DEPTH)
@@ -1094,22 +1094,22 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     int4 mult_y = min((int4)dst_size - offset, (int4)1);                                 // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
     // Store the output tile
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * (int)dst_stride_y + offset.s0) = out_col0.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * (int)dst_stride_y + offset.s0) = out_col1.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * (int)dst_stride_y + offset.s0) = out_col2.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * (int)dst_stride_y + offset.s0) = out_col3.s0;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * (int)dst_stride_y + offset.s1) = out_col0.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * (int)dst_stride_y + offset.s1) = out_col1.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * (int)dst_stride_y + offset.s1) = out_col2.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * (int)dst_stride_y + offset.s1) = out_col3.s1;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * (int)dst_stride_y + offset.s2) = out_col0.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * (int)dst_stride_y + offset.s2) = out_col1.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * (int)dst_stride_y + offset.s2) = out_col2.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * (int)dst_stride_y + offset.s2) = out_col3.s2;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * (int)dst_stride_y + offset.s3) = out_col0.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * (int)dst_stride_y + offset.s3) = out_col1.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * (int)dst_stride_y + offset.s3) = out_col2.s3;
-    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * (int)dst_stride_y + offset.s3) = out_col3.s3;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 0 * (int)dst_stride_y + offset.s0) = (DATA_TYPE)out_col0.s0;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 1 * (int)dst_stride_y + offset.s0) = (DATA_TYPE)out_col1.s0;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 2 * (int)dst_stride_y + offset.s0) = (DATA_TYPE)out_col2.s0;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s0 * 3 * (int)dst_stride_y + offset.s0) = (DATA_TYPE)out_col3.s0;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 0 * (int)dst_stride_y + offset.s1) = (DATA_TYPE)out_col0.s1;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 1 * (int)dst_stride_y + offset.s1) = (DATA_TYPE)out_col1.s1;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 2 * (int)dst_stride_y + offset.s1) = (DATA_TYPE)out_col2.s1;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s1 * 3 * (int)dst_stride_y + offset.s1) = (DATA_TYPE)out_col3.s1;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 0 * (int)dst_stride_y + offset.s2) = (DATA_TYPE)out_col0.s2;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 1 * (int)dst_stride_y + offset.s2) = (DATA_TYPE)out_col1.s2;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 2 * (int)dst_stride_y + offset.s2) = (DATA_TYPE)out_col2.s2;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s2 * 3 * (int)dst_stride_y + offset.s2) = (DATA_TYPE)out_col3.s2;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 0 * (int)dst_stride_y + offset.s3) = (DATA_TYPE)out_col0.s3;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 1 * (int)dst_stride_y + offset.s3) = (DATA_TYPE)out_col1.s3;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 2 * (int)dst_stride_y + offset.s3) = (DATA_TYPE)out_col2.s3;
+    *(__global DATA_TYPE *)(dst_ptr + mult_y.s3 * 3 * (int)dst_stride_y + offset.s3) = (DATA_TYPE)out_col3.s3;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
