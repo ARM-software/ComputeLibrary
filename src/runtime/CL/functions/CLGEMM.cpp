@@ -160,6 +160,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     const auto workload   = static_cast<float>((m * n) / 20.0f);
     _is_new_gemm_reshaped = (workload > 1600.0f) && (get_arch_from_target(gpu_target) == GPUTarget::BIFROST) && _is_interleaved_transposed && (data_type == DataType::F32);
 
+    const bool add_matrix_c  = (beta != 0.f && c != nullptr);
+    const bool is_beta_one   = std::abs(1.0f - beta) < 0.00001f;
+    const bool use_fused_add = is_beta_one && (c != nullptr && c->info()->num_dimensions() == 1) && !_is_new_gemm_reshaped;
+
     // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
     if(_is_interleaved_transposed)
     {
@@ -202,9 +206,8 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     if(!_is_new_gemm_reshaped)
     {
         // Configure and tune matrix multiply kernel
-        _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
-                                                                                                            mult_transpose1xW_width, mult_interleave4x4_height,
-                                                                                                            depth_output_gemm3d, reinterpret_input_as_3d),
+        _mm_kernel.configure(matrix_a, matrix_b, (add_matrix_c && !use_fused_add) ? nullptr : c, output, alpha, beta, _is_interleaved_transposed,
+                             GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d, reinterpret_input_as_3d),
                              gemm_info.fp_mixed_precision());
         CLScheduler::get().tune_kernel_static(_mm_kernel);
     }
@@ -220,7 +223,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     }
 
     // Configure matrix addition kernel
-    if(beta != 0 && c != nullptr)
+    if(add_matrix_c && !use_fused_add)
     {
         _ma_kernel.configure(c, output, beta);
         _run_addition = true;
@@ -284,6 +287,10 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     const auto workload             = static_cast<float>((m * n) / 20.0f);
     const bool is_new_gemm_reshaped = (workload > 1600.f) && (get_arch_from_target(gpu_target) == GPUTarget::BIFROST) && run_interleave_transpose && (data_type == DataType::F32);
 
+    const bool add_matrix_c  = (beta != 0.f && c != nullptr);
+    const bool is_beta_one   = std::abs(1.0f - beta) < 0.00001f;
+    const bool use_fused_add = is_beta_one && (c != nullptr && c->num_dimensions() == 1) && !is_new_gemm_reshaped;
+
     // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
     if(run_interleave_transpose)
     {
@@ -328,10 +335,11 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     if(!is_new_gemm_reshaped)
     {
         // Validate matrix multiply
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target, gemm_info.fp_mixed_precision()));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, (add_matrix_c && !use_fused_add) ? nullptr : c, output, alpha, beta,
+                                                                         run_interleave_transpose, reshape_info, gpu_target, gemm_info.fp_mixed_precision()));
     }
 
-    if(beta != 0 && c != nullptr)
+    if(add_matrix_c && !use_fused_add)
     {
         // Validate matrix addition kernel
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, output, beta));

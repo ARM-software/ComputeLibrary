@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,14 +86,13 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     _input  = input;
     _output = output;
 
-    std::ostringstream ma_arguments;
-    ma_arguments << "-DBETA=" << beta;
-    std::set<std::string> build_opts;
-    build_opts.emplace(ma_arguments.str());
+    // Create build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DBETA=" + float_to_string_with_full_precision(beta));
 
     // Create kernel
     std::string data_type_name = lower_string(string_from_data_type(input->info()->data_type()));
-    _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(("gemm_ma_" + data_type_name), build_opts));
+    _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(("gemm_ma_" + data_type_name), build_opts.options()));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());

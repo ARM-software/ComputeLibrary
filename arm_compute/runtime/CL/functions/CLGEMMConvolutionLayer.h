@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -163,7 +163,7 @@ private:
      * @param[in, out] output                Output tensor. Data types supported: Same as @p input,
      *                                       except for input of QASYMM8 type where output should be of S32 type.
      * @param[in]      gemmlowp_output_stage GEMMLowp output stage info
-     * @param[in]      gemm_3d_depth         (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in]      gemm_3d_depth         Depth of GEMM 3D
      */
     void configure_mm(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
@@ -175,13 +175,14 @@ private:
      * @param[in] biases                Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                                  Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[in] gemmlowp_output_stage GEMMLowp output stage info
-     * @param[in] gemm_3d_depth         (Optional) Depth of GEMM 3D (Defaults to 1)
-     * @param[in] skip_im2col           (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
+     * @param[in] gemm_3d_depth         Depth of GEMM 3D
+     * @param[in] skip_im2col           Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout.
+     * @param[in] run_addition          Flag which specifies if @ref CLGEMMMatrixMatrixMultiplyAddition to be run.
      *
      * @return a status
      */
     static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const GEMMLowpOutputStageInfo &gemmlowp_output_stage,
-                              int gemm_3d_depth = 1, bool skip_im2col = false);
+                              int gemm_3d_depth, bool skip_im2col, bool run_addition);
 
 private:
     CLMemoryGroup                        _memory_group;
@@ -207,6 +208,7 @@ private:
     bool _is_quantized;
     bool _is_activationlayer_enabled;
     bool _is_prepared;
+    bool _run_addition;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

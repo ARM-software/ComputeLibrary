@@ -1784,6 +1784,8 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
@@ -1795,6 +1797,8 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
  *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -1808,6 +1812,10 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1821,6 +1829,9 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
  */
 __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                 VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                  IMAGE_DECLARATION(dst),
                                                  uint src0_stride_z,
                                                  uint src1_stride_z,
@@ -1910,6 +1921,16 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
     c30 = c30 * (float4)ALPHA;
 #endif // defined(ALPHA)
 
+#if defined(ADD_VEC_C)
+    __global float *src2_addr = (__global float *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    float4          c0        = vload4(0, src2_addr);
+
+    c00 += c0;
+    c10 += c0;
+    c20 += c0;
+    c30 += c0;
+#endif /* defined(ADD_VEC_C) */
+
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
@@ -1959,7 +1980,9 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
 }
 
 /** This OpenCL kernel is optimized for Bifrost. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
- *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication.
+ *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
  *
  * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
@@ -1974,6 +1997,8 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1986,6 +2011,10 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1999,6 +2028,9 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                         VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                          IMAGE_DECLARATION(dst),
                                                          uint src0_stride_z,
                                                          uint src1_stride_z,
@@ -2223,6 +2255,28 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
+#if defined(ADD_VEC_C)
+    __global float *src2_addr = (__global float *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    float4          c0        = vload4(0, src2_addr);
+
+    c00 += c0.s0;
+    c01 += c0.s1;
+    c02 += c0.s2;
+    c03 += c0.s3;
+    c10 += c0.s0;
+    c11 += c0.s1;
+    c12 += c0.s2;
+    c13 += c0.s3;
+    c20 += c0.s0;
+    c21 += c0.s1;
+    c22 += c0.s2;
+    c23 += c0.s3;
+    c30 += c0.s0;
+    c31 += c0.s1;
+    c32 += c0.s2;
+    c33 += c0.s3;
+#endif /* defined(ADD_VEC_C) */
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
     // in order to take into account the presence of possible cross plane paddings
@@ -2275,6 +2329,8 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
@@ -2286,6 +2342,8 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
  *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -2299,6 +2357,10 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -2312,6 +2374,9 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
  */
 __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                 VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                  IMAGE_DECLARATION(dst),
                                                  uint src0_stride_z,
                                                  uint src1_stride_z,
@@ -2401,6 +2466,20 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
     c30 = c30 * (half8)ALPHA;
 #endif // defined(ALPHA)
 
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global half *src2_addr = (__global half *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    half8          c0        = vload8(0, src2_addr);
+    // clang-format on
+    // *INDENT-ON*
+
+    c00 += c0;
+    c10 += c0;
+    c20 += c0;
+    c30 += c0;
+#endif /* defined(ADD_VEC_C) */
+
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
@@ -2452,6 +2531,8 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) while accumulating the result in a 32 floating point variable.
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
@@ -2463,6 +2544,8 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
  *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -2476,6 +2559,10 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -2489,6 +2576,9 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
                                                        IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                       VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                        IMAGE_DECLARATION(dst),
                                                        uint src0_stride_z,
                                                        uint src1_stride_z,
@@ -2578,6 +2668,20 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
     c30 = c30 * (float8)ALPHA;
 #endif // defined(ALPHA)
 
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global half *src2_addr = (__global half *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    float8         c0        = convert_float8(vload8(0, src2_addr));
+    // clang-format on
+    // *INDENT-ON*
+
+    c00 += c0;
+    c10 += c0;
+    c20 += c0;
+    c30 += c0;
+#endif /* defined(ADD_VEC_C) */
+
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
@@ -2629,6 +2733,8 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel optimized for Bifrost architectures computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
  * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
  * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
@@ -2640,6 +2746,8 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
  *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -2653,6 +2761,10 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
@@ -2663,6 +2775,9 @@ __kernel void gemm_mm_interleaved_transposed_f16_acc32(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                         VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                          IMAGE_DECLARATION(dst),
                                                          uint src0_stride_z,
                                                          uint src1_stride_z,
@@ -2834,6 +2949,20 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
     c30 = c30 * (half8)ALPHA;
 #endif // defined(ALPHA)
 
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global half *src2_addr = (__global half *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    half8          c0        = vload8(0, src2_addr);
+    // clang-format on
+    // *INDENT-ON*
+
+    c00 += c0;
+    c10 += c0;
+    c20 += c0;
+    c30 += c0;
+#endif /* defined(ADD_VEC_C) */
+
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
@@ -2892,7 +3021,9 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
 #if defined(COLS_A) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && (NUM_ELEMS_PROCESSED_PER_THREAD_Y)
 #if defined(DATA_TYPE)
 #define VECTOR_TYPE VEC_DATA_TYPE(DATA_TYPE, NUM_ELEMS_PROCESSED_PER_THREAD_X)
-/** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped
+/** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped.
+ *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
  *
  * @note This OpenCL kernel works with floating point data types (F16/F32)
  * @note The floating point data type must be passed at compile time using -DDATA_TYPE (e.g. -DDATA_TYPE=float)
@@ -2908,6 +3039,8 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16/F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -2920,6 +3053,10 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
@@ -2934,6 +3071,9 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
  */
 __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
                                      IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                     VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                      IMAGE_DECLARATION(dst),
                                      uint src0_stride_z,
                                      uint src1_stride_z,
@@ -3134,6 +3274,26 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
     acc3 = acc3 * (VECTOR_TYPE)ALPHA;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3 && defined(ALPHA)
 
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global DATA_TYPE *src2_addr = (__global DATA_TYPE *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    VECTOR_TYPE         c0        = VLOAD(NUM_ELEMS_PROCESSED_PER_THREAD_X)(0, src2_addr);
+    // clang-format on
+    // *INDENT-ON*
+
+    acc0 += c0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc1 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc2 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc3 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#endif /* defined(ADD_VEC_C) */
+
     int z = get_global_id(2);
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
@@ -3204,6 +3364,8 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
 
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note This OpenCL kernel works with the 32-bit floating point data type (float) and uses the fma units.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
  * This kernel optimally uses -DNUM_ELEMS_PROCESSED_PER_THREAD_X=4.
@@ -3219,6 +3381,8 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16/F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -3231,6 +3395,10 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
@@ -3245,6 +3413,9 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                 VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                  IMAGE_DECLARATION(dst),
                                                  uint src0_stride_z,
                                                  uint src1_stride_z,
@@ -3599,6 +3770,34 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
+#if defined(ADD_VEC_C)
+    __global float *src2_addr = (__global float *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    float4          c0        = vload4(0, src2_addr);
+
+    acc00 += c0.s0;
+    acc01 += c0.s1;
+    acc02 += c0.s2;
+    acc03 += c0.s3;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc10 += c0.s0;
+    acc11 += c0.s1;
+    acc12 += c0.s2;
+    acc13 += c0.s3;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc20 += c0.s0;
+    acc21 += c0.s1;
+    acc22 += c0.s2;
+    acc23 += c0.s3;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc30 += c0.s0;
+    acc31 += c0.s1;
+    acc32 += c0.s2;
+    acc33 += c0.s3;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#endif /* defined(ADD_VEC_C) */
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
     // in order to take into account the presence of possible cross plane paddings
@@ -3658,6 +3857,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not been reshaped
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note This OpenCL kernel works with the 32-bit floating point data type (float) and uses the fma units.
  * This OpenCL kernel is optimized for Bifrost when the number of matrix B columns is less or equal to 1000.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
@@ -3674,6 +3875,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16/F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -3686,6 +3889,10 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
@@ -3700,6 +3907,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
                                                       IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                      VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                       IMAGE_DECLARATION(dst),
                                                       uint src0_stride_z,
                                                       uint src1_stride_z,
@@ -3986,6 +4196,26 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
+#if defined(ADD_VEC_C)
+    __global float *src2_addr = (__global float *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    float2          c0        = vload2(0, src2_addr);
+
+    acc00 += c0.s0;
+    acc01 += c0.s1;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc10 += c0.s0;
+    acc11 += c0.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc20 += c0.s0;
+    acc21 += c0.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc30 += c0.s0;
+    acc31 += c0.s1;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#endif /* defined(ADD_VEC_C) */
+
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
     // in order to take into account the presence of possible cross plane paddings
@@ -4046,6 +4276,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note This OpenCL kernel works with the 16-bit floating point data type (half) and accumulating the result in a 32 floating point variable.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
  * This kernel optimally uses -DNUM_ELEMS_PROCESSED_PER_THREAD_X=4.
@@ -4061,6 +4293,8 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -4073,6 +4307,10 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
@@ -4087,6 +4325,9 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
                                                        IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                       VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                        IMAGE_DECLARATION(dst),
                                                        uint src0_stride_z,
                                                        uint src1_stride_z,
@@ -4327,6 +4568,26 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
 #endif // defined(ALPHA)
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global half *src2_addr = (__global half *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    half8          c0        = vload8(0, src2_addr);
+    // clang-format on
+    // *INDENT-ON*
+
+    hacc0 += c0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    hacc1 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    hacc2 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    hacc3 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#endif /* defined(ADD_VEC_C) */
+
     int z = get_global_id(2);
 
     // Compute destination address
@@ -4394,6 +4655,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
 
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
+ * Moreover, it can add a vector (src2) if the ADD_VEC_C parameter is passed at compile time.
+ *
  * @note This OpenCL kernel works with the 16-bit floating point data type (half) and uses the fma units.
  * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
  * This kernel optimally uses -DNUM_ELEMS_PROCESSED_PER_THREAD_X=4.
@@ -4409,6 +4672,8 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
  *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
  *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
  *
+ * @note In case a 3rd input (src2) needs to be added, the ADD_VEC_C parameter has to be passed at compile time as -DADD_VEC_C
+ *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
  * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -4421,6 +4686,10 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
  * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
  * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src2_ptr                           (Optional) Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src2_stride_x                      (Optional) Stride of the source vector in X dimension (in bytes)
+ * @param[in]  src2_step_x                        (Optional) src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src2_offset_first_element_in_bytes (Optional) The offset of the first element in the source matrix
  * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
  * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
  * @param[in]  dst_step_x                         dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
@@ -4435,6 +4704,9 @@ __kernel void gemm_mm_floating_point_f16_bifrost_acc32(IMAGE_DECLARATION(src0),
  */
 __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
+#if defined(ADD_VEC_C)
+                                                 VECTOR_DECLARATION(src2),
+#endif /* defined(ADD_VEC_C) */
                                                  IMAGE_DECLARATION(dst),
                                                  uint src0_stride_z,
                                                  uint src1_stride_z,
@@ -4658,6 +4930,26 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3 && defined(ALPHA)
     acc3 = acc3 * (half8)ALPHA;
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3 && defined(ALPHA)
+
+#if defined(ADD_VEC_C)
+    // *INDENT-OFF*
+    // clang-format off
+    __global half *src2_addr = (__global half *)(src2_ptr + src2_offset_first_element_in_bytes + get_global_id(0) * src2_step_x);
+    half8          c0        = vload8(0, src2_addr);
+    // clang-format on
+    // *INDENT-ON*
+
+    acc0 += c0;
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc1 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc2 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc3 += c0;
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+#endif /* defined(ADD_VEC_C) */
 
     int z = get_global_id(2);
 
