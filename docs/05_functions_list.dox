@@ -1,0 +1,297 @@
+///
+/// Copyright (c) 2018 ARM Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+
+@page functions_list List of functions
+
+@tableofcontents
+
+@section S5_1 NEON functions
+
+- @ref IFunction
+    - @ref INESimpleFunction
+        - @ref NEAbsoluteDifference
+        - @ref NEAccumulate
+        - @ref NEAccumulateSquared
+        - @ref NEAccumulateWeighted
+        - @ref NEActivationLayer
+        - @ref NEArithmeticAddition
+        - @ref NEArithmeticSubtraction
+        - @ref NEBitwiseAnd
+        - @ref NEBitwiseNot
+        - @ref NEBitwiseOr
+        - @ref NEBitwiseXor
+        - @ref NEBox3x3
+        - @ref NEChannelCombine
+        - @ref NEChannelExtract
+        - @ref NEChannelShuffleLayer
+        - @ref NECol2Im
+        - @ref NEColorConvert
+        - @ref NEConvolution3x3
+        - @ref NEConvolutionRectangle
+        - @ref NECopy
+        - @ref NEDepthConvertLayer
+        - @ref NEDilate
+        - @ref NEErode
+        - @ref NEFlattenLayer
+        - @ref NEFloor
+        - @ref NEFullyConnectedLayerReshapeWeights
+        - @ref NEGEMMInterleave4x4
+        - @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
+        - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+        - @ref NEGEMMTranspose1xW
+        - @ref NEGaussian3x3
+        - @ref NEHOGDetector
+        - @ref NEIntegralImage
+        - @ref NEMagnitude
+        - @ref NEMedian3x3
+        - @ref NENonLinearFilter
+        - @ref NENonMaximaSuppression3x3
+        - @ref NEPermute
+        - @ref NEPhase
+        - @ref NEPixelWiseMultiplication
+        - @ref NERemap
+        - @ref NEReorgLayer
+        - @ref NEReshapeLayer
+        - @ref NEScharr3x3
+        - @ref NESobel3x3
+        - @ref NETableLookup
+        - @ref NEThreshold
+        - @ref NETranspose
+        - @ref NEWarpAffine
+        - @ref NEWarpPerspective
+        - @ref NEYOLOLayer
+    - @ref NEBatchNormalizationLayer
+    - @ref NECannyEdge
+    - @ref NEConcatenateLayer
+    - @ref NEConvertFullyConnectedWeights
+    - @ref NEConvolutionLayer
+    - @ref NEConvolutionLayerReshapeWeights
+    - @ref NEConvolutionSquare&lt;matrix_size&gt;
+    - @ref NEDeconvolutionLayer
+    - @ref NEDepthConcatenateLayer
+    - @ref NEDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer3x3
+    - @ref NEDepthwiseSeparableConvolutionLayer
+    - @ref NEDequantizationLayer
+    - @ref NEDerivative
+    - @ref NEDirectConvolutionLayer
+    - @ref NEEqualizeHistogram
+    - @ref NEFastCorners
+    - @ref NEFillBorder
+    - @ref NEFullyConnectedLayer
+    - @ref NEGEMM
+    - @ref NEGEMMAssemblyDispatch
+    - @ref NEGEMMConvolutionLayer
+    - @ref NEGEMMInterleavedWrapper
+    - @ref NEGEMMLowpAssemblyMatrixMultiplyCore
+    - @ref NEGEMMLowpMatrixMultiplyCore
+    - @ref NEGaussian5x5
+    - @ref NEGaussianPyramid
+        - @ref NEGaussianPyramidHalf
+        - @ref NEGaussianPyramidOrb
+    - @ref NEHOGDescriptor
+    - @ref NEHOGGradient
+    - @ref NEHOGMultiDetection
+    - @ref NEHarrisCorners
+    - @ref NEHistogram
+    - @ref NEIm2Col
+    - @ref NEL2NormalizeLayer
+    - @ref NELSTMLayer
+    - @ref NELaplacianPyramid
+    - @ref NELaplacianReconstruct
+    - @ref NELocallyConnectedLayer
+    - @ref NEMeanStdDev
+    - @ref NEMinMaxLocation
+    - @ref NENormalizationLayer
+    - @ref NEOpticalFlow
+    - @ref NEPoolingLayer
+    - @ref NEQuantizationLayer
+    - @ref NERNNLayer
+    - @ref NEROIPoolingLayer
+    - @ref NEReduceMean
+    - @ref NEReductionOperation
+    - @ref NEScale
+    - @ref NESimpleAssemblyFunction
+    - @ref NESobel5x5
+    - @ref NESobel7x7
+    - @ref NESoftmaxLayer
+    - @ref NEUpsampleLayer
+    - @ref NEWidthConcatenateLayer
+    - @ref NEWinogradConvolutionLayer
+
+@section S5_2 OpenCL functions
+
+- @ref IFunction
+    - @ref CLBatchNormalizationLayer
+    - @ref CLBatchToSpaceLayer
+    - @ref CLCannyEdge
+    - @ref CLConcatenateLayer
+    - @ref CLConvolutionLayer
+    - @ref CLConvolutionLayerReshapeWeights
+    - @ref CLConvolutionSquare&lt;matrix_size&gt;
+    - @ref CLDeconvolutionLayer
+    - @ref CLDeconvolutionLayerUpsample
+    - @ref CLDepthConcatenateLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3
+    - @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDequantizationLayer
+    - @ref CLDirectConvolutionLayer
+    - @ref CLEqualizeHistogram
+    - @ref CLFastCorners
+    - @ref CLFullyConnectedLayer
+    - @ref CLFuseBatchNormalization
+    - @ref CLGEMM
+    - @ref CLGEMMConvolutionLayer
+    - @ref CLGEMMLowpMatrixMultiplyCore
+    - @ref CLGaussian5x5
+    - @ref CLGaussianPyramid
+        - @ref CLGaussianPyramidHalf
+        - @ref CLGaussianPyramidOrb
+    - @ref CLHOGDescriptor
+    - @ref CLHOGDetector
+    - @ref CLHOGGradient
+    - @ref CLHOGMultiDetection
+    - @ref CLHarrisCorners
+    - @ref CLHistogram
+    - @ref CLIntegralImage
+    - @ref CLL2NormalizeLayer
+    - @ref CLLSTMLayer
+    - @ref CLLaplacianPyramid
+    - @ref CLLaplacianReconstruct
+    - @ref CLLocallyConnectedLayer
+    - @ref CLMeanStdDev
+    - @ref CLMinMaxLocation
+    - @ref CLNormalizationLayer
+    - @ref CLNormalizePlanarYUVLayer
+    - @ref CLOpticalFlow
+    - @ref CLPadLayer
+    - @ref CLQuantizationLayer
+    - @ref CLRNNLayer
+    - @ref CLReduceMean
+    - @ref CLReductionOperation
+    - @ref CLSobel5x5
+    - @ref CLSobel7x7
+    - @ref CLSoftmaxLayer
+    - @ref CLSpaceToBatchLayer
+    - @ref CLSplit
+    - @ref CLUpsampleLayer
+    - @ref CLWidthConcatenateLayer
+    - @ref CLWinogradConvolutionLayer
+    - @ref ICLSimpleFunction
+        - @ref CLAbsoluteDifference
+        - @ref CLAccumulate
+        - @ref CLAccumulateSquared
+        - @ref CLAccumulateWeighted
+        - @ref CLActivationLayer
+        - @ref CLArithmeticAddition
+        - @ref CLArithmeticDivision
+        - @ref CLArithmeticSubtraction
+        - @ref CLBitwiseAnd
+        - @ref CLBitwiseNot
+        - @ref CLBitwiseOr
+        - @ref CLBitwiseXor
+        - @ref CLBoundingBoxTransform
+        - @ref CLBox3x3
+        - @ref CLChannelCombine
+        - @ref CLChannelExtract
+        - @ref CLChannelShuffleLayer
+        - @ref CLColorConvert
+        - @ref CLConvertFullyConnectedWeights
+        - @ref CLConvolution3x3
+        - @ref CLConvolutionRectangle
+        - @ref CLCopy
+        - @ref CLDepthConvertLayer
+        - @ref CLDerivative
+        - @ref CLDilate
+        - @ref CLErode
+        - @ref CLFillBorder
+        - @ref CLFlattenLayer
+        - @ref CLFloor
+        - @ref CLFullyConnectedLayerReshapeWeights
+        - @ref CLGEMMInterleave4x4
+        - @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
+        - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+        - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
+        - @ref CLGEMMTranspose1xW
+        - @ref CLGaussian3x3
+        - @ref CLMagnitude
+        - @ref CLMedian3x3
+        - @ref CLNonLinearFilter
+        - @ref CLNonMaximaSuppression3x3
+        - @ref CLPermute
+        - @ref CLPhase
+        - @ref CLPixelWiseMultiplication
+        - @ref CLPoolingLayer
+        - @ref CLROIAlignLayer
+        - @ref CLROIPoolingLayer
+        - @ref CLRemap
+        - @ref CLReorgLayer
+        - @ref CLReshapeLayer
+        - @ref CLScale
+        - @ref CLScharr3x3
+        - @ref CLSlice
+        - @ref CLSobel3x3
+        - @ref CLStridedSlice
+        - @ref CLTableLookup
+        - @ref CLThreshold
+        - @ref CLTranspose
+        - @ref CLWarpAffine
+        - @ref CLWarpPerspective
+        - @ref CLWinogradInputTransform
+        - @ref CLYOLOLayer
+
+@section S5_3 GLES Compute functions
+
+- @ref IFunction
+    - @ref GCBatchNormalizationLayer
+    - @ref GCConvolutionLayer
+    - @ref GCConvolutionLayerReshapeWeights
+    - @ref GCDepthConcatenateLayer
+    - @ref GCDepthwiseConvolutionLayer3x3
+    - @ref GCDirectConvolutionLayer
+    - @ref GCDropoutLayer
+    - @ref GCFullyConnectedLayer
+    - @ref GCGEMM
+    - @ref GCNormalizationLayer
+    - @ref GCNormalizePlanarYUVLayer
+    - @ref GCPoolingLayer
+    - @ref GCSoftmaxLayer
+    - @ref IGCSimpleFunction
+        - @ref GCAbsoluteDifference
+        - @ref GCActivationLayer
+        - @ref GCArithmeticAddition
+        - @ref GCFillBorder
+        - @ref GCFullyConnectedLayerReshapeWeights
+        - @ref GCGEMMInterleave4x4
+        - @ref GCGEMMTranspose1xW
+        - @ref GCPixelWiseMultiplication
+        - @ref GCScale
+        - @ref GCTensorShift
+        - @ref GCTranspose
+*/
+} // namespace

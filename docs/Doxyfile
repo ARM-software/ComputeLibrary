@@ -769,6 +769,7 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./docs/00_introduction.dox \
+                         ./docs/05_functions_list.dox \
                          ./docs/01_library.dox \
                          ./docs/02_tests.dox \
                          ./docs/03_scripts.dox \
