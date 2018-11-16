@@ -72,7 +72,7 @@ inline void calculate_xy_min_max_nchw(Image *out, int idx, float center_x, float
  *
  * @return The updated index
  */
-inline int calculate_min_nchw(Image *out, float *max, float *aspect_ratios, int max_size, int aspect_ratios_size, float min_size, int min_idx, int idx)
+inline int calculate_min_nchw(Image *out, __global float *max, __global float *aspect_ratios, int max_size, int aspect_ratios_size, float min_size, int min_idx, int idx)
 {
     const float center_x = ((float)(get_global_id(0) % LAYER_WIDTH) + OFFSET) * STEP_X;
     const float center_y = ((float)(get_global_id(0) / LAYER_WIDTH) + OFFSET) * STEP_Y;
@@ -153,7 +153,7 @@ inline void calculate_xy_min_max_nhwc(Tensor3D *out, int idx, float center_x, fl
  *
  * @return The updated index
  */
-inline int calculate_min_nhwc(Image *out, float *max, float *aspect_ratios, int max_size, int aspect_ratios_size, float min_size, int min_idx, int idx)
+inline int calculate_min_nhwc(Tensor3D *out, __global float *max, __global float *aspect_ratios, int max_size, int aspect_ratios_size, float min_size, int min_idx, int idx)
 {
     const float center_x = ((float)(get_global_id(1) % LAYER_WIDTH) + OFFSET) * STEP_X;
     const float center_y = ((float)(get_global_id(1) / LAYER_WIDTH) + OFFSET) * STEP_Y;
