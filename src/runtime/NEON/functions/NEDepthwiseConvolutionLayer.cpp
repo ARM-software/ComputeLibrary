@@ -271,7 +271,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(channel_idx);
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON((input->info()->dimension(channel_idx) * depth_multiplier) != weights->info()->dimension(channel_idx));
 

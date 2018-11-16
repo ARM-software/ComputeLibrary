@@ -55,7 +55,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input            The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                              while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8, F32
+     *                              while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
      * @param[out] output           The output tensor. First 3 lower dimensions represent a transform of each 3D input,
      *                              while every dimension above 3 represents a batch. Data types supported: Same as @p input
      * @param[in]  kernel_dims      The kernel dimensions (width and height).
@@ -68,7 +68,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseIm2ColKernel
      *
      * @param[in] input            The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                             while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8, F32
+     *                             while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
      * @param[in] output           The output tensor. First 3 lower dimensions represent a transform of each 3D input,
      *                             while every dimension above 3 represents a batch. Data types supported: Same as @p input
      * @param[in] kernel_dims      The kernel dimensions (width and height).
@@ -105,5 +105,5 @@ private:
     bool                       _has_bias;
     unsigned int               _depth_multiplier;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDEPTHWISEIM2COLKERNEL_H__ */

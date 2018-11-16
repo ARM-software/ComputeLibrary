@@ -132,7 +132,7 @@ public:
     NEDepthwiseConvolutionLayer &operator=(NEDepthwiseConvolutionLayer &&) = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
@@ -146,7 +146,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer
      *
-     * @param[in] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in] biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
@@ -189,5 +189,5 @@ private:
     bool                                      _is_activationlayer_enabled;
     const ITensor                            *_original_weights;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */
