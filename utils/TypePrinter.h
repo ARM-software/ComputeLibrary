@@ -1901,6 +1901,85 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &det
     return os;
 }
 
+/** Formatted output of the DetectionOutputLayerCodeType type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_code Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayerCodeType &detection_code)
+{
+    switch(detection_code)
+    {
+        case DetectionOutputLayerCodeType::CENTER_SIZE:
+            os << "CENTER_SIZE";
+            break;
+        case DetectionOutputLayerCodeType::CORNER:
+            os << "CORNER";
+            break;
+        case DetectionOutputLayerCodeType::CORNER_SIZE:
+            os << "CORNER_SIZE";
+            break;
+        case DetectionOutputLayerCodeType::TF_CENTER:
+            os << "TF_CENTER";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+/** Formatted output of the DetectionOutputLayerCodeType type.
+ *
+ * @param[in] detection_code Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionOutputLayerCodeType &detection_code)
+{
+    std::stringstream str;
+    str << detection_code;
+    return str.str();
+}
+
+/** Formatted output of the DetectionOutputLayerInfo type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_info Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayerInfo &detection_info)
+{
+    os << "{Classes=" << detection_info.num_classes() << ","
+       << "ShareLocation=" << detection_info.share_location() << ","
+       << "CodeType=" << detection_info.code_type() << ","
+       << "VarianceEncodedInTarget=" << detection_info.variance_encoded_in_target() << ","
+       << "KeepTopK=" << detection_info.keep_top_k() << ","
+       << "NMSThreshold=" << detection_info.nms_threshold() << ","
+       << "Eta=" << detection_info.eta() << ","
+       << "BackgroundLabelId=" << detection_info.background_label_id() << ","
+       << "ConfidenceThreshold=" << detection_info.confidence_threshold() << ","
+       << "TopK=" << detection_info.top_k() << ","
+       << "NumLocClasses=" << detection_info.num_loc_classes()
+       << "}";
+
+    return os;
+}
+
+/** Formatted output of the DetectionOutputLayerInfo type.
+ *
+ * @param[in] detection_info Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionOutputLayerInfo &detection_info)
+{
+    std::stringstream str;
+    str << detection_info;
+    return str.str();
+}
 /** Formatted output of the DetectionWindow type.
  *
  * @param[in] detection_window Type to output

@@ -995,6 +995,134 @@ private:
     std::array<float, 2> _steps;
 };
 
+/** Available Detection Output code types */
+enum class DetectionOutputLayerCodeType
+{
+    CORNER,      /**< Use box corners */
+    CENTER_SIZE, /**< Use box centers and size */
+    CORNER_SIZE, /**< Use box centers and size */
+    TF_CENTER    /**< Use box centers and size but flip x and y co-ordinates */
+};
+
+/** Detection Output layer info */
+class DetectionOutputLayerInfo final
+{
+public:
+    /** Default Constructor */
+    DetectionOutputLayerInfo()
+        : _num_classes(),
+          _share_location(),
+          _code_type(DetectionOutputLayerCodeType::CORNER),
+          _keep_top_k(),
+          _nms_threshold(),
+          _top_k(),
+          _background_label_id(),
+          _confidence_threshold(),
+          _variance_encoded_in_target(false),
+          _eta(),
+          _num_loc_classes()
+    {
+        _num_loc_classes = _share_location ? 1 : _num_classes;
+    }
+    /** Constructor
+     *
+     * @param[in] num_classes                Number of classes to be predicted.
+     * @param[in] share_location             If true, bounding box are shared among different classes.
+     * @param[in] code_type                  Type of coding method for bbox.
+     * @param[in] keep_top_k                 Number of total bounding boxes to be kept per image after NMS step.
+     * @param[in] nms_threshold              Threshold to be used in NMS.
+     * @param[in] top_k                      (Optional) Number of boxes per image with top confidence scores that are fed into the NMS algorithm. Default set to -1.
+     * @param[in] background_label_id        (Optional) Background label ID. If there is no background class, set it as -1.
+     * @param[in] confidence_threshold       (Optional) Only consider detections whose confidences are larger than a threshold. Default set to -FLT_MAX.
+     * @param[in] variance_encoded_in_target (Optional) If true, variance is encoded in target. Otherwise we need to adjust the predicted offset accordingly.Default set to false.
+     * @param[in] eta                        (Optional) Eta.
+     */
+    DetectionOutputLayerInfo(int num_classes, bool share_location, DetectionOutputLayerCodeType code_type, int keep_top_k, float nms_threshold, int top_k = -1, int background_label_id = -1,
+                             float confidence_threshold = std::numeric_limits<float>::lowest(), bool variance_encoded_in_target = false, float eta = 1)
+        : _num_classes(num_classes),
+          _share_location(share_location),
+          _code_type(code_type),
+          _keep_top_k(keep_top_k),
+          _nms_threshold(nms_threshold),
+          _top_k(top_k),
+          _background_label_id(background_label_id),
+          _confidence_threshold(confidence_threshold),
+          _variance_encoded_in_target(variance_encoded_in_target),
+          _eta(eta),
+          _num_loc_classes()
+    {
+        _num_loc_classes = _share_location ? 1 : _num_classes;
+    }
+    /** Get num classes. */
+    int num_classes() const
+    {
+        return _num_classes;
+    }
+    /** Get share location. */
+    bool share_location() const
+    {
+        return _share_location;
+    }
+    /** Get detection output code type. */
+    DetectionOutputLayerCodeType code_type() const
+    {
+        return _code_type;
+    }
+    /** Get if variance encoded in target. */
+    bool variance_encoded_in_target() const
+    {
+        return _variance_encoded_in_target;
+    }
+    /** Get the number of total bounding boxes to be kept per image. */
+    int keep_top_k() const
+    {
+        return _keep_top_k;
+    }
+    /** Get nms threshold. */
+    float nms_threshold() const
+    {
+        return _nms_threshold;
+    }
+    /** Get eta. */
+    float eta() const
+    {
+        return _eta;
+    }
+    /** Get background label ID. */
+    int background_label_id() const
+    {
+        return _background_label_id;
+    }
+    /** Get confidence threshold. */
+    float confidence_threshold() const
+    {
+        return _confidence_threshold;
+    }
+    /** Get top K. */
+    int top_k() const
+    {
+        return _top_k;
+    }
+    /** Get number of location classes. */
+    int num_loc_classes() const
+    {
+        return _num_loc_classes;
+    }
+
+private:
+    int                          _num_classes;
+    bool                         _share_location;
+    DetectionOutputLayerCodeType _code_type;
+    int                          _keep_top_k;
+    float                        _nms_threshold;
+    int                          _top_k;
+    int                          _background_label_id;
+    float                        _confidence_threshold;
+    bool                         _variance_encoded_in_target;
+    float                        _eta;
+    int                          _num_loc_classes;
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {
