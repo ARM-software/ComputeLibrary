@@ -1,15 +1,16 @@
-
+Release repository: https://github.com/arm-software/ComputeLibrary
+Development repository: https://review.mlplatform.org/#/admin/projects/ml/ComputeLibrary
 Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 **Make sure you are using the latest version of the library before opening an issue. Thanks**
 
 News:
 
 - [Gian Marco's talk on optimizing CNNs with Winograd algorithms at the EVS](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice)
+- [Gian Marco's talk on using SGEMM and FFTs to Accelerate Deep Learning](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2016-embedded-vision-summit-iodice)
 
 Related projects:
 
 - [Arm NN SDK](https://github.com/arm-software/armnn)
-- [Caffe on Compute Library](https://github.com/OAID/Caffe-HRT)
 - [Tutorial: Cartoonifying Images on Raspberry Pi with the Compute Library](https://community.arm.com/graphics/b/blog/posts/cartoonifying-images-on-raspberry-pi-with-the-compute-library)
 - [Tutorial: Running AlexNet on Raspberry Pi with Compute Library](https://community.arm.com/processors/b/blog/posts/running-alexnet-on-raspberry-pi-with-compute-library)
 
@@ -47,6 +48,6 @@ Binaries available here:
 - [v17.04](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.04/arm_compute-v17.04-bin.tar.gz)
 - [v17.03.1](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.03.1/arm_compute-v17.03.1-bin.tar.gz)
 
-Support: developer-compute@arm.com
+Contact: developer-compute@arm.com
 
 License & Contributions: The software is provided under MIT license. Contributions to this project are accepted under the same license.
