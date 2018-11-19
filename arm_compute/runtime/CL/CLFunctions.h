@@ -40,6 +40,7 @@
 #include "arm_compute/runtime/CL/functions/CLBoundingBoxTransform.h"
 #include "arm_compute/runtime/CL/functions/CLBox3x3.h"
 #include "arm_compute/runtime/CL/functions/CLCannyEdge.h"
+#include "arm_compute/runtime/CL/functions/CLCast.h"
 #include "arm_compute/runtime/CL/functions/CLChannelCombine.h"
 #include "arm_compute/runtime/CL/functions/CLChannelExtract.h"
 #include "arm_compute/runtime/CL/functions/CLChannelShuffleLayer.h"

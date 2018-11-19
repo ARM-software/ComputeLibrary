@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHCONVERT_H__
-#define __ARM_COMPUTE_CLDEPTHCONVERT_H__
+#ifndef __ARM_COMPUTE_CLCAST_H__
+#define __ARM_COMPUTE_CLCAST_H__
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
@@ -34,7 +34,7 @@ namespace arm_compute
 class ICLTensor;
 
 /** Basic function to run @ref CLDepthConvertLayerKernel. */
-class CLDepthConvertLayer : public ICLSimpleFunction
+class CLCast : public ICLSimpleFunction
 {
 public:
     /** Initialize the function's source, destination
@@ -54,19 +54,17 @@ public:
      * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
-     * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayer
+    void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLCast
      *
      * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in] output Destination tensor info. Data type supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy.
-     * @param[in] shift  Value for down/up conversions. Must be 0 <= shift < 8.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy);
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHCONVERT_H__*/
+#endif /*__ARM_COMPUTE_CLCAST_H__*/

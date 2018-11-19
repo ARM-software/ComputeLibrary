@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
-#define __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
-
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#ifndef __ARM_COMPUTE_UTILS_REQUIRES_H__
+#define __ARM_COMPUTE_UTILS_REQUIRES_H__
 
 namespace arm_compute
 {
-namespace test
+namespace utils
 {
-namespace validation
+namespace requires
 {
-namespace reference
+// *INDENT-OFF*
+// clang-format off
+namespace detail
 {
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-
-template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-} // namespace reference
-} // namespace validation
-} // namespace test
+enum class enabler
+{
+};
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__ */
+
+/** Requirements as template */
+#define REQUIRES_T(...) template <bool Cond = (__VA_ARGS__), typename std::enable_if<Cond, int>::type = 0>
+/** Requirements as template argument */
+#define REQUIRES_TA(...) typename = typename std::enable_if<(__VA_ARGS__), arm_compute::utils::requires::detail::enabler>::type
+// clang-format on
+// *INDENT-ON*
+} // namespace requires
+} // namespace utils
+} // namespace arm_compute
+#endif /*__ARM_COMPUTE_UTILS_REQUIRES_H__ */

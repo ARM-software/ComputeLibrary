@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
-#define __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
+#include "arm_compute/runtime/CL/functions/CLCast.h"
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "support/ToolchainSupport.h"
+
+#include <utility>
 
 namespace arm_compute
 {
-namespace test
+void CLCast::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy)
 {
-namespace validation
-{
-namespace reference
-{
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+    auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
+    k->configure(input, output, policy, 0);
+    _kernel = std::move(k);
+}
 
-template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-} // namespace reference
-} // namespace validation
-} // namespace test
+Status CLCast::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy)
+{
+    return CLDepthConvertLayerKernel::validate(input, output, policy, 0);
+}
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__ */

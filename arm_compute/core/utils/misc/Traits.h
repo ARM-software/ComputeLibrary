@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
-#define __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__
+#ifndef __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__
+#define __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include <type_traits>
 
 namespace arm_compute
 {
-namespace test
+namespace utils
 {
-namespace validation
+namespace traits
 {
-namespace reference
+template <typename T>
+struct is_floating_point : public std::is_floating_point<T>
 {
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+};
 
-template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&!std::is_same<T1, T2>::value, int >::type = 0 >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
-} // namespace reference
-} // namespace validation
-} // namespace test
+template <>
+struct is_floating_point<half> : public std::true_type
+{
+};
+} // namespace traits
+} // namespace utils
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_DEPTH_CONVERT_H__ */
+#endif /* __ARM_COMPUTE_UTILS_TRAITS_TRAITS_H__ */

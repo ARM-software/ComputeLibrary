@@ -128,22 +128,6 @@ inline auto foldl(F &&func, T &&initial, U &&value, Us &&... values) -> decltype
     return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)), std::forward<Us>(values)...);
 }
 
-/** Type cast with saturation.
- *
- * @param[in] val Value of type U to cast.
- *
- * @return Original value clamped to numeric limits of T and converted to type T.
- *
- * @warning Numeric limits of T must be representable without loss in type U.
- */
-template <typename T, typename U>
-T saturate_cast(U val)
-{
-    const auto low  = static_cast<U>(std::numeric_limits<T>::lowest());
-    const auto high = static_cast<U>(std::numeric_limits<T>::max());
-    return static_cast<T>(clamp(val, low, high));
-}
-
 /** Perform an index sort of a given vector.
  *
  * @param[in] v Vector to sort

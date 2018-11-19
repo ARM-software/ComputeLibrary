@@ -69,8 +69,7 @@ __kernel void convert_depth_down(
     in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    const DATA_TYPE_IN scale = (DATA_TYPE_IN)(1 << shift);
-    vstore16(CONVERT_DOWN(in_data / scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    vstore16(CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
     vstore16(CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
@@ -109,8 +108,7 @@ __kernel void convert_depth_up(
     in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    const DATA_TYPE_OUT scale = (DATA_TYPE_OUT)(1 << shift);
-    vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)) * scale, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
     vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)) << shift, 0, (__global DATA_TYPE_OUT *)out.ptr);
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
