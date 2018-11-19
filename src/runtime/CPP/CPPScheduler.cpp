@@ -228,6 +228,7 @@ unsigned int CPPScheduler::num_threads() const
     return _num_threads;
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 {
     const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
@@ -262,6 +263,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
         std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
     }
 }
+#endif /* DOXYGEN_SKIP_THIS */
 
 void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {

@@ -35,6 +35,7 @@
 
 #include <cstdint>
 
+/** [NEReshapeLayerKernel Kernel] **/
 using namespace arm_compute;
 
 namespace
@@ -120,3 +121,4 @@ void NEReshapeLayerKernel::run(const Window &window, const ThreadInfo &info)
             ARM_COMPUTE_ERROR("Unsupported data type!");
     }
 }
+/** [NEReshapeLayerKernel Kernel] **/

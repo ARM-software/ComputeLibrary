@@ -771,10 +771,11 @@ WARN_LOGFILE           =
 INPUT                  = ./docs/00_introduction.dox \
                          ./docs/05_functions_list.dox \
                          ./docs/01_library.dox \
+                         ./docs/04_adding_operator.dox \
                          ./docs/02_tests.dox \
                          ./docs/03_scripts.dox \
                          ./arm_compute/ \
-                         ./src/core/CL/cl_kernels/ \
+                         ./src/ \
                          ./examples/ \
                          ./tests/ \
                          ./utils/ \
@@ -855,8 +856,13 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ./arm_compute/core/NEON/kernels/assembly/ \ 
+EXCLUDE                = ./arm_compute/core/NEON/kernels/assembly/ \
                          ./arm_compute/core/NEON/kernels/convolution/ \
+                         ./src/core/NEON/kernels/assembly/ \
+                         ./src/core/NEON/kernels/convolution/ \
+                         ./src/core/NEON/kernels/NELKTrackerKernel.cpp \
+                         ./src/core/NEON/kernels/NEL2NormalizeLayerKernel.cpp \
+                         ./src/core/GLES_COMPUTE/cs_shaders/ \
                          ./tests/datasets/ \
                          ./tests/benchmark/fixtures/ \
                          ./tests/validation/fixtures/

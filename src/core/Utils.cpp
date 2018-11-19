@@ -34,7 +34,7 @@
 #include <string>
 
 using namespace arm_compute;
-
+#ifndef DOXYGEN_SKIP_THIS
 std::string arm_compute::build_information()
 {
     static const std::string information =
@@ -42,7 +42,7 @@ std::string arm_compute::build_information()
         ;
     return information;
 }
-
+#endif /* DOXYGEN_SKIP_THIS */
 std::string arm_compute::read_file(const std::string &filename, bool binary)
 {
     std::string   out;

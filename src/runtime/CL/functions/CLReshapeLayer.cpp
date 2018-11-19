@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "support/ToolchainSupport.h"
 
+/** [CLReshapeLayer snippet] **/
 using namespace arm_compute;
 
 void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
@@ -40,3 +41,4 @@ Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 {
     return CLReshapeLayerKernel::validate(input, output);
 }
+/** [CLReshapeLayer snippet] **/

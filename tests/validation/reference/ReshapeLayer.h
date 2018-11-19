@@ -34,8 +34,11 @@ namespace validation
 {
 namespace reference
 {
+/** [ReshapeLayer] **/
 template <typename T>
 SimpleTensor<T> reshape_layer(const SimpleTensor<T> &src, const TensorShape &output_shape);
+/** [ReshapeLayer] **/
+
 } // namespace reference
 } // namespace validation
 } // namespace test

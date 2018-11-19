@@ -527,6 +527,7 @@ inline std::string to_string(const RoundingPolicy &rounding_policy)
     return str.str();
 }
 
+/** [Print DataLayout type] **/
 /** Formatted output of the DataLayout type.
  *
  * @param[out] os          Output stream.
@@ -566,6 +567,7 @@ inline std::string to_string(const arm_compute::DataLayout &data_layout)
     str << data_layout;
     return str.str();
 }
+/** [Print DataLayout type] **/
 
 /** Formatted output of the DataLayoutDimension type.
  *

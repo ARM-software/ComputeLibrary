@@ -249,6 +249,7 @@ int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ker
     return WinogradConv::get_kernel_matrix_stride(kernel_shape);
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
     const ITensor *weights_hwio,
@@ -270,6 +271,7 @@ void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ke
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     INEKernel::configure(win);
 }
+#endif /* DOXYGEN_SKIP_THIS */
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)

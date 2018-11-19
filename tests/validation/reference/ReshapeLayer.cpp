@@ -33,6 +33,7 @@ namespace validation
 {
 namespace reference
 {
+/** [ReshapeLayer] **/
 template <typename T>
 SimpleTensor<T> reshape_layer(const SimpleTensor<T> &src, const TensorShape &output_shape)
 {
@@ -51,6 +52,7 @@ template SimpleTensor<uint32_t> reshape_layer(const SimpleTensor<uint32_t> &src,
 template SimpleTensor<int32_t> reshape_layer(const SimpleTensor<int32_t> &src, const TensorShape &output_shape);
 template SimpleTensor<half> reshape_layer(const SimpleTensor<half> &src, const TensorShape &output_shape);
 template SimpleTensor<float> reshape_layer(const SimpleTensor<float> &src, const TensorShape &output_shape);
+/** [ReshapeLayer] **/
 } // namespace reference
 } // namespace validation
 } // namespace test

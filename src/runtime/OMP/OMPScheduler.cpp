@@ -89,6 +89,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> &workloads)
 {
     const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
@@ -107,3 +108,4 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
         workloads[tid](info);
     }
 }
+#endif /* DOXYGEN_SKIP_THIS */

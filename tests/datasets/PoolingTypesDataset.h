@@ -35,6 +35,7 @@ namespace test
 {
 namespace datasets
 {
+/** [PoolingTypes datasets] **/
 class PoolingTypes final : public framework::dataset::ContainerDataset<std::vector<PoolingType>>
 {
 public:
@@ -46,6 +47,7 @@ public:
     {
     }
 };
+/** [PoolingTypes datasets] **/
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

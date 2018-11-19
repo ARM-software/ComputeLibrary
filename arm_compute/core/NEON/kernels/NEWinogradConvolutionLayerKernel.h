@@ -448,8 +448,35 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
+
+#ifndef DOXYGEN_SKIP_THIS
+    /** Configure the weights transform kernel.
+     *
+     * @param[in]  weights_hwio        Pointer to the weights tensor
+     * @param[out] output              Pointer to working space for the output tensor in the Winograd domain.
+     * @param[in]  matrix_stride       Stride across matrices in the output workspace.
+     * @param[in]  num_output_channels Number of filters.
+     * @param[in]  num_input_channels  Number of channels in each filter.
+     */
     void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
+#endif /* DOXYGEN_SKIP_THIS */
+
+    /** Determine how much memory (in units of T) to allocate for the
+     * transformed weights.
+     *
+     * @param[in] num_output_channels Number of output feature maps.
+     * @param[in] num_input_channels  Number of input feature maps.
+     *
+     * @return Storage size (in units of T) required.
+     */
     unsigned int get_weight_storage_size(int num_output_channels, int num_input_channels) const override;
+
+    /** Gets the stride between matrices in the input worspace
+     *
+     * @param[in] kernel_shape The shape of the weights tensor.
+     *
+     * @return Stride expressed in bytes.
+     */
     int get_matrix_stride(const KernelShape &kernel_shape) const override;
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;

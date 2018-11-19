@@ -37,6 +37,7 @@
 
 #include <string>
 
+/** [CLReshapeLayerKernel Kernel] **/
 using namespace arm_compute;
 
 namespace
@@ -123,3 +124,4 @@ void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     add_3D_tensor_argument(idx, _output, window_collapsed);
     enqueue(queue, *this, slice);
 }
+/** [CLReshapeLayerKernel Kernel] **/

@@ -162,11 +162,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+/** [CLActivationLayerFixture snippet] **/
 template <typename T>
 using CLActivationLayerFixture = ActivationValidationFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
+/** [CLActivationLayerFixture snippet] **/
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
+/** [CLActivationLayer Test snippet] **/
 FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset),
                                                                                                             framework::dataset::make("DataType",
                                                                                                                     DataType::F16)))
@@ -174,6 +177,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixture<half>, framework::Data
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
+/** [CLActivationLayer Test snippet] **/
 FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
                                                                                                           framework::dataset::make("DataType",
                                                                                                                   DataType::F16)))
