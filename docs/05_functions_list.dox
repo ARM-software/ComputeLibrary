@@ -73,6 +73,7 @@ namespace arm_compute
         - @ref NEPermute
         - @ref NEPhase
         - @ref NEPixelWiseMultiplication
+        - @ref NEPriorBoxLayer
         - @ref NERemap
         - @ref NEReorgLayer
         - @ref NEReshapeLayer
@@ -172,6 +173,7 @@ namespace arm_compute
     - @ref CLGaussianPyramid
         - @ref CLGaussianPyramidHalf
         - @ref CLGaussianPyramidOrb
+    - @ref CLGenerateProposalsLayer
     - @ref CLHOGDescriptor
     - @ref CLHOGDetector
     - @ref CLHOGGradient
@@ -247,6 +249,7 @@ namespace arm_compute
         - @ref CLPhase
         - @ref CLPixelWiseMultiplication
         - @ref CLPoolingLayer
+        - @ref CLPriorBoxLayer
         - @ref CLROIAlignLayer
         - @ref CLROIPoolingLayer
         - @ref CLRemap

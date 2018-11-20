@@ -238,6 +238,69 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.11 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - New Neon kernels / functions:
+    - @ref NEChannelShuffleLayer / @ref NEChannelShuffleLayerKernel
+    - @ref NEReduceMean
+    - @ref NEReorgLayer / @ref NEReorgLayerKernel
+    - @ref NEPriorBoxLayer / @ref NEPriorBoxLayerKernel
+    - @ref NEUpsampleLayer / @ref NEUpsampleLayerKernel
+    - @ref NEYOLOLayer / @ref NEYOLOLayerKernel
+ - New OpenCL kernels / functions:
+    - @ref CLBatchToSpaceLayer / @ref CLBatchToSpaceLayerKernel
+    - @ref CLBoundingBoxTransform / @ref CLBoundingBoxTransformKernel
+    - @ref CLComputeAllAnchorsKernel
+    - @ref CLGenerateProposalsLayer
+    - @ref CLNormalizePlanarYUVLayer / @ref CLNormalizePlanarYUVLayerKernel
+    - @ref CLReorgLayer / @ref CLReorgLayerKernel
+    - @ref CLSpaceToBatchLayer / @ref CLSpaceToBatchLayerKernel
+    - @ref CLPadLayer
+    - @ref CLReduceMean
+    - @ref CLPriorBoxLayer / @ref CLPriorBoxLayerKernel
+    - @ref CLROIAlignLayer / @ref CLROIAlignLayerKernel
+    - @ref CLSlice
+    - @ref CLSplit
+    - @ref CLStridedSlice / @ref CLStridedSliceKernel
+    - @ref CLUpsampleLayer / @ref CLUpsampleLayerKernel
+    - @ref CLYOLOLayer / @ref CLYOLOLayerKernel
+ - New CPP kernels / functions:
+    - @ref CPPBoxWithNonMaximaSuppressionLimit / @ref CPPBoxWithNonMaximaSuppressionLimitKernel
+ - Added the validate method in:
+    - @ref NEDepthConvertLayer
+    - @ref NEFloor / @ref CLFloor
+    - @ref NEGEMMMatrixAdditionKernel
+    - @ref NEReshapeLayer / @ref CLReshapeLayer
+    - @ref CLScale
+ - Added new examples:
+    - graph_shufflenet.cpp
+    - graph_yolov3.cpp
+ - Added documentation for add a new function or kernel.
+ - Improved doxygen documentation adding a list of the existing functions.
+ - Add 4D tensors support to
+    - @ref CLWidthConcatenateLayer
+    - @ref CLFlattenLayer
+    - @ref CLSoftmaxLayer
+ - Add dot product support for @ref CLDepthwiseConvolutionLayer3x3NHWCKernel non-unit stride
+ - Add SVE support
+ - Fused batch normalization into convolution layer weights in @ref CLFuseBatchNormalization
+ - Fuses activation in @ref CLDepthwiseConvolutionLayer3x3NCHWKernel, @ref CLDepthwiseConvolutionLayer3x3NHWCKernel and @ref NEGEMMConvolutionLayer
+ - Added NHWC data layout support to:
+    - @ref CLChannelShuffleLayer
+    - @ref CLDeconvolutionLayer
+    - @ref CLL2NormalizeLayer
+ - Added QASYMM8 support to the following kernels:
+    - @ref CLScaleKernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref CLPixelWiseMultiplicationKernel
+ - Added FP16 support to the following kernels:
+    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref CLNormalizePlanarYUVLayerKernel
+    - @ref CLWinogradConvolutionLayer (5x5 kernel)
+ - More tests added to both validation and benchmarking suites.
+
 v18.08 Public major release
  - Various bug fixes.
  - Various optimisations.
