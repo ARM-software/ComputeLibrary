@@ -55,7 +55,7 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        std::uniform_real_distribution<> distribution(-1.f, 1.f);
+        std::uniform_real_distribution<> distribution(1.f, 2.f);
         library->fill(tensor, distribution, 0);
     }
 
