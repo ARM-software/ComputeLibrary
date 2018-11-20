@@ -56,7 +56,7 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
     // IN_MAP_1D and CROSS_MAP normalize over a single axis only
     int radius_rows = (NormType::IN_MAP_2D == type) ? norm_size / 2 : 0;
 
-    if(type == NormType::CROSS_MAP)
+    if(info.is_cross_map())
     {
         // Remove also depth from upper dimensions since it is the dimension we
         // want to use for normalization

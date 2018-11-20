@@ -47,11 +47,11 @@ class NormalizationValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type)
+    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
     {
         NormalizationLayerInfo info(norm_type, norm_size, 5, beta, 1.f, is_scaled);
 
-        _target    = compute_target(shape, info, data_type);
+        _target    = compute_target(shape, info, data_type, data_layout);
         _reference = compute_reference(shape, info, data_type);
     }
 
@@ -63,11 +63,16 @@ protected:
         library->fill(tensor, distribution, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, NormalizationLayerInfo info, DataType data_type)
+    TensorType compute_target(TensorShape shape, NormalizationLayerInfo info, DataType data_type, DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1);
-        TensorType dst = create_tensor<TensorType>(shape, data_type, 1);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType norm_layer;
@@ -112,9 +117,9 @@ class NormalizationValidationFixture : public NormalizationValidationGenericFixt
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type)
+    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
     {
-        NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, is_scaled, data_type);
+        NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, is_scaled, data_type, data_layout);
     }
 };
 } // namespace validation

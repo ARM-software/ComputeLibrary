@@ -1345,7 +1345,7 @@ class NormalizationLayerInfo
 public:
     /** Default Constructor
      *
-     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NORM_TYPE::CROSS_MAP
+     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NormType::CROSS_MAP
      * @param[in] norm_size The normalization size is the number of elements to normalize across. Defaults to 5.
      * @param[in] alpha     (Optional) Alpha parameter used by normalization equation. Defaults to 0.0001.
      * @param[in] beta      (Optional) Beta parameter used by normalization equation. Defaults to 0.5.
@@ -1381,6 +1381,11 @@ public:
     float kappa() const
     {
         return _kappa;
+    }
+    /** Get the is_scaled value */
+    bool is_scaled() const
+    {
+        return _is_scaled;
     }
     /** Check if normalization is cross map */
     bool is_cross_map() const

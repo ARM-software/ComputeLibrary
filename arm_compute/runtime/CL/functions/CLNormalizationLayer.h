@@ -51,16 +51,19 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler)
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler).
+     *                           Data layouts supported: NCHW/NHWC.
      * @param[out]     output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
+     *                           Data types supported: same as @p input. Data layouts supported: same as @p input.
      * @param[in]      norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
     void configure(ICLTensor *input, ICLTensor *output, const NormalizationLayerInfo &norm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayer
      *
      * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                      and an optional 4th dimension for batch of inputs. Data types supported: F16/F32
+     *                      and an optional 4th dimension for batch of inputs. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
      * @param[in] output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
+     *                      Data layouts supported: same as @p input.
      * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      *
      * @return a status
