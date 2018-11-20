@@ -154,7 +154,10 @@ struct RedOpX
         input);
 
         auto carry_addition = wrapper::vpadd(wrapper::vgethigh(vec_sum_value), wrapper::vgetlow(vec_sum_value));
-        carry_addition      = wrapper::vpadd(carry_addition, carry_addition);
+        for(int i = 0; i < S / 4; ++i)
+        {
+            carry_addition = wrapper::vpadd(carry_addition, carry_addition);
+        }
 
         auto res = wrapper::vgetlane(carry_addition, 0);
         if(op == ReductionOperation::MEAN_SUM)

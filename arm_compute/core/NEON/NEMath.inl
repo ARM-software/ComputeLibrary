@@ -245,37 +245,12 @@ inline float16x8_t vtaylor_polyq_f16(float16x8_t x, const std::array<float16x8_t
 
 inline float16x8_t vexpq_f16(float16x8_t x)
 {
-    static const std::array<float16x8_t, 8> exp_tab_f16 =
-    {
-        {
-            vdupq_n_f16(1.f),
-            vdupq_n_f16(0.0416598916054f),
-            vdupq_n_f16(0.500000596046f),
-            vdupq_n_f16(0.0014122662833f),
-            vdupq_n_f16(1.00000011921f),
-            vdupq_n_f16(0.00833693705499f),
-            vdupq_n_f16(0.166665703058f),
-            vdupq_n_f16(0.000195780929062f),
-        }
-    };
+    // TODO (COMPMID-1535) : Revisit FP16 approximations
+    const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
+    const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
-    static const float16x8_t CONST_LN2          = vdupq_n_f16(0.6931471805f); // ln(2)
-    static const float16x8_t CONST_INV_LN2      = vdupq_n_f16(1.4426950408f); // 1/ln(2)
-    static const float16x8_t CONST_0            = vdupq_n_f16(0.f);
-    static const int16x8_t   CONST_NEGATIVE_126 = vdupq_n_s16(-126);
-
-    // Perform range reduction [-log(2),log(2)]
-    const int16x8_t   m   = vcvtq_s16_f16(vmulq_f16(x, CONST_INV_LN2));
-    const float16x8_t val = vsubq_f16(x, vmulq_f16(vcvtq_f16_s16(m), CONST_LN2));
-
-    // Polynomial Approximation
-    float16x8_t poly = vtaylor_polyq_f16(val, exp_tab_f16);
-
-    // Reconstruct
-    poly = vreinterpretq_f16_s16(vqaddq_s16(vreinterpretq_s16_f16(poly), vqshlq_n_s16(m, 9)));
-    poly = vbslq_f16(vcltq_s16(m, CONST_NEGATIVE_126), CONST_0, poly);
-
-    return poly;
+    const float16x8_t res = vcvt_high_f16_f32(vcvt_f16_f32(vexpq_f32(x_low)), vexpq_f32(x_high));
+    return res;
 }
 
 inline float16x8_t vlogq_f16(float16x8_t x)
