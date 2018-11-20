@@ -183,7 +183,9 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
     unsigned int    kernel_number = 0;
     for(auto kernel : _kernels)
     {
-        cl_ulong start, end;
+        cl_ulong queued, flushed, start, end;
+        kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queued);
+        kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &flushed);
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         std::string name = kernel.name + " #" + support::cpp11::to_string(kernel_number++);
@@ -191,6 +193,8 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
         if(output_timestamps)
         {
             measurements.emplace("[start]" + name, Measurement(start / static_cast<cl_ulong>(_scale_factor), _unit));
+            measurements.emplace("[queued]" + name, Measurement(queued / static_cast<cl_ulong>(_scale_factor), _unit));
+            measurements.emplace("[flushed]" + name, Measurement(flushed / static_cast<cl_ulong>(_scale_factor), _unit));
             measurements.emplace("[end]" + name, Measurement(end / static_cast<cl_ulong>(_scale_factor), _unit));
         }
         else
