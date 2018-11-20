@@ -50,18 +50,18 @@ public:
     NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in, out] input   Source tensor. Data types supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in, out] input   Source tensor. Data types supported: F16/F32. (Written to only for border_size != 0)
      * @param[out]     output  Destination tensor. Data types and data layouts supported: same as @p input.
-     * @param[in]      axis    Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in]      axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
      * @param[in]      epsilon (Optional) Lower bound value for the normalization.
      */
     void configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon = 1e-12f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayer.
      *
-     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in] input   Source tensor info. Data types supported: F16/F32. (Written to only for border_size != 0)
      * @param[in] output  Destination tensor info. Data types and data layouts supported: same as @p input.
-     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
      * @param[in] epsilon (Optional) Lower bound value for the normalization.
      *
      * @return a status

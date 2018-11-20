@@ -66,12 +66,14 @@ public:
     {
         // Set in window
         Window in_window(window);
+        Window out_window(window);
 
         in_window.set(Window::DimY, Window::Dimension(0, 1, 1));
+        out_window.set(Window::DimY, Window::Dimension(0, output->info()->dimension(1), output->info()->dimension(1)));
 
         // Get first input and output slices
         Window in_slice  = in_window.first_slice_window_2D();
-        Window out_slice = window.first_slice_window_2D();
+        Window out_slice = out_window.first_slice_window_2D();
 
         do
         {
@@ -80,18 +82,20 @@ public:
 
             f(in, out, in_slice, out_slice, *input->info(), 1);
         }
-        while(in_window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
+        while(in_window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
     }
     static void reduceZ(const Window &window, const ITensor *input, ITensor *output, F f)
     {
         // Set in window
         Window in_window(window);
+        Window out_window(window);
 
         in_window.set(Window::DimZ, Window::Dimension(0, 1, 1));
+        out_window.set(Window::DimZ, Window::Dimension(0, output->info()->dimension(2), output->info()->dimension(2)));
 
         // Get first input and output slices
         Window in_slice  = in_window.first_slice_window_3D();
-        Window out_slice = window.first_slice_window_3D();
+        Window out_slice = out_window.first_slice_window_3D();
 
         do
         {
@@ -100,7 +104,7 @@ public:
 
             f(in, out, in_slice, out_slice, *input->info(), 2);
         }
-        while(in_window.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(out_slice));
+        while(in_window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_3D(out_slice));
     }
     static void reduceW(const Window &window, const ITensor *input, ITensor *output, F f)
     {

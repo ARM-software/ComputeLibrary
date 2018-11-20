@@ -32,6 +32,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlow.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/invsqrt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/min.h"

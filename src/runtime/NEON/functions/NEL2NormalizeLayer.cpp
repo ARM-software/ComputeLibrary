@@ -26,8 +26,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEL2NormalizeLayer::NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
@@ -57,8 +57,8 @@ Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperation::validate(input, &sum_sq, axis, ReductionOperation::SUM_SQUARE));
 
-    // Reduce shape on axis (supported axis is 0)
-    shape.set(0, 1);
+    // Reduce shape on axis
+    shape.set(axis, 1);
     sum_sq.set_tensor_shape(shape);
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEL2NormalizeLayerKernel::validate(input, &sum_sq, output, axis, epsilon));
@@ -75,3 +75,4 @@ void NEL2NormalizeLayer::run()
 
     _memory_group.release();
 }
+} // namespace arm_compute

@@ -32,8 +32,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLL2NormalizeLayer::CLL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _reduce_func(), _normalize_kernel(), _sumsq()
 {
@@ -81,3 +81,4 @@ void CLL2NormalizeLayer::run()
 
     _memory_group.release();
 }
+} // namespace arm_compute

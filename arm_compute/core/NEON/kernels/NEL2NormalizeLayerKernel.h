@@ -52,24 +52,24 @@ public:
     ~NEL2NormalizeLayerKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input   Source tensor. Data types supported: F16/F32.
      * @param[in]  sum     Sum values tensor. Data types supported: same as @p input.
      *                     Sum will have the same number of dimensions as input.
      * @param[out] output  Destination tensor. Data types and data layouts supported: same as @p input.
      *                     Output will have the same number of dimensions as input.
-     * @param[in]  axis    Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in]  axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
      * @param[in]  epsilon Lower bound value for the normalization.
      */
     void configure(const ITensor *input, const ITensor *sum, ITensor *output, unsigned int axis, float epsilon);
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayerKernel.
      *
-     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] input   Source tensor info. Data types supported: F16/F32.
      * @param[in] sum     Sum values tensor info. Data types supported: same as @p input.
      *                    Sum will have the same number of dimensions as input.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: same as @p input.
      *                    Output will have the same number of dimensions as input.
-     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0, 1, 2
      * @param[in] epsilon Lower bound value for the normalization.
      *
      * @return a status

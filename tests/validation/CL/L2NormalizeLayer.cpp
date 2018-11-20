@@ -62,7 +62,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
-                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 3
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 2
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
     framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
@@ -73,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            })),
-    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 4U, 0U })),
+    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 3U, 0U })),
     framework::dataset::make("Expected",   { false, false, false, false, false, false, true })),
     input_info, output_info, axis, expected)
 {
