@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ArithmeticOperationsFixture.h"
+#include "tests/validation/fixtures/ElementwiseOperationsFixture.h"
 
 namespace arm_compute
 {
@@ -43,23 +43,26 @@ namespace validation
 {
 namespace
 {
+RelativeTolerance<float> tolerance_fp32(0.000001f);
+RelativeTolerance<float> tolerance_fp16(0.001f);
+
 constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
-const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
-                                                 DataType::U8));
-const auto ArithmeticAdditionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                      framework::dataset::make("DataType",
-                                                                               DataType::QASYMM8));
-const auto ArithmeticAdditionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
-                                                  framework::dataset::make("DataType", DataType::S16));
-const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
-                                                   framework::dataset::make("DataType", DataType::F16));
-const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
-                                                   framework::dataset::make("DataType", DataType::F32));
+const auto ElementwiseMaxU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
+                                             DataType::U8));
+const auto ElementwiseMaxQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                  framework::dataset::make("DataType",
+                                                                           DataType::QASYMM8));
+const auto ElementwiseMaxS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+                                              framework::dataset::make("DataType", DataType::S16));
+const auto ElementwiseMaxFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+                                               framework::dataset::make("DataType", DataType::F16));
+const auto ElementwiseMaxFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+                                               framework::dataset::make("DataType", DataType::F32));
 } // namespace
 
 TEST_SUITE(CL)
-TEST_SUITE(ArithmeticAddition)
+TEST_SUITE(ElementwiseMax)
 
 // *INDENT-OFF*
 // clang-format off
@@ -85,17 +88,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Expected", { true, true, false, false, false})),
                input1_info, input2_info, output_info, expected)
 {
-    ARM_COMPUTE_EXPECT(bool(CLArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(CLElementwiseMax::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
 
 template <typename T>
-using CLArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+using CLElementwiseMaxFixture = ElementwiseMaxValidationFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+               shape)
 {
     // Create tensors
     CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::U8);
@@ -103,8 +106,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
+    CLElementwiseMax add;
+    add.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -117,8 +120,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxU8Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -126,12 +128,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<uint8_t>, framework
 TEST_SUITE_END()
 
 template <typename T>
-using CLArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantizedFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+using CLElementwiseMaxQuantizedFixture = ElementwiseMaxValidationQuantizedFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+               shape)
 {
     // Create tensors
     CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
@@ -139,8 +141,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
 
     // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
+    CLElementwiseMax add;
+    add.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -153,25 +155,23 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
-                       ArithmeticAdditionQASYMM8Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                       ElementwiseMaxQASYMM8Dataset),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
 
                       )
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, data_type, policy)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+               shape, data_type)
 {
     // Create tensors
     CLTensor ref_src1 = create_tensor<CLTensor>(shape, data_type);
@@ -179,8 +179,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
 
     // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
+    CLElementwiseMax add;
+    add.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -193,15 +193,13 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
-                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticAdditionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionS16Dataset),
-                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMaxFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMaxS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -210,17 +208,16 @@ TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),
-                                                                                                         framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP16Dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
 }
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, policy)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+               shape)
 {
     // Create tensors
     CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::F32);
@@ -228,8 +225,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
 
     // Create and Configure function
-    CLArithmeticAddition add;
-    add.configure(&ref_src1, &ref_src2, &dst, policy);
+    CLElementwiseMax add;
+    add.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -242,37 +239,33 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
-                                                                                                                framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticAdditionFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticAdditionFP32Dataset),
-                                                                                                              framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMaxFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMaxFP32Dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
 template <typename T>
-using CLArithmeticAdditionBroadcastFixture = ArithmeticAdditionBroadcastValidationFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+using CLElementwiseMaxBroadcastFixture = ElementwiseMaxBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapesBroadcast(),
-                       ArithmeticAdditionFP32Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
+                       ElementwiseMaxFP32Dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLArithmeticAdditionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
-                       ArithmeticAdditionFP32Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
+                       ElementwiseMaxFP32Dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

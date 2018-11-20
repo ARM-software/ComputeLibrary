@@ -26,8 +26,8 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
+#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
@@ -90,7 +90,7 @@ private:
  * -# @ref CLGEMM (if the data type is FP32 or FP16)
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
- * -# @ref CLArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
+ * -# @ref CLElementwiseOperationKernel for addition (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
  * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
@@ -185,14 +185,14 @@ private:
                               int gemm_3d_depth = 1, bool skip_im2col = false);
 
 private:
-    CLMemoryGroup                    _memory_group;
-    CLConvolutionLayerReshapeWeights _reshape_weights;
-    CLIm2ColKernel                   _im2col_kernel;
-    CLGEMM                           _mm_gemm;
-    CLGEMMLowpMatrixMultiplyCore     _mm_gemmlowp;
-    CLCol2ImKernel                   _col2im_kernel;
-    CLActivationLayer                _activationlayer_function;
-    CLArithmeticAdditionKernel       _add_bias_kernel;
+    CLMemoryGroup                        _memory_group;
+    CLConvolutionLayerReshapeWeights     _reshape_weights;
+    CLIm2ColKernel                       _im2col_kernel;
+    CLGEMM                               _mm_gemm;
+    CLGEMMLowpMatrixMultiplyCore         _mm_gemmlowp;
+    CLCol2ImKernel                       _col2im_kernel;
+    CLActivationLayer                    _activationlayer_function;
+    CLSaturatedArithmeticOperationKernel _add_bias_kernel;
 
     const ICLTensor *_original_weights;
 

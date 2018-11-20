@@ -110,7 +110,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _gemm_forget_gate.configure(output_state_in, &_forget_gate_out2, nullptr, &_forget_gate_out3, 1.f, 0.f);
     _forget_gate_out2.allocator()->allocate();
     _memory_group.manage(&_forget_gate_out5);
-    _accum_forget_gate1.configure(&_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out5, ConvertPolicy::SATURATE);
+    _accum_forget_gate1.configure(ArithmeticOperation::ADD, &_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out5, ConvertPolicy::SATURATE);
     CLTensor *forget_gate_out = &_forget_gate_out5;
 
     if(lstm_params.has_peephole_opt())
@@ -139,7 +139,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     {
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-        _subtract_input_gate.configure(&_ones, &_forget_gate_out1, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _subtract_input_gate.configure(ArithmeticOperation::SUB, &_ones, &_forget_gate_out1, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
     }
@@ -160,7 +160,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _gemm_input_gate.configure(output_state_in, &_input_gate_out2, nullptr, &_input_gate_out3, 1.f, 0.f);
         _input_gate_out2.allocator()->allocate();
         _memory_group.manage(&_input_gate_out4);
-        _accum_input_gate1.configure(&_input_gate_out1, &_input_gate_out3, &_input_gate_out4, ConvertPolicy::SATURATE);
+        _accum_input_gate1.configure(ArithmeticOperation::ADD, &_input_gate_out1, &_input_gate_out3, &_input_gate_out4, ConvertPolicy::SATURATE);
         if(_run_peephole_opt)
         {
             _memory_group.manage(&_input_gate_out5);
@@ -190,14 +190,14 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _gemm_cell_state1.configure(output_state_in, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
     _cell_state_out2.allocator()->allocate();
     _memory_group.manage(&_cell_state_out4);
-    _accum_cell_state1.configure(&_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
+    _accum_cell_state1.configure(ArithmeticOperation::ADD, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
     _activation_cell_state.configure(&_cell_state_out4, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
     _pixelwise_mul_cell_state1.configure(&_cell_state_out4, &_input_gate_out1, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _cell_state_out4.allocator()->allocate();
     _pixelwise_mul_cell_state2.configure(&_forget_gate_out1, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _forget_gate_out1.allocator()->allocate();
-    _accum_cell_state2.configure(&_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
+    _accum_cell_state2.configure(ArithmeticOperation::ADD, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
     _cell_state_out5.allocator()->allocate();
     // Perform clipping
@@ -223,7 +223,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _gemm_output.configure(output_state_in, &_output2, nullptr, &_output3, 1.f, 0.f);
     _output2.allocator()->allocate();
     _memory_group.manage(&_output5);
-    _accum_output1.configure(&_output1, &_output3, &_output5, ConvertPolicy::SATURATE);
+    _accum_output1.configure(ArithmeticOperation::ADD, &_output1, &_output3, &_output5, ConvertPolicy::SATURATE);
     _output3.allocator()->allocate();
     CLTensor *output_gate_out = &_output5;
     if(lstm_params.has_peephole_opt())
@@ -364,7 +364,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     // Validate forget gate
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, input_to_forget_weights, forget_gate_bias, &forget_gate));
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(output_state_in, &units_out_transposed_info, nullptr, &forget_gate, 1.f, 0.f, GEMMInfo()));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAdditionKernel::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, &forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
     if(lstm_params.has_peephole_opt())
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLPixelWiseMultiplicationKernel::validate(cell_state_in, lstm_params.cell_to_forget_weights(), &forget_gate, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN));
@@ -396,7 +396,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticSubtractionKernel::validate(&forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::SUB, &forget_gate, &forget_gate, &forget_gate, ConvertPolicy::SATURATE));
     }
 
     // Validate cell state

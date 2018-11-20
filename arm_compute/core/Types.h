@@ -552,6 +552,17 @@ enum class ReductionOperation
     ARG_IDX_MIN  /**< Index of the min value */
 };
 
+/** Available element-wise operations */
+enum class ArithmeticOperation
+{
+    ADD,          /**< (x + y) */
+    SUB,          /**< (x  - y) */
+    DIV,          /**< (x / y) */
+    MIN,          /**< Min(x, y) */
+    MAX,          /**< Max(x, y) */
+    SQUARED_DIFF, /**< (x - y)^2 */
+};
+
 /** The normalization type used for the normalization layer */
 enum class NormType
 {

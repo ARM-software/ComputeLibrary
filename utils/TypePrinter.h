@@ -1322,6 +1322,55 @@ inline std::string to_string(const ConvertPolicy &policy)
     return str.str();
 }
 
+/** Formatted output of the ArithmeticOperation type.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Operation to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation &op)
+{
+    switch(op)
+    {
+        case ArithmeticOperation::ADD:
+            os << "ADD";
+            break;
+        case ArithmeticOperation::SUB:
+            os << "SUB";
+            break;
+        case ArithmeticOperation::DIV:
+            os << "DIV";
+            break;
+        case ArithmeticOperation::MAX:
+            os << "MAX";
+            break;
+        case ArithmeticOperation::MIN:
+            os << "MIN";
+            break;
+        case ArithmeticOperation::SQUARED_DIFF:
+            os << "SQUARED_DIFF";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Arithmetic Operation
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ArithmeticOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
 /** Formatted output of the Reduction Operations.
  *
  * @param[out] os Output stream.

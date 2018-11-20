@@ -27,14 +27,13 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticSubtractionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
+#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
@@ -141,76 +140,76 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                   _memory_group;
-    CLFullyConnectedLayer           _fully_connected_input_gate;
-    CLGEMM                          _gemm_input_gate;
-    CLTransposeKernel               _transpose_input_gate;
-    CLArithmeticAdditionKernel      _accum_input_gate1;
-    CLArithmeticAddition            _accum_input_gate2;
-    CLArithmeticSubtractionKernel   _subtract_input_gate;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_input_gate;
-    CLActivationLayerKernel         _activation_input_gate;
-    CLFullyConnectedLayer           _fully_connected_forget_gate;
-    CLGEMM                          _gemm_forget_gate;
-    CLTransposeKernel               _transpose_forget_gate;
-    CLArithmeticAdditionKernel      _accum_forget_gate1;
-    CLArithmeticAddition            _accum_forget_gate2;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate;
-    CLActivationLayerKernel         _activation_forget_gate;
-    CLFullyConnectedLayer           _fully_connected_cell_state;
-    CLGEMM                          _gemm_cell_state1;
-    CLGEMM                          _gemm_cell_state2;
-    CLTransposeKernel               _transpose_cell_state;
-    CLArithmeticAdditionKernel      _accum_cell_state1;
-    CLArithmeticAdditionKernel      _accum_cell_state2;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_cell_state1;
-    CLActivationLayerKernel         _activation_cell_state;
-    CLActivationLayerKernel         _cell_clip;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_cell_state2;
-    CLFullyConnectedLayer           _fully_connected_output;
-    CLGEMM                          _gemm_output;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_output_state1;
-    CLTransposeKernel               _transpose_output;
-    CLArithmeticAdditionKernel      _accum_output1;
-    CLArithmeticAddition            _accum_output2;
-    CLActivationLayerKernel         _activation_output;
-    CLActivationLayerKernel         _activation_output_state;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_output_state2;
-    CLFullyConnectedLayer           _fully_connected_output_state;
-    CLGEMM                          _gemm_output_state;
-    CLArithmeticAdditionKernel      _accum_output_state;
-    CLActivationLayerKernel         _projection_clip;
-    CLCopyKernel                    _copy_cell_state;
-    CLCopyKernel                    _copy_output;
-    CLWidthConcatenateLayer         _concat_scratch_buffer;
-    CLTensor                        _input_gate_out1;
-    CLTensor                        _input_gate_out2;
-    CLTensor                        _input_gate_out3;
-    CLTensor                        _input_gate_out4;
-    CLTensor                        _input_gate_out5;
-    CLTensor                        _forget_gate_out1;
-    CLTensor                        _forget_gate_out2;
-    CLTensor                        _forget_gate_out3;
-    CLTensor                        _forget_gate_out4;
-    CLTensor                        _forget_gate_out5;
-    CLTensor                        _cell_state_out1;
-    CLTensor                        _cell_state_out2;
-    CLTensor                        _cell_state_out3;
-    CLTensor                        _cell_state_out4;
-    CLTensor                        _cell_state_out5;
-    CLTensor                        _output1;
-    CLTensor                        _output2;
-    CLTensor                        _output3;
-    CLTensor                        _output4;
-    CLTensor                        _output5;
-    CLTensor                        _cell_state_activation;
-    CLTensor                        _output_state1;
-    CLTensor                        _ones;
-    bool                            _run_peephole_opt;
-    bool                            _run_cifg_opt;
-    bool                            _perform_cell_clipping;
-    bool                            _has_projection_weights;
-    bool                            _perform_projection_clipping;
+    CLMemoryGroup                        _memory_group;
+    CLFullyConnectedLayer                _fully_connected_input_gate;
+    CLGEMM                               _gemm_input_gate;
+    CLTransposeKernel                    _transpose_input_gate;
+    CLSaturatedArithmeticOperationKernel _accum_input_gate1;
+    CLArithmeticAddition                 _accum_input_gate2;
+    CLSaturatedArithmeticOperationKernel _subtract_input_gate;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_input_gate;
+    CLActivationLayerKernel              _activation_input_gate;
+    CLFullyConnectedLayer                _fully_connected_forget_gate;
+    CLGEMM                               _gemm_forget_gate;
+    CLTransposeKernel                    _transpose_forget_gate;
+    CLSaturatedArithmeticOperationKernel _accum_forget_gate1;
+    CLArithmeticAddition                 _accum_forget_gate2;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_forget_gate;
+    CLActivationLayerKernel              _activation_forget_gate;
+    CLFullyConnectedLayer                _fully_connected_cell_state;
+    CLGEMM                               _gemm_cell_state1;
+    CLGEMM                               _gemm_cell_state2;
+    CLTransposeKernel                    _transpose_cell_state;
+    CLSaturatedArithmeticOperationKernel _accum_cell_state1;
+    CLSaturatedArithmeticOperationKernel _accum_cell_state2;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_cell_state1;
+    CLActivationLayerKernel              _activation_cell_state;
+    CLActivationLayerKernel              _cell_clip;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_cell_state2;
+    CLFullyConnectedLayer                _fully_connected_output;
+    CLGEMM                               _gemm_output;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_output_state1;
+    CLTransposeKernel                    _transpose_output;
+    CLSaturatedArithmeticOperationKernel _accum_output1;
+    CLArithmeticAddition                 _accum_output2;
+    CLActivationLayerKernel              _activation_output;
+    CLActivationLayerKernel              _activation_output_state;
+    CLPixelWiseMultiplicationKernel      _pixelwise_mul_output_state2;
+    CLFullyConnectedLayer                _fully_connected_output_state;
+    CLGEMM                               _gemm_output_state;
+    CLSaturatedArithmeticOperationKernel _accum_output_state;
+    CLActivationLayerKernel              _projection_clip;
+    CLCopyKernel                         _copy_cell_state;
+    CLCopyKernel                         _copy_output;
+    CLWidthConcatenateLayer              _concat_scratch_buffer;
+    CLTensor                             _input_gate_out1;
+    CLTensor                             _input_gate_out2;
+    CLTensor                             _input_gate_out3;
+    CLTensor                             _input_gate_out4;
+    CLTensor                             _input_gate_out5;
+    CLTensor                             _forget_gate_out1;
+    CLTensor                             _forget_gate_out2;
+    CLTensor                             _forget_gate_out3;
+    CLTensor                             _forget_gate_out4;
+    CLTensor                             _forget_gate_out5;
+    CLTensor                             _cell_state_out1;
+    CLTensor                             _cell_state_out2;
+    CLTensor                             _cell_state_out3;
+    CLTensor                             _cell_state_out4;
+    CLTensor                             _cell_state_out5;
+    CLTensor                             _output1;
+    CLTensor                             _output2;
+    CLTensor                             _output3;
+    CLTensor                             _output4;
+    CLTensor                             _output5;
+    CLTensor                             _cell_state_activation;
+    CLTensor                             _output_state1;
+    CLTensor                             _ones;
+    bool                                 _run_peephole_opt;
+    bool                                 _run_cifg_opt;
+    bool                                 _perform_cell_clipping;
+    bool                                 _has_projection_weights;
+    bool                                 _perform_projection_clipping;
 };
 }
 #endif /* __ARM_COMPUTE_CLLSTMLAYER_H__ */

@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_CL_REDUCE_MEAN_H__
 
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
-#include "arm_compute/runtime/CL/functions/CLArithmeticDivision.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"

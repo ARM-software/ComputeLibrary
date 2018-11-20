@@ -242,7 +242,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     else if(_append_bias)
     {
         // Configure add bias kernel
-        _add_bias_kernel.configure(output, biases, output, ConvertPolicy::SATURATE);
+        _add_bias_kernel.configure(ArithmeticOperation::ADD, output, biases, output, ConvertPolicy::SATURATE);
     }
 
     // Create GEMM output tensor
@@ -276,9 +276,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     {
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
 
-        const float multiplier  = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
+        const float multiplier        = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
+        int         output_multiplier = 0;
+        int         output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         int min_activation = 0;
@@ -432,7 +432,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     else if(append_bias)
     {
         // Validate add bias kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAdditionKernel::validate(output, biases, output, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, output, biases, output, ConvertPolicy::SATURATE));
     }
 
     // Create GEMM output tensor
@@ -459,9 +459,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     {
         const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input->quantization_info() : output->quantization_info();
 
-        const float multiplier  = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
+        const float multiplier        = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
+        int         output_multiplier = 0;
+        int         output_shift      = 0;
 
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 

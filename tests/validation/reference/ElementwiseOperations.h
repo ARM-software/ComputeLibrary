@@ -21,34 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLArithmeticDivision.h"
+#ifndef __ARM_COMPUTE_TEST_ELEMENTWISE_OPERATIONS_H__
+#define __ARM_COMPUTE_TEST_ELEMENTWISE_OPERATIONS_H__
 
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticDivisionKernel.h"
-#include "support/ToolchainSupport.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
 
-#include <utility>
-
-using namespace arm_compute;
-
-void CLArithmeticDivision::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+namespace arm_compute
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLArithmeticDivisionKernel>();
-    k->configure(input1, input2, output);
-    _kernel = std::move(k);
-
-    if(output->info()->dimension(0) > 1)
-    {
-        ICLTensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
-
-        if(broadcasted_info->info()->dimension(0) == 1)
-        {
-            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
-        }
-    }
-}
-
-Status CLArithmeticDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+namespace test
 {
-    return CLArithmeticDivisionKernel::validate(input1, input2, output);
-}
+namespace validation
+{
+namespace reference
+{
+template <typename T>
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy = ConvertPolicy::WRAP);
+
+template <typename T>
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy = ConvertPolicy::WRAP);
+} // namespace reference
+} // namespace validation
+} // namespace test
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_ELEMENTWISE_OPERATIONS_H__ */

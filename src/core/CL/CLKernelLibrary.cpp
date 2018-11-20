@@ -149,11 +149,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "accumulate_weighted", "accumulate.cl" },
     { "activation_layer", "activation_layer.cl" },
     { "activation_layer_qa8", "activation_layer_qa8.cl" },
-    { "arithmetic_add_quantized", "arithmetic_op_quantized.cl" },
-    { "arithmetic_add", "arithmetic_op.cl" },
-    { "arithmetic_sub", "arithmetic_op.cl" },
-    { "arithmetic_sub_quantized", "arithmetic_op_quantized.cl" },
-    { "arithmetic_div", "arithmetic_op.cl" },
     { "batch_to_space_nchw", "batch_to_space.cl" },
     { "batch_to_space_static_nchw", "batch_to_space.cl" },
     { "batch_to_space_nhwc", "batch_to_space.cl" },
@@ -246,6 +241,18 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
     { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "elementwise_operation_ADD", "elementwise_operation.cl" },
+    { "elementwise_operation_SUB", "elementwise_operation.cl" },
+    { "elementwise_operation_MAX", "elementwise_operation.cl" },
+    { "elementwise_operation_MIN", "elementwise_operation.cl" },
+    { "elementwise_operation_DIV", "elementwise_operation.cl" },
+    { "elementwise_operation_SQUARED_DIFF", "elementwise_operation.cl" },
+    { "elementwise_operation_ADD_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SUB_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MAX_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MIN_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_DIV_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SQUARED_DIFF_quantized", "elementwise_operation_quantized.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "flatten", "flatten.cl" },
@@ -510,14 +517,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/activation_layer_qa8.clembed"
     },
     {
-        "arithmetic_op.cl",
-#include "./cl_kernels/arithmetic_op.clembed"
-    },
-    {
-        "arithmetic_op_quantized.cl",
-#include "./cl_kernels/arithmetic_op_quantized.clembed"
-    },
-    {
         "batch_to_space.cl",
 #include "./cl_kernels/batch_to_space.clembed"
     },
@@ -640,6 +639,14 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "direct_convolution_1x1_3x3_5x5_quantized.cl",
 #include "./cl_kernels/direct_convolution_1x1_3x3_5x5_quantized.clembed"
+    },
+    {
+        "elementwise_operation.cl",
+#include "./cl_kernels/elementwise_operation.clembed"
+    },
+    {
+        "elementwise_operation_quantized.cl",
+#include "./cl_kernels/elementwise_operation_quantized.clembed"
     },
     {
         "erode.cl",
