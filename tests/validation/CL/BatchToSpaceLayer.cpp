@@ -91,17 +91,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Mismatching data types
-                                                       TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),    // Negative block shapes
-                                                       TensorInfo(TensorShape(32U, 16U, 2U, 1U, 4U), 1, DataType::F32), // Wrong tensor shape
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Negative block shapes
+                                                       TensorInfo(TensorShape(32U, 16U, 2U, 4U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                      }),
                framework::dataset::make("BlockShapeX", { 2, 2, 2, 2 })),
                framework::dataset::make("BlockShapeY", { 2, 2, -2, 2 })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 8U, 2U, 4U), 1, DataType::F32),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 8U, 2U, 1U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("Expected", { true, false, false, false})),
                input_info, block_shape_x, block_shape_y, output_info, expected)

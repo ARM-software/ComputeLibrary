@@ -55,18 +55,19 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape_x <= 0);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape_y <= 0);
 
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
+
     // Validate output if initialized
     if(output->total_size() != 0)
     {
-        const DataLayout data_layout = input->data_layout();
-        const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-        const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-        const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-        const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_width] != (block_shape_x * output->tensor_shape()[idx_width]));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_height] != (block_shape_x * output->tensor_shape()[idx_height]));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
+        const int idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+        const int idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+        const int idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_width] != (block_shape_x * input->tensor_shape()[idx_width]));
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_height] != (block_shape_x * input->tensor_shape()[idx_height]));
+        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_channel] != input->tensor_shape()[idx_channel]);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
