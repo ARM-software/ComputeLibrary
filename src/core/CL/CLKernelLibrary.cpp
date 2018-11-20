@@ -251,6 +251,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_mv", "gemv.cl" },
     { "gemm_mv_quantized", "gemv.cl" },
     { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
+    { "gemm_mm_interleaved_transposed_f16_acc32", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm.cl" },

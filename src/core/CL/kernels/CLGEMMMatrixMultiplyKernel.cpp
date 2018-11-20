@@ -292,6 +292,11 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         else
         {
             kernel_name = "gemm_mm_interleaved_transposed_" + lower_string(string_from_data_type(data_type));
+            if(fp_mixed_precision && data_type == DataType::F16)
+            {
+                // currently wider accumulator is only supported for fp16 kernels.
+                kernel_name += "_acc32";
+            }
         }
     }
     else // The input tensors have not been reshaped
@@ -307,6 +312,11 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
             if(input0->info()->num_dimensions() != 1)
             {
                 kernel_name += "_" + lower_string(string_from_data_type(data_type)) + "_bifrost";
+                if(fp_mixed_precision && data_type == DataType::F16)
+                {
+                    // currently wider accumulator is only supported for fp16 kernels.
+                    kernel_name += "_acc32";
+                }
             }
             else if(input1->info()->dimension(0) <= 1000 && data_type == DataType::F32)
             {
@@ -319,11 +329,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
             // The work-group size equal to the Bifrost quad size has been proved to be optimal for these kernels
             // via exhaustive autotuning over a range of representative layer configurations.
             set_lws_hint(cl::NDRange(4));
-            if(fp_mixed_precision && data_type == DataType::F16)
-            {
-                // currently wider accumulator is only supported for fp16 kernels.
-                kernel_name += "_acc32";
-            }
         }
         else // (MIDGARD and F32) or (F16)
         {
