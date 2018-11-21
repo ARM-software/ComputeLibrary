@@ -47,7 +47,7 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 constexpr AbsoluteTolerance<float> tolerance_f16(0.2f);
 
 auto data = concat(combine(framework::dataset::make("DataLayout", { DataLayout::NCHW }), framework::dataset::make("Axis", { 0, 1, 2 })), combine(framework::dataset::make("DataLayout", { DataLayout::NHWC }),
-                   framework::dataset::make("Axis", { 0, 1 })));
+                   framework::dataset::make("Axis", { 1, 2 })));
 
 } // namespace
 
