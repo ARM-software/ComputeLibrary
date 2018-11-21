@@ -62,13 +62,12 @@ protected:
         if(data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(output_shape, PermutationVector(2U, 0U, 1U));
         }
 
         // Create tensors
         TensorType src1 = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
         TensorType src2 = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType dst  = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst  = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo());
 
         // Create and configure function
         FunctionType prior_box;
