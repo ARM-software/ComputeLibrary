@@ -116,6 +116,7 @@
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/CL/kernels/CLScharr3x3Kernel.h"
+#include "arm_compute/core/CL/kernels/CLSelectKernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel5x5Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"

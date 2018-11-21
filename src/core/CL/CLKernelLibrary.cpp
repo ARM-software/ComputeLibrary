@@ -386,6 +386,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "scale_bilinear_quantized_nchw", "scale_quantized.cl" },
     { "scale_bilinear_quantized_nhwc", "scale_quantized.cl" },
     { "scharr3x3", "scharr_filter.cl" },
+    { "select_same_rank", "select.cl" },
+    { "select_different_rank_2", "select.cl" },
+    { "select_different_rank_n", "select.cl" },
     { "sobel3x3", "sobel_filter.cl" },
     { "sobel_separable5x1", "sobel_filter.cl" },
     { "sobel_separable1x5", "sobel_filter.cl" },
@@ -812,6 +815,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "scharr_filter.cl",
 #include "./cl_kernels/scharr_filter.clembed"
+    },
+    {
+        "select.cl",
+#include "./cl_kernels/select.clembed"
     },
     {
         "sobel_filter.cl",

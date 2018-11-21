@@ -117,6 +117,7 @@
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
+#include "arm_compute/runtime/CL/functions/CLSelect.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 #include "arm_compute/runtime/CL/functions/CLSobel3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSobel5x5.h"
