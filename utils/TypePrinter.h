@@ -882,6 +882,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding
     return os;
 }
 
+/** Formatted output of the Multiples type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  multiples Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Multiples &multiples)
+{
+    os << "(";
+    for(size_t i = 0; i < multiples.size() - 1; i++)
+    {
+        os << multiples[i] << ", ";
+    }
+    os << multiples.back() << ")";
+    return os;
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[out] os     Output stream.
@@ -1231,6 +1249,19 @@ inline std::string to_string(const PaddingList &padding)
 {
     std::stringstream str;
     str << padding;
+    return str.str();
+}
+
+/** Formatted output of the Multiples type.
+ *
+ * @param[in] multiples Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Multiples &multiples)
+{
+    std::stringstream str;
+    str << multiples;
     return str.str();
 }
 

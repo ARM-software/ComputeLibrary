@@ -671,6 +671,16 @@ inline TensorShape compute_padded_shape(const TensorShape &input_shape, const Pa
     return padded_shape;
 }
 
+inline TensorShape compute_tiled_shape(const TensorShape &input_shape, const Multiples &multiples)
+{
+    TensorShape tiled_shape = input_shape;
+    for(size_t dim = 0; dim < multiples.size(); ++dim)
+    {
+        tiled_shape.set(dim, input_shape[dim] * multiples[dim]);
+    }
+    return tiled_shape;
+}
+
 inline TensorShape compute_upsample_shape(const ITensorInfo &input, const Size2D &info)
 {
     const DataLayout data_layout = input.data_layout();

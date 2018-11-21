@@ -479,6 +479,9 @@ using PaddingInfo = std::pair<uint32_t, uint32_t>;
 /** List of padding information */
 using PaddingList = std::vector<PaddingInfo>;
 
+/** Information to produce a tiled version of a Tensor */
+using Multiples = std::vector<uint32_t>;
+
 /** Region of interest */
 struct ROI
 {

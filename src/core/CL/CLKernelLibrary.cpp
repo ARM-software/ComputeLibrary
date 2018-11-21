@@ -410,6 +410,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "tablelookup_S16", "tablelookup.cl" },
     { "threshold_binary", "threshold.cl" },
     { "threshold_range", "threshold.cl" },
+    { "tile", "tile.cl" },
     { "transpose", "transpose.cl" },
     { "UYVY422_to_IYUV_bt709", "color_convert.cl" },
     { "UYVY422_to_NV12_bt709", "color_convert.cl" },
@@ -847,6 +848,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "threshold.cl",
 #include "./cl_kernels/threshold.clembed"
+    },
+    {
+        "tile.cl",
+#include "./cl_kernels/tile.clembed"
     },
     {
         "transpose.cl",
