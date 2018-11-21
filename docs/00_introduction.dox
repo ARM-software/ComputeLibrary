@@ -49,7 +49,7 @@ In order to facilitate the work of the support team please provide the build inf
 For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
 
 These binaries have been built using the following toolchains:
-            - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
+            - Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
             - Android armv7a: clang++ / libc++ NDK r17b
             - Android am64-v8a: clang++ / libc++ NDK r17b

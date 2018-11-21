@@ -134,9 +134,9 @@ CPUModel midr_to_model(const unsigned int midr)
                 }
                 break;
             case 0xd0b: // A76
-            case 0xd06: // Helios FIXME: Unreleased CPU, remove before release
-            case 0xd0c: // Ares   FIXME: Unreleased CPU, remove before release
-            case 0xd0d: // Deimos FIXME: Unreleased CPU, remove before release
+            case 0xd06:
+            case 0xd0c:
+            case 0xd0d:
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
             default:

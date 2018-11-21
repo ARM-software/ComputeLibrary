@@ -48,12 +48,10 @@ information is needed within the test (e.g. to validate the results).
 @subsection tests_overview_structure Directory structure
 
     .
-    |-- computer_vision <- Legacy tests. No new test must be added. <!-- FIXME: Remove before release -->
     `-- tests <- Top level test directory. All files in here are shared among validation and benchmark.
         |-- framework <- Underlying test framework.
         |-- CL   \
         |-- NEON -> Backend specific files with helper functions etc.
-        |-- VX   / <!-- FIXME: Remove VX -->
         |-- benchmark <- Top level directory for the benchmarking files.
         |   |-- fixtures <- Fixtures for benchmark tests.
         |   |-- CL <- OpenCL backend test cases on a function level.
@@ -67,7 +65,6 @@ information is needed within the test (e.g. to validate the results).
             |-- CPP -> C++ reference code
             |-- CL   \
             |-- NEON -> Backend specific test cases
-            |-- VX   / <!-- FIXME: Remove VX -->
             `-- fixtures -> Fixtures shared among all backends. Used to setup target function and tensors.
 
 @subsection tests_overview_fixtures Fixtures
