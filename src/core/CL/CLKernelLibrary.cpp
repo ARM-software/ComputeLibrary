@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -262,6 +262,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "finalize", "optical_flow_pyramid_lk.cl" },
     { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "floor_layer", "floor.cl" },
+    { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
     { "gemm_accumulate_biases", "gemm.cl" },
@@ -682,6 +683,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "floor.cl",
 #include "./cl_kernels/floor.clembed"
+    },
+    {
+        "gather.cl",
+#include "./cl_kernels/gather.clembed"
     },
     {
         "gaussian_pyramid.cl",

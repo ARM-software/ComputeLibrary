@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/CL/kernels/CLGatherKernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussian3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussian5x5Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGaussianPyramidKernel.h"

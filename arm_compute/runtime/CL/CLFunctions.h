@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMTranspose1xW.h"
+#include "arm_compute/runtime/CL/functions/CLGather.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian3x3.h"
 #include "arm_compute/runtime/CL/functions/CLGaussian5x5.h"
 #include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
