@@ -134,10 +134,10 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const int bloc
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(output->info()->dimension(idx_batch)));
     build_opts.add_option("-DBLOCK_SHAPE_X=" + support::cpp11::to_string(block_shape_x));
     build_opts.add_option("-DBLOCK_SHAPE_Y=" + support::cpp11::to_string(block_shape_y));
-    build_opts.add_option("-DPAD_START_X=" + support::cpp11::to_string(padding_left.x()));
-    build_opts.add_option("-DPAD_END_X=" + support::cpp11::to_string(padding_right.x()));
-    build_opts.add_option("-DPAD_START_Y=" + support::cpp11::to_string(padding_left.y()));
-    build_opts.add_option("-DPAD_END_Y=" + support::cpp11::to_string(padding_right.y()));
+    build_opts.add_option("-DPAD_LEFT_X=" + support::cpp11::to_string(padding_left.x()));
+    build_opts.add_option("-DPAD_RIGHT_X=" + support::cpp11::to_string(padding_right.x()));
+    build_opts.add_option("-DPAD_LEFT_Y=" + support::cpp11::to_string(padding_left.y()));
+    build_opts.add_option("-DPAD_RIGHT_Y=" + support::cpp11::to_string(padding_right.y()));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("space_to_batch_static_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
 
     // Configure kernel window

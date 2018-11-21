@@ -71,10 +71,10 @@ __kernel void space_to_batch_nchw(
     Vector   block = CONVERT_TO_VECTOR_STRUCT_NO_STEP(block_shape);
     Tensor3D out   = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    const int PAD_LEFT_X  = *((__global int *)offset(&pad, 0, 0));
-    const int PAD_RIGHT_X = *((__global int *)offset(&pad, 1, 0));
-    const int PAD_LEFT_Y  = *((__global int *)offset(&pad, 0, 1));
-    const int PAD_RIGHT_Y = *((__global int *)offset(&pad, 1, 1));
+    const int pad_left_x  = *((__global int *)offset(&pad, 0, 0));
+    const int pad_right_x = *((__global int *)offset(&pad, 1, 0));
+    const int pad_left_y  = *((__global int *)offset(&pad, 0, 1));
+    const int pad_right_y = *((__global int *)offset(&pad, 1, 1));
 
     int block_x = *((__global int *)vector_offset(&block, 0));
     int block_y = *((__global int *)vector_offset(&block, 1));
@@ -83,12 +83,12 @@ __kernel void space_to_batch_nchw(
     const int out_y = get_global_id(1);
     const int z     = get_global_id(2);
 
-    if((out_x >= PAD_LEFT_X && out_x < WIDTH_OUT - PAD_RIGHT_X) && (out_y >= PAD_LEFT_Y && out_y < HEIGHT_OUT - PAD_RIGHT_Y))
+    if((out_x >= pad_left_x && out_x < WIDTH_OUT - pad_right_x) && (out_y >= pad_left_y && out_y < HEIGHT_OUT - pad_right_y))
     {
         const int r                      = (BATCH_SIZE / (block_x * block_y));
         const int w                      = batch_id % r;
-        const int in_x                   = (out_x - PAD_LEFT_X) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - PAD_LEFT_Y) * block_y + (batch_id / r) / block_x;
+        const int in_x                   = (out_x - pad_left_x) * block_x + (batch_id / r) % block_x;
+        const int in_y                   = (out_y - pad_left_y) * block_y + (batch_id / r) / block_x;
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, in_x, in_y, z, w));
     }
 }
@@ -139,10 +139,10 @@ __kernel void space_to_batch_nhwc(
     Vector   block = CONVERT_TO_VECTOR_STRUCT_NO_STEP(block_shape);
     Tensor3D out   = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    const int PAD_LEFT_X  = *((__global int *)offset(&pad, 0, 0));
-    const int PAD_RIGHT_X = *((__global int *)offset(&pad, 1, 0));
-    const int PAD_LEFT_Y  = *((__global int *)offset(&pad, 0, 1));
-    const int PAD_RIGHT_Y = *((__global int *)offset(&pad, 1, 1));
+    const int pad_left_x  = *((__global int *)offset(&pad, 0, 0));
+    const int pad_right_x = *((__global int *)offset(&pad, 1, 0));
+    const int pad_left_y  = *((__global int *)offset(&pad, 0, 1));
+    const int pad_right_y = *((__global int *)offset(&pad, 1, 1));
 
     int block_x = *((__global int *)vector_offset(&block, 0));
     int block_y = *((__global int *)vector_offset(&block, 1));
@@ -151,12 +151,12 @@ __kernel void space_to_batch_nhwc(
     const int out_y = get_global_id(2);
     const int z     = get_global_id(0);
 
-    if((out_x >= PAD_LEFT_X && out_x < WIDTH_OUT - PAD_RIGHT_X) && (out_y >= PAD_LEFT_Y && out_y < HEIGHT_OUT - PAD_RIGHT_Y))
+    if((out_x >= pad_left_x && out_x < WIDTH_OUT - pad_right_x) && (out_y >= pad_left_y && out_y < HEIGHT_OUT - pad_right_y))
     {
         const int r                      = (BATCH_SIZE / (block_x * block_y));
         const int w                      = batch_id % r;
-        const int in_x                   = (out_x - PAD_LEFT_X) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - PAD_LEFT_Y) * block_y + (batch_id / r) / block_x;
+        const int in_x                   = (out_x - pad_left_x) * block_x + (batch_id / r) % block_x;
+        const int in_y                   = (out_y - pad_left_y) * block_y + (batch_id / r) / block_x;
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, z, in_x, in_y, w));
     }
 }
@@ -201,7 +201,7 @@ __kernel void space_to_batch_static_nchw(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 
     int block_x = BLOCK_SHAPE_X;
-    int block_y = *((__global int *)vector_offset(&block, 1));
+    int block_y = BLOCK_SHAPE_Y;
 
     const int out_x = get_global_id(0);
     const int out_y = get_global_id(1);
@@ -254,7 +254,7 @@ __kernel void space_to_batch_static_nhwc(
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 
     int block_x = BLOCK_SHAPE_X;
-    int block_y = *((__global int *)vector_offset(&block, 1));
+    int block_y = BLOCK_SHAPE_Y;
 
     const int out_x = get_global_id(1);
     const int out_y = get_global_id(2);
