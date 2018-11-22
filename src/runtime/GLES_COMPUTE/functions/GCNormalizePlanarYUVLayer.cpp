@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,9 +37,15 @@ GCNormalizePlanarYUVLayer::GCNormalizePlanarYUVLayer()
 {
 }
 
-void GCNormalizePlanarYUVLayer::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *sd)
+void GCNormalizePlanarYUVLayer::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std)
 {
-    _norm_kernel.configure(input, output, mean, sd);
+    _norm_kernel.configure(input, output, mean, std);
+}
+
+Status GCNormalizePlanarYUVLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
+                                           const ITensorInfo *mean, const ITensorInfo *std)
+{
+    return GCNormalizePlanarYUVLayerKernel::validate(input, output, mean, std);
 }
 
 void GCNormalizePlanarYUVLayer::run()

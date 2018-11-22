@@ -50,14 +50,26 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM].
+     * @param[in]  input  Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, channels].
      *                    Data types supported: F16.
-     * @param[out] output Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  sd     Standard deviation values tensor. 1 dimension with size equal to the feature maps [FM].
-     *                     Data types supported: Same as @p input
+     * @param[out] output Destination tensor. Data type supported: same as @p input
+     * @param[in]  mean   Mean values tensor. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
+     * @param[in]  std    Standard deviation values tensor. 1 dimension with size equal to the feature maps [FM].
+     *                    Data types supported: same as @p input
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *sd);
+    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std);
+    /** Static function to check if given info will lead to a valid configuration of @ref GCNormalizePlanarYUVLayerKernel
+     *
+     * @param[in]  input  Source tensor info. 3 lower dimensions represent a single input with dimensions [width, height, channels].
+     *                    Data types supported: F16.
+     * @param[out] output Destination tensor info. Data type supported: same as @p input
+     * @param[in]  mean   Mean values tensor info. 1 dimension with size equal to the number of input channels. Data types supported: same as @p input
+     * @param[in]  std    Standard deviation values tensor info. 1 dimension with size equal to the number of input channels.
+     *                    Data types supported: same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std);
 
     // Inherited methods overridden:
     void run(const Window &window) override;
@@ -66,7 +78,7 @@ private:
     const IGCTensor *_input;
     IGCTensor       *_output;
     const IGCTensor *_mean;
-    const IGCTensor *_sd;
+    const IGCTensor *_std;
 };
 }
 #endif /*__ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYERKERNEL_H__ */

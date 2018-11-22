@@ -48,7 +48,7 @@ namespace
 constexpr AbsoluteTolerance<float>  absolute_tolerance_float(0.0001f);    /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1);                 /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 /** CNN data types */
@@ -197,6 +197,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 
     // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
 }
 
 template <typename T>
@@ -267,11 +268,18 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 
+const auto QuantizationData = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(0.5f, 10),
+    QuantizationInfo(0.3f, 3),
+    QuantizationInfo(1.f, 10),
+});
+
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       QuantizationData),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -281,7 +289,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 0) })),
+                       QuantizationData),
                        QuantizedActivationFunctionsDataset))
 {
     // Validate output
@@ -334,6 +342,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
 }
 
 TEST_SUITE(Float)

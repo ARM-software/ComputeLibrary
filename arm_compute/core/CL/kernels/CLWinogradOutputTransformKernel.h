@@ -59,7 +59,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
+     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F16/F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
@@ -78,7 +78,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
+     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F16/F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo

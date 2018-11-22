@@ -1,6 +1,7 @@
 var validation_2_c_l_2_g_e_m_m_lowp_8cpp =
 [
     [ "CLGEMMLowpMatrixMultiplyCoreFixture", "validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml#a987e738d167c4e273e09c6295fdde3a4", null ],
+    [ "CLGEMMLowpMatrixMultiplyCoreOutput3DFixture", "validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml#aa0968b537944a3c391565d96837b7429", null ],
     [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture", "validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml#a71106ae8df0196a319680b32270fd757", null ],
     [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleFixture", "validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml#a527c6fecbfe2c655c29481170eeee85a", null ],
     [ "DATA_TEST_CASE", "validation_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml#ac60bce01d83538dd27cddcbea97046c8", null ],

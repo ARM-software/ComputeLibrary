@@ -55,6 +55,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     }
 
     // Force target to all graph construct
+    // TODO (geopin01) : Support heterogeneous execution
     Target forced_target = target;
     if(!is_target_supported(target))
     {
@@ -101,7 +102,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
 
     // Register graph
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id() << std::endl);
 }
 
 void GraphManager::execute_graph(Graph &graph)

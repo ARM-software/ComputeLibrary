@@ -42,6 +42,7 @@ class GoogLeNetInceptionV4PoolingLayerDataset final : public PoolingLayerDataset
 public:
     GoogLeNetInceptionV4PoolingLayerDataset()
     {
+        // FIXME: Add support for global pooling layer pool_8x8_s1
         // inception_stem1_pool
         add_config(TensorShape(147U, 147U, 64U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_stem3_pool

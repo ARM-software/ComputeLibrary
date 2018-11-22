@@ -49,7 +49,7 @@ INEGEMMWrapperKernel::Params INEGEMMWrapperKernel::extract_parameters(const ITen
     p.N       = c->info()->tensor_shape().x();
     p.K       = a->info()->tensor_shape().x();
     p.multis  = b->info()->tensor_shape().z();
-    p.batches = c->info()->tensor_shape().total_size_upper(2) / p.multis;
+    p.batches = c->info()->tensor_shape().total_size_upper(2) / p.multis; //COMPMID-1423: Agree on and document the layout of gemm inputs/outputs
 
     return p;
 }

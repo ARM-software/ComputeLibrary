@@ -71,14 +71,17 @@ const auto data_pad_f16 = concat(combine(framework::dataset::make("PadX", { 0, 1
 const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
                               combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
                                       combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
-                                              combine(data_pad_f32,
-                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+                                              data_pad_f32)));
 
 const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),
                               combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
                                       combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
-                                              combine(data_pad_f16,
-                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+                                              data_pad_f16)));
+
+const auto data_f32_nightly   = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
+const auto data_f16_nightly   = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
+const auto data_f32_precommit = combine(data_f32, framework::dataset::make("NumKernels", { 4 }));
+const auto data_f16_precommit = combine(data_f16, framework::dataset::make("NumKernels", { 4 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -160,32 +163,51 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+//TODO(COMPMID-415): Configuration tests?
+
 template <typename T>
 using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tensor, Accessor, NEDirectConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(data_f16, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                ActivationFunctionsDataset),
-                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_f16_precommit, framework::dataset::make("DataType",
+                                                                                                                   DataType::F16)),
+                                                                                                                   ActivationFunctionsDataset),
+                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_f16_nightly, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                 ActivationFunctionsDataset),
+                                                                                                                 framework::dataset::make("DataLayout", DataLayout::NCHW)))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+}
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(data_f32, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 ActivationFunctionsDataset),
-                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_f32_precommit, framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)),
+                                                                                                                    ActivationFunctionsDataset),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_f32_nightly, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                                  ActivationFunctionsDataset),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -194,8 +216,8 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
 });
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // DirectConvolutionLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -10,6 +10,7 @@ var searchData=
   ['unsigned',['UNSIGNED',['../namespacearm__compute.xhtml#af00a42ecad444bbda75cde1b64bd7e72aaf36b47f395cd01f48b8fc1013665054',1,'arm_compute']]],
   ['unspecified',['UNSPECIFIED',['../namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35da1c04cc3823d476c3017238679a0fdf52',1,'arm_compute::graph']]],
   ['unsupported_5fextension_5fuse',['UNSUPPORTED_EXTENSION_USE',['../namespacearm__compute.xhtml#a59e56af19e754a6aa26a612ebf91d05fa0ffe8be9137815d1266845a195c053c7',1,'arm_compute']]],
+  ['upsamplelayer',['UpsampleLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a1634ae65e32998568feae7e5e8e3bb65',1,'arm_compute::graph']]],
   ['uv88',['UV88',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a079eb95759d2ad31254f659d63651825',1,'arm_compute']]],
   ['uyvy422',['UYVY422',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58af557448a61ad2927194f63442e131dfa',1,'arm_compute']]]
 ];

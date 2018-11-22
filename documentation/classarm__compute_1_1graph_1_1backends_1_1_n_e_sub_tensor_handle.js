@@ -11,10 +11,10 @@ var classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle =
     [ "map", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a74bed133a977865cdde5a939e0f98910", null ],
     [ "operator=", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a21f1dbacc549582a3c3517697c25e9d4", null ],
-    [ "parent_handle", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4", null ],
+    [ "parent_handle", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#ad2e03a2b8a2acf09a141dd498c5b7c73", null ],
     [ "release_if_unused", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#ab02ec2036cf0299acc02f35ef56c2214", null ],
     [ "target", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a0940aabdc8069229baa191d992e43140", null ],
-    [ "tensor", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#acf1bd554b2252904ada2cd58c217214c", null ],
-    [ "tensor", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a199c24dd627f406cfb77c65efbeb0cca", null ],
+    [ "tensor", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a0a7fe5d3c044b1590bb45fc07c8c273f", null ],
+    [ "tensor", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a5d9a543899a9f7c93a950a1d080f2437", null ],
     [ "unmap", "classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a7deff0e432f0883942948c55c12673d2", null ]
 ];

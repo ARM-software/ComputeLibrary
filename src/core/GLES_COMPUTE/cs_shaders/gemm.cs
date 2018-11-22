@@ -169,6 +169,7 @@ void main()
     vec4 c20 = vec4(0.0f);
     vec4 c30 = vec4(0.0f);
 
+    // FIXME: loop unrolling really needed for GLES?
     for(; int(CURRENT_ITEM_OFFSET(src1_iter)) <= (end_row_mtx_b - 8); TENSOR_ITERATOR_ADVANCE(src0_iter, 8), TENSOR_ITERATOR_ADVANCE(src1_iter, 8))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */
@@ -1061,6 +1062,7 @@ void main()
     c30[0] = vec4(0.0f);
     c30[1] = vec4(0.0f);
 
+    // FIXME: loop unrolling really needed for GLES?
     for(; (int(CURRENT_ITEM_OFFSET_IN_BYTES(src1_iter)) >> 1) <= (end_row_mtx_b - 16); TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 16), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, 32))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */

@@ -39,6 +39,7 @@ namespace test
 {
 namespace validation
 {
+/** [ReshapeLayer fixture] **/
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ReshapeLayerValidationFixture : public framework::Fixture
 {
@@ -104,6 +105,7 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
 };
+/** [ReshapeLayer fixture] **/
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

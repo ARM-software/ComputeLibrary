@@ -35,14 +35,15 @@ namespace test
 namespace framework
 {
 /** Implementation of an instrument to measure elapsed wall-clock time in milliseconds. */
-class WallClockTimer : public Instrument
+template <bool output_timestamps>
+class WallClock : public Instrument
 {
 public:
     /** Construct a Wall clock timer.
      *
      * @param[in] scale_factor Measurement scale factor.
      */
-    WallClockTimer(ScaleFactor scale_factor)
+    WallClock(ScaleFactor scale_factor)
     {
         switch(scale_factor)
         {
@@ -73,6 +74,9 @@ private:
     std::chrono::high_resolution_clock::time_point _stop{};
     float                                          _scale_factor{};
 };
+
+using WallClockTimer      = WallClock<false>;
+using WallClockTimestamps = WallClock<true>;
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

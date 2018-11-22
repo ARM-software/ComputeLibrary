@@ -39,10 +39,12 @@
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Types.h"
 
-// Algorithms
+// Nodes
+#include "arm_compute/graph/nodes/Nodes.h"
+
+// Algorithms, Mutators, Printers
 #include "arm_compute/graph/algorithms/Algorithms.h"
 #include "arm_compute/graph/mutators/GraphMutators.h"
-#include "arm_compute/graph/nodes/Nodes.h"
 #include "arm_compute/graph/printers/Printers.h"
 
 // Frontend

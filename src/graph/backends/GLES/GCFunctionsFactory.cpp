@@ -94,7 +94,8 @@ std::unique_ptr<IFunction> create_concatenate_layer<GCDepthConcatenateLayer, GCT
     func->configure(inputs, output);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
                                << " Target " << GCTargetInfo::TargetType
                                << " Data Type: " << output->info()->data_type()
                                << " Shape: " << output->info()->tensor_shape()
@@ -120,8 +121,9 @@ std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions,
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo     conv_info      = node.convolution_info();
-    const ConvolutionMethod conv_algorithm = node.convolution_method();
+    const PadStrideInfo       conv_info      = node.convolution_info();
+    const ConvolutionMethod   conv_algorithm = node.convolution_method();
+    const ActivationLayerInfo fused_act      = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, GCTargetInfo::TargetType);
@@ -132,23 +134,26 @@ std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions,
     {
         std::tie(func, func_name) = create_named_function<GCConvolutionLayerFunctions::DirectConvolutionLayer>(
                                         std::string("DirectConvolutionLayer"),
-                                        input, weights, biases, output, conv_info);
+                                        input, weights, biases, output, conv_info, fused_act);
     }
     else
     {
         std::tie(func, func_name) = create_named_memory_managed_function<GCConvolutionLayerFunctions::GenericConvolutionLayer>(
                                         std::string("ConvolutionLayer"), mm,
-                                        input, weights, biases, output, conv_info);
+                                        input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1U, 1U), fused_act);
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
                                << " Data Type: " << input->info()->data_type()
                                << " Input QuantInfo: " << input->info()->quantization_info()
                                << " Weights QuantInfo: " << weights->info()->quantization_info()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
 }
@@ -169,8 +174,10 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo              conv_info     = node.convolution_info();
-    const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
+    const PadStrideInfo              conv_info        = node.convolution_info();
+    const DepthwiseConvolutionMethod dwc_algorithm    = node.depthwise_convolution_method();
+    const unsigned int               depth_multiplier = 1;
+    const ActivationLayerInfo        fused_act        = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::unique_ptr<IFunction> func;
@@ -179,7 +186,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
     {
         std::tie(func, func_name) = create_named_function<GCDepthwiseConvolutionLayerFunctions::DepthwiseConvolutionLayer3x3>(
                                         std::string("DepthwiseConvolutionLayer3x3"),
-                                        input, weights, biases, output, conv_info);
+                                        input, weights, biases, output, conv_info, depth_multiplier, fused_act);
     }
     else
     {
@@ -187,7 +194,9 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
                                << " Target " << GCTargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input QuantInfo: " << input->info()->quantization_info()
@@ -195,6 +204,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
 }
@@ -241,11 +251,13 @@ std::unique_ptr<IFunction> create_eltwise_layer<GCEltwiseFunctions, GCTargetInfo
     }
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << GCTargetInfo::TargetType
-                               << " Operation " << func_name
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << GCTargetInfo::TargetType
+                               << " Operation: " << func_name
                                << " Data Type: " << input1->info()->data_type()
-                               << " Shape : " << input1->info()->tensor_shape()
+                               << " Shape: " << input1->info()->tensor_shape()
                                << std::endl);
 
     return func;
@@ -278,6 +290,8 @@ std::unique_ptr<IFunction> GCFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<GCFullyConnectedLayer, GCTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<GCNormalizationLayer, GCTargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::create_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer, GCTargetInfo>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<GCPoolingLayer, GCTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::ResizeLayer:

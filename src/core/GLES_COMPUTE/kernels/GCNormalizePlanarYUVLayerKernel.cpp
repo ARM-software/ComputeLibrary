@@ -36,26 +36,75 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, std);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, std);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(mean->num_dimensions() > 1, "mean and std must be vectors");
+
+    const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(channel_idx) != mean->dimension(0));
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *mean, ITensorInfo *std)
+{
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, *input->clone());
+
+    const unsigned int num_elems_processed_per_iteration = 4;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    const int              mean_padding = ceil_to_multiple(mean->dimension(0), num_elems_processed_per_iteration) - mean->dimension(0);
+    const int              std_padding  = ceil_to_multiple(std->dimension(0), num_elems_processed_per_iteration) - std->dimension(0);
+    AccessWindowStatic     mean_access(mean, 0, 0, mean->dimension(0) + mean_padding, mean->dimension(1));
+    AccessWindowStatic     std_access(std, 0, 0, std->dimension(0) + std_padding, std->dimension(1));
+
+    const bool window_changed = update_window_and_padding(win, input_access, output_access, mean_access, std_access);
+    output_access.set_valid_region(win, input->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 GCNormalizePlanarYUVLayerKernel::GCNormalizePlanarYUVLayerKernel()
-    : _input(nullptr), _output(nullptr), _mean(nullptr), _sd(nullptr)
+    : _input(nullptr), _output(nullptr), _mean(nullptr), _std(nullptr)
 {
 }
 
-void GCNormalizePlanarYUVLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *sd)
+void GCNormalizePlanarYUVLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *std)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, sd);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, sd);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, std);
+
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), *input->info()->clone());
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mean->info(), std->info()));
 
     _input  = input;
     _output = output;
     _mean   = mean;
-    _sd     = sd;
-
-    const unsigned int num_elems_processed_per_iteration = 4;
+    _std    = std;
 
     // Set build options
     std::set<std::string> build_opts;
@@ -67,19 +116,17 @@ void GCNormalizePlanarYUVLayerKernel::configure(const IGCTensor *input, IGCTenso
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("normalize_planar_yuv_layer", build_opts));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(input->info(), output->info(), mean->info(), std->info());
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    const int              mean_padding = ceil_to_multiple(mean->info()->dimension(0), num_elems_processed_per_iteration) - mean->info()->dimension(0);
-    const int              sd_padding   = ceil_to_multiple(sd->info()->dimension(0), num_elems_processed_per_iteration) - sd->info()->dimension(0);
-    AccessWindowStatic     mean_access(mean->info(), 0, 0, mean->info()->dimension(0) + mean_padding, mean->info()->dimension(1));
-    AccessWindowStatic     sd_access(sd->info(), 0, 0, sd->info()->dimension(0) + sd_padding, sd->info()->dimension(1));
+    IGCKernel::configure(std::get<1>(win_config));
+}
 
-    update_window_and_padding(win, input_access, output_access, mean_access, sd_access);
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    IGCKernel::configure(win);
+Status GCNormalizePlanarYUVLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *std)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, std));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), mean->clone().get(), std->clone().get())));
+    return Status{};
 }
 
 void GCNormalizePlanarYUVLayerKernel::run(const Window &window)
@@ -100,7 +147,7 @@ void GCNormalizePlanarYUVLayerKernel::run(const Window &window)
 
     unsigned int idx = 2 * num_arguments_per_3D_tensor();
     add_1D_tensor_argument(idx, _mean, 3, slice_in);
-    add_1D_tensor_argument(idx, _sd, 4, slice_in);
+    add_1D_tensor_argument(idx, _std, 4, slice_in);
 
     slice_in = window.first_slice_window_3D();
 

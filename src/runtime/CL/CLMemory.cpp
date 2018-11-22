@@ -24,23 +24,20 @@
 #include "arm_compute/runtime/CL/CLMemory.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 
 namespace arm_compute
 {
 CLMemory::CLMemory()
     : _region(nullptr), _region_owned(nullptr)
 {
-    create_empty_region();
 }
 
 CLMemory::CLMemory(std::shared_ptr<ICLMemoryRegion> memory)
     : _region(nullptr), _region_owned(std::move(memory))
 {
-    if(_region_owned == nullptr)
-    {
-        create_empty_region();
-    }
-    _region = _region_owned.get();
+    _region_owned = memory;
+    _region       = _region_owned.get();
 }
 
 CLMemory::CLMemory(ICLMemoryRegion *memory)
@@ -49,19 +46,36 @@ CLMemory::CLMemory(ICLMemoryRegion *memory)
     _region = memory;
 }
 
-ICLMemoryRegion *CLMemory::region()
+ICLMemoryRegion *CLMemory::cl_region()
 {
     return _region;
 }
 
-ICLMemoryRegion *CLMemory::region() const
+ICLMemoryRegion *CLMemory::cl_region() const
 {
     return _region;
 }
 
-void CLMemory::create_empty_region()
+IMemoryRegion *CLMemory::region()
 {
-    _region_owned = std::make_shared<CLBufferMemoryRegion>(cl::Context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, 0);
+    return _region;
+}
+
+IMemoryRegion *CLMemory::region() const
+{
+    return _region;
+}
+
+void CLMemory::set_region(IMemoryRegion *region)
+{
+    auto cl_region = utils::cast::polymorphic_downcast<ICLMemoryRegion *>(region);
+    _region_owned  = nullptr;
+    _region        = cl_region;
+}
+
+void CLMemory::set_owned_region(std::unique_ptr<IMemoryRegion> region)
+{
+    _region_owned = utils::cast::polymorphic_downcast_unique_ptr<ICLMemoryRegion>(std::move(region));
     _region       = _region_owned.get();
 }
 } // namespace arm_compute

@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 
+#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
@@ -45,8 +46,12 @@ namespace arm_compute
  * specified value where a < stride - 1 that increases the padding top and right of the input image.
  *
  *  The relation between input to output is as follows:
- *       width_output = round((width_input − 1) ∗ (stride_x - 1) − 2 ∗ padding_x + kernel_x + inner_border_right )
- *       height_output = round((height_input − 1) ∗ (stride_y - 1) − 2 ∗ padding_y + kernel_y + inner_border_top )
+ *  \f[
+ *       width\_output = (width\_input - 1) \cdot stride\_x - 2 \cdot padding\_x + kernel\_x
+ *  \f]
+ *  \f[
+ *       height\_output = (height\_input - 1) \cdot stride\_y - 2 \cdot padding\_y + kernel\_y
+ *  \f]
  *
  *  where
  *      width is the size of the first input dimension.
@@ -54,12 +59,15 @@ namespace arm_compute
  *      width_output is the size of the first output dimension.
  *      height_output is the size of the second output dimension.
  *      kernel_x and kernel_y are the convolution sizes in x and y.
- *      inner_border_right and inner_border_top the number of zeros added to the top and right edges of the input.
  *      stride_x and stride_y is the input stride of the first and second dimension.
  *
- *  This function calls the following NEON kernels:
+ * The weights used by Deconvolution are supposed to be the same as the ones used for Convolution. Therefore, it will be necessary to use the weights in the
+ * reverse order to perform an actual convolution. This is achieved by using the @ref CPPFlipWeightsKernel.
  *
- * -# @ref NEDirectConvolutionLayer
+ * This function calls the following NEON kernels/functions:
+ *
+ * -# @ref CPPUpsample
+ * -# @ref NEConvolutionLayer
  *
  */
 class NEDeconvolutionLayer : public IFunction
@@ -111,12 +119,15 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup        _memory_group;
-    NEConvolutionLayer _conv_f;
-    CPPUpsample        _upsample_f;
-    Tensor             _scaled_output;
-    ITensor           *_input;
-    PadStrideInfo      _info;
+    MemoryGroup          _memory_group;
+    NEConvolutionLayer   _conv_f;
+    CPPUpsample          _upsample_f;
+    CPPFlipWeightsKernel _flip_weights;
+    Tensor               _scaled_output;
+    Tensor               _weights_flipped;
+    const ITensor       *_original_weights;
+    ITensor             *_input;
+    PadStrideInfo        _info;
     std::pair<unsigned int, unsigned int> _inner_border;
     bool _is_prepared;
 };

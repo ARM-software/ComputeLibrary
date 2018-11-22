@@ -7,5 +7,6 @@ var searchData=
   ['filter_5fheight',['filter_height',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab9960ce2e784cfff275d273c1810797f',1,'arm_compute::test::validation']]],
   ['filter_5fsize',['filter_size',['../namespacearm__compute_1_1test_1_1validation.xhtml#a2237230a1357685ba2472c2d6fca17fa',1,'arm_compute::test::validation']]],
   ['filter_5fwidth',['filter_width',['../namespacearm__compute_1_1test_1_1validation.xhtml#a23a07c975b13e0133e838d850dcf30c5',1,'arm_compute::test::validation']]],
+  ['fixed_5fpoint_5fone_5fq0',['fixed_point_one_Q0',['../_asymm_helpers_8cpp.xhtml#ab153bd5bebd2a695c5d2c79801d0abec',1,'AsymmHelpers.cpp']]],
   ['floating_5fpoint',['floating_point',['../structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b',1,'arm_compute::test::framework::Measurement::Value']]]
 ];

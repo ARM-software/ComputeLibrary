@@ -40,10 +40,19 @@ public:
     }
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: F32.
-     * @param[out] output Destination tensor. Data type supported: F32.
+     * @param[in]  input  Source tensor. Data type supported: F16/F32.
+     * @param[out] output Destination tensor. Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEFloorKernel
+     *
+     * @param[in] input  Source tensor info. Data type supported: F16/F32.
+     * @param[in] output Destination tensor info. Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 };

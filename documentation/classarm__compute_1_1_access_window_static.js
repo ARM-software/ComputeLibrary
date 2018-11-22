@@ -4,7 +4,7 @@ var classarm__compute_1_1_access_window_static =
     [ "AccessWindowStatic", "classarm__compute_1_1_access_window_static.xhtml#adbdf53818c3318f2f6700b15aa055b5d", null ],
     [ "AccessWindowStatic", "classarm__compute_1_1_access_window_static.xhtml#a39d00bd382d82a99f7b2055ff0a4c1e2", null ],
     [ "~AccessWindowStatic", "classarm__compute_1_1_access_window_static.xhtml#a657392da3805fde373c0cef557739d08", null ],
-    [ "compute_valid_region", "classarm__compute_1_1_access_window_static.xhtml#aab85c0fd0e72d231aad894f28f12528b", null ],
+    [ "compute_valid_region", "classarm__compute_1_1_access_window_static.xhtml#a53fc3353f92358e4f4e36b6057bbfa71", null ],
     [ "compute_valid_region", "classarm__compute_1_1_access_window_static.xhtml#ae80edc371ba9f02d756aed720040878b", null ],
     [ "operator=", "classarm__compute_1_1_access_window_static.xhtml#a5c6934ef061e9aeaa31fa952c05e2730", null ],
     [ "operator=", "classarm__compute_1_1_access_window_static.xhtml#af5312479f43d5fd6c46e4e8473049847", null ],

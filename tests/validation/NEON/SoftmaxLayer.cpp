@@ -118,16 +118,18 @@ using NESoftmaxLayerFixture = SoftmaxValidationFixture<Tensor, Accessor, NESoftm
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
-                                                                                                         framework::dataset::make("Beta", { 1.0f, 2.0f })))
+                                                                                                                 framework::dataset::make("Beta", { 1.0f, 2.0f })),
+                                                                                                         framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                               framework::dataset::make("DataType", DataType::F16)),
-                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
+                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.0f })),
+                                                                                                       framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
@@ -136,16 +138,18 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                          framework::dataset::make("Beta", { 1.0f, 2.0f })))
+                                                                                                                  framework::dataset::make("Beta", { 1.0f, 2.0f })),
+                                                                                                          framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
-                                                                                                                framework::dataset::make("DataType", DataType::F32)),
-                                                                                                        framework::dataset::make("Beta", { 1.0f, 2.0f })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                framework::dataset::make("Beta", { 1.0f, 2.0f })),
+                                                                                                        framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -158,22 +162,25 @@ using NESoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<Tensor,
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                               combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                       framework::dataset::make("Beta", { 1.0f, 2.0f }))))
+                                                                                                                       combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                               framework::dataset::make("Beta", { 1.0f, 2.f }))),
+                                                                                                               framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                                    combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
-                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }))))
+                                                                                                                           framework::dataset::make("Beta", { 1.0f, 2.0f }))),
+                                                                                                                   framework::dataset::make("Axis", { 1 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 

@@ -220,6 +220,45 @@ protected:
     DataLayout       _data_layout{ DataLayout::UNKNOWN };
 };
 
+template <typename T1, typename T2>
+SimpleTensor<T1> copy_tensor(const SimpleTensor<T2> &tensor)
+{
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
+                        tensor.num_channels(),
+                        tensor.quantization_info(),
+                        tensor.data_layout());
+    for(size_t n = 0; n < size_t(st.num_elements()); n++)
+    {
+        st.data()[n] = static_cast<T1>(tensor.data()[n]);
+    }
+    return st;
+}
+
+template <typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value, int>::type = 0>
+SimpleTensor<T1> copy_tensor(const SimpleTensor<half> &tensor)
+{
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
+                        tensor.num_channels(),
+                        tensor.quantization_info(),
+                        tensor.data_layout());
+    memcpy((void *)st.data(), (const void *)tensor.data(), size_t(st.num_elements() * sizeof(T1)));
+    return st;
+}
+
+template < typename T1, typename T2, typename std::enable_if < (std::is_same<T1, half>::value || std::is_same<T2, half>::value), int >::type = 0 >
+SimpleTensor<T1> copy_tensor(const SimpleTensor<half> &tensor)
+{
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
+                        tensor.num_channels(),
+                        tensor.quantization_info(),
+                        tensor.data_layout());
+    for(size_t n = 0; n < size_t(st.num_elements()); n++)
+    {
+        st.data()[n] = half_float::detail::half_cast<T1, T2>(tensor.data()[n]);
+    }
+    return st;
+}
+
 template <typename T>
 SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format)
     : _buffer(nullptr),

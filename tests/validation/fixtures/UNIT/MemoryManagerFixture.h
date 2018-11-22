@@ -99,11 +99,9 @@ protected:
         dst.allocator()->allocate();
 
         // Finalize memory manager
-        mm->set_allocator(&_allocator);
-        mm->set_num_pools(1);
-        mm->finalize();
-        ARM_COMPUTE_EXPECT(mm->is_finalized(), framework::LogLevel::ERRORS);
+        mm->populate(_allocator, 1 /* num_pools */);
         ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
@@ -207,11 +205,9 @@ protected:
         dst.allocator()->allocate();
 
         // Finalize memory manager
-        mm->set_allocator(&allocator);
-        mm->set_num_pools(1);
-        mm->finalize();
-        ARM_COMPUTE_EXPECT(mm->is_finalized(), framework::LogLevel::ERRORS);
+        mm->populate(_allocator, 1 /* num_pools */);
         ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
 
         // Fill tensors (1st iteration)
         fill(AccessorType(src), 0);
@@ -343,11 +339,9 @@ protected:
         dst.allocator()->allocate();
 
         // Finalize memory manager
-        mm->set_allocator(&allocator);
-        mm->set_num_pools(1);
-        mm->finalize();
-        ARM_COMPUTE_EXPECT(mm->is_finalized(), framework::LogLevel::ERRORS);
+        mm->populate(_allocator, 1 /* num_pools */);
         ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(mm->pool_manager()->num_pools() == 1, framework::LogLevel::ERRORS);
 
         // Fill tensors (1st iteration)
         fill(AccessorType(src), 0);

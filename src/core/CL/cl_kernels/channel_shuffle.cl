@@ -23,19 +23,28 @@
 */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(BLOCK_SIZE) && defined(NUM_GROUPS) && defined(K)
+#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(NUM_GROUPS) && defined(K) && defined(SRC_DIM_Z)
 
-// Check valid BLOCK_SIZES
-#if BLOCK_SIZE != 4 && BLOCK_SIZE != 8 && BLOCK_SIZE != 16
-#error "Only block sizes 4, 8 and 16 are supported"
-#endif /* BLOCK_SIZE != 4 && BLOCK_SIZE != 8 && BLOCK_SIZE != 16 */
+// Check valid VEC_SIZES
+#if VEC_SIZE != 4 && VEC_SIZE != 8 && VEC_SIZE != 16
+#error "Only vector sizes 4, 8 and 16 are supported"
+#endif // VEC_SIZE != 4 && VEC_SIZE != 8 && VEC_SIZE != 16
 
-#define TYPE VEC_DATA_TYPE(DATA_TYPE, BLOCK_SIZE)
+#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 
-/** Perfoms channel shuffle see https://arxiv.org/pdf/1707.01083.pdf for details.
+#define DIV_MOD_UINT(x, y, div_res, mod_res)                \
+    ({                                                      \
+        div_res = (uint)((x) * (float)(1.0f / (float)(y))); \
+        uint r  = div_res * (y);                            \
+        mod_res = (x)-r;                                    \
+    })
+
+/** Performs channel shuffle when the data layout is NCHW. See https://arxiv.org/pdf/1707.01083.pdf for details.
  *
- * @note The number of groups should be given as a preprocessor argument using -DNUM_GROUPS=num_groups. e.g. -DNUM_GROUPS=2
- * @note The number of channels in each group should be given as a preprocessor argument using -DK=num. e.g. -DK=1
+ * @note The vector size must be given as a preprocessor argument using -DVEC_SIZE=num. e.g. -DVEC_SIZE=4
+ * @note The depth of the tensor must be given as a preprocessor argument using -DSRC_DIM_Z=num. e.g. -DSRC_DIM_Z=64
+ * @note The number of groups must be given as a preprocessor argument using -DNUM_GROUPS=num_groups. e.g. -DNUM_GROUPS=2
+ * @note The number of channels in each group must be given as a preprocessor argument using -DK=num. e.g. -DK=1
  *       K is equal to num_channels / num_groups.
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
@@ -45,6 +54,8 @@
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the first source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -53,80 +64,118 @@
  * @param[in]  dst_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void channel_shuffle_nchw(TENSOR3D_DECLARATION(src),
-                                   TENSOR3D_DECLARATION(dst))
+__kernel void channel_shuffle_nchw(TENSOR4D_DECLARATION(src),
+                                   TENSOR4D_DECLARATION(dst))
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(dst);
+    uint curr_channel = 0; // channel id of input
+    uint batch_id     = 0; // batch id
+    uint group_id     = 0; // group id
+    uint channel_id   = 0; // channel id within the group
 
-    const uint curr_channel = get_global_id(2); // channel id of input
-    const uint group_id     = curr_channel / K; // group id
-    const uint channel_id   = curr_channel % K; // channel id within the group
+    // Compute curr_channel and batch_id
+    DIV_MOD_UINT(get_global_id(2), SRC_DIM_Z, batch_id, curr_channel);
 
-    const uint x = get_global_id(0) * BLOCK_SIZE;
-    const uint y = get_global_id(1) * BLOCK_SIZE;
+    // Compute group_id and channel_id
+    DIV_MOD_UINT(curr_channel, K, group_id, channel_id);
+
+    const uint x = get_global_id(0) * VEC_SIZE;
+    const uint y = get_global_id(1) * 2;
     const uint z = channel_id * NUM_GROUPS + group_id;
 
-    // Load the NxN block
-    TYPE u0 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 0, 0));
-    TYPE u1 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 1, 0));
-    TYPE u2 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 2, 0));
-    TYPE u3 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 3, 0));
-#if BLOCK_SIZE > 4
-    TYPE u4 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 4, 0));
-    TYPE u5 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 5, 0));
-    TYPE u6 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 6, 0));
-    TYPE u7 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 7, 0));
-#if BLOCK_SIZE == 16
-    TYPE u8  = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 8, 0));
-    TYPE u9  = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 9, 0));
-    TYPE u10 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 10, 0));
-    TYPE u11 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 11, 0));
-    TYPE u12 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 12, 0));
-    TYPE u13 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 13, 0));
-    TYPE u14 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 14, 0));
-    TYPE u15 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 15, 0));
-#endif /* BLOCK_SIZE == 16 */
-#endif /* BLOCK_SIZE > 4 */
+    // Load the Nx2 block
+    const __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * src_stride_y + curr_channel * src_stride_z + batch_id * src_stride_w;
+    TYPE u0                         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
+    TYPE u1                         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y));
 
     // Store blocks
-    VSTORE(BLOCK_SIZE)
-    (u0, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 0, z));
-    VSTORE(BLOCK_SIZE)
-    (u1, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 1, z));
-    VSTORE(BLOCK_SIZE)
-    (u2, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 2, z));
-    VSTORE(BLOCK_SIZE)
-    (u3, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 3, z));
-#if BLOCK_SIZE > 4
-    VSTORE(BLOCK_SIZE)
-    (u4, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 4, z));
-    VSTORE(BLOCK_SIZE)
-    (u5, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 5, z));
-    VSTORE(BLOCK_SIZE)
-    (u6, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 6, z));
-    VSTORE(BLOCK_SIZE)
-    (u7, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 7, z));
-#if BLOCK_SIZE == 16
-    VSTORE(BLOCK_SIZE)
-    (u8, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 8, z));
-    VSTORE(BLOCK_SIZE)
-    (u9, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 9, z));
-    VSTORE(BLOCK_SIZE)
-    (u10, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 10, z));
-    VSTORE(BLOCK_SIZE)
-    (u11, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 11, z));
-    VSTORE(BLOCK_SIZE)
-    (u12, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 12, z));
-    VSTORE(BLOCK_SIZE)
-    (u13, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 13, z));
-    VSTORE(BLOCK_SIZE)
-    (u14, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 14, z));
-    VSTORE(BLOCK_SIZE)
-    (u15, 0, (__global DATA_TYPE *)tensor3D_offset(&dst, x, y + 15, z));
-#endif /* BLOCK_SIZE == 16 */
-#endif /* BLOCK_SIZE > 4 */
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(DATA_TYPE) + y * dst_stride_y + z * dst_stride_z + batch_id * dst_stride_w;
+    VSTORE(VEC_SIZE)
+    (u0, 0, (__global DATA_TYPE *)(output_ptr + 0 * dst_stride_y));
+    VSTORE(VEC_SIZE)
+    (u1, 0, (__global DATA_TYPE *)(output_ptr + 1 * dst_stride_y));
 }
-#endif /* defined(DATA_TYPE) && defined(BLOCK_SIZE) && defined(NUM_GROUPS) && defined(K) */
+
+#if VEC_SIZE == 4 && defined(LAST_ACCESSED)
+/** Performs channel shuffle when the data layout is NHWC. See https://arxiv.org/pdf/1707.01083.pdf for details.
+ *
+ * @note This implementation is only defined for VEC_SIZE = 4
+ * @note This last element accessed along the first dimension must be given as a preprocessor argument using -DLAST_ACCESSED=num. e.g. -DLAST_ACCESSED=64 in order to prevent out-of-bound writes.
+ * @note The vector size must be given as a preprocessor argument using -DVEC_SIZE=num. e.g. -DVEC_SIZE=4
+ * @note The height of the tensor must be given as a preprocessor argument using -DSRC_DIM_Z=num. e.g. -DSRC_DIM_Z=64
+ * @note The number of groups must be given as a preprocessor argument using -DNUM_GROUPS=num_groups. e.g. -DNUM_GROUPS=2
+ * @note The number of channels in each group must be given as a preprocessor argument using -DK=num. e.g. -DK=1
+ *       K is equal to num_channels / num_groups.
+ *
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_stride_x                      Stride of the first source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the first source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the first source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void channel_shuffle_nhwc(TENSOR4D_DECLARATION(src),
+                                   TENSOR4D_DECLARATION(dst))
+{
+    const uint curr_channel = min((uint)(get_global_id(0) * VEC_SIZE), (uint)LAST_ACCESSED); // input feature map
+    uint       channel_id0  = 0;
+    uint       channel_id1  = 0;
+    uint       channel_id2  = 0;
+    uint       channel_id3  = 0;
+    uint       group_id0    = 0;
+    uint       group_id1    = 0;
+    uint       group_id2    = 0;
+    uint       group_id3    = 0;
+    uint       y            = 0;
+    uint       batch_id     = 0;
+
+    // Compute curr_channel and batch_id
+    DIV_MOD_UINT(get_global_id(2), (uint)SRC_DIM_Z, batch_id, y);
+
+    // Compute group_id and channel_id
+    DIV_MOD_UINT(curr_channel + (uint)0, K, group_id0, channel_id0);
+    DIV_MOD_UINT(curr_channel + (uint)1, K, group_id1, channel_id1);
+    DIV_MOD_UINT(curr_channel + (uint)2, K, group_id2, channel_id2);
+    DIV_MOD_UINT(curr_channel + (uint)3, K, group_id3, channel_id3);
+
+    const uint x  = get_global_id(1) * 2;
+    const uint z0 = channel_id0 * (uint)NUM_GROUPS + group_id0;
+    const uint z1 = channel_id1 * (uint)NUM_GROUPS + group_id1;
+    const uint z2 = channel_id2 * (uint)NUM_GROUPS + group_id2;
+    const uint z3 = channel_id3 * (uint)NUM_GROUPS + group_id3;
+
+    // Load the Nx2 block
+    const __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + curr_channel * sizeof(DATA_TYPE) + x * src_stride_y + y * src_stride_z + batch_id * src_stride_w;
+    TYPE u0                         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
+    TYPE u1                         = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y));
+
+    // Store blocks
+    __global uchar *output_ptr                                                              = dst_ptr + dst_offset_first_element_in_bytes + x * dst_stride_y + y * dst_stride_z + batch_id * dst_stride_w;
+    *((__global DATA_TYPE *)(output_ptr + (uint)0 * dst_stride_y + z0 * sizeof(DATA_TYPE))) = u0.s0;
+    *((__global DATA_TYPE *)(output_ptr + (uint)0 * dst_stride_y + z1 * sizeof(DATA_TYPE))) = u0.s1;
+    *((__global DATA_TYPE *)(output_ptr + (uint)0 * dst_stride_y + z2 * sizeof(DATA_TYPE))) = u0.s2;
+    *((__global DATA_TYPE *)(output_ptr + (uint)0 * dst_stride_y + z3 * sizeof(DATA_TYPE))) = u0.s3;
+    *((__global DATA_TYPE *)(output_ptr + (uint)1 * dst_stride_y + z0 * sizeof(DATA_TYPE))) = u1.s0;
+    *((__global DATA_TYPE *)(output_ptr + (uint)1 * dst_stride_y + z1 * sizeof(DATA_TYPE))) = u1.s1;
+    *((__global DATA_TYPE *)(output_ptr + (uint)1 * dst_stride_y + z2 * sizeof(DATA_TYPE))) = u1.s2;
+    *((__global DATA_TYPE *)(output_ptr + (uint)1 * dst_stride_y + z3 * sizeof(DATA_TYPE))) = u1.s3;
+}
+#endif // VEC_SIZE == 4 && defined(LAST_ACCESSED)
+#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(NUM_GROUPS) && defined(K) && defined(SRC_DIM_Z)

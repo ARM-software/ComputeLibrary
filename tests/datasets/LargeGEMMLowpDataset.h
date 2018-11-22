@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,26 @@ public:
         add_config(TensorShape(1021U, 973U), TensorShape(783U, 1021U), TensorShape(783U, 973U), 5, 13);
         add_config(TensorShape(681U, 1023U), TensorShape(213U, 681U), TensorShape(213U, 1023U), -3, -2);
         add_config(TensorShape(941U, 1011U), TensorShape(623U, 941U), TensorShape(623U, 1011U), -9, 1);
+    }
+};
+class LargeGEMMLowpOutput3DDataset final : public GEMMLowpDataset
+{
+public:
+    LargeGEMMLowpOutput3DDataset()
+    {
+        add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 143U, 3U), 0, 0);
+        add_config(TensorShape(681U, 1025U), TensorShape(213U, 681U), TensorShape(213U, 205U, 5U), -3, 2);
+        add_config(TensorShape(364U, 3025U), TensorShape(96U, 364U), TensorShape(96U, 605U, 5U), 2, 3);
+    }
+};
+class LargeGEMMLowpInputOutput3DDataset final : public GEMMLowpDataset
+{
+public:
+    LargeGEMMLowpInputOutput3DDataset()
+    {
+        add_config(TensorShape(923U, 143U, 3U), TensorShape(871U, 923U), TensorShape(871U, 143U, 3U), 0, 0);
+        add_config(TensorShape(681U, 205U, 5U), TensorShape(213U, 681U), TensorShape(213U, 205U, 5U), -2, 5);
+        add_config(TensorShape(364U, 605U, 5U), TensorShape(96U, 364U), TensorShape(96U, 605U, 5U), 2, 4);
     }
 };
 } // namespace datasets

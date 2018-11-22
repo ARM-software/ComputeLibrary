@@ -16,6 +16,7 @@ var classarm__compute_1_1graph_1_1_i_node_visitor =
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#ab87ed681a6ea37686aec7cd27b887527", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#af394f8b2857e0272182ba95275cc8994", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a0f23f0b02ad93c75535890e51c0b3905", null ],
+    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a6a7d79aed59ab72f3cedcfabf1f7884b", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a3ab3d1a5fedf335e979356b1236af8a9", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a35761aee870b4c937facc4c7f29fd39c", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a879921d1e54b9711d71a8d2938516d11", null ]

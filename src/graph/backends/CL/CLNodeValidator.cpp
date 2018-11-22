@@ -47,6 +47,8 @@ Status CLNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::BoundingBoxTransformLayer:
+            return detail::validate_bounding_box_transform_layer<CLBoundingBoxTransform>(*polymorphic_downcast<BoundingBoxTransformLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:
             return detail::validate_channel_shuffle_layer<CLChannelShuffleLayer>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
@@ -57,8 +59,26 @@ Status CLNodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer,
                    CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::GenerateProposalsLayer:
+            return detail::validate_generate_proposals_layer<CLGenerateProposalsLayer>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node));
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::validate_normalize_planar_yuv_layer<CLNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
+        case NodeType::PadLayer:
+            return detail::validate_pad_layer<CLPadLayer>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::PriorBoxLayer:
+            return detail::validate_priorbox_layer<CLPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::validate_reorg_layer<CLReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
+        case NodeType::ROIAlignLayer:
+            return detail::validate_roi_align_layer<CLROIAlignLayer>(*polymorphic_downcast<ROIAlignLayerNode *>(node));
+        case NodeType::SliceLayer:
+            return detail::validate_slice_layer<CLSlice>(*polymorphic_downcast<SliceLayerNode *>(node));
+        case NodeType::UpsampleLayer:
+            return detail::validate_upsample_layer<CLUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
+        case NodeType::YOLOLayer:
+            return detail::validate_yolo_layer<CLYOLOLayer>(*polymorphic_downcast<YOLOLayerNode *>(node));
         default:
             return Status{};
     }

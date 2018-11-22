@@ -1,8 +1,8 @@
 var classarm__compute_1_1graph_1_1backends_1_1_backend_registry =
 [
     [ "add_backend", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a451414fa66c0042dbda95c7620b377a5", null ],
-    [ "backends", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#ac79ce508f33184eecd9c2cd3253d3f06", null ],
-    [ "contains", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a7ab3541aa19379c2a414f6dd8fde588d", null ],
-    [ "find_backend", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#ac1794eb37cf7ace4b8e0f9bf759df6e4", null ],
-    [ "get_backend", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a83ba5515af28873a9ed86a36ac29516a", null ]
+    [ "backends", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#af0cb8edaa2dd7d982b8bf63ddfb3f966", null ],
+    [ "contains", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#aaacd907a06b819a33edf3c2c927aad46", null ],
+    [ "find_backend", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a62aabe90a748206d11150f01899d4bce", null ],
+    [ "get_backend", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml#a0e2e9eb7cf2545949ea4130d768bea93", null ]
 ];

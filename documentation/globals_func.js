@@ -9,6 +9,7 @@ var globals_func =
     [ "g", "globals_func_g.xhtml", null ],
     [ "h", "globals_func_h.xhtml", null ],
     [ "i", "globals_func_i.xhtml", null ],
+    [ "k", "globals_func_k.xhtml", null ],
     [ "l", "globals_func_l.xhtml", null ],
     [ "m", "globals_func_m.xhtml", null ],
     [ "n", "globals_func_n.xhtml", null ],

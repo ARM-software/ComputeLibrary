@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,21 +30,30 @@
 using namespace arm_compute::quantization;
 
 constexpr int64_t fixed_point_one_Q0 = (1ll << 31);
+constexpr float   epsilon            = 0.00001f;
 
-arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_less_than_one(double multiplier,
+arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_less_than_one(float multiplier,
                                                                                             int   *quant_multiplier,
                                                                                             int   *right_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON(multiplier < 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(multiplier >= 1);
-    if(multiplier == 0)
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier < -epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f + epsilon);
+    if(std::fabs(1.0f - multiplier) < epsilon)
+    {
+        *quant_multiplier = 1;
+        *right_shift      = 0;
+        return arm_compute::Status{};
+    }
+
+    if(std::fabs(0.0f - multiplier) < epsilon)
     {
         *quant_multiplier = 0;
         *right_shift      = 0;
         return arm_compute::Status{};
     }
+
     const double q = std::frexp(multiplier, right_shift);
     *right_shift *= -1;
     auto q_fixed = static_cast<int64_t>(round(q * fixed_point_one_Q0));
@@ -61,7 +70,7 @@ arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_le
     return arm_compute::Status{};
 }
 
-arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(double multiplier,
+arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(float multiplier,
                                                                                                int   *quantized_multiplier,
                                                                                                int   *left_shift)
 {

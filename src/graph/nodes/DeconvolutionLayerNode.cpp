@@ -51,8 +51,7 @@ Size2D DeconvolutionLayerNode::inner_border() const
 
 TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                                    const TensorDescriptor &weights_descriptor,
-                                                                   const PadStrideInfo    &info,
-                                                                   const Size2D           &inner_border)
+                                                                   const PadStrideInfo    &info)
 {
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
@@ -65,7 +64,6 @@ TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorD
     std::tie(output_width, output_height) = deconvolution_output_dimensions(input_width, input_height,
                                                                             kernel_width, kernel_height,
                                                                             info.pad().first, info.pad().second,
-                                                                            inner_border.x(), inner_border.y(),
                                                                             info.stride().first, info.stride().second);
 
     TensorDescriptor output_descriptor = input_descriptor;
@@ -96,7 +94,7 @@ TensorDescriptor DeconvolutionLayerNode::configure_output(size_t idx) const
 
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
-    TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info, _inner_border);
+    TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info);
     return output_info;
 }
 

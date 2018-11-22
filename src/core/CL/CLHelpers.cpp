@@ -64,6 +64,36 @@ std::string get_cl_type_from_data_type(const DataType &dt)
     }
 }
 
+std::string get_cl_select_type_from_data_type(const DataType &dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            return "uchar";
+        case DataType::S8:
+            return "char";
+        case DataType::QASYMM8:
+            return "uchar";
+        case DataType::U16:
+            return "ushort";
+        case DataType::F16:
+        case DataType::S16:
+            return "short";
+        case DataType::U32:
+            return "uint";
+        case DataType::F32:
+        case DataType::S32:
+            return "int";
+        case DataType::U64:
+            return "ulong";
+        case DataType::S64:
+            return "long";
+        default:
+            ARM_COMPUTE_ERROR("Unsupported input data type.");
+            return "";
+    }
+}
+
 std::string get_data_size_from_data_type(const DataType &dt)
 {
     switch(dt)
@@ -114,7 +144,12 @@ bool fp16_supported(const cl::Device &device)
 
 bool dot8_supported(const cl::Device &device)
 {
-    return device_supports_extension(device, "cl_arm_integer_dot_product_int8");
+    std::string     device_name = device.getInfo<CL_DEVICE_NAME>();
+    const GPUTarget gpu_target  = get_target_from_name(device_name);
+
+    // SW_WORKAROUND: Workaround for DDK revision r14p0.to enable cl_arm_integer_dot_product_int8
+    std::set<GPUTarget> sw_workaround_issue = {GPUTarget::G76};
+    return (device_supports_extension(device, "cl_arm_integer_dot_product_int8") || sw_workaround_issue.count(gpu_target) != 0);
 }
 
 bool dot8_acc_supported(const cl::Device &device)

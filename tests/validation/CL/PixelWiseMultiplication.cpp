@@ -38,8 +38,11 @@ namespace validation
 {
 namespace
 {
-const float scale_255 = 1.f / 255.f;
-
+namespace
+{
+const float                        scale_255 = 1.f / 255.f;
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+} //namespace
 // *INDENT-OFF*
 // clang-format off
 #define VALIDATE(TYPE, TOLERANCE) validate(CLAccessor(_target), _reference, AbsoluteTolerance<TYPE>(TOLERANCE), 0.f);
@@ -105,31 +108,41 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(F16toF16)
-
 TEST_SUITE(Scale255)
 PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF16Fixture<half_float::half>, PRECOMMIT, SmallShapes(), F16, F16, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
 TEST_SUITE_END() // Scale255
-
 TEST_SUITE_END() // F16toF16
 
 TEST_SUITE(F32toF32)
-
 TEST_SUITE(Scale255)
 PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, ToF32Fixture<float>, PRECOMMIT, SmallShapes(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
 TEST_SUITE_END() // Scale255
-
 TEST_SUITE_END() // F32toF32
 
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+
+template <typename T>
+using CLPixelWiseMultiplicationQuantizedFixture = PixelWiseMultiplicationValidationQuantizedFixture<CLTensor, CLAccessor, CLPixelWiseMultiplication, T, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("Scale", { 1.f, 2.f })),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
+
 TEST_SUITE_END() // PixelWiseMultiplication
-
-TEST_SUITE(FixedPointPixelWiseMultiplication)
-
-TEST_SUITE(Broadcast)
-PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
-TEST_SUITE_END() // Broadcast
-
-TEST_SUITE_END() // FixedPointPixelWiseMultiplication
-TEST_SUITE_END()
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

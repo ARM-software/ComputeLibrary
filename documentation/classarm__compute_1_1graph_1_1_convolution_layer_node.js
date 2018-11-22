@@ -3,12 +3,14 @@ var classarm__compute_1_1graph_1_1_convolution_layer_node =
     [ "ConvolutionLayerNode", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#ad556cd2cfb55554dbd3cbdefff2a26b7", null ],
     [ "accept", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f", null ],
     [ "configure_output", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a3f18a7449b9d7fc9e5fec212b8e61710", null ],
-    [ "convolution_info", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#af8bae150bf98eca8fe0fa86eba1c82e7", null ],
-    [ "convolution_method", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a1e41ff600f64885f7594756f39ff8af3", null ],
-    [ "fast_math_hint", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a5d23729a29c27170ce6607223a5e47a0", null ],
+    [ "convolution_info", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#ad087f1f9aa1e444236911adf6c57df04", null ],
+    [ "convolution_method", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a16b2c6652c4cee5b566daf018f768a42", null ],
+    [ "fast_math_hint", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a807d0a897f65b2fa1f8ea92892fa2c2a", null ],
     [ "forward_descriptors", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a6272eb9643b239dd0c1e7adde3ee093b", null ],
-    [ "num_groups", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a8dcb6000a40ebf3e3ced2bdb0fc496a8", null ],
+    [ "fused_activation", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a32186582e0a6e02ed7ac3944f60b9c62", null ],
+    [ "num_groups", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a984881c2c9e6de259af8fcd4ecbc4d80", null ],
     [ "set_convolution_method", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a9d809efcf3df31392abc965f2cc3bae6", null ],
     [ "set_fast_math_hint", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a82ca2fe256cf9c4c201b74510d41852c", null ],
+    [ "set_fused_activation", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a8f9c3ed345d401dc02c5a8f34b284a33", null ],
     [ "type", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5", null ]
 ];

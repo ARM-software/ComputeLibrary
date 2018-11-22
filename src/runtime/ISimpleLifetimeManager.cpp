@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/IAllocator.h"
+#include "arm_compute/runtime/IMemory.h"
 #include "arm_compute/runtime/IMemoryGroup.h"
 #include "arm_compute/runtime/IMemoryPool.h"
 #include "support/ToolchainSupport.h"
@@ -70,7 +71,7 @@ void ISimpleLifetimeManager::start_lifetime(void *obj)
     _active_elements.insert(std::make_pair(obj, obj));
 }
 
-void ISimpleLifetimeManager::end_lifetime(void *obj, void **handle, size_t size)
+void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t size)
 {
     ARM_COMPUTE_ERROR_ON(obj == nullptr);
 
@@ -80,7 +81,7 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, void **handle, size_t size)
 
     // Update object fields and mark object as complete
     Element &el = active_object_it->second;
-    el.handle   = handle;
+    el.handle   = &obj_memory;
     el.size     = size;
     el.status   = true;
 

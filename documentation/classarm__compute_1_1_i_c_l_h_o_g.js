@@ -5,7 +5,7 @@ var classarm__compute_1_1_i_c_l_h_o_g =
     [ "ICLHOG", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a5fa39e889172d1997da4d8369d7eff2d", null ],
     [ "~ICLHOG", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a4f666198e882c54ee00dd2d7c5407df2", null ],
     [ "cl_buffer", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a1fb4c50755a0ef424652246838ed91a6", null ],
-    [ "descriptor", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a548b8c6fda024da07113ff6cf6ec6af6", null ],
+    [ "descriptor", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a27295b82a57124dd502fbe8cebe8f9ca", null ],
     [ "free", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a1781eecaabd2bc97d074437d01b2c683", null ],
     [ "map", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0", null ],
     [ "operator=", "classarm__compute_1_1_i_c_l_h_o_g.xhtml#a580c5fa0472ca0d70b463da27803a264", null ],

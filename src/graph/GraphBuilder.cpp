@@ -132,7 +132,7 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
     TensorDescriptor common_desc = input_tensor_desc;
     common_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
 
-    // Create mean and nodes
+    // Create mean and var nodes
     auto mean_nid = add_const_node_with_name(g, params, "Mean", common_desc, std::move(mean_accessor));
     auto var_nid  = add_const_node_with_name(g, params, "Variance", common_desc, std::move(var_accessor));
 
@@ -166,6 +166,20 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
     set_node_params(g, batch_norm_nid, params);
 
     return batch_norm_nid;
+}
+
+NodeID GraphBuilder::add_bounding_box_transform_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair deltas, BoundingBoxTransformInfo info)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+    CHECK_NODEIDX_PAIR(deltas, g);
+
+    NodeID nid = g.add_node<BoundingBoxTransformLayerNode>(info);
+
+    g.add_connection(input.node_id, input.index, nid, 0);
+    g.add_connection(deltas.node_id, deltas.index, nid, 1);
+
+    set_node_params(g, nid, params);
+    return nid;
 }
 
 NodeID GraphBuilder::add_channel_shuffle_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_groups)
@@ -327,7 +341,13 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+
+        if(is_data_type_quantized_asymmetric(b_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
     // Create convolution node and connect
@@ -412,9 +432,56 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     return fc_nid;
 }
 
+NodeID GraphBuilder::add_generate_proposals_node(Graph &g, NodeParams params, NodeIdxPair scores, NodeIdxPair deltas, NodeIdxPair anchors, GenerateProposalsInfo info)
+{
+    CHECK_NODEIDX_PAIR(scores, g);
+    CHECK_NODEIDX_PAIR(deltas, g);
+    CHECK_NODEIDX_PAIR(anchors, g);
+
+    NodeID nid = g.add_node<GenerateProposalsLayerNode>(info);
+
+    g.add_connection(scores.node_id, scores.index, nid, 0);
+    g.add_connection(deltas.node_id, deltas.index, nid, 1);
+    g.add_connection(anchors.node_id, anchors.index, nid, 2);
+
+    set_node_params(g, nid, params);
+    return nid;
+}
+
 NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info)
 {
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);
+}
+
+NodeID GraphBuilder::add_normalize_planar_yuv_node(Graph &g, NodeParams params, NodeIdxPair input,
+                                                   ITensorAccessorUPtr mean_accessor, ITensorAccessorUPtr std_accessor)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Calculate Common Descriptor
+    TensorDescriptor common_desc = input_tensor_desc;
+    common_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
+
+    // Create mean and std nodes
+    auto mean_nid = add_const_node_with_name(g, params, "Mean", common_desc, std::move(mean_accessor));
+    auto std_nid  = add_const_node_with_name(g, params, "Std", common_desc, std::move(std_accessor));
+
+    // Create normalize planar YUV node and add connections
+    NodeID norm_planar_yuv_nid = g.add_node<NormalizePlanarYUVLayerNode>();
+    g.add_connection(input.node_id, input.index, norm_planar_yuv_nid, 0);
+    g.add_connection(mean_nid, 0, norm_planar_yuv_nid, 1);
+    g.add_connection(std_nid, 0, norm_planar_yuv_nid, 2);
+    set_node_params(g, norm_planar_yuv_nid, params);
+
+    return norm_planar_yuv_nid;
+}
+
+NodeID GraphBuilder::add_pad_node(Graph &g, NodeParams params, NodeIdxPair input, PaddingList padding)
+{
+    return create_simple_single_input_output_node<PadLayerNode>(g, params, input, padding);
 }
 
 NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)
@@ -427,6 +494,26 @@ NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
 }
 
+NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info)
+{
+    CHECK_NODEIDX_PAIR(input0, g);
+    CHECK_NODEIDX_PAIR(input1, g);
+
+    // Create priorbox node and connect
+    NodeID prior_nid = g.add_node<PriorBoxLayerNode>(prior_info);
+    g.add_connection(input0.node_id, input0.index, prior_nid, 0);
+    g.add_connection(input1.node_id, input1.index, prior_nid, 1);
+
+    set_node_params(g, prior_nid, params);
+
+    return prior_nid;
+}
+
+NodeID GraphBuilder::add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride)
+{
+    return create_simple_single_input_output_node<ReorgLayerNode>(g, params, input, stride);
+}
+
 NodeID GraphBuilder::add_reshape_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
 {
     return create_simple_single_input_output_node<ReshapeLayerNode>(g, params, input, shape);
@@ -436,6 +523,20 @@ NodeID GraphBuilder::add_resize_node(Graph &g, NodeParams params, NodeIdxPair in
                                      float width_scale, float height_scale)
 {
     return create_simple_single_input_output_node<ResizeLayerNode>(g, params, input, policy, width_scale, height_scale);
+}
+
+NodeID GraphBuilder::add_roi_align_node(Graph &g, NodeParams params, NodeIdxPair input, NodeIdxPair rois, ROIPoolingLayerInfo pool_info)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+    CHECK_NODEIDX_PAIR(rois, g);
+
+    NodeID nid = g.add_node<ROIAlignLayerNode>(pool_info);
+
+    g.add_connection(input.node_id, input.index, nid, 0);
+    g.add_connection(rois.node_id, rois.index, nid, 1);
+
+    set_node_params(g, nid, params);
+    return nid;
 }
 
 NodeID GraphBuilder::add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor, ITensorAccessorUPtr add_accessor)
@@ -472,9 +573,24 @@ NodeID GraphBuilder::add_softmax_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<SoftmaxLayerNode>(g, params, input, beta);
 }
 
+NodeID GraphBuilder::add_slice_node(Graph &g, NodeParams params, NodeIdxPair input, Coordinates &starts, Coordinates &ends)
+{
+    return create_simple_single_input_output_node<SliceLayerNode>(g, params, input, starts, ends);
+}
+
 NodeID GraphBuilder::add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis)
 {
     return create_simple_single_input_output_node<SplitLayerNode>(g, params, input, num_splits, axis);
+}
+
+NodeID GraphBuilder::add_upsample_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D info, InterpolationPolicy upsampling_policy)
+{
+    return create_simple_single_input_output_node<UpsampleLayerNode>(g, params, input, info, upsampling_policy);
+}
+
+NodeID GraphBuilder::add_yolo_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, int32_t num_classes)
+{
+    return create_simple_single_input_output_node<YOLOLayerNode>(g, params, input, act_info, num_classes);
 }
 } // namespace graph
 } // namespace arm_compute

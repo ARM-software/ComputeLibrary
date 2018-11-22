@@ -34,7 +34,7 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+template <typename T>
 SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info)
 {
     // Create reference
@@ -46,46 +46,7 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
 
     for(int i = 0; i < src.num_elements(); ++i)
     {
-        T x = src[i];
-
-        switch(info.activation())
-        {
-            case ActivationLayerInfo::ActivationFunction::ABS:
-                dst[i] = std::abs(x);
-                break;
-            case ActivationLayerInfo::ActivationFunction::LINEAR:
-                dst[i] = a * x + b;
-                break;
-            case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                dst[i] = static_cast<T>(1) / (static_cast<T>(1) + std::exp(-x));
-                break;
-            case ActivationLayerInfo::ActivationFunction::RELU:
-                dst[i] = std::max<T>(static_cast<T>(0), x);
-                break;
-            case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-                dst[i] = std::min<T>(a, std::max(static_cast<T>(0), x));
-                break;
-            case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-                dst[i] = std::min<T>(a, std::max<T>(b, x));
-                break;
-            case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-                dst[i] = (x > 0) ? x : a * x;
-                break;
-            case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-                dst[i] = std::log(static_cast<T>(1) + std::exp(x));
-                break;
-            case ActivationLayerInfo::ActivationFunction::SQRT:
-                dst[i] = std::sqrt(x);
-                break;
-            case ActivationLayerInfo::ActivationFunction::SQUARE:
-                dst[i] = x * x;
-                break;
-            case ActivationLayerInfo::ActivationFunction::TANH:
-                dst[i] = a * std::tanh(b * x);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Unsupported activation function");
-        }
+        dst[i] = activate_float<T>(src[i], a, b, info.activation());
     }
 
     return dst;

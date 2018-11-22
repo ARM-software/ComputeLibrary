@@ -1,8 +1,8 @@
 var _c_l_2_permute_8cpp =
 [
     [ "CLPermuteFixture", "_c_l_2_permute_8cpp.xhtml#a422b5e1fb5024793f870f0a76a229b1f", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#a9fef1defe4d1be1c781ab819d46ad1e9", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#ab1b781bfa8aede873549ccc651f6bcf8", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#aa09dc286bdc4ddde0d0d7914ad026346", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#a10cbef7a4d5b95ee888e5371244056ae", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#ab3f4ab4a5c5018ffd9d99cf7b369a61a", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#a64c3d1d676bc6c2ba622e62a362ed055", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_permute_8cpp.xhtml#ab3e3208a529c7485121fe2f7e2a6c3a5", null ],

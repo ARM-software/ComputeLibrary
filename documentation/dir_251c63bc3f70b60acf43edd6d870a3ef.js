@@ -23,6 +23,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLBatchNormalizationLayer.h", "_c_l_batch_normalization_layer_8h.xhtml", [
       [ "CLBatchNormalizationLayer", "classarm__compute_1_1_c_l_batch_normalization_layer.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer" ]
     ] ],
+    [ "CLBatchToSpaceLayer.h", "_c_l_batch_to_space_layer_8h.xhtml", [
+      [ "CLBatchToSpaceLayer", "classarm__compute_1_1_c_l_batch_to_space_layer.xhtml", "classarm__compute_1_1_c_l_batch_to_space_layer" ]
+    ] ],
     [ "CLBitwiseAnd.h", "_c_l_bitwise_and_8h.xhtml", [
       [ "CLBitwiseAnd", "classarm__compute_1_1_c_l_bitwise_and.xhtml", "classarm__compute_1_1_c_l_bitwise_and" ]
     ] ],
@@ -34,6 +37,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLBitwiseXor.h", "_c_l_bitwise_xor_8h.xhtml", [
       [ "CLBitwiseXor", "classarm__compute_1_1_c_l_bitwise_xor.xhtml", "classarm__compute_1_1_c_l_bitwise_xor" ]
+    ] ],
+    [ "CLBoundingBoxTransform.h", "_c_l_bounding_box_transform_8h.xhtml", [
+      [ "CLBoundingBoxTransform", "classarm__compute_1_1_c_l_bounding_box_transform.xhtml", "classarm__compute_1_1_c_l_bounding_box_transform" ]
     ] ],
     [ "CLBox3x3.h", "_c_l_box3x3_8h.xhtml", [
       [ "CLBox3x3", "classarm__compute_1_1_c_l_box3x3.xhtml", "classarm__compute_1_1_c_l_box3x3" ]
@@ -52,6 +58,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLColorConvert.h", "_c_l_color_convert_8h.xhtml", [
       [ "CLColorConvert", "classarm__compute_1_1_c_l_color_convert.xhtml", "classarm__compute_1_1_c_l_color_convert" ]
+    ] ],
+    [ "CLComputeAllAnchors.h", "_c_l_compute_all_anchors_8h.xhtml", [
+      [ "CLComputeAllAnchors", "classarm__compute_1_1_c_l_compute_all_anchors.xhtml", "classarm__compute_1_1_c_l_compute_all_anchors" ]
     ] ],
     [ "CLConcatenateLayer.h", "_c_l_concatenate_layer_8h.xhtml", [
       [ "CLConcatenateLayer", "classarm__compute_1_1_c_l_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_concatenate_layer" ]
@@ -119,6 +128,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLFullyConnectedLayerReshapeWeights", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer_reshape_weights" ],
       [ "CLFullyConnectedLayer", "classarm__compute_1_1_c_l_fully_connected_layer.xhtml", "classarm__compute_1_1_c_l_fully_connected_layer" ]
     ] ],
+    [ "CLFuseBatchNormalization.h", "_c_l_fuse_batch_normalization_8h.xhtml", [
+      [ "CLFuseBatchNormalization", "classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml", "classarm__compute_1_1_c_l_fuse_batch_normalization" ]
+    ] ],
     [ "CLGaussian3x3.h", "_c_l_gaussian3x3_8h.xhtml", [
       [ "CLGaussian3x3", "classarm__compute_1_1_c_l_gaussian3x3.xhtml", "classarm__compute_1_1_c_l_gaussian3x3" ]
     ] ],
@@ -145,10 +157,14 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLGEMMLowpOutputStage.h", "_c_l_g_e_m_m_lowp_output_stage_8h.xhtml", [
       [ "CLGEMMLowpQuantizeDownInt32ToUint8Scale", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale" ],
-      [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point" ]
+      [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point" ],
+      [ "CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_float" ]
     ] ],
     [ "CLGEMMTranspose1xW.h", "_c_l_g_e_m_m_transpose1x_w_8h.xhtml", [
       [ "CLGEMMTranspose1xW", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w" ]
+    ] ],
+    [ "CLGenerateProposalsLayer.h", "_c_l_generate_proposals_layer_8h.xhtml", [
+      [ "CLGenerateProposalsLayer", "classarm__compute_1_1_c_l_generate_proposals_layer.xhtml", "classarm__compute_1_1_c_l_generate_proposals_layer" ]
     ] ],
     [ "CLHarrisCorners.h", "_c_l_harris_corners_8h.xhtml", [
       [ "CLHarrisCorners", "classarm__compute_1_1_c_l_harris_corners.xhtml", "classarm__compute_1_1_c_l_harris_corners" ]
@@ -184,7 +200,6 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLLocallyConnectedLayer", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml", "classarm__compute_1_1_c_l_locally_connected_layer" ]
     ] ],
     [ "CLLSTMLayer.h", "_c_l_l_s_t_m_layer_8h.xhtml", [
-      [ "LSTMParams", "classarm__compute_1_1_l_s_t_m_params.xhtml", "classarm__compute_1_1_l_s_t_m_params" ],
       [ "CLLSTMLayer", "classarm__compute_1_1_c_l_l_s_t_m_layer.xhtml", "classarm__compute_1_1_c_l_l_s_t_m_layer" ]
     ] ],
     [ "CLMagnitude.h", "_c_l_magnitude_8h.xhtml", [
@@ -208,7 +223,13 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLNormalizationLayer.h", "_c_l_normalization_layer_8h.xhtml", [
       [ "CLNormalizationLayer", "classarm__compute_1_1_c_l_normalization_layer.xhtml", "classarm__compute_1_1_c_l_normalization_layer" ]
     ] ],
+    [ "CLNormalizePlanarYUVLayer.h", "_c_l_normalize_planar_y_u_v_layer_8h.xhtml", [
+      [ "CLNormalizePlanarYUVLayer", "classarm__compute_1_1_c_l_normalize_planar_y_u_v_layer.xhtml", "classarm__compute_1_1_c_l_normalize_planar_y_u_v_layer" ]
+    ] ],
     [ "CLOpticalFlow.h", "_c_l_optical_flow_8h.xhtml", "_c_l_optical_flow_8h" ],
+    [ "CLPadLayer.h", "_c_l_pad_layer_8h.xhtml", [
+      [ "CLPadLayer", "classarm__compute_1_1_c_l_pad_layer.xhtml", "classarm__compute_1_1_c_l_pad_layer" ]
+    ] ],
     [ "CLPermute.h", "_c_l_permute_8h.xhtml", [
       [ "CLPermute", "classarm__compute_1_1_c_l_permute.xhtml", "classarm__compute_1_1_c_l_permute" ]
     ] ],
@@ -221,8 +242,14 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLPoolingLayer.h", "_c_l_pooling_layer_8h.xhtml", [
       [ "CLPoolingLayer", "classarm__compute_1_1_c_l_pooling_layer.xhtml", "classarm__compute_1_1_c_l_pooling_layer" ]
     ] ],
+    [ "CLPriorBoxLayer.h", "_c_l_prior_box_layer_8h.xhtml", [
+      [ "CLPriorBoxLayer", "classarm__compute_1_1_c_l_prior_box_layer.xhtml", "classarm__compute_1_1_c_l_prior_box_layer" ]
+    ] ],
     [ "CLQuantizationLayer.h", "_c_l_quantization_layer_8h.xhtml", [
       [ "CLQuantizationLayer", "classarm__compute_1_1_c_l_quantization_layer.xhtml", "classarm__compute_1_1_c_l_quantization_layer" ]
+    ] ],
+    [ "CLReduceMean.h", "_c_l_reduce_mean_8h.xhtml", [
+      [ "CLReduceMean", "classarm__compute_1_1_c_l_reduce_mean.xhtml", "classarm__compute_1_1_c_l_reduce_mean" ]
     ] ],
     [ "CLReductionOperation.h", "_c_l_reduction_operation_8h.xhtml", [
       [ "CLReductionOperation", "classarm__compute_1_1_c_l_reduction_operation.xhtml", "classarm__compute_1_1_c_l_reduction_operation" ]
@@ -230,11 +257,17 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLRemap.h", "_c_l_remap_8h.xhtml", [
       [ "CLRemap", "classarm__compute_1_1_c_l_remap.xhtml", "classarm__compute_1_1_c_l_remap" ]
     ] ],
+    [ "CLReorgLayer.h", "_c_l_reorg_layer_8h.xhtml", [
+      [ "CLReorgLayer", "classarm__compute_1_1_c_l_reorg_layer.xhtml", "classarm__compute_1_1_c_l_reorg_layer" ]
+    ] ],
     [ "CLReshapeLayer.h", "_c_l_reshape_layer_8h.xhtml", [
       [ "CLReshapeLayer", "classarm__compute_1_1_c_l_reshape_layer.xhtml", "classarm__compute_1_1_c_l_reshape_layer" ]
     ] ],
     [ "CLRNNLayer.h", "_c_l_r_n_n_layer_8h.xhtml", [
       [ "CLRNNLayer", "classarm__compute_1_1_c_l_r_n_n_layer.xhtml", "classarm__compute_1_1_c_l_r_n_n_layer" ]
+    ] ],
+    [ "CLROIAlignLayer.h", "_c_l_r_o_i_align_layer_8h.xhtml", [
+      [ "CLROIAlignLayer", "classarm__compute_1_1_c_l_r_o_i_align_layer.xhtml", "classarm__compute_1_1_c_l_r_o_i_align_layer" ]
     ] ],
     [ "CLROIPoolingLayer.h", "_c_l_r_o_i_pooling_layer_8h.xhtml", [
       [ "CLROIPoolingLayer", "classarm__compute_1_1_c_l_r_o_i_pooling_layer.xhtml", "classarm__compute_1_1_c_l_r_o_i_pooling_layer" ]
@@ -244,6 +277,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLScharr3x3.h", "_c_l_scharr3x3_8h.xhtml", [
       [ "CLScharr3x3", "classarm__compute_1_1_c_l_scharr3x3.xhtml", "classarm__compute_1_1_c_l_scharr3x3" ]
+    ] ],
+    [ "CLSlice.h", "_c_l_slice_8h.xhtml", [
+      [ "CLSlice", "classarm__compute_1_1_c_l_slice.xhtml", "classarm__compute_1_1_c_l_slice" ]
     ] ],
     [ "CLSobel3x3.h", "_c_l_sobel3x3_8h.xhtml", [
       [ "CLSobel3x3", "classarm__compute_1_1_c_l_sobel3x3.xhtml", "classarm__compute_1_1_c_l_sobel3x3" ]
@@ -257,6 +293,15 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLSoftmaxLayer.h", "_c_l_softmax_layer_8h.xhtml", [
       [ "CLSoftmaxLayer", "classarm__compute_1_1_c_l_softmax_layer.xhtml", "classarm__compute_1_1_c_l_softmax_layer" ]
     ] ],
+    [ "CLSpaceToBatchLayer.h", "_c_l_space_to_batch_layer_8h.xhtml", [
+      [ "CLSpaceToBatchLayer", "classarm__compute_1_1_c_l_space_to_batch_layer.xhtml", "classarm__compute_1_1_c_l_space_to_batch_layer" ]
+    ] ],
+    [ "CLSplit.h", "_c_l_split_8h.xhtml", [
+      [ "CLSplit", "classarm__compute_1_1_c_l_split.xhtml", "classarm__compute_1_1_c_l_split" ]
+    ] ],
+    [ "CLStridedSlice.h", "_c_l_strided_slice_8h.xhtml", [
+      [ "CLStridedSlice", "classarm__compute_1_1_c_l_strided_slice.xhtml", "classarm__compute_1_1_c_l_strided_slice" ]
+    ] ],
     [ "CLTableLookup.h", "_c_l_table_lookup_8h.xhtml", [
       [ "CLTableLookup", "classarm__compute_1_1_c_l_table_lookup.xhtml", "classarm__compute_1_1_c_l_table_lookup" ]
     ] ],
@@ -265,6 +310,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLTranspose.h", "_c_l_transpose_8h.xhtml", [
       [ "CLTranspose", "classarm__compute_1_1_c_l_transpose.xhtml", "classarm__compute_1_1_c_l_transpose" ]
+    ] ],
+    [ "CLUpsampleLayer.h", "_c_l_upsample_layer_8h.xhtml", [
+      [ "CLUpsampleLayer", "classarm__compute_1_1_c_l_upsample_layer.xhtml", "classarm__compute_1_1_c_l_upsample_layer" ]
     ] ],
     [ "CLWarpAffine.h", "_c_l_warp_affine_8h.xhtml", [
       [ "CLWarpAffine", "classarm__compute_1_1_c_l_warp_affine.xhtml", "classarm__compute_1_1_c_l_warp_affine" ]
@@ -280,5 +328,8 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLWinogradInputTransform.h", "_c_l_winograd_input_transform_8h.xhtml", [
       [ "CLWinogradInputTransform", "classarm__compute_1_1_c_l_winograd_input_transform.xhtml", "classarm__compute_1_1_c_l_winograd_input_transform" ]
+    ] ],
+    [ "CLYOLOLayer.h", "_c_l_y_o_l_o_layer_8h.xhtml", [
+      [ "CLYOLOLayer", "classarm__compute_1_1_c_l_y_o_l_o_layer.xhtml", "classarm__compute_1_1_c_l_y_o_l_o_layer" ]
     ] ]
 ];

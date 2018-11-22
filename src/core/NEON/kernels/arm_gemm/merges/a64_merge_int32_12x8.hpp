@@ -273,7 +273,7 @@ inline void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const in
 template<>
 inline void MergeResults<12, 8>(uint32_t *out, const uint32_t *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const uint32_t alpha, const uint32_t beta) {
   // Since the above code uses only MUL and MLA instructions discard the "unsignedness" and proceed safely.
-  MergeResults<12, 8>(reinterpret_cast<int32_t*>(out), reinterpret_cast<const int32_t*>(in), ldout, y0, ymax, x0, xmax, static_cast<const int32_t>(alpha), static_cast<const int32_t>(beta));
+  MergeResults<12, 8>(reinterpret_cast<int32_t*>(out), reinterpret_cast<const int32_t*>(in), ldout, y0, ymax, x0, xmax, static_cast<int32_t>(alpha), static_cast<int32_t>(beta));
 }
 
 #endif // __aarch64__

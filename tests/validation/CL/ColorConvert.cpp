@@ -52,6 +52,9 @@ const auto ColorConvert_RGBA_to_RGB = combine(framework::dataset::make("FormatTy
 const auto ColorConvert_RGB_to_RGBA = combine(framework::dataset::make("FormatType", { Format::RGB888 }),
                                               framework::dataset::make("FormatType", { Format::RGBA8888 }));
 
+const auto ColorConvert_RGB_to_U8 = combine(framework::dataset::make("FormatType", { Format::RGB888 }),
+                                            framework::dataset::make("FormatType", { Format::U8 }));
+
 const auto ColorConvert_YUYV_to_RGBDataset = combine(YUYVDataset,
                                                      RGBDataset);
 
@@ -143,6 +146,12 @@ DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(concat(datasets::Small2
     validate_configuration(shape, src_format, dst_format);
 }
 
+DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGB_to_U8),
+               shape, src_format, dst_format)
+{
+    validate_configuration(shape, src_format, dst_format);
+}
+
 DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUYV_to_RGBDataset),
                shape, src_format, dst_format)
 {
@@ -204,6 +213,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::Data
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvert_RGB_to_RGBA))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+TEST_SUITE_END()
+
+TEST_SUITE(RGBtoU8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvert_RGB_to_U8))
 {
     // Validate output
     for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)

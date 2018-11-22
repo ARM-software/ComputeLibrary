@@ -1,3 +1,26 @@
+///
+/// Copyright (c) 2017-2018 ARM Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
 namespace arm_compute
 {
 /** @mainpage Introduction
@@ -26,7 +49,7 @@ In order to facilitate the work of the support team please provide the build inf
 For each release we provide some pre-built binaries of the library [here](https://github.com/ARM-software/ComputeLibrary/releases)
 
 These binaries have been built using the following toolchains:
-            - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
+            - Linux armv7a: gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
             - Android armv7a: clang++ / libc++ NDK r17b
             - Android am64-v8a: clang++ / libc++ NDK r17b
@@ -214,6 +237,69 @@ If there is more than one release in a month then an extra sequential number is 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
 @subsection S2_2_changelog Changelog
+
+v18.11 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - New Neon kernels / functions:
+    - @ref NEChannelShuffleLayer / @ref NEChannelShuffleLayerKernel
+    - @ref NEReduceMean
+    - @ref NEReorgLayer / @ref NEReorgLayerKernel
+    - @ref NEPriorBoxLayer / @ref NEPriorBoxLayerKernel
+    - @ref NEUpsampleLayer / @ref NEUpsampleLayerKernel
+    - @ref NEYOLOLayer / @ref NEYOLOLayerKernel
+ - New OpenCL kernels / functions:
+    - @ref CLBatchToSpaceLayer / @ref CLBatchToSpaceLayerKernel
+    - @ref CLBoundingBoxTransform / @ref CLBoundingBoxTransformKernel
+    - @ref CLComputeAllAnchorsKernel
+    - @ref CLGenerateProposalsLayer
+    - @ref CLNormalizePlanarYUVLayer / @ref CLNormalizePlanarYUVLayerKernel
+    - @ref CLReorgLayer / @ref CLReorgLayerKernel
+    - @ref CLSpaceToBatchLayer / @ref CLSpaceToBatchLayerKernel
+    - @ref CLPadLayer
+    - @ref CLReduceMean
+    - @ref CLPriorBoxLayer / @ref CLPriorBoxLayerKernel
+    - @ref CLROIAlignLayer / @ref CLROIAlignLayerKernel
+    - @ref CLSlice
+    - @ref CLSplit
+    - @ref CLStridedSlice / @ref CLStridedSliceKernel
+    - @ref CLUpsampleLayer / @ref CLUpsampleLayerKernel
+    - @ref CLYOLOLayer / @ref CLYOLOLayerKernel
+ - New CPP kernels / functions:
+    - @ref CPPBoxWithNonMaximaSuppressionLimit / @ref CPPBoxWithNonMaximaSuppressionLimitKernel
+ - Added the validate method in:
+    - @ref NEDepthConvertLayer
+    - @ref NEFloor / @ref CLFloor
+    - @ref NEGEMMMatrixAdditionKernel
+    - @ref NEReshapeLayer / @ref CLReshapeLayer
+    - @ref CLScale
+ - Added new examples:
+    - graph_shufflenet.cpp
+    - graph_yolov3.cpp
+ - Added documentation for add a new function or kernel.
+ - Improved doxygen documentation adding a list of the existing functions.
+ - Add 4D tensors support to
+    - @ref CLWidthConcatenateLayer
+    - @ref CLFlattenLayer
+    - @ref CLSoftmaxLayer
+ - Add dot product support for @ref CLDepthwiseConvolutionLayer3x3NHWCKernel non-unit stride
+ - Add SVE support
+ - Fused batch normalization into convolution layer weights in @ref CLFuseBatchNormalization
+ - Fuses activation in @ref CLDepthwiseConvolutionLayer3x3NCHWKernel, @ref CLDepthwiseConvolutionLayer3x3NHWCKernel and @ref NEGEMMConvolutionLayer
+ - Added NHWC data layout support to:
+    - @ref CLChannelShuffleLayer
+    - @ref CLDeconvolutionLayer
+    - @ref CLL2NormalizeLayer
+ - Added QASYMM8 support to the following kernels:
+    - @ref CLScaleKernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref CLPixelWiseMultiplicationKernel
+ - Added FP16 support to the following kernels:
+    - @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref CLNormalizePlanarYUVLayerKernel
+    - @ref CLWinogradConvolutionLayer (5x5 kernel)
+ - More tests added to both validation and benchmarking suites.
 
 v18.08 Public major release
  - Various bug fixes.
@@ -509,7 +595,7 @@ v17.04 Public bug fixes release
  -  @ref NEFillArrayKernel
  -  @ref NEGaussianPyramidHorKernel
  -  @ref NEGaussianPyramidVertKernel
- -  @ref NEHarrisScoreFP16Kernel
+ -  NEHarrisScoreFP16Kernel
  -  @ref NEHarrisScoreKernel
  -  @ref NEHOGDetectorKernel
  -  @ref NELogits1DMaxKernel

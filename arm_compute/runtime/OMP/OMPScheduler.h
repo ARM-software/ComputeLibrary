@@ -57,6 +57,8 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
+
+protected:
     /** Execute all the passed workloads
      *
      * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.

@@ -169,7 +169,8 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
     return dst;
 }
 
-void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out)
+template <typename T>
+void matrix_multiply(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &out)
 {
     ARM_COMPUTE_ERROR_ON(a.shape()[0] != b.shape()[1]);
     ARM_COMPUTE_ERROR_ON(a.shape()[1] != out.shape()[1]);
@@ -194,7 +195,8 @@ void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b,
     }
 }
 
-void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out)
+template <typename T>
+void transpose_matrix(const SimpleTensor<T> &in, SimpleTensor<T> &out)
 {
     ARM_COMPUTE_ERROR_ON((in.shape()[0] != out.shape()[1]) || (in.shape()[1] != out.shape()[0]));
 
@@ -300,8 +302,24 @@ void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &sh
     }
 }
 
+std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(min > max, "min must be lower equal than max");
+
+    const int min_bound = quant_info.quantize(min, RoundingPolicy::TO_NEAREST_UP);
+    const int max_bound = quant_info.quantize(max, RoundingPolicy::TO_NEAREST_UP);
+    return std::pair<int, int>(min_bound, max_bound);
+}
+
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
+template void get_tile(const SimpleTensor<half> &in, SimpleTensor<half> &roi, const Coordinates &coord);
 template void zeros(SimpleTensor<float> &in, const Coordinates &anchor, const TensorShape &shape);
+template void zeros(SimpleTensor<half> &in, const Coordinates &anchor, const TensorShape &shape);
+template void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
+template void transpose_matrix(const SimpleTensor<half> &in, SimpleTensor<half> &out);
+template void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
+template void matrix_multiply(const SimpleTensor<half> &a, const SimpleTensor<half> &b, SimpleTensor<half> &out);
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -132,7 +132,7 @@ ImageType get_image_type_from_file(const std::string &filename);
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs);
 
 /** Parse the npy header from an input file stream. At the end of the execution,
- *  the file position pointer will be located at the first pixel stored in the npy file
+ *  the file position pointer will be located at the first pixel stored in the npy file //TODO
  *
  * @param[in] fs Input file stream to parse
  *
@@ -181,6 +181,8 @@ inline std::string get_typestring(DataType data_type)
             return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
         case DataType::S64:
             return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F16:
+            return endianness + "f" + support::cpp11::to_string(sizeof(half));
         case DataType::F32:
             return endianness + "f" + support::cpp11::to_string(sizeof(float));
         case DataType::F64:
@@ -275,6 +277,43 @@ inline void unmap(GCTensor &tensor)
 }
 #endif /* ARM_COMPUTE_GC */
 
+/** Specialized class to generate random non-zero FP16 values.
+ *  uniform_real_distribution<half> generates values that get rounded off to zero, causing
+ *  differences between ACL and reference implementation
+*/
+class uniform_real_distribution_fp16
+{
+    half                                   min{ 0.0f }, max{ 0.0f };
+    std::uniform_real_distribution<float>  neg{ min, -0.3f };
+    std::uniform_real_distribution<float>  pos{ 0.3f, max };
+    std::uniform_int_distribution<uint8_t> sign_picker{ 0, 1 };
+
+public:
+    using result_type = half;
+    /** Constructor
+     *
+     * @param[in] a Minimum value of the distribution
+     * @param[in] b Maximum value of the distribution
+     */
+    explicit uniform_real_distribution_fp16(half a = half(0.0), half b = half(1.0))
+        : min(a), max(b)
+    {
+    }
+
+    /** () operator to generate next value
+     *
+     * @param[in] gen an uniform random bit generator object
+     */
+    half operator()(std::mt19937 &gen)
+    {
+        if(sign_picker(gen))
+        {
+            return (half)neg(gen);
+        }
+        return (half)pos(gen);
+    }
+};
+
 /** Numpy data loader */
 class NPYLoader
 {
@@ -357,7 +396,7 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32);
         try
         {
             // Map buffer if creating a CLTensor
@@ -413,7 +452,10 @@ public:
 
             switch(tensor.info()->data_type())
             {
+                case arm_compute::DataType::QASYMM8:
+                case arm_compute::DataType::S32:
                 case arm_compute::DataType::F32:
+                case arm_compute::DataType::F16:
                 {
                     // Read data
                     if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty())
@@ -565,7 +607,6 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
 /** Template helper function to save a tensor image to a NPY file.
  *
  * @note Only F32 data type supported.
- * @note Only works with 2D tensors.
  * @note If the input tensor is a CLTensor, the function maps and unmaps the image
  *
  * @param[in] tensor        The tensor to save as NPY file
@@ -585,9 +626,9 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 
         std::vector<npy::ndarray_len_t> shape(tensor.info()->num_dimensions());
 
-        for(unsigned int i = 0; i < tensor.info()->num_dimensions(); ++i)
+        for(unsigned int i = 0, j = tensor.info()->num_dimensions() - 1; i < tensor.info()->num_dimensions(); ++i, --j)
         {
-            shape[i] = tensor.info()->tensor_shape()[i];
+            shape[i] = tensor.info()->tensor_shape()[!fortran_order ? j : i];
         }
 
         // Map buffer if creating a CLTensor
@@ -697,6 +738,18 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
 
     switch(tensor.info()->data_type())
     {
+        case arm_compute::DataType::F16:
+        {
+            std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                *reinterpret_cast<half *>(it.ptr()) = (half)dist(gen);
+            },
+            it);
+
+            break;
+        }
         case arm_compute::DataType::F32:
         {
             std::uniform_real_distribution<float> dist(lower_bound, upper_bound);
@@ -748,12 +801,13 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2)
 
     map(tensor1, true);
     map(tensor2, true);
+
     Iterator itensor1(&tensor1, window);
     Iterator itensor2(&tensor2, window);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > 0.00001)
+        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > 0.0001)
         {
             ++num_mismatches;
         }

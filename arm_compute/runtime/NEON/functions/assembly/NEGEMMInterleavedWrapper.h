@@ -93,6 +93,7 @@ private:
     std::vector<PrepareBWorkload>                           _b_workloads{};
     std::vector<MatrixMultiplyWorkload>                     _mm_workloads{};
     std::vector<IScheduler::Workload>                       _workloads{};
+    std::string                                             _tag{};
 };
 
 } // namespace arm_compute

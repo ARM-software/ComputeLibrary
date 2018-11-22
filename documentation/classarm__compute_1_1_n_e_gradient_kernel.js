@@ -4,7 +4,7 @@ var classarm__compute_1_1_n_e_gradient_kernel =
     [ "NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#ad383dd933d1927d688347f6f412dfc21", null ],
     [ "NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a5abcaf3e9545a325505641d321a858c9", null ],
     [ "~NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#aec72e1144d2cb538834aa369232de727", null ],
-    [ "configure", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a49306e1c9421979fc704f3c96096ce8e", null ],
+    [ "configure", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a0c6175a719b3ef4c20d8e2fc45d6990d", null ],
     [ "name", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#ac9fb1a343e29082ecd7ffaa0216dcd35", null ],
     [ "operator=", "classarm__compute_1_1_n_e_gradient_kernel.xhtml#a77d401f1799eff9f50baca598c912801", null ],

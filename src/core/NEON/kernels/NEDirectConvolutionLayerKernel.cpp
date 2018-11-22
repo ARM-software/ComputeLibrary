@@ -36,6 +36,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include <algorithm>
 #include <arm_neon.h>
 
@@ -603,10 +604,9 @@ public:
                                 out_values = internal_vmlal(out_values, in_values, we_values);
                             }
 
-                            out_val += out_values[0];
-                            out_val += out_values[1];
-                            out_val += out_values[2];
-                            out_val += out_values[3];
+                            auto carry_addition = wrapper::vpadd(wrapper::vgethigh(out_values), wrapper::vgetlow(out_values));
+                            carry_addition      = wrapper::vpadd(carry_addition, carry_addition);
+                            out_val += wrapper::vgetlane(carry_addition, 0);
 
                             // Leftover
                             for(; x < input_width; ++x)

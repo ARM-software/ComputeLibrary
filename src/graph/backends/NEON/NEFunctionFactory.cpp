@@ -90,13 +90,16 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
     NETargetInfo::TensorType *biases  = get_backing_tensor<NETargetInfo>(node.input(2));
     NETargetInfo::TensorType *output  = get_backing_tensor<NETargetInfo>(node.output(0));
 
-    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+
+    if(is_quantized)
     {
         biases->info()->set_data_type(DataType::S32);
     }
 
-    const PadStrideInfo     conv_info      = node.convolution_info();
-    const ConvolutionMethod conv_algorithm = node.convolution_method();
+    const PadStrideInfo       conv_info      = node.convolution_info();
+    const ConvolutionMethod   conv_algorithm = node.convolution_method();
+    const ActivationLayerInfo fused_act      = node.fused_activation();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::NEON);
@@ -105,33 +108,40 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
     if(conv_algorithm == ConvolutionMethod::Direct)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEDirectConvolutionLayer>(
-                                        std::string("DirectConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("DirectConvolutionLayer"), mm, input, weights, biases, output, conv_info, fused_act);
     }
     else if(conv_algorithm == ConvolutionMethod::GEMM)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEGEMMConvolutionLayer>(
-                                        std::string("GEMMConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("GEMMConvolutionLayer"), mm, input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1, 1), fused_act);
     }
     else if(conv_algorithm == ConvolutionMethod::Winograd)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEWinogradConvolutionLayer>(
-                                        std::string("WinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("WinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info, fused_act);
     }
     else
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEConvolutionLayer>(
-                                        std::string("ConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("ConvolutionLayer"), mm, input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1, 1), fused_act);
     }
 
     // Log info
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Input QuantInfo: " << input->info()->quantization_info()
+            << " Weights QuantInfo: " << weights->info()->quantization_info()
+            << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Target " << NETargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
-                               << " Input QuantInfo: " << input->info()->quantization_info()
-                               << " Weights QuantInfo: " << weights->info()->quantization_info()
+                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
 }
@@ -153,8 +163,10 @@ std::unique_ptr<IFunction> create_normalization_layer<NENormalizationLayer, NETa
     func->configure(input, output, norm_info);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << NETargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << NETargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -179,6 +191,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_activation_layer<NEActivationLayer, NETargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return detail::create_batch_normalization_layer<NEBatchNormalizationLayer, NETargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
+        case NodeType::ChannelShuffleLayer:
+            return detail::create_channel_shuffle_layer<NEChannelShuffleLayer, NETargetInfo>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return detail::create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
         case NodeType::DeconvolutionLayer:
@@ -199,12 +213,20 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_permute_layer<NEPermute, NETargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PriorBoxLayer:
+            return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::create_reorg_layer<NEReorgLayer, NETargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
             return detail::create_reshape_layer<NEReshapeLayer, NETargetInfo>(*polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<NEScale, NETargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<NESoftmaxLayer, NETargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+        case NodeType::UpsampleLayer:
+            return detail::create_upsample_layer<NEUpsampleLayer, NETargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
+        case NodeType::YOLOLayer:
+            return detail::create_yolo_layer<NEYOLOLayer, NETargetInfo>(*polymorphic_downcast<YOLOLayerNode *>(node), ctx);
         default:
             return nullptr;
     }

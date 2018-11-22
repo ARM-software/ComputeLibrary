@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
+#include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
 
 #include <utility>
@@ -35,4 +36,12 @@ void NEReshapeLayer::configure(const ITensor *input, ITensor *output)
     auto k = arm_compute::support::cpp14::make_unique<NEReshapeLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
+}
+
+Status NEReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReshapeLayerKernel::validate(input, output));
+
+    return Status{};
 }

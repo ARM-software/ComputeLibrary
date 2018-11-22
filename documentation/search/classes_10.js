@@ -1,6 +1,8 @@
 var searchData=
 [
   ['paddingcalculator',['PaddingCalculator',['../classarm__compute_1_1test_1_1_padding_calculator.xhtml',1,'arm_compute::test']]],
+  ['padlayer',['PadLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_pad_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['padlayernode',['PadLayerNode',['../classarm__compute_1_1graph_1_1_pad_layer_node.xhtml',1,'arm_compute::graph']]],
   ['padstrideinfo',['PadStrideInfo',['../classarm__compute_1_1_pad_stride_info.xhtml',1,'arm_compute']]],
   ['passmanager',['PassManager',['../classarm__compute_1_1graph_1_1_pass_manager.xhtml',1,'arm_compute::graph']]],
   ['permutelayer',['PermuteLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_permute_layer.xhtml',1,'arm_compute::graph::frontend']]],
@@ -15,8 +17,10 @@ var searchData=
   ['ppmloader',['PPMLoader',['../classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml',1,'arm_compute::utils']]],
   ['ppmwriter',['PPMWriter',['../classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml',1,'arm_compute::graph_utils']]],
   ['prettyprinter',['PrettyPrinter',['../classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml',1,'arm_compute::test::framework']]],
-  ['printer',['Printer',['../classarm__compute_1_1test_1_1framework_1_1_printer.xhtml',1,'arm_compute::test::framework']]],
-  ['printer',['Printer',['../classarm__compute_1_1logging_1_1_printer.xhtml',1,'arm_compute::logging']]],
+  ['printer',['Printer',['../classarm__compute_1_1logging_1_1_printer.xhtml',1,'Printer'],['../classarm__compute_1_1test_1_1framework_1_1_printer.xhtml',1,'Printer']]],
+  ['priorboxlayer',['PriorBoxLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_prior_box_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['priorboxlayerinfo',['PriorBoxLayerInfo',['../classarm__compute_1_1_prior_box_layer_info.xhtml',1,'arm_compute']]],
+  ['priorboxlayernode',['PriorBoxLayerNode',['../classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml',1,'arm_compute::graph']]],
   ['profiler',['Profiler',['../classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml',1,'arm_compute::test::framework']]],
   ['program',['Program',['../classarm__compute_1_1_program.xhtml',1,'arm_compute']]],
   ['promote',['promote',['../structarm__compute_1_1test_1_1traits_1_1promote.xhtml',1,'arm_compute::test::traits']]],

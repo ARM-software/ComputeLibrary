@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,8 +43,46 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(Floor)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Wrong data type
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid data type combination
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        }),
+        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
+                                                TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        })),
+        framework::dataset::make("Expected", { false, false, false, false, true })),
+        input_info, output_info, expected)
+{
+    const Status status = CLFloor::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using CLFloorFixture = FloorValidationFixture<CLTensor, CLAccessor, CLFloor, T>;
+
+TEST_SUITE(Float)
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFloorFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFloorFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLFloorFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
@@ -57,10 +95,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFloorFixture<float>, framework::DatasetMode::
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // Floor
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

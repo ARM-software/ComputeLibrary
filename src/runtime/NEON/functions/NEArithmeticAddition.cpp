@@ -29,8 +29,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void NEArithmeticAddition::configure(ITensor *input1, ITensor *input2, ITensor *output, ConvertPolicy policy)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEArithmeticAdditionKernel>();
@@ -51,3 +51,4 @@ Status NEArithmeticAddition::validate(const ITensorInfo *input1, const ITensorIn
 {
     return NEArithmeticAdditionKernel::validate(input1, input2, output, policy);
 }
+} // namespace arm_compute

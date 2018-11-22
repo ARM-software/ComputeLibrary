@@ -31,8 +31,6 @@
 #include "tests/validation/reference/Phase.h"
 #include "tests/validation/reference/Sobel.h"
 
-#include "tests/SimpleTensorPrinter.h"
-
 #include <cmath>
 #include <stack>
 
@@ -231,7 +229,8 @@ SimpleTensor<T> canny_edge_detector_impl(const SimpleTensor<T> &src, int32_t upp
 } // namespace
 
 template <typename T>
-SimpleTensor<T> canny_edge_detector(const SimpleTensor<T> &src, int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
+SimpleTensor<T> canny_edge_detector(const SimpleTensor<T> &src,
+                                    int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
                                     BorderMode border_mode, T constant_border_value)
 {
     if(gradient_size < 7)
@@ -244,7 +243,8 @@ SimpleTensor<T> canny_edge_detector(const SimpleTensor<T> &src, int32_t upper_th
     }
 }
 
-template SimpleTensor<uint8_t> canny_edge_detector(const SimpleTensor<uint8_t> &src, int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
+template SimpleTensor<uint8_t> canny_edge_detector(const SimpleTensor<uint8_t> &src,
+                                                   int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
                                                    BorderMode border_mode, uint8_t constant_border_value);
 } // namespace reference
 } // namespace validation

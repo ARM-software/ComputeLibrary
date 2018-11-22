@@ -1,5 +1,5 @@
 var _topological_sort_8h =
 [
-    [ "bfs", "_topological_sort_8h.xhtml#a96552dd9dcc894d118d68697efad8fd8", null ],
-    [ "dfs", "_topological_sort_8h.xhtml#aee3a27da0a4769cf70186029719495c5", null ]
+    [ "bfs", "_topological_sort_8h.xhtml#aa1c6a4a70ded6258fff31b3de53dfb8f", null ],
+    [ "dfs", "_topological_sort_8h.xhtml#a14abdeb0f575e919aa6d586a95f23920", null ]
 ];

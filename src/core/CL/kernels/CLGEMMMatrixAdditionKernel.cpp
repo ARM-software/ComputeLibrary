@@ -60,7 +60,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float beta)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_UNUSED(input, output, beta);
+    ARM_COMPUTE_UNUSED(beta);
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);

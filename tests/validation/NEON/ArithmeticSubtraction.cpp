@@ -33,7 +33,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ArithmeticSubtractionFixture.h"
+#include "tests/validation/fixtures/ArithmeticOperationsFixture.h"
 
 namespace arm_compute
 {
@@ -49,12 +49,6 @@ const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::
                                                                              DataType::U8));
 const auto ArithmeticSubtractionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
                                                      framework::dataset::make("DataType", DataType::S16));
-const auto ArithmeticSubtractionU8U8S16Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)),
-                                                         framework::dataset::make("DataType", DataType::S16));
-const auto ArithmeticSubtractionS16U8S16Dataset = combine(combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8)),
-                                                          framework::dataset::make("DataType", DataType::S16));
-const auto ArithmeticSubtractionU8S16S16Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16)),
-                                                          framework::dataset::make("DataType", DataType::S16));
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto ArithmeticSubtractionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
                                                       framework::dataset::make("DataType", DataType::F16));
@@ -66,37 +60,37 @@ const auto ArithmeticSubtractionFP32Dataset = combine(combine(framework::dataset
 TEST_SUITE(NEON)
 TEST_SUITE(ArithmeticSubtraction)
 
+template <typename T>
+using NEArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
+
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
-                                                      }),
-               framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
-                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, true, false, false, false})),
-               input1_info, input2_info, output_info, expected)
+        framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
+                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
+                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+        }),
+        framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
+                                                TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+        })),
+        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
+                                                TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+        })),
+        framework::dataset::make("Expected", { true, true, false, false, false})),
+        input1_info, input2_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEArithmeticSubtraction::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
-
-template <typename T1, typename T2 = T1, typename T3 = T1>
-using NEArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T1, T2, T3>;
 
 TEST_SUITE(U8)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
@@ -128,21 +122,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framew
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-
-template <typename T1, typename T2 = T1>
-using NEArithmeticSubtractionToS16Fixture = NEArithmeticSubtractionFixture<T1, T2, int16_t>;
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
-                                                                                   framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                           framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
-               shape, data_type1, data_type2, policy)
+               shape, data_type, policy)
 {
     // Create tensors
-    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type1);
-    Tensor ref_src2 = create_tensor<Tensor>(shape, data_type2);
+    Tensor ref_src1 = create_tensor<Tensor>(shape, data_type);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::S16);
     Tensor dst      = create_tensor<Tensor>(shape, DataType::S16);
 
     // Create and Configure function
@@ -160,92 +149,34 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     validate(dst.info()->padding(), padding);
 }
 
-TEST_SUITE(S16_S16_S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionToS16Fixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticSubtractionS16Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticSubtractionS16Dataset),
+                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionToS16Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticSubtractionS16Dataset),
-                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ArithmeticSubtractionS16Dataset),
+                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-
-TEST_SUITE(U8_U8_S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionToS16Fixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                       ArithmeticSubtractionU8U8S16Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionToS16Fixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                                        ArithmeticSubtractionU8U8S16Dataset),
-                                                                                                                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(S16_U8_S16)
-using NEAriSubS16U8ToS16Fixture = NEArithmeticSubtractionToS16Fixture<int16_t, uint8_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAriSubS16U8ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                               ArithmeticSubtractionS16U8S16Dataset),
-                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAriSubS16U8ToS16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                             ArithmeticSubtractionS16U8S16Dataset),
-                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(U8_S16_S16)
-using NEAriSubU8S16ToS16Fixture = NEArithmeticSubtractionToS16Fixture<uint8_t, int16_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEAriSubU8S16ToS16Fixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                               ArithmeticSubtractionU8S16S16Dataset),
-                                                                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEAriSubU8S16ToS16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                             ArithmeticSubtractionU8S16S16Dataset),
-                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // S16
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(FP16)
+TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticSubtractionFP16Dataset),
                                                                                                             framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // F16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-TEST_SUITE(FP32)
+TEST_SUITE(F32)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                shape, policy)
 {
@@ -282,11 +213,30 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticSubtractionFixture<float>, framewor
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+template <typename T>
+using NEArithmeticSubtractionBroadcastFixture = ArithmeticSubtractionBroadcastValidationFixture<Tensor, Accessor, NEArithmeticSubtraction, T>;
+
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEArithmeticSubtractionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapesBroadcast(),
+                       ArithmeticSubtractionFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEArithmeticSubtractionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapesBroadcast(),
+                       ArithmeticSubtractionFP32Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // ArithmeticSubtraction
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

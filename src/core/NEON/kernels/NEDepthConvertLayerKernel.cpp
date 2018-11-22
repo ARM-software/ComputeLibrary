@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -34,68 +35,90 @@
 
 using namespace arm_compute;
 
-namespace arm_compute
+namespace
 {
-class Coordinates;
-} // namespace arm_compute
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(output);
+    ARM_COMPUTE_UNUSED(policy);
+    ARM_COMPUTE_RETURN_ERROR_ON(input == output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::U16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U8 && (output->data_type() != DataType::S16 && output->data_type() != DataType::U16
+                                                                           && output->data_type() != DataType::S32),
+                                    "Only data_types supported [in] U8 -> [out] U16, S16, S32");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U32),
+                                    "Only data_types supported [in] U16 ->  [out] U8, U32");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::S32),
+                                    "Only data_types supported [in] S16 ->  [out] U8, S32");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && output->data_type() != DataType::F32,
+                                    "Only data_types supported [in] F16 ->  [out] F32");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && output->data_type() != DataType::F16,
+                                    "Only data_types supported [in] F32 ->  [out] F16");
+
+    // Validate in case of configured output
+    if(output->total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, output->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 
 NEDepthConvertLayerKernel::NEDepthConvertLayerKernel()
     : _input(nullptr), _output(nullptr), _policy(), _shift(0)
 {
 }
 
-void NEDepthConvertLayerKernel::configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
+void NEDepthConvertLayerKernel::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::U16);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
+    set_shape_if_empty(*output->info(), input->info()->tensor_shape());
 
     _input  = input;
-    _output = input;
+    _output = output;
     _policy = policy;
     _shift  = shift;
 
-    if(output != nullptr)
-    {
-        // Auto initialize output shape if not initialized (We can only auto-configure the shape, datatype must be given)
-        set_shape_if_empty(*output->info(), input->info()->tensor_shape());
-
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F32);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-
-        // Set output
-        _output = output;
-    }
-
-    ARM_COMPUTE_ERROR_ON(shift >= 8);
-    ARM_COMPUTE_ERROR_ON(input == output && (data_size_from_type(input->info()->data_type()) != data_size_from_type(output->info()->data_type())));
-
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::U8 && (output->info()->data_type() != DataType::S16 && output->info()->data_type() != DataType::U16
-                                                                            && output->info()->data_type() != DataType::S32),
-                             "Only data_types supported [in] U8 -> [out] U16, S16, S32");
-
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::U16 && (output->info()->data_type() != DataType::U8 && output->info()->data_type() != DataType::U32),
-                             "Only data_types supported [in] U16 ->  [out] U8, U32");
-
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->data_type() == DataType::S16 && (output->info()->data_type() != DataType::U8 && output->info()->data_type() != DataType::S32),
-                             "Only data_types supported [in] S16 ->  [out] U8, S32");
-
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy, shift));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICPPKernel::configure(win_config.second);
+}
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    if(output != nullptr)
-    {
-        AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-        update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, input->info()->valid_region());
-    }
-    else
-    {
-        // In-place computation
-        update_window_and_padding(win, input_access);
-    }
-    ICPPKernel::configure(win);
+Status NEDepthConvertLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy, shift));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+
+    return Status{};
 }
 
 void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info)
@@ -103,8 +126,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-    ARM_COMPUTE_ERROR_ON(nullptr == _input);
-    ARM_COMPUTE_ERROR_ON(nullptr == _output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_input, _output);
     ARM_COMPUTE_ERROR_ON(_input == _output);
 
     Iterator input(_input, window);
@@ -341,6 +363,68 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
             }
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            switch(_output->info()->data_type())
+            {
+                case DataType::F32:
+                {
+                    const float32x4_t scale = vdupq_n_f32(1 << _shift);
+
+                    /* Up-conversion F16 -> F32 */
+                    execute_window_loop(window, [&](const Coordinates & id)
+                    {
+                        const float16x8x2_t texels =
+                        {
+                            {
+                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr())),
+                                vld1q_f16(reinterpret_cast<float16_t *>(input.ptr()) + 8)
+                            }
+                        };
+
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()), vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[0])), scale));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 4, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[0])), scale));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 8, vmulq_f32(vcvt_f32_f16(vget_low_f16(texels.val[1])), scale));
+                        vst1q_f32(reinterpret_cast<float *>(output.ptr()) + 12, vmulq_f32(vcvt_f32_f16(vget_high_f16(texels.val[1])), scale));
+                    },
+                    input, output);
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Output data type not supported");
+            }
+            break;
+        case DataType::F32:
+            switch(_output->info()->data_type())
+            {
+                case DataType::F16:
+                {
+                    const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
+
+                    /* Down-conversion F32 -> F16 */
+                    execute_window_loop(window, [&](const Coordinates & id)
+                    {
+                        const float32x4x4_t texels =
+                        {
+                            {
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr())), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 4), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 8), scale),
+                                vmulq_f32(vld1q_f32(reinterpret_cast<float *>(input.ptr()) + 12), scale)
+                            }
+                        };
+
+                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vcombine_f16(vcvt_f16_f32(texels.val[0]), vcvt_f16_f32(texels.val[1])));
+                        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()) + 8, vcombine_f16(vcvt_f16_f32(texels.val[2]), vcvt_f16_f32(texels.val[3])));
+                    },
+                    input, output);
+                    break;
+                }
+                default:
+                    ARM_COMPUTE_ERROR("Output data type not supported");
+            }
+            break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("Not supported");
     }

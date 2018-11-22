@@ -64,6 +64,17 @@ public:
      * @param[in]      beta   Weight of matrix C
      */
     void configure(const ITensor *input, ITensor *output, float beta);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMMatrixAdditionKernel.
+     *
+     * @note The input and output tensor must have the same dimensions
+     *
+     * @param[in] input  Input tensor info (Matrix C). Data types supported: F16/F32
+     * @param[in] output Output tensor info. If this kernel is used to finalize the GEMM result, output contains the result obtained by the kernel @ref NEGEMMMatrixMultiplyKernel. Data type supported: the same as @p input.
+     * @param[in] beta   Weight of matrix C
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

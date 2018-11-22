@@ -225,6 +225,7 @@ inline void CommandLineParser::print_help(const std::string &program_name) const
 
     for(const auto &option : _positional_options)
     {
+        //FIXME: Print help string as well
         std::cout << option->name() << "\n";
     }
 }

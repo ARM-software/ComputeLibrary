@@ -57,7 +57,7 @@ TensorDescriptor FlattenLayerNode::configure_output(size_t idx) const
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
     TensorDescriptor output_desc = src->desc();
-    output_desc.shape.collapse(src->desc().shape.num_dimensions());
+    output_desc.shape.collapse(3);
 
     return output_desc;
 }

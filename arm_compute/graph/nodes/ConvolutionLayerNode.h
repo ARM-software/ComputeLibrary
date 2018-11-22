@@ -80,6 +80,16 @@ public:
      * @return Number of groups in convolution
      */
     unsigned int num_groups() const;
+    /** Returns fused activation
+     *
+     * @return Fused activation
+     */
+    ActivationLayerInfo fused_activation() const;
+    /** Sets fused activation
+     *
+     * @param[in] fused_activation Fused activation to set
+     */
+    void set_fused_activation(ActivationLayerInfo fused_activation);
     /** Computes convolution output descriptor
      *
      * @param[in] input_descriptor   Input descriptor
@@ -98,12 +108,16 @@ public:
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
 
+public:
+    static constexpr NodeType node_type = NodeType::ConvolutionLayer;
+
 private:
-    PadStrideInfo     _info;
-    unsigned int      _num_groups;
-    ConvolutionMethod _method;
-    FastMathHint      _fast_math_hint;
-    QuantizationInfo  _out_quant_info;
+    PadStrideInfo       _info;
+    unsigned int        _num_groups;
+    ConvolutionMethod   _method;
+    FastMathHint        _fast_math_hint;
+    QuantizationInfo    _out_quant_info;
+    ActivationLayerInfo _fused_activation;
 };
 } // namespace graph
 } // namespace arm_compute

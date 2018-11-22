@@ -4,7 +4,7 @@ var classarm__compute_1_1_access_window_auto_padding =
     [ "AccessWindowAutoPadding", "classarm__compute_1_1_access_window_auto_padding.xhtml#ab876b2c3c41ed76c14c177c9373d320b", null ],
     [ "AccessWindowAutoPadding", "classarm__compute_1_1_access_window_auto_padding.xhtml#ae196752aa67bd2acb53c83b48f22dcce", null ],
     [ "~AccessWindowAutoPadding", "classarm__compute_1_1_access_window_auto_padding.xhtml#a129a10edb6f1ecc24810945981a7e50e", null ],
-    [ "compute_valid_region", "classarm__compute_1_1_access_window_auto_padding.xhtml#afcb885847b100ff54645487092b6af74", null ],
+    [ "compute_valid_region", "classarm__compute_1_1_access_window_auto_padding.xhtml#afc85c53e80cef34eceff34c9100d116d", null ],
     [ "compute_valid_region", "classarm__compute_1_1_access_window_auto_padding.xhtml#ae80edc371ba9f02d756aed720040878b", null ],
     [ "operator=", "classarm__compute_1_1_access_window_auto_padding.xhtml#ad38db221ef94b6cd0e73f5dfd743414a", null ],
     [ "operator=", "classarm__compute_1_1_access_window_auto_padding.xhtml#a4bca6da5857d60a9565c60b483859208", null ],

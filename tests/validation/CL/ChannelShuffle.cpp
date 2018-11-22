@@ -63,15 +63,17 @@ template <typename T>
 using CLChannelShuffleLayerFixture = ChannelShuffleLayerValidationFixture<CLTensor, CLAccessor, CLChannelShuffleLayer, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+                                                                                                                   framework::dataset::make("DataType", DataType::U8)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -80,14 +82,18 @@ TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::F16)),
+                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(), framework::dataset::make("DataType",
-                                                                                                              DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::F16)),
+                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -95,14 +101,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<half>, framework::
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomChannelShuffleLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallRandomChannelShuffleLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeRandomChannelShuffleLayerDataset(), framework::dataset::make("DataType",
-                                                                                                               DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelShuffleLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeRandomChannelShuffleLayerDataset(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F32)),
+                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

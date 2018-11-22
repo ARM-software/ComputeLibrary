@@ -41,7 +41,7 @@ namespace graph
 namespace
 {
 NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPair input, NodeID weights, NodeID bias,
-                                  PadStrideInfo conv_info, ConvolutionMethod method, FastMathHint fast_math_hint, unsigned int num_groups)
+                                  PadStrideInfo conv_info, ConvolutionMethod method, ActivationLayerInfo fused_act, FastMathHint fast_math_hint, unsigned int num_groups)
 {
     bool has_bias = (bias != EmptyNodeID);
 
@@ -86,6 +86,10 @@ NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPai
         ARM_COMPUTE_ERROR_ON(node == nullptr);
         node->set_common_node_parameters(group_params);
 
+        // Down-cast node
+        auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node);
+        conv_node->set_fused_activation(fused_act);
+
         convolution_outputs.push_back({ conv_nid, 0 });
     }
 
@@ -127,17 +131,20 @@ void GroupedConvolutionMutator::mutate(Graph &g)
                 auto *conv_node = arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node);
 
                 // Get internal convolution info
-                const PadStrideInfo     conv_info       = conv_node->convolution_info();
-                const ConvolutionMethod conv_method     = conv_node->convolution_method();
-                const FastMathHint      fast_math_hint  = conv_node->fast_math_hint();
-                const unsigned int      num_groups      = conv_node->num_groups();
-                const NodeParams        params          = conv_node->common_node_params();
-                const Target            assigned_target = conv_node->assigned_target();
+                // TODO (geopin01) : Create a descriptor or a clone interface
+                const PadStrideInfo       conv_info       = conv_node->convolution_info();
+                const ConvolutionMethod   conv_method     = conv_node->convolution_method();
+                const ActivationLayerInfo fused_act_info  = conv_node->fused_activation();
+                const FastMathHint        fast_math_hint  = conv_node->fast_math_hint();
+                const unsigned int        num_groups      = conv_node->num_groups();
+                const NodeParams          params          = conv_node->common_node_params();
+                const Target              assigned_target = conv_node->assigned_target();
 
                 // Extract node ids
-                const NodeID input_id   = conv_node->input_id(0);
-                const NodeID weights_id = conv_node->input_id(1);
-                const NodeID bias_id    = conv_node->input_id(2);
+                ARM_COMPUTE_ERROR_ON(conv_node->input_edge(0) == nullptr || conv_node->input_edge(1) == nullptr);
+                const NodeID input_id   = conv_node->input_edge(0)->producer()->id();
+                const NodeID weights_id = conv_node->input_edge(1)->producer()->id();
+                const NodeID bias_id    = (conv_node->input_edge(2) != nullptr) ? conv_node->input_edge(2)->producer()->id() : EmptyNodeID;
 
                 // Get driving nodes
                 std::vector<NodeIdxPair> driving_nodes = get_driving_nodes(*node);
@@ -151,7 +158,7 @@ void GroupedConvolutionMutator::mutate(Graph &g)
 
                 // Create grouped convolution node
                 NodeID grouped_conv_id = create_grouped_convolution(g, params, { input_id, 0 }, weights_id, bias_id,
-                                                                    conv_info, conv_method, fast_math_hint, num_groups);
+                                                                    conv_info, conv_method, fused_act_info, fast_math_hint, num_groups);
 
                 // Remove convolution node
                 g.remove_node(node->id());

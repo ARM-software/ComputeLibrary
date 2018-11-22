@@ -29,6 +29,8 @@
 #include "arm_compute/core/Window.h"
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
 #include "arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 
 #include <memory>
@@ -40,7 +42,9 @@ class ICLTensor;
 
 /** Basic function to execute concatenate tensors along x axis. This function calls the following kernel:
  *
- * -# @ref CLDepthConcatenateLayerKernel
+ * -# @ref CLWidthConcatenateLayerKernel
+ * -# @ref CLWidthConcatenate2TensorsKernel (if there are exactly 2 input tensors)
+ * -# @ref CLWidthConcatenate4TensorsKernel (if there are exactly 4 input tensors)
  *
  */
 class CLWidthConcatenateLayer : public IFunction
@@ -74,6 +78,8 @@ public:
 
 private:
     std::unique_ptr<CLWidthConcatenateLayerKernel[]> _concat_kernels_vector;
+    CLWidthConcatenate2TensorsKernel                 _concat_x2_kernel;
+    CLWidthConcatenate4TensorsKernel                 _concat_x4_kernel;
     unsigned int                                     _num_inputs;
 };
 } // namespace arm_compute

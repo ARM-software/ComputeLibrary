@@ -47,8 +47,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>       rel_tolerance_f32(0.01f);  /**< Relative tolerance for FP32 types */
-const AbsoluteTolerance<float> abs_tolerance_f32(0.002f); /**< Absolute tolerance for FP32 types */
+const RelativeTolerance<float> rel_tolerance_f32(0.01f);              /**< Relative tolerance for FP32 types */
+const RelativeTolerance<float> rel_tolerance_winograd_3x3_f32(0.05f); /**< Relative tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_f32(0.002f);             /**< Absolute tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_1xN_f32(0.0041f);        /**< Absolute tolerance for FP32 types */
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
 const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
@@ -117,13 +120,145 @@ template <typename T>
 using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T>;
 
 template <typename T>
-using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, false>;
+using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, T, false>;
 
 TEST_SUITE(FP32)
 
+TEST_SUITE(Conv1x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                                                          datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+
+TEST_SUITE_END() // Conv1x3
+
+TEST_SUITE(Conv3x1)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+
+TEST_SUITE_END() // Conv3x1
+
+TEST_SUITE(Conv1x5)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+
+TEST_SUITE_END() // Conv1x5
+
+TEST_SUITE(Conv5x1)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+
+TEST_SUITE_END() // Conv5x1
+
+TEST_SUITE(Conv7x1)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer7x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer7x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+TEST_SUITE_END() // Conv7x1
+
+TEST_SUITE(Conv1x7)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x7Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer7x1Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_1xN_f32);
+}
+TEST_SUITE_END() // Conv1x7
+
+TEST_SUITE(Conv3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                        ActivationFunctionsDataset),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -132,6 +267,42 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, frame
     // Validate output
     validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    // floating point arithmetic the Winograd results will not be exactly the same as direct convolution, especially for big shapes
+    validate(Accessor(_target), _reference, rel_tolerance_winograd_3x3_f32, 0.f, float(abs_tolerance_f32));
+}
+TEST_SUITE_END() // Conv3x3
+
+TEST_SUITE(Conv5x5)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+
+TEST_SUITE_END() // Conv5x5
 
 FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
@@ -192,6 +363,7 @@ input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type,
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 
     // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
 }
 
 template <typename T>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,15 +39,17 @@ namespace benchmark
 {
 namespace
 {
-const auto data_shapes = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12);
-const auto data_types  = framework::dataset::make("DataType", { DataType::U8, DataType::U16, DataType::U32 });
+const auto small_data_shapes = framework::dataset::make("M", 8, 12) * framework::dataset::make("N", 8, 12);
+const auto big_data_shapes   = framework::dataset::make("M", 9999, 10001) * framework::dataset::make("N", 20000, 20003);
+const auto data_types        = framework::dataset::make("DataType", { DataType::U8, DataType::U16, DataType::U32 });
 } // namespace
 
 using CLGEMMInterleave4x4Fixture = GEMMInterleave4x4Fixture<CLTensor, CLGEMMInterleave4x4, CLAccessor>;
 
 TEST_SUITE(CL)
+REGISTER_FIXTURE_DATA_TEST_CASE(GEMMInterleave4x4Small, CLGEMMInterleave4x4Fixture, framework::DatasetMode::ALL, small_data_shapes *data_types);
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GEMMInterleave4x4, CLGEMMInterleave4x4Fixture, framework::DatasetMode::ALL, data_shapes *data_types);
+REGISTER_FIXTURE_DATA_TEST_CASE(GEMMInterleave4x4Big, CLGEMMInterleave4x4Fixture, framework::DatasetMode::NIGHTLY, big_data_shapes *data_types);
 
 TEST_SUITE_END()
 } // namespace benchmark

@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
 #define __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
 
+#include "arm_compute/runtime/IMemory.h"
+
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLMemoryRegion.h"
 
@@ -33,7 +35,7 @@
 namespace arm_compute
 {
 /** OpenCL implementation of memory object */
-class CLMemory
+class CLMemory : public IMemory
 {
 public:
     /** Default Constructor */
@@ -59,20 +61,22 @@ public:
     CLMemory(CLMemory &&) noexcept = default;
     /** Allow instances of this class to be move assigned */
     CLMemory &operator=(CLMemory &&) noexcept = default;
-    /** Region accessor
+    /** OpenCL Region accessor
      *
      * @return Memory region
      */
-    ICLMemoryRegion *region();
-    /** Region accessor
+    ICLMemoryRegion *cl_region();
+    /** OpenCL Region accessor
      *
      * @return Memory region
      */
-    ICLMemoryRegion *region() const;
+    ICLMemoryRegion *cl_region() const;
 
-private:
-    /** Creates empty region */
-    void create_empty_region();
+    // Inherited methods overridden:
+    IMemoryRegion *region() final;
+    IMemoryRegion *region() const final;
+    void set_region(IMemoryRegion *region) final;
+    void set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
 
 private:
     ICLMemoryRegion                 *_region;

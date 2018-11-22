@@ -27,9 +27,12 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -38,7 +41,8 @@ namespace arm_compute
 {
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                          int min, int max)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(max > 255);
@@ -63,10 +67,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
 
     // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
@@ -75,8 +82,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(output->total_size() != 0)
     {
+        Window                 win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
         AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_result_access);
+        window_changed = window_changed || update_window_and_padding(win_out, output_result_access);
 
         output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
@@ -100,7 +108,8 @@ CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::CLGEMMLowpQuantizeDow
 {
 }
 
-Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, int min, int max)
+Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                                                                           int min, int max)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
@@ -112,20 +121,14 @@ Status CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const
     return Status{};
 }
 
-void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, int result_fixedpoint_multiplier, int result_shift,
-                                                                          int result_offset_after_shift, int min, int max)
+void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output,
+                                                                          int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift,
+                                                                          int min, int max)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
-                                                  (bias != nullptr) ? bias->info() : nullptr,
-                                                  output->info(),
-                                                  min,
-                                                  max));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(),
+                                                  min, max));
 
     _input  = input;
     _bias   = bias;
@@ -154,9 +157,11 @@ void CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    // Create input window
     Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
     Window slice     = collapsed.first_slice_window_3D();
 
+    // Setup bias slice
     unsigned int idx1 = num_arguments_per_3D_tensor();
     if(_bias != nullptr)
     {

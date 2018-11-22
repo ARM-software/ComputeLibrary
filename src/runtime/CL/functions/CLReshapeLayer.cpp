@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "support/ToolchainSupport.h"
 
+/** [CLReshapeLayer snippet] **/
 using namespace arm_compute;
 
 void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
@@ -35,3 +36,9 @@ void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLReshapeLayerKernel::validate(input, output);
+}
+/** [CLReshapeLayer snippet] **/

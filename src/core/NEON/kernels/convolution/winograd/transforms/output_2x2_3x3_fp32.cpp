@@ -23,59 +23,34 @@
  */
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/output.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_output_transform.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
 
-namespace winograd
+namespace
 {
 
-using Transform = WinogradGEMM<2, 2, 3, 3>::OutputTransform<float>;
-
-template <>
-template <>
-int Transform::ops_performed(const Tensor4DShape &shape)
-{
-  // NOTE: Cost in FLOPs rather than instructions or uops.
-  const int tile_M = iceildiv(shape.n_rows, 2);
-  const int tile_N = iceildiv(shape.n_cols, 2);
-  return 24 * tile_M * tile_N * shape.n_channels;
-}
-
-/* F(2x2, 3x3) constructs 2x2 output tiles from a 3x3 convolution. Since we use
- * enough tiles to cover the output space each output tile may contain 0 or 1
- * padded values to the right and bottom columns or rows of the tile, e.g.:
- *
- *      ___     ___
- *     |   |   |  X|
- *     |___|   |__X|
- *
- *      ___     ___
- *     |   |   |  X|
- *     |X_X|   |X_X|
- *
- *
- * We provide a specialised output transform for each of these instances.
- * Consequently we below construct an array of the various padding options, the
- * array contains pointers to the specific implementations.
- */
-template <>
-template <>
-template <int pad_bottom, int pad_right>
-void Transform::process_tile(
+template <bool Specialized, int PadBottom=0, int PadRight=0>
+void winograd_output_transform_2x2_3x3_fp32_process_tile(
   const int n_channels,
   const float* const matrix_base,
   const int matrix_stride,
   const float* const biases,
   float* const output,
   const int output_row_stride,
-  const int output_col_stride
+  const int output_col_stride,
+  const int _pad_bottom,
+  const int _pad_right
 )
 {
-  constexpr int cells_i = 2 - pad_bottom;
-  constexpr int cells_j = 2 - pad_right;
+  constexpr int OutputTileRows = 2, OutputTileCols = 2;
+  const int pad_bottom = Specialized ? PadBottom : _pad_bottom;
+  const int pad_right = Specialized ? PadRight : _pad_right;
+
+  const int cells_i = OutputTileRows - pad_bottom;
+  const int cells_j = OutputTileCols - pad_right;
 
   // Construct a map to the output cells
-  float *outptrs[cells_i][cells_j];
+  float *outptrs[OutputTileRows][OutputTileCols];
   for (int i = 0; i < cells_i; i++)
   {
     for (int j = 0; j < cells_j; j++)
@@ -373,19 +348,28 @@ void Transform::process_tile(
   }
 }
 
-template <>
-template <>
-const Transform::TileFn Transform::tile_fns[max_pad_bottom][max_pad_right] =
+}  // namespace (anonymous)
+
+namespace winograd
 {
-  {
-    Transform::template process_tile<0, 0>,  // No padding
-    Transform::template process_tile<0, 1>,  // Right padding
-  },
-  {
-    Transform::template process_tile<1, 0>,  // Bottom padding
-    Transform::template process_tile<1, 1>,  // Bottom and right padding
-  }
+using Tiles = OutputTransformImplTiles<3, 3, 4, 4, float>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_generic = winograd_output_transform_2x2_3x3_fp32_process_tile<false>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_unpadded = winograd_output_transform_2x2_3x3_fp32_process_tile<true>;
+
+template <>
+const Tiles::TileFn Tiles::tilefn_bottom_padded[n_pad_bottom] = {
+  winograd_output_transform_2x2_3x3_fp32_process_tile<true, 1, 0>
 };
 
-template struct WinogradGEMM<2, 2, 3, 3>::OutputTransform<float>;
+template <>
+const Tiles::TileFn Tiles::tilefn_right_padded[n_pad_right] = {
+  winograd_output_transform_2x2_3x3_fp32_process_tile<true, 0, 1>
+};
+
+template class OutputTransform<3, 3, 4, 4, float>;
 }  // namespace winograd
+

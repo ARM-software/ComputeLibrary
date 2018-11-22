@@ -59,63 +59,30 @@ protected:
     template <typename U>
     void fill(U &&src_tensor, U &&mean_tensor, U &&var_tensor, U &&beta_tensor, U &&gamma_tensor)
     {
-        if(is_data_type_float(_data_type))
+        const float                      min_bound = -1.f;
+        const float                      max_bound = 1.f;
+        std::uniform_real_distribution<> distribution(min_bound, max_bound);
+        std::uniform_real_distribution<> distribution_var(0, max_bound);
+        library->fill(src_tensor, distribution, 0);
+        library->fill(mean_tensor, distribution, 1);
+        library->fill(var_tensor, distribution_var, 0);
+        if(_use_beta)
         {
-            float min_bound = 0.f;
-            float max_bound = 0.f;
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<T>();
-            std::uniform_real_distribution<> distribution(min_bound, max_bound);
-            std::uniform_real_distribution<> distribution_var(0, max_bound);
-            library->fill(src_tensor, distribution, 0);
-            library->fill(mean_tensor, distribution, 1);
-            library->fill(var_tensor, distribution_var, 0);
-            if(_use_beta)
-            {
-                library->fill(beta_tensor, distribution, 3);
-            }
-            else
-            {
-                // Fill with default value 0.f
-                library->fill_tensor_value(beta_tensor, 0.f);
-            }
-            if(_use_gamma)
-            {
-                library->fill(gamma_tensor, distribution, 4);
-            }
-            else
-            {
-                // Fill with default value 1.f
-                library->fill_tensor_value(gamma_tensor, 1.f);
-            }
+            library->fill(beta_tensor, distribution, 3);
         }
         else
         {
-            int min_bound = 0;
-            int max_bound = 0;
-            std::tie(min_bound, max_bound) = get_batchnormalization_layer_test_bounds<T>();
-            std::uniform_int_distribution<> distribution(min_bound, max_bound);
-            std::uniform_int_distribution<> distribution_var(0, max_bound);
-            library->fill(src_tensor, distribution, 0);
-            library->fill(mean_tensor, distribution, 1);
-            library->fill(var_tensor, distribution_var, 0);
-            if(_use_beta)
-            {
-                library->fill(beta_tensor, distribution, 3);
-            }
-            else
-            {
-                // Fill with default value 0
-                library->fill_tensor_value(beta_tensor, static_cast<T>(0));
-            }
-            if(_use_gamma)
-            {
-                library->fill(gamma_tensor, distribution, 4);
-            }
-            else
-            {
-                // Fill with default value 1
-                library->fill_tensor_value(gamma_tensor, static_cast<T>(1));
-            }
+            // Fill with default value 0.f
+            library->fill_tensor_value(beta_tensor, 0.f);
+        }
+        if(_use_gamma)
+        {
+            library->fill(gamma_tensor, distribution, 4);
+        }
+        else
+        {
+            // Fill with default value 1.f
+            library->fill_tensor_value(gamma_tensor, 1.f);
         }
     }
 

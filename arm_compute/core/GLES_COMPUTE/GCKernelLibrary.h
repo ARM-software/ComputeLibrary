@@ -211,6 +211,7 @@ public:
      */
     void init(std::string shader_path = "./", EGLDisplay dpy = EGL_NO_DISPLAY, EGLContext ctx = EGL_NO_CONTEXT)
     {
+        //TODO: deal with old display and context.
         _shader_path = std::move(shader_path);
 
         _display = dpy;
@@ -235,6 +236,7 @@ public:
      */
     void set_context(EGLDisplay dpy, EGLContext ctx)
     {
+        //TODO: deal with old display and context.
         _display = dpy;
         _context = ctx;
 

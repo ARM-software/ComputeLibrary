@@ -184,7 +184,7 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
     Iterator output(_output, window);
 
     static const float16x8_t CONST_0   = vdupq_n_f16(0.f);
-    static const float16x4_t CONST_1_H = vdup_n_f16(1.f);
+    static const float16x8_t CONST_1_H = vdupq_n_f16(1.f);
 
     static const float32x4_t CONST_1_F32 = vdupq_n_f32(1.f);
 
@@ -240,23 +240,11 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 break;
             case ActivationFunction::LOGISTIC:
             {
-                const float16x4x2_t in0 =
-                {
-                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[0]))))))),
-                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[0]))))))),
-                };
-
-                const float16x4x2_t in1 =
-                {
-                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[1]))))))),
-                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[1]))))))),
-                };
-
                 tmp =
                 {
                     {
-                        vcombine_f16(in0.val[0], in0.val[1]),
-                        vcombine_f16(in1.val[0], in1.val[1]),
+                        vinvq_f16(vaddq_f16(CONST_1_H, vexpq_f16(vnegq_f16(in.val[0])))),
+                        vinvq_f16(vaddq_f16(CONST_1_H, vexpq_f16(vnegq_f16(in.val[1]))))
                     }
                 };
             }
@@ -281,6 +269,7 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 break;
             case ActivationFunction::SOFT_RELU:
             {
+                // TODO (COMPMID-1535) : Revisit FP16 approximations
                 const float16x4x2_t in0 =
                 {
                     vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[0])))))),
@@ -322,6 +311,7 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 break;
             case ActivationFunction::TANH:
             {
+                // TODO (COMPMID-1535) : Revisit FP16 approximations
                 const float16x8x2_t mul =
                 {
                     vmulq_f16(b, in.val[0]),

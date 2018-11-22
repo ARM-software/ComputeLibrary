@@ -8,6 +8,11 @@ var searchData=
   ['bloblifetimemanager',['BlobLifetimeManager',['../classarm__compute_1_1_blob_lifetime_manager.xhtml',1,'arm_compute']]],
   ['blobmemorypool',['BlobMemoryPool',['../classarm__compute_1_1_blob_memory_pool.xhtml',1,'arm_compute']]],
   ['bordersize',['BorderSize',['../structarm__compute_1_1_border_size.xhtml',1,'arm_compute']]],
-  ['branchlayer',['BranchLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_branch_layer.xhtml',1,'arm_compute::graph::frontend']]],
-  ['brelu',['brelu',['../structarm__compute_1_1detail_1_1brelu.xhtml',1,'arm_compute::detail']]]
+  ['boundingboxtransforminfo',['BoundingBoxTransformInfo',['../classarm__compute_1_1_bounding_box_transform_info.xhtml',1,'arm_compute']]],
+  ['boundingboxtransformlayer',['BoundingBoxTransformLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_bounding_box_transform_layer.xhtml',1,'arm_compute::graph::frontend']]],
+  ['boundingboxtransformlayernode',['BoundingBoxTransformLayerNode',['../classarm__compute_1_1graph_1_1_bounding_box_transform_layer_node.xhtml',1,'arm_compute::graph']]],
+  ['boxnmslimitinfo',['BoxNMSLimitInfo',['../classarm__compute_1_1_box_n_m_s_limit_info.xhtml',1,'arm_compute']]],
+  ['brelu',['brelu',['../structarm__compute_1_1detail_1_1brelu.xhtml',1,'arm_compute::detail']]],
+  ['buffer',['Buffer',['../classarm__gemm_1_1_buffer.xhtml',1,'arm_gemm']]],
+  ['buffermanager',['BufferManager',['../classarm__gemm_1_1_buffer_manager.xhtml',1,'arm_gemm']]]
 ];

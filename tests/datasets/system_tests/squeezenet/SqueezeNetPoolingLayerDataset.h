@@ -48,6 +48,7 @@ public:
         add_config(TensorShape(55U, 55U, 128U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool5
         add_config(TensorShape(27U, 27U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        //FIXME: Add support for global pooling.
     }
 };
 } // namespace datasets

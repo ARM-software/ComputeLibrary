@@ -80,6 +80,8 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(GC)
 TEST_SUITE(DirectConvolutionLayer)
 
+//TODO(COMPMID-415): Configuration tests?
+
 template <typename T>
 using GCDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<GCTensor, GCAccessor, GCDirectConvolutionLayer, T>;
 

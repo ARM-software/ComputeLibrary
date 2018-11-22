@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__
 
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -36,12 +37,25 @@ public:
      *
      * @param[in] size Region size
      */
-    IMemoryRegion(size_t size)
+    explicit IMemoryRegion(size_t size)
         : _size(size)
     {
     }
     /** Virtual Destructor */
     virtual ~IMemoryRegion() = default;
+    /** Extract a sub-region from the memory
+     *
+     * @warning Ownership is maintained by the parent memory,
+     *          while a wrapped raw memory region is returned by this function.
+     *          Thus parent memory should not be released before this.
+     *
+     *
+     * @param[in] offset Offset to the region
+     * @param[in] size   Size of the region
+     *
+     * @return A wrapped memory sub-region with no ownership of the underlying memory
+     */
+    virtual std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) = 0;
     /** Returns the pointer to the allocated data.
      *
      * @return Pointer to the allocated data
@@ -52,16 +66,11 @@ public:
      * @return Pointer to the allocated data
      */
     virtual void *buffer() const = 0;
-    /** Handle of internal memory
-     *
-     * @return Handle of memory
-     */
-    virtual void **handle() = 0;
     /** Memory region size accessor
      *
      * @return Memory region size
      */
-    size_t size()
+    size_t size() const
     {
         return _size;
     }

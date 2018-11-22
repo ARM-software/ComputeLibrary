@@ -264,6 +264,7 @@ std::random_device::result_type AssetsLibrary::seed() const
 
 void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Format format) const
 {
+    //FIXME: Should be done by swapping cached buffers
     const RawTensor &src = get(name, format);
     std::copy_n(src.data(), raw.size(), raw.data());
 }
@@ -415,7 +416,7 @@ RawTensor AssetsLibrary::load_image(const std::string &name) const
 
 const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format) const
 {
-    std::lock_guard<std::mutex> guard(_format_lock);
+    std::lock_guard<arm_compute::Mutex> guard(_format_lock);
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format));
 
@@ -428,6 +429,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 
     if(raw.format() != format)
     {
+        //FIXME: Remove unnecessary copy
         RawTensor dst(raw.shape(), format);
         (*get_converter(raw.format(), format))(raw, dst);
         raw = std::move(dst);
@@ -438,7 +440,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 
 const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const
 {
-    std::lock_guard<std::mutex> guard(_channel_lock);
+    std::lock_guard<arm_compute::Mutex> guard(_channel_lock);
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format, channel));
 
@@ -448,6 +450,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
     }
 
     const RawTensor &src = get(name, format);
+    //FIXME: Need to change shape to match channel
     RawTensor dst(src.shape(), get_channel_format(channel));
 
     (*get_extractor(format, channel))(src, dst);
@@ -462,11 +465,13 @@ TensorShape AssetsLibrary::get_image_shape(const std::string &name)
 
 const RawTensor &AssetsLibrary::get(const std::string &name) const
 {
+    //FIXME: Format should be derived from the image name. Not be fixed to RGB.
     return find_or_create_raw_tensor(name, Format::RGB888);
 }
 
 RawTensor AssetsLibrary::get(const std::string &name)
 {
+    //FIXME: Format should be derived from the image name. Not be fixed to RGB.
     return RawTensor(find_or_create_raw_tensor(name, Format::RGB888));
 }
 

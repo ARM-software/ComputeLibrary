@@ -15,6 +15,7 @@ var color__convert_8cl =
     [ "RGB888_to_IYUV_bt709", "color__convert_8cl.xhtml#a0e87467985f2b64c5aaf073ee5c64267", null ],
     [ "RGB888_to_NV12_bt709", "color__convert_8cl.xhtml#aa07d313ff115012737d4b522efc6079f", null ],
     [ "RGB888_to_RGBA8888_bt709", "color__convert_8cl.xhtml#a2a21de930ca0898bed0a081f40cb4406", null ],
+    [ "RGB888_to_U8_bt709", "color__convert_8cl.xhtml#a25f017c5de97048db44e1a5eb431c32a", null ],
     [ "RGB888_to_YUV444_bt709", "color__convert_8cl.xhtml#a917c100f2da4a0e773bb63dd4f87de0b", null ],
     [ "RGBA8888_to_IYUV_bt709", "color__convert_8cl.xhtml#a18ef3b2b70de9af3e4386b2a07f2cd36", null ],
     [ "RGBA8888_to_NV12_bt709", "color__convert_8cl.xhtml#a9ef9b466943c743b2a0f2865a70f741a", null ],

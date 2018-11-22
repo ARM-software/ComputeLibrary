@@ -29,10 +29,8 @@ namespace winograd
 {
   /***************************************************************************/
   /* Instance-less API */
-  template <int output_tile_rows, int output_tile_cols,
-            int kernel_rows, int kernel_cols>
-  template <typename T>
-  void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::InputTransform<T>::execute(
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void InputTransformImpl<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::execute(
     const T* const input,        /** Input tensor data */
     const int n_batches,         /** Number of batches in input tensor. */
     const int in_batch_stride,   /** Stride between batches of the input. */
@@ -51,9 +49,8 @@ namespace winograd
   )
   {
     // Compute the padding required on each edge of the image
-    const int pad_top = (padding == PADDING_SAME) ? (kernel_rows - 1) / 2 : 0;
-    const int pad_left = (padding == PADDING_SAME) ? (kernel_cols - 1) / 2 : 0;
-    const int tile_overlap = kernel_rows - 1;
+    const int pad_top = (padding == PADDING_SAME) ? (KernelRows - 1) / 2 : 0;
+    const int pad_left = (padding == PADDING_SAME) ? (KernelCols - 1) / 2 : 0;
 
     // Compute striding values (assuming NHWC ordered data)
     const int output_col_stride = matrix_row_stride;
@@ -69,18 +66,18 @@ namespace winograd
       // Loop over rows of tiles
       for (int tile_i = 0; tile_i < tile_M; tile_i++)
       {
+        // Padding (top + bottom) for the row
+        const int row_top = tile_i*(InnerTileRows - overlap_rows) - pad_top;
+        const int row_bottom = row_top + InnerTileRows;
+        const int row_pad_top = std::max(0, pad_top - tile_i*(InnerTileRows - overlap_rows));
+        const int row_pad_bottom = (row_bottom <= n_rows) ? 0 : row_bottom - n_rows;
+
         // Pointer to the row
-        const int row_offset = (tile_i == 0) ? 0 : pad_top;
+        const int row_offset = std::min(0, row_pad_top - pad_top);
         const T* const input_base_row = (
-          input_base_batch + ((inner_tile_rows - (kernel_rows - 1))*tile_i - row_offset)*in_row_stride
+          input_base_batch + ((InnerTileRows - overlap_rows)*tile_i + row_offset)*in_row_stride
         );
         T* const outptr_base_row = outptr_base_batch + tile_i*output_row_stride;
-
-        // Padding (top + bottom) for the row
-        const int row_top = tile_i*(inner_tile_rows - tile_overlap) - pad_top;
-        const int row_bottom = row_top + inner_tile_rows;
-        const int row_pad_top = (tile_i == 0) ? pad_top : 0;
-        const int row_pad_bottom = (row_bottom <= n_rows) ? 0 : row_bottom - n_rows;
 
         // Process the row
         process_tile_row(
@@ -93,10 +90,40 @@ namespace winograd
     }
   }
 
-  template <int output_tile_rows, int output_tile_cols,
-            int kernel_rows, int kernel_cols>
-  template <typename T>
-  void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::InputTransform<T>::process_tile_row(
+
+  template <int KernelRows, int InnerTileRows, typename T>
+  void InputTransformImpl<KernelRows, 1, InnerTileRows, 1, T>::execute(
+    const T* const input,        /** Input tensor data */
+    const int n_batches,         /** Number of batches in input tensor. */
+    const int in_batch_stride,   /** Stride between batches of the input. */
+    const int n_rows,            /** Number of rows in input tensor. */
+    const int in_row_stride,     /** Stride between rows of the input. */
+    const int n_cols,            /** Number of columns in input tensor. */
+    const int in_col_stride,     /** Stride between columns of the input. */
+    const int n_channels,        /** Number of channels in input tensor. */
+    const PaddingType padding,   /** Padding type. */
+    const int tile_M,
+    const int tile_N,
+    T* const output,             /** Base of output matrices. */
+    const int matrix_stride,     /** Stride between output matrices. */
+    const int matrix_batch_stride,  /** Stride between batches within the matrix. */
+    const int matrix_row_stride  /** Stride within matrices. */
+  )
+  {
+    // If an Nx1 kernel then transpose and redirect to the 1xN implementation
+    InputTransformImpl<1, KernelRows, 1, InnerTileRows, T>::execute(
+      input,
+      n_batches, in_batch_stride,
+      n_cols, in_col_stride,
+      n_rows, in_row_stride,
+      n_channels, padding,
+      tile_N, tile_M,
+      output, matrix_stride, matrix_batch_stride, matrix_row_stride
+    );
+  }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void InputTransformImpl<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::process_tile_row(
     const int tile_N,
     int n_channels,
     const T* const input_base,
@@ -111,42 +138,39 @@ namespace winograd
     const int n_cols
   )
   {
-    constexpr int tile_overlap = kernel_cols - 1;
-
     // Loop over columns of tiles
     for (int tile_j = 0; tile_j < tile_N; tile_j++)
     {
       // Padding (left + right) for the tile
-      const int t_pad_left = (tile_j == 0) ? row_pad_left : 0;
-      const int t_start = tile_j*(inner_tile_cols - tile_overlap) - row_pad_left;
-      const int t_end = t_start + inner_tile_cols;
+      const int t_start = tile_j*(InnerTileCols - overlap_cols) - row_pad_left;
+      const int t_end = t_start + InnerTileCols;
+      const int t_pad_left = std::max(0, row_pad_left - tile_j*(InnerTileCols - overlap_cols));
       const int t_pad_right = (t_end <= n_cols) ? 0 : t_end - n_cols;
 
       // Get pointers into the inputs and outputs
-      const int col_offset = (tile_j == 0) ? 0 : row_pad_left;
+      const int col_offset = std::min(0, t_pad_left - row_pad_left);
       const T* const input_base_col = (
-        input_base + ((inner_tile_cols - tile_overlap)*tile_j - col_offset)*input_col_stride
+        input_base + ((InnerTileCols - overlap_cols)*tile_j + col_offset)*input_col_stride
       );
       T* const outptr = matrix_base + tile_j*matrix_row_stride;
 
       // Apply the specific tile processing function
-      const int f_pad_top = pad_top ? 1 : 0;
-      const int f_pad_left = t_pad_left ? 1 : 0;
-      tile_fns[f_pad_top][f_pad_left][pad_bottom][t_pad_right](
+      const typename Tiles::TileFn tilefn = Tiles::get_tile_specialization(
+        pad_top, t_pad_left, pad_bottom, t_pad_right
+      );
+
+      tilefn(
         n_channels,
-        input_base_col,
-        input_row_stride,
-        input_col_stride,
-        outptr,
-        matrix_stride
+        input_base_col, input_row_stride, input_col_stride,
+        outptr, matrix_stride,
+        pad_top, t_pad_left, pad_bottom, t_pad_right
       );
     }
   }
 
   /***************************************************************************/
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  WinogradGEMM<otr, otc, kr, kc>::InputTransform<T>::InputTransform(
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  InputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::InputTransform(
     const T* const input,        /** Input tensor data */
     const int n_batches,         /** Number of batches in input tensor. */
     const int n_rows,            /** Number of rows in input tensor. */
@@ -162,10 +186,10 @@ namespace winograd
   ) : _inptr(input), _outptr(output),
       _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols), _n_channels(n_channels),
       _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
-      _tiles_M(iceildiv((padding == PADDING_SAME) ? n_rows : n_rows - kr + 1,
-                        output_tile_rows)),
-      _tiles_N(iceildiv((padding == PADDING_SAME) ? n_cols : n_cols - kc + 1,
-                        output_tile_cols)),
+      _tiles_M(iceildiv((padding == PADDING_SAME) ? n_rows : n_rows - KernelRows + 1,
+                        InnerTileRows - KernelRows + 1)),
+      _tiles_N(iceildiv((padding == PADDING_SAME) ? n_cols : n_cols - KernelCols + 1,
+                        InnerTileCols - KernelCols + 1)),
       _in_col_stride(in_col_stride ? in_col_stride : n_channels),
       _in_row_stride(in_row_stride ? in_row_stride : n_cols * _in_col_stride),
       _in_batch_stride(in_batch_stride ? in_batch_stride : n_rows * _in_row_stride),
@@ -173,18 +197,16 @@ namespace winograd
   {
   }
 
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  unsigned int WinogradGEMM<otr, otc, kr, kc>::InputTransform<T>::get_window() const
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  unsigned int InputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::get_window() const
   {
     // The final window includes the tail, all other windows will be a multiple
     // of the window block in size.
     return iceildiv(_n_channels, WINDOW_BLOCK);
   }
 
-  template <int otr, int otc, int kr, int kc>
-  template <typename T>
-  void WinogradGEMM<otr, otc, kr, kc>::InputTransform<T>::run(
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void InputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::run(
     const unsigned int start, const unsigned int stop
   )
   {
@@ -216,4 +238,112 @@ namespace winograd
       _matrix_row_stride
     );
   }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  void InputTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::execute(
+    const T* const input,        /** Input tensor data */
+    const int n_batches,         /** Number of batches in input tensor. */
+    const int in_batch_stride,   /** Stride between batches of the input. */
+    const int n_rows,            /** Number of rows in input tensor. */
+    const int in_row_stride,     /** Stride between rows of the input. */
+    const int n_cols,            /** Number of columns in input tensor. */
+    const int in_col_stride,     /** Stride between columns of the input. */
+    const int n_channels,        /** Number of channels in input tensor. */
+    const PaddingType padding,   /** Padding type. */
+    const int tile_M,
+    const int tile_N,
+    T* const output,             /** Base of output matrices. */
+    const int matrix_stride,     /** Stride between output matrices. */
+    const int matrix_batch_stride,  /** Stride between batches within the matrix. */
+    const int matrix_row_stride  /** Stride within matrices. */
+  )
+  {
+    Transform::execute(
+      input, n_batches, in_batch_stride, n_rows, in_row_stride, n_cols,
+      in_col_stride, n_channels, padding, tile_M, tile_N, output,
+      matrix_stride, matrix_batch_stride, matrix_row_stride
+    );
+  }
+
+  template <int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename T>
+  typename InputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::TileFn
+    InputTransformImplTiles<KernelRows, KernelCols, InnerTileRows, InnerTileCols, T>::
+      get_tile_specialization(
+        const int pad_top,
+        const int pad_left,
+        const int pad_bottom,
+        const int pad_right
+      )
+  {
+    if (!(pad_top || pad_left || pad_bottom || pad_right))
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else if (pad_top && !(pad_left || pad_bottom || pad_right))
+    {
+      // Top padding only
+      const int index = (pad_top - min_pad_top) / (InnerTileRows - overlap_rows);
+      return tilefn_top_padded[index];
+    }
+    else if (!(pad_top) && pad_left && !(pad_bottom || pad_right))
+    {
+      // Left padding only
+      const int index = (pad_left - min_pad_left) / (InnerTileCols - overlap_cols);
+      return tilefn_left_padded[index];
+    }
+    else if (!(pad_top || pad_left) && pad_bottom && !(pad_right))
+    {
+      // Bottom padding only
+      return tilefn_bottom_padded[pad_bottom - 1];
+    }
+    else if (!(pad_top || pad_left || pad_bottom) && pad_right)
+    {
+      // Right padding only
+      return tilefn_right_padded[pad_right - 1];
+    }
+    else
+    {
+      // Combination of paddings, return an unspecialised method
+      return tilefn_generic;
+    }
+  }
+
+  template <int KernelCols, int InnerTileCols, typename T>
+  typename InputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::TileFn
+    InputTransformImplTiles<1, KernelCols, 1, InnerTileCols, T>::
+      get_tile_specialization(
+        const int pad_top,
+        const int pad_left,
+        const int pad_bottom,
+        const int pad_right
+      )
+  {
+    (void) pad_top;
+    (void) pad_bottom;
+
+    if (!(pad_left || pad_right))
+    {
+      // No padding, return unpadded specialisation
+      return tilefn_unpadded;
+    }
+    else if (pad_left && !pad_right)
+    {
+      // Left padding only
+      const int index = (pad_left - min_pad_left) / (InnerTileCols - overlap_cols);
+      return tilefn_left_padded[index];
+    }
+    else if (!pad_left && pad_right)
+    {
+      // Right padding only
+      return tilefn_right_padded[pad_right - 1];
+    }
+    else
+    {
+      // Combination of paddings, return an unspecialised method
+      return tilefn_generic;
+    }
+  }
 }
+
+

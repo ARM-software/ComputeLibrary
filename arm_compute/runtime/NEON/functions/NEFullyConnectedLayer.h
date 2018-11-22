@@ -26,8 +26,8 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
@@ -129,14 +129,14 @@ private:
     void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
 
     MemoryGroup                                         _memory_group;
-    NEIm2ColKernel                                      _im2col_kernel;
+    NEFlattenLayerKernel                                _flatten_kernel;
     NEConvertFullyConnectedWeights                      _convert_weights;
     NEFullyConnectedLayerReshapeWeights                 _reshape_weights_function;
     NEGEMM                                              _mm_gemm;
     NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     NEGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
-    Tensor                                              _im2col_output;
+    Tensor                                              _flatten_output;
     Tensor                                              _gemmlowp_output;
     Tensor                                              _converted_weights_output;
     Tensor                                              _reshape_weights_output;

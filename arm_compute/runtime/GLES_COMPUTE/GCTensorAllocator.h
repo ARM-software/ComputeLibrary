@@ -26,6 +26,7 @@
 #define __ARM_COMPUTE_GCTENSORALLOCATOR_H__
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemory.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 #include "arm_compute/runtime/MemoryGroupBase.h"
 
@@ -38,20 +39,6 @@ template <typename>
 class MemoryGroupBase;
 using GCMemoryGroup = MemoryGroupBase<GCTensor>;
 
-class GLBufferWrapper
-{
-public:
-    GLBufferWrapper()
-        : _ssbo_name(0)
-    {
-        ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_ssbo_name));
-    }
-    ~GLBufferWrapper()
-    {
-        ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, &_ssbo_name));
-    }
-    GLuint _ssbo_name;
-};
 /** Basic implementation of a GLES memory tensor allocator. */
 class GCTensorAllocator : public ITensorAllocator
 {
@@ -72,7 +59,7 @@ public:
     GCTensorAllocator &operator=(GCTensorAllocator &&) = default;
 
     /** Default destructor */
-    ~GCTensorAllocator();
+    ~GCTensorAllocator() = default;
 
     /** Interface to be implemented by the child class to return the pointer to the mapped data.
      *
@@ -135,11 +122,10 @@ protected:
     void unlock() override;
 
 private:
-    GCMemoryGroup                   *_associated_memory_group; /**< Registered memory group */
-    std::unique_ptr<GLBufferWrapper> _gl_buffer;               /**< OpenGL ES object containing the tensor data. */
-    uint8_t                         *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
-    GCTensor                        *_owner;                   /**< Owner of the allocator */
+    GCMemoryGroup *_associated_memory_group; /**< Registered memory group */
+    GCMemory       _memory;                  /**< OpenGL ES memory */
+    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
+    GCTensor      *_owner;                   /**< Owner of the allocator */
 };
-}
-
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCTENSORALLOCATOR_H__ */

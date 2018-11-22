@@ -42,6 +42,7 @@ class GoogLeNetInceptionV1PoolingLayerDataset final : public PoolingLayerDataset
 public:
     GoogLeNetInceptionV1PoolingLayerDataset()
     {
+        // FIXME: Add support for 7x7 pooling layer pool5/7x7_s1
         // pool1/3x3_s2
         add_config(TensorShape(112U, 112U, 64U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool2/3x3_s2

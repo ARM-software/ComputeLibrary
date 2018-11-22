@@ -59,20 +59,24 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs)
     {
         ARM_COMPUTE_ERROR_ON(width_offset >= width_out);
 
-        const int width  = src.shape().x();
-        const int height = src.shape().y();
-        const int depth  = src.shape().z();
+        const int width      = src.shape().x();
+        const int height     = src.shape().y();
+        const int depth      = src.shape().z();
+        const int upper_dims = src.shape().total_size() / (width * height * depth);
 
         const T *src_ptr = src.data();
         T       *dst_ptr = dst.data();
 
-        for(int d = 0; d < depth; ++d)
+        for(int u = 0; u < upper_dims; ++u)
         {
-            for(int r = 0; r < height; ++r)
+            for(int d = 0; d < depth; ++d)
             {
-                int offset = d * height + r;
-                std::copy(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out);
-                src_ptr += width;
+                for(int r = 0; r < height; ++r)
+                {
+                    const int offset = u * height * depth + d * height + r;
+                    std::copy(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out);
+                    src_ptr += width;
+                }
             }
         }
 

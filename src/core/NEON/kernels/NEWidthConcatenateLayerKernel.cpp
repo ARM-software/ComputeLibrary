@@ -67,7 +67,6 @@ Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != output->dimension(i));
     }
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 3);
 
     return Status{};
 }

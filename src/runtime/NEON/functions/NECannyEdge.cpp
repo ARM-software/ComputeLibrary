@@ -58,8 +58,7 @@ NECannyEdge::NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager) // NOLI
 {
 }
 
-void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value,
-                            bool use_fp16)
+void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -127,18 +126,9 @@ void NECannyEdge::configure(ITensor *input, ITensor *output, int32_t upper_thr, 
     _memory_group.manage(&_phase);
 
     // Configure gradient
-    if(use_fp16)
-    {
-        auto k = arm_compute::support::cpp14::make_unique<NEGradientFP16Kernel>();
-        k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
-        _gradient = std::move(k);
-    }
-    else
-    {
-        auto k = arm_compute::support::cpp14::make_unique<NEGradientKernel>();
-        k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
-        _gradient = std::move(k);
-    }
+    auto k = arm_compute::support::cpp14::make_unique<NEGradientKernel>();
+    k->configure(&_gx, &_gy, &_magnitude, &_phase, norm_type);
+    _gradient = std::move(k);
 
     // Allocate intermediate tensors
     _gx.allocator()->allocate();

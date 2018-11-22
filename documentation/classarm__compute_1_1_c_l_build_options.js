@@ -6,5 +6,5 @@ var classarm__compute_1_1_c_l_build_options =
     [ "add_option_if_else", "classarm__compute_1_1_c_l_build_options.xhtml#a9b58a8c8bf638904a0b5f62b2bfcf96a", null ],
     [ "add_options", "classarm__compute_1_1_c_l_build_options.xhtml#a58abf0792821f6f1d6271570aa27dd84", null ],
     [ "add_options_if", "classarm__compute_1_1_c_l_build_options.xhtml#a504e7a51a86c19f1f529f739f50729f2", null ],
-    [ "options", "classarm__compute_1_1_c_l_build_options.xhtml#aa8653d4327df885173a41982fa0f777a", null ]
+    [ "options", "classarm__compute_1_1_c_l_build_options.xhtml#ae3b08139a1e57323c5d7dd93f30496c8", null ]
 ];

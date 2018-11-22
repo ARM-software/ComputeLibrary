@@ -8,7 +8,7 @@ var classarm__compute_1_1test_1_1framework_1_1_test_case_factory =
     [ "TestCaseFactory", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a2d128e015a7913a30691094670608cfd", null ],
     [ "~TestCaseFactory", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#aca5077964dc68ade0c366fb10a09fce8", null ],
     [ "make", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a15cffdfdea029e4617b983044f27f25e", null ],
-    [ "mode", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4", null ],
-    [ "name", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a37627d5d5bba7f4a8690c71c2ab3cb07", null ],
-    [ "status", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a53db8bc0a7fc4a59903bd0492614bc3e", null ]
+    [ "mode", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a7a45c67d3c31de477d1a54c8dea7caa4", null ],
+    [ "name", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a1d89c28bd42ba9a52da008bb69367171", null ],
+    [ "status", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a12bb27a4d1aa5d1e69b44b06b515be74", null ]
 ];

@@ -56,17 +56,27 @@ public:
      *                       last value of each row to the nearest multiple.
      * @param[out]    output Destination tensor. Data types supported: same as @p input.
      * @param[in]     beta   (Optional) A scaling factor for the exponent.
+     * @param[in]     axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
+     *                       dimensions together. For instance, given a [4x4x4x4] image,
+     *                       when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     *
+     * @note The value of @p axis must be always 1 for NEON
      */
-    void configure(ITensor *input, ITensor *output, float beta = 1.0f);
+    void configure(ITensor *input, ITensor *output, float beta = 1.0f, size_t axis = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
      *
      * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in] output Destination tensor. Data types supported: same as @p input
      * @param[in] beta   (Optional) A scaling factor for the exponent.
+     * @param[in] axis   (Optional) Reduction axis. It has the purpose of squashing the first @p axis
+     *                   dimensions together. For instance, given a [4x4x4x4] image,
+     *                   when @p axis is 2, the Softmax reduction will be applied on each of the [4x4] planes of the input image.
+     *
+     * @note The value of @p axis must be always 1 for NEON
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta = 1.0f, size_t axis = 1);
 
     // Inherited methods overridden:
     void run() override;

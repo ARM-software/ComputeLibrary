@@ -78,7 +78,7 @@ TensorDescriptor BatchNormalizationLayerNode::configure_output(size_t idx) const
 
 NodeType BatchNormalizationLayerNode::type() const
 {
-    return NodeType::BatchNormalizationLayer;
+    return BatchNormalizationLayerNode::node_type;
 }
 
 void BatchNormalizationLayerNode::accept(INodeVisitor &v)

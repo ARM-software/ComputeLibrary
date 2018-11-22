@@ -87,6 +87,7 @@ std::set<ITensorHandle *> get_const_handles(const Graph &g)
         // If its a const node:
         if(node != nullptr && const_node_types.find(node->type()) != std::end(const_node_types))
         {
+            // TODO (geopin01) : Create IO iterator wrappers
             // Add all its inputs / outputs to the list of constant handles
             for(unsigned int i = 0; i < node->num_inputs(); ++i)
             {

@@ -48,6 +48,10 @@ constexpr float rgb2yuv_bt709_cu = 0.5389f;
 // C_v = 1 / (2 * (1 - K_r))
 constexpr float rgb2yuv_bt709_cv = 0.6350f;
 
+constexpr float rgb2u8_red_coef   = 0.2126f;
+constexpr float rgb2u8_green_coef = 0.7152f;
+constexpr float rgb2u8_blue_coef  = 0.0722f;
+
 template <typename T>
 inline void store_rgb_from_src(const SimpleTensor<T> src, SimpleTensor<T> &rvec, SimpleTensor<T> &gvec, SimpleTensor<T> &bvec)
 {
@@ -214,6 +218,29 @@ inline void colorconvert_rgb_to_rgbx(const SimpleTensor<T> src, SimpleTensor<T> 
 
                 dst_pixel[channel_idx] = src_pixel[channel_idx];
             }
+        }
+    }
+}
+
+template <typename T>
+inline void colorconvert_rgb_to_u8(const SimpleTensor<T> src, SimpleTensor<T> &dst)
+{
+    const int width  = dst.shape().x();
+    const int height = dst.shape().y();
+
+    for(int y = 0; y < height; ++y)
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            const Coordinates src_coord{ x, y };
+            const Coordinates dst_coord{ x, y };
+
+            const auto *src_pixel = reinterpret_cast<const T *>(src(src_coord));
+            auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
+
+            const float result = rgb2u8_red_coef * src_pixel[0] + rgb2u8_green_coef * src_pixel[1] + rgb2u8_blue_coef * src_pixel[2];
+
+            dst_pixel[0] = utility::clamp<float>(result, 0, 255);
         }
     }
 }

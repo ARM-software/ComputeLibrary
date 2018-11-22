@@ -37,7 +37,7 @@ template <typename To, typename Tr, bool use_dot>
 void NEGEMMInterleavedMatrixMultiplyWrapperTemplate<To, Tr, use_dot>::configure(const ITensor *prepared_a, const ITensor *transformed_b, ITensor *tmp_c, ITensor *c, const Window &block_walker,
                                                                                 const BlockSizes &block_sizes, const INEGEMMWrapperKernel::Params &params, bool b_is_pretransposed, float alpha, float beta, unsigned int max_num_threads)
 {
-    using strategy = typename Kernel<To>::strategy;
+    using strategy = typename Kernel<To, use_dot>::strategy;
 
     _prepared_a         = prepared_a;
     _transformed_b      = transformed_b;
@@ -57,7 +57,7 @@ template <typename To, typename Tr, bool use_dot>
 void NEGEMMInterleavedMatrixMultiplyWrapperTemplate<To, Tr, use_dot>::transform(const MatrixMultiplyWorkload &wl, const ThreadInfo &info, const Window &batch_window, const Coordinates &start_offset,
                                                                                 const Coordinates &end_offset)
 {
-    using strategy = typename Kernel<To>::strategy;
+    using strategy = typename Kernel<To, use_dot>::strategy;
 
     strategy           strat(info.cpu_info);
     TensorAccessor<To> prepared_a(*_prepared_a);
@@ -98,7 +98,7 @@ void NEGEMMInterleavedMatrixMultiplyWrapperTemplate<To, Tr, use_dot>::transform(
 template <typename To, typename Tr, bool use_dot>
 void NEGEMMInterleavedMatrixMultiplyWrapperTemplate<To, Tr, use_dot>::create_workloads(std::vector<MatrixMultiplyWorkload> &workloads)
 {
-    using strategy = typename Kernel<To>::strategy;
+    using strategy = typename Kernel<To, use_dot>::strategy;
 
     unsigned int offset_transformed_b = 0;
     execute_window_loop(_block_walker, [&](const Coordinates & id)
@@ -127,6 +127,7 @@ void NEGEMMInterleavedMatrixMultiplyWrapperTemplate<To, Tr, use_dot>::create_wor
     });
 }
 
+//TODO: regroup somewhere ?
 template class NEGEMMInterleavedMatrixMultiplyWrapperTemplate<float, float>;
 #ifdef __aarch64__
 template class NEGEMMInterleavedMatrixMultiplyWrapperTemplate<uint8_t, uint32_t>;

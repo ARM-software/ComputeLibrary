@@ -50,7 +50,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm.num_dimensions() == 3 && !(perm[0] == 2 && perm[1] == 0 && perm[2] == 1) && !(perm[0] == 1 && perm[1] == 2 && perm[2] == 0)),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm != PermutationVector{ 2U, 0U, 1U })
+                                    && (perm != PermutationVector{ 1U, 2U, 0U }),
                                     "Only [2, 0, 1] and [1, 2, 0] permutation is supported");
 
     const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
@@ -89,7 +90,7 @@ void NEPermuteKernel::run_permute(const Window &window)
     Iterator out(_output, window_out);
 
     // CHW -> HWC
-    if((_perm.num_dimensions() == 3) && (_perm[0] == 2) && (_perm[1] == 0) && (_perm[2] == 1))
+    if(_perm == PermutationVector{ 2U, 0U, 1U })
     {
         const int in_row_stride     = _input->info()->strides_in_bytes().y() / sizeof(T);
         const int in_channel_stride = _input->info()->strides_in_bytes().z() / sizeof(T);
@@ -116,7 +117,7 @@ void NEPermuteKernel::run_permute(const Window &window)
         in, out);
     }
     // HWC -> CHW
-    else if((_perm.num_dimensions() == 3) && (_perm[0] == 1) && (_perm[1] == 2) && (_perm[2] == 0))
+    else if(_perm == PermutationVector{ 1U, 2U, 0U })
     {
         const int in_col_stride   = _input->info()->strides_in_bytes().y() / sizeof(T);
         const int in_row_stride   = _input->info()->strides_in_bytes().z() / sizeof(T);

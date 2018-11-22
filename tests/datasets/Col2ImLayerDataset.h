@@ -128,7 +128,7 @@ public:
         add_config(TensorShape(8U, 16U, 3U, 1U), 4U, 4U, 3U);
         add_config(TensorShape(8U, 16U, 3U, 3U), 4U, 4U, 3U);
         add_config(TensorShape(12U, 20U, 4U, 1U), 5U, 4U, 4U);
-        add_config(TensorShape(12U, 20U, 4U, 3U), 5U, 4U, 4U);
+        add_config(TensorShape(12U, 20U, 4U, 3U, 2U), 5U, 4U, 4U);
     }
 };
 
@@ -142,7 +142,7 @@ public:
         add_config(TensorShape(333U, 280U, 1U, 77U), 14U, 20U, 1U);
         add_config(TensorShape(333U, 280U, 77U, 1U), 14U, 20U, 1U);
         add_config(TensorShape(120U, 300U, 8U, 3U), 20U, 15U, 8U);
-        add_config(TensorShape(233U, 300U, 8U, 3U), 20U, 15U, 8U);
+        add_config(TensorShape(233U, 300U, 8U, 3U, 2U), 20U, 15U, 8U);
         add_config(TensorShape(333U, 280U, 12U, 5U), 20U, 14U, 12U);
         add_config(TensorShape(177U, 300U, 12U, 5U), 15U, 20U, 12U);
         add_config(TensorShape(450U, 400U, 16U, 5U), 20U, 20U, 16U);

@@ -9,19 +9,28 @@ var arm__compute_2core_2_types_8h =
     [ "Coordinates3D", "structarm__compute_1_1_coordinates3_d.xhtml", "structarm__compute_1_1_coordinates3_d" ],
     [ "ROI", "structarm__compute_1_1_r_o_i.xhtml", "structarm__compute_1_1_r_o_i" ],
     [ "DetectionWindow", "structarm__compute_1_1_detection_window.xhtml", "structarm__compute_1_1_detection_window" ],
+    [ "BoxNMSLimitInfo", "classarm__compute_1_1_box_n_m_s_limit_info.xhtml", "classarm__compute_1_1_box_n_m_s_limit_info" ],
     [ "PadStrideInfo", "classarm__compute_1_1_pad_stride_info.xhtml", "classarm__compute_1_1_pad_stride_info" ],
     [ "FullyConnectedLayerInfo", "structarm__compute_1_1_fully_connected_layer_info.xhtml", "structarm__compute_1_1_fully_connected_layer_info" ],
+    [ "PriorBoxLayerInfo", "classarm__compute_1_1_prior_box_layer_info.xhtml", "classarm__compute_1_1_prior_box_layer_info" ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
     [ "ROIPoolingLayerInfo", "classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml", "classarm__compute_1_1_r_o_i_pooling_layer_info" ],
+    [ "GenerateProposalsInfo", "classarm__compute_1_1_generate_proposals_info.xhtml", "classarm__compute_1_1_generate_proposals_info" ],
+    [ "ComputeAnchorsInfo", "classarm__compute_1_1_compute_anchors_info.xhtml", "classarm__compute_1_1_compute_anchors_info" ],
+    [ "BoundingBoxTransformInfo", "classarm__compute_1_1_bounding_box_transform_info.xhtml", "classarm__compute_1_1_bounding_box_transform_info" ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml", "classarm__compute_1_1_activation_layer_info" ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", "classarm__compute_1_1_weights_info" ],
     [ "GEMMReshapeInfo", "classarm__compute_1_1_g_e_m_m_reshape_info.xhtml", "classarm__compute_1_1_g_e_m_m_reshape_info" ],
+    [ "GEMMLowpOutputStageInfo", "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml", "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info" ],
     [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", "classarm__compute_1_1_g_e_m_m_info" ],
     [ "WinogradInfo", "structarm__compute_1_1_winograd_info.xhtml", "structarm__compute_1_1_winograd_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
+    [ "BiStrides", "arm__compute_2core_2_types_8h.xhtml#a11916d4148a39a67794050373f54825a", null ],
     [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
     [ "InternalKeypoint", "arm__compute_2core_2_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
+    [ "PaddingInfo", "arm__compute_2core_2_types_8h.xhtml#a669b5d3c5994f9ae3be31df9a1014297", null ],
+    [ "PaddingList", "arm__compute_2core_2_types_8h.xhtml#ac1a1b012674e0f1de071a611391828ad", null ],
     [ "PaddingSize", "arm__compute_2core_2_types_8h.xhtml#a4467b302fc9ec312c40580336ab783da", null ],
     [ "PermutationVector", "arm__compute_2core_2_types_8h.xhtml#a33e65be485104e2e9e69fca551d6f492", null ],
     [ "BilinearInterpolation", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [
@@ -106,6 +115,12 @@ var arm__compute_2core_2_types_8h =
       [ "IYUV", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58ab08f0cb36474118c5bbc03b3a172a778", null ],
       [ "UYVY422", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58af557448a61ad2927194f63442e131dfa", null ]
     ] ],
+    [ "GEMMLowpOutputStageType", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864", [
+      [ "NONE", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864ab50339a10e1de285ac99d4c3990b8693", null ],
+      [ "QUANTIZE_DOWN", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864a079e2ddc95b344b5cb0188bed9a80d8b", null ],
+      [ "QUANTIZE_DOWN_FIXEDPOINT", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864ab300cae200f67712c1eb9234e28158ca", null ],
+      [ "QUANTIZE_DOWN_FLOAT", "arm__compute_2core_2_types_8h.xhtml#a5558e2cc22f7f4771653d992c8ad8864aad664ac5008f135e38afeb391e524f9c", null ]
+    ] ],
     [ "HOGNormType", "arm__compute_2core_2_types_8h.xhtml#a673665b4587a2956fcbad5f0e9ba89d3", [
       [ "L2_NORM", "arm__compute_2core_2_types_8h.xhtml#a673665b4587a2956fcbad5f0e9ba89d3a80485e54c7a3c93a0f74637c6b918ce5", null ],
       [ "L2HYS_NORM", "arm__compute_2core_2_types_8h.xhtml#a673665b4587a2956fcbad5f0e9ba89d3ac9e68c0594494ec85805b225a7acb9c2", null ],
@@ -125,6 +140,11 @@ var arm__compute_2core_2_types_8h =
       [ "CROSS", "arm__compute_2core_2_types_8h.xhtml#afdda916edc7502967bbec17ea3c06c02a04dd53a8e6c2306e9bbf944c1d6047f2", null ],
       [ "DISK", "arm__compute_2core_2_types_8h.xhtml#afdda916edc7502967bbec17ea3c06c02a290d4b81f4e2b47d86fd1b0170e9aab7", null ],
       [ "OTHER", "arm__compute_2core_2_types_8h.xhtml#afdda916edc7502967bbec17ea3c06c02a03570470bad94692ce93e32700d2e1cb", null ]
+    ] ],
+    [ "NMSType", "arm__compute_2core_2_types_8h.xhtml#a201391f6e13e2a1ac203256a77792718", [
+      [ "LINEAR", "arm__compute_2core_2_types_8h.xhtml#a201391f6e13e2a1ac203256a77792718aaac544aacc3615aada24897a215f5046", null ],
+      [ "GAUSSIAN", "arm__compute_2core_2_types_8h.xhtml#a201391f6e13e2a1ac203256a77792718a0fceff26ae86a047835cafbb6cadb1b9", null ],
+      [ "ORIGINAL", "arm__compute_2core_2_types_8h.xhtml#a201391f6e13e2a1ac203256a77792718aa87d5006e1de1bfc07d5c56086ad20f1", null ]
     ] ],
     [ "NonLinearFilterFunction", "arm__compute_2core_2_types_8h.xhtml#adf2ced65e536375a1c96425d9fced858", [
       [ "MEDIAN", "arm__compute_2core_2_types_8h.xhtml#adf2ced65e536375a1c96425d9fced858a8ab0c3a037e882577dec378985477074", null ],
@@ -147,7 +167,8 @@ var arm__compute_2core_2_types_8h =
     ] ],
     [ "ReductionOperation", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45b", [
       [ "SUM_SQUARE", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64", null ],
-      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ]
+      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ],
+      [ "MEAN_SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bafc54513dae613e117ffc4169e48bfce5", null ]
     ] ],
     [ "SamplingPolicy", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7b", [
       [ "CENTER", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e", null ],

@@ -34,16 +34,25 @@ namespace test
 {
 namespace framework
 {
-std::string SchedulerTimer::id() const
+template <bool output_timestamps>
+std::string    SchedulerClock<output_timestamps>::id() const
 {
-    return "SchedulerTimer";
+    if(output_timestamps)
+    {
+        return "SchedulerTimestamps";
+    }
+    else
+    {
+        return "SchedulerTimer";
+    }
 }
 
+template <bool    output_timestamps>
 class Interceptor final : public IScheduler
 {
 public:
     /** Default constructor. */
-    Interceptor(std::list<SchedulerTimer::kernel_info> &kernels, IScheduler &real_scheduler, ScaleFactor scale_factor)
+    Interceptor(std::list<struct SchedulerClock<output_timestamps>::kernel_info> &kernels, IScheduler &real_scheduler, ScaleFactor scale_factor)
         : _kernels(kernels), _real_scheduler(real_scheduler), _timer(scale_factor), _prefix()
     {
     }
@@ -69,49 +78,58 @@ public:
         _real_scheduler.schedule(kernel, hints.split_dimension());
         _timer.stop();
 
-        SchedulerTimer::kernel_info info;
+        typename SchedulerClock<output_timestamps>::kernel_info info;
         info.name         = kernel->name();
         info.prefix       = _prefix;
         info.measurements = _timer.measurements();
         _kernels.push_back(std::move(info));
     }
 
-    void run_workloads(std::vector<Workload> &workloads) override
+    void run_tagged_workloads(std::vector<Workload> &workloads, const char *tag) override
     {
         _timer.start();
-        _real_scheduler.run_workloads(workloads);
+        _real_scheduler.run_tagged_workloads(workloads, tag);
         _timer.stop();
 
-        SchedulerTimer::kernel_info info;
-        info.name         = "Unknown";
+        typename SchedulerClock<output_timestamps>::kernel_info info;
+        info.name         = tag != nullptr ? tag : "Unknown";
         info.prefix       = _prefix;
         info.measurements = _timer.measurements();
         _kernels.push_back(std::move(info));
     }
 
+protected:
+    void run_workloads(std::vector<Workload> &workloads) override
+    {
+        ARM_COMPUTE_UNUSED(workloads);
+        ARM_COMPUTE_ERROR("Can't be reached");
+    }
+
 private:
-    std::list<SchedulerTimer::kernel_info> &_kernels;
-    IScheduler                             &_real_scheduler;
-    WallClockTimer                          _timer;
-    std::string                             _prefix;
+    std::list<struct SchedulerClock<output_timestamps>::kernel_info> &_kernels;
+    IScheduler                                                       &_real_scheduler;
+    WallClock<output_timestamps>                                      _timer;
+    std::string                                                       _prefix;
 };
 
-SchedulerTimer::SchedulerTimer(ScaleFactor scale_factor)
+template <bool output_timestamps>
+SchedulerClock<output_timestamps>::SchedulerClock(ScaleFactor scale_factor)
     : _kernels(), _real_scheduler(nullptr), _real_scheduler_type(), _real_graph_function(nullptr), _scale_factor(scale_factor), _interceptor(nullptr)
 {
 }
 
-void SchedulerTimer::test_start()
+template <bool output_timestamps>
+void           SchedulerClock<output_timestamps>::test_start()
 {
     // Start intercepting tasks:
     ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
     _real_graph_function  = graph::TaskExecutor::get().execute_function;
     auto task_interceptor = [this](graph::ExecutionTask & task)
     {
-        Interceptor *scheduler = nullptr;
-        if(dynamic_cast<Interceptor *>(this->_interceptor.get()) != nullptr)
+        Interceptor<output_timestamps> *scheduler = nullptr;
+        if(dynamic_cast<Interceptor<output_timestamps> *>(this->_interceptor.get()) != nullptr)
         {
-            scheduler = arm_compute::utils::cast::polymorphic_downcast<Interceptor *>(_interceptor.get());
+            scheduler = arm_compute::utils::cast::polymorphic_downcast<Interceptor<output_timestamps> *>(_interceptor.get());
             if(task.node != nullptr && !task.node->name().empty())
             {
                 scheduler->set_prefix(task.node->name() + "/");
@@ -136,18 +154,20 @@ void SchedulerTimer::test_start()
     if(_real_scheduler_type != Scheduler::Type::CUSTOM)
     {
         _real_scheduler = &Scheduler::get();
-        _interceptor    = std::make_shared<Interceptor>(_kernels, *_real_scheduler, _scale_factor);
+        _interceptor    = std::make_shared<Interceptor<output_timestamps>>(_kernels, *_real_scheduler, _scale_factor);
         Scheduler::set(std::static_pointer_cast<IScheduler>(_interceptor));
         graph::TaskExecutor::get().execute_function = task_interceptor;
     }
 }
 
-void SchedulerTimer::start()
+template <bool output_timestamps>
+void           SchedulerClock<output_timestamps>::start()
 {
     _kernels.clear();
 }
 
-void SchedulerTimer::test_stop()
+template <bool output_timestamps>
+void           SchedulerClock<output_timestamps>::test_stop()
 {
     // Restore real scheduler
     Scheduler::set(_real_scheduler_type);
@@ -157,17 +177,45 @@ void SchedulerTimer::test_stop()
     _real_graph_function                        = nullptr;
 }
 
-Instrument::MeasurementsMap SchedulerTimer::measurements() const
+template <bool              output_timestamps>
+Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() const
 {
     MeasurementsMap measurements;
     unsigned int    kernel_number = 0;
     for(auto kernel : _kernels)
     {
-        measurements.emplace(kernel.prefix + kernel.name + " #" + support::cpp11::to_string(kernel_number++), kernel.measurements.begin()->second);
+        std::string name = kernel.prefix + kernel.name + " #" + support::cpp11::to_string(kernel_number++);
+        if(output_timestamps)
+        {
+            ARM_COMPUTE_ERROR_ON(kernel.measurements.size() != 2);
+            for(auto m : kernel.measurements)
+            {
+                if(m.first.find("[start]") != std::string::npos)
+                {
+                    measurements.emplace("[start]" + name, m.second);
+                }
+                else if(m.first.find("[end]") != std::string::npos)
+                {
+                    measurements.emplace("[end]" + name, m.second);
+                }
+                else
+                {
+                    ARM_COMPUTE_ERROR("Measurement not handled");
+                }
+            }
+        }
+        else
+        {
+            measurements.emplace(name, kernel.measurements.begin()->second);
+        }
     }
 
     return measurements;
 }
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+
+template class arm_compute::test::framework::SchedulerClock<true>;
+template class arm_compute::test::framework::SchedulerClock<false>;

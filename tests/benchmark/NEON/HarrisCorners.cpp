@@ -53,49 +53,23 @@ using NEHarrisCornersFixture = HarrisCornersFixture<Tensor, NEHarrisCorners, Acc
 TEST_SUITE(NEON)
 TEST_SUITE(HarrisCorners)
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(FP16)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
-                                                                                                                     framework::dataset::make("Format", { Format::U8 })),
-                                                                                                                     threshold),
-                                                                                                                     min_dist),
-                                                                                                                     sensitivity),
-                                                                                                                     gradient_size),
-                                                                                                                     block_size),
-                                                                                                                     border_mode),
-                                                                                                             framework::dataset::make("UseFP16", { true })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
-                                                                                                                   framework::dataset::make("Format", { Format::U8 })),
-                                                                                                                   threshold),
-                                                                                                                   min_dist),
-                                                                                                                   sensitivity),
-                                                                                                                   gradient_size),
-                                                                                                                   block_size),
-                                                                                                                   border_mode),
-                                                                                                           framework::dataset::make("UseFP16", { true })));
-TEST_SUITE_END() // FP16
-#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 TEST_SUITE(S16)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
                                                                                                                      framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
                                                                                                                      sensitivity),
                                                                                                                      gradient_size),
                                                                                                                      block_size),
-                                                                                                                     border_mode),
-                                                                                                             framework::dataset::make("UseFP16", { false })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
+                                                                                                             border_mode));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
                                                                                                                    framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
                                                                                                                    sensitivity),
                                                                                                                    gradient_size),
                                                                                                                    block_size),
-                                                                                                                   border_mode),
-                                                                                                           framework::dataset::make("UseFP16", { false })));
+                                                                                                           border_mode));
 TEST_SUITE_END() // S16
 TEST_SUITE_END() // HarrisCorners
 TEST_SUITE_END() // NEON

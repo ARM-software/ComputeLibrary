@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,19 +48,19 @@ TEST_SUITE(Transpose)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::U8),  // Input not a multiple of 8
                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::U16), // Invalid shape
-                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U32), // Window shrink
                                             TensorInfo(TensorShape(20U, 13U), 1, DataType::U8),  // Wrong data type
-                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U16),
-                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(20U, 16U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(20U, 16U), 1, DataType::U32),
                                           }),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(13U, 21U), 1, DataType::U8),
                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::U16),
                                             TensorInfo(TensorShape(13U, 20U), 1, DataType::U32),
                                             TensorInfo(TensorShape(31U, 20U), 1, DataType::U16),
-                                            TensorInfo(TensorShape(13U, 20U), 1, DataType::U16),
-                                            TensorInfo(TensorShape(13U, 20U), 1, DataType::U32),
+                                            TensorInfo(TensorShape(16U, 20U), 1, DataType::U16),
+                                            TensorInfo(TensorShape(16U, 20U), 1, DataType::U32),
                                            })),
-    framework::dataset::make("Expected", { true, false, true, false, true, true })),
+    framework::dataset::make("Expected", { false, false, false, false, true, true })),
     a_info, output_info, expected)
 {
     // Lock tensors
@@ -90,9 +90,17 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding(0, 0);
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    const unsigned int num_elems_processed_per_iteration_x = 1;
+    const unsigned int num_elems_processed_per_iteration_y = std::max(4, static_cast<int>(8 / src.info()->element_size()));
+    const unsigned int max_in_x                            = ceil_to_multiple(shape[0], num_elems_processed_per_iteration_x);
+    const unsigned int max_in_y                            = ceil_to_multiple(shape[1], num_elems_processed_per_iteration_y);
+    const unsigned int max_out_x                           = ceil_to_multiple(output_shape[0], num_elems_processed_per_iteration_y);
+    const unsigned int max_out_y                           = ceil_to_multiple(output_shape[1], num_elems_processed_per_iteration_x);
+
+    const PaddingSize in_padding(0, max_in_x - shape[0], max_in_y - shape[1], 0);
+    const PaddingSize out_padding(0, max_out_x - output_shape[0], max_out_y - output_shape[1], 0);
+    validate(src.info()->padding(), in_padding);
+    validate(dst.info()->padding(), out_padding);
 }
 
 template <typename T>

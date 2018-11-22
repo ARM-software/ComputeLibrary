@@ -63,21 +63,35 @@ public:
     /** Default Constructor
      *
      * @param mean Mean array in RGB ordering
+     * @param scale Scale value
      * @param bgr  Boolean specifying if the preprocessing should assume BGR format
      */
-    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, bool bgr = true);
+    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, float scale = 1.f, bool bgr = true);
     void preprocess(ITensor &tensor) override;
 
 private:
     std::array<float, 3> _mean;
-    bool _bgr;
+    float _scale;
+    bool  _bgr;
 };
 
 /** TF preproccessor */
 class TFPreproccessor : public IPreprocessor
 {
 public:
+    /** Constructor
+     *
+     * @param[in] min_range Min normalization range. (Defaults to -1.f)
+     * @param[in] max_range Max normalization range. (Defaults to 1.f)
+     */
+    TFPreproccessor(float min_range = -1.f, float max_range = 1.f);
+
+    // Inherited overriden methods
     void preprocess(ITensor &tensor) override;
+
+private:
+    float _min_range;
+    float _max_range;
 };
 
 /** PPM writer class */

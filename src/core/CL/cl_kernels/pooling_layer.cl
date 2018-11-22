@@ -489,7 +489,11 @@ DATA_TYPE calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y,
                                    const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
     int start_x = get_global_id(1) * stride_x - pad_x;
+#if defined(DST_DEPTH)
+    int start_y = (get_global_id(2) % DST_DEPTH) * stride_y - pad_y;
+#else  /* defined(DST_DEPTH) */
     int start_y = get_global_id(2) * stride_y - pad_y;
+#endif /* defined(DST_DEPTH) */
 
 #if !defined(EXCLUDE_PADDING)
     upper_bound_w += pad_x;
@@ -522,30 +526,43 @@ DATA_TYPE calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y,
  * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_stride_w                       Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  input_step_w                         input_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source image
  * @param[out] output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  output_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_stride_w                      Stride of the destination tensor in W dimension (in bytes)
+ * @param[in]  output_step_w                        output_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void pooling_layer_MxN_nhwc(
-    TENSOR3D_DECLARATION(input),
-    TENSOR3D_DECLARATION(output))
+    TENSOR4D_DECLARATION(input),
+    TENSOR4D_DECLARATION(output))
 {
     // Get pixels pointer
-    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
-    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#if defined(DST_DEPTH)
+    Tensor4D input  = CONVERT_TO_TENSOR4D_STRUCT(input, DST_DEPTH);
+    Tensor4D output = CONVERT_TO_TENSOR4D_STRUCT(output, DST_DEPTH);
+#else  /* defined(DST_DEPTH) */
+    Tensor3D  input      = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D  output     = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* defined(DST_DEPTH) */
 
     VEC_DATA_TYPE(DATA_TYPE, 8)
     vdata           = INITIAL_VALUE;
     DATA_TYPE sdata = INITIAL_VALUE;
 
-    const int idx_width  = get_global_id(1) * STRIDE_X;
+    const int idx_width = get_global_id(1) * STRIDE_X;
+#if defined(DST_DEPTH)
+    const int idx_height = (get_global_id(2) % DST_DEPTH) * STRIDE_Y;
+#else  /* defined(DST_DEPTH) */
     const int idx_height = get_global_id(2) * STRIDE_Y;
+#endif /* defined(DST_DEPTH) */
 
     for(int y = 0; y < POOL_SIZE_Y; ++y)
     {
@@ -555,8 +572,14 @@ __kernel void pooling_layer_MxN_nhwc(
             int x1 = select(x, PAD_X - idx_width - 1, x + idx_width - PAD_X < 0 || x + idx_width - PAD_X >= MAX_WIDTH);
             x1     = select(x1, PAD_X - idx_width - 1, y != y1);
 
+#if defined(DST_DEPTH)
+            VEC_DATA_TYPE(DATA_TYPE, 8)
+            data0 = vload8(0, (__global DATA_TYPE *)tensor4D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y, 0));
+#else  /* defined(DST_DEPTH) */
             VEC_DATA_TYPE(DATA_TYPE, 8)
             data0 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
+#endif /* defined(DST_DEPTH) */
+
 #if defined(POOL_L2)
             // Raise to power of 2 for L2 Pooling
             data0 *= data0;

@@ -36,6 +36,10 @@ class ICLTensor;
  *
  * @note The tensor data type for the inputs must be U8/S16/F16/F32.
  * @note The function performs an arithmetic subtraction between two tensors.
+ *
+ *  This function calls the following kernels:
+ * -# @ref CLFillBorderKernel (In case of broadcasting, in the input being broadcasted)
+ * -# @ref CLArithmeticSubtractionKernel
  */
 class CLArithmeticSubtraction : public ICLSimpleFunction
 {
@@ -47,7 +51,7 @@ public:
      * @param[out] output Output tensor. Data types supported: U8 (Only if both inputs are U8), S16/F16/F32.
      * @param[in]  policy Policy to use to handle overflow.
      */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
+    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticSubtraction
      *
      * @param[in] input1 First tensor input info. Data types supported: U8/S16/F16/F32.

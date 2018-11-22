@@ -42,10 +42,10 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.001)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
-constexpr float                      tolerance_num = 0.05f;                  /**< Tolerance number */
+RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.01)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
+constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
 const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 3 });
 } // namespace
@@ -227,6 +227,7 @@ using CLDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 TEST_SUITE(W3x3)
+TEST_SUITE(NCHW)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL,
                        combine(combine(combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                           datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
@@ -245,6 +246,27 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, fr
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
+TEST_SUITE_END()
+
+TEST_SUITE(NHWC)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL,
+                       combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                               framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
+                                       framework::dataset::make("DataType",
+                                                                DataType::F16)),
+                               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(Generic)
@@ -291,7 +313,7 @@ TEST_SUITE_END()
 TEST_SUITE(NHWC)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                               framework::dataset::make("DepthMultiplier", 1)),
+                                               framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
                                        framework::dataset::make("DataType",
                                                                 DataType::F32)),
                                framework::dataset::make("DataLayout", DataLayout::NHWC)))
@@ -299,7 +321,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, f
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                        framework::dataset::make("DepthMultiplier", 1)),
+                                                                                                                        framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
                                                                                                                         framework::dataset::make("DataType",
                                                                                                                                 DataType::F32)),
                                                                                                                         framework::dataset::make("DataLayout", DataLayout::NHWC)))
@@ -359,7 +381,7 @@ TEST_SUITE_END()
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                       framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
@@ -368,7 +390,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture3x3<
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                       framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))

@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement InceptionV3's network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement InceptionV3's network using the Compute Library's graph API */
 class InceptionV3Example : public Example
 {
 public:
@@ -56,12 +52,6 @@ public:
         {
             cmd_parser.print_help(argv[0]);
             return false;
-        }
-
-        // Set default layout if needed
-        if(!common_opts.data_layout->is_set() && common_params.target == Target::NEON)
-        {
-            common_params.data_layout = DataLayout::NCHW;
         }
 
         // Checks
@@ -230,7 +220,7 @@ private:
     Stream             graph;
 
 private:
-    BranchLayer get_inception_node_A(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node_A(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int a_filt,
                                      std::tuple<unsigned int, unsigned int> b_filters,
                                      std::tuple<unsigned int, unsigned int, unsigned int> c_filters,
@@ -355,10 +345,10 @@ private:
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_3/Conv2d_0b_1x1/Relu");
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 
-    BranchLayer get_inception_node_B(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node_B(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int a_filt,
                                      std::tuple<unsigned int, unsigned int, unsigned int> b_filters)
     {
@@ -426,10 +416,10 @@ private:
         SubStream i_c(graph);
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name(param_path + "/Branch_2/MaxPool_1a_3x3/MaxPool");
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
 
-    BranchLayer get_inception_node_C(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node_C(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int a_filt,
                                      std::tuple<unsigned int, unsigned int, unsigned int> b_filters,
                                      std::tuple<unsigned int, unsigned int, unsigned int, unsigned int, unsigned int> c_filters,
@@ -585,10 +575,10 @@ private:
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_3/Conv2d_0b_1x1/Relu");
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 
-    BranchLayer get_inception_node_D(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node_D(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      std::tuple<unsigned int, unsigned int> a_filters,
                                      std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> b_filters)
     {
@@ -684,10 +674,10 @@ private:
         SubStream i_c(graph);
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL))).set_name(param_path + "/Branch_2/MaxPool_1a_3x3/MaxPool");
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
 
-    BranchLayer get_inception_node_E(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node_E(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int a_filt,
                                      std::tuple<unsigned int, unsigned int, unsigned int> b_filters,
                                      std::tuple<unsigned int, unsigned int, unsigned int, unsigned int> c_filters,
@@ -767,7 +757,7 @@ private:
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_1/Conv2d" + conv_id + "3x1/Relu");
 
         // Merge b1 and b2
-        i_b << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_b1), std::move(i_b2)).set_name(param_path + "/Branch_1/concat");
+        i_b << ConcatLayer(std::move(i_b1), std::move(i_b2)).set_name(param_path + "/Branch_1/concat");
 
         SubStream i_c(graph);
         i_c << ConvolutionLayer(
@@ -832,7 +822,7 @@ private:
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_2/Conv2d_0d_3x1/Relu");
 
         // Merge i_c1 and i_c2
-        i_c << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_c1), std::move(i_c2)).set_name(param_path + "/Branch_2/concat");
+        i_c << ConcatLayer(std::move(i_c1), std::move(i_c2)).set_name(param_path + "/Branch_2/concat");
 
         SubStream i_d(graph);
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true)).set_name(param_path + "/Branch_3/AvgPool_0a_3x3/AvgPool")
@@ -851,11 +841,16 @@ private:
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_3/Conv2d_0b_1x1/Relu");
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 };
 
 /** Main program for Inception V3
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1512.00567
+ *      "Rethinking the Inception Architecture for Computer Vision"
+ *      Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, Zbigniew Wojna
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

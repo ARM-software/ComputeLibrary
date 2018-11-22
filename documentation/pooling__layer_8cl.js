@@ -12,5 +12,5 @@ var pooling__layer_8cl =
     [ "calculate_avg_scale_nhwc", "pooling__layer_8cl.xhtml#a93173b51e52924504320e874affcf881", null ],
     [ "pooling_layer_2", "pooling__layer_8cl.xhtml#a2d95de36199fd06803ffb62f5ff1df08", null ],
     [ "pooling_layer_3", "pooling__layer_8cl.xhtml#af5751970a4d8c62febdc6c63d6d4fd1d", null ],
-    [ "pooling_layer_MxN_nhwc", "pooling__layer_8cl.xhtml#ac320fea94a0f786ca35fe159d57a6e49", null ]
+    [ "pooling_layer_MxN_nhwc", "pooling__layer_8cl.xhtml#a074db9113f7fb9fc3f5e389892b38d32", null ]
 ];

@@ -26,19 +26,15 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
 GCTensorAllocator::GCTensorAllocator(GCTensor *owner)
-    : _associated_memory_group(nullptr), _gl_buffer(), _mapping(nullptr), _owner(owner)
+    : _associated_memory_group(nullptr), _memory(), _mapping(nullptr), _owner(owner)
 {
-}
-
-GCTensorAllocator::~GCTensorAllocator()
-{
-    _gl_buffer = support::cpp14::make_unique<GLBufferWrapper>();
 }
 
 uint8_t *GCTensorAllocator::data()
@@ -50,32 +46,28 @@ void GCTensorAllocator::allocate()
 {
     if(_associated_memory_group == nullptr)
     {
-        _gl_buffer = support::cpp14::make_unique<GLBufferWrapper>();
-        ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_buffer->_ssbo_name));
-        ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(info().total_size()), nullptr, GL_STATIC_DRAW));
-        ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+        _memory.set_owned_region(support::cpp14::make_unique<GCBufferMemoryRegion>(info().total_size()));
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, reinterpret_cast<void **>(&_gl_buffer), info().total_size());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
     }
     info().set_is_resizable(false);
 }
 
 void GCTensorAllocator::free()
 {
-    if(_associated_memory_group == nullptr)
-    {
-        _gl_buffer.reset();
-        info().set_is_resizable(true);
-    }
+    _mapping = nullptr;
+    _memory.set_region(nullptr);
+    info().set_is_resizable(true);
 }
 
 void GCTensorAllocator::set_associated_memory_group(GCMemoryGroup *associated_memory_group)
 {
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
     ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
-    ARM_COMPUTE_ERROR_ON(_gl_buffer.get() != nullptr);
+    ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.gc_region()->gc_ssbo_name() != 0);
+
     _associated_memory_group = associated_memory_group;
 }
 
@@ -91,27 +83,23 @@ void GCTensorAllocator::unlock()
 
 GLuint GCTensorAllocator::get_gl_ssbo_name() const
 {
-    return _gl_buffer->_ssbo_name;
+    return (_memory.region() == nullptr) ? static_cast<GLuint>(0) : _memory.gc_region()->gc_ssbo_name();
 }
 
 uint8_t *GCTensorAllocator::map(bool blocking)
 {
     ARM_COMPUTE_ERROR_ON(_mapping != nullptr);
-    ARM_COMPUTE_UNUSED(blocking);
+    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
 
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_buffer->_ssbo_name));
-    void *p  = ARM_COMPUTE_GL_CHECK(glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, static_cast<GLsizeiptr>(info().total_size()), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT));
-    _mapping = reinterpret_cast<uint8_t *>(p);
-
+    _mapping = reinterpret_cast<uint8_t *>(_memory.gc_region()->map(blocking));
     return _mapping;
 }
 
 void GCTensorAllocator::unmap()
 {
     ARM_COMPUTE_ERROR_ON(_mapping == nullptr);
+    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
 
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_buffer->_ssbo_name));
-    ARM_COMPUTE_GL_CHECK(glUnmapBuffer(GL_SHADER_STORAGE_BUFFER));
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+    _memory.gc_region()->unmap();
     _mapping = nullptr;
 }

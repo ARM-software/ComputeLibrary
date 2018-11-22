@@ -71,7 +71,7 @@ public:
      * @param[in]  convolved_dims Output convolved dimensions.
      * @param[in]  num_groups     (Optional) Number of groups when performing a grouped convolution
      */
-    void configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1);
+    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
      * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
@@ -82,7 +82,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims, unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -90,7 +90,7 @@ public:
 public:
     const ICLTensor *_input;
     ICLTensor       *_output;
-    std::pair<unsigned int, unsigned int> _convolved_dims;
+    Size2D           _convolved_dims;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLCOL2IMKERNEL_H__ */

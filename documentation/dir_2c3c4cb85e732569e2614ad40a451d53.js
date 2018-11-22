@@ -30,12 +30,19 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "NEBitwiseXorKernel", "classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml", "classarm__compute_1_1_n_e_bitwise_xor_kernel" ]
     ] ],
     [ "NEBox3x3Kernel.h", "_n_e_box3x3_kernel_8h.xhtml", "_n_e_box3x3_kernel_8h" ],
-    [ "NECannyEdgeKernel.h", "_n_e_canny_edge_kernel_8h.xhtml", "_n_e_canny_edge_kernel_8h" ],
+    [ "NECannyEdgeKernel.h", "_n_e_canny_edge_kernel_8h.xhtml", [
+      [ "NEGradientKernel", "classarm__compute_1_1_n_e_gradient_kernel.xhtml", "classarm__compute_1_1_n_e_gradient_kernel" ],
+      [ "NEEdgeNonMaxSuppressionKernel", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel" ],
+      [ "NEEdgeTraceKernel", "classarm__compute_1_1_n_e_edge_trace_kernel.xhtml", "classarm__compute_1_1_n_e_edge_trace_kernel" ]
+    ] ],
     [ "NEChannelCombineKernel.h", "_n_e_channel_combine_kernel_8h.xhtml", [
       [ "NEChannelCombineKernel", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml", "classarm__compute_1_1_n_e_channel_combine_kernel" ]
     ] ],
     [ "NEChannelExtractKernel.h", "_n_e_channel_extract_kernel_8h.xhtml", [
       [ "NEChannelExtractKernel", "classarm__compute_1_1_n_e_channel_extract_kernel.xhtml", "classarm__compute_1_1_n_e_channel_extract_kernel" ]
+    ] ],
+    [ "NEChannelShuffleLayerKernel.h", "_n_e_channel_shuffle_layer_kernel_8h.xhtml", [
+      [ "NEChannelShuffleLayerKernel", "classarm__compute_1_1_n_e_channel_shuffle_layer_kernel.xhtml", "classarm__compute_1_1_n_e_channel_shuffle_layer_kernel" ]
     ] ],
     [ "NECol2ImKernel.h", "_n_e_col2_im_kernel_8h.xhtml", [
       [ "NECol2ImKernel", "classarm__compute_1_1_n_e_col2_im_kernel.xhtml", "classarm__compute_1_1_n_e_col2_im_kernel" ]
@@ -101,6 +108,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEFillInnerBorderKernel.h", "_n_e_fill_inner_border_kernel_8h.xhtml", [
       [ "NEFillInnerBorderKernel", "classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml", "classarm__compute_1_1_n_e_fill_inner_border_kernel" ]
     ] ],
+    [ "NEFlattenLayerKernel.h", "_n_e_flatten_layer_kernel_8h.xhtml", [
+      [ "NEFlattenLayerKernel", "classarm__compute_1_1_n_e_flatten_layer_kernel.xhtml", "classarm__compute_1_1_n_e_flatten_layer_kernel" ]
+    ] ],
     [ "NEFloorKernel.h", "_n_e_floor_kernel_8h.xhtml", [
       [ "NEFloorKernel", "classarm__compute_1_1_n_e_floor_kernel.xhtml", "classarm__compute_1_1_n_e_floor_kernel" ]
     ] ],
@@ -153,7 +163,10 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEGEMMTranspose1xWKernel.h", "_n_e_g_e_m_m_transpose1x_w_kernel_8h.xhtml", [
       [ "NEGEMMTranspose1xWKernel", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel" ]
     ] ],
-    [ "NEHarrisCornersKernel.h", "_n_e_harris_corners_kernel_8h.xhtml", "_n_e_harris_corners_kernel_8h" ],
+    [ "NEHarrisCornersKernel.h", "_n_e_harris_corners_kernel_8h.xhtml", [
+      [ "INEHarrisScoreKernel", "classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_i_n_e_harris_score_kernel" ],
+      [ "NEHarrisScoreKernel", "classarm__compute_1_1_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_n_e_harris_score_kernel" ]
+    ] ],
     [ "NEHistogramKernel.h", "_n_e_histogram_kernel_8h.xhtml", [
       [ "NEHistogramKernel", "classarm__compute_1_1_n_e_histogram_kernel.xhtml", "classarm__compute_1_1_n_e_histogram_kernel" ]
     ] ],
@@ -209,6 +222,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEPoolingLayerKernel.h", "_n_e_pooling_layer_kernel_8h.xhtml", [
       [ "NEPoolingLayerKernel", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml", "classarm__compute_1_1_n_e_pooling_layer_kernel" ]
     ] ],
+    [ "NEPriorBoxLayerKernel.h", "_n_e_prior_box_layer_kernel_8h.xhtml", [
+      [ "NEPriorBoxLayerKernel", "classarm__compute_1_1_n_e_prior_box_layer_kernel.xhtml", "classarm__compute_1_1_n_e_prior_box_layer_kernel" ]
+    ] ],
     [ "NEQuantizationLayerKernel.h", "_n_e_quantization_layer_kernel_8h.xhtml", [
       [ "NEQuantizationLayerKernel", "classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_quantization_layer_kernel" ]
     ] ],
@@ -217,6 +233,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NERemapKernel.h", "_n_e_remap_kernel_8h.xhtml", [
       [ "NERemapKernel", "classarm__compute_1_1_n_e_remap_kernel.xhtml", "classarm__compute_1_1_n_e_remap_kernel" ]
+    ] ],
+    [ "NEReorgLayerKernel.h", "_n_e_reorg_layer_kernel_8h.xhtml", [
+      [ "NEReorgLayerKernel", "classarm__compute_1_1_n_e_reorg_layer_kernel.xhtml", "classarm__compute_1_1_n_e_reorg_layer_kernel" ]
     ] ],
     [ "NEReshapeLayerKernel.h", "_n_e_reshape_layer_kernel_8h.xhtml", [
       [ "NEReshapeLayerKernel", "classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml", "classarm__compute_1_1_n_e_reshape_layer_kernel" ]
@@ -254,6 +273,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NETransposeKernel.h", "_n_e_transpose_kernel_8h.xhtml", [
       [ "NETransposeKernel", "classarm__compute_1_1_n_e_transpose_kernel.xhtml", "classarm__compute_1_1_n_e_transpose_kernel" ]
     ] ],
+    [ "NEUpsampleLayerKernel.h", "_n_e_upsample_layer_kernel_8h.xhtml", [
+      [ "NEUpsampleLayerKernel", "classarm__compute_1_1_n_e_upsample_layer_kernel.xhtml", "classarm__compute_1_1_n_e_upsample_layer_kernel" ]
+    ] ],
     [ "NEWarpKernel.h", "_n_e_warp_kernel_8h.xhtml", [
       [ "INEWarpKernel", "classarm__compute_1_1_i_n_e_warp_kernel.xhtml", "classarm__compute_1_1_i_n_e_warp_kernel" ],
       [ "NEWarpAffineKernel", "classarm__compute_1_1_n_e_warp_affine_kernel.xhtml", null ],
@@ -273,5 +295,8 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "INEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel" ],
       [ "NEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel" ],
       [ "NEWinogradLayerConfiguration", "classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml", "classarm__compute_1_1_n_e_winograd_layer_configuration" ]
+    ] ],
+    [ "NEYOLOLayerKernel.h", "_n_e_y_o_l_o_layer_kernel_8h.xhtml", [
+      [ "NEYOLOLayerKernel", "classarm__compute_1_1_n_e_y_o_l_o_layer_kernel.xhtml", "classarm__compute_1_1_n_e_y_o_l_o_layer_kernel" ]
     ] ]
 ];

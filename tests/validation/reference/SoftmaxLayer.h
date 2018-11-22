@@ -36,10 +36,10 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta);
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
 
 template <typename T, typename std::enable_if<std::is_same<T, uint8_t>::value, int>::type = 0>
-SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta);
+SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axis = 1);
 } // namespace reference
 } // namespace validation
 } // namespace test

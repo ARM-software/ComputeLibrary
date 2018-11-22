@@ -8,11 +8,11 @@ var benchmark_2_c_l_2_pooling_layer_8cpp =
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#af5de9e9950e88b4f8ae838606730e330", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a97a5c3434c3234e4b1f4bb4729d4f610", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a4d4104e5bf2e89104503e1605970b701", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a088f88d4eacea3c4fa33c748c88807ea", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a7b444a39936c565789010eb1dd9a8ce7", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a318bfa3838f274d6896579a6370850e6", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a1532918b53d213386255ea7fad94922d", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a8dcc7af8dd276844c2a269bc9fc81354", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a8dea8c94ce6f82cee7f98c019d682969", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#af0ebd7c0e363f26be755bf9285409f85", null ]
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a32d46130028346966574200df4f3400f", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#adaeac2f5f2b60f6fcd6162630049ef1a", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a23ab205742fe9cc0f257a43f11351e47", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a44462bfadb6a17d68d22603e2bc21ee3", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a306992d7991224f6c93ab2bd2cb8cc82", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#a71ac9d0528424387587a34c8de12c93c", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_pooling_layer_8cpp.xhtml#ad32c7c18d077ec839615f4def1d36873", null ]
 ];

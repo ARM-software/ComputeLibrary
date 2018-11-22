@@ -25,8 +25,8 @@ var _error_8h =
       [ "RUNTIME_ERROR", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fa62be47fdd89da032cf78dfce82239579", null ],
       [ "UNSUPPORTED_EXTENSION_USE", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05fa0ffe8be9137815d1266845a195c053c7", null ]
     ] ],
-    [ "create_error", "_error_8h.xhtml#a3eee3c80d78ee4574a5eed0af5af919d", null ],
-    [ "create_error_va_list", "_error_8h.xhtml#a2edb6ec8bea5c26d7d802d21caf64d02", null ],
-    [ "error", "_error_8h.xhtml#a568b0fbfa3d903099d9c9f7b6acf188d", null ],
+    [ "create_error", "_error_8h.xhtml#a439338e8e5a7c76a079aca52e16cff79", null ],
+    [ "create_error_va_list", "_error_8h.xhtml#aee087c8a7edb0fb5b7e75b9037e34cf7", null ],
+    [ "error", "_error_8h.xhtml#a0768178b90a30994784fd28c5a89323f", null ],
     [ "ignore_unused", "_error_8h.xhtml#a053a24bb37402fa4b4d8d5963976ba17", null ]
 ];

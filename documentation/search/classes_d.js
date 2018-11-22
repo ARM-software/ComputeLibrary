@@ -2,6 +2,7 @@ var searchData=
 [
   ['malicounter',['MaliCounter',['../classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml',1,'arm_compute::test::framework']]],
   ['measurement',['Measurement',['../structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml',1,'arm_compute::test::framework']]],
+  ['meminfo',['MEMInfo',['../classarm__compute_1_1_m_e_m_info.xhtml',1,'arm_compute']]],
   ['memory',['Memory',['../classarm__compute_1_1_memory.xhtml',1,'arm_compute']]],
   ['memorygroupbase',['MemoryGroupBase',['../classarm__compute_1_1_memory_group_base.xhtml',1,'arm_compute']]],
   ['memorygroupbase_3c_20cltensor_20_3e',['MemoryGroupBase&lt; CLTensor &gt;',['../classarm__compute_1_1_memory_group_base.xhtml',1,'arm_compute']]],

@@ -33,19 +33,31 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &output_shape,
+template <typename T, typename TB>
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
                                     const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a)
 {
     // Create reference
-    const int   stride_x     = info.stride().first;
-    const int   stride_y     = info.stride().second;
+    const int stride_x           = info.stride().first;
+    const int stride_y           = info.stride().second;
+    const int weights_width      = weights.shape().x();
+    const int weights_height     = weights.shape().y();
+    const int weights_upper_dims = weights.shape().total_size() / (weights_width * weights_height);
+
+    // Find the upsampled dimensions
+    unsigned int out_x = (src.shape().x() - 1) * stride_x + a.first + 1;
+    unsigned int out_y = (src.shape().y() - 1) * stride_y + a.second + 1;
+
+    // Find the padding needed for the convolution with stride 1 in order to match output shape
+    unsigned int padx = output_shape.x() - (out_x - weights_width + 1);
+    unsigned int pady = output_shape.y() - (out_y - weights_height + 1);
+    out_x += padx;
+    out_y += pady;
+
     TensorShape scaled_shape = src.shape();
-    int         out_x        = src.shape().x() + (src.shape().x() - 1) * (stride_x - 1) + a.first + 2 * info.pad().first;
-    int         out_y        = src.shape().y() + (src.shape().y() - 1) * (stride_y - 1) + a.second + 2 * info.pad().second;
     scaled_shape.set(0, out_x);
     scaled_shape.set(1, out_y);
-    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1 };
+    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1, src.quantization_info() };
 
     const int width_in      = src.shape().x();
     const int height_in     = src.shape().y();
@@ -59,19 +71,38 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     ARM_COMPUTE_ERROR_ON_MSG(ax > stride_x - 1, "ax must be smaller than stride_x");
     ARM_COMPUTE_ERROR_ON_MSG(ay > stride_y - 1, "ay must be smaller than stride_y");
 
-    for(int j = 0; j < scaled.num_elements(); ++j)
+    if(src.data_type() == DataType::QASYMM8)
     {
-        scaled[j] = T(0);
+        const uint8_t quantized_zero = src.quantization_info().offset;
+        std::fill_n(scaled.data(), scaled.num_elements(), quantized_zero);
+    }
+    else
+    {
+        std::fill_n(scaled.data(), scaled.num_elements(), T(0));
+    }
+
+    // Flip weights by 180 degrees
+    SimpleTensor<T> weights_flipped{ weights.shape(), weights.data_type(), 1, weights.quantization_info() };
+    for(int ud = 0; ud < weights_upper_dims; ++ud)
+    {
+        const int offset = ud * weights_width * weights_height;
+        for(int y = 0; y < weights_height; ++y)
+        {
+            for(int x = 0; x < weights_width; ++x)
+            {
+                weights_flipped[offset + (weights_height - 1 - y) * weights_width + (weights_width - 1 - x)] = weights[offset + y * weights_width + x];
+            }
+        }
     }
 
     for(int slice = 0; slice < num_2d_slices; ++slice)
     {
         const int offset_slice_in  = slice * width_in * height_in;
         const int offset_slice_out = slice * width_scaled * height_scaled;
-        const int start_x          = info.pad().first;
-        const int start_y          = ay + info.pad().second;
-        const int end_y            = height_scaled - info.pad().second;
-        const int end_x            = width_scaled - ax - info.pad().first;
+        const int start_x          = padx / 2;
+        const int start_y          = ay + pady / 2;
+        const int end_y            = height_scaled - pady / 2;
+        const int end_x            = width_scaled - ax - padx / 2;
 
         for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
         {
@@ -85,9 +116,11 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     }
 
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    return convolution_layer(scaled, weights, bias, output_shape, conv_info);
+    return convolution_layer(scaled, weights_flipped, bias, output_shape, conv_info);
 }
 
+template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
+                                                   const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,

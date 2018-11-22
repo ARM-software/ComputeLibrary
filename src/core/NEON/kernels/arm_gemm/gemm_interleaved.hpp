@@ -450,6 +450,7 @@ public:
         return _pretransposed && (_B_transposed==nullptr);
     }
 
+    // TODO: this could almost certainly be considerably simpler.
     size_t get_B_pretransposed_array_size() const override {
         size_t total=0;
         blockwalker current(*this);

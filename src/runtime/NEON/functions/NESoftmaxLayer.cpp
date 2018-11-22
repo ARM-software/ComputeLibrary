@@ -36,9 +36,10 @@ NESoftmaxLayer::NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
 {
 }
 
-void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta)
+void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_UNUSED(axis);
 
     // Configure Kernels
     _max_kernel.configure(input, &_max);
@@ -58,8 +59,10 @@ void NESoftmaxLayer::configure(ITensor *input, ITensor *output, float beta)
     _tmp.allocator()->allocate();
 }
 
-Status NESoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float beta)
+Status NESoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output, float beta, size_t axis)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis != 1, "Axis must be 1 for NEON");
+
     // Perform validation step
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 2, "Only 2D inputs are supported");

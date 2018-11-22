@@ -176,43 +176,6 @@ void fill_lookuptable(T &&table)
     }
 }
 
-/** Helper function to get the testing range for batch normalization layer.
- *
- * @return A pair containing the lower upper testing bounds.
- */
-template <typename T>
-std::pair<T, T> get_batchnormalization_layer_test_bounds()
-{
-    const bool is_float = std::is_floating_point<T>::value;
-    std::pair<T, T> bounds;
-
-    // Set initial values
-    if(is_float)
-    {
-        bounds = std::make_pair(-1.f, 1.f);
-    }
-    else
-    {
-        bounds = std::make_pair(1, 1);
-    }
-
-    return bounds;
-}
-
-/** Helper function to get the testing range for NormalizePlanarYUV layer.
- *
- * @return A pair containing the lower upper testing bounds.
- */
-template <typename T>
-std::pair<T, T> get_normalize_planar_yuv_layer_test_bounds()
-{
-    std::pair<T, T> bounds;
-
-    bounds = std::make_pair(-1.f, 1.f);
-
-    return bounds;
-}
-
 /** Convert quantized simple tensor into float using tensor quantization information.
  *
  * @param[in] src Quantized tensor.
@@ -237,7 +200,8 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
  * @param[out] out Output tensor
  *
  */
-void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
+template <typename T>
+void matrix_multiply(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &out);
 
 /** Transpose matrix
  *
@@ -245,7 +209,8 @@ void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b,
  * @param[out] out Output tensor
  *
  */
-void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
+template <typename T>
+void transpose_matrix(const SimpleTensor<T> &in, SimpleTensor<T> &out);
 
 /** Get a 2D tile from a tensor
  *
@@ -266,6 +231,14 @@ void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinate
  */
 template <typename T>
 void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &shape);
+
+/** Helper function to compute quantized min and max bounds
+ *
+ * @param[in] quant_info Quantization info to be used for conversion
+ * @param[in] min        Floating point minimum value to be quantized
+ * @param[in] max        Floating point maximum value to be quantized
+ */
+std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, float min, float max);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

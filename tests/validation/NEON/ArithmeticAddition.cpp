@@ -33,7 +33,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/ArithmeticAdditionFixture.h"
+#include "tests/validation/fixtures/ArithmeticOperationsFixture.h"
 
 namespace arm_compute
 {

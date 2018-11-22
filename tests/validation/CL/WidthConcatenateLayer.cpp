@@ -103,14 +103,16 @@ using CLWidthConcatenateLayerFixture = WidthConcatenateLayerValidationFixture<CL
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                  DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                  framework::dataset::make("DataType",
+                                                                                                                          DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
-                                                                                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large2DShapes(), datasets::Small4DShapes()),
+                                                                                                                framework::dataset::make("DataType",
+                                                                                                                        DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -118,8 +120,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<half>, framework
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

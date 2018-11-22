@@ -45,7 +45,10 @@ public:
     Small1DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 256U }
+        TensorShape{ 128U },
+                     TensorShape{ 256U },
+                     TensorShape{ 512U },
+                     TensorShape{ 1024U }
     })
     {
     }
@@ -161,8 +164,8 @@ public:
     {
         // Batch size 1
         TensorShape{ 11U, 11U },
-                     TensorShape{ 27U, 13U, 2U },
-                     TensorShape{ 128U, 64U, 1U, 3U },
+                     TensorShape{ 27U, 13U, 7U },
+                     TensorShape{ 31U, 27U, 17U, 2U },
                      // Batch size 4
                      TensorShape{ 11U, 11U, 3U, 4U },
                      TensorShape{ 27U, 13U, 2U, 4U },
@@ -727,7 +730,8 @@ public:
     {
         TensorShape{ 232U, 65U, 3U },
                      TensorShape{ 432U, 65U, 3U },
-                     TensorShape{ 124U, 65U, 3U }
+                     TensorShape{ 124U, 65U, 3U },
+                     TensorShape{ 124U, 65U, 3U, 4U }
     })
     {
     }
@@ -791,6 +795,24 @@ public:
         TensorShape{ 1000U, 10U },
                      TensorShape{ 3989U, 10U },
                      TensorShape{ 7339U, 11U },
+
+    })
+    {
+    }
+};
+
+/** Data set containing large and small softmax layer 4D shapes. */
+class SoftmaxLayer4DShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayer4DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U, 9U, 9U },
+                     TensorShape{ 256U, 10U, 1U, 9U },
+                     TensorShape{ 353U, 8U, 2U },
+                     TensorShape{ 781U, 5U, 2U, 2U },
+                     TensorShape{ 781U, 11U, 1U, 2U },
     })
     {
     }
@@ -821,6 +843,37 @@ public:
         TensorShape{ 1920U, 1080U },
                      TensorShape{ 2560U, 1536U },
                      TensorShape{ 3584U, 2048U }
+    })
+    {
+    }
+};
+
+/** Data set containing small YOLO tensor shapes. */
+class SmallYOLOShapes final : public ShapeDataset
+{
+public:
+    SmallYOLOShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 11U, 11U, 270U },
+                     TensorShape{ 27U, 13U, 90U },
+                     TensorShape{ 13U, 12U, 45U, 2U },
+    })
+    {
+    }
+};
+
+/** Data set containing large YOLO tensor shapes. */
+class LargeYOLOShapes final : public ShapeDataset
+{
+public:
+    LargeYOLOShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 24U, 23U, 270U },
+                     TensorShape{ 51U, 63U, 90U, 2U },
+                     TensorShape{ 76U, 91U, 45U, 3U }
     })
     {
     }

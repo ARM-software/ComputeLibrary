@@ -220,6 +220,99 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo 
     return os;
 }
 
+/** Formatted output of the ROIPoolingInfo type.
+ *
+ * @param[in] pool_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ROIPoolingLayerInfo &pool_info)
+{
+    std::stringstream str;
+    str << pool_info;
+    return str.str();
+}
+
+/** Formatted output of the BoundingBoxTransformInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  bbox_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const BoundingBoxTransformInfo &bbox_info)
+{
+    auto weights = bbox_info.weights();
+    os << "(" << bbox_info.img_width() << "x" << bbox_info.img_height() << ")~" << bbox_info.scale() << "(weights = {" << weights[0] << ", " << weights[1] << ", " << weights[2] << ", " << weights[3] <<
+       "})";
+    return os;
+}
+
+/** Formatted output of the BoundingBoxTransformInfo type.
+ *
+ * @param[in] bbox_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const BoundingBoxTransformInfo &bbox_info)
+{
+    std::stringstream str;
+    str << bbox_info;
+    return str.str();
+}
+
+/** Formatted output of the ComputeAnchorsInfo type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  anchors_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ComputeAnchorsInfo &anchors_info)
+{
+    os << "(" << anchors_info.feat_width() << "x" << anchors_info.feat_height() << ")~" << anchors_info.spatial_scale();
+    return os;
+}
+
+/** Formatted output of the ComputeAnchorsInfo type.
+ *
+ * @param[in] anchors_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ComputeAnchorsInfo &anchors_info)
+{
+    std::stringstream str;
+    str << anchors_info;
+    return str.str();
+}
+
+/** Formatted output of the GenerateProposalsInfo type.
+ *
+ * @param[out] os             Output stream.
+ * @param[in]  proposals_info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GenerateProposalsInfo &proposals_info)
+{
+    os << "(" << proposals_info.im_width() << "x" << proposals_info.im_height() << ")~" << proposals_info.im_scale();
+    return os;
+}
+
+/** Formatted output of the GenerateProposalsInfo type.
+ *
+ * @param[in] proposals_info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GenerateProposalsInfo &proposals_info)
+{
+    std::stringstream str;
+    str << proposals_info;
+    return str.str();
+}
+
 /** Formatted output of the QuantizationInfo type.
  *
  * @param[out] os                Output stream.
@@ -434,6 +527,7 @@ inline std::string to_string(const RoundingPolicy &rounding_policy)
     return str.str();
 }
 
+/** [Print DataLayout type] **/
 /** Formatted output of the DataLayout type.
  *
  * @param[out] os          Output stream.
@@ -473,6 +567,7 @@ inline std::string to_string(const arm_compute::DataLayout &data_layout)
     str << data_layout;
     return str.str();
 }
+/** [Print DataLayout type] **/
 
 /** Formatted output of the DataLayoutDimension type.
  *
@@ -769,6 +864,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
     return os;
 }
 
+/** Formatted output of the PaddingList type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  padding Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding)
+{
+    os << "{";
+    for(auto const &p : padding)
+    {
+        os << "{" << p.first << "," << p.second << "}";
+    }
+    os << "}";
+    return os;
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[out] os     Output stream.
@@ -847,6 +960,7 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
+//FIXME: Check why this doesn't work and the TensorShape and Coordinates overload are needed
 /** Formatted output of the Dimensions type.
  *
  * @param[in] dimensions Type to output.
@@ -1107,6 +1221,19 @@ inline std::string to_string(const BorderSize &border)
     return str.str();
 }
 
+/** Formatted output of the PaddingList type.
+ *
+ * @param[in] padding Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PaddingList &padding)
+{
+    std::stringstream str;
+    str << padding;
+    return str.str();
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[in] policy Type to output.
@@ -1175,8 +1302,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
 {
     switch(op)
     {
+        case ReductionOperation::SUM:
+            os << "SUM";
+            break;
         case ReductionOperation::SUM_SQUARE:
             os << "SUM_SQUARE";
+            break;
+        case ReductionOperation::MEAN_SUM:
+            os << "MEAN_SUM";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -1241,6 +1374,30 @@ inline std::string to_string(const PoolingLayerInfo &info)
             << "PoolSize=" << info.pool_size().width << "," << info.pool_size().height << ","
             << "PadStride=" << info.pad_stride_info();
     }
+    str << "}";
+    return str.str();
+}
+
+/** Formatted output of the PriorBoxLayerInfo.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PriorBoxLayerInfo &info)
+{
+    std::stringstream str;
+    str << "{";
+    str << "Clip:" << info.clip()
+        << "Flip:" << info.flip()
+        << "StepX:" << info.steps()[0]
+        << "StepY:" << info.steps()[1]
+        << "MinSizes:" << info.min_sizes().size()
+        << "MaxSizes:" << info.max_sizes().size()
+        << "ImgSizeX:" << info.img_size().x
+        << "ImgSizeY:" << info.img_size().y
+        << "Offset:" << info.offset()
+        << "Variances:" << info.variances().size();
     str << "}";
     return str.str();
 }
@@ -1698,6 +1855,29 @@ inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args
         os << arg;
     }
     os << "]";
+    return os;
+}
+
+/** Formatted output of @ref PriorBoxLayerInfo.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PriorBoxLayerInfo &info)
+{
+    os << "Clip:" << info.clip()
+       << "Flip:" << info.flip()
+       << "StepX:" << info.steps()[0]
+       << "StepY:" << info.steps()[1]
+       << "MinSizes:" << info.min_sizes()
+       << "MaxSizes:" << info.max_sizes()
+       << "ImgSizeX:" << info.img_size().x
+       << "ImgSizeY:" << info.img_size().y
+       << "Offset:" << info.offset()
+       << "Variances:" << info.variances();
+
     return os;
 }
 

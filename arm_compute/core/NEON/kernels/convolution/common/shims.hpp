@@ -23,7 +23,9 @@
  */
 
 #pragma once
+#ifndef DOXYGEN_SKIP_THIS
 #include <cstdint>
+#endif /* DOXYGEN_SKIP_THIS */
 #include "arm.hpp"
 
 namespace reorder {

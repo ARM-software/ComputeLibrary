@@ -81,6 +81,9 @@ private:
     const ICLTensor *_input0;
     const ICLTensor *_input1;
     ICLTensor       *_output;
+    bool             _slide_matrix_b;
+    bool             _reinterpret_input_as_3d;
+    bool             _reinterpret_output_as_3d;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYKERNEL_H__*/

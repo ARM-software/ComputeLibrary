@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ public:
     ReductionOperations()
         : ContainerDataset("ReductionOperation",
     {
-        ReductionOperation::SUM_SQUARE
+        ReductionOperation::SUM
     })
     {
     }

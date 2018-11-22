@@ -40,7 +40,7 @@ SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape,
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
 
     // Compute reference
-    const size_t batches    = dst_shape[3];
+    const size_t batches    = dst_shape.total_size() / (dst_shape.x() * dst_shape.y() * dst_shape.z());
     const size_t src_width  = src.shape().x();
     const size_t src_height = src.shape().y();
 

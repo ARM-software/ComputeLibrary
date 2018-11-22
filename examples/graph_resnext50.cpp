@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement ResNeXt50 network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement ResNeXt50 network using the Compute Library's graph API */
 class GraphResNeXt50Example : public Example
 {
 public:
@@ -182,13 +178,18 @@ private:
                      .set_name(unit_name + "sc/scale");
             }
 
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right)).set_name(unit_name + "add");
+            graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             graph << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Relu");
         }
     }
 };
 
 /** Main program for ResNeXt50
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1611.05431
+ *      "Aggregated Residual Transformations for Deep Neural Networks"
+ *      Saining Xie, Ross Girshick, Piotr Dollar, Zhuowen Tu, Kaiming He
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

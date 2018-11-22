@@ -103,7 +103,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    template <bool fused_activation>
+    template <bool fused_activation, typename F>
     void batch_normalization_fp16_nchw(const Window &window);
     /** Template function to run batch normalization on fp16 on tensors with NHWC format
      *
@@ -111,7 +111,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    template <bool fused_activation>
+    template <bool fused_activation, typename F>
     void batch_normalization_fp16_nhwc(const Window &window);
     /** Template function to run batch normalization on fp32
      *

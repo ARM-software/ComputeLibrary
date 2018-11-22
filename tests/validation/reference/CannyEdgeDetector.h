@@ -36,7 +36,8 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> canny_edge_detector(const SimpleTensor<T> &src, int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
+SimpleTensor<T> canny_edge_detector(const SimpleTensor<T> &src,
+                                    int32_t upper_thresh, int32_t lower_thresh, int gradient_size, MagnitudeType norm_type,
                                     BorderMode border_mode, T constant_border_value = 0);
 } // namespace reference
 } // namespace validation

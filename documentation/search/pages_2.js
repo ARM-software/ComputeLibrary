@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['validation_20and_20benchmarks_20tests',['Validation and benchmarks tests',['../tests.xhtml',1,'']]]
+  ['library_20architecture',['Library architecture',['../architecture.xhtml',1,'']]],
+  ['list_20of_20functions',['List of functions',['../functions_list.xhtml',1,'']]]
 ];

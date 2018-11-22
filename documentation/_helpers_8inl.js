@@ -3,7 +3,7 @@ var _helpers_8inl =
     [ "auto_init_if_empty", "_helpers_8inl.xhtml#a47be6fa38308d0003c25b60b7dbc45ce", null ],
     [ "auto_init_if_empty", "_helpers_8inl.xhtml#a5844c8e025388ddd8c3afc5c3f7a3256", null ],
     [ "coords2index", "_helpers_8inl.xhtml#ad95e1c14c3007ca18950bf8f4c5a5c93", null ],
-    [ "execute_window_loop", "_helpers_8inl.xhtml#a6c0dcc38187027dcb89cd9724bc5a823", null ],
+    [ "execute_window_loop", "_helpers_8inl.xhtml#a5002bf7ec46d52971f9526e94172cfee", null ],
     [ "get_data_layout_dimension_index", "_helpers_8inl.xhtml#a46e938020a3ac8c926d0590b7fe957db", null ],
     [ "index2coords", "_helpers_8inl.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d", null ],
     [ "pixel_area_c1u8_clamp", "_helpers_8inl.xhtml#ab7b3af731907e85fcaf72555c446176b", null ],

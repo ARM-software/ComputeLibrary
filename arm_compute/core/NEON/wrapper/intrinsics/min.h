@@ -43,6 +43,9 @@ VMIN_IMPL(int16_t, int16x4_t, vmin, s16)
 VMIN_IMPL(uint32_t, uint32x2_t, vmin, u32)
 VMIN_IMPL(int32_t, int32x2_t, vmin, s32)
 VMIN_IMPL(float, float32x2_t, vmin, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMIN_IMPL(float16_t, float16x4_t, vmin, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VMIN_IMPL(uint8_t, uint8x16_t, vminq, u8)
 VMIN_IMPL(int8_t, int8x16_t, vminq, s8)
@@ -51,6 +54,9 @@ VMIN_IMPL(int16_t, int16x8_t, vminq, s16)
 VMIN_IMPL(uint32_t, uint32x4_t, vminq, u32)
 VMIN_IMPL(int32_t, int32x4_t, vminq, s32)
 VMIN_IMPL(float, float32x4_t, vminq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMIN_IMPL(float16_t, float16x8_t, vminq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VMIN_IMPL
 } // namespace wrapper

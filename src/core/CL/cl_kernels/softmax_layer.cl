@@ -64,6 +64,7 @@ __constant uint16 idx__ = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
 
 #endif /* VECTOR_SIZE END */
 
+// TODO (COMPMID-661): Remove if the non-fused kernels are removed
 __constant VEC_DATA_TYPE(DATA_TYPE, 16) type_min = (VEC_DATA_TYPE(DATA_TYPE, 16))(MINVAL);
 __constant uint16 idx16 = (uint16)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
 __constant uint4 idx4   = (uint4)(0, 1, 2, 3);
@@ -344,6 +345,7 @@ __kernel void softmax_layer_max_shift_exp_sum_parallel(
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
     // How many work-items needed to complete the computation.
+    //TODO: Optimize this calculation (avoid %).
     int boundary_workitems = (width % (GRID_SIZE * 4)) / 4;
     if(lid < boundary_workitems)
     {
@@ -459,6 +461,7 @@ __kernel void softmax_layer_max_shift_exp_sum_parallel(
         sum1D = ADD_OP(sum1D, data, DATA_TYPE, 4);
     }
 #ifdef NON_MULTIPLE_OF_GRID_SIZE
+    //TODO: Optimize the calculation (avoid %).
     boundary_workitems = (width % (GRID_SIZE * 4)) / 4;
     if(lid < boundary_workitems)
     {

@@ -1,8 +1,10 @@
 var searchData=
 [
+  ['linear',['linear',['../structarm__compute_1_1detail_1_1linear.xhtml',1,'arm_compute::detail']]],
   ['listoption',['ListOption',['../classarm__compute_1_1utils_1_1_list_option.xhtml',1,'arm_compute::utils']]],
   ['logger',['Logger',['../classarm__compute_1_1logging_1_1_logger.xhtml',1,'arm_compute::logging']]],
   ['loggerregistry',['LoggerRegistry',['../classarm__compute_1_1logging_1_1_logger_registry.xhtml',1,'arm_compute::logging']]],
+  ['logistic',['logistic',['../structarm__compute_1_1detail_1_1logistic.xhtml',1,'arm_compute::detail']]],
   ['logleveldecorator',['LogLevelDecorator',['../classarm__compute_1_1logging_1_1_log_level_decorator.xhtml',1,'arm_compute::logging']]],
   ['logmsg',['LogMsg',['../structarm__compute_1_1logging_1_1_log_msg.xhtml',1,'arm_compute::logging']]],
   ['lstmparams',['LSTMParams',['../classarm__compute_1_1_l_s_t_m_params.xhtml',1,'arm_compute']]],

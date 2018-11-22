@@ -82,7 +82,7 @@ public:
      * @param[in] output Output tensor. Data type supported: Data type supported: QASYMM8
      * @param[in] min    (Optional) Min value used to saturate down the output result before converting back to QASYMM8
      * @param[in] max    (Optional) Max value used to saturate up the output result before converting back to QASYMM8,
-     *                   Along with @p min, this value can be used to implement "rectified linear unit" activation functions
+     *                            Along with @p min, this value can be used to implement "rectified linear unit" activation functions
      *
      * @return a status
      */
@@ -116,5 +116,4 @@ private:
     int                     _max;
 };
 } // namespace arm_compute
-
 #endif /* __ARM_COMPUTE_NEGEMMLOWPQUANTIZEDOWNINT32TOUINT8SCALEBYFIXEDPOINTKERNEL_H__ */

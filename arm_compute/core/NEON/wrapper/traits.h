@@ -62,6 +62,10 @@ template <> struct neon_vector<uint64_t, 2>{ using type = uint64x2_t; using tag_
 template <> struct neon_vector<int64_t, 2>{ using type = int64x2_t; using tag_type = vector_128_tag; };
 template <> struct neon_vector<float_t, 2>{ using type = float32x2_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<float_t, 4>{ using type = float32x4_t; using tag_type = vector_128_tag; };
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <> struct neon_vector<float16_t, 4>{ using type = float16x4_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<float16_t, 8>{ using type = float16x8_t; using tag_type = vector_128_tag; };
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #endif /* DOXYGEN_SKIP_THIS */
 
 /**  Helper type template to get the type of a neon vector */

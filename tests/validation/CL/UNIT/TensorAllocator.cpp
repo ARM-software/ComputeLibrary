@@ -45,31 +45,32 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     // Init tensor info
     TensorInfo info(TensorShape(24U, 16U, 3U), 1, DataType::F32);
 
-    // Allocate memory
-    auto buf = std::make_shared<CLBufferMemoryRegion>(CLScheduler::get().context(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, info.total_size());
+    // Allocate memory buffer
+    const size_t total_size = info.total_size();
+    auto         buf        = cl::Buffer(CLScheduler::get().context(), CL_MEM_READ_WRITE, total_size);
 
-    // Negative case : Import empty memory
+    // Negative case : Import nullptr
     CLTensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(CLMemory())), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(cl::Buffer())), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Negative case : Import memory to a tensor that is memory managed
     CLTensor      t2;
     CLMemoryGroup mg;
     t2.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(CLMemory(buf))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-    // Positive case : Set managed pointer
+    // Positive case : Set raw pointer
     CLTensor t3;
     t3.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t3.allocator()->import_memory(CLMemory(buf))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(t3.allocator()->import_memory(buf)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.cl_buffer().get() == buf->cl_data().get(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t3.cl_buffer().get() == buf.get(), framework::LogLevel::ERRORS);
     t3.allocator()->free();
     ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.buffer() == nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t3.cl_buffer().get() != buf.get(), framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END()

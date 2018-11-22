@@ -134,6 +134,9 @@ CPUModel midr_to_model(const unsigned int midr)
                 }
                 break;
             case 0xd0b: // A76
+            case 0xd06:
+            case 0xd0c:
+            case 0xd0d:
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
             default:
@@ -160,8 +163,8 @@ void populate_models_cpuid(std::vector<CPUModel> &cpusv)
             std::string line;
             if(bool(getline(file, line)))
             {
-                const unsigned long midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
-                c                        = midr_to_model(midr & 0xffffffff);
+                const uint32_t midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
+                c                   = midr_to_model(midr & 0xffffffff);
             }
         }
     }
@@ -170,11 +173,11 @@ void populate_models_cpuid(std::vector<CPUModel> &cpusv)
 void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 {
     // If "long-form" cpuinfo is present, parse that to populate models.
-    std::regex proc_regex("^processor.*(\\d+)$");
-    std::regex imp_regex("^CPU implementer.*0x(..)$");
-    std::regex var_regex("^CPU variant.*0x(.)$");
-    std::regex part_regex("^CPU part.*0x(...)$");
-    std::regex rev_regex("^CPU revision.*(\\d+)$");
+    std::regex proc_regex(R"(^processor.*(\d+)$)");
+    std::regex imp_regex(R"(^CPU implementer.*0x(..)$)");
+    std::regex var_regex(R"(^CPU variant.*0x(.)$)");
+    std::regex part_regex(R"(^CPU part.*0x(...)$)");
+    std::regex rev_regex(R"(^CPU revision.*(\d+)$)");
 
     std::ifstream file;
     file.open("/proc/cpuinfo", std::ios::in);
@@ -317,10 +320,12 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
         hwcaps_fp16_support = true;
     }
 
+#if defined(__aarch64__)
     if((hwcaps & HWCAP_ASIMDDP) != 0)
     {
         hwcaps_dot_support = true;
     }
+#endif /* defined(__aarch64__) */
 
     const unsigned int max_cpus = get_max_cpus();
     cpuinfo.set_cpu_num(max_cpus);
@@ -334,17 +339,18 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
         populate_models_cpuinfo(percpu);
     }
     int j(0);
-    // Update dot product and FP16 support if all CPUs support these features:
-    bool all_support_dot  = true;
-    bool all_support_fp16 = true;
+    // Update dot product and FP16 support if one of the CPUs support these features
+    // We assume that the system does not have mixed architectures
+    bool one_supports_dot  = false;
+    bool one_supports_fp16 = false;
     for(const auto &v : percpu)
     {
-        all_support_dot &= model_supports_dot(v);
-        all_support_fp16 &= model_supports_fp16(v);
+        one_supports_dot  = one_supports_dot || model_supports_dot(v);
+        one_supports_fp16 = one_supports_fp16 || model_supports_fp16(v);
         cpuinfo.set_cpu_model(j++, v);
     }
-    cpuinfo.set_dotprod(all_support_dot || hwcaps_dot_support);
-    cpuinfo.set_fp16(all_support_fp16 || hwcaps_fp16_support);
+    cpuinfo.set_dotprod(one_supports_dot || hwcaps_dot_support);
+    cpuinfo.set_fp16(one_supports_fp16 || hwcaps_fp16_support);
 #else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */

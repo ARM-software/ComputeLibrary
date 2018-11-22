@@ -71,7 +71,7 @@ public:
     GemvPretransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const unsigned int nmultis, const bool trB, const Tr beta) :
         _Nsize(N), _Ksize(K), _nmultis(nmultis), _trB(trB), _beta(beta), _ci(ci),
         _buffer_per_multi(_Ksize * iceildiv(_Nsize, strategy::A_interleave) * strategy::A_interleave) {
-        /* For now don't do any blocking.*/
+        /* For now don't do any blocking. TODO: figure out if we should. */
         m_block = K;
         n_block = N;
     }

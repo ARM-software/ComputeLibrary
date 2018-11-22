@@ -56,6 +56,8 @@ const auto NormalizationDataset = combine(combine(combine(combine(datasets::Smal
 TEST_SUITE(GC)
 TEST_SUITE(NormalizationLayer)
 
+//TODO(COMPMID-415): Missing configuration?
+
 template <typename T>
 using GCNormalizationLayerFixture = NormalizationValidationFixture<GCTensor, GCAccessor, GCNormalizationLayer, T>;
 

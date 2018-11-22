@@ -1,8 +1,8 @@
 var _n_e_o_n_2_permute_8cpp =
 [
     [ "NEPermuteFixture", "_n_e_o_n_2_permute_8cpp.xhtml#a2a5527aa9271a188c66dede8c1faac56", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#a512b7ceb04308d4d2e4e7950073b70b5", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#ab1b781bfa8aede873549ccc651f6bcf8", null ],
+    [ "DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#a3d93fd83742ad7467793fd97fa86fa3f", null ],
+    [ "DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#a10cbef7a4d5b95ee888e5371244056ae", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#a61e3f050ddc951ac278d4a658d97e0de", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#a1472a19e122cedae0fa4c0a8c7dde29a", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_permute_8cpp.xhtml#aaef97d1a414ff109d1556fc7c9158973", null ],

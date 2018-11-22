@@ -110,10 +110,12 @@ void ICLKernel::add_tensor_argument(unsigned &idx, const ICLTensor *tensor, cons
     ARM_COMPUTE_UNUSED(idx_start);
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 template void ICLKernel::add_tensor_argument<1>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<2>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<3>(unsigned &idx, const ICLTensor *tensor, const Window &window);
 template void ICLKernel::add_tensor_argument<4>(unsigned &idx, const ICLTensor *tensor, const Window &window);
+#endif /* DOXYGEN_SKIP_THIS */
 
 void ICLKernel::set_target(cl::Device &device)
 {

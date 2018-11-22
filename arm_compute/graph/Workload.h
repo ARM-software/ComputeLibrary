@@ -69,6 +69,7 @@ public:
  */
 struct ExecutionTask
 {
+    // TODO (geopin01) : Support vector of functions?
     std::unique_ptr<arm_compute::IFunction> task = {}; /**< Task to execute */
     INode                                  *node = {}; /**< Node bound to this workload */
 

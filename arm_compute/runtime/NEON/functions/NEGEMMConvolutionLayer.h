@@ -85,7 +85,7 @@ private:
  * -# @ref NEGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
  * -# @ref NEArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
- * -# @ref NECol2ImKernel or @ref NEReshapeLayer (if NHWC and GEMM3D is not supported)
+ * -# @ref NECol2ImKernel (if NCHW data layout)
  *
  */
 class NEGEMMConvolutionLayer : public IFunction
@@ -206,5 +206,5 @@ private:
     bool _is_activationlayer_enabled;
     bool _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ void BlobMemoryPool::acquire(MemoryMappings &handles)
     for(auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
-        *handle.first = _blobs[handle.second];
+        handle.first->set_region(_blobs[handle.second].get());
     }
 }
 
@@ -61,7 +61,7 @@ void BlobMemoryPool::release(MemoryMappings &handles)
     for(auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
-        *handle.first = nullptr;
+        handle.first->set_region(nullptr);
     }
 }
 
@@ -82,17 +82,11 @@ void BlobMemoryPool::allocate_blobs(const std::vector<size_t> &sizes)
 
     for(const auto &size : sizes)
     {
-        _blobs.push_back(_allocator->allocate(size, 0));
+        _blobs.push_back(_allocator->make_region(size, 0));
     }
 }
 
 void BlobMemoryPool::free_blobs()
 {
-    ARM_COMPUTE_ERROR_ON(!_allocator);
-
-    for(auto &blob : _blobs)
-    {
-        _allocator->free(blob);
-    }
     _blobs.clear();
 }

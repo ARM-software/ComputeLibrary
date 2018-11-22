@@ -1,6 +1,7 @@
 var searchData=
 [
   ['edge',['Edge',['../classarm__compute_1_1graph_1_1_edge.xhtml',1,'arm_compute::graph']]],
+  ['eltwiselayer',['EltwiseLayer',['../classarm__compute_1_1graph_1_1frontend_1_1_eltwise_layer.xhtml',1,'arm_compute::graph::frontend']]],
   ['eltwiselayernode',['EltwiseLayerNode',['../classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml',1,'arm_compute::graph']]],
   ['enable_5fbitwise_5fops',['enable_bitwise_ops',['../structarm__compute_1_1enable__bitwise__ops.xhtml',1,'arm_compute']]],
   ['enable_5fbitwise_5fops_3c_20arm_5fcompute_3a_3agputarget_20_3e',['enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;',['../structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml',1,'arm_compute']]],

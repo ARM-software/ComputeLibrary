@@ -22,9 +22,7 @@ var dir_4efd0ee2ecda32567e74991b08d544ea =
       [ "OpenCLMemoryUsage", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage" ]
     ] ],
     [ "OpenCLTimer.cpp", "_open_c_l_timer_8cpp.xhtml", null ],
-    [ "OpenCLTimer.h", "_open_c_l_timer_8h.xhtml", [
-      [ "OpenCLTimer", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer" ]
-    ] ],
+    [ "OpenCLTimer.h", "_open_c_l_timer_8h.xhtml", "_open_c_l_timer_8h" ],
     [ "PMU.cpp", "_p_m_u_8cpp.xhtml", null ],
     [ "PMU.h", "_p_m_u_8h.xhtml", [
       [ "PMU", "classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u" ]
@@ -34,12 +32,7 @@ var dir_4efd0ee2ecda32567e74991b08d544ea =
       [ "PMUCounter", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter" ]
     ] ],
     [ "SchedulerTimer.cpp", "_scheduler_timer_8cpp.xhtml", null ],
-    [ "SchedulerTimer.h", "_scheduler_timer_8h.xhtml", [
-      [ "SchedulerTimer", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer" ],
-      [ "kernel_info", "structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info.xhtml", "structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info" ]
-    ] ],
+    [ "SchedulerTimer.h", "_scheduler_timer_8h.xhtml", "_scheduler_timer_8h" ],
     [ "WallClockTimer.cpp", "_wall_clock_timer_8cpp.xhtml", null ],
-    [ "WallClockTimer.h", "_wall_clock_timer_8h.xhtml", [
-      [ "WallClockTimer", "classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer" ]
-    ] ]
+    [ "WallClockTimer.h", "_wall_clock_timer_8h.xhtml", "_wall_clock_timer_8h" ]
 ];

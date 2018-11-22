@@ -1,13 +1,13 @@
 var _c_l_2_channel_combine_8cpp =
 [
     [ "CLChannelCombineFixture", "_c_l_2_channel_combine_8cpp.xhtml#a562634a0f250b3afee086305408cb604", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a19d41bc377e61f6e095650006e3a5705", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a4681151abc8c89179b796af5daba7a7f", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#ac9971715ed56d3e3b1b60237c683a87c", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#af9c880d5c692a656b614a3847474c824", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a6c801233cab1264675e455b2babe2119", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#adf0d8047e7333c5b4b45865eeb9cfa8e", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#aeafa2180f94287768463558b1016d0c7", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a758d99e16f371efa848bb0cac37999cc", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a5e8a31d4e3d452d71db793b41ca8c163", null ]
+    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a0324d8b990822bf5a4198dbd314c3bb6", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a95cb3ec331c9716238f345cf079ebb63", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a4718e06b14b31bf5ee5327d5d7bd01d4", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a33ef73d9e890fd9db081f1ea48f79618", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#ae5fe43cec1fb6be35fb3843967dc00b7", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#add095588c16b6f8987abcea2465028be", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a93ea11644b7100b02b97f2d7ee3cfc49", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a34c0a5008da4e0be04dca251dda5e5cd", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_channel_combine_8cpp.xhtml#a8b5dcd386c7d06894b0e1fbc7a361834", null ]
 ];

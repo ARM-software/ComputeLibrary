@@ -130,7 +130,6 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _forget_gate_out3.allocator()->allocate();
     }
     _activation_forget_gate.configure(forget_gate_out, &_forget_gate_out1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    forget_gate_out->allocator()->allocate();
 
     // Configure block that calculates the input gate
     // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
@@ -195,7 +194,6 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _activation_cell_state.configure(&_cell_state_out4, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
     _pixelwise_mul_cell_state1.configure(&_cell_state_out4, &_input_gate_out1, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-    _input_gate_out1.allocator()->allocate();
     _cell_state_out4.allocator()->allocate();
     _pixelwise_mul_cell_state2.configure(&_forget_gate_out1, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _forget_gate_out1.allocator()->allocate();
@@ -246,7 +244,6 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _output1.allocator()->allocate();
     }
     _activation_output.configure(output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    output_gate_out->allocator()->allocate();
 
     // Configure block that calculates the output state
     /** lstm_res = PixelwiseMul(output, Activation(cell_state))
@@ -281,12 +278,11 @@ void CLLSTMLayer::configure(const ICLTensor *input,
 
     // Copy cell state and output
     _copy_cell_state.configure(&_cell_state_out1, cell_state_out);
-    _cell_state_out1.allocator()->allocate();
     _copy_output.configure(output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
     std::vector<ICLTensor *> scratch_inputs;
-    if(lstm_params.has_cifg_opt())
+    if(!lstm_params.has_cifg_opt())
     {
         scratch_inputs.emplace_back(&_input_gate_out1);
     }
@@ -294,6 +290,10 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
     _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer);
+    _input_gate_out1.allocator()->allocate();
+    _cell_state_out1.allocator()->allocate();
+    forget_gate_out->allocator()->allocate();
+    output_gate_out->allocator()->allocate();
 }
 
 Status CLLSTMLayer::validate(const ITensorInfo *input,
@@ -444,7 +444,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
 
     // Validate scratch concatenation
     std::vector<ITensorInfo *> inputs_vector_info_raw;
-    if(lstm_params.has_cifg_opt())
+    if(!lstm_params.has_cifg_opt())
     {
         inputs_vector_info_raw.push_back(&input_gate);
     }

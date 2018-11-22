@@ -33,6 +33,7 @@ class IDepthwiseConvolution
     virtual ~IDepthwiseConvolution() = default;
     virtual int output_size(const int dim_size, const bool padding_same) const = 0;
     virtual unsigned int get_window(void) const = 0;
+    virtual void set_offsets(int input_offset, int weights_offset) = 0;
     virtual void run(const unsigned int start, const unsigned int stop) = 0;
 };
 
@@ -179,6 +180,13 @@ class DepthwiseConvolution : public IDepthwiseConvolution
       >::get_output_size(dim_size, padding_same);
     }
 
+    /** Sets quantization offsets
+     *
+     * @param[in] input_offset   Input offset
+     * @param[in] weights_offset Weights offset
+     */
+     void set_offsets(int input_offset, int weights_offset) override;
+
     /** Get the window of work to be performed by an instance of the operator.
      */
     unsigned int get_window(void) const override;
@@ -212,7 +220,9 @@ class DepthwiseConvolution : public IDepthwiseConvolution
       const int row_pad_out_bottom,
       const int n_tiles,
       const int n_input_cols,
-      const int n_output_cols
+      const int n_output_cols,
+      const int input_offset,
+      const int weights_offset
     );
 
     // Determine the maximum (and minimum) padding values which can be applied
@@ -272,7 +282,9 @@ class DepthwiseConvolution : public IDepthwiseConvolution
       const int _in_pad_bottom,
       const int _in_pad_right,
       const int _out_pad_bottom,
-      const int _out_pad_right
+      const int _out_pad_right,
+      const int _input_offset,
+      const int _weights_offset
     );
 
     /* Arrays of methods to process tensor tiles.
@@ -300,6 +312,7 @@ class DepthwiseConvolution : public IDepthwiseConvolution
     const int _weight_col_stride, _weight_row_stride;
     const int _input_col_stride, _input_row_stride, _input_batch_stride;
     const int _output_col_stride, _output_row_stride, _output_batch_stride;
+    int _input_offset, _weights_offset;
 };
 
 }  // namespace depthwise

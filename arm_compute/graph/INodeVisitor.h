@@ -111,6 +111,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(PoolingLayerNode &n) = 0;
+    /** Visit PriorBoxLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PriorBoxLayerNode &n) = 0;
     /** Visit ReshapeLayerNode.
      *
      * @param[in] n Node to visit.
@@ -198,6 +203,10 @@ public:
         default_visit();
     }
     virtual void visit(PoolingLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(PriorBoxLayerNode &n) override
     {
         default_visit();
     }

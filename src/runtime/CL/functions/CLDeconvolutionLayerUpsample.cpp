@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,15 @@ void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output
 void CLDeconvolutionLayerUpsample::run()
 {
     _output->map(CLScheduler::get().queue(), true);
-    memset(_output->buffer(), 0, _output->info()->total_size());
+    if(is_data_type_quantized_asymmetric(_output->info()->data_type()))
+    {
+        const uint8_t quantized_zero = _output->info()->quantization_info().offset;
+        std::fill_n(_output->buffer(), _output->info()->total_size(), quantized_zero);
+    }
+    else
+    {
+        memset(_output->buffer(), 0, _output->info()->total_size());
+    }
     _output->unmap(CLScheduler::get().queue());
 
     CLScheduler::get().enqueue(_upsample, false);

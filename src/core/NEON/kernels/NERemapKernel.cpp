@@ -113,8 +113,8 @@ void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const 
     AccessWindowStatic input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
 
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal mapx_access(map_x->info(), 0, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal mapy_access(map_y->info(), 0, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapx_access(map_x->info(),    0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapy_access(map_y->info(),    0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, mapx_access, mapy_access, output_access);
 

@@ -78,20 +78,16 @@ PassManager create_default_pass_manager(Target target)
 {
     PassManager pm;
 
+    const bool is_target_gc = target == Target::GC;
+
     // Passes that mutate graph IR
+    pm.append(support::cpp14::make_unique<NodeFusionMutator>(), !is_target_gc);
     pm.append(support::cpp14::make_unique<GroupedConvolutionMutator>());
-    if(target != Target::GC)
-    {
-        pm.append(support::cpp14::make_unique<NodeFusionMutator>());
-        pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
-    }
+    pm.append(support::cpp14::make_unique<InPlaceOperationMutator>(), !is_target_gc);
 
     // Passes that mutate backend information
-    if(target != Target::GC)
-    {
-        pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
-        pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
-    }
+    pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>(), !is_target_gc);
+    pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>(), !is_target_gc);
     pm.append(support::cpp14::make_unique<NodeExecutionMethodMutator>());
 
     return pm;

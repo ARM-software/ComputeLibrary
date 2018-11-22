@@ -69,6 +69,7 @@ CLDeviceBackend::CLDeviceBackend()
 
 CLDeviceBackend::~CLDeviceBackend()
 {
+    // TODO (geopin01) : Shouldn't call non exception safe stuff here
     if(_tuner.tune_new_kernels() && !_tuner.lws_table().empty() && !_tuner_file.empty())
     {
         _tuner.save_to_file(_tuner_file);
@@ -126,6 +127,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
         mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
         mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
         mm_ctx.cross_group = std::make_shared<CLMemoryGroup>(mm_ctx.cross_mm);
+        mm_ctx.allocator   = _allocator.get();
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
@@ -193,8 +195,6 @@ std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_mana
     auto lifetime_mgr = std::make_shared<BlobLifetimeManager>();
     auto pool_mgr     = std::make_shared<PoolManager>();
     auto mm           = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
-
-    mm->set_allocator(_allocator.get());
 
     return mm;
 }

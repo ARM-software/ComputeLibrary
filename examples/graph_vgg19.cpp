@@ -30,11 +30,7 @@
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
-/** Example demonstrating how to implement VGG19's network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement VGG19's network using the Compute Library's graph API */
 class GraphVGG19Example : public Example
 {
 public:
@@ -44,6 +40,16 @@ public:
     }
     bool do_setup(int argc, char **argv) override
     {
+        // Check if the system has enough RAM to run the example, systems with less than 2GB have
+        // to hint the API to minimize memory consumption otherwise it'll run out of memory and
+        // fail throwing the bad_alloc exception
+        arm_compute::MEMInfo meminfo;
+        const size_t         mem_total = meminfo.get_total_in_kb();
+        if(mem_total <= arm_compute::MEMInfo::TWO_GB_IN_KB)
+        {
+            arm_compute::MEMInfo::set_policy(arm_compute::MemoryPolicy::MINIMIZE);
+        }
+
         // Parse arguments
         cmd_parser.parse(argc, argv);
 
@@ -250,6 +256,11 @@ private:
 };
 
 /** Main program for VGG19
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1409.1556
+ *      "Very Deep Convolutional Networks for Large-Scale Image Recognition"
+ *      Karen Simonyan, Andrew Zisserman
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

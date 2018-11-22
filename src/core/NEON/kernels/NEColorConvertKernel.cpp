@@ -112,6 +112,10 @@ void NEColorConvertKernel::configure(const ITensor *input, ITensor *output)
                     _func                             = colorconvert_rgb_to_rgbx;
                     num_elems_processed_per_iteration = 16;
                     break;
+                case Format::U8:
+                    _func                             = colorconvert_rgb_to_u8;
+                    num_elems_processed_per_iteration = 16;
+                    break;
                 default:
                     ARM_COMPUTE_ERROR("Not supported");
                     break;

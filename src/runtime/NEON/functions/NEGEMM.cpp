@@ -62,7 +62,14 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     if(run_optimised)
     {
-        _asm_glue.configure(a, b, d, alpha, beta, _reshape_b_only_on_first_run);
+        if(MEMInfo::get_policy() == MemoryPolicy::MINIMIZE)
+        {
+            _asm_glue.configure(a, b, d, alpha, beta, false);
+        }
+        else
+        {
+            _asm_glue.configure(a, b, d, alpha, beta, _reshape_b_only_on_first_run);
+        }
         ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
     }
     else
@@ -132,7 +139,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     ARM_COMPUTE_UNUSED(alpha);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
@@ -140,7 +147,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     if(c != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.depth_output_gemm3d() != 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.depth_output_gemm3d() != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(gemm_info.reinterpret_input_as_3d());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->dimension(1), "The C matrix must have the same number of rows as the matrix A");
@@ -150,7 +157,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(b->dimension(0) != output->dimension(0));
-        if(gemm_info.depth_output_gemm3d() != 1)
+        if(gemm_info.depth_output_gemm3d() != 0)
         {
             if(gemm_info.reinterpret_input_as_3d())
             {
@@ -174,7 +181,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     if(!run_optimised)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.reinterpret_input_as_3d(), "NEGEMM cannot reinterpret the input tensor as 3D");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 1, "NEGEMM cannot reinterpret the output tensor as 3D");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.depth_output_gemm3d() != 0, "NEGEMM cannot reinterpret the output tensor as 3D");
 
         // Check if the first input tensor is a vector.
         const bool run_vector_matrix_multiplication = a->dimension(1) < 2;
@@ -216,6 +223,12 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         // Validate matrix multiply
         auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
+    }
+
+    // Validate matrix addition kernel
+    if(beta != 0 && c != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAdditionKernel::validate(c, output, beta));
     }
 
     return Status{};

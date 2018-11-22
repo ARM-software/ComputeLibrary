@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement LeNet's network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
- */
+/** Example demonstrating how to implement LeNet's network using the Compute Library's graph API */
 class GraphLenetExample : public Example
 {
 public:

@@ -50,16 +50,16 @@ public:
 
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input        Source tensor. Data types supported: F16/F32.
-     * @param[out] output       Destination tensor. Data types supported: F16/F32. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]  input        Source tensor. Data types supported: QASYMM8/F16/F32.
+     * @param[out] output       Destination tensor. Data types supported: same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]  inner_border Top and right inner border sizes. These rows and columns will be filled with zero.
      * @param[in]  info         Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const BorderSize &inner_border, const PadStrideInfo &info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayerUpsample
      *
-     * @param[in] input        Source tensor info. Data types supported: F16/F32.
-     * @param[in] output       Destination tensor info. Data types supported: F16/F32. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in] input        Source tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] output       Destination tensor info. Data types supported: same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in] inner_border Top and right inner border sizes. These rows and columns will be filled with zero.
      * @param[in] info         Contains padding and stride information described in @ref PadStrideInfo.
      *

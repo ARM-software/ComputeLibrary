@@ -25,6 +25,7 @@
 
 #include "arm_compute/graph.h"
 #include "arm_compute/graph/Utils.h"
+#include "arm_compute/graph/backends/BackendRegistry.h"
 
 namespace arm_compute
 {
@@ -75,17 +76,20 @@ std::map<Target, MemoryManagerContext> &GraphContext::memory_managers()
 
 void GraphContext::finalize()
 {
+    const size_t num_pools = 1;
     for(auto &mm_obj : _memory_managers)
     {
+        ARM_COMPUTE_ERROR_ON(!mm_obj.second.allocator);
+
         // Finalize intra layer memory manager
         if(mm_obj.second.intra_mm != nullptr)
         {
-            mm_obj.second.intra_mm->finalize();
+            mm_obj.second.intra_mm->populate(*mm_obj.second.allocator, num_pools);
         }
         // Finalize cross layer memory manager
         if(mm_obj.second.cross_mm != nullptr)
         {
-            mm_obj.second.cross_mm->finalize();
+            mm_obj.second.cross_mm->populate(*mm_obj.second.allocator, num_pools);
         }
     }
 }

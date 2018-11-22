@@ -35,10 +35,12 @@ namespace frontend
 // Import types for graph
 using graph::DataType;
 using graph::DataLayout;
+using graph::DataLayoutDimension;
 using graph::TensorShape;
 using graph::PermutationVector;
 
 using graph::ActivationLayerInfo;
+using graph::EltwiseOperation;
 using graph::FullyConnectedLayerInfo;
 using graph::NormalizationLayerInfo;
 using graph::NormType;
@@ -54,13 +56,6 @@ using graph::DimensionRoundingType;
 using graph::GraphConfig;
 using graph::InterpolationPolicy;
 using graph::Size2D;
-
-/** Branch layer merging method */
-enum class BranchMergeMethod
-{
-    DEPTH_CONCATENATE, /**< Concatenate across depth */
-    ADD                /**< Adds the results of each stream */
-};
 
 /** Hints that can be passed to the stream to expose parameterization */
 struct StreamHints

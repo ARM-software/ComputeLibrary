@@ -374,8 +374,9 @@ inline void store_results<3>(int32_t *buffer, const int32x4x2_t &values)
  *
  * @return The loaded matrix.
  */
-inline float16x8x3_t load_matrix_row(const float16_t *ptr)
+inline float16x8x3_t load_matrix_row(const float16_t *ptr, int weights_offset = 0)
 {
+    ARM_COMPUTE_UNUSED(weights_offset);
     /* ptr is a pointer to a row in a 3x3 matrix, the function returns 3 vectors holding exactly the same value in all lanes:
        r.val[0] contains the first element, r.val[1] the second element and r.val[2] the third element (in all lanes) */
     const float16x8x3_t r =
@@ -400,11 +401,16 @@ inline float16x8x3_t load_matrix_row(const float16_t *ptr)
  *
  */
 template <unsigned int stridex>
-float16x8x2_t convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2);
+float16x8x2_t convolve_3x3(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                           const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                           int input_offset = 0);
 
 template <>
-inline float16x8x2_t convolve_3x3<1>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2)
+inline float16x8x2_t convolve_3x3<1>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                     const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                     int input_offset)
 {
+    ARM_COMPUTE_UNUSED(input_offset);
     const float16x8x3_t vtop =
     {
         {
@@ -456,8 +462,11 @@ inline float16x8x2_t convolve_3x3<1>(const float16_t *in_top, const float16_t *i
 }
 
 template <>
-inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2)
+inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                     const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                     int input_offset)
 {
+    ARM_COMPUTE_UNUSED(input_offset);
     float16x8x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 2), out.val[0], 1);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 4), out.val[0], 2);
@@ -470,8 +479,11 @@ inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *i
 }
 
 template <>
-inline float16x8x2_t convolve_3x3<3>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low, const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2)
+inline float16x8x2_t convolve_3x3<3>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                     const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                     int input_offset)
 {
+    ARM_COMPUTE_UNUSED(input_offset);
     float16x8x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);

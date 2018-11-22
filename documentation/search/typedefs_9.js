@@ -23,7 +23,7 @@ var searchData=
   ['iint16array',['IInt16Array',['../namespacearm__compute.xhtml#a1dd5e04cea002eae658fa2a899848ad7',1,'arm_compute']]],
   ['iint32array',['IInt32Array',['../namespacearm__compute.xhtml#a51fdf34dfc5c60b6f4f455f0a9cac457',1,'arm_compute']]],
   ['ikeypointarray',['IKeyPointArray',['../namespacearm__compute.xhtml#ab56a557a5fdf97819f23c35c24f0b0d2',1,'arm_compute']]],
-  ['image',['Image',['../namespacearm__compute.xhtml#a7fb6a368d181ef193475f725c713430a',1,'arm_compute::Image()'],['../helpers_8h.xhtml#a9082e6aa9fd1705dc218cf44bc5a9d66',1,'Image():&#160;helpers.h']]],
+  ['image',['Image',['../namespacearm__compute.xhtml#a7fb6a368d181ef193475f725c713430a',1,'arm_compute::Image()'],['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a9082e6aa9fd1705dc218cf44bc5a9d66',1,'Image():&#160;helpers.h']]],
   ['inekernel',['INEKernel',['../namespacearm__compute.xhtml#a9f3ed96e009111cfbe53d3f77c712390',1,'arm_compute']]],
   ['inelkinternalkeypointarray',['INELKInternalKeypointArray',['../namespacearm__compute.xhtml#a19699533eb1b662e46a10715f6086487',1,'arm_compute']]],
   ['inesimplekernel',['INESimpleKernel',['../namespacearm__compute.xhtml#a4aad0c49ce3d7cf4693830398f190250',1,'arm_compute']]],

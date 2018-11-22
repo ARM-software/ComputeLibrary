@@ -83,6 +83,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_activation_layer<CLActivationLayer, CLTargetInfo>(*polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return detail::create_batch_normalization_layer<CLBatchNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
+        case NodeType::BoundingBoxTransformLayer:
+            return detail::create_bounding_box_transform_layer<CLBoundingBoxTransform, CLTargetInfo>(*polymorphic_downcast<BoundingBoxTransformLayerNode *>(node));
         case NodeType::ChannelShuffleLayer:
             return detail::create_channel_shuffle_layer<CLChannelShuffleLayer, CLTargetInfo>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
@@ -99,18 +101,36 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_flatten_layer<CLFlattenLayer, CLTargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:
             return detail::create_fully_connected_layer<CLFullyConnectedLayer, CLTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
+        case NodeType::GenerateProposalsLayer:
+            return detail::create_generate_proposals_layer<CLGenerateProposalsLayer, CLTargetInfo>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<CLNormalizationLayer, CLTargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::create_normalize_planar_yuv_layer<CLNormalizePlanarYUVLayer, CLTargetInfo>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
+        case NodeType::PadLayer:
+            return detail::create_pad_layer<CLPadLayer, CLTargetInfo>(*polymorphic_downcast<PadLayerNode *>(node));
         case NodeType::PermuteLayer:
             return detail::create_permute_layer<CLPermute, CLTargetInfo>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PoolingLayer:
             return detail::create_pooling_layer<CLPoolingLayer, CLTargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
+        case NodeType::PriorBoxLayer:
+            return detail::create_priorbox_layer<CLPriorBoxLayer, CLTargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::create_reorg_layer<CLReorgLayer, CLTargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:
             return detail::create_reshape_layer<CLReshapeLayer, CLTargetInfo>(*polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ResizeLayer:
             return detail::create_resize_layer<CLScale, CLTargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
+        case NodeType::ROIAlignLayer:
+            return detail::create_roi_align_layer<CLROIAlignLayer, CLTargetInfo>(*polymorphic_downcast<ROIAlignLayerNode *>(node));
+        case NodeType::SliceLayer:
+            return detail::create_slice_layer<CLSlice, CLTargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<CLSoftmaxLayer, CLTargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+        case NodeType::UpsampleLayer:
+            return detail::create_upsample_layer<CLUpsampleLayer, CLTargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
+        case NodeType::YOLOLayer:
+            return detail::create_yolo_layer<CLYOLOLayer, CLTargetInfo>(*polymorphic_downcast<YOLOLayerNode *>(node), ctx);
         default:
             return nullptr;
     }

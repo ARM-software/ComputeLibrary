@@ -104,9 +104,9 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
     {
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32); //disable winograd for fp16 if fast math is false.
         ARM_COMPUTE_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
     }
-
     const WinogradInfo winograd_info = WinogradInfo(output_tile,
                                                     kernel_size,
                                                     input_dims,
@@ -129,7 +129,8 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     _filter_transform.configure(weights, &_input1, winograd_info);
 
     // Configure batched matrix multiply
-    _batched_mm.configure(&_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
+    _batched_mm.configure(&_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false, GEMMLowpOutputStageInfo(),
+                                                                                                 (input->info()->data_type() == DataType::F16)));
 
     // Configure output transform
     _output_transform.configure(&_batched_mm_output, biases, output, winograd_info);
@@ -161,6 +162,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32); //disable winograd for fp16 if fast math is false.
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
     }
 
@@ -184,7 +186,8 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     TensorShape batched_mm_output_shape = input0.tensor_shape();
     batched_mm_output_shape[0]          = input1.tensor_shape()[0];
     const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/, 0, false, false,
+                                                                                                                     GEMMLowpOutputStageInfo(), (input->data_type() == DataType::F16))));
 
     // Configure output transform
     ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info));

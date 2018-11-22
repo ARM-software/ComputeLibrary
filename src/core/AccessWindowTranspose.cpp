@@ -53,7 +53,10 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     // the kernel to write back output values.
     // As the relation between input and output is transposed window.y() is
     // used for x anchor and window.x() for y anchor.
-    anchor.set(0, std::max<int>(window.y().start() * _scale_x, anchor[1] + border_size.top) + _x);
+    if(_info->dimension(0) > 1)
+    {
+        anchor.set(0, std::max<int>(window.y().start() * _scale_x, anchor[1] + border_size.top) + _x);
+    }
     anchor.set(1, std::max<int>(window.x().start() * _scale_y, anchor[0] + border_size.left) + _y);
 
     // End of the valid region is equal to the start of the last write of the
@@ -66,8 +69,11 @@ ValidRegion AccessWindowTranspose::compute_valid_region(const Window &window, Va
     // a size of the region.
     // As the relation between input and output is transposed window.y() is
     // used for x shape and window.x() for y shape.
-    shape.set(0, std::min<int>((old_anchor[1] + old_shape[1]) * _scale_x - border_size.right, (window.y().end() - window.y().step()) * _scale_x + _width) - anchor[0]);
-    shape.set(1, std::min<int>((old_anchor[0] + old_shape[0]) * _scale_y - border_size.bottom, (window.x().end() - window.x().step()) * _scale_y + _height) - anchor[1]);
+    if(_info->dimension(0) > 1)
+    {
+        shape.set(0, std::min<int>((old_anchor[1] + old_shape[0]) * _scale_x - border_size.right, (window.y().end() - window.y().step()) * _scale_x + _width) - anchor[0]);
+    }
+    shape.set(1, std::min<int>((old_anchor[0] + old_shape[1]) * _scale_y - border_size.bottom, (window.x().end() - window.x().step()) * _scale_y + _height) - anchor[1]);
 
     // For higher dimensions use the intersection of the window size and the
     // valid region of the input
@@ -192,9 +198,9 @@ bool AccessWindowTranspose::update_padding_if_needed(const Window &window)
     ARM_COMPUTE_ERROR_ON(window.x().step() == 0);
 
     const int min_x = window.y().start() * _scale_x + _x;
-    const int max_x = window.y().end() * _scale_x + _x;
+    const int max_x = (window.y().end() - window.y().step()) * _scale_x + _x + _width;
     const int min_y = window.x().start() * _scale_y + _y;
-    const int max_y = window.x().end() * _scale_y + _y;
+    const int max_y = (window.x().end() - window.x().step()) * _scale_y + _y + _height;
 
     const TensorShape &shape = _info->tensor_shape();
 

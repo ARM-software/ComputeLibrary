@@ -32,6 +32,7 @@ namespace graph
 class INode;
 class ActivationLayerNode;
 class BatchNormalizationLayerNode;
+class BoundingBoxTransformLayerNode;
 class ChannelShuffleLayerNode;
 class ConcatenateLayerNode;
 class ConstNode;
@@ -42,15 +43,24 @@ class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
+class GenerateProposalsLayerNode;
 class InputNode;
 class NormalizationLayerNode;
+class NormalizePlanarYUVLayerNode;
 class OutputNode;
+class PadLayerNode;
 class PermuteLayerNode;
 class PoolingLayerNode;
+class PriorBoxLayerNode;
+class ReorgLayerNode;
 class ReshapeLayerNode;
 class ResizeLayerNode;
+class ROIAlignLayerNode;
 class SoftmaxLayerNode;
+class SliceLayerNode;
 class SplitLayerNode;
+class UpsampleLayerNode;
+class YOLOLayerNode;
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */

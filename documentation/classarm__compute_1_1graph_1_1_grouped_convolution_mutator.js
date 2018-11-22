@@ -1,5 +1,5 @@
 var classarm__compute_1_1graph_1_1_grouped_convolution_mutator =
 [
-    [ "mutate", "classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6", null ],
-    [ "name", "classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a1cd33f9b97e7d892aed89053b0f3fe0d", null ]
+    [ "mutate", "classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#af6705a49326de235df4e9b6028bdcdce", null ],
+    [ "name", "classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml#a0ee2c922a45715b33e30f83f8c005b68", null ]
 ];

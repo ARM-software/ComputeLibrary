@@ -4,6 +4,7 @@ var classarm__compute_1_1_n_e_arithmetic_subtraction_kernel =
     [ "NEArithmeticSubtractionKernel", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#a026b41642629bcc690e3b4fa82f820d1", null ],
     [ "NEArithmeticSubtractionKernel", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#a6501ef61f473949fc980b4ada8e18bad", null ],
     [ "~NEArithmeticSubtractionKernel", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#aeb20f5092b85fd6c9a4deb6e59de7c03", null ],
+    [ "border_size", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7", null ],
     [ "configure", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#ae549ed675eab6d763ac6ffd18d226c27", null ],
     [ "name", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#abaf3795e8b23cb20a57d6fbc2250b4f2", null ],

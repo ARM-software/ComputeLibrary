@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['x',['x',['../classarm__compute_1_1_dimensions.xhtml#afb5cd37bb08f1029691590372e6330f0',1,'arm_compute::Dimensions::x()'],['../classarm__compute_1_1_size2_d.xhtml#aa19402aa7cd5346df67c0142c75d36c0',1,'arm_compute::Size2D::x()'],['../classarm__compute_1_1_window.xhtml#ade63ce331b49eb66d330aab444e57ca9',1,'arm_compute::Window::x()']]]
+  ['x',['x',['../classarm__compute_1_1_dimensions.xhtml#aa87f8fc26981b0f3228a78c83b95b802',1,'arm_compute::Dimensions::x()'],['../classarm__compute_1_1_size2_d.xhtml#a94b8468af876f5ab54020d5e9787a4f0',1,'arm_compute::Size2D::x()'],['../classarm__compute_1_1_window.xhtml#a273fd2ecdd45169b2f702f01a7e5e382',1,'arm_compute::Window::x()']]]
 ];

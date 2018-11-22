@@ -35,6 +35,7 @@
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -121,8 +122,10 @@ public:
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer
      *
@@ -133,10 +136,12 @@ public:
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overriden:
     void run() override;
@@ -148,6 +153,7 @@ private:
     CLGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
     CLDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
     CLDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    CLActivationLayer                         _activationlayer_function;
     CLFillBorderKernel                        _v2mm_input_fill_border;
     CLFillBorderKernel                        _v2mm_weights_fill_border;
     CLTensor                                  _input_reshaped;
@@ -156,6 +162,7 @@ private:
     CLTensor                                  _output_reshaped;
     bool                                      _is_prepared;
     bool                                      _is_quantized;
+    bool                                      _is_activationlayer_enabled;
     const ICLTensor                          *_original_weights;
 };
 }

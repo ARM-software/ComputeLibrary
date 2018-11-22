@@ -79,11 +79,10 @@ public:
      * @param[out]     corners               Array of keypoints to store the results.
      * @param[in]      border_mode           Border mode to use
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
-     * @param[in]      use_fp16              (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
      */
     void configure(IImage *input, float threshold, float min_dist, float sensitivity,
                    int32_t gradient_size, int32_t block_size, KeyPointArray *corners,
-                   BorderMode border_mode, uint8_t constant_border_value = 0, bool use_fp16 = false);
+                   BorderMode border_mode, uint8_t constant_border_value = 0);
 
     // Inherited methods overridden:
     void run() override;

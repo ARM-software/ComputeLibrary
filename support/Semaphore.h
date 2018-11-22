@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,14 +74,17 @@ public:
     Semaphore(int value = 0)
         : _value(value)
     {
+        (void)_value;
     }
     /** Signals a semaphore */
     inline void signal()
     {
+        (void)_value;
     }
     /** Waits on a semaphore */
     inline void wait()
     {
+        (void)_value;
     }
 
 private:

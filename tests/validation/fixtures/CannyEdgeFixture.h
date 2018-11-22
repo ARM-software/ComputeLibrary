@@ -47,11 +47,11 @@ class CannyEdgeValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(std::string image, int gradient_size, MagnitudeType norm_type, BorderMode border_mode, bool use_fp16, Format format)
+    void setup(std::string image, int gradient_size, MagnitudeType norm_type, BorderMode border_mode, Format format)
     {
         CannyEdgeParameters params = canny_edge_parameters();
 
-        _target = compute_target(image, gradient_size, norm_type, border_mode, use_fp16, format, params);
+        _target    = compute_target(image, gradient_size, norm_type, border_mode, format, params);
         _reference = compute_reference(image, gradient_size, norm_type, border_mode, format, params);
     }
 
@@ -62,21 +62,7 @@ protected:
         library->fill(tensor, raw);
     }
 
-    template <typename F, typename std::enable_if<std::is_same<F, NECannyEdge>::value, int>::type = 0>
-    void configure_target(F &func, TensorType &src, TensorType &dst, int gradient_size, int norm_type, BorderMode border_mode, bool use_fp16, const CannyEdgeParameters &params)
-    {
-        func.configure(&src, &dst, params.upper_thresh, params.lower_thresh, gradient_size, norm_type, border_mode, params.constant_border_value, use_fp16);
-    }
-
-    template <typename F, typename std::enable_if<std::is_same<F, CLCannyEdge>::value, int>::type = 0>
-    void configure_target(F &func, TensorType &src, TensorType &dst, int gradient_size, int norm_type, BorderMode border_mode, bool use_fp16, const CannyEdgeParameters &params)
-    {
-        ARM_COMPUTE_UNUSED(use_fp16);
-        ARM_COMPUTE_ERROR_ON(use_fp16);
-        func.configure(&src, &dst, params.upper_thresh, params.lower_thresh, gradient_size, norm_type, border_mode, params.constant_border_value);
-    }
-
-    TensorType compute_target(const std::string &image, int gradient_size, MagnitudeType norm_type, BorderMode border_mode, bool use_fp16, Format format, const CannyEdgeParameters &params)
+    TensorType compute_target(const std::string &image, int gradient_size, MagnitudeType norm_type, BorderMode border_mode, Format format, const CannyEdgeParameters &params)
     {
         // Load the image (cached by the library if loaded before)
         const RawTensor &raw = library->get(image, format);
@@ -89,7 +75,7 @@ protected:
 
         // Create Canny edge configure function
         FunctionType canny_edge;
-        configure_target<FunctionType>(canny_edge, src, dst, gradient_size, static_cast<int>(norm_type) + 1, border_mode, use_fp16, params);
+        canny_edge.configure(&src, &dst, params.upper_thresh, params.lower_thresh, gradient_size, static_cast<int>(norm_type) + 1, border_mode, params.constant_border_value);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

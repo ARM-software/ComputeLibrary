@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement Googlenet's network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement Googlenet's network using the Compute Library's graph API */
 class GraphGooglenetExample : public Example
 {
 public:
@@ -145,7 +141,7 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    BranchLayer get_inception_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                    unsigned int a_filt,
                                    std::tuple<unsigned int, unsigned int> b_filters,
                                    std::tuple<unsigned int, unsigned int> c_filters,
@@ -197,11 +193,16 @@ private:
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 };
 
 /** Main program for Googlenet
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1409.4842
+ *      "Going deeper with convolutions"
+ *      Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke, Andrew Rabinovich
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

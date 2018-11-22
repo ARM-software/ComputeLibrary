@@ -60,7 +60,11 @@ public:
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         // Create and configure function
-        conv_layer.configure(&src, &weights, &biases, &dst, info, act_info);
+        if(data_type == DataType::F16){
+            conv_layer.configure(&src, &weights, &biases, &dst, info, act_info, true);
+        }else{
+            conv_layer.configure(&src, &weights, &biases, &dst, info, act_info);
+        }
 
         // Allocate tensors
         src.allocator()->allocate();

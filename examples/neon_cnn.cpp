@@ -205,28 +205,11 @@ public:
 
         /* -----------------------End: [Allocate tensors] */
 
-        // Finalize layers memory manager
+        // Populate the layers manager. (Validity checks, memory allocations etc)
+        mm_layers->populate(allocator, 1 /* num_pools */);
 
-        // Set allocator that the memory manager will use
-        mm_layers->set_allocator(&allocator);
-
-        // Number of pools that the manager will create. This specifies how many layers you want to run in parallel
-        mm_layers->set_num_pools(1);
-
-        // Finalize the manager. (Validity checks, memory allocations etc)
-        mm_layers->finalize();
-
-        // Finalize transitions memory manager
-
-        // Set allocator that the memory manager will use
-        mm_transitions->set_allocator(&allocator);
-
-        // Number of pools that the manager will create. This specifies how many models we can run in parallel.
-        // Setting to 2 as we need one for the input and one for the output at any given time
-        mm_transitions->set_num_pools(2);
-
-        // Finalize the manager. (Validity checks, memory allocations etc)
-        mm_transitions->finalize();
+        // Populate the transitions manager. (Validity checks, memory allocations etc)
+        mm_transitions->populate(allocator, 2 /* num_pools */);
 
         return true;
     }

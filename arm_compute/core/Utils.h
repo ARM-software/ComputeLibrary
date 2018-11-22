@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_UTILS_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/Types.h"
 
@@ -814,34 +815,22 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
  */
 PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info);
 
-/** Returns expected shape for the deconvolution output tensor.
- *
- * @param[in] out_dims widht and height of the output tensor, these values can be obtained with the function deconvolution_output_dimensions.
- * @param[in] input    Shape of the input tensor.
- * @param[in] weights  Shape of the weights tensor.
- *
- * @return Deconvolution output tensor shape.
- */
-TensorShape deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights);
-
 /** Returns expected width and height of the deconvolution's output tensor.
  *
- * @param[in] in_width           Width of input tensor (Number of columns)
- * @param[in] in_height          Height of input tensor (Number of rows)
- * @param[in] kernel_width       Kernel width.
- * @param[in] kernel_height      Kernel height.
- * @param[in] padx               X axis padding.
- * @param[in] pady               Y axis padding.
- * @param[in] inner_border_right The number of zeros added to right edge of the input.
- * @param[in] inner_border_top   The number of zeros added to top edge of the input.
- * @param[in] stride_x           X axis input stride.
- * @param[in] stride_y           Y axis input stride.
+ * @param[in] in_width      Width of input tensor (Number of columns)
+ * @param[in] in_height     Height of input tensor (Number of rows)
+ * @param[in] kernel_width  Kernel width.
+ * @param[in] kernel_height Kernel height.
+ * @param[in] padx          X axis padding.
+ * @param[in] pady          Y axis padding.
+ * @param[in] stride_x      X axis input stride.
+ * @param[in] stride_y      Y axis input stride.
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
 const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
                                                                             unsigned int kernel_width, unsigned int kernel_height,
-                                                                            unsigned int padx, unsigned int pady, unsigned int inner_border_right, unsigned int inner_border_top,
+                                                                            unsigned int padx, unsigned int pady,
                                                                             unsigned int stride_x, unsigned int stride_y);
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
@@ -938,6 +927,21 @@ const std::string &string_from_norm_type(NormType type);
  * @return The string describing the pooling type.
  */
 const std::string &string_from_pooling_type(PoolingType type);
+/** Translates a given GEMMLowp output stage to a string.
+ *
+ * @param[in] output_stage @ref GEMMLowpOutputStageInfo to be translated to string.
+ *
+ * @return The string describing the GEMMLowp output stage
+ */
+const std::string &string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage);
+/** Convert a PixelValue to a string, represented through the specific data type
+ *
+ * @param[in] value     The PixelValue to convert
+ * @param[in] data_type The type to be used to convert the @p value
+ *
+ * @return String representation of the PixelValue through the given data type.
+ */
+std::string string_from_pixel_value(const PixelValue &value, const DataType data_type);
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.
@@ -1011,6 +1015,12 @@ inline std::string float_to_string_with_full_precision(float val)
     std::stringstream ss;
     ss.precision(std::numeric_limits<float>::digits10 + 1);
     ss << val;
+
+    if(val != static_cast<int>(val))
+    {
+        ss << "f";
+    }
+
     return ss.str();
 }
 

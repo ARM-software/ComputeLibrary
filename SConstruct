@@ -40,7 +40,7 @@ vars.AddVariables(
     BoolVariable("debug", "Debug", False),
     BoolVariable("asserts", "Enable asserts (this flag is forced to 1 for debug=1)", False),
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
-    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
+    EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
     EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
@@ -54,21 +54,52 @@ vars.AddVariables(
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
+    PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
+    ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
-env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+build_path = env['build_dir']
+# If build_dir is a relative path then add a #build/ prefix:
+if not env['build_dir'].startswith('/'):
+    SConsignFile('build/%s/.scons' % build_path)
+    build_path = "#build/%s" % build_path
+else:
+    SConsignFile('%s/.scons' % build_path)
+
+install_path = env['install_dir']
+#If the install_dir is a relative path then assume it's from inside build_dir
+if not env['install_dir'].startswith('/') and install_path != "":
+    install_path = "%s/%s" % (build_path, install_path)
+
+env.Append(LIBPATH = [build_path])
 Export('env')
 Export('vars')
 
-SConsignFile('build/.%s' % env['build_dir'])
+def install_lib( lib ):
+    # If there is no install folder, then there is nothing to do:
+    if install_path == "":
+        return lib
+    return env.Install( "%s/lib/" % install_path, lib)
+def install_bin( bin ):
+    # If there is no install folder, then there is nothing to do:
+    if install_path == "":
+        return bin
+    return env.Install( "%s/bin/" % install_path, bin)
+def install_include( inc ):
+    if install_path == "":
+        return inc
+    return env.Install( "%s/include/" % install_path, inc)
+
+Export('install_lib')
+Export('install_bin')
 
 Help(vars.GenerateHelpText(env))
 
 if env['build'] == "embed_only":
-    SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+    SConscript('./SConscript', variant_dir=build_path, duplicate=0)
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
@@ -142,17 +173,23 @@ elif env['arch'] == 'arm64-v8a':
         prefix = "aarch64-linux-android-"
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-no-integrated-as'])
-elif env['arch'] == 'arm64-v8.2-a':
-    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+elif 'arm64-v8.2-a' in env['arch']:
+    if env['arch'] == 'arm64-v8.2-a-sve':
+        if env['os'] != 'bare_metal':
+            print("Only bare metal SVE is supported at the moment")
+            Exit(1)
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
+    else:
+        env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
+        if env['os'] == 'linux':
+            prefix = "aarch64-linux-gnu-"
+        elif env['os'] == 'bare_metal':
+            prefix = "aarch64-elf-"
+        elif env['os'] == 'android':
+            prefix = "aarch64-linux-android-"
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-no-integrated-as'])
-    if env['os'] == 'linux':
-        prefix = "aarch64-linux-gnu-"
-    elif env['os'] == 'bare_metal':
-        prefix = "aarch64-elf-"
-    elif env['os'] == 'android':
-        prefix = "aarch64-linux-android-"
 elif env['arch'] == 'x86_32':
     env.Append(CCFLAGS = ['-m32'])
     env.Append(LINKFLAGS = ['-m32'])
@@ -242,20 +279,24 @@ if env['logging']:
 
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
+env.Append(LINKFLAGS = env['extra_link_flags'])
+
+Default( install_include("arm_compute"))
+Default( install_include("support"))
 
 Export('version_at_least')
 
 if env['opencl']:
-    SConscript("./opencl-1.2-stubs/SConscript", variant_dir="build/%s/opencl-1.2-stubs" % env['build_dir'], duplicate=0)
+    SConscript("./opencl-1.2-stubs/SConscript", variant_dir="%s/opencl-1.2-stubs" % build_path, duplicate=0)
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])
-    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="build/%s/opengles-3.1-stubs" % env['build_dir'], duplicate=0)
+    SConscript("./opengles-3.1-stubs/SConscript", variant_dir="%s/opengles-3.1-stubs" % build_path, duplicate=0)
 
-SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
 if env['examples'] and env['os'] != 'bare_metal':
-    SConscript('./examples/SConscript', variant_dir='#build/%s/examples' % env['build_dir'], duplicate=0)
+    SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
 if env['os'] != 'bare_metal':
-    SConscript('./tests/SConscript', variant_dir='#build/%s/tests' % env['build_dir'], duplicate=0)
+    SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)

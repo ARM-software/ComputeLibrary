@@ -49,13 +49,25 @@ public:
      *    U8 -> U16, S16, S32
      *    U16 -> U8, U32
      *    S16 -> U8, S32
+     *    F16 -> F32
+     *    F32 -> F16
      *
-     * @param[in, out] input  The input tensor to convert (Written in case of in-place computation). Data types supported: U8/U16/S16/F32.
-     * @param[out]     output The output tensor. Can be null in case of in-place computation. Data types supported: U8/U16/S16/U32/S32/F32.
-     * @param[in]      policy Conversion policy.
-     * @param[in]      shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/U16/S16/F32.
+     * @param[out] output The output tensor. Data types supported: U8/U16/S16/U32/S32/F32.
+     * @param[in]  policy Conversion policy.
+     * @param[in]  shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
      */
-    void configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
+    void configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthConvertLayer
+     *
+     * @param[in] input  Source tensor info. Data types supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] policy Conversion policy.
+     * @param[in] shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift = 0);
 };
 }
 #endif /*__ARM_COMPUTE_NEDEPTHCONVERT_H__*/

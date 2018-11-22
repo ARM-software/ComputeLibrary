@@ -31,16 +31,12 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement ResNet50 network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
-class GraphResNet50Example : public Example
+/** Example demonstrating how to implement ResNetV1_50 network using the Compute Library's graph API */
+class GraphResNetV1_50Example : public Example
 {
 public:
-    GraphResNet50Example()
-        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ResNet50")
+    GraphResNetV1_50Example()
+        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ResNetV1_50")
     {
     }
     bool do_setup(int argc, char **argv) override
@@ -218,19 +214,19 @@ private:
                          0.0000100099996416f)
                      .set_name(unit_name + "shortcut/BatchNorm");
 
-                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right)).set_name(unit_name + "add");
+                graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             }
             else if(middle_stride > 1)
             {
                 SubStream left(graph);
                 left << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 1, PadStrideInfo(middle_stride, middle_stride, 0, 0), true)).set_name(unit_name + "shortcut/MaxPool");
 
-                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right)).set_name(unit_name + "add");
+                graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             }
             else
             {
                 SubStream left(graph);
-                graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right)).set_name(unit_name + "add");
+                graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(unit_name + "add");
             }
 
             graph << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Relu");
@@ -238,7 +234,12 @@ private:
     }
 };
 
-/** Main program for ResNet50
+/** Main program for ResNetV1_50
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1512.03385
+ *      "Deep Residual Learning for Image Recognition"
+ *      Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
@@ -247,5 +248,5 @@ private:
  */
 int main(int argc, char **argv)
 {
-    return arm_compute::utils::run_example<GraphResNet50Example>(argc, argv);
+    return arm_compute::utils::run_example<GraphResNetV1_50Example>(argc, argv);
 }

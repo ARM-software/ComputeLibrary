@@ -28,6 +28,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTensorShiftKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -54,8 +55,10 @@ public:
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override final;
@@ -64,6 +67,9 @@ private:
     std::unique_ptr<IGCKernel> _kernel;
     GCFillBorderKernel         _border_handler;
     GCTensorShiftKernel        _shift_handler;
+    GCActivationLayer          _activationlayer_function;
+
+    bool _is_activationlayer_enabled;
 };
 }
 #endif /*__ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__ */

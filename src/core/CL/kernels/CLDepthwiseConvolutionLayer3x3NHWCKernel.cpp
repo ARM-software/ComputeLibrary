@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -44,14 +45,15 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                           const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::F32 || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
-                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
+                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported"); //COMPMID-1317 add fused activation for F32
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) != 3 || weights->dimension(2) != 3);
 
     const bool is_qasymm = is_data_type_quantized_asymmetric(input->data_type());
@@ -96,7 +98,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const bool is_stride_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
 
     const unsigned int num_rows_processed_per_iteration = is_stride_1 ? 2 : 1;
-    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
+    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->element_size());
     const unsigned int num_rows_read_per_iteration      = num_rows_processed_per_iteration + 2;
     const unsigned int num_rows_written_per_iteration   = std::ceil(num_rows_processed_per_iteration / static_cast<float>(conv_info.stride().first));
 
@@ -137,8 +139,7 @@ BorderSize CLDepthwiseConvolutionLayer3x3NHWCKernel::border_size() const
 }
 
 void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                                         unsigned int        depth_multiplier,
-                                                         ActivationLayerInfo act_info)
+                                                         unsigned int depth_multiplier, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
@@ -158,8 +159,9 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     ARM_COMPUTE_ERROR_ON(conv_stride_x < 1 || conv_stride_x > 2);
     ARM_COMPUTE_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 1);
 
-    const bool is_qasymm   = is_data_type_quantized_asymmetric(input->info()->data_type());
-    const bool is_stride_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool is_qasymm         = is_data_type_quantized_asymmetric(input->info()->data_type());
+    const bool is_stride_1       = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
 
     _input                              = input;
     _output                             = output;
@@ -168,9 +170,16 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _conv_stride_y                      = conv_info.stride().second;
     _num_rows_processed_per_iteration   = is_stride_1 ? 2 : 1;
     _num_planes_processed_per_iteration = is_stride_1 ? 2 : 1;
-    _border_size                        = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
-    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
+    // If QASYMM8 and the 8 bit dot product is available, force _num_planes_processed_per_iteration to 1
+    if(is_dot8_supported && is_qasymm)
+    {
+        _num_planes_processed_per_iteration = 1;
+    }
+
+    _border_size = BorderSize(is_qasymm && is_stride_1 ? 0 : conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
+
+    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -211,15 +220,19 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
                 const float s2 = output->info()->quantization_info().scale;
                 const int   o2 = output->info()->quantization_info().offset;
 
+                build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
+                build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
                 if(o1 != o2 || s1 != s2)
                 {
-                    build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
                     build_opts.add_option("-DS2_VAL=" + float_to_string_with_full_precision(s2));
-                    build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
                     build_opts.add_option("-DO2_VAL=" + support::cpp11::to_string(o2));
                 }
             }
         }
+    }
+    else
+    {
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     }
 
     if(is_stride_1)
@@ -233,11 +246,12 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
         build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(conv_stride_x));
         build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(_conv_stride_y));
     }
+    build_opts.add_option_if(_input->info()->tensor_shape().total_size_upper(3) > 1,
+                             "-DDST_DEPTH=" + support::cpp11::to_string(static_cast<int>(std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)))));
 
     // Create kernel
-    const bool  is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
-    std::string kernel_name       = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
-                                                                                                                          && is_stride_1 ) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
+    std::string kernel_name = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
+                                                                                                                    && is_stride_1) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -280,8 +294,12 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window win = window;
-    win.set(Window::DimZ, Window::Dimension(0, std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)), 1));
+    // Collapse window
+    Window       window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+    const size_t total_batches    = _input->info()->tensor_shape().total_size_upper(3);
+
+    Window win = window_collapsed;
+    win.set(Window::DimZ, Window::Dimension(0, std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)) * total_batches, 1));
 
     // Create input window and adjust
     Window win_in = win;
@@ -290,10 +308,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
 
     ARM_COMPUTE_ERROR_ON((win_in.y().step() < window.y().step()) || (win_in.z().step() < window.z().step()));
 
-    Window slice_in  = win_in.first_slice_window_3D();
-    Window slice_out = win.first_slice_window_3D();
+    Window slice_in  = win_in.first_slice_window_4D();
+    Window slice_out = win.first_slice_window_4D();
 
-    unsigned int idx = 3 * num_arguments_per_3D_tensor();
+    unsigned int idx = 2 * num_arguments_per_4D_tensor() + num_arguments_per_3D_tensor();
 
     if(_biases != nullptr)
     {
@@ -310,11 +328,11 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice_in);
-        add_3D_tensor_argument(idx, _output, slice_out);
+        add_4D_tensor_argument(idx, _input, slice_in);
+        add_4D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_out);
 
         enqueue(queue, *this, slice_out, lws_hint());
     }
-    while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
+    while(win.slide_window_slice_4D(slice_out) && win_in.slide_window_slice_4D(slice_in));
 }

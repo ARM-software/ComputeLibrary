@@ -99,6 +99,7 @@ private:
         auto now  = std::chrono::system_clock::now();
         auto time = std::chrono::system_clock::to_time_t(now);
 
+        // TODO: use put_time for gcc > 4.9
         char buf[100] = { 0 };
         std::strftime(buf, sizeof(buf), "%d-%m-%Y %I:%M:%S", std::localtime(&time));
         return buf;

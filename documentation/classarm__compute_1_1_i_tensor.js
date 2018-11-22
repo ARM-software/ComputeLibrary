@@ -5,8 +5,8 @@ var classarm__compute_1_1_i_tensor =
     [ "copy_from", "classarm__compute_1_1_i_tensor.xhtml#a4a774ad8d5f4837f3d7de1876d367c5b", null ],
     [ "info", "classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237", null ],
     [ "info", "classarm__compute_1_1_i_tensor.xhtml#a7e6b5e55a2914b1fb1966310e7733ac4", null ],
-    [ "is_used", "classarm__compute_1_1_i_tensor.xhtml#a58d056d9b5ad2bb18a0e07f4a902f385", null ],
-    [ "mark_as_unused", "classarm__compute_1_1_i_tensor.xhtml#afe4e1d42d62608a941124f0d50c3e48a", null ],
-    [ "print", "classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a", null ],
-    [ "ptr_to_element", "classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2", null ]
+    [ "is_used", "classarm__compute_1_1_i_tensor.xhtml#a209ea2ddfdfa80703799c92da8beb643", null ],
+    [ "mark_as_unused", "classarm__compute_1_1_i_tensor.xhtml#a9bc00234de9adf8c99a21eb1d7d494c2", null ],
+    [ "print", "classarm__compute_1_1_i_tensor.xhtml#ade74189c92e70baa2848986c10dbe7ef", null ],
+    [ "ptr_to_element", "classarm__compute_1_1_i_tensor.xhtml#adbd73147d41e8a640bc299d12613c31e", null ]
 ];

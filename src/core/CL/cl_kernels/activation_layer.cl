@@ -21,80 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "helpers.h"
-
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
 
-#define CONST_ONE 1.f
-#define ABS_OP(a) fabs((a))
-#define ADD_OP(a, b) ((a) + (b))
-#define SUB_OP(a, b) ((a) - (b))
-#define MUL_OP(a, b) ((a) * (b))
-#define MLA_OP(a, b, c) ((b) * (c) + (a))
-#define DIV_OP(a, b) ((a) / (b))
-#define EXP_OP(a) exp((a))
-#define LOG_OP(a) log((a))
-#define SQRT_OP(a) sqrt((a))
-#define TANH_OP(a) tanh((a))
-
-// Logistic Activation
-inline TYPE logistic_op(TYPE x)
-{
-    return DIV_OP((TYPE)CONST_ONE, ADD_OP((TYPE)CONST_ONE, EXP_OP(-x)));
-}
-// Hyperbolic Tangent Activation
-inline TYPE tanh_op(TYPE x)
-{
-    return MUL_OP((TYPE)A_VAL, TANH_OP(MUL_OP((TYPE)B_VAL, x)));
-}
-// RELU Tangent Activation
-inline TYPE relu_op(TYPE x)
-{
-    return max(0, x);
-}
-// Bounded RELU Activation
-inline TYPE brelu_op(TYPE x)
-{
-    return min((TYPE)A_VAL, max(0, x));
-}
-// Lower Upper Bounded RELU Activation
-inline TYPE lu_brelu_op(TYPE x)
-{
-    return min(max(x, (TYPE)B_VAL), (TYPE)A_VAL);
-}
-// Leaky RELU Activation
-inline TYPE lrelu_op(TYPE x)
-{
-    return select(MUL_OP((TYPE)A_VAL, x), x, x > (TYPE)0);
-}
-// Soft RELU Activation
-inline TYPE srelu_op(TYPE x)
-{
-    return LOG_OP(ADD_OP((TYPE)CONST_ONE, EXP_OP(x)));
-}
-// Absolute Activation
-inline TYPE abs_op(TYPE x)
-{
-    return ABS_OP(x);
-}
-// Square Activation
-inline TYPE square_op(TYPE x)
-{
-    return MUL_OP(x, x);
-}
-// Square-root Activation
-inline TYPE sqrt_op(TYPE x)
-{
-    return SQRT_OP(x);
-}
-// Linear Activation
-inline TYPE linear_op(TYPE x)
-{
-    return MLA_OP((TYPE)B_VAL, (TYPE)A_VAL, x);
-}
-
-#define ACTIVATION_OP2(op, x) op##_op(x)
-#define ACTIVATION_OP(op, x) ACTIVATION_OP2(op, x)
+#include "activation_helpers.h"
 
 #if defined(ACT)
 

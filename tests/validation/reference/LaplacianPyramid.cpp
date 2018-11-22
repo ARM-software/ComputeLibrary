@@ -23,7 +23,7 @@
  */
 #include "LaplacianPyramid.h"
 
-#include "tests/validation/reference/ArithmeticSubtraction.h"
+#include "tests/validation/reference/ArithmeticOperations.h"
 #include "tests/validation/reference/DepthConvertLayer.h"
 #include "tests/validation/reference/Gaussian5x5.h"
 #include "tests/validation/reference/GaussianPyramidHalf.h"
@@ -53,7 +53,10 @@ std::vector<SimpleTensor<U>> laplacian_pyramid(const SimpleTensor<T> &src, Simpl
         const SimpleTensor<T> level_filtered = reference::gaussian5x5(gaussian_level_pyramid[i], border_mode, constant_border_value);
         pyramid_conv.push_back(level_filtered);
 
-        const SimpleTensor<U> level_sub = reference::arithmetic_subtraction<T, T, U>(gaussian_level_pyramid[i], level_filtered, dst.data_type(), ConvertPolicy::WRAP);
+        const SimpleTensor<U> level_filtered_converted = depth_convert<T, U>(level_filtered, DataType::S16, ConvertPolicy::WRAP, 0);
+        const SimpleTensor<U> gaussian_level_converted = depth_convert<T, U>(gaussian_level_pyramid[i], DataType::S16, ConvertPolicy::WRAP, 0);
+
+        const SimpleTensor<U> level_sub = reference::arithmetic_operation<U>(reference::ArithmeticOperation::SUB, gaussian_level_converted, level_filtered_converted, dst.data_type(), ConvertPolicy::WRAP);
         pyramid_dst.push_back(level_sub);
     }
 

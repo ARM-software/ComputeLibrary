@@ -23,7 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
+#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "arm_compute/core/Size2D.h"
 #include "support/ToolchainSupport.h"
 
@@ -31,7 +31,12 @@ using namespace arm_compute;
 
 void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
-    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, Size2D(1U, 1U), 1, false, true);
+    auto k = arm_compute::support::cpp14::make_unique<NEFlattenLayerKernel>();
+    k->configure(input, output);
     _kernel = std::move(k);
+}
+
+Status NEFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEFlattenLayerKernel::validate(input, output);
 }

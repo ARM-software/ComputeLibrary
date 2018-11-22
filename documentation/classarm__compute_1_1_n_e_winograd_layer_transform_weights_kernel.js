@@ -4,7 +4,6 @@ var classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel =
     [ "NEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#aba37abbbb60c14dfc48462c988f201de", null ],
     [ "~NEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ab9a247b5c031e2501d6b962d2c1024cc", null ],
     [ "NEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#ad25daf413f7dd45f084ae22a25b8bbe5", null ],
-    [ "configure", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a230eb2ff01fd2a41ad155567e0a72412", null ],
     [ "get_matrix_stride", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a07a976f4d6b4b62e2ffcea8b0dab6d9f", null ],
     [ "get_weight_storage_size", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a87a7d4fe23da86c3682b79300d23f248", null ],
     [ "is_parallelisable", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],

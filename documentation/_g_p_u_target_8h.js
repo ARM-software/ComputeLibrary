@@ -14,13 +14,15 @@ var _g_p_u_target_8h =
       [ "G51", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a0a2d4856ae75ec5a7b78851f6e5875f0", null ],
       [ "G51BIG", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3afc99dd3bc5650c5116886eefd3d18988", null ],
       [ "G51LIT", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a9d0acedfece9dfaf5cc3e63bfbeecf2f", null ],
+      [ "G52", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a3731064380218cfc2b9613d2b6293cfb", null ],
+      [ "G52LIT", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a4b3e9b93a7e833f9d7ab01d4cf9f7837", null ],
       [ "G76", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3aa46ce37da51477a1af33a8810e0ed04d", null ],
       [ "TTRX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3ab39f7e42574174cf9ee7da726bdb13b4", null ],
       [ "TBOX", "_g_p_u_target_8h.xhtml#a735ac6c2a02e320969625308810444f3a53e518b6393904e797819c7a941f9ddc", null ]
     ] ],
-    [ "get_arch_from_target", "_g_p_u_target_8h.xhtml#a4a351d5c39dec88af98a671da1c43fd6", null ],
-    [ "get_target_from_name", "_g_p_u_target_8h.xhtml#ade888194135e9dcce690e9e71a40620a", null ],
-    [ "gpu_target_is_in", "_g_p_u_target_8h.xhtml#a0e3b0d9b90f6c97d5fe97b7d17c7ee25", null ],
+    [ "get_arch_from_target", "_g_p_u_target_8h.xhtml#a2355c2bf5d1950088937416baea24fe6", null ],
+    [ "get_target_from_name", "_g_p_u_target_8h.xhtml#a0dc6fb54ac0bbc7bf512fe0ca7414076", null ],
+    [ "gpu_target_is_in", "_g_p_u_target_8h.xhtml#a1da498e9b2c2d24883087f62c6bbe75d", null ],
     [ "gpu_target_is_in", "_g_p_u_target_8h.xhtml#aab39ce9a593f7e12a4bf4cb47272b917", null ],
-    [ "string_from_target", "_g_p_u_target_8h.xhtml#afab814721e78cbfc34e7e7fe2874fa56", null ]
+    [ "string_from_target", "_g_p_u_target_8h.xhtml#af7795707992825c309fe846740dc8cf8", null ]
 ];

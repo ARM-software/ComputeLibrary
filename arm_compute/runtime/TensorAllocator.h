@@ -95,17 +95,11 @@ public:
     void free() override;
     /** Import an existing memory as a tensor's backing memory
      *
-     * @warning If the tensor is flagged to be managed by a memory manager,
-     *          this call will lead to an error.
-     * @warning Ownership of memory depends on the way the @ref Memory object was constructed
-     * @note    Calling free on a tensor with imported memory will just clear
-     *          the internal pointer value.
-     *
-     * @param[in] memory Memory to import
+     * @warning ownership of memory is not transferred
      *
      * @return error status
      */
-    arm_compute::Status import_memory(Memory memory);
+    arm_compute::Status import_memory(void *memory, size_t size);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with

@@ -46,21 +46,15 @@ namespace validation
 {
 namespace
 {
-const auto use_fp16 = framework::dataset::make("UseFP16",
-{ false });
-
-const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }), combine(framework::dataset::make("BlockSize", { 3, 5, 7 }), combine(datasets::BorderModes(), use_fp16)));
+const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }), combine(framework::dataset::make("BlockSize", { 3, 5, 7 }), datasets::BorderModes()));
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), data), framework::dataset::make("Format", Format::U8)), shape,
-               gradient_size, block_size, border_mode, use_fp16, format)
+               gradient_size, block_size, border_mode, format)
 {
-    ARM_COMPUTE_UNUSED(use_fp16);
-    ARM_COMPUTE_ERROR_ON(use_fp16);
-
     std::mt19937                          gen(library->seed());
     std::uniform_real_distribution<float> real_dist(0.f, 0.01f);
 

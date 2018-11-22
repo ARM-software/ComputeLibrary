@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -59,7 +60,7 @@ std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITens
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic     input_access(input, 0, 0, ceil_to_multiple(input->dimension(0), 16), input->dimension(1));
+    AccessWindowStatic     input_access(input, 0, 0, input->dimension(0), input->dimension(1));
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
@@ -115,8 +116,12 @@ void CLGEMMLowpMatrixAReductionKernel::configure(const ICLTensor *mtx_a, ICLTens
     CLBuildOptions build_opts;
     build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(mtx_a->info()->dimension(0)));
 
+    const bool is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
+
+    std::string kernel_name = "gemmlowp_matrix_a_reduction" + std::string(is_dot8_supported ? "_dot8" : "");
+
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemmlowp_matrix_a_reduction", build_opts.options()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
     auto win_config = validate_and_configure_window_matrix_a_reduction(_input->info(), _output->info());
@@ -196,8 +201,8 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
     Window slice_out = collapsed.first_slice_window_2D();
     Window slice_in  = slice_out;
 
-    slice_in.set(Window::DimY, Window::Dimension(0, 1, 1));
-    slice_in.set(Window::DimZ, Window::Dimension(0, 1, 1));
+    slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
+    slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     do
     {

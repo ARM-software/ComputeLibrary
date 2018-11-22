@@ -49,37 +49,34 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     TensorInfo info(TensorShape(24U, 16U, 3U), 1, DataType::F32);
 
     // Allocate memory buffer
-    auto buf = std::make_shared<MemoryRegion>(info.total_size());
+    const size_t total_size = info.total_size();
+    auto         data       = support::cpp14::make_unique<uint8_t[]>(total_size);
 
-    // Negative case : Import empty memory
+    // Negative case : Import pointer with zero size
     Tensor t1;
     t1.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(Memory())), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!bool(t1.allocator()->import_memory(data.get(), 0)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t1.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-    // Negative case : Import memory to a tensor that is memory managed
-    Tensor      t2;
-    MemoryGroup mg;
-    t2.allocator()->set_associated_memory_group(&mg);
-    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
+    // Negative case : Import nullptr
+    Tensor t2;
+    t2.allocator()->init(info);
+    ARM_COMPUTE_EXPECT(!bool(t2.allocator()->import_memory(nullptr, total_size)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t2.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-    // Positive case : Set raw pointer
-    Tensor t3;
-    t3.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t3.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!t3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.buffer() == reinterpret_cast<uint8_t *>(buf->buffer()), framework::LogLevel::ERRORS);
-    t3.allocator()->free();
+    // Negative case : Import memory to a tensor that is memory managed
+    Tensor      t3;
+    MemoryGroup mg;
+    t3.allocator()->set_associated_memory_group(&mg);
+    ARM_COMPUTE_EXPECT(!bool(t3.allocator()->import_memory(data.get(), total_size)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.buffer() == nullptr, framework::LogLevel::ERRORS);
 
-    // Positive case : Set managed pointer
+    // Positive case : Set raw pointer
     Tensor t4;
     t4.allocator()->init(info);
-    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(Memory(buf))), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(data.get(), total_size)), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t4.buffer() == reinterpret_cast<uint8_t *>(buf->buffer()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t4.buffer() == reinterpret_cast<uint8_t *>(data.get()), framework::LogLevel::ERRORS);
     t4.allocator()->free();
     ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t4.buffer() == nullptr, framework::LogLevel::ERRORS);

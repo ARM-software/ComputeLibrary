@@ -1,3 +1,26 @@
+///
+/// Copyright (c) 2017-2018 ARM Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
 namespace arm_compute
 {
 /**
@@ -342,8 +365,6 @@ Requesting backing memory for a specific group can be done using @ref IMemoryGro
 - @ref ILifetimeManager that keeps track of the lifetime of the registered objects of the memory groups and given an @ref IAllocator creates an appropriate memory pool that fulfils the memory requirements of all the registered memory groups.
 - @ref IPoolManager that safely manages the registered memory pools.
 
-@note @ref IMemoryManager::finalize should be called once the configuration of all the memory groups, kernels and functions is done, so that the memory manager can allocate the appropriate backing memory.
-
 @note @ref BlobLifetimeManager is currently implemented which models the memory requirements as a vector of distinct memory blobs.
 
 @subsection S4_7_2_working_with_memory_manager Working with the Memory Manager
@@ -385,11 +406,9 @@ tmp3.allocator()->allocate();       // Flag that the lifetime of object tmp3 has
 
 @warning The configuration step should be done sequentially by a single thread so that all the lifetimes are captured correclty.
 
-When configuration of all the operations is finished then the memory manager have to be finalized:
+When configuration of all the operations is finished then the memory manager have to be populated:
 @code{.cpp}
-mm->set_allocator(&allocator); // Set allocator to use
-mm->set_set_num_pools(2);      // Set number of pools to create in case parallel operations can be run
-mm->finalize();                // Finalize memory manager (Object lifetime check, Memory pool creation etc)
+mm->populate(&allocator), 2 /* num_pools */); // Populate memory manager pools
 @endcode
 
 Finally, during execution of the pipeline the memory of the appropriate memory group should be requested before running:
@@ -422,10 +441,8 @@ CLConvolutionLayer conv1(mm), conv2(mm);
 conv1.configure(...);
 conv2.configure(...);
 
-// Finalize memory manager
-mm->set_allocator(&allocator); // Set allocator to use
-mm->set_set_num_pools(1);      // Set number of pools to create in case parallel operations can be run
-mm->finalize();                // Finalize memory manager (Object lifetime check, Memory pool creation etc)
+// Populate memory manager
+mm->populate(&allocator), 1 /* num_pools */); // Populate memory manager pools
 
 // Run layers (Memory will be recycled for internal buffers for conv1 and conv2
 conv1.run();

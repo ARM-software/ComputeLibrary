@@ -26,8 +26,6 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/utils/strong_type/StrongType.h"
-#include "arm_compute/core/utils/strong_type/StrongTypeAttributes.h"
 
 #include <limits>
 #include <string>
@@ -53,16 +51,15 @@ using arm_compute::FullyConnectedLayerInfo;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
+using arm_compute::PriorBoxLayerInfo;
 using arm_compute::DimensionRoundingType;
 using arm_compute::InterpolationPolicy;
 
+using GraphID    = unsigned int;
 using TensorID   = unsigned int;
 using NodeID     = unsigned int;
 using EdgeID     = unsigned int;
 using Activation = arm_compute::ActivationLayerInfo::ActivationFunction;
-
-/**< GraphID strong type */
-using GraphID = strong_type::StrongType<unsigned int, struct graph_id_t, strong_type::Comparable>;
 
 /**< Constant TensorID specifying an equivalent of null tensor */
 constexpr TensorID NullTensorID = std::numeric_limits<TensorID>::max();
@@ -130,6 +127,7 @@ enum class NodeType
 {
     ActivationLayer,
     BatchNormalizationLayer,
+    BoundingBoxTransformLayer,
     ChannelShuffleLayer,
     ConcatenateLayer,
     ConvolutionLayer,
@@ -138,13 +136,22 @@ enum class NodeType
     EltwiseLayer,
     FlattenLayer,
     FullyConnectedLayer,
+    GenerateProposalsLayer,
     NormalizationLayer,
+    NormalizePlanarYUVLayer,
+    PadLayer,
     PermuteLayer,
     PoolingLayer,
+    PriorBoxLayer,
+    ReorgLayer,
     ReshapeLayer,
     ResizeLayer,
+    ROIAlignLayer,
     SoftmaxLayer,
+    SliceLayer,
     SplitLayer,
+    UpsampleLayer,
+    YOLOLayer,
 
     Input,
     Output,

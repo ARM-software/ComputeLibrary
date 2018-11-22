@@ -42,6 +42,8 @@ namespace validation
 TEST_SUITE(GC)
 TEST_SUITE(DepthConcatenateLayer)
 
+//TODO(COMPMID-415): Add configuration test?
+
 template <typename T>
 using GCDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCDepthConcatenateLayer, T>;
 

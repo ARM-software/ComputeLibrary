@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/impl_fp32_fp32.hpp"
+#include "impl_fp32_fp32.hpp"
 
 namespace depthwise
 {
@@ -43,7 +43,7 @@ void ConvImpl::process_tile<true, 0, 0, 0, 0, 0, 0>(
   float* const outptr,
   const int out_row_stride,
   const int out_col_stride,
-  const int, const int, const int, const int, const int, const int
+  const int, const int, const int, const int, const int, const int, const int, const int
 )
 {
   // Copy pointers

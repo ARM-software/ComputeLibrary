@@ -44,6 +44,7 @@ public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta)
     {
+        // TODO (COMPMID-717): The interface used for GEMMLowp is the same one used for GEMM in order to re-use the datasets
         // However the interface for both GEMM and GEMMLowp should be reworked in order to accepts only the 3 dimensions M, N and K
         ARM_COMPUTE_UNUSED(shape_c);
         ARM_COMPUTE_UNUSED(alpha);
@@ -57,7 +58,7 @@ public:
         c = create_tensor<TensorType>(shape_dst, DataType::S32, 1, QuantizationInfo(1.0f / 255.0f, 0));
 
         // Create and configure function
-        gemmlowp.configure(&a, &b, &c);
+        gemmlowp.configure(&a, &b, nullptr, &c);
 
         // Allocate tensors
         a.allocator()->allocate();

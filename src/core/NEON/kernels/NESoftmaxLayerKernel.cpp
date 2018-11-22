@@ -282,6 +282,7 @@ float32x4_t vexp(const float32x4_t &vec)
 }
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+// TODO (COMPMID-1535) : Revisit FP16 approximations
 float16x8_t vexp(const float16x8_t &vec)
 {
     float16x4x2_t res =

@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement InceptionV4's network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement InceptionV4's network using the Compute Library's graph API */
 class InceptionV4Example final : public Example
 {
 public:
@@ -56,12 +52,6 @@ public:
         {
             cmd_parser.print_help(argv[0]);
             return false;
-        }
-
-        // Set default layout if needed
-        if(!common_opts.data_layout->is_set() && common_params.target == Target::NEON)
-        {
-            common_params.data_layout = DataLayout::NCHW;
         }
 
         // Checks
@@ -174,7 +164,7 @@ private:
     Stream             graph;
 
 private:
-    BranchLayer get_mixed_3a(const std::string &data_path, DataLayout weights_layout)
+    ConcatLayer get_mixed_3a(const std::string &data_path, DataLayout weights_layout)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_3a_";
 
@@ -192,10 +182,10 @@ private:
                                        0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
+        return ConcatLayer(std::move(i_a), std::move(i_b));
     }
 
-    BranchLayer get_mixed_4a(const std::string &data_path, DataLayout weights_layout)
+    ConcatLayer get_mixed_4a(const std::string &data_path, DataLayout weights_layout)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_4a_";
 
@@ -257,10 +247,10 @@ private:
                                        0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
+        return ConcatLayer(std::move(i_a), std::move(i_b));
     }
 
-    BranchLayer get_mixed_5a(const std::string &data_path, DataLayout weights_layout)
+    ConcatLayer get_mixed_5a(const std::string &data_path, DataLayout weights_layout)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_5a_";
 
@@ -278,10 +268,10 @@ private:
         SubStream i_b(graph);
         i_b << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
+        return ConcatLayer(std::move(i_a), std::move(i_b));
     }
 
-    BranchLayer get_inceptionA_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
+    ConcatLayer get_inceptionA_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/" + param_path + "_";
 
@@ -357,10 +347,10 @@ private:
                                        0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 
-    BranchLayer get_reductionA_block(const std::string &data_path, DataLayout weights_layout)
+    ConcatLayer get_reductionA_block(const std::string &data_path, DataLayout weights_layout)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_6a_";
 
@@ -407,10 +397,10 @@ private:
         SubStream i_c(graph);
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
 
-    BranchLayer get_inceptionB_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
+    ConcatLayer get_inceptionB_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/" + param_path + "_";
 
@@ -513,10 +503,10 @@ private:
                                        0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 
-    BranchLayer get_reductionB_block(const std::string &data_path, DataLayout weights_layout)
+    ConcatLayer get_reductionB_block(const std::string &data_path, DataLayout weights_layout)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/Mixed_7a_";
 
@@ -581,10 +571,10 @@ private:
         SubStream i_c(graph);
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c));
     }
 
-    BranchLayer get_inceptionC_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
+    ConcatLayer get_inceptionC_block(const std::string &data_path, DataLayout weights_layout, std::string &&param_path)
     {
         std::string total_path = "/cnn_data/inceptionv4_model/" + param_path + "_";
 
@@ -642,7 +632,7 @@ private:
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // Merge b1 and b2
-        i_b << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_b1), std::move(i_b2));
+        i_b << ConcatLayer(std::move(i_b1), std::move(i_b2));
 
         SubStream i_c(graph);
         i_c << ConvolutionLayer(
@@ -711,7 +701,7 @@ private:
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         // Merge i_c1 and i_c2
-        i_c << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_c1), std::move(i_c2));
+        i_c << ConcatLayer(std::move(i_c1), std::move(i_c2));
 
         SubStream i_d(graph);
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true))
@@ -725,11 +715,16 @@ private:
                                        0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 };
 
 /** Main program for Inception V4
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1602.07261
+ *      "Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning"
+ *      Christian Szegedy, Sergey Ioffe, Vincent Vanhoucke, Alex Alemi
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

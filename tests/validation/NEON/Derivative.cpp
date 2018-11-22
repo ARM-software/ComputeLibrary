@@ -76,6 +76,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 
     validate(dst_x.info()->valid_region(), dst_valid_region);
     validate(dst_y.info()->valid_region(), dst_valid_region);
+
+    // TODO(COMPMID-415) Validate padding after fixing x-access input bug in NEON kernel
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDerivativeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",

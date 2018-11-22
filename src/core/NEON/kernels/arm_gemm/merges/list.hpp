@@ -26,3 +26,5 @@
 #include "a64_merge_float_to_half_12x8.hpp"
 #include "a64_merge_half_24x8.hpp"
 #include "a64_merge_int32_12x8.hpp"
+#include "sve_merge_fp32_2VLx8.hpp"
+#include "sve_merge_fp32_3VLx8.hpp"

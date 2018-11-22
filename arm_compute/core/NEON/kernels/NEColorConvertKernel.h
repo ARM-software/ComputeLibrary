@@ -57,7 +57,8 @@ public:
      *
      * @param[in]  input  Source tensor. Formats supported: RGBA8888/UYVY422/YUYV422/RGB888
      * @param[out] output Destination tensor. Formats supported: RGB888 (if the formats of @p input are RGBA8888/UYVY422/YUYV422),
-     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/)
+     *                                                          RGBA8888 (if the formats of @p input are UYVY422/YUYV422/RGB888/),
+     *                                                          U8 (if the formats of @p input is RGB888)
      */
     void configure(const ITensor *input, ITensor *output);
     /** Set the input and output of the kernel

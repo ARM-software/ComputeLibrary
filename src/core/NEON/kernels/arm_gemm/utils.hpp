@@ -24,6 +24,10 @@
 
 #pragma once
 
+#ifdef __ARM_FEATURE_SVE
+#include <arm_sve.h>
+#endif
+
 // Macro for unreachable code (e.g. impossible default cases on switch)
 #define UNREACHABLE(why)  __builtin_unreachable()
 
@@ -31,23 +35,27 @@
 // #define UNREACHABLE(why)   assert(0 && why)
 
 inline int iceildiv(const int a, const int b) {
-  return (a + b - 1) / b;
+    return (a + b - 1) / b;
 }
 
 template <typename T>
 inline T roundup(const T a, const T b) {
-  T rem = a % b;
+    T rem = a % b;
 
-  if (rem) {
-    return a + b - rem;
-  } else {
-    return a;
-  }
+    if (rem) {
+        return a + b - rem;
+    } else {
+        return a;
+    }
 }
 
 template <typename T>
 inline unsigned long get_vector_length() {
+#ifdef __ARM_FEATURE_SVE
+    const unsigned long length = svcntb();
+#else
     const unsigned long length = 16;
+#endif
 
     return length / sizeof(T);
 }

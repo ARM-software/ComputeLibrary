@@ -194,8 +194,8 @@ inline float16x8_t internal_vqaddq(const float16x8_t &x, const float16x8_t &y)
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <typename T1, typename T2, bool in_place, bool has_bias>
-void output_stage(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+void output_stage_nchw(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
+                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_UNUSED(result_fixedpoint_multiplier);
@@ -304,14 +304,14 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
                 internal_vst1q(out_ptr, internal_vld1q(in_ptr));
             }
         },
-        in, bi);
+        in, bi, out);
     }
 }
 
 // QASYMM8 specializations
 template <>
-void output_stage<int32_t, uint8_t, false, true>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                                                 int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+void output_stage_nchw<int32_t, uint8_t, false, true>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
+                                                      int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
     const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
     uint8x16_t      min                           = vdupq_n_u8(0);
@@ -352,8 +352,8 @@ void output_stage<int32_t, uint8_t, false, true>(ITensor *input, const ITensor *
     in, out);
 }
 template <>
-void output_stage<int32_t, uint8_t, false, false>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
-                                                  int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+void output_stage_nchw<int32_t, uint8_t, false, false>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
+                                                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
 {
     ARM_COMPUTE_UNUSED(bias);
 
@@ -381,6 +381,85 @@ void output_stage<int32_t, uint8_t, false, false>(ITensor *input, const ITensor 
         vst1q_u8(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
     },
     in, out);
+}
+template <>
+void output_stage_nhwc<int32_t, uint8_t, false, true>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
+                                                      int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+{
+    const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
+    uint8x16_t      min                           = vdupq_n_u8(0);
+    uint8x16_t      max                           = vdupq_n_u8(255);
+
+    Window window_bias = window;
+    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
+    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    window_bias.set(3, Window::Dimension(0, 0, 0));
+
+    Iterator in(input, window);
+    Iterator bi(bias, window_bias);
+
+    Iterator out(output, window);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        // Get bias and pointer to input
+        const auto in_ptr   = reinterpret_cast<int32_t *>(in.ptr());
+        const auto bias_ptr = reinterpret_cast<int32_t *>(bi.ptr());
+
+        // Accumulate bias
+        int32x4x4_t v_in =
+        {
+            {
+                vaddq_s32(vld1q_s32(in_ptr), vld1q_s32(bias_ptr)),
+                vaddq_s32(vld1q_s32(in_ptr + 4), vld1q_s32(bias_ptr + 4)),
+                vaddq_s32(vld1q_s32(in_ptr + 8), vld1q_s32(bias_ptr + 8)),
+                vaddq_s32(vld1q_s32(in_ptr + 12), vld1q_s32(bias_ptr + 12))
+            }
+        };
+
+        const auto out_ptr = out.ptr();
+        vst1q_u8(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
+    },
+    in, bi, out);
+}
+template <>
+void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITensor *bias, const Window &window, ITensor *output,
+                                                       int result_fixedpoint_multiplier, int result_shift, int result_offset_after_shift)
+{
+    ARM_COMPUTE_UNUSED(bias);
+
+    const int32x4_t result_offset_after_shift_s32 = vdupq_n_s32(result_offset_after_shift);
+    uint8x16_t      min                           = vdupq_n_u8(0);
+    uint8x16_t      max                           = vdupq_n_u8(255);
+
+    Window window_bias = window;
+    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
+    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
+    window_bias.set(3, Window::Dimension(0, 0, 0));
+
+    Iterator in(input, window);
+    Iterator bi(bias, window_bias);
+
+    Iterator out(output, window);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        // Get bias and pointer to input
+        const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr());
+
+        // Accumulate bias
+        int32x4x4_t v_in =
+        {
+            {
+                vld1q_s32(in_ptr),
+                vld1q_s32(in_ptr + 4),
+                vld1q_s32(in_ptr + 8),
+                vld1q_s32(in_ptr + 12)
+            }
+        };
+
+        const auto out_ptr = out.ptr();
+        vst1q_u8(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
+    },
+    in, bi, out);
 }
 } // namespace
 
@@ -426,19 +505,19 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
         {
             case DataType::S32:
             {
-                _func = (bias == nullptr) ? &output_stage<int32_t, uint8_t, false, false> : &output_stage<int32_t, uint8_t, false, true>;
+                _func = (bias == nullptr) ? &output_stage_nchw<int32_t, uint8_t, false, false> : &output_stage_nchw<int32_t, uint8_t, false, true>;
                 break;
             }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
             {
-                _func = (output == nullptr) ? &output_stage<float16_t, float16_t, true, true> : &output_stage<float16_t, float16_t, false, true>;
+                _func = (output == nullptr) ? &output_stage_nchw<float16_t, float16_t, true, true> : &output_stage_nchw<float16_t, float16_t, false, true>;
                 break;
             }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
             {
-                _func = (output == nullptr) ? &output_stage<float, float, true, true> : &output_stage<float, float, false, true>;
+                _func = (output == nullptr) ? &output_stage_nchw<float, float, true, true> : &output_stage_nchw<float, float, false, true>;
                 break;
             }
             default:
@@ -451,6 +530,18 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     {
         switch(input->info()->data_type())
         {
+            case DataType::S32:
+            {
+                _func = (output == nullptr) ? &output_stage_nhwc<int32_t, uint8_t, false, false> : &output_stage_nhwc<int32_t, uint8_t, false, true>;
+                break;
+            }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+            case DataType::F16:
+            {
+                _func = (output == nullptr) ? &output_stage_nhwc<float16_t, float16_t, true, true> : &output_stage_nhwc<float16_t, float16_t, false, true>;
+                break;
+            }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
             {
                 _func = (output == nullptr) ? &output_stage_nhwc<float, float, true, true> : &output_stage_nhwc<float, float, false, true>;

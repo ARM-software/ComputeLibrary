@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLNormalizationLayerKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
@@ -61,24 +62,32 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, *input->clone());
 
-    const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
-    const unsigned int norm_size             = norm_info.norm_size();
-    bool               is_norm_accross_width = norm_idx == 0;
+    const unsigned int num_elems_processed_per_iteration = 4;
 
-    const unsigned int border_width = is_norm_accross_width ? std::min(norm_size / 2, 3U) : 0;
+    const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
+    const bool         is_norm_accross_width = norm_idx == 0;
+
+    const unsigned int border_width = is_norm_accross_width ? num_elems_processed_per_iteration - 1 : 0;
     const BorderSize   border_size  = BorderSize(0, border_width);
 
-    const unsigned int num_elems_processed_per_iteration = 4;
-    const unsigned int num_elems_read_per_iteration      = is_norm_accross_width ? (num_elems_processed_per_iteration + 2 * (norm_size / 2)) : num_elems_processed_per_iteration;
-
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    bool   window_changed = false;
 
     // We do not use a Rectangle window for IN_MAP_2D as we clamp the top and bottom accesses inside the kernel, avoiding padding
-    AccessWindowHorizontal input_access(input, -border_size.left, num_elems_read_per_iteration);
+    // Reads can occur within the valid region of the input
+    if(is_norm_accross_width)
+    {
+        AccessWindowStatic input_access(input, -border_size.left, 0, input->dimension(0) + border_size.right, 0);
+        window_changed = window_changed || update_window_and_padding(win, input_access);
+    }
+    else
+    {
+        AccessWindowHorizontal input_access(input, -border_size.left, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, input_access);
+    }
+
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win, input_access, output_access);
-
+    window_changed = window_changed || update_window_and_padding(win, output_access);
     output_access.set_valid_region(win, input->valid_region());
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -109,13 +118,14 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _input  = input;
     _output = output;
 
-    const unsigned int norm_idx     = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
-    _is_norm_across_width           = norm_idx == 0;
-    const unsigned int border_width = _is_norm_across_width ? std::min(norm_info.norm_size() / 2, 3U) : 0;
-    _border_size                    = BorderSize(0, border_width);
-
     const unsigned int num_elems_processed_per_iteration = 4;
     const bool         is_in_map_2D                      = (norm_info.type() == NormType::IN_MAP_2D);
+
+    const DataLayout   data_layout  = input->info()->data_layout();
+    const unsigned int norm_idx     = get_normalization_dimension_index(data_layout, norm_info);
+    _is_norm_across_width           = norm_idx == 0;
+    const unsigned int border_width = _is_norm_across_width ? num_elems_processed_per_iteration - 1 : 0;
+    _border_size                    = BorderSize(0, border_width);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -127,6 +137,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     build_opts.add_option(("-DRADIUS=" + support::cpp11::to_string(norm_info.norm_size() / 2)));
     build_opts.add_option(("-DNUM_SLICES=" + support::cpp11::to_string(input->info()->dimension(2))));
     build_opts.add_option_if(is_in_map_2D, "-DIN_MAP_2D");
+    build_opts.add_option_if(norm_info.is_in_map() || (data_layout == DataLayout::NHWC && norm_info.is_cross_map()), "-DWIDTH_SIZE=" + support::cpp11::to_string(input->info()->dimension(0)));
 
     // Create kernel
     std::string kernel_name = _is_norm_across_width ? "normalization_layer_in_map" : "normalization_layer_cross_map";

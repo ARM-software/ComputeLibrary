@@ -26,8 +26,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 /** Define dimension to split the window
@@ -42,6 +42,10 @@ size_t reduction_window_split_dimension(unsigned int axis)
     {
         case 0:
             return Window::DimY;
+        case 1:
+        case 2:
+        case 3:
+            return Window::DimX;
         default:
             ARM_COMPUTE_ERROR("Unsupported reduction axis");
     }
@@ -59,7 +63,7 @@ BorderMode reduction_operation_border_mode(ReductionOperation op)
 } // namespace
 
 NEReductionOperation::NEReductionOperation()
-    : _reduction_kernel(), _fill_border_kernel(), _window_split(0)
+    : _reduction_kernel(), _fill_border_kernel(), _window_split(0), _reduction_axis()
 {
 }
 
@@ -72,20 +76,28 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
 void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
 
     // Configure reduction kernel
     _reduction_kernel.configure(input, output, axis, op);
-    _window_split = reduction_window_split_dimension(axis);
+    _window_split   = reduction_window_split_dimension(axis);
+    _reduction_axis = axis;
 
-    // Configure fill border kernel
-    BorderSize fill_border_size = (axis == 0) ? _reduction_kernel.border_size() : BorderSize();
-    BorderMode fill_border_mode = reduction_operation_border_mode(op);
-    _fill_border_kernel.configure(input, fill_border_size, fill_border_mode, PixelValue(static_cast<float>(0.f)));
+    if(axis == 0)
+    {
+        // Configure fill border kernel
+        BorderSize fill_border_size = (axis == 0) ? _reduction_kernel.border_size() : BorderSize();
+        BorderMode fill_border_mode = reduction_operation_border_mode(op);
+        _fill_border_kernel.configure(input, fill_border_size, fill_border_mode, PixelValue(static_cast<float>(0.f)));
+    }
 }
 
 void NEReductionOperation::run()
 {
-    NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
+    if(_reduction_axis == 0)
+    {
+        NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
+    }
     NEScheduler::get().schedule(&_reduction_kernel, _window_split);
 }
+} // namespace arm_compute

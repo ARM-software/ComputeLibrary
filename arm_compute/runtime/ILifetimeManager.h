@@ -32,8 +32,10 @@
 
 namespace arm_compute
 {
-class IMemoryGroup;
+// Forward declarations
 class IAllocator;
+class IMemory;
+class IMemoryGroup;
 
 /** Interface for managing the lifetime of objects */
 class ILifetimeManager
@@ -53,11 +55,11 @@ public:
     virtual void start_lifetime(void *obj) = 0;
     /** Ends lifetime of an object
      *
-     * @param[in] obj    Object
-     * @param[in] handle Memory handle of the object
-     * @param[in] size   Size of the given object at given time
+     * @param[in] obj        Object
+     * @param[in] obj_memory Object memory
+     * @param[in] size       Size of the given object at given time
      */
-    virtual void end_lifetime(void *obj, void **handle, size_t size) = 0;
+    virtual void end_lifetime(void *obj, IMemory &obj_memory, size_t size) = 0;
     /** Checks if the lifetime of the registered object is complete
      *
      * @return True if all object lifetimes are finalized else false.

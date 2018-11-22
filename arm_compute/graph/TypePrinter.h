@@ -68,6 +68,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::BatchNormalizationLayer:
             os << "BatchNormalizationLayer";
             break;
+        case NodeType::BoundingBoxTransformLayer:
+            os << "BoundingBoxTransformLayer";
+            break;
         case NodeType::ChannelShuffleLayer:
             os << "ChannelShuffleLayer";
             break;
@@ -92,8 +95,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::FullyConnectedLayer:
             os << "FullyConnectedLayer";
             break;
+        case NodeType::GenerateProposalsLayer:
+            os << "GenerateProposalsLayer";
+            break;
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";
+            break;
+        case NodeType::NormalizePlanarYUVLayer:
+            os << "NormalizePlanarYUVLayer";
+            break;
+        case NodeType::PadLayer:
+            os << "PadLayer";
             break;
         case NodeType::PermuteLayer:
             os << "PermuteLayer";
@@ -101,17 +113,35 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::PoolingLayer:
             os << "PoolingLayer";
             break;
+        case NodeType::PriorBoxLayer:
+            os << "PriorBoxLayer";
+            break;
+        case NodeType::ReorgLayer:
+            os << "ReorgLayer";
+            break;
         case NodeType::ReshapeLayer:
             os << "ReshapeLayer";
             break;
         case NodeType::ResizeLayer:
             os << "ResizeLayer";
             break;
+        case NodeType::ROIAlignLayer:
+            os << "ROIAlignLayer";
+            break;
         case NodeType::SoftmaxLayer:
             os << "SoftmaxLayer";
             break;
+        case NodeType::SliceLayer:
+            os << "SliceLayer";
+            break;
         case NodeType::SplitLayer:
             os << "SplitLayer";
+            break;
+        case NodeType::UpsampleLayer:
+            os << "UpsampleLayer";
+            break;
+        case NodeType::YOLOLayer:
+            os << "YOLOLayer";
             break;
         case NodeType::Input:
             os << "Input";

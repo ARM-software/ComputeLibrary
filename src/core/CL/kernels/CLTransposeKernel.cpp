@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
@@ -86,8 +87,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(output->total_size() != 0)
     {
-        AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration), ceil_to_multiple(output->dimension(1),
-                                         num_elems_processed_per_iteration));
+        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
 
         window_changed = window_changed || update_window_and_padding(win, output_access);
 

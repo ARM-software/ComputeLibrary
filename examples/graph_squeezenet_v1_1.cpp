@@ -31,11 +31,7 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
-/** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API
- *
- * @param[in] argc Number of arguments
- * @param[in] argv Arguments
- */
+/** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API */
 class GraphSqueezenet_v1_1Example : public Example
 {
 public:
@@ -180,7 +176,7 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    BranchLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int expand1_filt, unsigned int expand3_filt)
     {
         std::string total_path = "/cnn_data/squeezenet_v1_1_model/" + param_path + "_";
@@ -200,11 +196,16 @@ private:
                 PadStrideInfo(1, 1, 1, 1))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
+        return ConcatLayer(std::move(i_a), std::move(i_b));
     }
 };
 
 /** Main program for Squeezenet v1.1
+ *
+ * Model is based on:
+ *      https://arxiv.org/abs/1602.07360
+ *      "SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size"
+ *      Forrest N. Iandola, Song Han, Matthew W. Moskewicz, Khalid Ashraf, William J. Dally, Kurt Keutzer
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

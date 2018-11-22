@@ -93,8 +93,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 inline bool can_run_optimized_kernel_for_bifrost(GPUTarget gpu_target, unsigned int conv_stride_x, unsigned int conv_stride_y, unsigned int kernel_size,
                                                  DataType data_type, DataLayout data_layout)
 {
-    return gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && (kernel_size <= 5)
-           && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32) && (data_layout == DataLayout::NCHW);
+    return gpu_target_is_in(gpu_target,
+                            GPUTarget::G71, GPUTarget::G72, GPUTarget::G76,
+                            GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT,
+                            GPUTarget::G52, GPUTarget::G52LIT)
+           && (kernel_size <= 5)
+           && (conv_stride_x == 1) && (conv_stride_y == 1)
+           && (data_type == DataType::F32)
+           && (data_layout == DataLayout::NCHW);
 }
 
 inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsigned int &num_elems_read_per_iteration_y,
@@ -278,6 +284,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
 
     // Output auto inizialitation if not yet initialized
+    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
@@ -356,6 +363,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
 
     // Output auto inizialitation if not yet initialized
+    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,
@@ -413,8 +421,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
     else
     {
-        bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
-
+        const bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
         build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
         build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
         build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));

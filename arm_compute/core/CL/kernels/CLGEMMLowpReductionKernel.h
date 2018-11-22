@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,5 +111,4 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
 };
 } // namespace arm_compute
-
 #endif /* __ARM_COMPUTE_CLGEMMLOWREDUCTIONKERNEL_H__ */

@@ -102,6 +102,7 @@ void NEGEMMNativeWrapperKernel<To, Tr>::run_internal(const Window &window, const
         const unsigned int multi = id.z();
         const unsigned int ymax  = std::min(y0 + strategy::out_height(), m_end);
 
+        // TODO(COMPMID-1424) : Agree on gemm IO layouts
         strat.kernel(a(0, y0, batch, multi), a.stride(Window::DimY),
                      b(0, 0, multi), b.stride(Window::DimY),
                      c(0, y0, batch, multi), c.stride(Window::DimY),

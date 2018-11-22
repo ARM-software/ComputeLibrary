@@ -44,9 +44,9 @@ IGraphMutator *PassManager::pass(size_t index)
     return (index >= _passes.size()) ? nullptr : _passes.at(index).get();
 }
 
-void PassManager::append(std::unique_ptr<IGraphMutator> pass)
+void PassManager::append(std::unique_ptr<IGraphMutator> pass, bool conditional)
 {
-    if(pass)
+    if(pass && conditional)
     {
         ARM_COMPUTE_LOG_GRAPH_VERBOSE("Appending mutating pass : " << pass->name() << std::endl);
         _passes.push_back(std::move(pass));

@@ -64,6 +64,8 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     if(bias != nullptr)
     {
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, bias);
+        // FIXME: Bug in framework, workaround it in tests currently.
+        //ARM_COMPUTE_ERROR_ON(bias->info()->dimension(0) != weights->info()->dimension(3));
         ARM_COMPUTE_ERROR_ON(bias->info()->num_dimensions() > 1);
     }
 
@@ -130,6 +132,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
             switch(input->info()->data_type())
             {
                 case DataType::F16:
+                    // TODO(APPBROWSER-299): Choose the most optimal path and remove others.
 #define PROCESS_4X_3Y_1Z
 
 #if defined(PROCESS_8X_3Y_1Z)
@@ -177,6 +180,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
                     break;
             }
         }
+        // FIXME: Just keep one in release
         else
         {
             switch(input->info()->data_type())
@@ -188,6 +192,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
                     break;
 
                 case DataType::F32:
+                    // TODO(APPBROWSER-299): Choose the most optimal path and remove others.
 #define PROCESS_4X_1Y_1Z
 
 #if defined(PROCESS_1X_1Y_1Z)

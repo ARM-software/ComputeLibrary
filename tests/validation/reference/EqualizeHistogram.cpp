@@ -66,7 +66,7 @@ SimpleTensor<T> equalize_histogram(const SimpleTensor<T> &src)
     }
     else
     {
-        const float diff = total_num_pixels - 1;
+        const float diff = total_num_pixels - cd_min;
 
         for(size_t i = 0; i < num_bins; ++i)
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,10 +35,55 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info);
+template <typename T>
+inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction activation)
+{
+    T ret;
 
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+    switch(activation)
+    {
+        case ActivationLayerInfo::ActivationFunction::ABS:
+            ret = std::abs(x);
+            break;
+        case ActivationLayerInfo::ActivationFunction::LINEAR:
+            ret = a * x + b;
+            break;
+        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+            ret = static_cast<T>(1) / (static_cast<T>(1) + std::exp(-x));
+            break;
+        case ActivationLayerInfo::ActivationFunction::RELU:
+            ret = std::max<T>(static_cast<T>(0), x);
+            break;
+        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
+            ret = std::min<T>(a, std::max(static_cast<T>(0), x));
+            break;
+        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
+            ret = std::min<T>(a, std::max<T>(b, x));
+            break;
+        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
+            ret = (x > 0) ? x : a * x;
+            break;
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+            ret = std::log(static_cast<T>(1) + std::exp(x));
+            break;
+        case ActivationLayerInfo::ActivationFunction::SQRT:
+            ret = std::sqrt(x);
+            break;
+        case ActivationLayerInfo::ActivationFunction::SQUARE:
+            ret = x * x;
+            break;
+        case ActivationLayerInfo::ActivationFunction::TANH:
+            ret = a * std::tanh(b * x);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported activation function");
+            break;
+    }
+
+    return ret;
+}
+
+template <typename T>
 SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info);
 } // namespace reference
 } // namespace validation

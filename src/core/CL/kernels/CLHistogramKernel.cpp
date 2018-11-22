@@ -115,6 +115,7 @@ void CLHistogramKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
 
+    // TODO (COMPMID-679): Add CLMemFill
     _output->map(queue, true);
     ARM_COMPUTE_ERROR_ON(_output->buffer() == nullptr);
     memset(_output->buffer(), 0, _output->size());

@@ -41,8 +41,11 @@ inline bool is_interleaved_transposed(int m, int n, int k, bool reshape_b_only_o
 {
     bool flag = true;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
+    if(gpu_target_is_in(gpu_target,
+                        GPUTarget::G71, GPUTarget::G72,
+                        GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT))
     {
+        // COMPMID-852
         if(k > 256 && m > 4 && reshape_b_only_on_first_run)
         {
             flag = ((0.72f + n * 0.10766f) < (n * 0.1284f));
@@ -51,6 +54,10 @@ inline bool is_interleaved_transposed(int m, int n, int k, bool reshape_b_only_o
         {
             flag = false;
         }
+    }
+    else
+    {
+        flag = m > 1;
     }
 
     return flag;
@@ -65,24 +72,26 @@ CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemo
       _mtx_a_reduction_kernel(),
       _mtx_b_reduction_kernel(),
       _offset_contribution_kernel(),
+      _offset_contribution_output_stage_kernel(),
       _vector_sum_col(),
       _vector_sum_row(),
       _tmp_a(),
       _tmp_b(),
+      _mm_result_s32(),
       _original_b(nullptr),
       _a_offset(0),
       _b_offset(0),
       _is_interleaved_transposed(true),
       _reshape_b_only_on_first_run(false),
-      _is_prepared(false)
+      _is_prepared(false),
+      _fuse_output_stage(false)
 {
 }
 
-void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor *b, ICLTensor *output, const GEMMInfo &gemm_info)
+void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
-    ARM_COMPUTE_UNUSED(gemm_info);
-    ARM_COMPUTE_ERROR_THROW_ON(CLGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), gemm_info));
 
     _is_prepared                 = false;
     _original_b                  = b;
@@ -103,9 +112,12 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     // Arguments used by GEMMReshapeInfo
     // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
     // in order to know how the matrices have been reshaped
-    const int     m                         = a->info()->dimension(1);
+    bool          reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
+    const bool    unroll_block              = dot8_supported(CLKernelLibrary::get().get_device());
+    const int     m                         = reinterpret_input_as_3d ? (a->info()->dimension(1) * a->info()->dimension(2)) : a->info()->dimension(1);
     const int     n                         = b->info()->dimension(0);
     const int     k                         = a->info()->dimension(0);
+    const int     depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
     constexpr int mult_transpose1xW_width   = 1;
     constexpr int mult_interleave4x4_height = 1;
 
@@ -114,6 +126,9 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
 
     if(_is_interleaved_transposed)
     {
+        // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
+        reinterpret_input_as_3d = false;
+
         matrix_a = &_tmp_a;
         matrix_b = &_tmp_b;
 
@@ -124,14 +139,11 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
         }
 
         // Configure interleave kernel
-        _mtx_a_reshape_kernel.configure(a, &_tmp_a, mult_interleave4x4_height);
+        _mtx_a_reshape_kernel.configure(a, &_tmp_a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d(), unroll_block);
 
         // Configure transpose kernel
         _mtx_b_reshape_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
     }
-
-    // Configure matrix multiply kernel
-    _mm_kernel.configure(matrix_a, matrix_b, output, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height));
 
     // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
     if(_a_offset != 0)
@@ -158,8 +170,34 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
         _mtx_a_reduction_kernel.configure(a, &_vector_sum_row);
     }
 
-    // Configure offset contribution kernel
-    _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, a->info()->dimension(0), _a_offset, _b_offset);
+    // If GEMMLowpOutputStage != NONE, fuse the offset contribution with the output stage
+    if(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
+    {
+        _fuse_output_stage = true;
+
+        _memory_group.manage(&_mm_result_s32);
+
+        // Configure matrix multiply kernel
+        _mm_kernel.configure(matrix_a, matrix_b, &_mm_result_s32, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
+                                                                                                              mult_transpose1xW_width, mult_interleave4x4_height,
+                                                                                                              depth_output_gemm3d, reinterpret_input_as_3d));
+
+        // Configure offset contribution kernel
+        _offset_contribution_output_stage_kernel.configure(&_mm_result_s32, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, output, a->info()->dimension(0),
+                                                           _a_offset, _b_offset, gemm_info.gemmlowp_output_stage());
+
+        _mm_result_s32.allocator()->allocate();
+    }
+    else
+    {
+        // Configure matrix multiply kernel
+        _mm_kernel.configure(matrix_a, matrix_b, output, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
+                                                                                                     mult_transpose1xW_width, mult_interleave4x4_height,
+                                                                                                     depth_output_gemm3d, reinterpret_input_as_3d));
+
+        // Configure offset contribution kernel
+        _offset_contribution_kernel.configure(output, _a_offset == 0 ? nullptr : &_vector_sum_col, _b_offset == 0 ? nullptr : &_vector_sum_row, c, a->info()->dimension(0), _a_offset, _b_offset);
+    }
 
     // Allocate tensors
     if(_is_interleaved_transposed)
@@ -182,45 +220,52 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     }
 }
 
-Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info)
+Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(0) != (b)->dimension(1),
-                                    "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a)->dimension(1) != (output)->dimension(1),
-                                    "The output matrix must have the same number of rows as the matrix A");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((b)->dimension(0) != (output)->dimension(0),
-                                    "The output matrix must have the same number of columns as the matrix B");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
     int32_t a_offset = a->quantization_info().offset;
     int32_t b_offset = b->quantization_info().offset;
 
-    const int             m                         = a->dimension(1);
-    const int             n                         = b->dimension(0);
-    const int             k                         = a->dimension(0);
-    constexpr int         mult_transpose1xW_width   = 1;
-    constexpr int         mult_interleave4x4_height = 1;
-    const int             depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
-    const GEMMReshapeInfo reshape_info(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d);
+    const ITensorInfo *matrix_a_info = a;
+    const ITensorInfo *matrix_b_info = b;
+
+    TensorInfo tmp_a_info{};
+    TensorInfo tmp_b_info{};
+
+    bool          reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
+    const int     m                         = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
+    const int     n                         = b->dimension(0);
+    const int     k                         = a->dimension(0);
+    constexpr int mult_transpose1xW_width   = 1;
+    constexpr int mult_interleave4x4_height = 1;
+    const int     depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
 
     bool reshape_matrices = is_interleaved_transposed(m, n, k, gemm_info.reshape_b_only_on_first_run(), CLScheduler::get().target());
 
+    // if reshape_matrices is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
     if(reshape_matrices)
     {
-        TensorInfo info_a(compute_interleaved_shape(*a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()), 1, a->data_type());
-        TensorInfo info_b(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width), 1, b->data_type());
-
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &info_a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &info_b, mult_transpose1xW_width));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output, reshape_matrices, reshape_info));
+        reinterpret_input_as_3d = false;
     }
-    else
+
+    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height, depth_output_gemm3d, reinterpret_input_as_3d);
+
+    if(reshape_matrices)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(a, b, output, reshape_matrices, reshape_info));
+        matrix_a_info = &tmp_a_info;
+        matrix_b_info = &tmp_b_info;
+
+        // Validate interleave kernel
+        auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d())));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()));
+
+        // Validate transpose kernel
+        auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &tmp_b_info, mult_transpose1xW_width));
     }
 
     TensorInfo info_vector_sum_col, info_vector_sum_row;
@@ -243,11 +288,37 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixAReductionKernel::validate(a, &info_vector_sum_row));
     }
 
-    // Validate offset contribution kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOffsetContributionKernel::validate(output,
-                                                                             a_offset == 0 ? nullptr : &info_vector_sum_col,
-                                                                             b_offset == 0 ? nullptr : &info_vector_sum_row,
-                                                                             a_offset, b_offset));
+    if(gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE)
+    {
+        TensorInfo mm_result_s32_info{};
+
+        // Output tensor auto inizialitation if not yet initialized
+        auto_init_if_empty(mm_result_s32_info, a->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, reshape_matrices, reshape_info)).set_data_type(DataType::S32));
+
+        // Validate matrix multiply
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &mm_result_s32_info, reshape_matrices, reshape_info));
+
+        // Validate offset contribution kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOffsetContributionOutputStageKernel::validate(&mm_result_s32_info,
+                                                                                            a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                                            b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                                            c,
+                                                                                            output,
+                                                                                            a_offset, b_offset,
+                                                                                            gemm_info.gemmlowp_output_stage()));
+    }
+    else
+    {
+        // Validate matrix multiply
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, reshape_matrices, reshape_info));
+
+        // Validate offset contribution kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOffsetContributionKernel::validate(output,
+                                                                                 a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                                 b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                                 c,
+                                                                                 a_offset, b_offset));
+    }
 
     return Status{};
 }
@@ -285,8 +356,16 @@ void CLGEMMLowpMatrixMultiplyCore::run()
         CLScheduler::get().enqueue(_mtx_a_reduction_kernel, false);
     }
 
-    // Run offset contribution kernel
-    CLScheduler::get().enqueue(_offset_contribution_kernel, true);
+    if(_fuse_output_stage)
+    {
+        // Run offset contribution/output stage kernel
+        CLScheduler::get().enqueue(_offset_contribution_output_stage_kernel, true);
+    }
+    else
+    {
+        // Run offset contribution kernel
+        CLScheduler::get().enqueue(_offset_contribution_kernel, true);
+    }
 
     _memory_group.release();
 }

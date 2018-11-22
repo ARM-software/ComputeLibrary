@@ -8,9 +8,9 @@ var classarm__compute_1_1logging_1_1_logger =
     [ "add_decorator", "classarm__compute_1_1logging_1_1_logger.xhtml#aca0de1bc76119d77831c0b1d58a20f4d", null ],
     [ "add_printer", "classarm__compute_1_1logging_1_1_logger.xhtml#a1a5b7c4d38c6f9fd1550c62441b69648", null ],
     [ "log", "classarm__compute_1_1logging_1_1_logger.xhtml#a50292ee16d3334856912eb89cffbcf83", null ],
-    [ "log", "classarm__compute_1_1logging_1_1_logger.xhtml#a2359a792f2d9a5c74d58017912a9fe24", null ],
-    [ "log_level", "classarm__compute_1_1logging_1_1_logger.xhtml#ae7de2e3a2078977fcf1ba9132e829c0e", null ],
-    [ "name", "classarm__compute_1_1logging_1_1_logger.xhtml#a37627d5d5bba7f4a8690c71c2ab3cb07", null ],
+    [ "log", "classarm__compute_1_1logging_1_1_logger.xhtml#a88fd6412cd6130ea020aa6447caab747", null ],
+    [ "log_level", "classarm__compute_1_1logging_1_1_logger.xhtml#a621f62a02364fc584cf86a8f221e715d", null ],
+    [ "name", "classarm__compute_1_1logging_1_1_logger.xhtml#a1d89c28bd42ba9a52da008bb69367171", null ],
     [ "operator=", "classarm__compute_1_1logging_1_1_logger.xhtml#ab18882a3175cd53305509643329a400a", null ],
     [ "operator=", "classarm__compute_1_1logging_1_1_logger.xhtml#a3f823d85882db15d1dd140a21ca391e2", null ],
     [ "set_log_level", "classarm__compute_1_1logging_1_1_logger.xhtml#a41691397975dfad51e3a2f6b55aef749", null ]

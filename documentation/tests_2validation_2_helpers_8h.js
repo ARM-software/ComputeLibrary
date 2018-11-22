@@ -12,11 +12,10 @@ var tests_2validation_2_helpers_8h =
     [ "fill_lookuptable", "tests_2validation_2_helpers_8h.xhtml#a6863b79e39e54f7770d759546fb54f1f", null ],
     [ "fill_mask_from_pattern", "tests_2validation_2_helpers_8h.xhtml#a131ea3f96ddd20058d2f866a012f1416", null ],
     [ "get_activation_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a9a1aa7d40588cbc644eb7d45d008b1f0", null ],
-    [ "get_batchnormalization_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a38824c49fdad911f1fbdf5dcfefb37cd", null ],
-    [ "get_normalize_planar_yuv_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a4bd7c62a72ba0ac0a1e073de9935506d", null ],
+    [ "get_quantized_bounds", "tests_2validation_2_helpers_8h.xhtml#a55866d648f6da2a3aaf3965bd1685868", null ],
     [ "get_tile", "tests_2validation_2_helpers_8h.xhtml#ab9399f3f1910e0f236cd6f4613bd4397", null ],
     [ "harris_corners_parameters", "tests_2validation_2_helpers_8h.xhtml#ad03c1c39d75226aecd5acd8e3959b02a", null ],
-    [ "matrix_multiply", "tests_2validation_2_helpers_8h.xhtml#a8f431b100088915a77ede3e283d1bdf6", null ],
-    [ "transpose_matrix", "tests_2validation_2_helpers_8h.xhtml#af07d79246ecf85a072b0d948e7142464", null ],
+    [ "matrix_multiply", "tests_2validation_2_helpers_8h.xhtml#a683cf9b1a237f2d8326735a1c5e881ed", null ],
+    [ "transpose_matrix", "tests_2validation_2_helpers_8h.xhtml#a67a7d3407f0ab92d1c80ccd0ea8908e0", null ],
     [ "zeros", "tests_2validation_2_helpers_8h.xhtml#af1e0de8172e8e875f08d040d03b164a5", null ]
 ];

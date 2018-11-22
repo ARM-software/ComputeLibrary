@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,6 +112,8 @@ class SmallROIPoolingLayerDataset final : public ROIPoolingLayerDataset
 public:
     SmallROIPoolingLayerDataset()
     {
+        add_config(TensorShape(50U, 47U, 1U), ROIPoolingLayerInfo(7U, 7U, 1.f / 8.f), 1U);
+        add_config(TensorShape(50U, 47U, 3U), ROIPoolingLayerInfo(7U, 7U, 1.f / 8.f), 1U);
         add_config(TensorShape(50U, 47U, 3U), ROIPoolingLayerInfo(7U, 7U, 1.f / 8.f), 40U);
         add_config(TensorShape(50U, 47U, 10U), ROIPoolingLayerInfo(7U, 7U, 1.f / 8.f), 80U);
         add_config(TensorShape(50U, 47U, 80U), ROIPoolingLayerInfo(7U, 7U, 1.f / 8.f), 80U);

@@ -73,6 +73,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     // Create and configure function
     GCGEMM gemm;
     gemm.configure(&a, &b, &c, &dst, alpha, beta);
+
+    //TODO(COMPMID-415): Validate valid region
 }
 
 template <typename T>
@@ -80,12 +82,16 @@ using GCGEMMFixture = GEMMValidationFixture<GCTensor, GCAccessor, GCGEMM, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
+                                                                                                          framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);

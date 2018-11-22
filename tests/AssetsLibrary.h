@@ -414,8 +414,8 @@ private:
     const RawTensor &find_or_create_raw_tensor(const std::string &name, Format format, Channel channel) const;
 
     mutable TensorCache             _cache{};
-    mutable std::mutex              _format_lock{};
-    mutable std::mutex              _channel_lock{};
+    mutable arm_compute::Mutex      _format_lock{};
+    mutable arm_compute::Mutex      _channel_lock{};
     const std::string               _library_path;
     std::random_device::result_type _seed;
 };

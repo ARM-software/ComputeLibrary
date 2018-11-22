@@ -42,6 +42,7 @@ struct MemoryManagerContext
     std::shared_ptr<arm_compute::IMemoryManager> intra_mm    = { nullptr };             /**< Intra-function memory manager */
     std::shared_ptr<arm_compute::IMemoryManager> cross_mm    = { nullptr };             /**< Cross-function memory manager */
     std::shared_ptr<arm_compute::IMemoryGroup>   cross_group = { nullptr };             /**< Cross-function memory group */
+    IAllocator                                  *allocator   = { nullptr };             /**< Backend allocator to use */
 };
 
 /** Graph context **/

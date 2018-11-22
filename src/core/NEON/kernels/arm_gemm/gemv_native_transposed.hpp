@@ -65,7 +65,7 @@ public:
     GemvNativeTransposed & operator= (GemvNativeTransposed &) = delete;
 
     GemvNativeTransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const unsigned int nmultis, const Tr beta) : _Nsize(N), _Ksize(K), _nmultis(nmultis), _beta(beta), _ci(ci) {
-        /* For now don't do any blocking.*/
+        /* For now don't do any blocking. TODO: figure out if we should. */
         m_block = K;
         n_block = N;
     }

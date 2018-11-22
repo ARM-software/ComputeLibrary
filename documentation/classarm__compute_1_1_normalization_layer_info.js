@@ -1,12 +1,12 @@
 var classarm__compute_1_1_normalization_layer_info =
 [
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml#a305c2145d26b998641402a9fec76f0bb", null ],
-    [ "alpha", "classarm__compute_1_1_normalization_layer_info.xhtml#a4ee7f04c477d0e6a2a3609c24a8815b8", null ],
-    [ "beta", "classarm__compute_1_1_normalization_layer_info.xhtml#a55fe6a30749e41ce31c2bb969a5aa25e", null ],
-    [ "is_cross_map", "classarm__compute_1_1_normalization_layer_info.xhtml#ada140e474f12d6849dae228b32dac8b7", null ],
-    [ "is_in_map", "classarm__compute_1_1_normalization_layer_info.xhtml#a15441073dba4931426c1b7730d8bd67b", null ],
-    [ "kappa", "classarm__compute_1_1_normalization_layer_info.xhtml#a4df91dc0be2437a7d1bfd6d8df72baa8", null ],
-    [ "norm_size", "classarm__compute_1_1_normalization_layer_info.xhtml#a0549be3702c05e6ec1ada69a6d08e349", null ],
-    [ "scale_coeff", "classarm__compute_1_1_normalization_layer_info.xhtml#a6f541aab23799f6c61d9c8d7ca9fe15c", null ],
-    [ "type", "classarm__compute_1_1_normalization_layer_info.xhtml#a39f6445d0b790034f0d8fac36f2eb7f5", null ]
+    [ "alpha", "classarm__compute_1_1_normalization_layer_info.xhtml#a418f33d41dc0830534ee590a162a10e3", null ],
+    [ "beta", "classarm__compute_1_1_normalization_layer_info.xhtml#a01524f49fa1d982d4382e390bef91de7", null ],
+    [ "is_cross_map", "classarm__compute_1_1_normalization_layer_info.xhtml#a727a7ffe5a01a9d26fb910796e84e163", null ],
+    [ "is_in_map", "classarm__compute_1_1_normalization_layer_info.xhtml#a9f8e7c7833f47804091414a46bef67d6", null ],
+    [ "kappa", "classarm__compute_1_1_normalization_layer_info.xhtml#afb71e43799c794c059aa2d6244bd3140", null ],
+    [ "norm_size", "classarm__compute_1_1_normalization_layer_info.xhtml#a7c3edc4b354dda6c7285541f4f0e5c43", null ],
+    [ "scale_coeff", "classarm__compute_1_1_normalization_layer_info.xhtml#a7a6d5f8b1f761ea40f7f1072642be9e5", null ],
+    [ "type", "classarm__compute_1_1_normalization_layer_info.xhtml#abf43f970446f0b82889df52463b9c2b8", null ]
 ];

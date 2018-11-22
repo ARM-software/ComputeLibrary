@@ -28,10 +28,12 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <arm_neon.h>
 #include <cstddef>
@@ -58,7 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, input);
     }
 
     return Status{};
@@ -71,8 +73,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // For this reason num_elems_processed_per_iteration is set to 1
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
+
     // Configure kernel window
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
@@ -81,10 +86,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     if(output->total_size() != 0)
     {
-        AccessWindowHorizontal output_result_access(output, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win, output_result_access);
-
-        output_result_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
     }
 
     if(bias != nullptr)
@@ -148,12 +150,11 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    Window win(window);
-    win.set(Window::DimX, Window::Dimension(0, 1, 1));
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    Iterator in(_input, win);
-    Iterator out(_output, win);
-
+    Iterator in(_input, win_collapsed);
+    Iterator out(_output, win_collapsed);
     if(_bias != nullptr)
     {
         Window win_biases;
@@ -161,7 +162,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
         Iterator bias(_bias, win_biases);
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates & id)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -210,11 +211,11 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
                                                                           static_cast<uint8_t>(_max));
             }
         },
-        in, bias, out);
+        in, out, bias);
     }
     else
     {
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates & id)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -256,15 +257,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_data_type(DataType::QASYMM8));
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
-                                                  (bias != nullptr) ? bias->info() : nullptr,
-                                                  output->info(),
-                                                  min,
-                                                  max));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info(), min, max));
 
     _input                        = input;
     _bias                         = bias;

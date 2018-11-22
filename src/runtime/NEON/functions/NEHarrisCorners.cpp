@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ NEHarrisCorners::NEHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
                                 float sensitivity, int32_t gradient_size, int32_t block_size, KeyPointArray *corners,
-                                BorderMode border_mode, uint8_t constant_border_value, bool use_fp16)
+                                BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
@@ -126,62 +126,31 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     // Manage intermediate buffers
     _memory_group.manage(&_score);
 
-    if(use_fp16)
+    // Set/init Harris Score kernel accordingly with block_size
+    switch(block_size)
     {
-        switch(block_size)
+        case 3:
         {
-            case 3:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<3>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            break;
-            case 5:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<5>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            break;
-            case 7:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreFP16Kernel<7>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            default:
-                break;
+            auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<3>>();
+            k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
+            _harris_score = std::move(k);
         }
-    }
-    else
-    {
-        // Set/init Harris Score kernel accordingly with block_size
-        switch(block_size)
+        break;
+        case 5:
         {
-            case 3:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<3>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            break;
-            case 5:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<5>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            break;
-            case 7:
-            {
-                auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<7>>();
-                k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
-                _harris_score = std::move(k);
-            }
-            default:
-                break;
+            auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<5>>();
+            k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
+            _harris_score = std::move(k);
         }
+        break;
+        case 7:
+        {
+            auto k = arm_compute::support::cpp14::make_unique<NEHarrisScoreKernel<7>>();
+            k->configure(&_gx, &_gy, &_score, norm_factor, threshold, sensitivity, border_mode == BorderMode::UNDEFINED);
+            _harris_score = std::move(k);
+        }
+        default:
+            break;
     }
 
     // Configure border filling before harris score

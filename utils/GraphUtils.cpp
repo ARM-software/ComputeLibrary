@@ -57,22 +57,28 @@ std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_perm
 }
 } // namespace
 
+TFPreproccessor::TFPreproccessor(float min_range, float max_range)
+    : _min_range(min_range), _max_range(max_range)
+{
+}
 void TFPreproccessor::preprocess(ITensor &tensor)
 {
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
+    const float range = _max_range - _min_range;
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id));
-        float       res                                       = value / 255.f;      // Normalize to [0, 1]
-        res                                                   = (res - 0.5f) * 2.f; // Map to [-1, 1]
+        float       res                                       = value / 255.f;            // Normalize to [0, 1]
+        res                                                   = res * range + _min_range; // Map to [min_range, max_range]
         *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = res;
     });
 }
 
-CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr)
-    : _mean(mean), _bgr(bgr)
+CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, float scale, bool bgr)
+    : _mean(mean), _scale(scale), _bgr(bgr)
 {
     if(_bgr)
     {
@@ -90,7 +96,7 @@ void CaffePreproccessor::preprocess(ITensor &tensor)
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id[channel_idx]];
-        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value * _scale;
     });
 }
 
@@ -505,7 +511,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
     {
         for(size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
         {
-            const T value                                    = distribution(gen);
+            const auto value                                 = static_cast<T>(distribution(gen));
             *reinterpret_cast<T *>(tensor.buffer() + offset) = value;
         }
     }
@@ -517,7 +523,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            const T value                                     = distribution(gen);
+            const auto value                                  = static_cast<T>(distribution(gen));
             *reinterpret_cast<T *>(tensor.ptr_to_element(id)) = value;
         });
     }
@@ -578,7 +584,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         case DataType::F16:
         {
             std::uniform_real_distribution<float> distribution_f16(_lower.get<float>(), _upper.get<float>());
-            fill<float>(tensor, distribution_f16);
+            fill<half>(tensor, distribution_f16);
             break;
         }
         case DataType::F32:

@@ -76,7 +76,7 @@ public:
 
     GemmNative(const CPUInfo *ci, const unsigned int M, const unsigned int N, const unsigned int K, const unsigned int nbatches, const unsigned int nmultis, const Tr beta) :
         _Msize(M), _Nsize(N), _Ksize(K), _nbatches(nbatches), _nmultis(nmultis), _beta(beta), _ci(ci) {
-        /* For now don't do any blocking.*/
+        /* For now don't do any blocking. TODO: figure out if we should. */
         k_block = K;
         n_block = N;
     }

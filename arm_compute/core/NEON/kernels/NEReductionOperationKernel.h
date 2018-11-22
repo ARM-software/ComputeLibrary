@@ -53,7 +53,7 @@ public:
 
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: F32. Data layouts supported: NCHW.
+     * @param[in]  input  Source tensor. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
      * @param[out] output Destination tensor.Data types and data layouts supported: same as @p input.
      *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
@@ -63,7 +63,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEReductionOperationKernel.
      *
-     * @param[in] input  Source tensor info. Data type supported: F32. Data layouts supported: NCHW.
+     * @param[in] input  Source tensor info. Data type supported: QASYMM8/F16/F32. Data layouts supported: NCHW.
      * @param[in] output Destination tensor info.Data types and data layouts supported: same as @p input.
      *                   Output will have the same number of dimensions as input.
      * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0

@@ -62,6 +62,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     // Validate dst region
     const ValidRegion valid_region = shape_to_valid_region(output_shape);
     validate(dst.info()->valid_region(), valid_region);
+
+    // TODO(bsgcomp): Add padding validation (COMPMID-659)
 }
 
 template <typename T>

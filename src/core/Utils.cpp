@@ -34,7 +34,7 @@
 #include <string>
 
 using namespace arm_compute;
-
+#ifndef DOXYGEN_SKIP_THIS
 std::string arm_compute::build_information()
 {
     static const std::string information =
@@ -42,7 +42,7 @@ std::string arm_compute::build_information()
         ;
     return information;
 }
-
+#endif /* DOXYGEN_SKIP_THIS */
 std::string arm_compute::read_file(const std::string &filename, bool binary)
 {
     std::string   out;
@@ -252,6 +252,68 @@ const std::string &arm_compute::string_from_pooling_type(PoolingType type)
     return pool_type_map[type];
 }
 
+const std::string &arm_compute::string_from_gemmlowp_output_stage(GEMMLowpOutputStageType output_stage)
+{
+    static std::map<GEMMLowpOutputStageType, const std::string> output_stage_map =
+    {
+        { GEMMLowpOutputStageType::NONE, "" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN, "quantize_down" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT, "quantize_down_fixedpoint" },
+        { GEMMLowpOutputStageType::QUANTIZE_DOWN_FLOAT, "quantize_down_float" }
+    };
+
+    return output_stage_map[output_stage];
+}
+
+std::string arm_compute::string_from_pixel_value(const PixelValue &value, const DataType data_type)
+{
+    std::stringstream ss;
+    std::string       converted_string;
+
+    switch(data_type)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+            // Needs conversion to 32 bit, otherwise interpreted as ASCII values
+            ss << uint32_t(value.get<uint8_t>());
+            converted_string = ss.str();
+            break;
+        case DataType::S8:
+            // Needs conversion to 32 bit, otherwise interpreted as ASCII values
+            ss << int32_t(value.get<int8_t>());
+            converted_string = ss.str();
+            break;
+        case DataType::U16:
+            ss << value.get<uint16_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::S16:
+            ss << value.get<int16_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::U32:
+            ss << value.get<uint32_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::S32:
+            ss << value.get<int32_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::F32:
+            converted_string = float_to_string_with_full_precision(value.get<float>());
+            break;
+        case DataType::F16:
+            static_assert(sizeof(half) == 2, "Half must be 16 bit");
+            ss << value.get<half>();
+            converted_string = ss.str();
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not handled");
+    }
+
+    return converted_string;
+}
+
 std::string arm_compute::lower_string(const std::string &val)
 {
     std::string res = val;
@@ -274,28 +336,16 @@ PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorSha
     return PadStrideInfo(strides.first, strides.second, same_pad_left, same_pad_right, same_pad_top, same_pad_bottom, DimensionRoundingType::CEIL);
 }
 
-TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights)
-{
-    TensorShape out_shape(input);
-    out_shape.set(0, out_dims.first);
-    out_shape.set(1, out_dims.second);
-    out_shape.set(2, weights[3]);
-    return out_shape;
-}
-
 const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
     unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
-    unsigned int inner_border_right, unsigned int inner_border_top, unsigned int stride_x, unsigned int stride_y)
+    unsigned int stride_x, unsigned int stride_y)
 {
     ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
-    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width + inner_border_right) < 2 * padx);
-    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height + inner_border_top) < 2 * pady);
-    const int padx_deconv = (kernel_width - padx - 1);
-    const int pady_deconv = (kernel_height - pady - 1);
-    ARM_COMPUTE_ERROR_ON(padx_deconv < 0);
-    ARM_COMPUTE_ERROR_ON(pady_deconv < 0);
-    const int w = stride_x * (in_width - 1) + kernel_width + inner_border_right - 2 * padx_deconv;
-    const int h = stride_y * (in_height - 1) + kernel_height + inner_border_top - 2 * pady_deconv;
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width) < 2 * padx);
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height) < 2 * pady);
+    const int w = stride_x * (in_width - 1) + kernel_width - 2 * padx;
+    const int h = stride_y * (in_height - 1) + kernel_height - 2 * pady;
+
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 

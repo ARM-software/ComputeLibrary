@@ -49,9 +49,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 0, "Unsupported reduction axis, Supported axis is 0");
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
 
     // Reduce shape on axis
@@ -62,9 +61,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output->tensor_shape());
-        ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != DataLayout::NCHW);
     }
 
     return Status{};
@@ -110,11 +109,36 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize", build_opts));
+    std::string  kernel_name;
+    unsigned int idx = 0;
+    switch(axis)
+    {
+        case 0:
+            kernel_name = "x";
+            idx         = num_arguments_per_1D_tensor() * 3;
+            break;
+        case 1:
+            kernel_name = "y";
+            idx         = num_arguments_per_2D_tensor() * 3;
+            break;
+        case 2:
+            kernel_name = "z";
+            idx         = num_arguments_per_3D_tensor() * 3;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+    }
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("l2_normalize_" + kernel_name, build_opts));
 
     // Set epsilon argument
-    unsigned int idx = num_arguments_per_1D_tensor() * 3;
-    _kernel.setArg<cl_uint>(idx, _epsilon);
+    if(input->info()->data_type() == DataType::F32)
+    {
+        _kernel.setArg<cl_uint>(idx, _epsilon);
+    }
+    else
+    {
+        _kernel.setArg<cl_ushort>(idx, _epsilon);
+    }
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(_input->info(), _output->info());
@@ -137,18 +161,58 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
     Window window_sum(window);
-    window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
 
-    Window in_slice  = window.first_slice_window_1D();
-    Window sum_slice = window_sum.first_slice_window_1D();
-
-    do
+    switch(_axis)
     {
-        unsigned int idx = 0;
-        add_1D_tensor_argument(idx, _input, in_slice);
-        add_1D_tensor_argument(idx, _sum, sum_slice);
-        add_1D_tensor_argument(idx, _output, in_slice);
-        enqueue(queue, *this, in_slice);
+        case 0:
+        {
+            window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
+            Window in_slice  = window.first_slice_window_1D();
+            Window sum_slice = window_sum.first_slice_window_1D();
+            do
+            {
+                unsigned int idx = 0;
+                add_1D_tensor_argument(idx, _input, in_slice);
+                add_1D_tensor_argument(idx, _sum, sum_slice);
+                add_1D_tensor_argument(idx, _output, in_slice);
+                enqueue(queue, *this, in_slice);
+            }
+            while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
+        }
+        break;
+        case 1:
+        {
+            window_sum.set(Window::DimY, Window::Dimension(0, 0, 0));
+            Window in_slice  = window.first_slice_window_2D();
+            Window sum_slice = window_sum.first_slice_window_2D();
+            do
+            {
+                unsigned int idx = 0;
+                add_2D_tensor_argument(idx, _input, in_slice);
+                add_2D_tensor_argument(idx, _sum, sum_slice);
+                add_2D_tensor_argument(idx, _output, in_slice);
+                enqueue(queue, *this, in_slice);
+            }
+            while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(sum_slice));
+        }
+        break;
+        case 2:
+        {
+            window_sum.set(Window::DimZ, Window::Dimension(0, 0, 0));
+            Window in_slice  = window.first_slice_window_3D();
+            Window sum_slice = window_sum.first_slice_window_3D();
+            do
+            {
+                unsigned int idx = 0;
+                add_3D_tensor_argument(idx, _input, in_slice);
+                add_3D_tensor_argument(idx, _sum, sum_slice);
+                add_3D_tensor_argument(idx, _output, in_slice);
+                enqueue(queue, *this, in_slice);
+            }
+            while(window.slide_window_slice_3D(in_slice) && window.slide_window_slice_3D(sum_slice));
+        }
+        break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
     }
-    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }

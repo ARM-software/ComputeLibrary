@@ -102,7 +102,7 @@ void NECumulativeDistributionKernel::run(const Window &window, const ThreadInfo 
     }
     else
     {
-        const float diff = image_size - 1;
+        const float diff = image_size - cd_min;
 
         for(unsigned int x = 0; x < _histogram_size; ++x)
         {

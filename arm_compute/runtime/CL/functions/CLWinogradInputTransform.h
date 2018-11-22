@@ -50,7 +50,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in] input         The input tensor to transform. Data types supported: F32
+     * @param[in] input         The input tensor to transform. Data types supported: F16,F32
      * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
      * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo.
      */
@@ -68,7 +68,7 @@ public:
      *
      *       Strides: only unit strides
      *
-     * @param[in] input         The input tensor to transform. Data types supported: F32
+     * @param[in] input         The input tensor to transform. Data types supported: F16,F32
      * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
      * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo.
      *

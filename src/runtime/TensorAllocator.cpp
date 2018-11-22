@@ -127,39 +127,35 @@ void TensorAllocator::init(const TensorAllocator &allocator, const Coordinates &
 
 uint8_t *TensorAllocator::data() const
 {
-    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
-    return reinterpret_cast<uint8_t *>(_memory.region()->buffer());
+    return (_memory.region() == nullptr) ? nullptr : reinterpret_cast<uint8_t *>(_memory.region()->buffer());
 }
 
 void TensorAllocator::allocate()
 {
-    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
-    ARM_COMPUTE_ERROR_ON(_memory.region()->buffer() != nullptr);
-
     if(_associated_memory_group == nullptr)
     {
-        _memory = Memory(std::make_shared<MemoryRegion>(info().total_size(), alignment()));
+        _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(info().total_size(), alignment()));
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, reinterpret_cast<void **>(_memory.region()->handle()), info().total_size());
-        _memory.region()->set_size(info().total_size());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
     }
     info().set_is_resizable(false);
 }
 
 void TensorAllocator::free()
 {
-    _memory = Memory();
+    _memory.set_region(nullptr);
     info().set_is_resizable(true);
 }
 
-arm_compute::Status TensorAllocator::import_memory(Memory memory)
+arm_compute::Status TensorAllocator::import_memory(void *memory, size_t size)
 {
-    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON(memory.region()->buffer() == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(memory == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(size == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
-    _memory = memory;
+
+    _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(memory, info().total_size()));
     info().set_is_resizable(false);
 
     return Status{};
@@ -167,10 +163,10 @@ arm_compute::Status TensorAllocator::import_memory(Memory memory)
 
 void TensorAllocator::set_associated_memory_group(MemoryGroup *associated_memory_group)
 {
-    ARM_COMPUTE_ERROR_ON(_memory.region() == nullptr);
     ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
     ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
-    ARM_COMPUTE_ERROR_ON(_memory.region()->buffer() != nullptr);
+    ARM_COMPUTE_ERROR_ON(_memory.region() != nullptr && _memory.region()->buffer() != nullptr);
+
     _associated_memory_group = associated_memory_group;
 }
 

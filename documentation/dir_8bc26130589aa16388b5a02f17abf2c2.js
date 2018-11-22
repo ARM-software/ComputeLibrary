@@ -1,6 +1,7 @@
 var dir_8bc26130589aa16388b5a02f17abf2c2 =
 [
     [ "CL", "dir_b986aa98f9b6490bb4fc7918500346fb.xhtml", "dir_b986aa98f9b6490bb4fc7918500346fb" ],
+    [ "common", "dir_b9621ae687ab229876c54f8c2df20e15.xhtml", "dir_b9621ae687ab229876c54f8c2df20e15" ],
     [ "CPP", "dir_b496024afd63bafbf4e8da80d7d3a81a.xhtml", "dir_b496024afd63bafbf4e8da80d7d3a81a" ],
     [ "GLES_COMPUTE", "dir_e83fa7cb9796f3ad7be03e3d9fcd3249.xhtml", "dir_e83fa7cb9796f3ad7be03e3d9fcd3249" ],
     [ "NEON", "dir_65e289039e1347f87d412b0a1b1a312c.xhtml", "dir_65e289039e1347f87d412b0a1b1a312c" ],
@@ -33,6 +34,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     ] ],
     [ "ILutAllocator.h", "_i_lut_allocator_8h.xhtml", [
       [ "ILutAllocator", "classarm__compute_1_1_i_lut_allocator.xhtml", "classarm__compute_1_1_i_lut_allocator" ]
+    ] ],
+    [ "IMemory.h", "_i_memory_8h.xhtml", [
+      [ "IMemory", "classarm__compute_1_1_i_memory.xhtml", "classarm__compute_1_1_i_memory" ]
     ] ],
     [ "IMemoryGroup.h", "_i_memory_group_8h.xhtml", [
       [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", "classarm__compute_1_1_i_memory_group" ]

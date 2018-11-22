@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -47,7 +48,8 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
 
     ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != winograd_info.output_data_layout);
 
@@ -155,6 +157,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
                                                                 kernel_size,
                                                                 output_tile_size,
                                                                 conv_info);
+    const size_t total_batches = output->info()->tensor_shape().total_size_upper(3);
 
     // Set build options
     CLBuildOptions build_opts;
@@ -162,6 +165,8 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
     build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
     build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option_if(total_batches > 1, "-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
     build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
     build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
 
@@ -203,8 +208,11 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
+    // Collapse window
+    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
+
     // Get initial windows
-    Window slice = window.first_slice_window_3D();
+    Window slice = window_collapsed.first_slice_window_4D();
     slice.set(Window::DimZ, Window::Dimension(0, 1, 1));
 
     // Setup output slice
@@ -214,7 +222,7 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
 
     if(_bias != nullptr)
     {
-        unsigned int idx1 = 2 * num_arguments_per_3D_tensor();
+        unsigned int idx1 = 2 * num_arguments_per_4D_tensor();
         Window       slice_biases;
         slice_biases.use_tensor_dimensions(_bias->info()->tensor_shape());
         add_1D_tensor_argument(idx1, _bias, slice_biases);
@@ -222,15 +230,15 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
 
     if(_output->info()->data_layout() == DataLayout::NHWC)
     {
-        unsigned int idx2 = 2 * num_arguments_per_3D_tensor() + ((_bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
+        unsigned int idx2 = 2 * num_arguments_per_4D_tensor() + ((_bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
         _kernel.setArg(idx2, static_cast<int>(_output->info()->total_size() - _output->info()->strides_in_bytes().y()));
     }
 
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice_out);
+        add_4D_tensor_argument(idx, _input, slice);
+        add_4D_tensor_argument(idx, _output, slice_out);
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_out));

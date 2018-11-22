@@ -67,9 +67,10 @@ public:
     IGraphMutator *pass(size_t index);
     /** Appends a mutation pass
      *
-     * @param[in] pass Pass to append
+     * @param[in] pass        Pass to append
+     * @param[in] conditional (Optional) Append pass if true else false. Defaults to true.
      */
-    void append(std::unique_ptr<IGraphMutator> pass);
+    void append(std::unique_ptr<IGraphMutator> pass, bool conditional = true);
     /** Clears all the passes */
     void clear();
     /** Runs all the mutation passes on a given graph

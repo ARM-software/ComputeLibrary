@@ -39,6 +39,121 @@ namespace arm_compute
 {
 namespace
 {
+inline Status validate_kernel_3x3(const Size2D input_dims, const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    if(input_dims.width > 4 && input_dims.height > 4)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>::validate(input, input0, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>::validate(weights, input1, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, input0, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, input1, winograd_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+    }
+
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_5x5(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(batched_mm_output, biases, output, winograd_info)));
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_3x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 1, 6, 1, 3>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 1, 6, 1, 3>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 1, 6, 1, 3>::validate(batched_mm_output, biases, output, winograd_info)));
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_1x3(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 6, 1, 3, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 6, 1, 3, 1>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 6, 1, 3, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_5x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 1, 4, 1, 5>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 1, 4, 1, 5>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 1, 4, 1, 5>::validate(batched_mm_output, biases, output, winograd_info)));
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+inline Status validate_kernel_1x5(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 4, 1, 5, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 4, 1, 5, 1>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 4, 1, 5, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_7x1(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 1, 2, 1, 7>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 1, 2, 1, 7>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 1, 2, 1, 7>::validate(batched_mm_output, biases, output, winograd_info)));
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
+inline Status validate_kernel_1x7(const ITensorInfo *input, const TensorInfo *input0, const TensorInfo *input1, const TensorInfo *batched_mm_output,
+                                  const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 1, 7, 1>::validate(input, input0, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 1, 7, 1>::validate(weights, input1, winograd_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 1, 7, 1>::validate(batched_mm_output, biases, output, winograd_info)));
+
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
+    return Status{};
+}
+
 inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
 {
     const DataLayout data_layout = input->info()->data_layout();
@@ -52,31 +167,19 @@ inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
-    const DataLayout   data_layout = input->data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 3 && weights->dimension(height_idx) != 5, "Only 3 and 5 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd layer only supports unit strides.");
-
     if(biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
-
-    return Status{};
+    return INEWinogradLayerTransformWeightsKernel<float>::validate(input, weights);
 }
 
 Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims)
 {
     Size2D output_tile = Size2D{};
-
     if(kernel_dims == Size2D(3U, 3U))
     {
         output_tile = (input_dims.width <= 4 && input_dims.height <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
@@ -85,7 +188,30 @@ Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims)
     {
         output_tile = Size2D(2U, 2U);
     }
-
+    else if(kernel_dims == Size2D(1U, 3U))
+    {
+        output_tile = Size2D(1U, 6U);
+    }
+    else if(kernel_dims == Size2D(3U, 1U))
+    {
+        output_tile = Size2D(6U, 1U);
+    }
+    else if(kernel_dims == Size2D(1U, 5U))
+    {
+        output_tile = Size2D(1U, 4U);
+    }
+    else if(kernel_dims == Size2D(5U, 1U))
+    {
+        output_tile = Size2D(4U, 1U);
+    }
+    else if(kernel_dims == Size2D(7U, 1U))
+    {
+        output_tile = Size2D(2U, 1U);
+    }
+    else if(kernel_dims == Size2D(1U, 7U))
+    {
+        output_tile = Size2D(1U, 2U);
+    }
     return output_tile;
 }
 
@@ -94,7 +220,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
     // Check if we want to configure a Winograd configuration which requires fast math
     using WinogradConfiguration = std::pair<std::pair<int, int>, std::pair<int, int>>;
 
-    std::vector<WinogradConfiguration> fast_math_winograd =
+    const std::vector<WinogradConfiguration> fast_math_winograd =
     {
         WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(5, 5)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
@@ -109,7 +235,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 } //namespace
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _asm_glue(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
+    : _memory_group(memory_manager), _gemm_function(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
       _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
       _is_prepared(false), _is_activationlayer_enabled(false)
 {
@@ -149,48 +275,96 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     int n_gemms = 0;
     int N_BLOCK = 0; // Size of block used by GEMM.
 
-    switch(kernel_size.width)
+    if(kernel_size == Size2D(3, 3))
     {
-        case 3:
+        if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
         {
-            if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
-            {
-                using config             = NEWinogradLayerConfiguration<float, float, 4, 4, 3, 3>;
-                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
-                n_gemms                  = config::WinogradBase::N_GEMMS;
-                N_BLOCK                  = config::WinogradConv::N_BLOCK;
-            }
-            else
-            {
-                using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 3, 3>;
-                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
-                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
-                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
-                n_gemms                  = config::WinogradBase::N_GEMMS;
-                N_BLOCK                  = config::WinogradConv::N_BLOCK;
-            }
-            break;
-        }
-        case 5:
-        {
-            using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 5, 5>;
+            using config             = NEWinogradLayerConfiguration<float, float, 4, 4, 3, 3>;
             transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
             transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
             transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
             n_gemms                  = config::WinogradBase::N_GEMMS;
             N_BLOCK                  = config::WinogradConv::N_BLOCK;
-            break;
         }
-        default:
+        else
         {
-            ARM_COMPUTE_ERROR("Not supported.");
-            break;
+            using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 3, 3>;
+            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            n_gemms                  = config::WinogradBase::N_GEMMS;
+            N_BLOCK                  = config::WinogradConv::N_BLOCK;
         }
     }
+    else if(kernel_size == Size2D(5, 5))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 5, 5>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(1, 3))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 6, 1, 3, 1>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(3, 1))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 1, 6, 1, 3>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(1, 5))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 4, 1, 5, 1>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(5, 1))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 1, 4, 1, 5>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(1, 7))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 2, 1, 7, 1>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else if(kernel_size == Size2D(7, 1))
+    {
+        using config             = NEWinogradLayerConfiguration<float, float, 1, 2, 1, 7>;
+        transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+        transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+        transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+        n_gemms                  = config::WinogradBase::N_GEMMS;
+        N_BLOCK                  = config::WinogradConv::N_BLOCK;
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR("Not supported.");
+    }
 
-    const PaddingType use_padding_type = (conv_info.pad_left() != 0u) ? PADDING_SAME : PADDING_VALID;
+    const PaddingType use_padding_type = (conv_info.pad_top() != 0u || conv_info.pad_left() != 0) ? PADDING_SAME : PADDING_VALID;
     const bool        use_same_padding = use_padding_type == PADDING_SAME;
 
     // Get convolved dimensions
@@ -207,19 +381,19 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const size_t kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels,
                                                                                          in_channels)
                                        * data_type_size
-                                       + storage_alignment - 1;
+                                       + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
 
     // Input storage
     const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols,
                                                                                      use_same_padding)
                                       * data_type_size
-                                      + storage_alignment - 1;
+                                      + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
 
     // Output storage
     const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels,
                                                                                         use_same_padding)
                                        * data_type_size
-                                       + storage_alignment - 1;
+                                       + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
     ;
     const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
     const int         kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
@@ -241,6 +415,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     TensorShape a_shape(k, m, 1, n_gemms);
     Strides     a_strides(data_type_size);
     a_strides.set(1, a_strides[0] * k);
+    //a_strides.set(2, data_type_size * input_matrix_stride / n_gemms); FIXME: This is the real batch size, but RSH's code crashes if it's not 0.
     a_strides.set(2, 0);
     a_strides.set(3, data_type_size * input_matrix_stride);
 
@@ -252,6 +427,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     TensorShape d_shape(n, m, 1, n_gemms);
     Strides     d_strides(data_type_size);
     d_strides.set(1, data_type_size * output_matrix_row_stride);
+    //d_strides.set(2, data_type_size * output_matrix_stride / n_gemms); FIXME: This is the real batch size, but RSH's code crashes if it's not 0.
     d_strides.set(2, 0);
     d_strides.set(3, data_type_size * output_matrix_stride);
 
@@ -272,6 +448,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     // Configure the InputTransform
     _memory_group.manage(&_input_workspace);
+    _memory_group.manage(&_output_workspace);
+
     if(data_layout == DataLayout::NCHW)
     {
         // configure the kernel to transform the input tensor from NCHW -> NHWC
@@ -279,48 +457,34 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _input_nhwc.allocator()->allocate();
         transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
                                           &_input_workspace, input_matrix_stride);
-    }
-    else
-    {
-        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          &_input_workspace, input_matrix_stride);
-    }
 
-    // Configure WeightsTransform
-    if(data_layout == DataLayout::NCHW)
-    {
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
 
         transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
-    }
-    else
-    {
-        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
-        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
 
-        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
-    }
-    _weights_hwio.allocator()->allocate();
-
-    // Configure OutputTransform
-    //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
-
-    _memory_group.manage(&_output_workspace);
-    if(data_layout == DataLayout::NCHW)
-    {
+        //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
         transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, &_output_nhwc,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
     else
     {
+        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          &_input_workspace, input_matrix_stride);
+
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
+
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
+
         transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, _output,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
 
-    _asm_glue.configure(&_input_workspace, &_kernel_storage, &_output_workspace, 1.0f, 0.f, false);
+    _weights_hwio.allocator()->allocate();
+    _gemm_function.configure(&_input_workspace, &_kernel_storage, nullptr, &_output_workspace, 1.0f, 0.f);
     _input_workspace.allocator()->allocate();
     _kernel_storage.allocator()->allocate();
     _output_workspace.allocator()->allocate();
@@ -355,12 +519,12 @@ void NEWinogradConvolutionLayer::run()
         //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
         _permute_input.run();
     }
+
     // Transform input tensor to the winograd domain
     NEScheduler::get().schedule(_transform_input_kernel.get(), Window::DimX);
 
     //Run 16 GEMMs in multiple threads, each kernel runs one or more GEMMs
-    _asm_glue.run();
-
+    _gemm_function.run();
     // Transform output tensor to the spatial domain
     NEScheduler::get().schedule(_transform_output_kernel.get(), Window::DimX);
 
@@ -408,97 +572,81 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Validate input transform
     const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
-
-    switch(weights->dimension(idx_width))
-    {
-        case 3:
-        {
-            if(input_dims.width > 4 && input_dims.height > 4)
-            {
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>::validate(input, &input0, winograd_info)));
-            }
-            else
-            {
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, winograd_info)));
-            }
-            break;
-        }
-        case 5:
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>::validate(input, &input0, winograd_info)));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
-            break;
-        }
-    }
     // Validate filter transform
     const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
-
-    switch(weights->dimension(idx_width))
-    {
-        case 3:
-        {
-            if(input_dims.width > 4 && input_dims.height > 4)
-            {
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>::validate(weights, &input1, winograd_info)));
-            }
-            else
-            {
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, winograd_info)));
-            }
-            break;
-        }
-        case 5:
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, &input1, winograd_info)));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
-            break;
-        }
-    }
     // Validate batched matrix multiply
     TensorShape batched_mm_output_shape = input0.tensor_shape();
     batched_mm_output_shape[0]          = input1.tensor_shape()[0];
     const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
-    switch(weights->dimension(idx_width))
+
+    if(kernel_size == Size2D(3, 3))
     {
-        case 3:
-        {
-            if(input_dims.width > 4 && input_dims.height > 4)
-            {
-                // Validate output transform
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
-            }
-            else
-            {
-                // Validate output transform
-                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
-            }
-            break;
-        }
-        case 5:
-        {
-            // Validate output transform
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(&batched_mm_output, biases, output, winograd_info)));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
-            break;
-        }
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != conv_info.pad_left(), "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_bottom(), "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_left(), "Only SAME or VALID padding supported");
+        return validate_kernel_3x3(input_dims, input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
     }
-    // Validate Activation Layer
-    if(act_info.enabled())
+    else if(kernel_size == Size2D(5, 5))
     {
-        NEActivationLayer::validate(output, nullptr, act_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != conv_info.pad_left(), "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_bottom(), "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != conv_info.pad_left(), "Only SAME or VALID padding supported");
+        return validate_kernel_5x5(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    if(kernel_size == Size2D(3, 1))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_3x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else if(kernel_size == Size2D(1, 3))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 1, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_1x3(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else if(kernel_size == Size2D(5, 1))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_5x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else if(kernel_size == Size2D(1, 5))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 2, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_1x5(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else if(kernel_size == Size2D(7, 1))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_left() != 3, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_right() != 0u && conv_info.pad_right() != 3, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_bottom() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_7x1(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else if(kernel_size == Size2D(1, 7))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_top() != 0u && conv_info.pad_top() != 3, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_bottom() != 0u && conv_info.pad_bottom() != 3, "Only SAME or VALID padding supported");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.pad_left() != 0u && conv_info.pad_right() != 0, "Only SAME or VALID padding supported");
+        return validate_kernel_1x7(input, &input0, &input1, &batched_mm_output, weights, biases, output, winograd_info, act_info);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_MSG("Kernel shape not supported");
     }
     return Status{};
 }
@@ -513,8 +661,8 @@ void NEWinogradConvolutionLayer::prepare()
 
         // Transform weights
         NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
-        _weights_hwio.allocator()->free();
 
+        _weights_hwio.allocator()->free();
         _is_prepared = true;
     }
 }

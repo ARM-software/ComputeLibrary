@@ -48,21 +48,16 @@ namespace
 /* Allowed ratio of mismatches between target and reference (1.0 = 100%) */
 const float allowed_mismatch_ratio = 0.1f;
 
-const auto use_fp16 = framework::dataset::make("UseFP16", { false });
-
 const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }),
-                          combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), combine(datasets::BorderModes(), use_fp16)));
+                          combine(framework::dataset::make("Normalization", { MagnitudeType::L1NORM, MagnitudeType::L2NORM }), datasets::BorderModes()));
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(CannyEdge)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), data), framework::dataset::make("Format", Format::U8)),
-               shape, gradient_size, normalization, border_mode, use_fp16, format)
+               shape, gradient_size, normalization, border_mode, format)
 {
-    ARM_COMPUTE_UNUSED(use_fp16);
-    ARM_COMPUTE_ERROR_ON(use_fp16);
-
     CannyEdgeParameters params = canny_edge_parameters();
     // Convert normalisation type to integer
     const auto norm_type = static_cast<int>(normalization) + 1;
@@ -83,6 +78,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
     // Validate valid region
     validate(src.info()->valid_region(), shape_to_valid_region(shape, (BorderMode::UNDEFINED == border_mode)));
 
+    //TODO(COMPMID-568): dst region validation fails when Shape=7x7 and GradientSize=7 and BorderMode=UNDEFINED (integer underflow)
     if(!(shape == TensorShape{ 7u, 7u } && gradient_size == 7 && border_mode == BorderMode::UNDEFINED))
     {
         validate(dst.info()->valid_region(), shape_to_valid_region(shape, (BorderMode::UNDEFINED == border_mode), BorderSize(gradient_size / 2 + 1)));

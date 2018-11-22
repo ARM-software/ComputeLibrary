@@ -1,5 +1,6 @@
 var utils_2_utils_8cpp =
 [
+    [ "STB_IMAGE_IMPLEMENTATION", "utils_2_utils_8cpp.xhtml#a18372412ad2fc3ce1e3240b3cf0efe78", null ],
     [ "draw_detection_rectangle", "utils_2_utils_8cpp.xhtml#ad1b5373f466a3945e1f0ef1c9943c357", null ],
     [ "get_image_type_from_file", "utils_2_utils_8cpp.xhtml#a779702024b509e6797b2d526d382cf65", null ],
     [ "get_mem_free_from_meminfo", "utils_2_utils_8cpp.xhtml#afb7b08e5c044dba650037628089a4e7c", null ],

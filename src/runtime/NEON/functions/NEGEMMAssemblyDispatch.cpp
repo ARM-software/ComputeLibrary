@@ -45,6 +45,7 @@ std::unique_ptr<IFunction> create_function_all_types(arm_gemm::GemmMethod method
     //Note: It's safe to not check for FP16 support because this was already checked in NEGEMMAssemblyDispatch::configure()
     switch(method)
     {
+        case arm_gemm::GemmMethod::GEMM_INTERLEAVED_FP16:
         case arm_gemm::GemmMethod::GEMM_INTERLEAVED:
         {
             if(!pretranspose_hint)
@@ -227,7 +228,7 @@ void Fallback<TypeInput, TypeOutput>::configure(const ITensor *a, const ITensor 
         // Forcing 128-byte alignment (required by 32-bit kernels)
         const unsigned int alignment           = 128;
         const size_t       B_pretranspose_size = _gemm_kernel_asm->get_B_pretransposed_array_size();
-        _pretranspose.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment) }, 1, DataType::S8), alignment);
+        _pretranspose.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
         _pretranspose.allocator()->allocate();
         ARM_COMPUTE_ERROR_ON_NULLPTR(_pretranspose.buffer());
     }
@@ -258,7 +259,7 @@ template <typename TypeInput, typename TypeOutput>
 void Fallback<TypeInput, TypeOutput>::allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) }, 1, DataType::S8), alignment);
+    _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
     memory_group.manage(&_workspace);
     _workspace.allocator()->allocate();
 }

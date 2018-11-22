@@ -47,8 +47,10 @@ Status NENodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::BoundingBoxTransformLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : BoundingBoxTransformLayer");
         case NodeType::ChannelShuffleLayer:
-            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ChannelShuffleLayer");
+            return detail::validate_channel_shuffle_layer<NEChannelShuffleLayer>(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return detail::validate_convolution_layer<NEConvolutionLayer,
                    NEDirectConvolutionLayer,
@@ -57,8 +59,26 @@ Status NENodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
                    NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::GenerateProposalsLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
+        case NodeType::NormalizePlanarYUVLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : NormalizePlanarYUVLayer");
+        case NodeType::PadLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PadLayer");
         case NodeType::PermuteLayer:
             return detail::validate_permute_layer<NEPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
+        case NodeType::PriorBoxLayer:
+            return detail::validate_priorbox_layer<NEPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::ReorgLayer:
+            return detail::validate_reorg_layer<NEReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
+        case NodeType::ROIAlignLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ROIAlignLayer");
+        case NodeType::SliceLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::UpsampleLayer:
+            return detail::validate_upsample_layer<NEUpsampleLayer>(*polymorphic_downcast<UpsampleLayerNode *>(node));
+        case NodeType::YOLOLayer:
+            return detail::validate_yolo_layer<NEYOLOLayer>(*polymorphic_downcast<YOLOLayerNode *>(node));
         default:
             return Status{};
     }

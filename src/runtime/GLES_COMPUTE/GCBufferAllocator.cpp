@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryRegion.h"
 
 #include <cstddef>
 
@@ -34,24 +34,26 @@ namespace arm_compute
 void *GCBufferAllocator::allocate(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
-    auto *gl_buffer = new GLBufferWrapper();
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, gl_buffer->_ssbo_name));
+
+    auto *gl_ssbo_name = new GLuint;
+    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, *gl_ssbo_name));
     ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(size), nullptr, GL_STATIC_DRAW));
     ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
 
-    return reinterpret_cast<void *>(gl_buffer);
+    return reinterpret_cast<void *>(gl_ssbo_name);
 }
 
 void GCBufferAllocator::free(void *ptr)
 {
     ARM_COMPUTE_ERROR_ON(ptr == nullptr);
-    auto *gl_buffer = reinterpret_cast<GLBufferWrapper *>(ptr);
-    delete gl_buffer;
+    auto *gl_ssbo_name = reinterpret_cast<GLuint *>(ptr);
+    ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, gl_ssbo_name));
+    delete gl_ssbo_name;
 }
 
 std::unique_ptr<IMemoryRegion> GCBufferAllocator::make_region(size_t size, size_t alignment)
 {
-    ARM_COMPUTE_UNUSED(size, alignment);
-    return nullptr;
+    ARM_COMPUTE_UNUSED(alignment);
+    return arm_compute::support::cpp14::make_unique<GCBufferMemoryRegion>(size);
 }
 } // namespace arm_compute

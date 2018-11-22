@@ -23,6 +23,7 @@
  */
 #include "Framework.h"
 
+#include "arm_compute/runtime/Scheduler.h"
 #include "support/ToolchainSupport.h"
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -41,9 +42,19 @@ namespace framework
 {
 Framework::Framework()
 {
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::TIME_MS),
+                                   Instrument::make_instrument<WallClockTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::TIME_S),
+                                   Instrument::make_instrument<WallClockTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::TIME_MS),
+                                   Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMESTAMPS, ScaleFactor::TIME_S),
+                                   Instrument::make_instrument<SchedulerTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::NONE), Instrument::make_instrument<SchedulerTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_S>);
@@ -58,6 +69,10 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::MALI, ScaleFactor::SCALE_1M), Instrument::make_instrument<MaliCounter, ScaleFactor::SCALE_1M>);
 #endif /* MALI_ENABLED */
 #ifdef ARM_COMPUTE_CL
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_US>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMESTAMPS, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimestamps, ScaleFactor::TIME_S>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::NONE), Instrument::make_instrument<OpenCLTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);
@@ -332,6 +347,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const FileNotFound &error)
         {
+            profiler.test_stop();
             if(_error_on_missing_assets)
             {
                 if(_log_level >= LogLevel::ERRORS)
@@ -365,6 +381,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(const TestError &error)
         {
+            profiler.test_stop();
             if(_log_level >= error.level())
             {
                 func_on_all_printers([&](Printer * p)
@@ -383,6 +400,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #ifdef ARM_COMPUTE_CL
         catch(const ::cl::Error &error)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 std::stringstream stream;
@@ -404,6 +422,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 #endif /* ARM_COMPUTE_CL */
         catch(const std::exception &error)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 func_on_all_printers([&](Printer * p)
@@ -421,6 +440,7 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
         }
         catch(...)
         {
+            profiler.test_stop();
             if(_log_level >= LogLevel::ERRORS)
             {
                 func_on_all_printers([&](Printer * p)
@@ -531,8 +551,8 @@ bool Framework::run()
         if(_test_filter.is_selected(test_info))
         {
 #ifdef ARM_COMPUTE_CL
-            // Every 5000 tests, reset the OpenCL context to release the allocated memory
-            if(opencl_is_available() && (id_run_test % 5000) == 0)
+            // Every 100 tests, reset the OpenCL context to release the allocated memory
+            if(opencl_is_available() && (id_run_test % 100) == 0)
             {
                 auto ctx_properties   = CLScheduler::get().context().getInfo<CL_CONTEXT_PROPERTIES>(nullptr);
                 auto queue_properties = CLScheduler::get().queue().getInfo<CL_QUEUE_PROPERTIES>(nullptr);

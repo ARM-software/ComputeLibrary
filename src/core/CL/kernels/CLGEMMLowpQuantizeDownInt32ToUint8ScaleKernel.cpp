@@ -63,7 +63,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
     // Configure kernel window
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));

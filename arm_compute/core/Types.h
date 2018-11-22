@@ -45,6 +45,8 @@ using half = half_float::half;
 
 /** Permutation vector */
 using PermutationVector = Strides;
+/** Bidirectional strides */
+using BiStrides = Coordinates;
 
 /** Image colour formats */
 enum class Format
@@ -103,6 +105,8 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 /** Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
 
+/** [DataLayout enum definition] **/
+
 /** Supported tensor data layouts */
 enum class DataLayout
 {
@@ -110,6 +114,7 @@ enum class DataLayout
     NCHW,    /**< Num samples, channels, height, width */
     NHWC     /**< Num samples, height, width, channels */
 };
+/** [DataLayout enum definition] **/
 
 /** Supported tensor data layout dimensions */
 enum class DataLayoutDimension
@@ -146,7 +151,7 @@ struct QuantizationInfo
      *
      * @return True if the given quantization info is the same.
      */
-    bool operator==(const QuantizationInfo &other)
+    bool operator==(const QuantizationInfo &other) const
     {
         return scale == other.scale && offset == other.offset;
     }
@@ -157,7 +162,7 @@ struct QuantizationInfo
      *
      * @return True if the given quantization info is not the same.
      */
-    bool operator!=(const QuantizationInfo &other)
+    bool operator!=(const QuantizationInfo &other) const
     {
         return !(*this == other);
     }
@@ -468,6 +473,12 @@ struct Coordinates3D
     uint32_t z; /**< Z coordinates */
 };
 
+/** Padding information as a pair of unsigned int start/end */
+using PaddingInfo = std::pair<uint32_t, uint32_t>;
+
+/** List of padding information */
+using PaddingList = std::vector<PaddingInfo>;
+
 /** Region of interest */
 struct ROI
 {
@@ -514,6 +525,7 @@ enum class ReductionOperation
 {
     SUM_SQUARE, /**< Sum of squares */
     SUM,        /**< Sum */
+    MEAN_SUM,   /**< Mean of sum */
 };
 
 /** The normalization type used for the normalization layer */
@@ -563,6 +575,110 @@ enum class PoolingType
     MAX, /**< Max Pooling */
     AVG, /**< Average Pooling */
     L2   /**< L2 Pooling */
+};
+
+/** Available non maxima suppression types */
+enum class NMSType
+{
+    LINEAR,   /**< Linear NMS */
+    GAUSSIAN, /**< Gaussian NMS */
+    ORIGINAL  /**< Original NMS */
+};
+
+/** BoxWithNonMaximaSuppressionLimit Information class */
+class BoxNMSLimitInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] score_thresh             (Optional) Score threshold.
+     * @param[in] nms                      (Optional) NMS value
+     * @param[in] detections               (Optional) Number of detections
+     * @param[in] soft_nms_enabled         (Optional) Enable SoftNMS
+     * @param[in] soft_nms_method          (Optional) Soft NMS method
+     * @param[in] soft_nms_sigma           (Optional) Soft NMS sigma value
+     * @param[in] soft_nms_min_score_thres (Optional) Soft NMS minimum score threshold
+     * @param[in] suppress_size            (Optional) Filter out boxes based on their size. Defaults to false
+     * @param[in] min_size                 (Optional) Smaller boxes than min_size will be filtered out. Defaults to 1
+     * @param[in] im_width                 (Optional) Boxes whose centers (on the x axis) is beyond im_width will be filtered. Defaults to 1
+     * @param[in] im_height                (Optional) Boxes whose centers (on the y axis) is beyond im_height will be filtered. Defaults to 1
+     */
+    BoxNMSLimitInfo(float score_thresh = 0.05f, float nms = 0.3f,
+                    int detections = 100, bool soft_nms_enabled = false,
+                    NMSType soft_nms_method = NMSType::LINEAR,
+                    float soft_nms_sigma = 0.5f, float soft_nms_min_score_thres = 0.001f, bool suppress_size = false, float min_size = 1.0f, float im_width = 1.0f, float im_height = 1.0f)
+        : _score_thresh(score_thresh), _nms(nms), _detections_per_im(detections), _soft_nms_enabled(soft_nms_enabled), _soft_nms_method(soft_nms_method), _soft_nms_sigma(soft_nms_sigma),
+          _soft_nms_min_score_thres(soft_nms_min_score_thres), _suppress_size(suppress_size), _min_size(min_size), _im_width(im_width), _im_height(im_height)
+    {
+    }
+    /** Get the score threshold */
+    float score_thresh() const
+    {
+        return _score_thresh;
+    }
+    /** Get the NMS */
+    float nms() const
+    {
+        return _nms;
+    }
+    /** Get the number of detections */
+    int detections_per_im() const
+    {
+        return _detections_per_im;
+    }
+    /** Check if soft NMS is enabled */
+    bool soft_nms_enabled() const
+    {
+        return _soft_nms_enabled;
+    }
+    /** Get soft NMS method */
+    NMSType soft_nms_method() const
+    {
+        return _soft_nms_method;
+    }
+    /** Get soft NMS sigma */
+    float soft_nms_sigma() const
+    {
+        return _soft_nms_sigma;
+    }
+    /** Get soft nms min score threshold */
+    float soft_nms_min_score_thres() const
+    {
+        return _soft_nms_min_score_thres;
+    }
+    /** Get if NMS will suppress boxes based on their size/position */
+    bool suppress_size() const
+    {
+        return _suppress_size;
+    }
+    /** Get size suppression threshold */
+    float min_size() const
+    {
+        return _min_size;
+    }
+    /** Get image width (NMS may suppress boxes whose center sits beyond the image width) */
+    float im_width() const
+    {
+        return _im_width;
+    }
+    /** Get image height (NMS may suppress boxes whose center sits beyond the image height) */
+    float im_height() const
+    {
+        return _im_height;
+    }
+
+private:
+    float   _score_thresh;
+    float   _nms;
+    int     _detections_per_im;
+    bool    _soft_nms_enabled;
+    NMSType _soft_nms_method;
+    float   _soft_nms_sigma;
+    float   _soft_nms_min_score_thres;
+    bool    _suppress_size;
+    float   _min_size;
+    float   _im_width;
+    float   _im_height;
 };
 
 /** Padding and stride information class */
@@ -714,6 +830,129 @@ struct FullyConnectedLayerInfo
     }
 };
 
+/** PriorBox layer info */
+class PriorBoxLayerInfo final
+{
+public:
+    /** Default Constructor */
+    PriorBoxLayerInfo()
+        : _min_sizes(),
+          _variances(),
+          _offset(),
+          _flip(true),
+          _clip(false),
+          _max_sizes(),
+          _aspect_ratios(),
+          _img_size(),
+          _steps()
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] min_sizes     Min sizes vector.
+     * @param[in] variances     Variances vector.
+     * @param[in] offset        Offset value.
+     * @param[in] flip          (Optional) Flip the aspect ratios.
+     * @param[in] clip          (Optional) Clip coordinates so that they're within [0,1].
+     * @param[in] max_sizes     (Optional) Max sizes vector.
+     * @param[in] aspect_ratios (Optional) Aspect ratios of the boxes.
+     * @param[in] img_size      (Optional) Image size.
+     * @param[in] steps         (Optional) Step values.
+     */
+    PriorBoxLayerInfo(const std::vector<float> &min_sizes, const std::vector<float> &variances, float offset, bool flip = true, bool clip = false,
+                      const std::vector<float> &max_sizes = {}, const std::vector<float> &aspect_ratios = {},
+    const Coordinates2D &img_size = Coordinates2D{ 0, 0 }, const std::array<float, 2> &steps = { { 0.f, 0.f } })
+        : _min_sizes(min_sizes),
+          _variances(variances),
+          _offset(offset),
+          _flip(flip),
+          _clip(clip),
+          _max_sizes(max_sizes),
+          _aspect_ratios(),
+          _img_size(img_size),
+          _steps(steps)
+    {
+        _aspect_ratios.push_back(1.);
+        for(unsigned int i = 0; i < aspect_ratios.size(); ++i)
+        {
+            float ar            = aspect_ratios[i];
+            bool  already_exist = false;
+            for(auto ar_new : _aspect_ratios)
+            {
+                if(fabs(ar - ar_new) < 1e-6)
+                {
+                    already_exist = true;
+                    break;
+                }
+            }
+            if(!already_exist)
+            {
+                _aspect_ratios.push_back(ar);
+                if(flip)
+                {
+                    _aspect_ratios.push_back(1.f / ar);
+                }
+            }
+        }
+    }
+    /** Get min sizes. */
+    std::vector<float> min_sizes() const
+    {
+        return _min_sizes;
+    }
+    /** Get min variances. */
+    std::vector<float> variances() const
+    {
+        return _variances;
+    }
+    /** Get the step coordinates */
+    std::array<float, 2> steps() const
+    {
+        return _steps;
+    }
+    /** Get the image size coordinates */
+    Coordinates2D img_size() const
+    {
+        return _img_size;
+    }
+    /** Get the offset */
+    float offset() const
+    {
+        return _offset;
+    }
+    /** Get the flip value */
+    bool flip() const
+    {
+        return _flip;
+    }
+    /** Get the clip value */
+    bool clip() const
+    {
+        return _clip;
+    }
+    /** Get max sizes. */
+    std::vector<float> max_sizes() const
+    {
+        return _max_sizes;
+    }
+    /** Get aspect ratios. */
+    std::vector<float> aspect_ratios() const
+    {
+        return _aspect_ratios;
+    }
+
+private:
+    std::vector<float> _min_sizes;
+    std::vector<float> _variances;
+    float              _offset;
+    bool               _flip;
+    bool               _clip;
+    std::vector<float> _max_sizes;
+    std::vector<float> _aspect_ratios;
+    Coordinates2D      _img_size;
+    std::array<float, 2> _steps;
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {
@@ -800,17 +1039,18 @@ private:
 };
 
 /** ROI Pooling Layer Information class */
-class ROIPoolingLayerInfo
+class ROIPoolingLayerInfo final
 {
 public:
-    /** Default Constructor
+    /** Constructor
      *
-     * @param[in] pooled_width  Pooled width of the layer.
-     * @param[in] pooled_height Pooled height of the layer.
-     * @param[in] spatial_scale Spatial scale to be applied to the ROI coordinates and dimensions.
+     * @param[in] pooled_width   Pooled width of the layer.
+     * @param[in] pooled_height  Pooled height of the layer.
+     * @param[in] spatial_scale  Spatial scale to be applied to the ROI coordinates and dimensions.
+     * @param[in] sampling_ratio Number of samples to include in each pooling region (if set to zero, a ceil(roi_dims/pooling_dims))
      */
-    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale)
-        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale)
+    ROIPoolingLayerInfo(unsigned int pooled_width, unsigned int pooled_height, float spatial_scale, unsigned int sampling_ratio = 0)
+        : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale), _sampling_ratio(sampling_ratio)
     {
     }
     /** Get the pooled width of the layer */
@@ -828,11 +1068,215 @@ public:
     {
         return _spatial_scale;
     }
+    /** Get sampling ratio */
+    unsigned int sampling_ratio() const
+    {
+        return _sampling_ratio;
+    }
 
 private:
     unsigned int _pooled_width;
     unsigned int _pooled_height;
     float        _spatial_scale;
+    unsigned int _sampling_ratio;
+};
+
+/** Generate Proposals Information class */
+class GenerateProposalsInfo
+{
+public:
+    /** Constructor
+     *
+     * @param[in] im_width       Width of the original image
+     * @param[in] im_height      Height of the original image
+     * @param[in] im_scale       Scale applied to the original image
+     * @param[in] spatial_scale  (Optional)Scale applied to the feature map. Defaults to 1.0
+     * @param[in] pre_nms_topN   (Optional)Number of the best scores to be selected from the transformations. Defaults to 6000.
+     * @param[in] post_nms_topN  (Optional)Number of the best scores to be selected from the NMS operation. Defaults to 300.
+     * @param[in] nms_thres      (Optional)NMS overlap threshold. Defaults to 0.7.
+     * @param[in] min_size       (Optional)Size used to validate the anchors produced. Defaults to 16.
+     * @param[in] values_per_roi (Optional)Values used to represent a ROI(Region of interest). Defaults to 4.
+     */
+    GenerateProposalsInfo(float im_width, float im_height, float im_scale, float spatial_scale = 1.0, int pre_nms_topN = 6000, int post_nms_topN = 300, float nms_thres = 0.7, float min_size = 16.0,
+                          size_t values_per_roi = 4)
+        : _im_height(im_height), _im_width(im_width), _im_scale(im_scale), _spatial_scale(spatial_scale), _pre_nms_topN(pre_nms_topN), _post_nms_topN(post_nms_topN), _nms_thres(nms_thres),
+          _min_size(min_size), _values_per_roi(values_per_roi)
+    {
+    }
+
+    /* Get the original height */
+    float im_height() const
+    {
+        return _im_height;
+    }
+    /* Get the original width */
+    float im_width() const
+    {
+        return _im_width;
+    }
+    /* Get the image scale */
+    float im_scale() const
+    {
+        return _im_scale;
+    }
+    /* Get the value of how many best scores to select (before NMS) */
+    int pre_nms_topN() const
+    {
+        return _pre_nms_topN;
+    }
+    /* Get the value of how many best scores to select (after NMS) */
+    int post_nms_topN() const
+    {
+        return _post_nms_topN;
+    }
+    /* Get the NMS overlap threshold */
+    float nms_thres() const
+    {
+        return _nms_thres;
+    }
+    /* Get the minimal size */
+    float min_size() const
+    {
+        return _min_size;
+    }
+    /* Get the spatial scale to be applied to the feature maps */
+    float spatial_scale() const
+    {
+        return _spatial_scale;
+    }
+    /* Get the values used to represent a ROI(Region of interest)*/
+    size_t values_per_roi() const
+    {
+        return _values_per_roi;
+    }
+
+private:
+    float  _im_height;
+    float  _im_width;
+    float  _im_scale;
+    float  _spatial_scale;
+    int    _pre_nms_topN;
+    int    _post_nms_topN;
+    float  _nms_thres;
+    float  _min_size;
+    size_t _values_per_roi;
+};
+
+/** ComputeAnchors information class */
+class ComputeAnchorsInfo
+{
+public:
+    /** Constructor
+     *
+     * @param[in] feat_width     Feature map width
+     * @param[in] feat_height    Feature map height
+     * @param[in] spatial_scale  Feature map scale
+     * @param[in] values_per_roi (Optional)Values used to represent a ROI(Region Of Interest). Defaults to 4
+     */
+    ComputeAnchorsInfo(float feat_width, float feat_height, float spatial_scale, size_t values_per_roi = 4)
+        : _feat_height(feat_height),
+          _feat_width(feat_width),
+          _spatial_scale(spatial_scale),
+          _values_per_roi(values_per_roi)
+    {
+    }
+
+    /* Get the height of the feature map */
+    float feat_height() const
+    {
+        return _feat_height;
+    }
+
+    /* Get the width of the feature map */
+    float feat_width() const
+    {
+        return _feat_width;
+    }
+
+    /* Get the scale of the feature map */
+    float spatial_scale() const
+    {
+        return _spatial_scale;
+    }
+
+    /* Get the values used to represent a ROI(Region Of Interest)*/
+    size_t values_per_roi() const
+    {
+        return _values_per_roi;
+    }
+
+private:
+    float  _feat_height;
+    float  _feat_width;
+    float  _spatial_scale;
+    size_t _values_per_roi;
+};
+
+/** Bounding Box Transform information class */
+class BoundingBoxTransformInfo final
+{
+public:
+    /** Constructor
+     *
+     * @param[in] img_width                Width of the original image
+     * @param[in] img_height               Height, of the original image
+     * @param[in] scale                    Scale of the original image
+     * @param[in] apply_scale              (Optional)Re-apply scaling after transforming the boxes. Defaults to false
+     * @param[in] weights                  (Optional)Weights [wx, wy, ww, wh] for the deltas. Defaults to all ones
+     * @param[in] correct_transform_coords (Optional)Correct bounding box transform coordinates. Defaults to false
+     * @param[in] bbox_xform_clip          (Optional)Minimum bounding box width and height after bounding box transformation in log-space. Defaults to log(1000/16)
+     */
+    BoundingBoxTransformInfo(float img_width, float img_height, float scale, bool apply_scale = false, const std::array<float, 4> weights = { { 1.f, 1.f, 1.f, 1.f } }, bool correct_transform_coords =
+    false,
+    float bbox_xform_clip =
+        4.135166556742356f)
+        : _img_width(img_width), _img_height(img_height), _scale(scale), _apply_scale(apply_scale), _correct_transform_coords(correct_transform_coords), _weights(weights), _bbox_xform_clip(bbox_xform_clip)
+    {
+    }
+
+    std::array<float, 4> weights() const
+    {
+        return _weights;
+    }
+
+    float bbox_xform_clip() const
+    {
+        return _bbox_xform_clip;
+    }
+
+    float img_height() const
+    {
+        return _img_height;
+    }
+
+    float img_width() const
+    {
+        return _img_width;
+    }
+
+    float scale() const
+    {
+        return _scale;
+    }
+
+    bool apply_scale() const
+    {
+        return _apply_scale;
+    }
+
+    bool correct_transform_coords() const
+    {
+        return _correct_transform_coords;
+    }
+
+private:
+    float _img_width;
+    float _img_height;
+    float _scale;
+    bool  _apply_scale;
+    bool  _correct_transform_coords;
+    std::array<float, 4> _weights;
+    float _bbox_xform_clip;
 };
 
 /** Activation Layer Information class */
@@ -1042,7 +1486,7 @@ class GEMMReshapeInfo final
 public:
     /** Default constructor */
     GEMMReshapeInfo()
-        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(1), _reinterpret_input_as_3d(false)
+        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false)
     {
     }
     /** Constructor
@@ -1052,11 +1496,12 @@ public:
      * @param[in] k                         Number of matrix A columns or matrix B rows
      * @param[in] mult_transpose1xW_width   (Optional) Multiplication factor for the width of the 1xW transposed block
      * @param[in] mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleaved block
-     * @param[in] depth_output_gemm3d       (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
+     * @param[in] depth_output_gemm3d       (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel.
+     *                                      If 0 the output will not be reinterpreted as 3D. Default 0
      * @param[in] reinterpret_input_as_3d   (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
      *                                                 to perform 1x1 convolutions with the NHWC data layout)
      */
-    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 1, bool reinterpret_input_as_3d = false)
+    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false)
         : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height), _depth_output_gemm3d(depth_output_gemm3d),
           _reinterpret_input_as_3d(reinterpret_input_as_3d)
     {
@@ -1131,6 +1576,26 @@ private:
     const bool _reinterpret_input_as_3d;
 };
 
+/** GEMMLowp output stage type */
+enum class GEMMLowpOutputStageType
+{
+    NONE,                     /**< No quantization to uint8 */
+    QUANTIZE_DOWN,            /**< Quantize to uint8 using an integer multiplication */
+    QUANTIZE_DOWN_FIXEDPOINT, /**< Quantize to uint8 using a fixed point multiplication */
+    QUANTIZE_DOWN_FLOAT       /**< Quantize to uint8 using a floating point multiplication */
+};
+
+/** GEMMLowp output stage info */
+struct GEMMLowpOutputStageInfo
+{
+    GEMMLowpOutputStageType type{ GEMMLowpOutputStageType::NONE }; /**< GEMMLowp output stage type */
+    int                     gemmlowp_offset{ 0 };                  /**< GEMMLowp output stage offset used for quantizing to QASYMM8 */
+    int                     gemmlowp_multiplier{ 0 };              /**< GEMMLowp output stage multiplier used for quantizing to QASYMM8 */
+    int                     gemmlowp_shift{ 0 };                   /**< GEMMLowp output stage shift used for quantizing to uint8 */
+    int                     gemmlowp_min_bound{ 0 };               /**< GEMMLowp min value used to saturate down the output result before converting back to QASYMM8 */
+    int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
+};
+
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped
@@ -1141,7 +1606,8 @@ class GEMMInfo
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(1), _reinterpret_input_as_3d(false), _retain_internal_weights(false)
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false),
+          _gemmlowp_output_stage(), _fp_mixed_precision(false)
     {
     }
     /** Constructor
@@ -1150,14 +1616,18 @@ public:
      * @param[in] is_b_reshaped               True if the matrix B has been reshaped
      * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
      * @param[in] depth_output_gemm3d         (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel
+     *                                        If 0 the output will not be reinterpreted as 3D. Default 0
      * @param[in] reinterpret_input_as_3d     (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
      *                                        to perform 1x1 convolutions with the NHWC data layout)
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
+     * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
+     * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      *
      */
-    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 1, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false)
+    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false)
         : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights)
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage), _fp_mixed_precision(fp_mixed_precision)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1210,14 +1680,32 @@ public:
     {
         return _retain_internal_weights;
     };
+    /** GEMMLowp output stage
+     *
+     * @return the GEMMLowp output stage info
+     */
+    GEMMLowpOutputStageInfo gemmlowp_output_stage() const
+    {
+        return _gemmlowp_output_stage;
+    };
+    /** Flag which specifies if a wider accumulator should be used.
+     *
+     * @return True if a wider accumulator has to be used
+     */
+    bool fp_mixed_precision() const
+    {
+        return _fp_mixed_precision;
+    };
 
 private:
-    const bool _is_a_reshaped;
-    const bool _is_b_reshaped;
-    const bool _reshape_b_only_on_first_run;
-    const int  _depth_output_gemm3d;
-    const bool _reinterpret_input_as_3d;
-    const bool _retain_internal_weights;
+    const bool                    _is_a_reshaped;
+    const bool                    _is_b_reshaped;
+    const bool                    _reshape_b_only_on_first_run;
+    const int                     _depth_output_gemm3d;
+    const bool                    _reinterpret_input_as_3d;
+    const bool                    _retain_internal_weights;
+    const GEMMLowpOutputStageInfo _gemmlowp_output_stage;
+    const bool                    _fp_mixed_precision;
 };
 
 /** Winograd information */

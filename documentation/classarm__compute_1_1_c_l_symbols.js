@@ -27,6 +27,7 @@ var classarm__compute_1_1_c_l_symbols =
     [ "clGetEventProfilingInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aad5f68729eb6cc674fce0fd950c5b765", null ],
     [ "clGetKernelInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a7b9fe21a9872e746fa811b916e4dd9bf", null ],
     [ "clGetKernelWorkGroupInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aa5bc2c92a538b212960c02f9cb480afe", null ],
+    [ "clGetMemObjectInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a1e85643ad6d7c35515d0e97b9b88e945", null ],
     [ "clGetPlatformIDs_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aa794227c46c954c6e6684d21af618b00", null ],
     [ "clGetProgramBuildInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a34391377f3991f0a88631cf1b05e3c8b", null ],
     [ "clGetProgramInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a38787d16b9a4ccb79f11c9e807b31f39", null ],

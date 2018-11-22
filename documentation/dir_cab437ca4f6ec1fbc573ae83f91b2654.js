@@ -9,6 +9,5 @@ var dir_cab437ca4f6ec1fbc573ae83f91b2654 =
     ] ],
     [ "Iterable.h", "_iterable_8h.xhtml", "_iterable_8h" ],
     [ "ShapeCalculator.h", "_shape_calculator_8h.xhtml", "_shape_calculator_8h" ],
-    [ "Signal.h", "_signal_8h.xhtml", "_signal_8h" ],
     [ "Utility.h", "_utility_8h.xhtml", "_utility_8h" ]
 ];

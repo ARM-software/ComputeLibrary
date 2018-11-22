@@ -10,7 +10,7 @@ var dir_99ae3712d1eecd2a93fc4d38b59a99ba =
     [ "Edge.h", "_edge_8h.xhtml", [
       [ "Edge", "classarm__compute_1_1graph_1_1_edge.xhtml", "classarm__compute_1_1graph_1_1_edge" ]
     ] ],
-    [ "Graph.h", "_graph_8h.xhtml", [
+    [ "Graph.h", "graph_2_graph_8h.xhtml", [
       [ "Graph", "classarm__compute_1_1graph_1_1_graph.xhtml", "classarm__compute_1_1graph_1_1_graph" ]
     ] ],
     [ "GraphBuilder.h", "_graph_builder_8h.xhtml", [

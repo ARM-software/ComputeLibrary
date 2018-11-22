@@ -112,6 +112,26 @@ public:
     }
 };
 
+class SmallWinogradConvolutionLayer7x1Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer7x1Dataset()
+    {
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(7U, 1U, 2U, 1U), TensorShape(1U), TensorShape(8U, 14U, 1U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(7U, 1U, 2U), TensorShape(1U), TensorShape(14U, 14U, 1U), PadStrideInfo(1, 1, 3, 0));
+    }
+};
+
+class SmallWinogradConvolutionLayer1x7Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer1x7Dataset()
+    {
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U, 1U), TensorShape(1U), TensorShape(14U, 8U, 1U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U), TensorShape(1U), TensorShape(14U, 14U, 1U), PadStrideInfo(1, 1, 0, 3));
+    }
+};
+
 class SmallConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
@@ -119,6 +139,7 @@ public:
     {
         add_config(TensorShape(224U, 224U, 3U), TensorShape(3U, 3U, 3U, 32U), TensorShape(32U), TensorShape(112U, 112U, 32U),
                    PadStrideInfo(2, 2, /*left*/ 0, /*right*/ 1, /*top*/ 0, /*bottom*/ 1, DimensionRoundingType::FLOOR));
+
         // Batch size 1
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0));
@@ -126,6 +147,7 @@ public:
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 1U, 5U, 21U), TensorShape(21U), TensorShape(11U, 27U, 21U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 11U, 16U), PadStrideInfo(3, 2, 1, 0));
         add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 3U, 2U, 19U), TensorShape(19U), TensorShape(15U, 16U, 19U), PadStrideInfo(1, 2, 1, 1));
+        add_config(TensorShape(3U, 3U, 1U), TensorShape(2U, 2U, 1U, 11U), TensorShape(11U), TensorShape(2U, 2U, 11U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 4
         add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U, 4U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U, 4U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 4U), PadStrideInfo(3, 2, 1, 0));
@@ -144,6 +166,26 @@ public:
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(10U, 11U, 16U, 5U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(10U, 11U, 16U, 5U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+
+        add_config(TensorShape(5U, 4U, 3U, 2U), TensorShape(4U, 4U, 3U, 1U), TensorShape(1U), TensorShape(2U, 1U, 1U, 2U), PadStrideInfo(1, 1, 0, 0, 0, 0, DimensionRoundingType::FLOOR));
+    }
+};
+
+// TODO (COMPMID-1749)
+class SmallConvolutionLayerReducedDataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallConvolutionLayerReducedDataset()
+    {
+        // Batch size 1
+        add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0));
+        add_config(TensorShape(17U, 31U, 2U), TensorShape(5U, 5U, 2U, 19U), TensorShape(19U), TensorShape(15U, 15U, 19U), PadStrideInfo(1, 2, 1, 1));
+
+        // Asymmetric padding
+        add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
     }
 };
 

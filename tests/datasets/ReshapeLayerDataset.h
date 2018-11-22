@@ -34,6 +34,7 @@ namespace test
 {
 namespace datasets
 {
+/** [ReshapeLayer datasets] **/
 class ReshapeLayerDataset
 {
 public:
@@ -96,6 +97,7 @@ private:
     std::vector<TensorShape> _in_shapes{};
     std::vector<TensorShape> _out_shapes{};
 };
+/** [ReshapeLayer datasets] **/
 
 class SmallReshapeLayerDataset final : public ReshapeLayerDataset
 {

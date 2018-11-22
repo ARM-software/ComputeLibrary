@@ -24,6 +24,7 @@ import os.path
 
 Import('env')
 Import('vars')
+Import('install_bin')
 
 SConscript('./framework/SConscript', duplicate=0)
 
@@ -69,10 +70,6 @@ else:
     test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_graph_so
 
-test_env.Append(CPPPATH = ["#3rdparty/include"])
-test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
-test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
-
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
@@ -116,11 +113,12 @@ if env['gles_compute']:
 
 if env['os'] == 'android':
     test_env.Append(LIBS = ["log"])
-else:
+elif env['os'] != 'bare_metal':
     test_env.Append(LIBS = ["rt"])
 
 if test_env['benchmark_tests']:
     arm_compute_benchmark = test_env.Program('arm_compute_benchmark', files_benchmark + common_objects)
+    arm_compute_benchmark = install_bin(arm_compute_benchmark)
     Depends(arm_compute_benchmark, arm_compute_test_framework)
     Depends(arm_compute_benchmark, arm_compute_lib)
     Default(arm_compute_benchmark)
@@ -132,6 +130,7 @@ if test_env['validation_tests']:
     Depends(arm_compute_validation_framework , arm_compute_core_a)
 
     arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'])
+    arm_compute_validation = install_bin(arm_compute_validation)
     Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)

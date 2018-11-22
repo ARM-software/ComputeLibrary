@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/IScheduler.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CPUUtils.h"
 
 namespace arm_compute
@@ -30,6 +31,7 @@ namespace arm_compute
 IScheduler::IScheduler()
     : _cpu_info()
 {
+    get_cpu_configuration(_cpu_info);
     // Work out the best possible number of execution threads
     _num_threads_hint = get_threads_hint();
 }
@@ -43,4 +45,10 @@ unsigned int IScheduler::num_threads_hint() const
 {
     return _num_threads_hint;
 }
+void IScheduler::run_tagged_workloads(std::vector<Workload> &workloads, const char *tag)
+{
+    ARM_COMPUTE_UNUSED(tag);
+    run_workloads(workloads);
+}
+
 } // namespace arm_compute

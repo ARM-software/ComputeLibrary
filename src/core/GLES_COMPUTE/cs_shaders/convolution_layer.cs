@@ -675,6 +675,7 @@ void main(void)
     {
         tmp_out_offset += (dst_attrs.stride_x >> dst_shift);
 
+        // FIXME: need odd/even detection for tmp_out_offset?
         mediump vec2 bias_vec = vec2(1.0f, 1.0f);
         STORE_PACK2_HALF(dst_ptr, tmp_out_offset, bias_vec);
     }

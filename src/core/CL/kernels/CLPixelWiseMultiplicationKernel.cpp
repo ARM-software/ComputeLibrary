@@ -51,9 +51,9 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     ARM_COMPUTE_UNUSED(rounding_policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(scale < 0, "Scale cannot be negative.");
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
@@ -64,7 +64,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     if(output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0), "Wrong shape for output");
@@ -168,27 +168,44 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
         data_type = "DATA_TYPE_INT";
     }
 
+    const bool is_quantized = is_data_type_quantized_asymmetric(input1->info()->data_type());
+
     // Construct kernel name
     std::string kernel_name = "pixelwise_mul";
-    kernel_name += (scale_int >= 0) ? "_int" : "_float";
+    if(!is_data_type_quantized(output->info()->data_type()))
+    {
+        kernel_name += (scale_int >= 0) ? "_int" : "_float";
+    }
 
     // Set kernel build options
-    std::set<std::string> build_opts;
-    build_opts.emplace((overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->info()->data_type())) ? "-DWRAP" : "-DSATURATE");
-    build_opts.emplace((rounding_policy == RoundingPolicy::TO_ZERO) ? "-DROUND=_rtz" : "-DROUND=_rte");
-    build_opts.emplace("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->info()->data_type()));
-    build_opts.emplace("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
-    build_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
-    build_opts.emplace("-DDATA_TYPE_RES=" + compute_type);
-    build_opts.emplace("-D" + data_type);
+    CLBuildOptions build_opts;
+    if(is_quantized)
+    {
+        build_opts.add_option("-DOFFSET_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
+        build_opts.add_option("-DOFFSET_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().offset));
+        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(output->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().scale));
+        build_opts.add_option("-DSCALE_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().scale));
+        build_opts.add_option("-DSCALE_OUT=" + support::cpp11::to_string(output->info()->quantization_info().scale));
+        kernel_name += "_quantized";
+    }
+    else
+    {
+        build_opts.add_option_if_else(overflow_policy == ConvertPolicy::WRAP || is_data_type_float(output->info()->data_type()), "-DWRAP", "-DSATURATE");
+        build_opts.add_option_if_else(rounding_policy == RoundingPolicy::TO_ZERO, "-DROUND=_rtz", "-DROUND=_rte");
+        build_opts.add_option("-DDATA_TYPE_IN1=" + get_cl_type_from_data_type(input1->info()->data_type()));
+        build_opts.add_option("-DDATA_TYPE_IN2=" + get_cl_type_from_data_type(input2->info()->data_type()));
+        build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+        build_opts.add_option("-DDATA_TYPE_RES=" + compute_type);
+    }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set scale argument
     unsigned int idx = 3 * num_arguments_per_3D_tensor(); //Skip the inputs and output parameters
 
-    if(scale_int >= 0)
+    if(scale_int >= 0 && !is_quantized)
     {
         _kernel.setArg(idx++, scale_int);
     }

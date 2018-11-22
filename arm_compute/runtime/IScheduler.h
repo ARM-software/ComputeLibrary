@@ -134,8 +134,9 @@ public:
      * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
      *
      * @param[in] workloads Array of workloads to run
+     * @param[in] tag       String that can be used by profiling tools to identify the workloads run by the scheduler (Can be null).
      */
-    virtual void run_workloads(std::vector<Workload> &workloads) = 0;
+    virtual void run_tagged_workloads(std::vector<Workload> &workloads, const char *tag);
 
     /** Get CPU info.
      *
@@ -152,6 +153,13 @@ public:
     unsigned int num_threads_hint() const;
 
 protected:
+    /** Execute all the passed workloads
+     *
+     * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
+     *
+     * @param[in] workloads Array of workloads to run
+     */
+    virtual void run_workloads(std::vector<Workload> &workloads) = 0;
     CPUInfo _cpu_info;
 
 private:

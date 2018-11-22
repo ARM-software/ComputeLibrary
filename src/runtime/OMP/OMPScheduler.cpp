@@ -42,7 +42,6 @@ OMPScheduler &OMPScheduler::get()
 OMPScheduler::OMPScheduler() // NOLINT
     : _num_threads(omp_get_max_threads())
 {
-    get_cpu_configuration(_cpu_info);
 }
 
 unsigned int OMPScheduler::num_threads() const
@@ -90,6 +89,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
     }
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> &workloads)
 {
     const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
@@ -108,3 +108,4 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
         workloads[tid](info);
     }
 }
+#endif /* DOXYGEN_SKIP_THIS */

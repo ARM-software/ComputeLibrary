@@ -52,6 +52,30 @@ inline arm_compute::ITensorInfo *get_backing_tensor_info(arm_compute::graph::Ten
     return ((tensor == nullptr) || (tensor->handle() == nullptr)) ? nullptr : tensor->handle()->tensor().info();
 }
 
+/** Validates a Bounding Box Transform layer node
+ *
+ * @tparam BoundingBoxTransformLayer  Bounding Box Transform layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename BoundingBoxTransformLayer>
+Status validate_bounding_box_transform_layer(BoundingBoxTransformLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating BoundingBoxTransformLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo      *input     = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo      *deltas    = get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo      *output    = get_backing_tensor_info(node.output(0));
+    const BoundingBoxTransformInfo bbox_info = node.info();
+
+    return BoundingBoxTransformLayer::validate(input, output, deltas, bbox_info);
+}
+
 /** Validates a Channel Shuffle layer node
  *
  * @tparam ChannelShuffleLayer  Channel Shuffle layer function type
@@ -179,6 +203,81 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     return status;
 }
 
+/** Validates a Generate Proposals layer node
+ *
+ * @tparam GenerateProposalsLayer Generate Proposals layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename GenerateProposalsLayer>
+Status validate_generate_proposals_layer(GenerateProposalsLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating GenerateProposalsLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 3);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo   *scores              = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo   *deltas              = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo   *anchors             = detail::get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo   *proposals           = get_backing_tensor_info(node.output(0));
+    arm_compute::ITensorInfo   *scores_out          = get_backing_tensor_info(node.output(1));
+    arm_compute::ITensorInfo   *num_valid_proposals = get_backing_tensor_info(node.output(2));
+    const GenerateProposalsInfo info                = node.info();
+
+    return GenerateProposalsLayer::validate(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
+}
+
+/** Validates a NormalizePlanarYUV layer node
+ *
+ * @tparam NormalizePlanarYUVLayer layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename NormalizePlanarYUVLayer>
+Status validate_normalize_planar_yuv_layer(NormalizePlanarYUVLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating NormalizePlanarYUVLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *mean   = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *std    = detail::get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return NormalizePlanarYUVLayer::validate(input, output, mean, std);
+}
+
+/** Validates a pad layer node
+ *
+ * @tparam PadLayer Pad layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename PadLayer>
+Status validate_pad_layer(PadLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PadLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input   = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
+    const PaddingList        &padding = node.padding();
+
+    return PadLayer::validate(input, output, padding);
+}
+
 /** Validates a permute layer node
  *
  * @tparam PermuteLayer Permute layer type
@@ -200,6 +299,146 @@ Status validate_permute_layer(PermuteLayerNode &node)
     const PermutationVector &perm   = node.permutation_vector();
 
     return PermuteLayer::validate(input, output, perm);
+}
+/** Validates a priorbox layer node
+ *
+ * @tparam PriorBoxLayer PriorBox layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename PriorBoxLayer>
+Status validate_priorbox_layer(PriorBoxLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating PriorBoxLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input0     = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *input1     = get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *output     = get_backing_tensor_info(node.output(0));
+    const PriorBoxLayerInfo   prior_info = node.priorbox_info();
+
+    return PriorBoxLayer::validate(input0, input1, output, prior_info);
+}
+
+/** Validates a Reorg layer node
+ *
+ * @tparam ReorgLayer Reorg layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ReorgLayer>
+Status validate_reorg_layer(ReorgLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReorgLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return ReorgLayer::validate(input, output, node.stride());
+}
+
+/** Validates a ROI Align layer node
+ *
+ * @tparam ROIAlignLayer ROIAlign layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ROIAlignLayer>
+Status validate_roi_align_layer(ROIAlignLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ROIAlignLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input     = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *rois      = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *output    = detail::get_backing_tensor_info(node.output(0));
+    const ROIPoolingLayerInfo &pool_info = node.pooling_info();
+
+    // Validate function
+    return ROIAlignLayer::validate(input, rois, output, pool_info);
+}
+
+/** Validates a Slice layer node
+ *
+ * @tparam SliceLayer Slice layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename SliceLayer>
+Status validate_slice_layer(SliceLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating Slice node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input  = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+    const Coordinates         starts = node.starts();
+    const Coordinates         ends   = node.ends();
+
+    return SliceLayer::validate(input, output, starts, ends);
+}
+
+/** Validates a Upsample layer node
+ *
+ * @tparam UpsampleLayer Upsample layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename UpsampleLayer>
+Status validate_upsample_layer(UpsampleLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating UpsampleLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return UpsampleLayer::validate(input, output, node.info(), node.upsampling_policy());
+}
+/** Validates a YOLO layer node
+ *
+ * @tparam YOLOLayer YOLO layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename YOLOLayer>
+Status validate_yolo_layer(YOLOLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating YOLOLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return YOLOLayer::validate(input, output, node.activation_info(), node.num_classes());
 }
 } // namespace detail
 } // namespace backends

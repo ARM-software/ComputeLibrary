@@ -109,7 +109,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         const int yin_end   = input->dimension(1);
 
         const int xout_start = 0;
-        const int xout_end   = input->dimension(0) < num_elems_processed_per_iteration ? ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration) : output->dimension(0);
+        const int xout_end   = input->dimension(0) < num_elems_processed_per_iteration ? output->dimension(0) + (num_elems_processed_per_iteration - input->dimension(0)) : output->dimension(0);
         const int yout_start = 0;
         const int yout_end   = output->dimension(1);
 

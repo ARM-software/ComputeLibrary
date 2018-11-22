@@ -57,6 +57,16 @@ protected:
      * @param[in]  border_size                       (Optional) Size of the border.
      */
     void configure(const ITensor *input, ITensor *output, unsigned int num_elems_processed_per_iteration, bool border_undefined = false, const BorderSize &border_size = BorderSize());
+    /** Static function to check if given info will lead to a valid configuration of @ref ICPPSimpleKernel.
+     *
+     * @param[in] input                             Source tensor info.
+     * @param[in] output                            Destination tensor info.
+     * @param[in] num_elems_processed_per_iteration Number of processed elements per iteration.
+     * @param[in] border_undefined                  (Optional) True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in] border_size                       (Optional) Size of the border.
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_elems_processed_per_iteration,
+                           bool border_undefined = false, const BorderSize &border_size = BorderSize());
 
 protected:
     const ITensor *_input;

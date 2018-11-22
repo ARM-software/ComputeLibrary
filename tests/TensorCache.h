@@ -26,6 +26,8 @@
 
 #include "RawTensor.h"
 
+#include "support/Mutex.h"
+
 #include <map>
 #include <mutex>
 #include <utility>
@@ -84,10 +86,10 @@ private:
     using FormatMap  = std::map<std::tuple<std::string, Format>, RawTensor>;
     using ChannelMap = std::map<std::tuple<std::string, Format, Channel>, RawTensor>;
 
-    FormatMap  _raw_tensor_cache{};
-    ChannelMap _raw_tensor_channel_cache{};
-    std::mutex _raw_tensor_cache_mutex{};
-    std::mutex _raw_tensor_channel_cache_mutex{};
+    FormatMap          _raw_tensor_cache{};
+    ChannelMap         _raw_tensor_channel_cache{};
+    arm_compute::Mutex _raw_tensor_cache_mutex{};
+    arm_compute::Mutex _raw_tensor_channel_cache_mutex{};
 };
 
 inline RawTensor *TensorCache::find(std::tuple<const std::string &, Format> key)
@@ -104,13 +106,13 @@ inline RawTensor *TensorCache::find(std::tuple<const std::string &, Format, Chan
 
 inline RawTensor &TensorCache::add(std::tuple<const std::string &, Format> key, RawTensor raw)
 {
-    std::lock_guard<std::mutex> lock(_raw_tensor_channel_cache_mutex);
+    std::lock_guard<arm_compute::Mutex> lock(_raw_tensor_cache_mutex);
     return std::get<0>(_raw_tensor_cache.emplace(std::move(key), std::move(raw)))->second;
 }
 
 inline RawTensor &TensorCache::add(std::tuple<const std::string &, Format, Channel> key, RawTensor raw)
 {
-    std::lock_guard<std::mutex> lock(_raw_tensor_channel_cache_mutex);
+    std::lock_guard<arm_compute::Mutex> lock(_raw_tensor_channel_cache_mutex);
     return std::get<0>(_raw_tensor_channel_cache.emplace(std::move(key), std::move(raw)))->second;
 }
 } // namespace test

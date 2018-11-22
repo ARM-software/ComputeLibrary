@@ -55,6 +55,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     arm_compute::ITensorInfo *weights = detail::get_backing_tensor_info(node.input(1));
     ARM_COMPUTE_ERROR_ON(weights == nullptr);
 
+    // TODO (geopin01) : Switch when validation is implemented
     // Validate function
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->tensor_shape().x() != 3 && weights->tensor_shape().y() != 3, "Unsupported depthwise convolution");
     node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Optimized3x3);
@@ -102,6 +103,8 @@ Status GCNodeValidator::validate(INode *node)
     NodeType type = node->type();
     switch(type)
     {
+        case NodeType::BoundingBoxTransformLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : BoundingBoxTransformLayer");
         case NodeType::ChannelShuffleLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ChannelShuffleLayer");
         case NodeType::ConvolutionLayer:
@@ -110,10 +113,28 @@ Status GCNodeValidator::validate(INode *node)
             return validate_depthwise_convolution_layer(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::FlattenLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : FlattenLayer");
+        case NodeType::GenerateProposalsLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : GenerateProposalsLayer");
+        case NodeType::NormalizePlanarYUVLayer:
+            return detail::validate_normalize_planar_yuv_layer<GCNormalizePlanarYUVLayer>(*polymorphic_downcast<NormalizePlanarYUVLayerNode *>(node));
+        case NodeType::PadLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PadLayer");
         case NodeType::PermuteLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PermuteLayer");
+        case NodeType::PriorBoxLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : PriorBoxLayer");
+        case NodeType::ReorgLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReorgLayer");
         case NodeType::ReshapeLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ReshapeLayer");
+        case NodeType::ROIAlignLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ROIAlignLayer");
+        case NodeType::SliceLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : SliceLayer");
+        case NodeType::UpsampleLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : UpsampleLayer");
+        case NodeType::YOLOLayer:
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : YOLOLayer");
         default:
             return Status{};
     }

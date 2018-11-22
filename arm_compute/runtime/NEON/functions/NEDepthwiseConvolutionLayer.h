@@ -35,6 +35,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/Tensor.h"
 
@@ -55,29 +56,33 @@ public:
     NEDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, kernels and border_size.
      *
-     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer3x3
      *
-     * @param[in] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in] weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in] biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overriden:
     void run() override;
@@ -89,6 +94,7 @@ private:
     NEPermute                                 _permute_input;
     NEPermute                                 _permute_weights;
     NEPermute                                 _permute_output;
+    NEActivationLayer                         _activationlayer_function;
     Tensor                                    _accumulator;
     Tensor                                    _permuted_input;
     Tensor                                    _permuted_weights;
@@ -100,6 +106,7 @@ private:
     bool                                      _is_nchw;
     bool                                      _is_first_run;
     bool                                      _permute;
+    bool                                      _is_activationlayer_enabled;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
@@ -132,8 +139,10 @@ public:
      *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer
      *
@@ -144,10 +153,12 @@ public:
      *                             Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overriden:
     void run() override;
@@ -164,6 +175,7 @@ private:
     NEPermute                                 _permute_input;
     NEPermute                                 _permute_weights;
     NEPermute                                 _permute_output;
+    NEActivationLayer                         _activationlayer_function;
     Tensor                                    _input_reshaped;
     Tensor                                    _weights_reshaped;
     Tensor                                    _v2mm_output;
@@ -174,6 +186,7 @@ private:
     bool                                      _is_prepared;
     bool                                      _is_quantized;
     bool                                      _is_nhwc;
+    bool                                      _is_activationlayer_enabled;
     const ITensor                            *_original_weights;
 };
 }

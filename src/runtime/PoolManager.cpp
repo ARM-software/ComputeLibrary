@@ -73,6 +73,36 @@ void PoolManager::register_pool(std::unique_ptr<IMemoryPool> pool)
     _sem = arm_compute::support::cpp14::make_unique<arm_compute::Semaphore>(_free_pools.size());
 }
 
+std::unique_ptr<IMemoryPool> PoolManager::release_pool()
+{
+    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to release one!");
+
+    if(!_free_pools.empty())
+    {
+        std::unique_ptr<IMemoryPool> pool = std::move(_free_pools.front());
+        ARM_COMPUTE_ERROR_ON(_free_pools.front() != nullptr);
+        _free_pools.pop_front();
+
+        // Update semaphore
+        _sem = arm_compute::support::cpp14::make_unique<arm_compute::Semaphore>(_free_pools.size());
+
+        return pool;
+    }
+
+    return nullptr;
+}
+
+void PoolManager::clear_pools()
+{
+    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+    ARM_COMPUTE_ERROR_ON_MSG(!_occupied_pools.empty(), "All pools should be free in order to clear the PoolManager!");
+    _free_pools.clear();
+
+    // Update semaphore
+    _sem = nullptr;
+}
+
 size_t PoolManager::num_pools() const
 {
     std::lock_guard<arm_compute::Mutex> lock(_mtx);

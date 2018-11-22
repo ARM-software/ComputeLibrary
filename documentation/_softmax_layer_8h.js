@@ -1,4 +1,4 @@
 var _softmax_layer_8h =
 [
-    [ "softmax_layer", "_softmax_layer_8h.xhtml#aba4029949774b83ce30bfea5aaa34e93", null ]
+    [ "softmax_layer", "_softmax_layer_8h.xhtml#a5be8e137e2ace7ccaa059ca741f9fb95", null ]
 ];

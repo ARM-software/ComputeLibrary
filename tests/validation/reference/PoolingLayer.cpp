@@ -37,7 +37,7 @@ namespace reference
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+template <typename T>
 SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));

@@ -77,6 +77,7 @@ inline void validate_configuration(const TensorShape &shape, Format format, Chan
         channel_extract.configure(&ref_src, channel, &dst);
     }
 
+    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
 }
 } // namespace
 

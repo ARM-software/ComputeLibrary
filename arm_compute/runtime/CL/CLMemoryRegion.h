@@ -81,9 +81,9 @@ public:
     virtual void unmap(cl::CommandQueue &q) = 0;
 
     // Inherited methods overridden :
-    void *buffer() override;
-    void *buffer() const override;
-    void **handle() override;
+    void                          *buffer() override;
+    void                          *buffer() const override;
+    std::unique_ptr<IMemoryRegion> extract_subregion(size_t offset, size_t size) override;
 
 protected:
     cl::Context _ctx;
@@ -102,11 +102,16 @@ public:
      * @param[in] size  Region size
      */
     CLBufferMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size);
+    /** Constructor
+     *
+     * @param[in] buffer Buffer to be used as a memory region
+     */
+    CLBufferMemoryRegion(const cl::Buffer &buffer);
 
     // Inherited methods overridden :
-    void *ptr() override;
-    void *map(cl::CommandQueue &q, bool blocking) override;
-    void unmap(cl::CommandQueue &q) override;
+    void *ptr() final;
+    void *map(cl::CommandQueue &q, bool blocking) final;
+    void unmap(cl::CommandQueue &q) final;
 };
 
 /** OpenCL SVM memory region interface */
@@ -153,8 +158,8 @@ public:
     CLCoarseSVMMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size, size_t alignment);
 
     // Inherited methods overridden :
-    void *map(cl::CommandQueue &q, bool blocking) override;
-    void unmap(cl::CommandQueue &q) override;
+    void *map(cl::CommandQueue &q, bool blocking) final;
+    void unmap(cl::CommandQueue &q) final;
 };
 
 /** OpenCL fine-grain SVM memory region implementation */
@@ -171,8 +176,8 @@ public:
     CLFineSVMMemoryRegion(cl::Context ctx, cl_mem_flags flags, size_t size, size_t alignment);
 
     // Inherited methods overridden :
-    void *map(cl::CommandQueue &q, bool blocking) override;
-    void unmap(cl::CommandQueue &q) override;
+    void *map(cl::CommandQueue &q, bool blocking) final;
+    void unmap(cl::CommandQueue &q) final;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_CL_CL_MEMORY_REGION_H__ */

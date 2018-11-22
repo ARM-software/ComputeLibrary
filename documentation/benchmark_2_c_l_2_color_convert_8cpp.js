@@ -5,6 +5,8 @@ var benchmark_2_c_l_2_color_convert_8cpp =
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a3110d9e17b2fed7a59da5069d55b21f1", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a71624fad883b263ef7b1551195e19a78", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a0c581bbf035477ef229090525ae7d9c0", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a4328aa51911dbced422bc5f1374c97c0", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a8a3d4a326b999635418fd320a069e051", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a8b3799c76bc466c6423cf2f8a752181b", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#ad503e02071cab2e13ef0801abdd0c341", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_color_convert_8cpp.xhtml#a97550db9243678761ddb38280dd826fe", null ],

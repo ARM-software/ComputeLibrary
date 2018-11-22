@@ -9,6 +9,7 @@ var _n_e_color_convert_helper_8inl =
     [ "colorconvert_rgb_to_iyuv", "_n_e_color_convert_helper_8inl.xhtml#a49b7a8e217ba7aad821fdeaab86bad53", null ],
     [ "colorconvert_rgb_to_nv12", "_n_e_color_convert_helper_8inl.xhtml#a14fd899b732509e245976b9967b8931d", null ],
     [ "colorconvert_rgb_to_rgbx", "_n_e_color_convert_helper_8inl.xhtml#a93cc303c8ae098d264f07d37890412de", null ],
+    [ "colorconvert_rgb_to_u8", "_n_e_color_convert_helper_8inl.xhtml#aa1d4cf707dec05e3ff1d63d4ce8065ca", null ],
     [ "colorconvert_rgb_to_yuv4", "_n_e_color_convert_helper_8inl.xhtml#ad304c0b0a72ed3f65c24fa69ab3cd53e", null ],
     [ "colorconvert_rgbx_to_rgb", "_n_e_color_convert_helper_8inl.xhtml#acf7451c0d0f8a4b1cfbb60d7531a43aa", null ],
     [ "colorconvert_yuyv_to_iyuv", "_n_e_color_convert_helper_8inl.xhtml#ae43e8f0463c0289169025c3041688d36", null ],

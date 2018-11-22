@@ -144,6 +144,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 
     // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
 }
 
 template <typename T>

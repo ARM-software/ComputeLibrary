@@ -58,6 +58,16 @@ public:
      * @return Convolution information
      */
     PadStrideInfo convolution_info() const;
+    /** Returns fused activation
+     *
+     * @return Fused activation
+     */
+    ActivationLayerInfo fused_activation() const;
+    /** Sets fused activation
+     *
+     * @param[in] fused_activation Fused activation to set
+     */
+    void set_fused_activation(ActivationLayerInfo fused_activation);
     /** Computes depthwise convolution output descriptor
      *
      * @param[in] input_descriptor   Input descriptor
@@ -76,9 +86,13 @@ public:
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
 
+public:
+    static constexpr NodeType node_type = NodeType::DepthwiseConvolutionLayer;
+
 private:
     PadStrideInfo              _info;
     DepthwiseConvolutionMethod _method;
+    ActivationLayerInfo        _fused_activation;
 };
 } // namespace graph
 } // namespace arm_compute

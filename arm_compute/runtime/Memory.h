@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_MEMORY_H__
 #define __ARM_COMPUTE_MEMORY_H__
 
+#include "arm_compute/runtime/IMemory.h"
+
 #include "arm_compute/runtime/IMemoryRegion.h"
 
 #include <cstddef>
@@ -32,7 +34,7 @@
 namespace arm_compute
 {
 /** CPU implementation of memory object */
-class Memory
+class Memory : public IMemory
 {
 public:
     /** Default Constructor */
@@ -58,24 +60,16 @@ public:
     Memory(Memory &&) noexcept = default;
     /** Allow instances of this class to be move assigned */
     Memory &operator=(Memory &&) noexcept = default;
-    /** Region accessor
-     *
-     * @return Memory region
-     */
-    IMemoryRegion *region();
-    /** Region accessor
-     *
-     * @return Memory region
-     */
-    IMemoryRegion *region() const;
 
-private:
-    /** Creates empty region */
-    void create_empty_region();
+    // Inherited methods overridden:
+    IMemoryRegion *region() final;
+    IMemoryRegion *region() const final;
+    void set_region(IMemoryRegion *region) final;
+    void set_owned_region(std::unique_ptr<IMemoryRegion> region) final;
 
 private:
     IMemoryRegion                 *_region;
     std::shared_ptr<IMemoryRegion> _region_owned;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_MEMORY_H__ */

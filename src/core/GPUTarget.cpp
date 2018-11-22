@@ -51,6 +51,14 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G51LIT;
     }
+    else if(version == "G52")
+    {
+        return arm_compute::GPUTarget::G52;
+    }
+    else if(version == "G52LIT")
+    {
+        return arm_compute::GPUTarget::G52LIT;
+    }
     else if(version == "G76")
     {
         return arm_compute::GPUTarget::G76;
@@ -106,6 +114,8 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G51, "g51" },
         { GPUTarget::G51BIG, "g51big" },
         { GPUTarget::G51LIT, "g51lit" },
+        { GPUTarget::G52, "g52" },
+        { GPUTarget::G52LIT, "g52lit" },
         { GPUTarget::G76, "g76" },
         { GPUTarget::TTRX, "ttrx" },
         { GPUTarget::TBOX, "tbox" }

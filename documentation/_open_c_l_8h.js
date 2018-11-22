@@ -6,5 +6,5 @@ var _open_c_l_8h =
     [ "CL_HPP_TARGET_OPENCL_VERSION", "_open_c_l_8h.xhtml#a37ea07405ca286c1570612b42d43b345", null ],
     [ "CL_TARGET_OPENCL_VERSION", "_open_c_l_8h.xhtml#a5990dea19d4ccb046a3d81b311457add", null ],
     [ "DECLARE_FUNCTION_PTR", "_open_c_l_8h.xhtml#af6e65f36e2be6bd9a1cac10ba6e82f7c", null ],
-    [ "opencl_is_available", "_open_c_l_8h.xhtml#aa4f4d7a58287017588fc338965873f14", null ]
+    [ "opencl_is_available", "_open_c_l_8h.xhtml#a5f49decb4b0a74d5361686ab45db8961", null ]
 ];

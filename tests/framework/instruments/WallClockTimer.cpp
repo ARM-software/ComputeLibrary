@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,26 +32,52 @@ namespace test
 {
 namespace framework
 {
-std::string WallClockTimer::id() const
+template <bool output_timestamps>
+std::string    WallClock<output_timestamps>::id() const
 {
-    return "Wall clock";
+    if(output_timestamps)
+    {
+        return "Wall clock timestamps";
+    }
+    else
+    {
+        return "Wall clock";
+    }
 }
 
-void WallClockTimer::start()
+template <bool output_timestamps>
+void           WallClock<output_timestamps>::start()
 {
     _start = std::chrono::high_resolution_clock::now();
 }
 
-void WallClockTimer::stop()
+template <bool output_timestamps>
+void           WallClock<output_timestamps>::stop()
 {
     _stop = std::chrono::high_resolution_clock::now();
 }
 
-Instrument::MeasurementsMap WallClockTimer::measurements() const
+template <bool              output_timestamps>
+Instrument::MeasurementsMap WallClock<output_timestamps>::measurements() const
 {
-    const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
-    return MeasurementsMap{ { "Wall clock time", Measurement(delta.count() / _scale_factor, _unit) } };
+    MeasurementsMap measurements;
+    if(output_timestamps)
+    {
+        // _start / _stop are in ns, so divide by an extra 1000:
+        measurements.emplace("[start]Wall clock time", Measurement(_start.time_since_epoch().count() / static_cast<uint64_t>(1000 * _scale_factor), _unit));
+        measurements.emplace("[end]Wall clock time", Measurement(_stop.time_since_epoch().count() / static_cast<uint64_t>(1000 * _scale_factor), _unit));
+    }
+    else
+    {
+        const auto delta = std::chrono::duration_cast<std::chrono::microseconds>(_stop - _start);
+        measurements.emplace("Wall clock time", Measurement(delta.count() / _scale_factor, _unit));
+    }
+    return measurements;
 }
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
+
+template class arm_compute::test::framework::WallClock<true>;
+template class arm_compute::test::framework::WallClock<false>;

@@ -13,14 +13,14 @@ var namespacearm__compute_1_1test_1_1framework =
     [ "JSONPrinter", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer" ],
     [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_mali_counter" ],
     [ "Measurement", "structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml", "structarm__compute_1_1test_1_1framework_1_1_measurement" ],
+    [ "OpenCLClock", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_clock.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_clock" ],
     [ "OpenCLMemoryUsage", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage" ],
-    [ "OpenCLTimer", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer" ],
     [ "PMU", "classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u" ],
     [ "PMUCounter", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter" ],
     [ "PrettyPrinter", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer" ],
     [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_printer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_printer" ],
     [ "Profiler", "classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml", "classarm__compute_1_1test_1_1framework_1_1_profiler" ],
-    [ "SchedulerTimer", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer" ],
+    [ "SchedulerClock", "classarm__compute_1_1test_1_1framework_1_1_scheduler_clock.xhtml", "classarm__compute_1_1test_1_1framework_1_1_scheduler_clock" ],
     [ "SimpleTestCaseFactory", "classarm__compute_1_1test_1_1framework_1_1_simple_test_case_factory.xhtml", "classarm__compute_1_1test_1_1framework_1_1_simple_test_case_factory" ],
     [ "TestCase", "classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml", "classarm__compute_1_1test_1_1framework_1_1_test_case" ],
     [ "TestCaseFactory", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml", "classarm__compute_1_1test_1_1framework_1_1_test_case_factory" ],
@@ -28,5 +28,5 @@ var namespacearm__compute_1_1test_1_1framework =
     [ "TestFilter", "classarm__compute_1_1test_1_1framework_1_1_test_filter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_test_filter" ],
     [ "TestInfo", "structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml", "structarm__compute_1_1test_1_1framework_1_1_test_info" ],
     [ "TestResult", "structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml", "structarm__compute_1_1test_1_1framework_1_1_test_result" ],
-    [ "WallClockTimer", "classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer" ]
+    [ "WallClock", "classarm__compute_1_1test_1_1framework_1_1_wall_clock.xhtml", "classarm__compute_1_1test_1_1framework_1_1_wall_clock" ]
 ];

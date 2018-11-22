@@ -69,6 +69,53 @@ constexpr float tolerance_num_f32(0.01f);
 TEST_SUITE(CL)
 TEST_SUITE(Scale)
 
+// *INDENT-OFF*
+// clang-format off
+
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+                framework::dataset::make("InputInfo",{ TensorInfo(TensorShape(28U, 32U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(28U, 32U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(36U, 36U, 2U, 4U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(40U, 35U, 2U, 4U), 1, DataType::S16),
+                                                       TensorInfo(TensorShape(37U, 37U, 2U), 1, DataType::F32),          // window shrink
+                                                       TensorInfo(TensorShape(37U, 37U, 3U, 4U), 1, DataType::F32),      // mismatching datatype
+                                                       TensorInfo(TensorShape(28U, 33U, 2U), 1, DataType::F32),          // policy area, scale factor not correct
+                                                    }),
+                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 68U, 2U), 1, DataType::F16),
+                                                        TensorInfo(TensorShape(40U, 56U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(40U, 76U, 2U, 4U), 1, DataType::U8),
+                                                        TensorInfo(TensorShape(28U, 32U, 2U, 4U), 1, DataType::S16),
+                                                        TensorInfo(TensorShape(39U, 55U, 2U), 1, DataType::F32),           // window shrink
+                                                        TensorInfo(TensorShape(39U, 77U, 3U, 4U), 1, DataType::F16),       // mismatching datatype
+                                                        TensorInfo(TensorShape(26U, 21U, 2U), 1, DataType::F32),           // policy area, scale factor not correct
+                })),
+                framework::dataset::make("Policy",{ InterpolationPolicy::BILINEAR,
+                                                    InterpolationPolicy::BILINEAR,
+                                                    InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                    InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                    InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                    InterpolationPolicy::BILINEAR,
+                                                    InterpolationPolicy::AREA,
+                })),
+                framework::dataset::make("BorderMode",{ BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                                                        BorderMode::UNDEFINED,
+                })),
+                framework::dataset::make("Expected", { true, true, true, true, false, false, false })),
+input_info, output_info, policy, border_mode, expected)
+{
+    Status status = CLScale::validate(&input_info.clone()->set_is_resizable(false),
+                                      &output_info.clone()->set_is_resizable(false), policy, border_mode);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::MediumShapes(), datasets::LargeShapes()), ScaleDataTypes),
                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                            datasets::BorderModes()),
@@ -146,7 +193,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32, tolerance_f32_absolute);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                     DataType::F16)),
@@ -176,8 +223,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<half>, framework::DatasetMode::N
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
@@ -209,7 +256,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 TEST_SUITE(S16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                        DataType::S16)),
@@ -239,11 +286,50 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<int16_t>, framework::DatasetMode
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Integer
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+template <typename T>
+using CLScaleQuantizedFixture = ScaleValidationQuantizedFixture<CLTensor, CLAccessor, CLScale, T>;
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QASYMM8)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                datasets::BorderModes()),
+                                                                                                        datasets::SamplingPolicies()))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(datasets::LargeShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QASYMM8)),
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -1) })),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
+                                                                                                                    datasets::BorderModes()),
+                                                                                                            datasets::SamplingPolicies()))
+{
+    //Create valid region
+    TensorInfo        src_info(_shape, 1, _data_type);
+    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, _sampling_policy, (_border_mode == BorderMode::UNDEFINED));
+
+    // Validate output
+    validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
+
+TEST_SUITE_END() // Scale
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -40,19 +40,27 @@ namespace arm_compute
 
 namespace
 {
+inline bool is_kernel_size_supported(Size2D size)
+{
+    const std::array<Size2D, 8> supported_input_sizes = { { Size2D(1, 3), Size2D(3, 1), Size2D(5, 5), Size2D(3, 3), Size2D(1, 5), Size2D(5, 1), Size2D(7, 1), Size2D(1, 7) } };
+    return std::end(supported_input_sizes) != std::find(std::begin(supported_input_sizes), std::end(supported_input_sizes), size);
+}
+
 Status validate_arguments_winograd_weight_trans(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
 
-    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_width) != 3 && input->dimension(idx_width) != 5);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_width) != input->dimension(idx_height));
+    const size_t idx_width    = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const auto   input_width  = input->dimension(idx_width);
+    const auto   input_height = input->dimension(idx_height);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(input_width, input_height)), "Only 1x3, 3x1, 1x5, 5x1, 7x1, 1x7, 3x3 and 5x5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     const Size2D &output_tile = winograd_info.output_tile_size;
-    ARM_COMPUTE_RETURN_ERROR_ON(output_tile != Size2D(2U, 2U) && output_tile != Size2D(4U, 4U));
+    const std::array<Size2D, 8> supported_tile_sizes = { { Size2D(2U, 2U), Size2D(4U, 4U), Size2D(1U, 6U), Size2D(6U, 1U), Size2D(4, 1), Size2D(1, 4), Size2D(2, 1), Size2D(1, 2) } };
+    ARM_COMPUTE_RETURN_ERROR_ON(std::end(supported_tile_sizes) == std::find(std::begin(supported_tile_sizes), std::end(supported_tile_sizes), output_tile));
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -98,8 +106,8 @@ Status validate_arguments_winograd_input_trans(const ITensorInfo *input, const I
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != 3U && kernel_dims.width != 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != kernel_dims.height), "Winograd input transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(kernel_dims.width, kernel_dims.height)),
+                                    "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
 
     // Validate configured output
     if(output->total_size() != 0)
@@ -151,9 +159,11 @@ Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != num_tiles.area());
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != 3U && kernel_dims.width != 5U), "Winograd output transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != kernel_dims.height), "Winograd output transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((input->dimension(2) != size_t(16U)) && (input->dimension(2) != size_t(36U))), "Only 2x2 and 4x4 output tile is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(kernel_dims.width, kernel_dims.height)),
+                                    "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
+
+    const std::array<unsigned int, 3> supported_gemm_sizes = { { 8U, 16U, 36U } };
+    ARM_COMPUTE_RETURN_ERROR_ON(std::end(supported_gemm_sizes) == std::find(std::begin(supported_gemm_sizes), std::end(supported_gemm_sizes), input->dimension(2)));
     ARM_COMPUTE_UNUSED(kernel_dims);
     if(bias != nullptr)
     {
@@ -201,7 +211,21 @@ std::pair<Status, Window> validate_and_configure_window_winograd_output_trans(IT
 }
 } // namespace
 
-// Weights transform
+template <typename T>
+Status INEWinogradLayerTransformWeightsKernel<T>::validate(const ITensorInfo *input, const ITensorInfo *weights)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    const DataLayout   data_layout = input->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_kernel_size_supported(Size2D(weights->dimension(width_idx), weights->dimension(height_idx))),
+                                    "Only 1x3, 3x1, 3x3 and 5x5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
+    return Status{};
+}
+
+template class INEWinogradLayerTransformWeightsKernel<float>;
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 unsigned int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_weight_storage_size(int num_output_channels, int num_input_channels) const
@@ -225,6 +249,7 @@ int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ker
     return WinogradConv::get_kernel_matrix_stride(kernel_shape);
 }
 
+#ifndef DOXYGEN_SKIP_THIS
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
     const ITensor *weights_hwio,
@@ -246,6 +271,7 @@ void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ke
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     INEKernel::configure(win);
 }
+#endif /* DOXYGEN_SKIP_THIS */
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
@@ -278,7 +304,13 @@ Status NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, 
 template class NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>;
 template class NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>;
 template class NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>;
+template class NEWinogradLayerTransformWeightsKernel<float, 1, 6, 1, 3>;
+template class NEWinogradLayerTransformWeightsKernel<float, 6, 1, 3, 1>;
 
+template class NEWinogradLayerTransformWeightsKernel<float, 1, 4, 1, 5>;
+template class NEWinogradLayerTransformWeightsKernel<float, 4, 1, 5, 1>;
+template class NEWinogradLayerTransformWeightsKernel<float, 1, 2, 1, 7>;
+template class NEWinogradLayerTransformWeightsKernel<float, 2, 1, 7, 1>;
 // Input transform
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -343,14 +375,15 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
-    const int element_size_in_bytes = _input_nhwc->info()->element_size();
-    const int input_col_stride      = _input_nhwc->info()->strides_in_bytes().y() / element_size_in_bytes;
-    const int input_row_stride      = _input_nhwc->info()->strides_in_bytes().z() / element_size_in_bytes;
-    const int input_batch_stride    = _input_nhwc->info()->strides_in_bytes()[3] / element_size_in_bytes;
-
-    InputTransform input_transform(reinterpret_cast<const T *>(_input_nhwc->buffer() + _input_nhwc->info()->offset_first_element_in_bytes()),
+    const int      element_size_in_bytes = _input_nhwc->info()->element_size();
+    const int      input_col_stride      = _input_nhwc->info()->strides_in_bytes().y() / element_size_in_bytes;
+    const int      input_row_stride      = _input_nhwc->info()->strides_in_bytes().z() / element_size_in_bytes;
+    const int      input_batch_stride    = _input_nhwc->info()->strides_in_bytes()[3] / element_size_in_bytes;
+    const auto     input_nhwc_ptr        = reinterpret_cast<const T *>(_input_nhwc->buffer() + _input_nhwc->info()->offset_first_element_in_bytes());
+    auto           output_ptr            = reinterpret_cast<T *>(_output->buffer() + _output->info()->offset_first_element_in_bytes());
+    InputTransform input_transform(input_nhwc_ptr,
                                    _num_batches, _num_rows, _num_cols, _num_channels, _padding,
-                                   reinterpret_cast<T *>(_output->buffer() + _output->info()->offset_first_element_in_bytes()),
+                                   output_ptr,
                                    _matrix_stride, _num_channels, input_batch_stride, input_row_stride, input_col_stride);
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
@@ -371,6 +404,13 @@ Status NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Ke
 template class NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>;
 template class NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>;
 template class NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>;
+template class NEWinogradLayerTransformInputKernel<float, 1, 6, 1, 3>;
+template class NEWinogradLayerTransformInputKernel<float, 6, 1, 3, 1>;
+
+template class NEWinogradLayerTransformInputKernel<float, 1, 4, 1, 5>;
+template class NEWinogradLayerTransformInputKernel<float, 4, 1, 5, 1>;
+template class NEWinogradLayerTransformInputKernel<float, 1, 2, 1, 7>;
+template class NEWinogradLayerTransformInputKernel<float, 2, 1, 7, 1>;
 
 // Output transform
 
@@ -438,7 +478,6 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     Window win;
     auto   win_last = output_transform.get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
-
     _output_nhwc->info()->set_valid_region(ValidRegion(Coordinates(), _output_nhwc->info()->tensor_shape()));
 
     INEKernel::configure(win);
@@ -452,10 +491,14 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output_workspace);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output_nhwc);
 
+    const int out_batch_stride = 0;
+    const int out_row_stride   = _output_nhwc->info()->strides_in_bytes()[2] / sizeof(T);
+    const int out_col_stride   = _output_nhwc->info()->strides_in_bytes()[1] / sizeof(T);
+
     OutputTransform output_transform(reinterpret_cast<T *>(_output_workspace->buffer()), _matrix_stride, _matrix_row_stride,
                                      (_biases ? reinterpret_cast<T *>(_biases->buffer() + _biases->info()->offset_first_element_in_bytes()) : nullptr),
                                      reinterpret_cast<T *>(_output_nhwc->buffer() + _output_nhwc->info()->offset_first_element_in_bytes()),
-                                     _num_batches, _num_rows, _num_cols, _num_channels, 0, _output_nhwc->info()->strides_in_bytes()[2] / sizeof(T), _output_nhwc->info()->strides_in_bytes()[1] / sizeof(T));
+                                     _num_batches, _num_rows, _num_cols, _num_channels, out_batch_stride, out_row_stride, out_col_stride);
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
     const size_t fst = window.x().start();
@@ -478,5 +521,12 @@ Status NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, K
 template class NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>;
 template class NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>;
 template class NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>;
+template class NEWinogradLayerTransformOutputKernel<float, 1, 6, 1, 3>;
+template class NEWinogradLayerTransformOutputKernel<float, 6, 1, 3, 1>;
+
+template class NEWinogradLayerTransformOutputKernel<float, 1, 4, 1, 5>;
+template class NEWinogradLayerTransformOutputKernel<float, 4, 1, 5, 1>;
+template class NEWinogradLayerTransformOutputKernel<float, 1, 2, 1, 7>;
+template class NEWinogradLayerTransformOutputKernel<float, 2, 1, 7, 1>;
 
 } // namespace arm_compute

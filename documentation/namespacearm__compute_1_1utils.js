@@ -1,7 +1,6 @@
 var namespacearm__compute_1_1utils =
 [
     [ "iterable", "namespacearm__compute_1_1utils_1_1iterable.xhtml", "namespacearm__compute_1_1utils_1_1iterable" ],
-    [ "signal", "namespacearm__compute_1_1utils_1_1signal.xhtml", "namespacearm__compute_1_1utils_1_1signal" ],
     [ "CommandLineParser", "classarm__compute_1_1utils_1_1_command_line_parser.xhtml", "classarm__compute_1_1utils_1_1_command_line_parser" ],
     [ "CommonGraphOptions", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml", "classarm__compute_1_1utils_1_1_common_graph_options" ],
     [ "CommonGraphParams", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml", "structarm__compute_1_1utils_1_1_common_graph_params" ],
@@ -19,5 +18,6 @@ var namespacearm__compute_1_1utils =
     [ "Option", "classarm__compute_1_1utils_1_1_option.xhtml", "classarm__compute_1_1utils_1_1_option" ],
     [ "PPMLoader", "classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml", "classarm__compute_1_1utils_1_1_p_p_m_loader" ],
     [ "SimpleOption", "classarm__compute_1_1utils_1_1_simple_option.xhtml", "classarm__compute_1_1utils_1_1_simple_option" ],
-    [ "ToggleOption", "classarm__compute_1_1utils_1_1_toggle_option.xhtml", "classarm__compute_1_1utils_1_1_toggle_option" ]
+    [ "ToggleOption", "classarm__compute_1_1utils_1_1_toggle_option.xhtml", "classarm__compute_1_1utils_1_1_toggle_option" ],
+    [ "uniform_real_distribution_fp16", "classarm__compute_1_1utils_1_1uniform__real__distribution__fp16.xhtml", "classarm__compute_1_1utils_1_1uniform__real__distribution__fp16" ]
 ];

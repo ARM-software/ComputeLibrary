@@ -1,5 +1,7 @@
 var namespaces =
 [
     [ "arm_compute", "namespacearm__compute.xhtml", "namespacearm__compute" ],
-    [ "cl", "namespacecl.xhtml", null ]
+    [ "arm_gemm", "namespacearm__gemm.xhtml", null ],
+    [ "cl", "namespacecl.xhtml", null ],
+    [ "reorder", "namespacereorder.xhtml", null ]
 ];

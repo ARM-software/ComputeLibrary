@@ -18,6 +18,7 @@ var globals_defs =
     [ "r", "globals_defs_r.xhtml", null ],
     [ "s", "globals_defs_s.xhtml", null ],
     [ "t", "globals_defs_t.xhtml", null ],
+    [ "u", "globals_defs_u.xhtml", null ],
     [ "v", "globals_defs_v.xhtml", null ],
     [ "w", "globals_defs_w.xhtml", null ],
     [ "x", "globals_defs_x.xhtml", null ],

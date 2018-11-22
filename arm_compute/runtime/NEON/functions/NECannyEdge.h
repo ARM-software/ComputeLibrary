@@ -74,11 +74,8 @@ public:
      * @param[in]      norm_type             Normalization type. If 1, L1-Norm otherwise L2-Norm
      * @param[in]      border_mode           Border mode to use for the convolution.
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
-     * @param[in]      use_fp16              (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
-     *
      */
-    void configure(ITensor *input, ITensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value = 0,
-                   bool use_fp16 = false);
+    void configure(ITensor *input, ITensor *output, int32_t upper_thr, int32_t lower_thr, int32_t gradient_size, int32_t norm_type, BorderMode border_mode, uint8_t constant_border_value = 0);
 
     // Inherited methods overridden:
     void run() override;

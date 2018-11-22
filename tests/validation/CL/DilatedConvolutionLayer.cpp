@@ -45,7 +45,7 @@ namespace
 {
 RelativeTolerance<float>            rel_tolerance_f32(0.05f);                 /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(0.0);               /**< Relative tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(1);                 /**< Relative tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     abs_tolerance_f32 = 0.001f;               /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr float                     abs_tolerance_f16 = 0.3f;                 /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float                     tolerance_num_f16 = 0.07f;                /**< Tolerance number for FP16 */
@@ -153,6 +153,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
 
     // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
 }
 
 template <typename T>

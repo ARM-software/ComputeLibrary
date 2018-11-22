@@ -159,7 +159,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
     /** Winograd base kernel */
-    using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelCols, KernelCols>;
+    using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
     /** Winograd convolution kernel */
     using WinogradConv = typename WinogradBase::template Convolution<T, T>;
 
@@ -360,6 +360,21 @@ template <typename T>
 class INEWinogradLayerTransformWeightsKernel : public INEKernel
 {
 public:
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INEWinogradLayerTransformWeightsKernel(const INEWinogradLayerTransformWeightsKernel &) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INEWinogradLayerTransformWeightsKernel &operator=(const INEWinogradLayerTransformWeightsKernel &) = default;
+    /** Allow instances of this class to be moved */
+    INEWinogradLayerTransformWeightsKernel(INEWinogradLayerTransformWeightsKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    INEWinogradLayerTransformWeightsKernel &operator=(INEWinogradLayerTransformWeightsKernel &&) = default;
+
+    INEWinogradLayerTransformWeightsKernel()
+    {
+    }
+    virtual ~INEWinogradLayerTransformWeightsKernel()
+    {
+    }
     /** Determine how much memory (in units of T) to allocate for the
      * transformed weights.
      *
@@ -388,9 +403,14 @@ public:
 
     virtual void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) = 0;
 
-    virtual ~INEWinogradLayerTransformWeightsKernel()
-    {
-    }
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
+     *
+     * @param[in] input   First tensor input info. Data types supported: F32.
+     * @param[in] weights Weights tensor info. Data types supported: same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights);
 };
 
 /** NEON kernel to perform Winograd weights transform. */
@@ -428,8 +448,35 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
+
+#ifndef DOXYGEN_SKIP_THIS
+    /** Configure the weights transform kernel.
+     *
+     * @param[in]  weights_hwio        Pointer to the weights tensor
+     * @param[out] output              Pointer to working space for the output tensor in the Winograd domain.
+     * @param[in]  matrix_stride       Stride across matrices in the output workspace.
+     * @param[in]  num_output_channels Number of filters.
+     * @param[in]  num_input_channels  Number of channels in each filter.
+     */
     void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
+#endif /* DOXYGEN_SKIP_THIS */
+
+    /** Determine how much memory (in units of T) to allocate for the
+     * transformed weights.
+     *
+     * @param[in] num_output_channels Number of output feature maps.
+     * @param[in] num_input_channels  Number of input feature maps.
+     *
+     * @return Storage size (in units of T) required.
+     */
     unsigned int get_weight_storage_size(int num_output_channels, int num_input_channels) const override;
+
+    /** Gets the stride between matrices in the input worspace
+     *
+     * @param[in] kernel_shape The shape of the weights tensor.
+     *
+     * @return Stride expressed in bytes.
+     */
     int get_matrix_stride(const KernelShape &kernel_shape) const override;
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;

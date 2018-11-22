@@ -401,7 +401,7 @@ namespace winograd
   template <>
   int WinogradGEMM<2, 2, 5, 5>::WeightsTransform<float>::ops_performed(const KernelShape &shape)
   {
-    return 0;
+    return 0;  // TODO
   }
 
   template class WinogradGEMM<2, 2, 5, 5>::WeightsTransform<float>;

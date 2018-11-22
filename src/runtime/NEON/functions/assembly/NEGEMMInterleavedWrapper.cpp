@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/NEON/functions/assembly/NEGEMMInterleavedWrapper.h"
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/kernels/assembly/Helpers.h"
 #include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedMatrixMultiplyWrapper.h"
 #include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedPrepareBWrapperKernel.h"
 #include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedTransformAWrapper.h"
@@ -42,7 +43,7 @@ void NEGEMMInterleavedWrapper::run()
     prepare();
 
     _memory_group.acquire();
-    NEScheduler::get().run_workloads(_workloads);
+    NEScheduler::get().run_tagged_workloads(_workloads, _tag.c_str());
     _memory_group.release();
 }
 
@@ -151,51 +152,59 @@ void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITe
     const unsigned int alignment = 128;
     _transformed_b.allocator()->init(TensorInfo{}, alignment);
     _tmp_c.allocator()->init(TensorInfo{}, alignment);
+    _tag = "NEGEMMInterleaved_";
+    _tag += get_strategy_name(input_type, use_dot);
+
     if(!_pretranspose_b)
     {
         // If B is transposed at every iteration then transformed_B can be managed:
         _memory_group.manage(&_transformed_b);
+        _block_sizes = calculate_block_sizes_from_data_type(NEScheduler::get().cpu_info(), _params.M, _params.N, _params.K, input_type, use_dot);
     }
-    switch(input_type)
+    else
     {
-        case DataType::F32:
-            _prepare_b = instantiate_prepareB<float>(_b, &_transformed_b, _params);
-            break;
+        _tag += "_preB";
+        switch(input_type)
+        {
+            case DataType::F32:
+                _prepare_b = instantiate_prepareB<float>(_b, &_transformed_b, _params);
+                break;
 #ifdef __aarch64__
-        case DataType::U8:
-        case DataType::QASYMM8:
-            if(use_dot)
-            {
-                _prepare_b = instantiate_prepareB<uint8_t, true>(_b, &_transformed_b, _params);
-            }
-            else
-            {
-                _prepare_b = instantiate_prepareB<uint8_t, false>(_b, &_transformed_b, _params);
-            }
-            break;
-        case DataType::S8:
-            if(use_dot)
-            {
-                _prepare_b = instantiate_prepareB<int8_t, true>(_b, &_transformed_b, _params);
-            }
-            else
-            {
-                _prepare_b = instantiate_prepareB<int8_t, false>(_b, &_transformed_b, _params);
-            }
-            break;
+            case DataType::U8:
+            case DataType::QASYMM8:
+                if(use_dot)
+                {
+                    _prepare_b = instantiate_prepareB<uint8_t, true>(_b, &_transformed_b, _params);
+                }
+                else
+                {
+                    _prepare_b = instantiate_prepareB<uint8_t, false>(_b, &_transformed_b, _params);
+                }
+                break;
+            case DataType::S8:
+                if(use_dot)
+                {
+                    _prepare_b = instantiate_prepareB<int8_t, true>(_b, &_transformed_b, _params);
+                }
+                else
+                {
+                    _prepare_b = instantiate_prepareB<int8_t, false>(_b, &_transformed_b, _params);
+                }
+                break;
 #endif /* __aarch64__ */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _prepare_b = instantiate_prepareB<__fp16>(_b, &_transformed_b, _params);
-            break;
+            case DataType::F16:
+                _prepare_b = instantiate_prepareB<__fp16>(_b, &_transformed_b, _params);
+                break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        default:
-            ARM_COMPUTE_ERROR("DataType not supported");
-            break;
-    }
-    ARM_COMPUTE_ERROR_ON(_prepare_b == nullptr);
+            default:
+                ARM_COMPUTE_ERROR("DataType not supported");
+                break;
+        }
+        ARM_COMPUTE_ERROR_ON(_prepare_b == nullptr);
 
-    _block_sizes = _prepare_b->block_sizes();
+        _block_sizes = _prepare_b->block_sizes();
+    }
 
     _block_walker.set(Window::DimX, Window::Dimension(0, ceil_to_multiple(_params.N, _block_sizes.x_block), _block_sizes.x_block));
     _block_walker.set(Window::DimY, Window::Dimension(0, ceil_to_multiple(_params.K, _block_sizes.k_block), _block_sizes.k_block));

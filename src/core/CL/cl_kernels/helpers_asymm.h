@@ -62,6 +62,7 @@
         b_64 = convert_long##size(b);                                                                        \
         VEC_DATA_TYPE(long, size)                                                                            \
         ab_64 = a_64 * b_64;                                                                                 \
+        /* COMPMID-907 */                                                                                    \
         VEC_DATA_TYPE(int, size)                                                                             \
         ab_x2_high32 = convert_int##size(((ab_64 + (1 << 30)) >> 31));                                       \
         return select(ab_x2_high32, INT_MAX, overflow);                                                      \

@@ -76,55 +76,46 @@ public:
 
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                                while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
-     *                                Note: QASYMM8 works only for has_bias = false
-     * @param[out] output             The output tensor. Data types supported: Same as @p input
-     * @param[in]  kernel_dims        The kernel dimensions (width and height).
-     * @param[in]  conv_info          Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias           In case biases are provided expands the matrix with 1.
-     * @param[in]  dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  num_groups         (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
-     * @param[in]  is_fully_connected (Optional) Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
-     * @param[in]  is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
+     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
+     *                         Note: QASYMM8 works only for has_bias = false
+     * @param[out] output      The output tensor. Data types supported: Same as @p input
+     * @param[in]  kernel_dims The kernel dimensions (width and height).
+     * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
+     * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      */
     void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                   bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, bool is_fully_connected = false, bool is_flatten = false);
+                   bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEIm2ColKernel
      *
-     * @param[in] input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                               while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
-     *                               Note: QASYMM8 works only for has_bias = false
-     * @param[in] output             The output tensor. Data types supported: Same as @p input
-     * @param[in] kernel_dims        The kernel dimensions (width and height).
-     * @param[in] conv_info          Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in] has_bias           In case biases are provided expands the matrix with 1.
-     * @param[in] dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] num_groups         (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
-     * @param[in] is_fully_connected (Optional)Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
-     * @param[in] is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
+     * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                        while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
+     *                        Note: QASYMM8 works only for has_bias = false
+     * @param[in] output      The output tensor. Data types supported: Same as @p input
+     * @param[in] kernel_dims The kernel dimensions (width and height).
+     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] has_bias    In case biases are provided expands the matrix with 1.
+     * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                           bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, bool is_fully_connected = false, bool is_flatten = false);
+                           bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Template function to run the im2col optimised for the fully connected and flatten layers case
+    /** Template function to run im2col
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    template <typename T>
-    void run_reduced(const Window &window);
-    /** Template function to run the im2col used for the convolution layer case
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T, bool has_pads>
-    void run_generic(const Window &window);
+    template <typename T, bool has_pads, bool is_nchw>
+    void run_im2col(const Window &window);
+
     /** Common signature for all the specialised im2col functions
      *
      * @param[in] window Region on which to execute the kernel.

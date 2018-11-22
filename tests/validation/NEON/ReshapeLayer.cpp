@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,36 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(ReshapeLayer)
+
+// *INDENT-OFF*
+// clang-format off
+
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+                                                              framework::dataset::make("InputInfo",
+{
+    TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
+    TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
+    TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
+    TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F16), // mismatching types
+}),
+framework::dataset::make("OutputInfo",
+{
+    TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
+    TensorInfo(TensorShape(8U, 24U, 4U), 1, DataType::F32),
+    TensorInfo(TensorShape(192U, 192U),  1, DataType::F32),
+    TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
+})),
+framework::dataset::make("Expected", { true, true, false, false })),
+input_info, output_info, expected)
+{
+    // Create Fully Connected layer info
+    Status status = NEReshapeLayer::validate(&input_info.clone()->set_is_resizable(false),
+                                             &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using NEReshapeLayerFixture = ReshapeLayerValidationFixture<Tensor, Accessor, NEReshapeLayer, T>;

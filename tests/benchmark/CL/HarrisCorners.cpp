@@ -54,25 +54,23 @@ using CLHarrisCornersFixture = HarrisCornersFixture<CLTensor, CLHarrisCorners, C
 TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallImageFiles(),
                                                                                                                      framework::dataset::make("Format", { Format::U8 })),
                                                                                                                      threshold),
                                                                                                                      min_dist),
                                                                                                                      sensitivity),
                                                                                                                      gradient_size),
                                                                                                                      block_size),
-                                                                                                                     border_mode),
-                                                                                                             framework::dataset::make("UseFP16", { false })));
+                                                                                                             border_mode));
 
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(combine(combine(datasets::LargeImageFiles(),
                                                                                                                    framework::dataset::make("Format", { Format::U8 })),
                                                                                                                    threshold),
                                                                                                                    min_dist),
                                                                                                                    sensitivity),
                                                                                                                    gradient_size),
                                                                                                                    block_size),
-                                                                                                                   border_mode),
-                                                                                                           framework::dataset::make("UseFP16", { false })));
+                                                                                                           border_mode));
 
 TEST_SUITE_END() // HarrisCorners
 TEST_SUITE_END() // CL

@@ -45,6 +45,9 @@ VSTORE_IMPL(int32_t, int32x2_t, vst1, s32)
 //VSTORE_IMPL(uint64_t, 1, vst1, u64)
 //VSTORE_IMPL(int64_t, 1, vst1, s64)
 VSTORE_IMPL(float, float32x2_t, vst1, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VSTORE_IMPL(float16_t, float16x4_t, vst1, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VSTORE_IMPL(uint8_t, uint8x16_t, vst1q, u8)
 VSTORE_IMPL(int8_t, int8x16_t, vst1q, s8)
@@ -55,6 +58,9 @@ VSTORE_IMPL(int32_t, int32x4_t, vst1q, s32)
 //VSTORE_IMPL(uint64_t, 2, vst1q, u64)
 //VSTORE_IMPL(int64_t, 2, vst1q, s64)
 VSTORE_IMPL(float, float32x4_t, vst1q, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VSTORE_IMPL(float16_t, float16x8_t, vst1q, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VSTORE_IMPL
 } // namespace wrapper

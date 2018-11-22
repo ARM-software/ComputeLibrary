@@ -24,11 +24,12 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v18.08"
-SONAME_VERSION="12.0.0"
+VERSION = "v18.11"
+SONAME_VERSION="13.0.0"
 
 Import('env')
 Import('vars')
+Import('install_lib')
 
 def build_library(name, sources, static=False, libs=[]):
     if static:
@@ -53,6 +54,7 @@ def build_library(name, sources, static=False, libs=[]):
         else:
             obj = arm_compute_env.SharedLibrary(name, source=sources, LIBS = arm_compute_env["LIBS"] + libs)
 
+    obj = install_lib(obj)
     Default(obj)
     return obj
 
@@ -208,6 +210,8 @@ if env['neon']:
 
     if "arm64-v8" in env['arch']:
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
+        if "sve" in env['arch']:
+             core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/sve_*/*.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')

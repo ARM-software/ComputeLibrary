@@ -61,6 +61,7 @@ public:
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
 
+protected:
     /** Will run the workloads in parallel using num_threads
      *
      * @param[in] workloads Workloads to run

@@ -95,7 +95,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
 
     // Create and configure function
     NEGEMMLowpMatrixMultiplyCore gemmlowp_mm;
-    gemmlowp_mm.configure(&a, &b, &c);
+    gemmlowp_mm.configure(&a, &b, nullptr, &c);
 }
 
 // *INDENT-OFF*
@@ -125,6 +125,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     // Lock tensors
     Status status =  NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
                                                             &b_info.clone()->set_is_resizable(false),
+                                                            nullptr,
                                                             &output_info.clone()->set_is_resizable(false));
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }

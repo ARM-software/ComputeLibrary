@@ -150,6 +150,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
 
+    // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
     TensorInfo im2col_reshaped_info(shape_im2col, 1, dt);
     _input_im2col_reshaped.allocator()->init(im2col_reshaped_info);
     _memory_group.manage(&_input_im2col_reshaped);
@@ -160,6 +161,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     shape_gemm.set(1, mat_input_rows);
     const DataType gemm_data_type = dt;
 
+    // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
     TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
     _gemm_output.allocator()->init(info_gemm);
     _memory_group.manage(&_gemm_output);

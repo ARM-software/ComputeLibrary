@@ -43,23 +43,24 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
-RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
-constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
+// COMPMID-517 Investigate the mismatch to see whether it is a real bug
+RelativeTolerance<half>              tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
+RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
+constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance for quantized tests */
+const auto data_strides     = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
+const auto data_ksize_one   = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_three = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
+const auto data_ksize_five  = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
+const auto data_all_kernels = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
 
-/** Direct convolution data set. */
-const auto data = combine(datasets::SmallDirectConvolutionShapes(),
-                          combine(framework::dataset::make("StrideX", 1, 3),
-                                  combine(framework::dataset::make("StrideY", 1, 3),
-                                          combine(concat(combine(framework::dataset::make("PadX", 0, 1),
-                                                                 combine(framework::dataset::make("PadY", 0, 1),
-                                                                         framework::dataset::make("KernelSize", 1))),
-                                                         combine(framework::dataset::make("PadX", 0, 2),
-                                                                 combine(framework::dataset::make("PadY", 0, 2),
-                                                                         framework::dataset::make("KernelSize", { 3, 5 })))),
-                                                  framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+const auto data = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_all_kernels));
+
+/** Direct convolution nightly data set. */
+const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
+/** Direct convolution precommit data set. */
+const auto data_precommit = combine(data, framework::dataset::make("NumKernels", { 4 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -73,6 +74,8 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 
 TEST_SUITE(CL)
 TEST_SUITE(DirectConvolutionLayer)
+
+//TODO(COMPMID-415): Configuration tests?
 
 // *INDENT-OFF*
 // clang-format off
@@ -157,24 +160,37 @@ using CLDirectConvolutionValidationWithTensorShapesFixture = DirectConvolutionVa
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                ActivationFunctionsDataset),
-                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                   ActivationFunctionsDataset),
+                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
-TEST_SUITE_END()
-
-TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                  ActivationFunctionsDataset),
-                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                                                                 framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
+}
+TEST_SUITE_END() // FP16
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
+                                                                                                                    DataType::F32)),
+                                                                                                                    ActivationFunctionsDataset),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                  ActivationFunctionsDataset),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP32_CustomDataset)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::DirectConvolutionLayerDataset(),
@@ -184,8 +200,8 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32_CustomDataset
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
@@ -200,14 +216,23 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
 });
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
-                                                                                                                    QuantizedActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
+                       QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
+                       QuantizedActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_CustomDataset)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
@@ -218,11 +243,11 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantiz
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8_CustomDataset
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // DirectConvolutionLayer
+TEST_SUITE_END() // Float
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

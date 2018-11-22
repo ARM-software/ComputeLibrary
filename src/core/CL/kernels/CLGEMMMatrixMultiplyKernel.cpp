@@ -24,7 +24,6 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
@@ -48,12 +47,14 @@ namespace
 {
 using ElementsProcessed = Steps;
 
-inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
+inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info,
+                                 bool fp_mixed_precision)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input0);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((fp_mixed_precision && (input0->data_type() != DataType::F16)), "Mixed precision floating point is supported only for F16 data");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the matrix B must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
@@ -111,7 +112,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
     bool           reinterpret_input_as_3d             = reshape_info.reinterpret_input_as_3d();
-    bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 1);
+    bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 0);
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -217,18 +218,19 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 {
 }
 
-void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
+void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info,
+                                           bool fp_mixed_precision)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
     // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info, fp_mixed_precision));
 
     _input0                   = input0;
     _input1                   = input1;
     _output                   = output;
     _reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
-    _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 1);
+    _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 0);
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -290,6 +292,11 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         else
         {
             kernel_name = "gemm_mm_interleaved_transposed_" + lower_string(string_from_data_type(data_type));
+            if(fp_mixed_precision && data_type == DataType::F16)
+            {
+                // currently wider accumulator is only supported for fp16 kernels.
+                kernel_name += "_acc32";
+            }
         }
     }
     else // The input tensors have not been reshaped
@@ -305,6 +312,11 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
             if(input0->info()->num_dimensions() != 1)
             {
                 kernel_name += "_" + lower_string(string_from_data_type(data_type)) + "_bifrost";
+                if(fp_mixed_precision && data_type == DataType::F16)
+                {
+                    // currently wider accumulator is only supported for fp16 kernels.
+                    kernel_name += "_acc32";
+                }
             }
             else if(input1->info()->dimension(0) <= 1000 && data_type == DataType::F32)
             {
@@ -332,6 +344,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     // Set config_id for enabling LWS tuning
     _config_id = "gemm_";
     _config_id += (is_interleaved_transposed ? "reshaped_" : "");
+    _config_id += (fp_mixed_precision ? "fp_mixed_" : "");
     _config_id += (_reinterpret_input_as_3d ? "3di_" : "");
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");
     _config_id += lower_string(string_from_data_type(input0->info()->data_type()));
@@ -348,12 +361,12 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 }
 
 Status CLGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved_transposed,
-                                            const GEMMReshapeInfo &reshape_info, GPUTarget gpu_target)
+                                            const GEMMReshapeInfo &reshape_info, GPUTarget gpu_target, bool fp_mixed_precision)
 {
     // Note: num_elements_processed will be set in validate_and_configure_window()
     ElementsProcessed num_elements_processed{};
     ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, is_interleaved_transposed, reshape_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, is_interleaved_transposed, reshape_info, fp_mixed_precision));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(),
                                                               input1->clone().get(),
                                                               output->clone().get(),
@@ -385,7 +398,7 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
 
     if(_reinterpret_input_as_3d)
     {
-        // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
+        // Pass bottom paddings to the kernel if the input has to be reinterpreted as 3D tensor
         const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3;
         const unsigned int total_cross_plane_pad = _input0->info()->padding().top + _input0->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));

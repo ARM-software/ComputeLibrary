@@ -1,5 +1,6 @@
 var structarm__compute_1_1graph_1_1_memory_manager_context =
 [
+    [ "allocator", "structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a8725ea3110284d80b57a98c2cdf7a995", null ],
     [ "cross_group", "structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a9a1a8b3c7023ca46b49d051c2ac25489", null ],
     [ "cross_mm", "structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a4e1e0a2d09540e4c286f7ef4b5a02053", null ],
     [ "intra_mm", "structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a4c2aea1a12258b14ffee603ac50ee29e", null ],

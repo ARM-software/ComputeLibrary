@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -887,9 +887,12 @@ void NENonLinearFilterKernel::non_linear_filter_generic(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-k_col_half, i));
     }
 
+    std::array<uint8_t, mask_size> vals{ {} };
+
     execute_window_loop(win, [&](const Coordinates & id)
     {
-        std::array<uint8_t, mask_size> vals{ {} };
+        // Clear array
+        std::fill(std::begin(vals), std::end(vals), 0);
 
         size_t v = 0;
         size_t m = 0;

@@ -82,7 +82,8 @@ DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
     _input_batch_stride(input_batch_stride ? input_batch_stride : _n_input_rows * _input_row_stride),
     _output_col_stride(output_col_stride ? output_col_stride : _n_channels),
     _output_row_stride(output_row_stride ? output_row_stride : _n_output_cols * _output_col_stride),
-    _output_batch_stride(output_batch_stride ? output_batch_stride : _n_output_rows * _output_row_stride)
+    _output_batch_stride(output_batch_stride ? output_batch_stride : _n_output_rows * _output_row_stride),
+    _input_offset(0), _weights_offset(0)
 {
 }
 
@@ -94,6 +95,12 @@ unsigned int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_wind
   return iceildiv(_n_channels, CHANNEL_BLOCK);
 }
 
+template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
+void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::set_offsets(int input_offset, int weights_offset)
+{
+    _input_offset = input_offset;
+    _weights_offset = weights_offset;
+}
 
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::run(
@@ -145,7 +152,8 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::run(
         outptr_row + start_channel, _output_row_stride, _output_col_stride,
         input_row_pad_top, input_pad_left, input_row_pad_bottom,
         output_row_pad_bottom,
-        _n_tile_cols, _n_input_cols, _n_output_cols
+        _n_tile_cols, _n_input_cols, _n_output_cols,
+        _input_offset, _weights_offset
       );
     }
   }
@@ -170,7 +178,9 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile_row
   const int row_pad_out_bottom,
   const int n_tiles,
   const int n_input_cols,
-  const int n_output_cols
+  const int n_output_cols,
+  const int input_offset,
+  const int weights_offset
 )
 {
   constexpr int tile_overlap = kernel_cols - stride_cols;
@@ -242,7 +252,7 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile_row
       inptr_col, in_row_stride, in_col_stride,
       outptr_col, out_row_stride, out_col_stride,
       row_pad_in_top, t_pad_in_left, row_pad_in_bottom, t_pad_in_right,
-      row_pad_out_bottom, t_pad_out_right
+      row_pad_out_bottom, t_pad_out_right, input_offset, weights_offset
     );
   }
 }
@@ -313,7 +323,9 @@ struct DepthwiseConvolutionImpl : public DepthwiseConvolution<
     const int in_pad_bottom=0,
     const int in_pad_right=0,
     const int out_pad_bottom=0,
-    const int out_pad_right=0
+    const int out_pad_right=0,
+    const int input_offset=0,
+    const int weights_offset=0
   );
 };
 
@@ -340,7 +352,9 @@ void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile
   const int _in_pad_bottom,
   const int _in_pad_right,
   const int _out_pad_bottom,
-  const int _out_pad_right
+  const int _out_pad_right,
+  const int _input_offset,
+  const int _weights_offset
 )
 {
   constexpr auto inner_tile_rows = DWC::inner_tile_rows;

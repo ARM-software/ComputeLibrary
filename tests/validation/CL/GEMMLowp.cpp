@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,7 @@ TEST_SUITE(CL)
 TEST_SUITE(GEMMLowp)
 
 TEST_SUITE(MatrixMultiplyCore)
+
 using CLGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
@@ -66,7 +67,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
 
     // Create and configure function
     CLGEMMLowpMatrixMultiplyCore gemmlowp_mm;
-    gemmlowp_mm.configure(&a, &b, &c);
+    // TODO (giaiod01) COMPMID-1672 - Extending the test to validate add bias in offset contribution
+    gemmlowp_mm.configure(&a, &b, nullptr, &c);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset())
@@ -81,6 +83,33 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreFixture, framework:
     validate(CLAccessor(_target), _reference);
 }
 
+TEST_SUITE(Output3D)
+using CLGEMMLowpMatrixMultiplyCoreOutput3DFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, false, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreOutput3DFixture, framework::DatasetMode::PRECOMMIT, datasets::SmallGEMMLowpOutput3DDataset())
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreOutput3DFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpOutput3DDataset())
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // Output3D
+
+TEST_SUITE(InputOutput3D)
+using CLGEMMLowpMatrixMultiplyCoreInputOutput3DFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore, true, true>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpMatrixMultiplyCoreInputOutput3DFixture, framework::DatasetMode::PRECOMMIT, datasets::SmallGEMMLowpInputOutput3DDataset())
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpMatrixMultiplyCoreInputOutput3DFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpInputOutput3DDataset())
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // InputOutput3D
 TEST_SUITE_END() // MatrixMultiplyCore
 
 TEST_SUITE(OutputStage)
@@ -127,7 +156,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 
@@ -210,7 +239,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    const PaddingSize padding = PaddingCalculator(shape.x(), 4).required_padding();
     validate(in.info()->padding(), padding);
     validate(out.info()->padding(), padding);
 

@@ -65,6 +65,8 @@ inline void validate_configuration(const TensorShape &shape, Format format)
     {
         channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], &dst);
     }
+
+    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
 }
 } // namespace
 

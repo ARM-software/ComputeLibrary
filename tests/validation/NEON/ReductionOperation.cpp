@@ -44,7 +44,10 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float> tolerance_f32(0.00001f);
+AbsoluteTolerance<float> tolerance_f32(0.0001f);
+RelativeTolerance<float> rel_tolerance_f32(0.00001f);
+/** Tolerance for quantized operations */
+RelativeTolerance<float> tolerance_qasymm8(1);
 } // namespace
 
 TEST_SUITE(NEON)
@@ -81,25 +84,47 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEReductionOperationFixture = ReductionOperationValidationFixture<Tensor, Accessor, NEReductionOperation, T>;
+using NEReductionOperationFixture = ReductionOperationFixture<Tensor, Accessor, NEReductionOperation, T>;
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+template <typename T>
+using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<Tensor, Accessor, NEReductionOperation, T>;
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       datasets::ReductionOperations()),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                                       datasets::ReductionOperations()),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+
+TEST_SUITE_END() // ReductionOperation
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
