@@ -42,6 +42,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/mul.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/neg.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/padd.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 
 #endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */

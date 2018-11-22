@@ -54,20 +54,20 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: FP16/F32.
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: FP16/F32. Data layouts supported: NCHW/NHWC.
      * @param[in]  input_squared Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           Data type supported: same as @p input
-     * @param[out] output        Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     *                           Data type and layout supported: same as @p input.
+     * @param[out] output        Destination tensor. Output will have the same number of dimensions as input. Data type and layout supported: same as @p input.
      * @param[in]  norm_info     Normalization layer information like the normalization type, normalization size and other parameters.
      */
     void configure(const ITensor *input, const ITensor *input_squared, ITensor *output, NormalizationLayerInfo norm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NENormalizationLayerKernel
      *
      * @param[in] input         Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                          and an optional 4th dimension for batch of inputs. Data types supported: FP16/F32.
+     *                          and an optional 4th dimension for batch of inputs. Data types supported: FP16/F32. Data layouts supported: NCHW/NHWC.
      * @param[in] input_squared Source with each element has been squared. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                          Data type supported: same as @p input
-     * @param[in] output        Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     *                          Data type and layout supported: same as @p input.
+     * @param[in] output        Destination tensor. Output will have the same number of dimensions as input. Data type and layout supported: same as @p input.
      * @param[in] norm_info     Normalization layer information like the normalization type, normalization size and other parameters.
      *
      * @return a status
@@ -89,7 +89,7 @@ private:
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    template <DataType dt, unsigned int dim, bool do_2D_norm>
+    template <typename T, unsigned int S, unsigned int dim, bool do_2D_norm>
     void normalize_float(const Window &window);
 
     /** Common signature for all the specialised normalization functions

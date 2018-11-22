@@ -104,14 +104,14 @@ TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset,
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
-                                                                                                               framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset,
                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
-                                                                                                             framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
@@ -122,14 +122,14 @@ TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NENormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), NormalizationDatasetFP32),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), NormalizationDatasetFP32),
                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
-                                                                                                              framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
