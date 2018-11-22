@@ -134,6 +134,7 @@
 #include "arm_compute/runtime/CL/functions/CLThreshold.h"
 #include "arm_compute/runtime/CL/functions/CLTile.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
+#include "arm_compute/runtime/CL/functions/CLUnstack.h"
 #include "arm_compute/runtime/CL/functions/CLUpsampleLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWarpAffine.h"
 #include "arm_compute/runtime/CL/functions/CLWarpPerspective.h"

@@ -803,6 +803,13 @@ inline TensorShape extract_shape(const TensorShape *data)
     return *data;
 }
 
+inline TensorShape calculate_unstack_shape(TensorShape input_shape, unsigned int axis)
+{
+    ARM_COMPUTE_ERROR_ON(axis > input_shape.num_dimensions());
+    input_shape.remove_dimension(axis);
+    return input_shape;
+}
+
 template <typename T>
 inline TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vector)
 {

@@ -118,6 +118,8 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 1U, 7U, 7U },
+                     TensorShape{ 2U, 5U, 4U },
+
                      TensorShape{ 7U, 7U, 5U },
                      TensorShape{ 27U, 13U, 37U },
                      TensorShape{ 128U, 64U, 21U }
