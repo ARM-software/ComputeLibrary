@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/CL/functions/CLAbsoluteDifference.h"
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLArgMinMaxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticDivision.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticSubtraction.h"

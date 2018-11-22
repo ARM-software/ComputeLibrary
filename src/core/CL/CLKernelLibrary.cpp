@@ -370,7 +370,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "prior_box_layer_nchw", "prior_box_layer.cl" },
     { "quantization_layer", "quantization_layer.cl" },
     { "reduction_operation_x", "reduction_operation.cl" },
-    { "reduction_operation_quantized_x", "reduction_operation.cl" },
+    { "reduction_operation_non_parallel_x", "reduction_operation.cl" },
     { "reduction_operation_y", "reduction_operation.cl" },
     { "reduction_operation_z", "reduction_operation.cl" },
     { "reduction_operation_w", "reduction_operation.cl" },

@@ -1342,6 +1342,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
         case ReductionOperation::MEAN_SUM:
             os << "MEAN_SUM";
             break;
+        case ReductionOperation::ARG_IDX_MAX:
+            os << "ARG_IDX_MAX";
+            break;
+        case ReductionOperation::ARG_IDX_MIN:
+            os << "ARG_IDX_MIN";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

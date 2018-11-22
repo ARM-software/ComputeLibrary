@@ -545,9 +545,11 @@ enum class NonLinearFilterFunction : unsigned
 /** Available reduction operations */
 enum class ReductionOperation
 {
-    SUM_SQUARE, /**< Sum of squares */
-    SUM,        /**< Sum */
-    MEAN_SUM,   /**< Mean of sum */
+    SUM_SQUARE,  /**< Sum of squares */
+    SUM,         /**< Sum */
+    MEAN_SUM,    /**< Mean of sum */
+    ARG_IDX_MAX, /**< Index of the max value */
+    ARG_IDX_MIN  /**< Index of the min value */
 };
 
 /** The normalization type used for the normalization layer */
