@@ -229,8 +229,6 @@ void Fallback<TypeInput, TypeOutput>::configure(const ITensor *a, const ITensor 
         const unsigned int alignment           = 128;
         const size_t       B_pretranspose_size = _gemm_kernel_asm->get_B_pretransposed_array_size();
         _pretranspose.allocator()->init(TensorInfo(TensorShape{ (B_pretranspose_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
-        _pretranspose.allocator()->allocate();
-        ARM_COMPUTE_ERROR_ON_NULLPTR(_pretranspose.buffer());
     }
 }
 
@@ -242,6 +240,7 @@ void Fallback<TypeInput, TypeOutput>::prepare()
         // Pretranspose B if required
         if(_gemm_kernel_asm->B_pretranspose_required())
         {
+            _pretranspose.allocator()->allocate();
             ARM_COMPUTE_ERROR_ON(_pretranspose.buffer() == nullptr);
             const int  ldb            = _b->info()->strides_in_bytes().y() / sizeof(TypeInput);
             const auto in1_ptr        = reinterpret_cast<const TypeInput *>(_b->buffer() + _b->info()->offset_first_element_in_bytes());

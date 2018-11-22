@@ -464,6 +464,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
 
         //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
+        _memory_group.manage(&_output_nhwc);
         transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, &_output_nhwc,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
@@ -483,16 +484,16 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
 
-    _weights_hwio.allocator()->allocate();
     _gemm_function.configure(&_input_workspace, &_kernel_storage, nullptr, &_output_workspace, 1.0f, 0.f);
     _input_workspace.allocator()->allocate();
-    _kernel_storage.allocator()->allocate();
     _output_workspace.allocator()->allocate();
 
     // Reorder the convoluted output to ACL's ordering NCHW
-    _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
-
-    _output_nhwc.allocator()->allocate();
+    if(data_layout == DataLayout::NCHW)
+    {
+        _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
+        _output_nhwc.allocator()->allocate();
+    }
 
     _transform_input_kernel   = std::move(transform_input_kernel);
     _transform_weights_kernel = std::move(transform_weights_kernel);
@@ -656,10 +657,12 @@ void NEWinogradConvolutionLayer::prepare()
     if(!_is_prepared)
     {
         // Permute weights
+        _weights_hwio.allocator()->allocate();
         _permute_weights.run();
         _weights->mark_as_unused();
 
         // Transform weights
+        _kernel_storage.allocator()->allocate();
         NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
 
         _weights_hwio.allocator()->free();

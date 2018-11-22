@@ -53,6 +53,7 @@ void NEGEMMInterleavedWrapper::prepare()
     {
         if(_pretranspose_b)
         {
+            _transformed_b.allocator()->allocate();
             NEScheduler::get().schedule(_prepare_b.get(), Window::DimX);
             _b->mark_as_unused();
         }
@@ -264,6 +265,9 @@ void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITe
     ARM_COMPUTE_ERROR_ON(_matrix_multiply == nullptr);
     _transformed_a.allocator()->allocate();
     _tmp_c.allocator()->allocate();
-    _transformed_b.allocator()->allocate();
+    if(!_pretranspose_b)
+    {
+        _transformed_b.allocator()->allocate();
+    }
 }
 } // namespace arm_compute
