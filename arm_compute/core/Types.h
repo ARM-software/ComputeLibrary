@@ -563,6 +563,13 @@ enum class ArithmeticOperation
     SQUARED_DIFF, /**< (x - y)^2 */
 };
 
+/** Available element wise unary operations */
+enum class ElementWiseUnary
+{
+    RSQRT, /**< Reverse square root */
+    EXP,   /**< Exponential */
+};
+
 /** The normalization type used for the normalization layer */
 enum class NormType
 {

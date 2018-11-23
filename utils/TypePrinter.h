@@ -1453,6 +1453,30 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation 
     return os;
 }
 
+/** Formatted output of the Elementwise unary Operations.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op)
+{
+    switch(op)
+    {
+        case ElementWiseUnary::RSQRT:
+            os << "RSQRT";
+            break;
+        case ElementWiseUnary::EXP:
+            os << "EXP";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the Comparison Operations.
  *
  * @param[in] op Type to output.
@@ -1460,6 +1484,19 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation 
  * @return Formatted string.
  */
 inline std::string to_string(const ComparisonOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
+/** Formatted output of the Elementwise unary Operations.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ElementWiseUnary &op)
 {
     std::stringstream str;
     str << op;

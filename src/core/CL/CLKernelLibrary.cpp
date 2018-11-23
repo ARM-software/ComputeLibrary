@@ -253,6 +253,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "elementwise_operation_MIN_quantized", "elementwise_operation_quantized.cl" },
     { "elementwise_operation_DIV_quantized", "elementwise_operation_quantized.cl" },
     { "elementwise_operation_SQUARED_DIFF_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_unary", "elementwise_unary.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "flatten", "flatten.cl" },
@@ -649,6 +650,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "elementwise_operation_quantized.cl",
 #include "./cl_kernels/elementwise_operation_quantized.clembed"
+    },
+    {
+        "elementwise_unary.cl",
+#include "./cl_kernels/elementwise_unary.clembed"
     },
     {
         "erode.cl",
