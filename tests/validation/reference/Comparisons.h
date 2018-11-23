@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,34 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__
-#define __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__
+#ifndef __ARM_COMPUTE_TEST_COMPARISONS_H__
+#define __ARM_COMPUTE_TEST_COMPARISONS_H__
 
-#include "arm_compute/core/Types.h"
-#include "tests/framework/datasets/ContainerDataset.h"
-
-#include "utils/TypePrinter.h"
+#include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace datasets
+namespace validation
 {
-class BorderModes final : public framework::dataset::ContainerDataset<std::vector<BorderMode>>
+namespace reference
 {
-public:
-    BorderModes()
-        : ContainerDataset("BorderMode",
-    {
-        BorderMode::UNDEFINED,
-                   BorderMode::CONSTANT,
-                   BorderMode::REPLICATE
-    })
-    {
-    }
-};
-} // namespace datasets
+template <typename T>
+SimpleTensor<uint8_t> compare(ComparisonOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2);
+} // namespace reference
+} // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__ */
+#endif /* __ARM_COMPUTE_TEST_COMPARISONS_H__ */

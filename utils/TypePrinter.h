@@ -1362,6 +1362,55 @@ inline std::string to_string(const ReductionOperation &op)
     return str.str();
 }
 
+/** Formatted output of the Comparison Operations.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation &op)
+{
+    switch(op)
+    {
+        case ComparisonOperation::Equal:
+            os << "Equal";
+            break;
+        case ComparisonOperation::NotEqual:
+            os << "NotEqual";
+            break;
+        case ComparisonOperation::Greater:
+            os << "Greater";
+            break;
+        case ComparisonOperation::GreaterEqual:
+            os << "GreaterEqual";
+            break;
+        case ComparisonOperation::Less:
+            os << "Less";
+            break;
+        case ComparisonOperation::LessEqual:
+            os << "LessEqual";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Comparison Operations.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ComparisonOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
 /** Formatted output of the Norm Type.
  *
  * @param[in] type Type to output.

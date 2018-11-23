@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__
-#define __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__
+#ifndef __ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H__
+#define __ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H__
 
 #include "arm_compute/core/Types.h"
 #include "tests/framework/datasets/ContainerDataset.h"
@@ -35,15 +35,18 @@ namespace test
 {
 namespace datasets
 {
-class BorderModes final : public framework::dataset::ContainerDataset<std::vector<BorderMode>>
+class ComparisonOperations final : public framework::dataset::ContainerDataset<std::vector<ComparisonOperation>>
 {
 public:
-    BorderModes()
-        : ContainerDataset("BorderMode",
+    ComparisonOperations()
+        : ContainerDataset("ComparisonOperation",
     {
-        BorderMode::UNDEFINED,
-                   BorderMode::CONSTANT,
-                   BorderMode::REPLICATE
+        ComparisonOperation::Equal,
+                            ComparisonOperation::NotEqual,
+                            ComparisonOperation::Greater,
+                            ComparisonOperation::GreaterEqual,
+                            ComparisonOperation::Less,
+                            ComparisonOperation::LessEqual
     })
     {
     }
@@ -51,4 +54,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_BORDER_MODE_DATASET_H__ */
+#endif /* __ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H__ */

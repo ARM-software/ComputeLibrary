@@ -180,6 +180,18 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "channel_extract_YUYV422", "channel_extract.cl" },
     { "combine_gradients_L1", "canny.cl" },
     { "combine_gradients_L2", "canny.cl" },
+    { "compare_equal", "comparisons.cl" },
+    { "compare_equal_quantized", "comparisons.cl" },
+    { "compare_notequal", "comparisons.cl" },
+    { "compare_notequal_quantized", "comparisons.cl" },
+    { "compare_greater", "comparisons.cl" },
+    { "compare_greater_quantized", "comparisons.cl" },
+    { "compare_greaterequal", "comparisons.cl" },
+    { "compare_greaterequal_quantized", "comparisons.cl" },
+    { "compare_less", "comparisons.cl" },
+    { "compare_less_quantized", "comparisons.cl" },
+    { "compare_lessequal", "comparisons.cl" },
+    { "compare_lessequal_quantized", "comparisons.cl" },
     { "concatenate_depth", "concatenate.cl" },
     { "concatenate_width", "concatenate.cl" },
     { "concatenate_width_x2", "concatenate.cl" },
@@ -536,6 +548,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "col2im.cl",
 #include "./cl_kernels/col2im.clembed"
+    },
+    {
+        "comparisons.cl",
+#include "./cl_kernels/comparisons.clembed"
     },
     {
         "concatenate.cl",

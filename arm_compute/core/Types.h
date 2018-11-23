@@ -125,6 +125,25 @@ enum class DataLayoutDimension
     BATCHES  /**< batches */
 };
 
+/** Available ConvolutionMethod*/
+enum class ConvolutionMethod
+{
+    GEMM,    /**< Convolution using GEMM */
+    DIRECT,  /**< Direct convolution */
+    WINOGRAD /**< Convolution using Winograd */
+};
+
+/** Supported comparison operations */
+enum class ComparisonOperation
+{
+    Equal,        /**< Equal comparison ( \f$ x == y \f$ ) */
+    NotEqual,     /**< NotEqual comparison ( \f$ x != y \f$ ) */
+    Greater,      /**< Greater comparison ( \f$ x > y \f$ ) */
+    GreaterEqual, /**< Greater equal comparison ( \f$ x >= y \f$ ) */
+    Less,         /**< Less comparison ( \f$ x < y \f$ ) */
+    LessEqual     /**< Less equal comparison ( \f$ x <= y \f$ ) */
+};
+
 /** Quantization settings (used for QASYMM8 data type) */
 struct QuantizationInfo
 {
@@ -1794,14 +1813,6 @@ struct IOFormatInfo
     std::string row_delim;
     /** Align columns */
     bool align_columns;
-};
-
-/** Available ConvolutionMethod*/
-enum class ConvolutionMethod
-{
-    GEMM,    /**< Convolution using GEMM */
-    DIRECT,  /**< Direct convolution */
-    WINOGRAD /**< Convolution using Winograd */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TYPES_H__ */
