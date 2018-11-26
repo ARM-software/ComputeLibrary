@@ -113,6 +113,7 @@
 #include "arm_compute/core/CL/kernels/CLRemapKernel.h"
 #include "arm_compute/core/CL/kernels/CLReorgLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLReverseKernel.h"
 #include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/CL/kernels/CLScharr3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSelectKernel.h"

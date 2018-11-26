@@ -387,6 +387,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "reorg_layer_nhwc", "reorg_layer.cl" },
     { "reshape_layer", "reshape_layer.cl" },
     { "reshape_to_columns", "convolution_layer.cl" },
+    { "reverse", "reverse.cl" },
     { "RGB888_to_IYUV_bt709", "color_convert.cl" },
     { "RGB888_to_NV12_bt709", "color_convert.cl" },
     { "RGB888_to_RGBA8888_bt709", "color_convert.cl" },
@@ -820,6 +821,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "reshape_layer.cl",
 #include "./cl_kernels/reshape_layer.clembed"
+    },
+    {
+        "reverse.cl",
+#include "./cl_kernels/reverse.clembed"
     },
     {
         "roi_align_layer.cl",

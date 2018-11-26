@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCHANNELSHUFFLELAYERKERNEL_H__
-#define __ARM_COMPUTE_CLCHANNELSHUFFLELAYERKERNEL_H__
+#ifndef __ARM_COMPUTE_CLREVERSEKERNEL_H__
+#define __ARM_COMPUTE_CLREVERSEKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -30,45 +30,47 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the channel shuffle kernel */
-class CLChannelShuffleLayerKernel : public ICLKernel
+/** Interface for the reverse kernel */
+class CLReverseKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLChannelShuffleLayerKernel();
+    CLReverseKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLChannelShuffleLayerKernel(const CLChannelShuffleLayerKernel &) = delete;
+    CLReverseKernel(const CLReverseKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLChannelShuffleLayerKernel &operator=(const CLChannelShuffleLayerKernel &) = delete;
+    CLReverseKernel &operator=(const CLReverseKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLChannelShuffleLayerKernel(CLChannelShuffleLayerKernel &&) = default;
+    CLReverseKernel(CLReverseKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLChannelShuffleLayerKernel &operator=(CLChannelShuffleLayerKernel &&) = default;
+    CLReverseKernel &operator=(CLReverseKernel &&) = default;
     /** Default destructor */
-    ~CLChannelShuffleLayerKernel() = default;
-    /** Configure function's inputs and outputs.
+    ~CLReverseKernel() = default;
+    /** Initialise the kernel's inputis and output
      *
-     * @param[in]  input      Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
-     * @param[out] output     Output tensor. Data type supported: Same as @p input
-     * @param[in]  num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[out] output Output tensor. Data type supported: Same as @p input
+     * @param[in]  axis   Axis tensor. Contains the indices of the dimensions to reverse. Data type supported: U32
      */
-    void configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLChannelShuffleLayerKernel
+    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *axis);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReverseKernel
      *
-     * @param[in] input      Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
-     * @param[in] output     Output tensor info. Data type supported: Same as @p input
-     * @param[in] num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
+     * @param[in] input  Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] output Output tensor info. Data type supported: Same as @p input
+     * @param[in] axis   Axis tensor info. Contains the indices of the dimensions to reverse. Data type supported: U32
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int num_groups);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    const ICLTensor *_axis;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLCHANNELSHUFFLELAYERKERNEL_H__ */
+#endif /*__ARM_COMPUTE_CLREVERSEKERNEL_H__ */

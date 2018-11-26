@@ -115,6 +115,7 @@
 #include "arm_compute/runtime/CL/functions/CLRemap.h"
 #include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+#include "arm_compute/runtime/CL/functions/CLReverse.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/CL/functions/CLScharr3x3.h"
 #include "arm_compute/runtime/CL/functions/CLSelect.h"

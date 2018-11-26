@@ -38,6 +38,20 @@ namespace datasets
 /** Parent type for all for shape datasets. */
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
 
+/** Data set containing tiny 1D tensor shapes. */
+class Tiny1DShapes final : public ShapeDataset
+{
+public:
+    Tiny1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 2U },
+                     TensorShape{ 3U },
+    })
+    {
+    }
+};
+
 /** Data set containing small 1D tensor shapes. */
 class Small1DShapes final : public ShapeDataset
 {
