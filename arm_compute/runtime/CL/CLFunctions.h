@@ -125,6 +125,7 @@
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSpaceToBatchLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSplit.h"
+#include "arm_compute/runtime/CL/functions/CLStackLayer.h"
 #include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
 #include "arm_compute/runtime/CL/functions/CLTableLookup.h"
 #include "arm_compute/runtime/CL/functions/CLThreshold.h"

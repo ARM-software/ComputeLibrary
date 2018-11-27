@@ -710,6 +710,18 @@ inline Size2D compute_winograd_convolution_tiles(const Size2D &in_dims, const Si
     return Size2D(num_tiles_x, num_tiles_y);
 }
 
+/** Wrap-around a number within the range 0 <= x < m
+ *
+ * @param[in] x Input value
+ * @param[in] m Range
+ *
+ * @return the wrapped-around number
+ */
+template <typename T>
+inline T wrap_around(T x, T m)
+{
+    return x >= 0 ? x % m : (x % m + m) % m;
+}
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"
