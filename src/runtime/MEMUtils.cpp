@@ -54,22 +54,22 @@ void parse_mem_info(size_t &total, size_t &free, size_t &buffer)
             if(std::regex_search(str, match, std::regex("MemTotal: (.*)kB")) && match.size() > 1)
             {
                 const std::string result = match.str(1);
-                total                    = std::stoul(result, nullptr, 0);
+                total                    = arm_compute::support::cpp11::stoul(result, nullptr);
             }
             if(std::regex_search(str, match, std::regex("MemFree: (.*)kB")) && match.size() > 1)
             {
                 const std::string result = match.str(1);
-                memfree                  = std::stoul(result, nullptr, 0);
+                memfree                  = arm_compute::support::cpp11::stoul(result, nullptr);
             }
             if(std::regex_search(str, match, std::regex("Buffers: (.*)kB")) && match.size() > 1)
             {
                 const std::string result = match.str(1);
-                buffer                   = std::stoul(result, nullptr, 0);
+                buffer                   = arm_compute::support::cpp11::stoul(result, nullptr);
             }
             if(std::regex_search(str, match, std::regex("Cached: (.*)kB")) && match.size() > 1)
             {
                 const std::string result = match.str(1);
-                memcache                 = std::stoul(result, nullptr, 0);
+                memcache                 = arm_compute::support::cpp11::stoul(result, nullptr);
             }
             free = memfree + (buffer + memcache);
         }
