@@ -33,6 +33,7 @@
 #include "arm_compute/graph/nodes/ConvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/DeconvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/DepthwiseConvolutionLayerNode.h"
+#include "arm_compute/graph/nodes/DetectionOutputLayerNode.h"
 #include "arm_compute/graph/nodes/DummyNode.h"
 #include "arm_compute/graph/nodes/EltwiseLayerNode.h"
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"

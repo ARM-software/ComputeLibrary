@@ -45,6 +45,7 @@ using arm_compute::Size2D;
 using arm_compute::PermutationVector;
 
 using arm_compute::ActivationLayerInfo;
+using arm_compute::DetectionOutputLayerInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
 using arm_compute::FullyConnectedLayerInfo;
@@ -133,6 +134,7 @@ enum class NodeType
     ConvolutionLayer,
     DeconvolutionLayer,
     DepthwiseConvolutionLayer,
+    DetectionOutputLayer,
     EltwiseLayer,
     FlattenLayer,
     FullyConnectedLayer,

@@ -39,6 +39,7 @@ class ConstNode;
 class ConvolutionLayerNode;
 class DeconvolutionLayerNode;
 class DepthwiseConvolutionLayerNode;
+class DetectionOutputLayerNode;
 class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;

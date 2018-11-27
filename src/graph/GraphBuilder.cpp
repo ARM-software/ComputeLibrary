@@ -362,6 +362,22 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
     return conv_nid;
 }
+NodeID GraphBuilder::add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info)
+{
+    CHECK_NODEIDX_PAIR(input_loc, g);
+    CHECK_NODEIDX_PAIR(input_conf, g);
+    CHECK_NODEIDX_PAIR(input_priorbox, g);
+
+    // Create detection_output node and connect
+    NodeID detect_nid = g.add_node<DetectionOutputLayerNode>(detect_info);
+    g.add_connection(input_loc.node_id, input_loc.index, detect_nid, 0);
+    g.add_connection(input_conf.node_id, input_conf.index, detect_nid, 1);
+    g.add_connection(input_priorbox.node_id, input_priorbox.index, detect_nid, 2);
+
+    set_node_params(g, detect_nid, params);
+
+    return detect_nid;
+}
 
 NodeID GraphBuilder::add_dummy_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
 {

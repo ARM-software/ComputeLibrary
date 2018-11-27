@@ -458,7 +458,35 @@ private:
     int                    _depth_multiplier;
     const QuantizationInfo _quant_info;
 };
+/** DetectionOutput Layer */
+class DetectionOutputLayer final : public ILayer
+{
+public:
+    /** Construct a detection output layer.
+     *
+     * @param[in] sub_stream_conf  Confidence graph sub-stream.
+     * @param[in] sub_stream_prior PriorBox graph sub-stream.
+     * @param[in] detect_info      DetectionOutput parameters.
+     */
+    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, DetectionOutputLayerInfo detect_info)
+        : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)
+    {
+    }
 
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params  = { name(), s.hints().target_hint };
+        NodeIdxPair input_loc      = { s.tail_node(), 0 };
+        NodeIdxPair input_conf     = { _ss_conf.tail_node(), 0 };
+        NodeIdxPair input_priorbox = { _ss_prior.tail_node(), 0 };
+        return GraphBuilder::add_detection_output_node(s.graph(), common_params, input_loc, input_conf, input_priorbox, _detect_info);
+    }
+
+private:
+    SubStream                _ss_conf;
+    SubStream                _ss_prior;
+    DetectionOutputLayerInfo _detect_info;
+};
 /** Dummy Layer */
 class DummyLayer final : public ILayer
 {

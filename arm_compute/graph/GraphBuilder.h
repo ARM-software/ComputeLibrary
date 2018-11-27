@@ -201,6 +201,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
+    /** Adds a detection output layer node to the graph
+     *
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input_loc      Location input to the detection output layer node as a NodeID-Index pair
+     * @param[in] input_conf     Confidence input to the detection output layer node as a NodeID-Index pair
+     * @param[in] input_priorbox PriorBox input to the detection output layer node as a NodeID-Index pair
+     * @param[in] detect_info    Detection output layer parameters
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info);
     /** Adds a Dummy node to the graph
      *
      * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.

@@ -203,6 +203,30 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 
     return status;
 }
+/** Validates a detection output layer node
+ *
+ * @tparam DetectionOutputLayer DetectionOutput layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename DetectionOutputLayer>
+Status validate_detection_output_layer(DetectionOutputLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating DetectionOutputLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo      *input0      = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo      *input1      = get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo      *input2      = get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo      *output      = get_backing_tensor_info(node.output(0));
+    const DetectionOutputLayerInfo detect_info = node.detection_output_info();
+
+    return DetectionOutputLayer::validate(input0, input1, input2, output, detect_info);
+}
 
 /** Validates a Generate Proposals layer node
  *

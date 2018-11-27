@@ -39,12 +39,9 @@ public:
     GraphSSDMobilenetExample()
         : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "MobileNetSSD")
     {
-        mbox_loc_opt = cmd_parser.add_option<SimpleOption<std::string>>("mbox_loc_opt", "");
-        mbox_loc_opt->set_help("Filename containing the reference values for the graph branch mbox_loc_opt.");
-        mbox_conf_flatten_opt = cmd_parser.add_option<SimpleOption<std::string>>("mbox_conf_flatten", "");
-        mbox_conf_flatten_opt->set_help("Filename containing the reference values for the graph branch mbox_conf_flatten.");
-        mbox_priorbox_opt = cmd_parser.add_option<SimpleOption<std::string>>("mbox_priorbox", "");
-        mbox_priorbox_opt->set_help("Filename containing the reference values for the graph branch mbox_priorbox.");
+        // Add topk option
+        keep_topk_opt = cmd_parser.add_option<SimpleOption<int>>("topk", 100);
+        keep_topk_opt->set_help("Top k detections results per image.");
     }
     GraphSSDMobilenetExample(const GraphSSDMobilenetExample &) = delete;
     GraphSSDMobilenetExample &operator=(const GraphSSDMobilenetExample &) = delete;
@@ -162,8 +159,6 @@ public:
         mbox_loc << ConcatLayer(std::move(conv_11_mbox_loc), std::move(conv_13_mbox_loc), conv_14_2_mbox_loc, std::move(conv_15_2_mbox_loc),
                                 std::move(conv_16_2_mbox_loc), std::move(conv_17_2_mbox_loc));
 
-        mbox_loc << OutputLayer(get_npy_output_accessor(mbox_loc_opt->value(), TensorShape(7668U), DataType::F32));
-
         //mbox_conf
         SubStream conv_11_mbox_conf(conv_11);
         conv_11_mbox_conf << get_node_C(conv_11, data_path, "conv11_mbox_conf", 63, PadStrideInfo(1, 1, 0, 0));
@@ -189,8 +184,6 @@ public:
         mbox_conf << ReshapeLayer(TensorShape(21U, 1917U)).set_name("mbox_conf/reshape");
         mbox_conf << SoftmaxLayer().set_name("mbox_conf/softmax");
         mbox_conf << FlattenLayer().set_name("mbox_conf/flat");
-
-        mbox_conf << OutputLayer(get_npy_output_accessor(mbox_conf_flatten_opt->value(), TensorShape(40257U), DataType::F32));
 
         const std::vector<float> priorbox_variances     = { 0.1f, 0.1f, 0.2f, 0.2f };
         const float              priorbox_offset        = 0.5f;
@@ -235,7 +228,19 @@ public:
                           std::move(conv_11_mbox_priorbox), std::move(conv_13_mbox_priorbox), std::move(conv_14_2_mbox_priorbox),
                           std::move(conv_15_2_mbox_priorbox), std::move(conv_16_2_mbox_priorbox), std::move(conv_17_2_mbox_priorbox));
 
-        mbox_priorbox << OutputLayer(get_npy_output_accessor(mbox_priorbox_opt->value(), TensorShape(7668U, 2U, 1U), DataType::F32));
+        const int                          num_classes         = 21;
+        const bool                         share_location      = true;
+        const DetectionOutputLayerCodeType detection_type      = DetectionOutputLayerCodeType::CENTER_SIZE;
+        const int                          keep_top_k          = keep_topk_opt->value();
+        const float                        nms_threshold       = 0.45f;
+        const int                          label_id_background = 0;
+        const float                        conf_thrs           = 0.25f;
+        const int                          top_k               = 100;
+
+        SubStream detection_ouput(mbox_loc);
+        detection_ouput << DetectionOutputLayer(std::move(mbox_conf), std::move(mbox_priorbox),
+                                                DetectionOutputLayerInfo(num_classes, share_location, detection_type, keep_top_k, nms_threshold, top_k, label_id_background, conf_thrs));
+        detection_ouput << OutputLayer(get_detection_output_accessor(common_params, { tensor_shape }));
 
         // Finalize graph
         GraphConfig config;
@@ -256,13 +261,9 @@ public:
 private:
     CommandLineParser  cmd_parser;
     CommonGraphOptions common_opts;
-
-    SimpleOption<std::string> *mbox_loc_opt{ nullptr };
-    SimpleOption<std::string> *mbox_conf_flatten_opt{ nullptr };
-    SimpleOption<std::string> *mbox_priorbox_opt{ nullptr };
-
-    CommonGraphParams common_params;
-    Stream            graph;
+    SimpleOption<int> *keep_topk_opt{ nullptr };
+    CommonGraphParams  common_params;
+    Stream             graph;
 
     ConcatLayer get_node_A(IStream &master_graph, const std::string &data_path, std::string &&param_path,
                            unsigned int  conv_filt,
