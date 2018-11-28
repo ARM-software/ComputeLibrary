@@ -1,6 +1,9 @@
 Release repository: https://github.com/arm-software/ComputeLibrary
+
 Development repository: https://review.mlplatform.org/#/admin/projects/ml/ComputeLibrary
+
 Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
+
 **Make sure you are using the latest version of the library before opening an issue. Thanks**
 
 News:
@@ -16,6 +19,7 @@ Related projects:
 
 Documentation available here:
 
+- [v18.11](https://arm-software.github.io/ComputeLibrary/v18.11/index.xhtml)
 - [v18.08](https://arm-software.github.io/ComputeLibrary/v18.08/)
 - [v18.05](https://arm-software.github.io/ComputeLibrary/v18.05/)
 - [v18.03](https://arm-software.github.io/ComputeLibrary/v18.03/)
@@ -31,6 +35,8 @@ Documentation available here:
 
 Binaries available here:
 
+- [v18.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.11/arm_compute-v18.11-bin-linux.tar.gz)
+- [v18.11-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.11/arm_compute-v18.11-bin-android.tar.gz)
 - [v18.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-linux.tar.gz)
 - [v18.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-android.tar.gz)
 - [v18.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.05/arm_compute-v18.05-bin-linux.tar.gz)
