@@ -85,6 +85,9 @@ common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
 files_benchmark = Glob('benchmark/*.cpp')
+#FIXME Delete before release
+if env['internal_only']:
+    files_benchmark += Glob('../3rdparty/tests/benchmark/*.cpp')
 
 # Add unit tests
 files_validation = Glob('validation/UNIT/*/*.cpp')
@@ -101,6 +104,9 @@ if env['opencl']:
 
     files_benchmark += Glob('benchmark/CL/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/CL/' + filter_pattern)
+    #FIXME Delete before release
+    if env['internal_only']:
+        files_benchmark += Glob('../3rdparty/tests/benchmark/CL/' + filter_pattern)
 
     files_validation += Glob('validation/CL/*/' + filter_pattern)
     files_validation += Glob('validation/CL/' + filter_pattern)
@@ -109,6 +115,9 @@ if env['neon']:
     filter_pattern = test_env['test_filter']
     files_benchmark += Glob('benchmark/NEON/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/NEON/' + filter_pattern)
+    #FIXME Delete before release
+    if env['internal_only']:
+        files_benchmark += Glob('../3rdparty/tests/benchmark/NEON/' + filter_pattern)
 
     files_validation += Glob('validation/NEON/*/' + filter_pattern)
     files_validation += Glob('validation/NEON/' + filter_pattern)
