@@ -32,8 +32,8 @@ Documentation available here:
 
 Binaries available here:
 
-- [v18.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.11-bin-linux.tar.gz)
-- [v18.11-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.11-bin-android.tar.gz)
+- [v18.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.11/arm_compute-v18.11-bin-linux.tar.gz)
+- [v18.11-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.11/arm_compute-v18.11-bin-android.tar.gz)
 - [v18.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-linux.tar.gz)
 - [v18.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.08/arm_compute-v18.08-bin-android.tar.gz)
 - [v18.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.05/arm_compute-v18.05-bin-linux.tar.gz)
