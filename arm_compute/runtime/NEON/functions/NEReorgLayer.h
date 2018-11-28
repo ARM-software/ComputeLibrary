@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_NEREORGLAYER_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -33,7 +33,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEReorgLayerKernel */
-class NEReorgLayer : public INESimpleFunction
+class NEReorgLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and outputs

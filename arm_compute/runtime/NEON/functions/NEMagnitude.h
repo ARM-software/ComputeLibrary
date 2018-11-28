@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_NEMAGNITUDE_H__
 #define __ARM_COMPUTE_NEMAGNITUDE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run NEMagnitudePhaseKernel */
-class NEMagnitude : public INESimpleFunction
+/** Basic function to run @ref NEMagnitudePhaseKernel */
+class NEMagnitude : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs.
@@ -43,5 +43,5 @@ public:
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEMAGNITUDE_H__ */

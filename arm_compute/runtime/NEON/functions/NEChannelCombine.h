@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NECHANNELCOMBINE_H__
 #define __ARM_COMPUTE_NECHANNELCOMBINE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -33,7 +33,7 @@ class ITensor;
 using IImage = ITensor;
 
 /**Basic function to run @ref NEChannelCombineKernel to perform channel combination. */
-class NEChannelCombine : public INESimpleFunction
+class NEChannelCombine : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize function's inputs and outputs.
@@ -54,5 +54,5 @@ public:
      */
     void configure(const IImage *plane0, const IImage *plane1, const IImage *plane2, IMultiImage *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECHANNELCOMBINE_H__*/

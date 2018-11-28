@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__
 #define __ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,7 @@ class ITensor;
  *  -# @ref NEGEMMInterleave4x4Kernel
  *
  */
-class NEGEMMInterleave4x4 : public INESimpleFunction
+class NEGEMMInterleave4x4 : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output
@@ -45,5 +45,5 @@ public:
      */
     void configure(const ITensor *input, ITensor *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMINTERLEAVE4X4_H__ */

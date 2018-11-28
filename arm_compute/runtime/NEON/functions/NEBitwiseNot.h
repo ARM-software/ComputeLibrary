@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_NEBITWISENOT_H__
 #define __ARM_COMPUTE_NEBITWISENOT_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEBitwiseNotKernel */
-class NEBitwiseNot : public INESimpleFunction
+class NEBitwiseNot : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's input and output
@@ -41,5 +41,5 @@ public:
      */
     void configure(const ITensor *input, ITensor *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEBITWISENOT_H__ */

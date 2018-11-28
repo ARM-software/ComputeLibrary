@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -76,5 +75,5 @@ private:
     NEDepthwiseConvolutionLayer _depthwise_conv;
     NEDirectConvolutionLayer    _pointwise_conv;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEON_DEPTHWISE_SEPARABLE_CONVOLUTION_H__ */

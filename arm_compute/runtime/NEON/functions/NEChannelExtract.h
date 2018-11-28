@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_NECHANNELEXTRACT_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -34,7 +34,7 @@ class ITensor;
 using IImage = ITensor;
 
 /**Basic function to run @ref NEChannelExtractKernel to perform channel extraction. */
-class NEChannelExtract : public INESimpleFunction
+class NEChannelExtract : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function's source, destination
@@ -52,5 +52,5 @@ public:
      */
     void configure(const IMultiImage *input, Channel channel, IImage *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECHANNELEXTRACT_H__*/

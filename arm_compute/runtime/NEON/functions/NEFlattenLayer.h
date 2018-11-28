@@ -25,14 +25,14 @@
 #define __ARM_COMPUTE_NEFLATTENLAYER_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to execute flatten layer kernel. */
-class NEFlattenLayer : public INESimpleFunction
+class NEFlattenLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's input and output.

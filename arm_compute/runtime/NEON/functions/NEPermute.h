@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEPERMUTE_H__
 #define __ARM_COMPUTE_NEPERMUTE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
 
@@ -33,7 +33,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEPermuteKernel */
-class NEPermute : public INESimpleFunction
+class NEPermute : public INESimpleFunctionNoBorder
 {
 public:
     /** Configure the permute NEON kernel
@@ -57,5 +57,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEPERMUTE_H__ */

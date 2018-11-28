@@ -25,14 +25,14 @@
 #define __ARM_COMPUTE_NECOPY_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NECopyKernel */
-class NECopy : public INESimpleFunction
+class NECopy : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the function's source and destination.

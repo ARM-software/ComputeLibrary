@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NETRANSPOSE_H__
-#define __ARM_COMPUTE_NETRANSPOSE_H__
-
-#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 namespace arm_compute
 {
-class ITensor;
-
-/** Basic function to transpose a matrix on NEON. This function calls the following NEON kernel:
- *
- *  -# @ref NETransposeKernel
- *
- */
-class NETranspose : public INESimpleFunctionNoBorder
+INESimpleFunctionNoBorder::INESimpleFunctionNoBorder() // NOLINT
+    : _kernel()
 {
-public:
-    /** Initialise the kernel's inputs and output
-     *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
-     * @param[out] output Output tensor. Data type supported: Same as @p input
-     */
-    void configure(const ITensor *input, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NETranspose
-     *
-     * @param[in] input  The input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
-     * @param[in] output The output tensor. Data types supported: Same as @p input
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-};
-} // namespace arm_compute
+}
 
-#endif /* __ARM_COMPUTE_NETRANSPOSE_H__ */
+void INESimpleFunctionNoBorder::run()
+{
+    NEScheduler::get().schedule(_kernel.get(), Window::DimY);
+}
+} // namespace arm_compute

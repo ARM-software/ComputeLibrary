@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NECHANNELSHUFFLELAYER_H__
 #define __ARM_COMPUTE_NECHANNELSHUFFLELAYER_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -37,7 +37,7 @@ class ITensor;
  * first divide the channels into G groups, C = (G * C'), and perform a transpose of the channel, which gives C = (C' * G).
  * for more details see: https://arxiv.org/pdf/1707.01083.pdf
  */
-class NEChannelShuffleLayer : public INESimpleFunction
+class NEChannelShuffleLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function

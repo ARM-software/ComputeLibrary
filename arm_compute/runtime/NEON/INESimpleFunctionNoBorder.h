@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NETABLELOOKUP_H__
-#define __ARM_COMPUTE_NETABLELOOKUP_H__
+#ifndef __ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__
+#define __ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
-class ITensor;
-class ILut;
-
-/** Basic function to run @ref NETableLookupKernel */
-class NETableLookup : public INESimpleFunctionNoBorder
+/** Basic interface for functions which have a single NEON kernel and no border */
+class INESimpleFunctionNoBorder : public IFunction
 {
 public:
-    /** Initialise the kernel's inputs and output
-     *
-     * @param[in]  input  First tensor input. Data types supported: U8/S16
-     * @param[in]  lut    Input lookup table.
-     * @param[out] output Output tensor. Data types supported: same as @p input
-     */
-    void configure(const ITensor *input, const ILut *lut, ITensor *output);
+    /** Constructor */
+    INESimpleFunctionNoBorder();
+
+    // Inherited methods overridden:
+    void run() override final;
+
+protected:
+    std::unique_ptr<INEKernel> _kernel; /**< Kernel to run */
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NETABLELOOKUP_H__ */
+#endif /*__ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__ */

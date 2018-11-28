@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/core/IHOG.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -35,7 +35,7 @@ namespace arm_compute
  * -# @ref NEHOGDetectorKernel
  *
  */
-class NEHOGDetector : public INESimpleFunction
+class NEHOGDetector : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's input, output, HOG data object, detection window stride, threshold and index class
@@ -52,6 +52,6 @@ public:
      */
     void configure(const ITensor *input, const IHOG *hog, IDetectionWindowArray *detection_windows, const Size2D &detection_window_stride, float threshold = 0.0f, size_t idx_class = 0);
 };
-}
+} // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_NEHOGDETECTOR_H__ */

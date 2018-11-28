@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NECOLORCONVERT_H__
 #define __ARM_COMPUTE_NECOLORCONVERT_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -33,7 +33,7 @@ class IMultiImage;
 using IImage = ITensor;
 
 /**Basic function to run @ref NEColorConvertKernel to perform color conversion */
-class NEColorConvert : public INESimpleFunction
+class NEColorConvert : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialize the function's source, destination
@@ -63,5 +63,5 @@ public:
      */
     void configure(const IMultiImage *input, IMultiImage *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NECOLORCONVERT_H__*/

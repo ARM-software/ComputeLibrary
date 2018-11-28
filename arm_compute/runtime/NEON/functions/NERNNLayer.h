@@ -27,7 +27,6 @@
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECopyKernel.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"

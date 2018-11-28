@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_NEDEPTHCONVERT_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include <cstdint>
 
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /**Basic function to run @ref NEDepthConvertLayerKernel */
-class NEDepthConvertLayer : public INESimpleFunction
+class NEDepthConvertLayer : public INESimpleFunctionNoBorder
 {
 public:
     /* Contructor */
@@ -69,5 +69,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift = 0);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDEPTHCONVERT_H__*/

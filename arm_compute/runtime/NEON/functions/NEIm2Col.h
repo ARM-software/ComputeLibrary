@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEIM2COL_H__
 #define __ARM_COMPUTE_NEIM2COL_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/Size2D.h"
@@ -78,5 +78,5 @@ private:
     NEIm2ColKernel _kernel;
     unsigned int   _y_dim;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEIM2COL_H__ */
