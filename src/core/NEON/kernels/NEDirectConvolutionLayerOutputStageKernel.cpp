@@ -431,21 +431,13 @@ void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITe
     uint8x16_t      min                           = vdupq_n_u8(0);
     uint8x16_t      max                           = vdupq_n_u8(255);
 
-    Window window_bias = window;
-    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    window_bias.set(3, Window::Dimension(0, 0, 0));
-
     Iterator in(input, window);
-    Iterator bi(bias, window_bias);
-
     Iterator out(output, window);
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Get bias and pointer to input
+        // Get pointer to input
         const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr());
 
-        // Accumulate bias
         int32x4x4_t v_in =
         {
             {
@@ -459,7 +451,7 @@ void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITe
         const auto out_ptr = out.ptr();
         vst1q_u8(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
     },
-    in, bi, out);
+    in, out);
 }
 } // namespace
 
