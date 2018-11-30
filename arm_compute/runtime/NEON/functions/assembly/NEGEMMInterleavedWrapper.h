@@ -44,6 +44,53 @@ class MatrixMultiplyWorkload;
 class NEGEMMInterleavedTransformAWrapper;
 class NEGEMMInterleavedMatrixMultiplyWrapper;
 
+/** Buffer manager used when reshaping B on the fly
+ *
+ * The typical workflow is:
+ * - lock_to_reshape_if_needed()
+ * - If the previous lock was successful: mark_as_reshaped()
+ * - wait_for_reshaping() wait for the reshaping to be complete
+ * - mark_as_unused() once the thread is done using this given buffer.
+ *
+ * Calls for different indices might be interleaved, however the calls for a given index must always be in that order.
+ */
+class IBufferManager
+{
+public:
+    /** Lock a buffer for the given index if it's available else return
+     *
+     * @param[in] index Index of the buffer to lock
+     *
+     * @return True if the buffer has been successfully locked, false if it's already reshaped / being reshaped.
+     */
+    virtual bool lock_to_reshape_if_needed(unsigned int index) = 0;
+    /** Mark a buffer previously locked as reshaped
+     *
+     * @pre The thread calling this function must have locked the given buffer through lock_to_reshape_if_needed()
+     *
+     * @param[in] index Index of the buffer to mark as reshaped
+     */
+    virtual void mark_as_reshaped(unsigned int index) = 0;
+    /** Block until the given buffer is marked as reshaped
+     *
+     * @param[in] index Index of the buffer
+     */
+    virtual void wait_for_reshaping(unsigned int index) = 0;
+    /** Mark a reshaped buffer as unused
+     *
+     * Once all the users have marked a buffer as unused then it goes back to being free
+     */
+    virtual void mark_as_unused(unsigned int index) = 0;
+
+    /** Number of buffers used internally
+     *
+     * @return The number of buffers used by the manager.
+     */
+    virtual unsigned int num_buffers() const = 0;
+    /** Default destructor */
+    virtual ~IBufferManager() = default;
+};
+
 /** Equivalent to arm_gemm::GemmInterleaved but using Compute Library types.
  */
 class NEGEMMInterleavedWrapper : public IFunction
@@ -89,6 +136,7 @@ private:
     std::unique_ptr<NEGEMMInterleavedPrepareBWrapperKernel> _prepare_b{ nullptr };
     std::unique_ptr<NEGEMMInterleavedTransformAWrapper>     _transform_a{ nullptr };
     std::unique_ptr<NEGEMMInterleavedMatrixMultiplyWrapper> _matrix_multiply{ nullptr };
+    std::unique_ptr<IBufferManager>                         _buffer_manager{ nullptr };
     std::vector<TransformAWorkload>                         _a_workloads{};
     std::vector<PrepareBWorkload>                           _b_workloads{};
     std::vector<MatrixMultiplyWorkload>                     _mm_workloads{};
