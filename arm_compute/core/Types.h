@@ -1646,8 +1646,8 @@ class GEMMInfo
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false),
-          _gemmlowp_output_stage(), _fp_mixed_precision(false)
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(true), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false), _gemmlowp_output_stage(),
+          _fp_mixed_precision(false)
     {
     }
     /** Constructor
