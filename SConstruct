@@ -55,6 +55,7 @@ vars.AddVariables(
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     PathVariable("install_dir", "Specify sub-folder for the install", "", PathVariable.PathAccept),
+    BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
@@ -117,6 +118,14 @@ if env['os'] == 'bare_metal':
     if env['cppthreads'] or env['openmp']:
          print("ERROR: OpenMP and C++11 threads not supported in bare_metal. Use cppthreads=0 openmp=0")
          Exit(1)
+
+if not env['exceptions']:
+    if env['opencl'] or env['gles_compute']:
+         print("ERROR: OpenCL and GLES are not supported when building without exceptions. Use opencl=0 gles_compute=0")
+         Exit(1)
+
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_EXCEPTIONS_DISABLED'])
+    env.Append(CXXFLAGS = ['-fno-exceptions'])
 
 env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
          '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
@@ -297,8 +306,8 @@ if env['gles_compute'] and env['os'] != 'android':
 
 SConscript('./SConscript', variant_dir=build_path, duplicate=0)
 
-if env['examples'] and env['os'] != 'bare_metal':
+if env['examples'] and env['os'] != 'bare_metal' and env['exceptions']:
     SConscript('./examples/SConscript', variant_dir='%s/examples' % build_path, duplicate=0)
 
-if env['os'] != 'bare_metal':
+if env['os'] != 'bare_metal' and env['exceptions']:
     SConscript('./tests/SConscript', variant_dir='%s/tests' % build_path, duplicate=0)

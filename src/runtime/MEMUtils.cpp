@@ -48,8 +48,10 @@ void parse_mem_info(size_t &total, size_t &free, size_t &buffer)
         std::stringstream str_stream;
         str_stream << meminfo_f.rdbuf();
         const std::string str = str_stream.str();
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
         try
         {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
             std::smatch match;
             if(std::regex_search(str, match, std::regex("MemTotal: (.*)kB")) && match.size() > 1)
             {
@@ -72,12 +74,14 @@ void parse_mem_info(size_t &total, size_t &free, size_t &buffer)
                 memcache                 = arm_compute::support::cpp11::stoul(result, nullptr);
             }
             free = memfree + (buffer + memcache);
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
         }
         catch(std::regex_error &e)
         {
             // failed parsing /proc/meminfo
             // return 0s on all fields
         }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
     }
 #endif // ifndef BARE_METAL
 }

@@ -190,15 +190,19 @@ void CPPScheduler::Thread::worker_thread()
             return;
         }
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
         try
         {
+#endif /* ARM_COMPUTE_EXCEPTIONS_ENABLED */
             process_workloads(*_workloads, *_feeder, _info);
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
         }
         catch(...)
         {
             _current_exception = std::current_exception();
         }
-
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         _job_complete = true;
         lock.unlock();
         _cv.notify_one();
@@ -250,18 +254,21 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 
     info.thread_id = t;
     process_workloads(workloads, feeder, info);
-
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         for(auto &thread : _threads)
         {
             thread.wait();
         }
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::system_error &e)
     {
         std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
 #endif /* DOXYGEN_SKIP_THIS */
 

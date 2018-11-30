@@ -48,8 +48,10 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     std::string   out;
     std::ifstream fs;
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         std::ios_base::openmode mode = std::ios::in;
 
@@ -68,11 +70,13 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
         fs.seekg(0, std::ios::beg);
         // Copy the content of the file
         out.assign(std::istreambuf_iterator<char>(fs), std::istreambuf_iterator<char>());
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 
     return out;
 }
