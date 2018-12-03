@@ -164,6 +164,7 @@ private:
     bool                                      _is_quantized;
     bool                                      _is_activationlayer_enabled;
     const ICLTensor                          *_original_weights;
+    std::unique_ptr<IFunction>                _optimised_function;
 };
 }
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */
