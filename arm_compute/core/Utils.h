@@ -1024,6 +1024,7 @@ inline std::string float_to_string_with_full_precision(float val)
     return ss.str();
 }
 
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
 /** Print consecutive elements to an output stream.
  *
  * @param[out] s             Output stream to print the elements to.
@@ -1112,5 +1113,6 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
  * @return The maximum width of the elements.
  */
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
+#endif /* ARM_COMPUTE_DEBUG_ENABLED */
 }
 #endif /*__ARM_COMPUTE_UTILS_H__ */

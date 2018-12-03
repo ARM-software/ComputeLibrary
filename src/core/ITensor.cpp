@@ -71,6 +71,7 @@ void ITensor::copy_from(const ITensor &src)
     src_it, dst_it);
 }
 
+#ifdef ARM_COMPUTE_DEBUG_ENABLED
 void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
 {
     ARM_COMPUTE_ERROR_ON(this->buffer() == nullptr);
@@ -151,6 +152,7 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
         }
     }
 }
+#endif /* ARM_COMPUTE_DEBUG_ENABLED */
 
 bool ITensor::is_used() const
 {

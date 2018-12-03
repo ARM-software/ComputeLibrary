@@ -161,7 +161,11 @@ arm_compute_env.Append(LIBS = ['dl'])
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
-core_files += Glob('src/core/utils/*/*.cpp')
+core_files += Glob('src/core/utils/helpers/*.cpp')
+core_files += Glob('src/core/utils/io/*.cpp')
+core_files += Glob('src/core/utils/quantization/*.cpp')
+if env["logging"]:
+    core_files += Glob('src/core/utils/logging/*.cpp')
 
 runtime_files = Glob('src/runtime/*.cpp')
 runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
