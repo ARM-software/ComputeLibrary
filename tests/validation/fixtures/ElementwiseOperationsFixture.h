@@ -200,6 +200,21 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ElementwiseMaxQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+
+    {
+        ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MAX, shape0, shape1,
+                                                                                             data_type0, data_type1, output_data_type,
+                                                                                             qinfo0, qinfo1, qinfo_out);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ElementwiseMinBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -241,6 +256,21 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ElementwiseMinQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+
+    {
+        ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::MIN, shape0, shape1,
+                                                                                             data_type0, data_type1, output_data_type,
+                                                                                             qinfo0, qinfo1, qinfo_out);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ElementwiseSquaredDiffBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -276,6 +306,21 @@ public:
 
     {
         ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape, shape,
+                                                                                             data_type0, data_type1, output_data_type,
+                                                                                             qinfo0, qinfo1, qinfo_out);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class ElementwiseSquaredDiffQuantizedBroadcastValidationFixture : public ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,
+               QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out)
+
+    {
+        ArithmeticOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(ArithmeticOperation::SQUARED_DIFF, shape0, shape1,
                                                                                              data_type0, data_type1, output_data_type,
                                                                                              qinfo0, qinfo1, qinfo_out);
     }

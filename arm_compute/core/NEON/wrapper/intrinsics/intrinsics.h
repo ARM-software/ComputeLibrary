@@ -44,5 +44,6 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/padd.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
 
 #endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */

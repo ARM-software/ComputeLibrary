@@ -57,6 +57,7 @@
 #include "arm_compute/core/NEON/kernels/NEDilateKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
+#include "arm_compute/core/NEON/kernels/NEElementwiseOperationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEErodeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFastCornersKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,7 @@ namespace arm_compute
 /** Rounding method */
 enum class RoundingPolicy
 {
-    TO_ZERO,         /**< Truncates the least significand values that are lost in operations. */
+    TO_ZERO,         /**< Truncates the least significant values that are lost in operations. */
     TO_NEAREST_UP,   /**< Rounds to nearest value; half rounds away from zero */
     TO_NEAREST_EVEN, /**< Rounds to nearest value; half rounds to nearest even */
 };
