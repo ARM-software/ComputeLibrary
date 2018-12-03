@@ -64,6 +64,29 @@ std::string generate_id_for_tuning_common(const std::string &kernel_name, const 
     return config_id;
 }
 
+Status validate_arguments_with_division_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(&input1, &input2, &output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
+
+    const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+
+    // Validate in case of configured output
+    if(output.total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
+                                        "Wrong shape for output");
+    }
+
+    return Status{};
+}
+
 Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
@@ -119,6 +142,26 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &i
     return build_opts;
 }
 
+std::pair<Status, Window> configure_window_arithmetic_common(const ValidRegion &valid_region, ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+{
+    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
+    Window win_input1 = win.broadcast_if_dimension_le_one(input1);
+    Window win_input2 = win.broadcast_if_dimension_le_one(input2);
+
+    AccessWindowHorizontal input1_access(&input1, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal input2_access(&input2, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win_input1, input1_access)
+                          || update_window_and_padding(win_input2, input2_access)
+                          || update_window_and_padding(win, output_access);
+
+    output_access.set_valid_region(win, valid_region);
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
 std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
     const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
@@ -140,22 +183,16 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
         set_format_if_unknown(output, Format::F32);
     }
 
-    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
-    Window win_input1 = win.broadcast_if_dimension_le_one(input1);
-    Window win_input2 = win.broadcast_if_dimension_le_one(input2);
+    return configure_window_arithmetic_common(valid_region, input1, input2, output);
+}
 
-    AccessWindowHorizontal input1_access(&input1, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal input2_access(&input2, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
-
-    bool window_changed = update_window_and_padding(win_input1, input1_access)
-                          || update_window_and_padding(win_input2, input2_access)
-                          || update_window_and_padding(win, output_access);
-
-    output_access.set_valid_region(win, valid_region);
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+std::pair<Status, Window> validate_and_configure_window_for_division(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
+{
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(input1, input2);
+    const TensorShape &out_shape    = broadcast_pair.first;
+    const ValidRegion &valid_region = broadcast_pair.second;
+    auto_init_if_empty(output, out_shape, 1, input1.data_type());
+    return configure_window_arithmetic_common(valid_region, input1, input2, output);
 }
 } // namespace
 
@@ -306,19 +343,44 @@ void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTen
 
 Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
-    ARM_COMPUTE_UNUSED(op);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_arithmetic_rules(*input1, *input2, *output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_arithmetic_operators(*input1->clone(), *input2->clone(), *output->clone()).first);
+    if(op == ArithmeticOperation::DIV)
+    {
+        // Division doesn't support integer arithmetic
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_division_rules(*input1, *input2, *output));
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_division(*input1->clone(), *input2->clone(), *output->clone()).first);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_arithmetic_rules(*input1, *input2, *output));
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_arithmetic_operators(*input1->clone(), *input2->clone(), *output->clone()).first);
+    }
+
     return Status{};
 }
 std::pair<Status, Window> CLArithmeticOperationKernel::validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
-    return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
+    if(_op == ArithmeticOperation::DIV)
+    {
+        // Division doesn't support integer arithmetic
+        return validate_and_configure_window_for_division(input1, input2, output);
+    }
+    else
+    {
+        return validate_and_configure_window_for_arithmetic_operators(input1, input2, output);
+    }
 }
 Status CLArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
-    return validate_arguments_with_arithmetic_rules(input1, input2, output);
+    if(_op == ArithmeticOperation::DIV)
+    {
+        // Division doesn't support integer arithmetic
+        return validate_arguments_with_division_rules(input1, input2, output);
+    }
+    else
+    {
+        return validate_arguments_with_arithmetic_rules(input1, input2, output);
+    }
 }
 
 CLBuildOptions CLArithmeticOperationKernel::generate_build_options(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
