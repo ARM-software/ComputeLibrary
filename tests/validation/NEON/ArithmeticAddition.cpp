@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -71,26 +71,30 @@ using NEArithmeticAdditionFixture = ArithmeticAdditionValidationFixture<Tensor, 
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                         TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
-                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8), // Unsupported broadcast
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8), // Invalid data type combination
+                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),// Mismatching shapes
                                                       }),
                framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(1U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::S16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                      })),
                framework::dataset::make("Expected", { true, true, false, false, false})),
                input1_info, input2_info, output_info, expected)
 {
-    ARM_COMPUTE_EXPECT(bool(NEArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
+    Status s = NEArithmeticAddition::validate(&input1_info.clone()->set_is_resizable(false),
+                                              &input2_info.clone()->set_is_resizable(false),
+                                              &output_info.clone()->set_is_resizable(false),
+                                              ConvertPolicy::WRAP);
+    ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
@@ -114,10 +118,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(ref_src1.info()->padding(), PaddingSize());
+    validate(ref_src2.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionU8Dataset),
@@ -147,10 +150,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(ref_src1.info()->padding(), PaddingSize());
+    validate(ref_src2.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionS16Dataset),
@@ -199,10 +201,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(ref_src1.info()->padding(), PaddingSize());
+    validate(ref_src2.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP32Dataset),
@@ -262,10 +263,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(ref_src1.info()->padding(), PaddingSize());
+    validate(ref_src2.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall,

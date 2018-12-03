@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,36 +30,29 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VNEG_IMPL(vtype, postfix)     \
-    inline vtype vneg(const vtype &a) \
-    {                                 \
-        return vneg_##postfix(a);     \
+#define VNEG_IMPL(vtype, prefix, postfix) \
+    inline vtype vneg(const vtype &a)     \
+    {                                     \
+        return prefix##_##postfix(a);     \
     }
 
-VNEG_IMPL(int8x8_t, s8)
-VNEG_IMPL(int16x4_t, s16)
-VNEG_IMPL(int32x2_t, s32)
-VNEG_IMPL(float32x2_t, f32)
+VNEG_IMPL(int8x8_t, vneg, s8)
+VNEG_IMPL(int16x4_t, vneg, s16)
+VNEG_IMPL(int32x2_t, vneg, s32)
+VNEG_IMPL(float32x2_t, vneg, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VNEG_IMPL(float16x4_t, f16)
+VNEG_IMPL(float16x4_t, vneg, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+VNEG_IMPL(int8x16_t, vnegq, s8)
+VNEG_IMPL(int16x8_t, vnegq, s16)
+VNEG_IMPL(int32x4_t, vnegq, s32)
+VNEG_IMPL(float32x4_t, vnegq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VNEG_IMPL(float16x8_t, vnegq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VNEG_IMPL
-#define VNEGQ_IMPL(vtype, postfix)     \
-    inline vtype vnegq(const vtype &a) \
-    {                                  \
-        return vnegq_##postfix(a);     \
-    }
-
-VNEGQ_IMPL(int8x16_t, s8)
-VNEGQ_IMPL(int16x8_t, s16)
-VNEGQ_IMPL(int32x4_t, s32)
-VNEGQ_IMPL(float32x4_t, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VNEGQ_IMPL(float16x8_t, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-#undef VNEGQ_IMPL
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_NEG_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/QAsymm8.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #include <arm_fp16.h>
@@ -89,15 +90,8 @@ private:
      * @param[in] window Region on which to execute the kernel
      */
     template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<std::is_same<T, float>::value, void>::type activation(const Window &window);
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    /** Function to apply an activation function on a tensor.
-     *
-     * @param[in] window Region on which to execute the kernel
-     */
-    template <ActivationLayerInfo::ActivationFunction F, typename T>
-    typename std::enable_if<std::is_same<T, float16_t>::value, void>::type activation(const Window &window);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+    typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
+    activation(const Window &window);
     /** Function to apply an activation function on a tensor.
      *
      * @param[in] window Region on which to execute the kernel

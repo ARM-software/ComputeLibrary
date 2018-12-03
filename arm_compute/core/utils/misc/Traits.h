@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,13 @@ template <>
 struct is_floating_point<half> : public std::true_type
 {
 };
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
+struct is_floating_point<__fp16> : public std::true_type
+{
+};
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 } // namespace traits
 } // namespace utils
 } // namespace arm_compute

@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
 #define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
 
+#include "arm_compute/core/NEON/wrapper/intrinsics/abs.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/bsl.h"
@@ -39,6 +40,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/invsqrt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/log.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/min.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/mla.h"
@@ -55,5 +57,6 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/setlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/tanh.h"
 
 #endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */

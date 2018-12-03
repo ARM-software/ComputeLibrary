@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_BSL_H__
-#define __ARM_COMPUTE_WRAPPER_BSL_H__
+#ifndef __ARM_COMPUTE_WRAPPER_ABS_H__
+#define __ARM_COMPUTE_WRAPPER_ABS_H__
 
 #include <arm_neon.h>
 
@@ -30,35 +30,46 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VBSL_IMPL(stype, vtype, ctype, prefix, postfix)               \
-    inline vtype vbsl(const ctype &a, const vtype &b, const vtype &c) \
-    {                                                                 \
-        return prefix##_##postfix(a, b, c);                           \
+#define VABS_IMPL(stype, vtype, prefix, postfix) \
+    inline vtype vabs(const vtype &a)            \
+    {                                            \
+        return prefix##_##postfix(a);            \
     }
 
-VBSL_IMPL(uint8_t, uint8x8_t, uint8x8_t, vbsl, u8)
-VBSL_IMPL(int8_t, int8x8_t, uint8x8_t, vbsl, s8)
-VBSL_IMPL(uint16_t, uint16x4_t, uint16x4_t, vbsl, u16)
-VBSL_IMPL(int16_t, int16x4_t, uint16x4_t, vbsl, s16)
-VBSL_IMPL(uint32_t, uint32x2_t, uint32x2_t, vbsl, u32)
-VBSL_IMPL(int32_t, int32x2_t, uint32x2_t, vbsl, s32)
-VBSL_IMPL(float32x2_t, float32x2_t, uint32x2_t, vbsl, f32)
+#define VQABS_IMPL(stype, vtype, prefix, postfix) \
+    inline vtype vqabs(const vtype &a)            \
+    {                                             \
+        return prefix##_##postfix(a);             \
+    }
+
+// Absolute: vabs{q}_<type>. Vd[i] = |Va[i]|
+VABS_IMPL(int8x8_t, int8x8_t, vabs, s8)
+VABS_IMPL(int16x4_t, int16x4_t, vabs, s16)
+VABS_IMPL(int32x2_t, int32x2_t, vabs, s32)
+VABS_IMPL(float32x2_t, float32x2_t, vabs, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VBSL_IMPL(float16x4_t, float16x4_t, uint16x4_t, vbsl, f16)
+VABS_IMPL(float16x4_t, float16x4_t, vabs, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-VBSL_IMPL(uint8_t, uint8x16_t, uint8x16_t, vbslq, u8)
-VBSL_IMPL(int8_t, int8x16_t, uint8x16_t, vbslq, s8)
-VBSL_IMPL(uint16_t, uint16x8_t, uint16x8_t, vbslq, u16)
-VBSL_IMPL(int16_t, int16x8_t, uint16x8_t, vbslq, s16)
-VBSL_IMPL(uint32_t, uint32x4_t, uint32x4_t, vbslq, u32)
-VBSL_IMPL(int32_t, int32x4_t, uint32x4_t, vbslq, s32)
-VBSL_IMPL(float32x4_t, float32x4_t, uint32x4_t, vbslq, f32)
+VABS_IMPL(int8x16_t, int8x16_t, vabsq, s8)
+VABS_IMPL(int16x8_t, int16x8_t, vabsq, s16)
+VABS_IMPL(int32x4_t, int32x4_t, vabsq, s32)
+VABS_IMPL(float32x4_t, float32x4_t, vabsq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VBSL_IMPL(float16x8_t, float16x8_t, uint16x8_t, vbslq, f16)
+VABS_IMPL(float16x8_t, float16x8_t, vabsq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-#undef VBSL_IMPL
+// Saturating absolute: vqabs{q}_<type>. Vd[i] = sat(|Va[i]|)
+VQABS_IMPL(int8x8_t, int8x8_t, vqabs, s8)
+VQABS_IMPL(int16x4_t, int16x4_t, vqabs, s16)
+VQABS_IMPL(int32x2_t, int32x2_t, vqabs, s32)
+
+VQABS_IMPL(int8x16_t, int8x16_t, vqabsq, s8)
+VQABS_IMPL(int16x8_t, int16x8_t, vqabsq, s16)
+VQABS_IMPL(int32x4_t, int32x4_t, vqabsq, s32)
+
+#undef VABS_IMPL
+#undef VQABS_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_BSL_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_ABS_H__ */

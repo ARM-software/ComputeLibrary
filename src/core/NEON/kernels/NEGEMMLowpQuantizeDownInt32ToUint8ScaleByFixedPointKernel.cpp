@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,37 +66,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
-    // Note: This kernel performs 16 elements per iteration.
-    // However, since we use a left-over for loop, we cannot have any read or write out of memory
-    // For this reason num_elems_processed_per_iteration is set to 1
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
-
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input->clone()->set_data_type(DataType::QASYMM8));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input, Steps());
 
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    // NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel doesn't need padding so update_window_and_padding() can be skipped
+    Coordinates coord;
+    coord.set_num_dimensions(output->num_dimensions());
+    output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
 
-    bool window_changed = update_window_and_padding(win,
-                                                    input_access);
-
-    if(output->total_size() != 0)
-    {
-        output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
-    }
-
-    if(bias != nullptr)
-    {
-        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = window_changed || update_window_and_padding(win, bias_access);
-    }
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, win);
 }
 } // namespace
 
@@ -269,7 +252,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::configure(const 
     _max                          = max;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr) ? bias->info() : nullptr, output->info());
+    auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 
@@ -282,10 +265,7 @@ Status NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::validate(const
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, bias, output, min, max));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
-                                                              (bias != nullptr) ? bias->clone().get() : nullptr,
-                                                              output->clone().get())
-                                .first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
     return Status{};
 }

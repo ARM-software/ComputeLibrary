@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -255,34 +255,12 @@ inline float16x8_t vexpq_f16(float16x8_t x)
 
 inline float16x8_t vlogq_f16(float16x8_t x)
 {
-    static const std::array<float16x8_t, 8> log_tab_f16 =
-    {
-        {
-            vdupq_n_f16(-2.29561495781f),
-            vdupq_n_f16(-2.47071170807f),
-            vdupq_n_f16(-5.68692588806f),
-            vdupq_n_f16(-0.165253549814f),
-            vdupq_n_f16(5.17591238022f),
-            vdupq_n_f16(0.844007015228f),
-            vdupq_n_f16(4.58445882797f),
-            vdupq_n_f16(0.0141278216615f),
-        }
-    };
+    // TODO (COMPMID-1535) : Revisit FP16 approximations
+    const float32x4_t x_high = vcvt_f32_f16(vget_high_f16(x));
+    const float32x4_t x_low  = vcvt_f32_f16(vget_low_f16(x));
 
-    static const int16x8_t   CONST_127 = vdupq_n_s16(127);           // 127
-    static const float16x8_t CONST_LN2 = vdupq_n_f16(0.6931471805f); // ln(2)
-
-    // Extract exponent
-    const int16x8_t   m   = vsubq_s16(vreinterpretq_s16_u16(vshrq_n_u16(vreinterpretq_u16_f16(x), 9)), CONST_127);
-    const float16x8_t val = vreinterpretq_f16_s16(vsubq_s16(vreinterpretq_s16_f16(x), vshlq_n_s16(m, 9)));
-
-    // Polynomial Approximation
-    float16x8_t poly = vtaylor_polyq_f16(val, log_tab_f16);
-
-    // Reconstruct
-    poly = vaddq_f16(poly, vmulq_f16(vcvtq_f16_s16(m), CONST_LN2));
-
-    return poly;
+    const float16x8_t res = vcvt_high_f16_f32(vcvt_f16_f32(vlogq_f32(x_low)), vlogq_f32(x_high));
+    return res;
 }
 
 inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)

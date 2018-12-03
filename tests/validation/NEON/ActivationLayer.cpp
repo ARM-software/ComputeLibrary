@@ -145,12 +145,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
     }
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(src.info()->padding(), padding);
-
+    validate(src.info()->padding(), PaddingSize());
     if(!in_place)
     {
-        validate(dst.info()->padding(), padding);
+        validate(dst.info()->padding(), PaddingSize());
     }
 }
 

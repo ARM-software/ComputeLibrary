@@ -21,14 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_H__
-#define __ARM_COMPUTE_WRAPPER_H__
+#ifndef __ARM_COMPUTE_WRAPPER_LOG_H__
+#define __ARM_COMPUTE_WRAPPER_LOG_H__
 
-// Traits
-#include "arm_compute/core/NEON/wrapper/traits.h"
+#include "arm_compute/core/NEON/NEMath.h"
+#include <arm_neon.h>
 
-// Intrinsics Overloads
-#include "arm_compute/core/NEON/wrapper/intrinsics/intrinsics.h"
-#include "arm_compute/core/NEON/wrapper/scalar/scalar.h"
+namespace arm_compute
+{
+namespace wrapper
+{
+#define VLOG_IMPL(vtype, prefix, postfix) \
+    inline vtype vlog(const vtype &a)     \
+    {                                     \
+        return prefix##_##postfix(a);     \
+    }
 
-#endif /* __ARM_COMPUTE_WRAPPER_H__ */
+VLOG_IMPL(float32x4_t, vlogq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VLOG_IMPL(float16x8_t, vlogq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#undef VLOG_IMPL
+} // namespace wrapper
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_WRAPPER_LOG_H__ */

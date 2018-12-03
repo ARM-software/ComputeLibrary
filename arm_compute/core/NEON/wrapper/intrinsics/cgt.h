@@ -30,10 +30,10 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VCGT_IMPL(votype, vtype, prefix, postfix)      \
-    inline votype vcgt(const vtype &a, const vtype &b) \
-    {                                                  \
-        return prefix##_##postfix(a, b);               \
+#define VCGT_IMPL(rtype, vtype, prefix, postfix)      \
+    inline rtype vcgt(const vtype &a, const vtype &b) \
+    {                                                 \
+        return prefix##_##postfix(a, b);              \
     }
 
 VCGT_IMPL(uint8x8_t, uint8x8_t, vcgt, u8)
