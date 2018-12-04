@@ -114,6 +114,7 @@
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NETableLookupKernel.h"
 #include "arm_compute/core/NEON/kernels/NEThresholdKernel.h"
+#include "arm_compute/core/NEON/kernels/NETileKernel.h"
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEUpsampleLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
