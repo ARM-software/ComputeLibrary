@@ -70,11 +70,21 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     ARM_COMPUTE_ERROR_ON(shift != 0);
     ARM_COMPUTE_UNUSED(policy, shift);
 
-    // Always saturate on floats
-    for(int i = 0; i < src.num_elements(); ++i)
+    if(!is_floating_point<T2>::value)
     {
-        T1 val    = utils::rounding::round_half_away_from_zero(src[i]);
-        result[i] = utils::cast::saturate_cast<T2>(val);
+        // Always saturate on floats
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            T1 val    = utils::rounding::round_half_away_from_zero(src[i]);
+            result[i] = utils::cast::saturate_cast<T2>(val);
+        }
+    }
+    else
+    {
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            result[i] = static_cast<T2>(src[i]);
+        }
     }
     return result;
 }

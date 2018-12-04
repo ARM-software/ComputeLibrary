@@ -226,7 +226,7 @@ CAST_SUITE(F16_to_U16, DataType::F16, DataType::U16, CLCastToU16Fixture<half>, C
 CAST_SUITE(F16_to_S16, DataType::F16, DataType::S16, CLCastToS16Fixture<half>, CastF16toS16Dataset, one_tolerance)
 CAST_SUITE(F16_to_U32, DataType::F16, DataType::U32, CLCastToU32Fixture<half>, CastF16toU32Dataset, one_tolerance)
 CAST_SUITE(F16_to_S32, DataType::F16, DataType::S32, CLCastToS32Fixture<half>, CastF16toS32Dataset, one_tolerance)
-CAST_SUITE(F16_to_F32, DataType::F16, DataType::F32, CLCastToF32Fixture<half>, CastF16toF32Dataset, one_tolerance)
+CAST_SUITE(F16_to_F32, DataType::F16, DataType::F32, CLCastToF32Fixture<half>, CastF16toF32Dataset, zero_tolerance)
 
 // F32
 CAST_SUITE(F32_to_U8, DataType::F32, DataType::U8, CLCastToU8Fixture<float>, CastF32toU8Dataset, one_tolerance)
@@ -235,7 +235,7 @@ CAST_SUITE(F32_to_U16, DataType::F32, DataType::U16, CLCastToU16Fixture<float>, 
 CAST_SUITE(F32_to_S16, DataType::F32, DataType::S16, CLCastToS16Fixture<float>, CastF32toS16Dataset, one_tolerance)
 CAST_SUITE(F32_to_U32, DataType::F32, DataType::U32, CLCastToU32Fixture<float>, CastF32toU32Dataset, one_tolerance)
 CAST_SUITE(F32_to_S32, DataType::F32, DataType::S32, CLCastToS32Fixture<float>, CastF32toS32Dataset, one_tolerance)
-CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, CLCastToF16Fixture<float>, CastF32toF16Dataset, one_tolerance)
+CAST_SUITE(F32_to_F16, DataType::F32, DataType::F16, CLCastToF16Fixture<float>, CastF32toF16Dataset, zero_tolerance)
 
 TEST_SUITE_END() // Cast
 TEST_SUITE_END() // CL
