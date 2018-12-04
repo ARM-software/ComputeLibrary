@@ -94,6 +94,7 @@ def filter_clang_tidy_lines( lines ):
                ("NEGEMMLowpAssemblyMatrixMultiplyCore" in line and "constructor does not initialize these fields" in line) or
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
+               ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue
