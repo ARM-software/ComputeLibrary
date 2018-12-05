@@ -805,6 +805,23 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
     }
 }
 
+/** Permutes the given dimensions according the permutation vector
+ *
+ * @param[in,out] dimensions Dimensions to be permuted.
+ * @param[in]     perm       Vector describing the permutation.
+ *
+ */
+template <typename T>
+inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &perm)
+{
+    const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
+    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    {
+        T dimension_val = old_dim[i];
+        dimensions.set(perm[i], dimension_val);
+    }
+}
+
 /** Calculate padding requirements in case of SAME padding
  *
  * @param[in] input_shape   Input shape

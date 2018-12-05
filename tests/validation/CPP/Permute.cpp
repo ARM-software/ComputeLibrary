@@ -42,10 +42,19 @@ namespace validation
 {
 namespace
 {
-const auto PermuteParametersSmall = combine(concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
-const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
+const auto PermuteVectors = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(2U, 0U, 1U),
+    PermutationVector(1U, 2U, 0U),
+    PermutationVector(0U, 1U, 2U),
+    PermutationVector(0U, 2U, 1U),
+    PermutationVector(1U, 0U, 2U),
+    PermutationVector(2U, 1U, 0U),
+});
+const auto PermuteInputLayout     = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteInputLayout * PermuteVectors;
+const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteInputLayout * PermuteVectors;
+
 } // namespace
 TEST_SUITE(CPP)
 TEST_SUITE(Permute)
@@ -77,25 +86,32 @@ template <typename T>
 using CPPPermuteFixture = PermuteValidationFixture<Tensor, Accessor, CPPPermute, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U8)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
+
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U16)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -103,12 +119,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint16_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CPPPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U32)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CPPPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);

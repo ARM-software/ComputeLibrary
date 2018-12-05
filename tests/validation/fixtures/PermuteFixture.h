@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,10 +46,10 @@ class PermuteValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PermutationVector perm, DataType data_type)
+    void setup(TensorShape input_shape, DataLayout input_layout, PermutationVector perm, DataType data_type)
     {
-        _target    = compute_target(shape, data_type, perm);
-        _reference = compute_reference(shape, data_type, perm);
+        _target    = compute_target(input_shape, input_layout, data_type, perm);
+        _reference = compute_reference(input_shape, data_type, perm);
     }
 
 protected:
@@ -59,14 +59,14 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type, PermutationVector perm)
+    TensorType compute_target(const TensorShape &input_shape, DataLayout input_layout, DataType data_type, PermutationVector perm)
     {
         // Permute shapes
-        TensorShape output_shape = shape;
+        TensorShape output_shape = input_shape;
         permute(output_shape, perm);
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type);
+        TensorType src = create_tensor<TensorType>(input_shape, data_type);
         TensorType dst = create_tensor<TensorType>(output_shape, data_type);
 
         // Create and configure function
@@ -92,10 +92,10 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, PermutationVector perm)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, DataType data_type, PermutationVector perm)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{ input_shape, data_type };
 
         // Fill reference
         fill(src);

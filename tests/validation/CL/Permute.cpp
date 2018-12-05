@@ -42,10 +42,16 @@ namespace validation
 {
 namespace
 {
-const auto PermuteParametersSmall = combine(datasets::Small4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
-const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
+const auto PermuteVectors = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(2U, 0U, 1U),
+    PermutationVector(1U, 2U, 0U),
+    PermutationVector(3U, 2U, 0U, 1U)
+});
+const auto PermuteInputLayout     = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteInputLayout * PermuteVectors;
+const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteInputLayout * PermuteVectors;
+
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(Permute)
