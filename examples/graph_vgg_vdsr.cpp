@@ -75,9 +75,6 @@ public:
         std::cout << "Image width: " << image_width << std::endl;
         std::cout << "Image height: " << image_height << std::endl;
 
-        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type) && common_params.target == Target::NEON,
-                                "QASYMM8 not supported for this graph");
-
         // Get trainable parameters data path
         const std::string data_path  = common_params.data_path;
         const std::string model_path = "/cnn_data/vdsr_model/";

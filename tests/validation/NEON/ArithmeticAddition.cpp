@@ -43,6 +43,8 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
                                                  DataType::U8));
@@ -54,6 +56,8 @@ const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::m
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto ArithmeticAdditionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
                                                    framework::dataset::make("DataType", DataType::F32));
+const auto ArithmeticAdditionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                      framework::dataset::make("DataType", DataType::QASYMM8));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -91,6 +95,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
+TEST_SUITE(Integer)
 TEST_SUITE(U8)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                shape, policy)
@@ -121,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<uint8_t>, framework
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
@@ -161,7 +166,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Integer
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -172,8 +178,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixture<half>, framework::D
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // F16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
@@ -231,11 +237,54 @@ FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEArithmeticAdditionBroadcastFixture<f
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+template <typename T>
+using NEArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantizedFixture<Tensor, Accessor, NEArithmeticAddition, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+               shape, policy)
+{
+    // Create tensors
+    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::QASYMM8);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::QASYMM8);
+    Tensor dst      = create_tensor<Tensor>(shape, DataType::QASYMM8);
+
+    // Create and Configure function
+    NEArithmeticAddition add;
+    add.configure(&ref_src1, &ref_src2, &dst, policy);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEArithmeticAdditionQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQASYMM8Dataset),
+                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
+
+TEST_SUITE_END() // ArithmeticAddition
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

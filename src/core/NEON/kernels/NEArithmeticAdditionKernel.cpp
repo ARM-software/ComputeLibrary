@@ -171,6 +171,61 @@ void add_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     input1, input2, output);
 }
 
+void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
+    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
+    Iterator output(out, window);
+
+    const float32x4_t vscale1    = vdupq_n_f32(in1->info()->quantization_info().scale);
+    const float32x4_t vscale2    = vdupq_n_f32(in2->info()->quantization_info().scale);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / out->info()->quantization_info().scale);
+    const int32x4_t   voffset1   = vdupq_n_s32(in1->info()->quantization_info().offset);
+    const int32x4_t   voffset2   = vdupq_n_s32(in2->info()->quantization_info().offset);
+    const float32x4_t voffseto   = vdupq_n_f32(out->info()->quantization_info().offset);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const uint8x16_t a = vld1q_u8(input1.ptr());
+        const uint8x16_t b = vld1q_u8(input2.ptr());
+
+        const float32x4x4_t af =
+        {
+            {
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(a))))), voffset1)), vscale1),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(a))))), voffset1)), vscale1),
+            }
+        };
+
+        const float32x4x4_t bf =
+        {
+            {
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(b))))), voffset2)), vscale2),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(b))))), voffset2)), vscale2),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(b))))), voffset2)), vscale2),
+                vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(b))))), voffset2)), vscale2),
+            }
+        };
+
+        const int32x4x4_t rf =
+        {
+            {
+                vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+            }
+        };
+
+        const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+        const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+        vst1q_u8(output.ptr(), vcombine_u8(pa, pb));
+    },
+    input1, input2, output);
+}
+
 void add_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
@@ -332,8 +387,8 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     ARM_COMPUTE_UNUSED(policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
@@ -349,7 +404,8 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
-            && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16),
+            && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16)
+            && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8),
             "You called addition with the wrong image formats");
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
@@ -380,6 +436,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &input1, ITe
         else if(input1.data_type() == DataType::F32 || input2.data_type() == DataType::F32)
         {
             set_format_if_unknown(output, Format::F32);
+        }
+        else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
+        {
+            set_data_type_if_unknown(output, DataType::QASYMM8);
         }
     }
 
@@ -432,6 +492,8 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_F32_F32_F32", &add_F32_F32_F32 },
         { "add_wrap_F16_F16_F16", &add_F16_F16_F16 },
         { "add_saturate_F16_F16_F16", &add_F16_F16_F16 },
+        { "add_wrap_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
+        { "add_saturate_QASYMM8_QASYMM8_QASYMM8", &add_QASYMM8_QASYMM8_QASYMM8 },
     };
 
     _input1 = input1;
