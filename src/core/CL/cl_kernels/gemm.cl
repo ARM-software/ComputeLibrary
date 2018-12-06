@@ -23,6 +23,235 @@
  */
 #include "helpers.h"
 
+#if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE)
+
+/** This OpenCL kernel reshapes the lhs input matrix. The kernel splits the input matrix in blocks of size M0xK0 and stores each one (not transposed) in
+ *  the output matrix unrolling the values.
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=float)
+ * @note The block's dimensions (M0 and K0) must be passed at compile time using -DM0 and -DK0 (i.e. -DM0=2, -DK0=2).
+ * @note The number of M0xK0 vertical blocks to store on the same output row must be passed at compile time using -DV0 (i.e. -DV0=2)
+ * @note Only the following values for M0, K0 and V0 are supported:
+ *                                      M0: 2,3,4,5,6,7,8
+ *                                      K0: 2,4,8,16
+ *                                      V0: greater than 0
+ * @note In case the input has to be reinterpreted as a 3D tensor (i.e. input of convolution layer 1x1), the following information must be passed at compile time:
+ *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
+ *       -# HEIGHT_GEMM3D: The height of the input in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the input in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns matrix A NOT reshaped
+ * @note If the M0xK0 blocks have to be interleaved, the option -DINTERLEAVE must passed at compile time.
+ *
+ * @param[in]  src_ptr                           Pointer to the source LHS tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+ * @param[in]  src_stride_x                      Stride of the source LHS tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source LHS tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source LHS tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source LHS tensor
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ * @param[in]  cross_plane_pad                   (Optional) Bottom paddings in unit of elements (only if defined REINTERPRET_INPUT_AS_3D)
+ */
+__kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
+                                         TENSOR3D_DECLARATION(dst)
+#if defined(REINTERPRET_INPUT_AS_3D)
+                                         ,
+                                         uint cross_plane_pad
+#endif // REINTERPRET_INPUT_AS_3D
+                                        )
+{
+// Block size
+#define BLOCK_SIZE ((M0) * (K0))
+
+// Output offset X
+#if defined(INTERLEAVE)
+#define OUTPUT_OFFSET_X (K0)
+#else // defined(INTERLEAVE)
+#define OUTPUT_OFFSET_X (BLOCK_SIZE)
+#endif // defined(INTERLEAVE)
+
+// Output step X
+#if defined(INTERLEAVE)
+#define OUTPUT_STEP_X (K0) * (V0)
+#else // Do not interleave
+#define OUTPUT_STEP_X (K0)
+#endif // defined(INTERLEAVE)
+
+    // Compute source and destination addresses
+    uint x = get_global_id(0);
+    uint y = get_global_id(1);
+    uint z = get_global_id(2);
+
+    // ------------------ Compute input/output addresses ---------------------------
+
+    // Compute the input address
+    __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + x * (uint)K0 * sizeof(DATA_TYPE) + y * (uint)M0 * src_stride_y;
+
+    // Compute the output address
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)BLOCK_SIZE * (uint)V0 * sizeof(DATA_TYPE)) + ((y / (uint)V0) * (uint)dst_stride_y) + ((y % V0) *
+                                 (uint)OUTPUT_OFFSET_X * sizeof(DATA_TYPE));
+
+    uint zin0 = 0;
+    uint zin1 = 0;
+    uint zin2 = 0;
+    uint zin3 = 0;
+    uint zin4 = 0;
+    uint zin5 = 0;
+    uint zin6 = 0;
+    uint zin7 = 0;
+
+#if defined(REINTERPRET_INPUT_AS_3D)
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply src_stride_z by DEPTH_GEMM3D
+
+    // Note for the REINTERPRET_INPUT_AS_3D case
+    // Since we load a 2D input tile from a 3D tensor, we need to check when the plane changes across the z dimension
+    // in order to take into account the presence of possible cross plane paddings
+    //
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
+
+    input_ptr += z * (uint)src_stride_z * DEPTH_GEMM3D;
+
+    // The plane (zin) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
+    zin0 = (0 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin0 = min((uint)(DEPTH_GEMM3D - 1), zin0);
+    zin0 *= (cross_plane_pad * src_stride_y);
+#if M0 > 1
+    zin1 = (1 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin1 = min((uint)(DEPTH_GEMM3D - 1), zin1);
+    zin1 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 1
+#if M0 > 2
+    zin2 = (2 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin2 = min((uint)(DEPTH_GEMM3D - 1), zin2);
+    zin2 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 2
+#if M0 > 3
+    zin3 = (3 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin3 = min((uint)(DEPTH_GEMM3D - 1), zin3);
+    zin3 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 3
+#if M0 > 4
+    zin4 = (4 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin4 = min((uint)(DEPTH_GEMM3D - 1), zin4);
+    zin4 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 4
+#if M0 > 5
+    zin5 = (5 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin5 = min((uint)(DEPTH_GEMM3D - 1), zin5);
+    zin5 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 5
+#if M0 > 6
+    zin6 = (6 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin6 = min((uint)(DEPTH_GEMM3D - 1), zin6);
+    zin6 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 6
+#if M0 > 6
+    zin7 = (7 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
+    zin7 = min((uint)(DEPTH_GEMM3D - 1), zin7);
+    zin7 *= (cross_plane_pad * src_stride_y);
+#endif // M0 > 7
+
+#else // defined(REINTERPRET_INPUT_AS_3D)
+
+    input_ptr += z * (uint)src_stride_z;
+
+#endif // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    output_ptr += z * (uint)dst_stride_z;
+
+    // ---------------------------Load input values --------------------------------
+
+    // Load values from the LHS matrix
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a0 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y + zin0));
+#if M0 > 1
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a1 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y + zin1));
+#endif // M0 > 1
+#if M0 > 2
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a2 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 2 * src_stride_y + zin2));
+#endif // M0 > 2
+#if M0 > 3
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a3 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 3 * src_stride_y + zin3));
+#endif // M0 > 3
+#if M0 > 4
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a4 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 4 * src_stride_y + zin4));
+#endif // M0 > 4
+#if M0 > 5
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a5 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 5 * src_stride_y + zin5));
+#endif // M0 > 5
+#if M0 > 6
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a6 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 6 * src_stride_y + zin6));
+#endif // M0 > 6
+#if M0 > 7
+    VEC_DATA_TYPE(DATA_TYPE, K0)
+    a7 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 7 * src_stride_y + zin7));
+#endif // M0 > 7
+
+    // ---------------------------Store output values ------------------------------
+
+    VSTORE(K0)
+    (a0, 0, (__global DATA_TYPE *)(output_ptr + 0 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#if M0 > 1
+    VSTORE(K0)
+    (a1, 0, (__global DATA_TYPE *)(output_ptr + 1 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 1
+#if M0 > 2
+    VSTORE(K0)
+    (a2, 0, (__global DATA_TYPE *)(output_ptr + 2 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 2
+#if M0 > 3
+    VSTORE(K0)
+    (a3, 0, (__global DATA_TYPE *)(output_ptr + 3 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 3
+#if M0 > 4
+    VSTORE(K0)
+    (a4, 0, (__global DATA_TYPE *)(output_ptr + 4 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 4
+#if M0 > 5
+    VSTORE(K0)
+    (a5, 0, (__global DATA_TYPE *)(output_ptr + 5 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 5
+#if M0 > 6
+    VSTORE(K0)
+    (a6, 0, (__global DATA_TYPE *)(output_ptr + 6 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 6
+#if M0 > 7
+    VSTORE(K0)
+    (a7, 0, (__global DATA_TYPE *)(output_ptr + 7 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
+#endif // M0 > 7
+
+#undef BLOCK_SIZE
+#undef OUTPUT_OFFSET_X
+#undef OUTPUT_STEP_X
+}
+#endif // defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE)
+
 #if defined(TRANSPOSE_W) && defined(MULT_TRANSPOSE1XW_WIDTH)
 
 #if ELEMENT_SIZE == 1
@@ -193,7 +422,7 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
     vstore4(a1, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 4 * MULT_INTERLEAVE4X4_HEIGHT));
     vstore4(a2, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 8 * MULT_INTERLEAVE4X4_HEIGHT));
     vstore4(a3, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 12 * MULT_INTERLEAVE4X4_HEIGHT));
-#else // defined(UNROLL_BLOCK)
+#else  // defined(UNROLL_BLOCK)
     VEC_DATA_TYPE(DATA_TYPE, 4)
     val0 = (VEC_DATA_TYPE(DATA_TYPE, 4))(a0.s0, a1.s0, a2.s0, a3.s0);
     vstore4(val0, 0, ((__global DATA_TYPE *)(dst_ptr + dst_addr_in_bytes) + 0 * MULT_INTERLEAVE4X4_HEIGHT));

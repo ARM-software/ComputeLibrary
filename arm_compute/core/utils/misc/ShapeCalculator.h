@@ -101,6 +101,43 @@ inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bo
     return weights_reshaped;
 }
 
+inline TensorShape compute_lhs_reshaped_shape(const ITensorInfo &a, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d = false)
+{
+    ARM_COMPUTE_ERROR_ON(lhs_info.m0 == 0);
+    ARM_COMPUTE_ERROR_ON(lhs_info.k0 == 0);
+    ARM_COMPUTE_ERROR_ON(lhs_info.v0 == 0);
+
+    // Input width/height
+    const unsigned int input_width  = a.dimension(0);
+    const unsigned int input_height = reinterpret_input_as_3d ? a.dimension(1) * a.dimension(2) : a.dimension(1);
+
+    // Number of horizontal/vertical blocks in the input tensor
+    const unsigned int num_horiz_blocks = std::ceil(input_width / static_cast<float>(lhs_info.k0));
+    const unsigned int num_vert_blocks  = std::ceil(input_height / static_cast<float>(lhs_info.m0));
+
+    // Block size
+    const unsigned int block_size = lhs_info.m0 * lhs_info.k0;
+
+    // Output width/height
+    const unsigned int output_width  = block_size * num_horiz_blocks * lhs_info.v0;
+    const unsigned int output_height = std::ceil(num_vert_blocks / static_cast<float>(lhs_info.v0));
+
+    TensorShape lhs_shape{ a.tensor_shape() };
+    lhs_shape.set(0, output_width);
+    lhs_shape.set(1, output_height);
+
+    if((reinterpret_input_as_3d) && (lhs_shape.num_dimensions() > 2))
+    {
+        // When the data format is NHWC and the shapes are Nx1x1
+        // the tensor shape num_dimensions is automatically set to 1 instead of 3.
+        // To avoid failures by removing a dimension that doesn't exist
+        // check if the number of dimensions is greater than 2.
+        lhs_shape.remove_dimension(2);
+    }
+
+    return lhs_shape;
+}
+
 inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height

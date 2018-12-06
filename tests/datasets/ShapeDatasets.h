@@ -892,6 +892,62 @@ public:
     {
     }
 };
+
+/** Data set containing small tensor shapes to be used with the GEMM reshaping kernel */
+class SmallGEMMReshape2DShapes final : public ShapeDataset
+{
+public:
+    SmallGEMMReshape2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 63U, 72U },
+    })
+    {
+    }
+};
+
+/** Data set containing small tensor shapes to be used with the GEMM reshaping kernel when the input has to be reinterpreted as 3D */
+class SmallGEMMReshape3DShapes final : public ShapeDataset
+{
+public:
+    SmallGEMMReshape3DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 63U, 9U, 8U },
+    })
+    {
+    }
+};
+
+/** Data set containing large tensor shapes to be used with the GEMM reshaping kernel */
+class LargeGEMMReshape2DShapes final : public ShapeDataset
+{
+public:
+    LargeGEMMReshape2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 16U, 27U },
+                     TensorShape{ 533U, 171U },
+                     TensorShape{ 345U, 612U }
+    })
+    {
+    }
+};
+
+/** Data set containing large tensor shapes to be used with the GEMM reshaping kernel when the input has to be reinterpreted as 3D */
+class LargeGEMMReshape3DShapes final : public ShapeDataset
+{
+public:
+    LargeGEMMReshape3DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 16U, 3U, 9U },
+                     TensorShape{ 533U, 19U, 9U },
+                     TensorShape{ 345U, 34U, 18U }
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

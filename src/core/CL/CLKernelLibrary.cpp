@@ -282,6 +282,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1xW", "gemm.cl" },
+    { "gemm_reshape_lhs_matrix_nt", "gemm.cl" },
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },

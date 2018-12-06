@@ -1771,6 +1771,16 @@ struct GEMMLowpOutputStageInfo
     int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
 };
 
+/** GEMM LHS (Left Hand Side) matrix information */
+struct GEMMLHSMatrixInfo
+{
+    unsigned int m0{ 1 };            /**< Number of rows processed by the matrix multiplication */
+    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int v0{ 1 };            /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
+    bool         transpose{ true };  /**< True if the (m0xk0) block has to be transposed before been stored */
+    bool         interleave{ true }; /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
+};
+
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped

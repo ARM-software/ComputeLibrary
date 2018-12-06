@@ -207,7 +207,7 @@ void transpose_matrix(const SimpleTensor<T> &in, SimpleTensor<T> &out)
     {
         for(int x = 0; x < width; ++x)
         {
-            const float val = in[x + y * width];
+            const T val = in[x + y * width];
 
             out[x * height + y] = val;
         }
@@ -313,10 +313,16 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
 template void get_tile(const SimpleTensor<half> &in, SimpleTensor<half> &roi, const Coordinates &coord);
+template void get_tile(const SimpleTensor<int> &in, SimpleTensor<int> &roi, const Coordinates &coord);
+template void get_tile(const SimpleTensor<short> &in, SimpleTensor<short> &roi, const Coordinates &coord);
+template void get_tile(const SimpleTensor<char> &in, SimpleTensor<char> &roi, const Coordinates &coord);
 template void zeros(SimpleTensor<float> &in, const Coordinates &anchor, const TensorShape &shape);
 template void zeros(SimpleTensor<half> &in, const Coordinates &anchor, const TensorShape &shape);
 template void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
 template void transpose_matrix(const SimpleTensor<half> &in, SimpleTensor<half> &out);
+template void transpose_matrix(const SimpleTensor<int> &in, SimpleTensor<int> &out);
+template void transpose_matrix(const SimpleTensor<short> &in, SimpleTensor<short> &out);
+template void transpose_matrix(const SimpleTensor<char> &in, SimpleTensor<char> &out);
 template void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
 template void matrix_multiply(const SimpleTensor<half> &a, const SimpleTensor<half> &b, SimpleTensor<half> &out);
 
