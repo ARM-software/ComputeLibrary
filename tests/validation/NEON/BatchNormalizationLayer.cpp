@@ -23,18 +23,22 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEFuseBatchNormalization.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/RandomBatchNormalizationLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFixture.h"
+#include "tests/validation/fixtures/BatchNormalizationLayerFusionFixture.h"
 
 namespace arm_compute
 {
@@ -44,16 +48,21 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>           rel_tolerance_f32(0.05f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                                   // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto act_infos = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
+const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias", { false, true }),
+                                                           framework::dataset::make("UseBeta", { false, true })),
+                                                   framework::dataset::make("UseGamma", { false, true })),
+                                           framework::dataset::make("Epsilon", { 0.001f }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -150,7 +159,7 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framewor
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32, 0);
+    validate(Accessor(_target), _reference, abs_tolerance_f32, 0);
 }
 TEST_SUITE_END()
 
@@ -166,12 +175,31 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16, 0);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // BatchNormalizationLayer
+
+TEST_SUITE(BatchNormalizationLayerFusion)
+template <typename T>
+using NEBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<Tensor, Accessor, NEConvolutionLayer, NEFuseBatchNormalization, T>;
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallConvolutionLayerDataset(), common_fusion_dataset),
+                                       framework::dataset::make("DataType", DataType::F32)),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // BatchNormalizationLayerFusion
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
