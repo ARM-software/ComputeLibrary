@@ -58,6 +58,7 @@ vars.AddVariables(
     BoolVariable("exceptions", "Enable/disable C++ exception support", True),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", False),
+    ("toolchain_prefix", "Override the toolchain prefix", ""),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("extra_link_flags", "Extra LD flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
@@ -210,6 +211,9 @@ elif env['arch'] == 'x86_64':
 
 if env['build'] == 'native':
     prefix = ""
+
+if env["toolchain_prefix"] != "":
+    prefix = env["toolchain_prefix"]
 
 env['CC'] = env['compiler_cache']+" "+prefix + c_compiler
 env['CXX'] = env['compiler_cache']+" "+prefix + cpp_compiler
