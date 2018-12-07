@@ -310,8 +310,8 @@ NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, std::vect
     return nid;
 }
 
-NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D kernel_spatial_extend, PadStrideInfo conv_info,
-                                                    DepthwiseConvolutionMethod method,
+NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D kernel_spatial_extend,
+                                                    PadStrideInfo conv_info, int depth_multiplier, DepthwiseConvolutionMethod method,
                                                     ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
@@ -327,7 +327,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::WIDTH), kernel_spatial_extend.width);
     w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::HEIGHT), kernel_spatial_extend.height);
     w_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::CHANNEL),
-                     get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
+                     get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL) * depth_multiplier);
     if(!quant_info.empty())
     {
         w_desc.quant_info = quant_info;
@@ -340,7 +340,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     if(has_bias)
     {
         TensorDescriptor b_desc = input_tensor_desc;
-        b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
+        b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL) * depth_multiplier);
 
         if(is_data_type_quantized_asymmetric(b_desc.data_type))
         {
@@ -351,7 +351,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     }
 
     // Create convolution node and connect
-    NodeID conv_nid = g.add_node<DepthwiseConvolutionLayerNode>(conv_info, method);
+    NodeID conv_nid = g.add_node<DepthwiseConvolutionLayerNode>(conv_info, depth_multiplier, method);
     g.add_connection(input.node_id, input.index, conv_nid, 0);
     g.add_connection(w_nid, 0, conv_nid, 1);
     if(has_bias)

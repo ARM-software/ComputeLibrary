@@ -34,8 +34,10 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -53,7 +55,15 @@ class CLDepthwiseConvolutionLayer3x3 : public IFunction
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolutionLayer3x3();
+    CLDepthwiseConvolutionLayer3x3(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3(const CLDepthwiseConvolutionLayer3x3 &) = delete;
+    /** Default move constructor */
+    CLDepthwiseConvolutionLayer3x3(CLDepthwiseConvolutionLayer3x3 &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3 &operator=(const CLDepthwiseConvolutionLayer3x3 &) = delete;
+    /** Default move assignment operator */
+    CLDepthwiseConvolutionLayer3x3 &operator=(CLDepthwiseConvolutionLayer3x3 &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
@@ -86,10 +96,21 @@ public:
                            ActivationLayerInfo act_info = ActivationLayerInfo(), GPUTarget gpu_target = GPUTarget::MIDGARD);
     // Inherited methods overriden:
     void run() override;
+    void prepare() override;
 
 private:
+    CLMemoryGroup                                          _memory_group;
     std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel> _kernel;
     CLFillBorderKernel                                     _border_handler;
+    CLPermute                                              _permute_input_to_nchw;
+    CLPermute                                              _permute_weights_to_nchw;
+    CLPermute                                              _permute_output_to_nhwc;
+    CLTensor                                               _permuted_input;
+    CLTensor                                               _permuted_weights;
+    CLTensor                                               _permuted_output;
+    const ITensor                                         *_original_weights;
+    bool                                                   _needs_permute;
+    bool                                                   _is_prepared;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
@@ -166,5 +187,5 @@ private:
     const ICLTensor                          *_original_weights;
     std::unique_ptr<IFunction>                _optimised_function;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

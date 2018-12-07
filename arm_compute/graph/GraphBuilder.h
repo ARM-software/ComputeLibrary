@@ -178,6 +178,7 @@ public:
      * @param[in] input                 Input to the depthwise convolution layer node as a NodeID-Index pair
      * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
      * @param[in] conv_info             Convolution layer information
+     * @param[in] depth_multiplier      (Optional) Depth multiplier parameter.
      * @param[in] method                (Optional) Convolution method to use
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
@@ -186,7 +187,7 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                                 Size2D kernel_spatial_extend, PadStrideInfo conv_info,
+                                                 Size2D kernel_spatial_extend, PadStrideInfo conv_info, int depth_multiplier = 1,
                                                  DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::Default,
                                                  ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo());
     /** Adds an element-wise layer node to the graph

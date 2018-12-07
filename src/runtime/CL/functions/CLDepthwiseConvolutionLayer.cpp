@@ -26,6 +26,7 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
@@ -36,8 +37,9 @@ using namespace arm_compute;
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
 
-CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3()
-    : _kernel(nullptr), _border_handler()
+CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _kernel(nullptr), _border_handler(), _permute_input_to_nchw(), _permute_weights_to_nchw(), _permute_output_to_nhwc(), _permuted_input(),
+      _permuted_weights(), _permuted_output(), _original_weights(nullptr), _needs_permute(false), _is_prepared(false)
 {
 }
 
@@ -47,17 +49,59 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    if(input->info()->data_layout() == DataLayout::NCHW)
+    const bool is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
+
+    _needs_permute    = is_nhwc && (depth_multiplier > 1);
+    _is_prepared      = false;
+    _original_weights = weights;
+
+    ICLTensor       *input_to_use   = input;
+    const ICLTensor *weights_to_use = weights;
+    ICLTensor       *output_to_use  = output;
+
+    if(_needs_permute)
     {
+        _memory_group.manage(&_permuted_input);
+        _memory_group.manage(&_permuted_output);
+
+        // Configure the function to transform the input tensor from NHWC -> NCHW
+        _permute_input_to_nchw.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
+        _permuted_input.info()->set_data_layout(DataLayout::NCHW);
+
+        // Configure the function to transform the weights tensor from HWI -> IHW
+        _permute_weights_to_nchw.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
+        _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
+
+        input_to_use   = &_permuted_input;
+        weights_to_use = &_permuted_weights;
+        output_to_use  = &_permuted_output;
+
         _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
     }
-    else
+    else if(is_nhwc)
     {
         _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
     }
+    else
+    {
+        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+    }
 
+    // Configure kernel
     _kernel->set_target(CLScheduler::get().target());
-    _kernel->configure(input, weights, biases, output, conv_info, depth_multiplier, act_info);
+    _kernel->configure(input_to_use, weights_to_use, biases, output_to_use, conv_info, depth_multiplier, act_info);
+
+    // Permute output if needed
+    if(_needs_permute)
+    {
+        // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
+        _permuted_output.info()->set_data_layout(DataLayout::NHWC);
+        _permute_output_to_nhwc.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
+
+        // Allocate tensors
+        _permuted_input.allocator()->allocate();
+        _permuted_output.allocator()->allocate();
+    }
 
     // Configure border handler
     PixelValue &&zero_value(0.f);
@@ -75,18 +119,72 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
-    if(input->data_layout() == DataLayout::NCHW)
+    const bool is_nhwc       = input->data_layout() == DataLayout::NHWC;
+    const bool needs_permute = is_nhwc && (depth_multiplier > 1);
+
+    if(needs_permute)
     {
-        return CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target);
+        TensorShape permuted_input_shape   = input->tensor_shape();
+        TensorShape permuted_weights_shape = weights->tensor_shape();
+        TensorShape permuted_output_shape  = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+
+        permute(permuted_input_shape, PermutationVector(1U, 2U, 0U));
+        permute(permuted_weights_shape, PermutationVector(1U, 2U, 0U));
+        permute(permuted_output_shape, PermutationVector(1U, 2U, 0U));
+
+        const TensorInfo permuted_input   = input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_input_shape).set_data_layout(DataLayout::NCHW);
+        const TensorInfo permuted_weights = weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_weights_shape).set_data_layout(DataLayout::NCHW);
+        const TensorInfo permuted_output  = output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_output_shape).set_data_layout(DataLayout::NCHW);
+
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(&permuted_input, &permuted_weights, biases, &permuted_output, conv_info, depth_multiplier, act_info, gpu_target));
+    }
+    else if(is_nhwc)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info));
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info, gpu_target));
     }
 
-    return CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info);
+    return Status{};
 }
 
 void CLDepthwiseConvolutionLayer3x3::run()
 {
+    prepare();
+
+    _memory_group.acquire();
+
+    if(_needs_permute)
+    {
+        _permute_input_to_nchw.run();
+    }
     CLScheduler::get().enqueue(_border_handler);
     CLScheduler::get().enqueue(*_kernel);
+
+    if(_needs_permute)
+    {
+        _permute_output_to_nhwc.run();
+    }
+
+    _memory_group.release();
+}
+
+void CLDepthwiseConvolutionLayer3x3::prepare()
+{
+    if(!_is_prepared)
+    {
+        if(_needs_permute)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+            _permuted_weights.allocator()->allocate();
+            _permute_weights_to_nchw.run();
+            _original_weights->mark_as_unused();
+        }
+        _is_prepared = true;
+    }
 }
 
 namespace

@@ -182,8 +182,9 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     arm_compute::ITensorInfo *biases  = get_backing_tensor_info(node.input(2));
     arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
 
-    const PadStrideInfo              conv_info     = node.convolution_info();
-    const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
+    const PadStrideInfo              conv_info        = node.convolution_info();
+    const DepthwiseConvolutionMethod dwc_algorithm    = node.depthwise_convolution_method();
+    const int                        depth_multiplier = node.depth_multiplier();
 
     // Validate function
     Status status{};
@@ -191,10 +192,10 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     {
         case DepthwiseConvolutionMethod::Default:
         case DepthwiseConvolutionMethod::GEMV:
-            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info, depth_multiplier);
             break;
         case DepthwiseConvolutionMethod::Optimized3x3:
-            status = DepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info);
+            status = DepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier);
             break;
         default:
             ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported depthwise convolution method");

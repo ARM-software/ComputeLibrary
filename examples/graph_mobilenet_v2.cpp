@@ -364,7 +364,7 @@ private:
               << DepthwiseConvolutionLayer(3U, 3U,
                                            get_weights_accessor(data_path, "expanded_conv_depthwise_depthwise_weights.npy"),
                                            get_weights_accessor(data_path, "expanded_conv_depthwise_depthwise_biases.npy"),
-                                           PadStrideInfo(1, 1, 1, 1), dwc_q.at(0))
+                                           PadStrideInfo(1, 1, 1, 1), 1, dwc_q.at(0))
               .set_name("expanded_conv/depthwise/depthwise")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name("expanded_conv/depthwise/Relu6")
               << ConvolutionLayer(1U, 1U, 16U,
@@ -425,7 +425,7 @@ private:
              << DepthwiseConvolutionLayer(3U, 3U,
                                           get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy"),
                                           get_weights_accessor(data_path, total_path + "depthwise_depthwise_biases.npy"),
-                                          dwc_pad_stride_info, dwi)
+                                          dwc_pad_stride_info, 1, dwi)
              .set_name(param_path + "/depthwise/depthwise")
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(param_path + "/depthwise/Relu6")
              << ConvolutionLayer(1U, 1U, output_channels,
