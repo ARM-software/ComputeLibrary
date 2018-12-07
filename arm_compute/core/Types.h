@@ -1781,6 +1781,16 @@ struct GEMMLHSMatrixInfo
     bool         interleave{ true }; /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
 };
 
+/** GEMM RHS (Right Hand Side) matrix information */
+struct GEMMRHSMatrixInfo
+{
+    unsigned int n0{ 1 };            /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int h0{ 1 };            /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         transpose{ true };  /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         interleave{ true }; /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+};
+
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped

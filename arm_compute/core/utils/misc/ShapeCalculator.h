@@ -138,6 +138,34 @@ inline TensorShape compute_lhs_reshaped_shape(const ITensorInfo &a, const GEMMLH
     return lhs_shape;
 }
 
+inline TensorShape compute_rhs_reshaped_shape(const ITensorInfo &a, const GEMMRHSMatrixInfo &rhs_info)
+{
+    ARM_COMPUTE_ERROR_ON(rhs_info.n0 == 0);
+    ARM_COMPUTE_ERROR_ON(rhs_info.k0 == 0);
+    ARM_COMPUTE_ERROR_ON(rhs_info.h0 == 0);
+
+    // Input width/height
+    const unsigned int input_width  = a.dimension(0);
+    const unsigned int input_height = a.dimension(1);
+
+    // Number of horizontal/vertical blocks in the input tensor
+    const unsigned int num_horiz_blocks = std::ceil(input_width / static_cast<float>(rhs_info.n0));
+    const unsigned int num_vert_blocks  = std::ceil(input_height / static_cast<float>(rhs_info.k0));
+
+    // Block size
+    const unsigned int block_size = rhs_info.n0 * rhs_info.k0;
+
+    // Output width/height
+    const unsigned int output_width  = block_size * num_vert_blocks * rhs_info.h0;
+    const unsigned int output_height = std::ceil(num_horiz_blocks / static_cast<float>(rhs_info.h0));
+
+    TensorShape rhs_shape{ a.tensor_shape() };
+    rhs_shape.set(0, output_width);
+    rhs_shape.set(1, output_height);
+
+    return rhs_shape;
+}
+
 inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height

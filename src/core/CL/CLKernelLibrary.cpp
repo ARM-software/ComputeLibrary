@@ -283,6 +283,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1xW", "gemm.cl" },
     { "gemm_reshape_lhs_matrix_nt", "gemm.cl" },
+    { "gemm_reshape_rhs_matrix_nt", "gemm.cl" },
+    { "gemm_reshape_rhs_matrix_t", "gemm.cl" },
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
