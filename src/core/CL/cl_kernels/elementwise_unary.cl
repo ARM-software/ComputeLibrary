@@ -24,7 +24,9 @@
 #include "helpers.h"
 #include "warp_helpers.h"
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE) && defined(OPERATION)
+#if defined(DATA_TYPE) && defined(OPERATION)
+
+#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 /** Calculate reverse square root
  *
  * @param[in] input Pointer to the first element.
@@ -46,6 +48,29 @@ inline VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) exponential(const VEC_DATA_TYPE(DATA_T
 {
     return exp(input);
 }
+#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
+/** Calculate reverse square root
+ *
+ * @param[in] input Single element.
+ *
+ * @return reverse square root
+ */
+inline DATA_TYPE inverse_sqrt(const DATA_TYPE input)
+{
+    return rsqrt(input);
+}
+
+/** Calculate exponential
+ *
+ * @param[in] input Single element.
+ *
+ * @return exponential
+ */
+inline DATA_TYPE exponential(const DATA_TYPE input)
+{
+    return exp(input);
+}
+#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 
 /** Applies element wise unary operator in a tensor.
  *
@@ -78,10 +103,7 @@ __kernel void elementwise_unary(
     VSTORE(VEC_SIZE)
     (OPERATION(data), 0, (__global DATA_TYPE *)out.ptr);
 #else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
-    VSTORE(VEC_SIZE)
-    (OPERATION(data), 0, (__global DATA_TYPE *)out.ptr);
+    *((__global DATA_TYPE *)(out.ptr)) = (DATA_TYPE)(OPERATION(*((__global DATA_TYPE *)in.ptr)));
 #endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 }
-#endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(OPERATION)
+#endif // defined(DATA_TYPE) && defined(OPERATION)
