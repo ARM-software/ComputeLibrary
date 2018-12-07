@@ -80,12 +80,13 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool               window_changed                    = false;
+    const bool         is_arg_op                         = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
 
     switch(axis)
     {
         case 0:
         {
-            if(is_data_type_quantized(input->data_type()))
+            if(is_data_type_quantized(input->data_type()) || is_arg_op)
             {
                 AccessWindowHorizontal input_access(input, 0, input->dimension(0));
                 AccessWindowHorizontal output_access(output, 0, 1);
