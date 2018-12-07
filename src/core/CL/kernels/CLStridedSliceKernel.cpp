@@ -69,7 +69,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     // Checks output if configured
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape() != exp_output_shape);
+        const TensorInfo exp_output_info = output->clone()->set_tensor_shape(exp_output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &exp_output_info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
