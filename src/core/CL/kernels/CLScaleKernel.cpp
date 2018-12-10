@@ -175,6 +175,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     DataLayout data_layout = input->info()->data_layout();
     const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const bool is_nhwc     = data_layout == DataLayout::NHWC;
 
     // Compute the ratio between source width/height and destination width/height
     const unsigned int input_width   = input->info()->dimension(idx_width);
@@ -201,6 +202,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
     build_opts.add_option_if(border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
+    build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
     if(call_quantized_kernel)
     {
@@ -215,7 +217,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     kernel_name += lower_string(string_from_data_layout(data_layout));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    unsigned int idx = data_layout == DataLayout::NHWC ? 2 * num_arguments_per_3D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 
     // Set static kernel arguments
     const float scale_x = static_cast<float>(input_width) / output_width;
@@ -250,16 +252,13 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
         }
         case DataLayout::NHWC:
         {
-            Window slice = window.first_slice_window_3D();
+            Window collapsed = window.collapse(ICLKernel::window(), Window::DimZ);
+            Window slice     = collapsed.first_slice_window_4D();
 
-            do
-            {
-                unsigned int idx = 0;
-                add_3D_tensor_argument(idx, _input, slice);
-                add_3D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, lws_hint());
-            }
-            while(window.slide_window_slice_3D(slice));
+            unsigned int idx = 0;
+            add_4D_tensor_argument(idx, _input, slice);
+            add_4D_tensor_argument(idx, _output, slice);
+            enqueue(queue, *this, slice, lws_hint());
             break;
         }
         default:
