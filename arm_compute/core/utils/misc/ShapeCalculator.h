@@ -668,15 +668,16 @@ inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
                                                int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
     using namespace arm_compute::helpers::tensor_transform;
+    return compute_strided_slice_output_shape(input.tensor_shape(), starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+}
 
-    const TensorShape &input_shape = input.tensor_shape();
+inline TensorShape compute_slice_shape(const TensorShape &input_shape, const Coordinates &starts, const Coordinates &ends)
+{
+    using namespace arm_compute::helpers::tensor_transform;
 
-    // Get actual start, end coordinates and strides
-    const Coordinates final_strides = strided_slice_strides(input_shape, strides);
-    const Coordinates starts_abs    = strided_slice_absolute_start_coords(input_shape, starts, final_strides, begin_mask);
-    const Coordinates ends_abs      = strided_slice_absolute_end_coords(input_shape, starts_abs, ends, final_strides, end_mask, shrink_axis_mask);
-
-    return compute_strided_slice_output_shape(input_shape, starts_abs, ends_abs, final_strides);
+    return compute_strided_slice_output_shape(input_shape,
+                                              starts, ends, BiStrides(),
+                                              0, construct_slice_end_mask(ends), 0);
 }
 
 inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const int block_x, const int block_y)

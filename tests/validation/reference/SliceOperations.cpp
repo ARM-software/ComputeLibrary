@@ -24,6 +24,7 @@
 #include "SliceOperations.h"
 
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 namespace arm_compute
 {
@@ -50,11 +51,8 @@ SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinate
     // Get source shape
     const TensorShape &src_shape = src.shape();
 
-    // Get actual end
-    Coordinates ends_abs = slice_absolute_end_coords(src_shape, ends);
-
     // Get destination shape
-    TensorShape dst_shape = compute_slice_output_shape(src_shape, starts, ends_abs);
+    TensorShape dst_shape = arm_compute::misc::shape_calculator::compute_slice_shape(src_shape, starts, ends);
 
     // Create destination tensor
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
@@ -98,20 +96,24 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
     // Get source shape
     const TensorShape &src_shape = src.shape();
 
-    // Get actual start, end coordinates and strides
-    const Coordinates final_strides = strided_slice_strides(src_shape, strides);
-    const Coordinates starts_abs    = strided_slice_absolute_start_coords(src_shape, starts, final_strides, begin_mask);
-    const Coordinates ends_abs      = strided_slice_absolute_end_coords(src_shape, starts_abs, ends, final_strides, end_mask, shrink_axis_mask);
-
     // Get destination shape
-    const TensorShape dst_shape = compute_strided_slice_output_shape(src_shape, starts_abs, ends_abs, final_strides);
+    const TensorShape dst_shape = compute_strided_slice_output_shape(src_shape, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 
     // Create destination tensor
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
 
+    // Get coordinates
+    Coordinates starts_abs, ends_abs, final_strides;
+    std::tie(starts_abs, ends_abs, final_strides) = calculate_strided_slice_coords(src_shape,
+                                                                                   starts, ends, strides,
+                                                                                   begin_mask, end_mask, shrink_axis_mask);
+
     // Perform strided slice
-    Window win;
-    win.use_tensor_dimensions(dst_shape);
+    unsigned int idx = 0;
+    Window       win;
+    win.use_tensor_dimensions(compute_strided_slice_output_shape(src_shape,
+                                                                 starts, ends, strides,
+                                                                 begin_mask, end_mask, shrink_axis_mask, true));
     execute_window_loop(win, [&](const Coordinates & id)
     {
         Coordinates offset;
@@ -119,7 +121,7 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
         {
             offset.set(i, starts_abs[i] + id[i] * final_strides[i]);
         }
-        *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
+        dst.data()[idx++] = *reinterpret_cast<const T *>(src(offset));
     });
 
     return dst;

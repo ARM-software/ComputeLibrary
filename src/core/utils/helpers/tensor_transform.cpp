@@ -23,13 +23,143 @@
  */
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 
+#include "arm_compute/core/utils/helpers/bit_ops.h"
+
 namespace arm_compute
 {
 namespace helpers
 {
 namespace tensor_transform
 {
-Coordinates slice_absolute_end_coords(TensorShape input_shape, Coordinates ends)
+int calculate_stride_on_index(int index, Coordinates strides)
+{
+    return index >= static_cast<int>(strides.num_dimensions()) ? 1 : strides[index];
+}
+
+int calculate_start_on_index(TensorShape input_shape, int index, Coordinates starts, Coordinates strides, int32_t begin_mask)
+{
+    // Early exit
+    if(index >= static_cast<int>(starts.num_dimensions()))
+    {
+        return 0;
+    }
+
+    // Get stride
+    const int stride = calculate_stride_on_index(index, strides);
+
+    // Calculate start
+    int start = starts[index];
+
+    // Reset in case of begin mask present
+    if(arm_compute::helpers::bit_ops::is_bit_set(begin_mask, index))
+    {
+        start = stride > 0 ? std::numeric_limits<int>::lowest() : std::numeric_limits<int>::max();
+    }
+
+    // Account negative start points
+    const int dim_size = input_shape[index];
+    if(start < 0)
+    {
+        start += dim_size;
+    }
+
+    // Final clamp
+    start = utility::clamp(start, 0, dim_size - 1);
+
+    return start;
+}
+
+int calculate_end_on_index(TensorShape input_shape, int index, int start_on_index,
+                           Coordinates ends, Coordinates strides,
+                           int32_t end_mask, int32_t shrink_axis_mask)
+{
+    // Early exit
+    if(index >= static_cast<int>(ends.num_dimensions()))
+    {
+        return input_shape[index];
+    }
+
+    const int  stride      = calculate_stride_on_index(index, strides);
+    const bool shrink_axis = arm_compute::helpers::bit_ops::is_bit_set(shrink_axis_mask, index);
+
+    // Calculate start
+    int stop = ends[index];
+
+    // Shrink dimension
+    if(shrink_axis)
+    {
+        stop = start_on_index + 1;
+    }
+
+    // Reset in case of begin mask present
+    if(arm_compute::helpers::bit_ops::is_bit_set(end_mask, index) && !shrink_axis)
+    {
+        stop = (stride > 0) ? std::numeric_limits<int>::max() : std::numeric_limits<int>::lowest();
+    }
+
+    // Account negative end points
+    const int dim_size = input_shape[index];
+    if(stop < 0)
+    {
+        stop += dim_size;
+    }
+
+    // Final clamp
+    stop = (stride > 0) ? utility::clamp(stop, 0, dim_size) : utility::clamp(stop, -1, dim_size - 1);
+
+    return stop;
+}
+
+std::tuple<Coordinates, Coordinates, Coordinates> calculate_strided_slice_coords(TensorShape input_shape,
+                                                                                 Coordinates starts, Coordinates ends, Coordinates strides,
+                                                                                 int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+{
+    Coordinates starts_abs, ends_abs, final_strides;
+    for(unsigned int i = 0; i < input_shape.num_dimensions(); ++i)
+    {
+        const int start_i = calculate_start_on_index(input_shape, i, starts, strides, begin_mask);
+        starts_abs.set(i, start_i);
+        ends_abs.set(i, calculate_end_on_index(input_shape, i, start_i, ends, strides, end_mask, shrink_axis_mask));
+        final_strides.set(i, calculate_stride_on_index(i, strides));
+    }
+
+    return std::make_tuple(starts_abs, ends_abs, final_strides);
+}
+
+TensorShape compute_strided_slice_output_shape(TensorShape input_shape, Coordinates starts, Coordinates ends, Coordinates strides,
+                                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask, bool return_unshrinked)
+{
+    unsigned int index = 0;
+
+    TensorShape output_shape;
+    for(unsigned int i = 0; i < input_shape.num_dimensions(); ++i)
+    {
+        const int stride = calculate_stride_on_index(index, strides);
+        const int start  = calculate_start_on_index(input_shape, i, starts, strides, begin_mask);
+        const int end    = calculate_end_on_index(input_shape, i, start, ends, strides, end_mask, shrink_axis_mask);
+        const int range  = end - start;
+
+        const bool is_shrink = arm_compute::helpers::bit_ops::is_bit_set(shrink_axis_mask, i);
+        if(return_unshrinked || !is_shrink)
+        {
+            if((range == 0) ||               // Zero range
+               (range < 0 && stride >= 0) || // Negative range with positive stride
+               (range > 0 && stride <= 0))   // Positive range with negative stride
+            {
+                output_shape.set(index, 0);
+                return output_shape;
+            }
+            else
+            {
+                int dim = range / stride + (range % stride != 0 ? 1 : 0);
+                output_shape.set(index++, dim);
+            }
+        }
+    }
+    return output_shape;
+}
+
+int32_t construct_slice_end_mask(Coordinates ends)
 {
     // Create end mask
     int32_t end_mask = 0;
@@ -40,126 +170,8 @@ Coordinates slice_absolute_end_coords(TensorShape input_shape, Coordinates ends)
             end_mask |= 1 << i;
         }
     }
-    // Get unit strides
-    const BiStrides unit_strides = strided_slice_strides(input_shape, BiStrides());
 
-    return strided_slice_absolute_end_coords(input_shape, Coordinates(), ends, unit_strides, end_mask);
-}
-
-TensorShape compute_slice_output_shape(TensorShape input_shape, Coordinates starts, Coordinates ends_abs)
-{
-    // Get unit strides
-    const BiStrides unit_strides = strided_slice_strides(input_shape, BiStrides());
-    return compute_strided_slice_output_shape(input_shape, starts, ends_abs, unit_strides);
-}
-
-Coordinates strided_slice_absolute_start_coords(TensorShape input_shape, Coordinates starts, Coordinates strides, int32_t begin_mask)
-{
-    Coordinates starts_abs;
-    for(unsigned int i = 0; i < starts.num_dimensions(); ++i)
-    {
-        // Get start index
-        int start_i = starts[i];
-
-        // Reset in case of begin mask present
-        if((begin_mask & 1 << i) != 0)
-        {
-            start_i = strides[i] > 0 ? std::numeric_limits<int>::lowest() : std::numeric_limits<int>::max();
-        }
-
-        // Account negative start points
-        const int dim_size = input_shape[i];
-        if(start_i < 0)
-        {
-            start_i += dim_size;
-        }
-
-        // Final clamp
-        start_i = utility::clamp(start_i, 0, dim_size - 1);
-        starts_abs.set(i, start_i);
-    }
-
-    // Fill remaining
-    for(unsigned int i = starts_abs.num_dimensions(); i < input_shape.num_dimensions(); ++i)
-    {
-        starts_abs.set(i, 0);
-    }
-
-    return starts_abs;
-}
-
-Coordinates strided_slice_absolute_end_coords(TensorShape input_shape, Coordinates starts_abs, Coordinates ends, Coordinates strides,
-                                              int32_t end_mask, int32_t shrink_axis_mask)
-{
-    Coordinates ends_abs;
-    for(unsigned int i = 0; i < ends.num_dimensions(); ++i)
-    {
-        // Get end index
-        int stop_i = ends[i];
-
-        // Shrink dimension
-        if((shrink_axis_mask & (1 << i)) != 0)
-        {
-            stop_i = starts_abs[i] + 1;
-        }
-
-        // Reset in case of begin mask present
-        if((end_mask & 1 << i) != 0)
-        {
-            stop_i = (strides[i] > 0) ? std::numeric_limits<int>::max() : std::numeric_limits<int>::lowest();
-        }
-
-        // Account negative end points
-        const int dim_size = input_shape[i];
-        if(stop_i < 0)
-        {
-            stop_i += dim_size;
-        }
-
-        // Final clamp
-        stop_i = (strides[i] > 0) ? utility::clamp(stop_i, 0, dim_size) : utility::clamp(stop_i, -1, dim_size - 1);
-        ends_abs.set(i, stop_i);
-    }
-
-    // Fill remaining ends
-    for(unsigned int i = ends_abs.num_dimensions(); i < input_shape.num_dimensions(); ++i)
-    {
-        ends_abs.set(i, input_shape[i]);
-    }
-
-    return ends_abs;
-}
-
-Coordinates strided_slice_strides(TensorShape input_shape, Coordinates strides)
-{
-    for(unsigned int i = strides.num_dimensions(); i < input_shape.num_dimensions(); ++i)
-    {
-        strides.set(i, 1);
-    }
-    return strides;
-}
-
-TensorShape compute_strided_slice_output_shape(TensorShape input_shape, Coordinates starts_abs, Coordinates ends_abs, Coordinates final_strides)
-{
-    TensorShape output_shape = input_shape;
-    for(unsigned int i = 0; i < input_shape.num_dimensions(); ++i)
-    {
-        const int stride_i = final_strides[i];
-        const int range    = ends_abs[i] - starts_abs[i];
-        if((range == 0) ||                 // Zero range
-           (range < 0 && stride_i >= 0) || // Negative range with positive stride
-           (range > 0 && stride_i <= 0))   // Positive range with negative stride
-        {
-            output_shape.set(i, 0);
-            return output_shape;
-        }
-        else
-        {
-            int dim = range / stride_i + (range % stride_i != 0 ? 1 : 0);
-            output_shape.set(i, dim);
-        }
-    }
-    return output_shape;
+    return end_mask;
 }
 } // namespace tensor_transform
 } // namespace helpers

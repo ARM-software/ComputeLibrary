@@ -36,10 +36,10 @@ void CLSlice::configure(const ICLTensor *input, ICLTensor *output, const Coordin
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
     // Get absolute end coordinates
-    const Coordinates ends_abs = arm_compute::helpers::tensor_transform::slice_absolute_end_coords(input->info()->tensor_shape(), ends);
+    const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
     auto k = arm_compute::support::cpp14::make_unique<CLStridedSliceKernel>();
-    k->configure(input, output, starts, ends_abs, BiStrides(), 0, 0, 0);
+    k->configure(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
     _kernel = std::move(k);
 }
 
@@ -54,8 +54,8 @@ Status CLSlice::validate(const ITensorInfo *input, const ITensorInfo *output, co
     }));
 
     // Get absolute end coordinates
-    const Coordinates ends_abs = arm_compute::helpers::tensor_transform::slice_absolute_end_coords(input->tensor_shape(), ends);
+    const int32_t slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(ends);
 
-    return CLStridedSliceKernel::validate(input, output, starts, ends_abs, BiStrides(), 0, 0, 0);
+    return CLStridedSliceKernel::validate(input, output, starts, ends, BiStrides(), 0, slice_end_mask, 0);
 }
 } // namespace arm_compute
