@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,12 +60,31 @@ inline DATA_TYPE sum(__global const DATA_TYPE *input)
 
     return (in.s0 + in.s1);
 }
+
+/** Calculate product of a vector
+ *
+ * @param[in] input Pointer to the first pixel.
+ *
+ * @return product of vector.
+ */
+inline DATA_TYPE product(__global const DATA_TYPE *input)
+{
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    in = vload16(0, input);
+
+    in.s01234567 *= in.s89ABCDEF;
+    in.s0123 *= in.s4567;
+    in.s01 *= in.s23;
+
+    return (in.s0 * in.s1);
+}
 #if defined(OPERATION)
 /** This kernel performs parallel reduction given an operation on x-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The operation we want to perform must be passed at compile time using -DOPERATION e.g. -DOPERATION=square_sum
  * @note The mean flag must be passed at compile time using -DMEAN if we want to compute the mean value
+ * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128 if we want to compute the mean value
  *
  * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: F16/F32
@@ -74,28 +93,28 @@ inline DATA_TYPE sum(__global const DATA_TYPE *input)
  * @param[in] src_stride_y                              Stride of the source tensor in Y dimension (in bytes)
  * @param[in] src_step_y                                src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] src_offset_first_element_in_bytes         The offset of the first element in the source tensor
- * @param[in] partial_sum_ptr                           The local buffer to hold sumed values. Supported data types: same as @p src_ptt
- * @param[in] partial_sum_stride_x                      Stride of the output tensor in X dimension (in bytes)
- * @param[in] partial_sum_step_x                        partial_sum_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] partial_sum_stride_y                      Stride of the output tensor in Y dimension (in bytes)
- * @param[in] partial_sum_step_y                        partial_sum_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] partial_sum_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] local_sums                                Local buffer for storing the partial sum
+ * @param[in] partial_res_ptr                           The local buffer to hold partial result values. Supported data types: same as @p src_ptr
+ * @param[in] partial_res_stride_x                      Stride of the output tensor in X dimension (in bytes)
+ * @param[in] partial_res_step_x                        partial_res_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] partial_res_stride_y                      Stride of the output tensor in Y dimension (in bytes)
+ * @param[in] partial_res_step_y                        partial_res_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] partial_res_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[in] local_results                             Local buffer for storing the partial result
  */
 __kernel void reduction_operation_x(
     IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(partial_sum),
-    __local DATA_TYPE *local_sums)
+    IMAGE_DECLARATION(partial_res),
+    __local DATA_TYPE *local_results)
 {
     Image src         = CONVERT_TO_IMAGE_STRUCT(src);
-    Image partial_sum = CONVERT_TO_IMAGE_STRUCT(partial_sum);
+    Image partial_res = CONVERT_TO_IMAGE_STRUCT(partial_res);
 
     unsigned int lsize = get_local_size(0);
     unsigned int lid   = get_local_id(0);
 
     for(unsigned int y = 0; y < get_local_size(1); ++y)
     {
-        local_sums[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
+        local_results[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // Perform parallel reduction
@@ -103,7 +122,11 @@ __kernel void reduction_operation_x(
         {
             if(lid < i)
             {
-                local_sums[lid] += local_sums[lid + i];
+#if defined(PROD)
+                local_results[lid] *= local_results[lid + i];
+#else  //!defined(PROD)
+                local_results[lid] += local_results[lid + i];
+#endif //defined(PROD)
             }
             barrier(CLK_LOCAL_MEM_FENCE);
         }
@@ -113,10 +136,10 @@ __kernel void reduction_operation_x(
 #if defined(MEAN) && defined(WIDTH)
             if(y == get_local_size(1) - 1)
             {
-                local_sums[0] /= WIDTH;
+                local_results[0] /= WIDTH;
             }
 #endif /* defined(MEAN) && defined(WIDTH) */
-            ((__global DATA_TYPE *)offset(&partial_sum, get_group_id(0), y))[0] = local_sums[0];
+            ((__global DATA_TYPE *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
         }
     }
 }
@@ -127,6 +150,7 @@ __kernel void reduction_operation_x(
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128
+ * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note In case of ARG_MIN and ARG_MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
  *
  * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: F16/F32 and QASYMM8 for operation MEAN
@@ -230,7 +254,11 @@ __kernel void reduction_operation_y(
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
+#if defined(PROD)
+        res *= in;
+#else  //!defined(PROD)
         res += in;
+#endif //defined(PROD)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
     }
 
@@ -304,7 +332,11 @@ __kernel void reduction_operation_z(
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
+#if defined(PROD)
+        res *= in;
+#else  //!defined(PROD)
         res += in;
+#endif //defined(PROD)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
     }
 
@@ -383,7 +415,11 @@ __kernel void reduction_operation_w(
 #if defined(SUM_SQUARE)
         in *= in;
 #endif // defined(SUM_SQUARE)
+#if defined(PROD)
+        res *= in;
+#else  //!defined(PROD)
         res += in;
+#endif //defined(PROD)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
     }
 

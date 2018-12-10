@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1396,6 +1396,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
             break;
         case ReductionOperation::ARG_IDX_MIN:
             os << "ARG_IDX_MIN";
+            break;
+        case ReductionOperation::PROD:
+            os << "PROD";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

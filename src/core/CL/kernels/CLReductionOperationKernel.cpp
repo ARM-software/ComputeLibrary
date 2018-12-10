@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,13 +80,13 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool               window_changed                    = false;
-    const bool         is_arg_op                         = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
+    const bool         is_serial_op                      = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(input->data_type()));
 
     switch(axis)
     {
         case 0:
         {
-            if(is_data_type_quantized(input->data_type()) || is_arg_op)
+            if(is_serial_op)
             {
                 AccessWindowHorizontal input_access(input, 0, input->dimension(0));
                 AccessWindowHorizontal output_access(output, 0, 1);
@@ -153,10 +153,11 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     }
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
-    build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE=");
+    build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE");
     build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DMEAN");
     build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX");
     build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
+    build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
 
     switch(op)
     {
@@ -170,6 +171,9 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         case ReductionOperation::ARG_IDX_MAX:
         case ReductionOperation::ARG_IDX_MIN:
             break;
+        case ReductionOperation::PROD:
+            build_opts.add_option(("-DOPERATION=product"));
+            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported reduction operation");
     }
@@ -177,12 +181,18 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
     std::string kernel_axis_name;
-    const bool  is_arg_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN);
+    const bool  is_serial_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(input->info()->data_type()));
     switch(axis)
     {
         case 0:
         {
-            if(!is_data_type_quantized(input->info()->data_type()) && !is_arg_op)
+            if(is_serial_op)
+            {
+                build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+                build_opts.add_option_if_else(_input->info()->data_type() == DataType::F32, "-DCOND_DATA_TYPE=int", "-DCOND_DATA_TYPE=short");
+                kernel_axis_name = "non_parallel_x";
+            }
+            else
             {
                 build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DWIDTH=" + support::cpp11::to_string(width));
                 const unsigned int width_leftover = input->info()->dimension(0) % border_val;
@@ -194,12 +204,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
                 // we can use fewer threads than 8.
                 lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
                 _border_size = BorderSize(0, border_width, 0, 0);
-            }
-            else
-            {
-                build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-                build_opts.add_option_if_else(_input->info()->data_type() == DataType::F32, "-DCOND_DATA_TYPE=int", "-DCOND_DATA_TYPE=short");
-                kernel_axis_name = "non_parallel_x";
             }
         }
         break;
@@ -242,40 +246,13 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    const bool is_arg_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN);
+    const bool is_serial_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(_input->info()->data_type()));
     switch(_reduction_axis)
     {
         case 0:
         {
             // We use parallel reduction only in non quantized types
-            if(!is_data_type_quantized(_input->info()->data_type()) && !is_arg_op)
-            {
-                // Set out window
-                Window out_window(window);
-                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
-
-                // Get first input and output slices
-                Window in_slice  = window.first_slice_window_2D();
-                Window out_slice = out_window.first_slice_window_2D();
-
-                // Reshape window
-                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
-                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
-
-                // Set local sums buffer
-                unsigned int local_sum_size = lws_hint()[0] * _input->info()->element_size();
-                _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_sum_size, nullptr);
-
-                do
-                {
-                    unsigned int idx = 0;
-                    add_2D_tensor_argument(idx, _input, in_slice);
-                    add_2D_tensor_argument(idx, _output, out_slice);
-                    enqueue(queue, *this, in_slice, lws_hint());
-                }
-                while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
-            }
-            else
+            if(is_serial_op)
             {
                 // Get first input and output slices
                 Window window_in{ window };
@@ -292,6 +269,33 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                     enqueue(queue, *this, in_slice);
                 }
                 while(window_in.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(out_slice));
+            }
+            else
+            {
+                // Set out window
+                Window out_window(window);
+                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+                // Get first input and output slices
+                Window in_slice  = window.first_slice_window_2D();
+                Window out_slice = out_window.first_slice_window_2D();
+
+                // Reshape window
+                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
+                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
+
+                // Set local sums buffer
+                unsigned int local_res_size = lws_hint()[0] * _input->info()->element_size();
+                _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_res_size, nullptr);
+
+                do
+                {
+                    unsigned int idx = 0;
+                    add_2D_tensor_argument(idx, _input, in_slice);
+                    add_2D_tensor_argument(idx, _output, out_slice);
+                    enqueue(queue, *this, in_slice, lws_hint());
+                }
+                while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
             }
         }
         break;

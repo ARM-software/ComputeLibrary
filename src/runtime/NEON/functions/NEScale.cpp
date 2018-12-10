@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,7 +167,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
 
-    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, constant_border_value);
 }
 
 Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,

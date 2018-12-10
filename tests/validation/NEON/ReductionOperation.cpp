@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/ReductionOperationDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -48,6 +47,9 @@ AbsoluteTolerance<float> tolerance_f32(0.0001f);
 RelativeTolerance<float> rel_tolerance_f32(0.00001f);
 /** Tolerance for quantized operations */
 RelativeTolerance<float> tolerance_qasymm8(1);
+
+const auto ReductionOperations = framework::dataset::make("ReductionOperation",
+{ ReductionOperation::SUM });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -86,13 +88,13 @@ using NEReductionOperationFixture = ReductionOperationFixture<Tensor, Accessor, 
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
@@ -105,7 +107,7 @@ using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       datasets::ReductionOperations()),
+                                       ReductionOperations),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
 {
     // Validate output
@@ -113,7 +115,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, 
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
-                                       datasets::ReductionOperations()),
+                                       ReductionOperations),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
 {
     // Validate output
