@@ -83,7 +83,7 @@ Target target_from_name(const std::string &name)
     {
         { "neon", Target::NEON },
         { "cl", Target::CL },
-        { "gles", Target::GC },
+        { "gc", Target::GC },
     };
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
