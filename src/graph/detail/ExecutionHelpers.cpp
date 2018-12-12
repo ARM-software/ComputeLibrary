@@ -135,6 +135,9 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
     workload.graph = &g;
     workload.ctx   = &ctx;
 
+    // Reserve memory for tasks
+    workload.tasks.reserve(node_order.size());
+
     // Create tasks
     for(auto &node_id : node_order)
     {
@@ -146,10 +149,7 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
             std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
             if(func != nullptr)
             {
-                ExecutionTask task;
-                task.task = std::move(func);
-                task.node = node;
-                workload.tasks.push_back(std::move(task));
+                workload.tasks.emplace_back(ExecutionTask(std::move(func), node));
             }
         }
     }

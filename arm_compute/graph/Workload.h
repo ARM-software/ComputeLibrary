@@ -69,6 +69,20 @@ public:
  */
 struct ExecutionTask
 {
+    ExecutionTask(std::unique_ptr<arm_compute::IFunction> &&f, INode *n)
+        : task(std::move(f)), node(n)
+    {
+    }
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    ExecutionTask(const ExecutionTask &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    ExecutionTask &operator=(const ExecutionTask &) = delete;
+    /** Default Move Constructor. */
+    ExecutionTask(ExecutionTask &&) noexcept = default;
+    /** Default move assignment operator */
+    ExecutionTask &operator=(ExecutionTask &&) noexcept = default;
+    /** Default destructor */
+    ~ExecutionTask() = default;
     // TODO (geopin01) : Support vector of functions?
     std::unique_ptr<arm_compute::IFunction> task = {}; /**< Task to execute */
     INode                                  *node = {}; /**< Node bound to this workload */
