@@ -27,6 +27,9 @@
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -39,9 +42,12 @@ class ICLTensor;
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model)
- *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model)
- *  -# @ref CLGEMMMatrixMultiplyKernel
+ *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target is NOT Mali-G76)
+ *  -# @ref CLGEMMReshapeLHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
+ *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target is NOT Mali-G76)
+ *  -# @ref CLGEMMReshapeRHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
+ *  -# @ref CLGEMMMatrixMultiplyKernel (if GPU target is NOT G76 or if the reshaped GEMM is NOT selected)
+ *  -# @ref CLGEMMMatrixMultiplyReshapedKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
  *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
  *
  */
@@ -100,18 +106,22 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup              _memory_group;
-    CLGEMMInterleave4x4Kernel  _interleave_kernel;
-    CLGEMMTranspose1xWKernel   _transpose_kernel;
-    CLGEMMMatrixMultiplyKernel _mm_kernel;
-    CLGEMMMatrixAdditionKernel _ma_kernel;
-    CLTensor                   _tmp_a;
-    CLTensor                   _tmp_b;
-    const ICLTensor           *_original_b;
-    bool                       _is_interleaved_transposed;
-    bool                       _run_addition;
-    bool                       _reshape_b_only_on_first_run;
-    bool                       _is_prepared;
+    CLMemoryGroup                      _memory_group;
+    CLGEMMInterleave4x4Kernel          _interleave_kernel; // TODO - COMPMID-1835: Remove this kernel and use CLGEMMReshapeLHSMatrixKernel
+    CLGEMMTranspose1xWKernel           _transpose_kernel;  // TODO - COMPMID-1836: Remove this kernel and use CLGEMMReshapeRHSMatrixKernel
+    CLGEMMMatrixMultiplyKernel         _mm_kernel;
+    CLGEMMMatrixAdditionKernel         _ma_kernel;
+    CLGEMMReshapeLHSMatrixKernel       _reshape_lhs_kernel;
+    CLGEMMReshapeRHSMatrixKernel       _reshape_rhs_kernel;
+    CLGEMMMatrixMultiplyReshapedKernel _mm_reshaped_kernel;
+    CLTensor                           _tmp_a;
+    CLTensor                           _tmp_b;
+    const ICLTensor                   *_original_b;
+    bool                               _is_interleaved_transposed;
+    bool                               _run_addition;
+    bool                               _reshape_b_only_on_first_run;
+    bool                               _is_prepared;
+    bool                               _is_G76_path; // TODO: To be removed once completed COMPMID-1835 and COMPMID-1836
 };
 }
 

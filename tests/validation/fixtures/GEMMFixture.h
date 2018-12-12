@@ -151,6 +151,117 @@ protected:
     SimpleTensor<T> _reference{};
 };
 
+template <typename TensorType, typename AccessorType, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
+class GEMMMatrixMultiplyReshapedValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
+               bool interleave_rhs)
+    {
+        GEMMLHSMatrixInfo lhs_info;
+        lhs_info.m0         = m0;
+        lhs_info.k0         = k0;
+        lhs_info.v0         = v0;
+        lhs_info.interleave = interleave_lhs;
+        lhs_info.transpose  = false;
+
+        GEMMRHSMatrixInfo rhs_info;
+        rhs_info.n0         = n0;
+        rhs_info.k0         = k0;
+        rhs_info.h0         = h0;
+        rhs_info.interleave = interleave_rhs;
+        rhs_info.transpose  = true;
+
+        // Set the tensor shapes for LHS and RHS matrices
+        const TensorShape lhs_shape(k, m, batch_size);
+        const TensorShape rhs_shape(n, k, batch_size);
+
+        _target    = compute_target(lhs_shape, rhs_shape, lhs_info, rhs_info);
+        _reference = compute_reference(lhs_shape, rhs_shape);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info)
+    {
+        // Create tensors
+        TensorType lhs = create_tensor<TensorType>(lhs_shape, DataType::F32, 1);
+        TensorType rhs = create_tensor<TensorType>(rhs_shape, DataType::F32, 1);
+        TensorType lhs_reshaped;
+        TensorType rhs_reshaped;
+        TensorType dst;
+
+        const unsigned int M = lhs_shape[1];
+        const unsigned int N = rhs_shape[0];
+        const unsigned int K = lhs_shape[0];
+
+        // The output tensor will be auto-initialized within the function
+
+        // Create and configure function
+        ReshapeLHSFunctionType reshape_lhs;
+        ReshapeRHSFunctionType reshape_rhs;
+        GEMMFunctionType       gemm;
+        reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
+        reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
+        gemm.configure(&lhs_reshaped, &rhs_reshaped, &dst, 1.0f, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K));
+
+        ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        lhs.allocator()->allocate();
+        rhs.allocator()->allocate();
+        lhs_reshaped.allocator()->allocate();
+        rhs_reshaped.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!lhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!rhs_reshaped.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(lhs), 0);
+        fill(AccessorType(rhs), 1);
+
+        // Compute GEMM
+        reshape_lhs.run();
+        reshape_rhs.run();
+        gemm.run();
+
+        return dst;
+    }
+
+    SimpleTensor<float> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape)
+    {
+        TensorShape dst_shape = lhs_shape;
+        dst_shape[0]          = rhs_shape[0];
+        dst_shape[1]          = lhs_shape[1];
+
+        // Create reference
+        SimpleTensor<float> lhs{ lhs_shape, DataType::F32, 1 };
+        SimpleTensor<float> rhs{ rhs_shape, DataType::F32, 1 };
+        SimpleTensor<float> c{ dst_shape, DataType::F32, 1 };
+
+        // Fill reference
+        fill(lhs, 0);
+        fill(rhs, 1);
+        fill(c, 2);
+
+        return reference::gemm<float>(lhs, rhs, c, 1.0f, 0.0f);
+    }
+
+    TensorType          _target{};
+    SimpleTensor<float> _reference{};
+};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

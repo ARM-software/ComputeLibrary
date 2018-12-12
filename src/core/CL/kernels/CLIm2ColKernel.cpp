@@ -192,10 +192,14 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
         num_elems_processed_per_iteration = 2;
         is_padding_required_nchw          = false;
 
-        // Only the 3x3 case is optimized for NHWC
+        // Only the 3x3 and 9x9 cases are optimized for NHWC
         if(kernel_dims == Size2D(3U, 3U))
         {
             kernel_name = "im2col3x3_";
+        }
+        else if(kernel_dims == Size2D(9U, 9U))
+        {
+            kernel_name = "im2col9x9_";
         }
 
         build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));

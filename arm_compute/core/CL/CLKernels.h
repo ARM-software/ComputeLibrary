@@ -78,6 +78,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"

@@ -49,6 +49,7 @@ const auto conv_filter_sizes = framework::dataset::make("KernelDims", { Size2D(3
                                                                         Size2D(1U, 3U),
                                                                         Size2D(5U, 3U),
                                                                         Size2D(1U, 1U),
+                                                                        Size2D(9U, 9U),
                                                                         Size2D(11U, 11U)} );
 const auto padstrides        = framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U),
                                                                        PadStrideInfo(1U, 1U, 1U, 1U),
