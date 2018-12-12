@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -14,9 +14,9 @@
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INNEUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY NEAIM, DAMAGES OR OTHER
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
@@ -60,37 +60,35 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
+    /** Common signature for all the specialised arithmetic functions
+     *
+     * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor. Data types supported: Dependent on subclass.
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using ElementwiseFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
+
 protected:
     /** Validate the argument passed to the kernel
      *
-     * @param[in] input1 First tensor input. Data types supported: S16/F16/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
-     * @param[in] output Output tensor. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor. Data types supported: Dependent on subclass.
      */
-    virtual Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) = 0;
+    static Status validate_arguments_common(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 
     /** Commmon configure function for element-wise operators with no additional options (e.g. Min, Max, SquaredDiff)
      *
      */
-    template <ArithmeticOperation op>
     void configure_common(const ITensor *input1, const ITensor *input2, ITensor *output);
 
-    ArithmeticOperation _op; // Code of the operation to execute
+    /** Function to use for the particular tensor types passed to configure() */
+    std::function<void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window)> _function;
 
-private:
-    /** Common signature for all the specialised add functions
-     *
-     * @param[in]  input1 An input tensor. Data types supported: S16/F16/S32/F32
-     * @param[in]  input2 An input tensor. Data types supported: S16/F16/S32/F32
-     * @param[out] output The output tensor. Data types supported: S16/F16/S32/F32
-     * @param[in]  window Region on which to execute the kernel.
-     */
-    using ElementwiseFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
-    /** Add function to use for the particular tensor types passed to configure() */
-    ElementwiseFunction *_func;
-    const ITensor       *_input1;
-    const ITensor       *_input2;
-    ITensor             *_output;
+    const ITensor *_input1;
+    const ITensor *_input2;
+    ITensor       *_output;
 };
 
 class NEArithmeticOperationKernel : public NEElementwiseOperationKernel
@@ -125,7 +123,40 @@ public:
 
 protected:
     // Inherited methods overridden:
-    Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output) override;
+    static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
+};
+
+class NEComparisonOperationKernel : public NEElementwiseOperationKernel
+{
+public:
+    NEComparisonOperationKernel()
+        : NEElementwiseOperationKernel()
+    {
+    }
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+     *
+     * @param[in] op     Comparison operation to be executed.
+     * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor. Data types supported: U16/U32.
+     */
+    void configure(ComparisonOperation op, const ITensor *input1, const ITensor *input2, ITensor *output);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
+     *
+     * @param[in] op     Comparison operation to be executed.
+     * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
+     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor info. Data types supported: U16/U32.
+     *
+     * @return a Status
+     */
+    static Status validate(ComparisonOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+
+protected:
+    // Inherited methods overridden:
+    static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEELEMENTWISEOPERATIONKERNEL_H__ */
