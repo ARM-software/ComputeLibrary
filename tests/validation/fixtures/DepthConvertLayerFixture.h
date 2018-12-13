@@ -41,29 +41,40 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationFixture : public framework::Fixture
+class DepthConvertLayerValidationBaseFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
     {
-        _shift     = shift;
-        _target    = compute_target(shape, dt_in, dt_out, policy, shift);
-        _reference = compute_reference(shape, dt_in, dt_out, policy, shift);
+        _shift             = shift;
+        _quantization_info = quantization_info;
+        _target            = compute_target(shape, dt_in, dt_out, policy, shift);
+        _reference         = compute_reference(shape, dt_in, dt_out, policy, shift);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, i);
+        if(is_data_type_quantized(tensor.data_type()))
+        {
+            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+
+            library->fill(tensor, distribution, i);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, i);
+        }
     }
 
     TensorType compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, dt_in, 1);
-        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1);
+        TensorType src = create_tensor<TensorType>(shape, dt_in, 1, _quantization_info);
+        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1, _quantization_info);
 
         // Create and configure function
         FunctionType depth_convert;
@@ -91,7 +102,7 @@ protected:
     SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create reference
-        SimpleTensor<T1> src{ shape, dt_in, 1 };
+        SimpleTensor<T1> src{ shape, dt_in, 1, _quantization_info };
 
         // Fill reference
         fill(src, 0);
@@ -102,6 +113,31 @@ protected:
     TensorType       _target{};
     SimpleTensor<T2> _reference{};
     int              _shift{};
+    QuantizationInfo _quantization_info{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class DepthConvertLayerValidationFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+    {
+        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,
+                                                                                                      shift, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class DepthConvertLayerValidationQuantizedFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
+    {
+        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,
+                                                                                                      shift, quantization_info);
+    }
 };
 } // namespace validation
 } // namespace test
