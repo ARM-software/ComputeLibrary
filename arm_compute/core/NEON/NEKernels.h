@@ -110,6 +110,7 @@
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScharr3x3Kernel.h"
+#include "arm_compute/core/NEON/kernels/NESelectKernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"

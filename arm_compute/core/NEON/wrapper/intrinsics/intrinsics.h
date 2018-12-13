@@ -26,11 +26,13 @@
 
 #include "arm_compute/core/NEON/wrapper/intrinsics/add.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/bitselect.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/exp.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/gethigh.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/getlow.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/greaterthan.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/inv.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/invsqrt.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
