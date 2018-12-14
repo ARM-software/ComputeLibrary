@@ -75,10 +75,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Wrong data type block shape
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U, 4U), 1, DataType::F32),    // Wrong tensor shape
                                                      }),
-               framework::dataset::make("BlockShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
-                                                       TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
-                                                       TensorInfo(TensorShape(2U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
+               framework::dataset::make("BlockShapeInfo",{ TensorInfo(TensorShape(2U), 1, DataType::S32),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::S32),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                      })),
                framework::dataset::make("PaddingsShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),

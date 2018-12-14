@@ -119,12 +119,12 @@ class SmallSpaceToBatchLayerDataset final : public SpaceToBatchLayerDataset
 public:
     SmallSpaceToBatchLayerDataset()
     {
-        add_config(TensorShape(2U, 2U, 1U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(1U, 1U, 1U, 4U));
-        add_config(TensorShape(6U, 2U, 1U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(3U, 1U, 1U, 4U));
-        add_config(TensorShape(2U, 4U, 2U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(1U, 2U, 2U, 4U));
-        add_config(TensorShape(2U, 6U, 1U, 2U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(1U, 3U, 1U, 8U));
-        add_config(TensorShape(6U, 8U, 1U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(3U, 4U, 1U, 4U));
-        add_config(TensorShape(6U, 8U, 15U, 5U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(3U, 4U, 15U, 20U));
+        add_config(TensorShape(2U, 2U, 1U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(1U, 1U, 1U, 4U));
+        add_config(TensorShape(6U, 2U, 1U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(3U, 1U, 1U, 4U));
+        add_config(TensorShape(2U, 4U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(1U, 2U, 2U, 4U));
+        add_config(TensorShape(2U, 6U, 1U, 2U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(1U, 3U, 1U, 8U));
+        add_config(TensorShape(6U, 8U, 1U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(3U, 4U, 1U, 4U));
+        add_config(TensorShape(6U, 8U, 15U, 5U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(3U, 4U, 15U, 20U));
     }
 };
 class LargeSpaceToBatchLayerDataset final : public SpaceToBatchLayerDataset
@@ -132,8 +132,8 @@ class LargeSpaceToBatchLayerDataset final : public SpaceToBatchLayerDataset
 public:
     LargeSpaceToBatchLayerDataset()
     {
-        add_config(TensorShape(128U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(64U, 32U, 2U, 4U));
-        add_config(TensorShape(512U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 4U), TensorShape(128U, 16U, 2U, 16U));
+        add_config(TensorShape(128U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(64U, 32U, 2U, 4U));
+        add_config(TensorShape(512U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(128U, 16U, 2U, 16U));
     }
 };
 } // namespace datasets

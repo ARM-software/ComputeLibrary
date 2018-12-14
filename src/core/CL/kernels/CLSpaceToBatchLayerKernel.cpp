@@ -39,10 +39,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_inf
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, block_info, padddings, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(block_info, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
+    ARM_COMPUTE_RETURN_ERROR_ON(block_info->num_dimensions() > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(padddings->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON(padddings->tensor_shape()[1] != block_info->tensor_shape()[0]);
 
     // Validate output if initialized
     if(output->total_size() != 0)
     {
+        const DataLayout data_layout = input->data_layout();
+        const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
@@ -64,8 +70,8 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
         const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
         const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
         ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_width] < padding_left.x() + padding_right.y());
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_width] / block_shape_x != (output->tensor_shape()[idx_width] - padding_left.x() - padding_right.y()));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_height] / block_shape_y != (output->tensor_shape()[idx_height] - padding_left.x() - padding_right.y()));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->tensor_shape()[idx_width] + padding_left.x() + padding_right.x()) % block_shape_x != 0);
+        ARM_COMPUTE_RETURN_ERROR_ON((input->tensor_shape()[idx_height] + padding_left.y() + padding_right.y()) % block_shape_y != 0);
         ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
         ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -101,6 +107,9 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const ICLTenso
     build_opts.add_option("-DWIDTH_OUT=" + support::cpp11::to_string(output->info()->dimension(idx_width)));
     build_opts.add_option("-DHEIGHT_OUT=" + support::cpp11::to_string(output->info()->dimension(idx_height)));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(output->info()->dimension(idx_batch)));
+    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
+    build_opts.add_option("-DHEIGHT_IN=" + support::cpp11::to_string(input->info()->dimension(idx_height)));
+    build_opts.add_option("-DBATCH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_batch)));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("space_to_batch_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
 
     // Configure kernel window
@@ -132,6 +141,9 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const int bloc
     build_opts.add_option("-DWIDTH_OUT=" + support::cpp11::to_string(output->info()->dimension(idx_width)));
     build_opts.add_option("-DHEIGHT_OUT=" + support::cpp11::to_string(output->info()->dimension(idx_height)));
     build_opts.add_option("-DBATCH_SIZE=" + support::cpp11::to_string(output->info()->dimension(idx_batch)));
+    build_opts.add_option("-DWIDTH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_width)));
+    build_opts.add_option("-DHEIGHT_IN=" + support::cpp11::to_string(input->info()->dimension(idx_height)));
+    build_opts.add_option("-DBATCH_IN=" + support::cpp11::to_string(input->info()->dimension(idx_batch)));
     build_opts.add_option("-DBLOCK_SHAPE_X=" + support::cpp11::to_string(block_shape_x));
     build_opts.add_option("-DBLOCK_SHAPE_Y=" + support::cpp11::to_string(block_shape_y));
     build_opts.add_option("-DPAD_LEFT_X=" + support::cpp11::to_string(padding_left.x()));
