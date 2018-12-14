@@ -70,8 +70,9 @@ public:
      * @param[in, out] obj_memory Object's memory handling interface which can be used to alter the underlying memory
      *                            that is used by the object.
      * @param[in]      size       Size of memory to allocate
+     * @param[in]      alignment  (Optional) Alignment to use
      */
-    void finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size);
+    void finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size, size_t alignment = 0);
 
     // Inherited methods overridden:
     void            acquire() override;
@@ -116,7 +117,7 @@ inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 }
 
 template <typename TensorType>
-inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size)
+inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, IMemory &obj_memory, size_t size, size_t alignment)
 {
     // TODO (geopin01) : Check size (track size in MemoryMappings)
     // Check if existing mapping is valid
@@ -125,7 +126,7 @@ inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, IMemor
     if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
-        _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size);
+        _memory_manager->lifetime_manager()->end_lifetime(obj, obj_memory, size, alignment);
     }
 }
 

@@ -138,7 +138,7 @@ void TensorAllocator::allocate()
     }
     else
     {
-        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size());
+        _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment());
     }
     info().set_is_resizable(false);
 }

@@ -46,6 +46,5 @@ using MemoryMappings = std::map<IMemory *, size_t>;
 
 /** A map of the groups and memory mappings */
 using GroupMappings = std::map<size_t, MemoryMappings>;
-
-} // arm_compute
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_TYPES_H__ */

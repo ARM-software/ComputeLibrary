@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
-#include "arm_compute/runtime/IMemoryPool.h"
+#include "arm_compute/runtime/BlobMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
@@ -60,7 +60,7 @@ private:
     void update_blobs_and_mappings() override;
 
 private:
-    std::vector<size_t> _blobs; /**< Memory blobs' sizes */
+    std::vector<BlobInfo> _blobs; /**< Memory blobs */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__ */

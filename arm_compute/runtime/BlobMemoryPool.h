@@ -35,7 +35,19 @@
 
 namespace arm_compute
 {
+// Forward declaration
 class IAllocator;
+
+/** Meta-data information for each blob */
+struct BlobInfo
+{
+    BlobInfo(size_t size_ = 0, size_t alignment_ = 0)
+        : size(size_), alignment(alignment_)
+    {
+    }
+    size_t size;      /**< Blob size */
+    size_t alignment; /**< Blob alignment */
+};
 
 /** Blob memory pool */
 class BlobMemoryPool : public IMemoryPool
@@ -45,10 +57,10 @@ public:
      *
      * @note allocator should outlive the memory pool
      *
-     * @param[in] allocator  Backing memory allocator
-     * @param[in] blob_sizes Sizes of the blobs to be allocated
+     * @param[in] allocator Backing memory allocator
+     * @param[in] blob_info Configuration information of the blobs to be allocated
      */
-    BlobMemoryPool(IAllocator *allocator, std::vector<size_t> blob_sizes);
+    BlobMemoryPool(IAllocator *allocator, std::vector<BlobInfo> blob_info);
     /** Default Destructor */
     ~BlobMemoryPool();
     /** Prevent instances of this class to be copy constructed */
@@ -69,16 +81,16 @@ public:
 private:
     /** Allocates internal blobs
      *
-     * @param sizes Size of each blob
+     * @param blob_info Size of each blob
      */
-    void allocate_blobs(const std::vector<size_t> &sizes);
+    void allocate_blobs(const std::vector<BlobInfo> &blob_info);
     /** Frees blobs **/
     void free_blobs();
 
 private:
-    IAllocator                                 *_allocator;  /**< Allocator to use for internal allocation */
-    std::vector<std::unique_ptr<IMemoryRegion>> _blobs;      /**< Vector holding all the memory blobs */
-    std::vector<size_t>                         _blob_sizes; /**< Sizes of each blob */
+    IAllocator                                 *_allocator; /**< Allocator to use for internal allocation */
+    std::vector<std::unique_ptr<IMemoryRegion>> _blobs;     /**< Vector holding all the memory blobs */
+    std::vector<BlobInfo>                       _blob_info; /**< Information of each blob */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */
