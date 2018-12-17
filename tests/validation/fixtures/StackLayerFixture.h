@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ protected:
         }
 
         // Create tensors
-        CLTensor dst;
+        TensorType dst;
 
         // The output tensor will be auto-initialized within the function
 

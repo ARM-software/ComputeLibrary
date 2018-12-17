@@ -21,33 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include <complex>
+#include "arm_compute/runtime/NEON/functions/NEStackLayer.h"
 
-#include "arm_compute/runtime/CL/functions/CLStackLayer.h"
-
-#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "support/ToolchainSupport.h"
-
-using namespace arm_compute;
-
-CLStackLayer::CLStackLayer() // NOLINT
+namespace arm_compute
+{
+NEStackLayer::NEStackLayer() // NOLINT
     : _input(),
       _stack_kernels(),
       _num_inputs(0)
 {
 }
 
-void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
+void NEStackLayer::configure(const std::vector<ITensor *> &input, int axis, ITensor *output)
 {
     _num_inputs    = input.size();
-    _stack_kernels = arm_compute::support::cpp14::make_unique<CLStackLayerKernel[]>(_num_inputs);
+    _stack_kernels = arm_compute::support::cpp14::make_unique<NEStackLayerKernel[]>(_num_inputs);
 
     // Wrap around negative values
     const unsigned int axis_u = wrap_around(axis, static_cast<int>(input[0]->info()->num_dimensions() + 1));
@@ -58,7 +55,7 @@ void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, IC
     }
 }
 
-Status CLStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis, const ITensorInfo *output)
+Status NEStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(input.empty());
@@ -74,16 +71,17 @@ Status CLStackLayer::validate(const std::vector<ITensorInfo *> &input, int axis,
         // All the tensors must have the same rank
         ARM_COMPUTE_RETURN_ERROR_ON(input[i]->num_dimensions() != rank);
         // Validate Kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLStackLayerKernel::validate(input[i], axis_u, i, num_inputs, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEStackLayerKernel::validate(input[i], axis_u, i, num_inputs, output));
     }
 
     return Status{};
 }
 
-void CLStackLayer::run()
+void NEStackLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; i++)
     {
-        CLScheduler::get().enqueue(_stack_kernels[i], false);
+        NEScheduler::get().schedule(&_stack_kernels[i], Window::DimY);
     }
 }
+} // namespace arm_compute

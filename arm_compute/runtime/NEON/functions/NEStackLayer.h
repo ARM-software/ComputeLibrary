@@ -21,31 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLSTACKLAYER_H__
-#define __ARM_COMPUTE_CLSTACKLAYER_H__
+#ifndef __ARM_COMPUTE_NESTACKLAYER_H__
+#define __ARM_COMPUTE_NESTACKLAYER_H__
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLStackLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEStackLayerKernel.h"
 
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
-class ICLTensor;
+class ITensor;
 
 /** Basic function to stack tensors along an axis. This function calls the following kernel:
  *
- * -# @ref CLStackLayerKernel
+ * -# @ref NEStackLayerKernel
  *
  */
-class CLStackLayer : public IFunction
+class NEStackLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLStackLayer();
+    NEStackLayer();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Supported input tensor rank: up to 4
@@ -55,8 +55,8 @@ public:
      *                    Negative values wrap around
      * @param[out] output Output tensor. Data types supported: Same as @p input.
      */
-    void configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
+    void configure(const std::vector<ITensor *> &input, int axis, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
      *
@@ -73,9 +73,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ICLTensor *>              _input;
-    std::unique_ptr<CLStackLayerKernel[]> _stack_kernels;
+    std::vector<ITensor *>                _input;
+    std::unique_ptr<NEStackLayerKernel[]> _stack_kernels;
     unsigned int                          _num_inputs;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLSTACKLAYER_H__ */
+#endif /* __ARM_COMPUTE_NESTACKLAYER_H__ */

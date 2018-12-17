@@ -22,32 +22,36 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__
-#define __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__
+#ifndef __ARM_COMPUTE_NESTACKLAYERKERNEL_H__
+#define __ARM_COMPUTE_NESTACKLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
-class ICLTensor;
+class ITensor;
 
-/** OpenCL kernel to stacks a rank-R tensor into one with rank-(R+1) along the axis dimension.*/
-class CLStackLayerKernel : public ICLKernel
+/** NEON kernel to stacks a rank-R tensor into one with rank-(R+1) along the axis dimension.*/
+class NEStackLayerKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEStackLayerKernel";
+    }
     /** Default constructor */
-    CLStackLayerKernel();
+    NEStackLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLStackLayerKernel(const CLStackLayerKernel &) = delete;
+    NEStackLayerKernel(const NEStackLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLStackLayerKernel &operator=(const CLStackLayerKernel &) = delete;
+    NEStackLayerKernel &operator=(const NEStackLayerKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLStackLayerKernel(CLStackLayerKernel &&) = default;
+    NEStackLayerKernel(NEStackLayerKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLStackLayerKernel &operator=(CLStackLayerKernel &&) = default;
+    NEStackLayerKernel &operator=(NEStackLayerKernel &&) = default;
     /** Default destructor */
-    ~CLStackLayerKernel() = default;
+    ~NEStackLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
      * @note Supported input tensor rank: up to 4
@@ -60,8 +64,8 @@ public:
      * @param[out] output      Output tensor. Data types supported: Same as @p input.
      *
      */
-    void configure(const ICLTensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLStackLayerKernel
+    void configure(const ITensor *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, ITensor *output);
+    /**  Static function to check if given info will lead to a valid configuration of @ref NEStackLayerKernel
      *
      * @note Supported input tensor rank: up to 4
      *
@@ -76,12 +80,28 @@ public:
      */
     static Status validate(const ITensorInfo *input, unsigned int axis, unsigned int idx_input, unsigned int num_tensors, const ITensorInfo *output);
 
-    // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
+    // Inherited methods overridden
+    void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
+    /** Template function to run the stack
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <typename T>
+    void run_stack(const Window &window);
+
+    /** Common signature for all the specialised stack functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using StackFunctionPtr = void (NEStackLayerKernel::*)(const Window &window);
+
+    const ITensor *_input;
+    ITensor       *_output;
+    unsigned int   _axis;
+    unsigned int   _idx_input;
+    StackFunctionPtr _func;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CLSTACKLAYERKERNEL_H__ */
+#endif /* __ARM_COMPUTE_NESTACKLAYERKERNEL_H__ */
