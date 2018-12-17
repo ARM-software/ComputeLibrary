@@ -42,10 +42,10 @@ class Coordinates;
 
 namespace
 {
-template <typename T, int S>
+template <typename T>
 inline void bitwise_and(const T *__restrict input1, const T *__restrict input2, T *__restrict output)
 {
-    using type      = typename wrapper::traits::neon_vector<T, S>::type;
+    using type      = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::type;
     const type val1 = vloadq(static_cast<const T *>(input1));
     const type val2 = vloadq(static_cast<const T *>(input2));
 
@@ -108,7 +108,7 @@ void NEBitwiseAndKernel::run(const Window &window, const ThreadInfo &info)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        bitwise_and<uint8_t, 16>(input1.ptr(), input2.ptr(), output.ptr());
+        bitwise_and<uint8_t>(input1.ptr(), input2.ptr(), output.ptr());
     },
     input1, input2, output);
 }
