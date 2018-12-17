@@ -61,9 +61,6 @@ public:
             return false;
         }
 
-        // Checks
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type == DataType::QASYMM8 && common_params.target == Target::NEON, "QASYMM8 NEON not supported for this graph");
-
         // Print parameter values
         std::cout << common_params << std::endl;
 
