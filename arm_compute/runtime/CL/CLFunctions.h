@@ -111,6 +111,7 @@
 #include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
+#include "arm_compute/runtime/CL/functions/CLRange.h"
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLRemap.h"

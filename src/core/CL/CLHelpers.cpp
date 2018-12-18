@@ -230,4 +230,30 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
         return (std::find(winograd_configs_nhwc.begin(), winograd_configs_nhwc.end(), p) != winograd_configs_nhwc.end());
     }
 }
+
+size_t preferred_vector_width(const cl::Device &device, const DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::U8:
+        case DataType::S8:
+        case DataType::QASYMM8:
+            return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR>();
+        case DataType::U16:
+        case DataType::S16:
+            return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT>();
+        case DataType::U32:
+        case DataType::S32:
+            return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT>();
+        case DataType::F16:
+        case DataType::F32:
+            return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT>();
+        case DataType::U64:
+        case DataType::S64:
+            return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG>();
+        default:
+            return 1;
+    }
+}
+
 } // namespace arm_compute

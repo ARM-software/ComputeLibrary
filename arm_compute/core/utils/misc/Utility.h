@@ -80,8 +80,10 @@ std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(It
  *
  *  @return Clamped value.
  */
-template <typename T>
-inline T clamp(const T &n, const T &lower, const T &upper)
+template <typename DataType, typename RangeType = DataType>
+inline DataType clamp(const DataType &n,
+                      const DataType &lower = std::numeric_limits<RangeType>::lowest(),
+                      const DataType &upper = std::numeric_limits<RangeType>::max())
 {
     return std::max(lower, std::min(n, upper));
 }

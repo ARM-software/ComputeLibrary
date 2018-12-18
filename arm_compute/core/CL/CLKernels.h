@@ -113,6 +113,7 @@
 #include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLROIAlignLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLRangeKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLRemapKernel.h"
 #include "arm_compute/core/CL/kernels/CLReorgLayerKernel.h"
