@@ -56,10 +56,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm != PermutationVector{ 2U, 0U, 1U })
-                                    && (perm != PermutationVector{ 1U, 2U, 0U })
-                                    && (perm != PermutationVector{ 3U, 2U, 0U, 1U }),
-                                    "Only [2, 0, 1], [1, 2, 0] and [3, 2, 0, 1] permutation is supported");
 
     const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
 
@@ -91,26 +87,13 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.emplace("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
+    // New positions of batch(D), height(H), width(W) and channel(C) based on permutation vector
+    build_opts.emplace("-DP1=" + support::cpp11::to_string(perm[0]));
+    build_opts.emplace("-DP2=" + support::cpp11::to_string(perm[1]));
+    build_opts.emplace("-DP3=" + support::cpp11::to_string(perm[2]));
+    build_opts.emplace("-DP4=" + support::cpp11::to_string(perm[3]));
 
-    // Run [2, 0, 1] permute
-    if(_perm == PermutationVector{ 2U, 0U, 1U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_201", build_opts));
-    }
-    // Run [1, 2, 0] permute
-    else if(_perm == PermutationVector{ 1U, 2U, 0U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_120", build_opts));
-    }
-    // Run [3, 2, 0, 1] permute
-    else if(_perm == PermutationVector{ 3U, 2U, 0U, 1U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_3201", build_opts));
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not supported.");
-    }
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute", build_opts));
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
