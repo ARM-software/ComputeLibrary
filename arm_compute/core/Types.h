@@ -1652,8 +1652,8 @@ private:
  * The matrix A can only be reshaped through @ref CLGEMMInterleave4x4Kernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
  * Note: Optionally just for @ref CLGEMMInterleave4x4Kernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
  *
- * The matrix B can only be reshaped through @ref CLGEMMTranspose1xWKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
- * Note: Optionally just for @ref CLGEMMTranspose1xWKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
+ * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
+ * Note: Optionally just for @ref CLGEMMReshapeRHSMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
  *
  */
 class GEMMReshapeInfo final

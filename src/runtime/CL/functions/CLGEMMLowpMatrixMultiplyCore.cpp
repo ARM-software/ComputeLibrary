@@ -108,6 +108,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
 
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
+    GEMMRHSMatrixInfo rhs_info;
 
     // Arguments used by GEMMReshapeInfo
     // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
@@ -120,6 +121,11 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     const int     depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
     constexpr int mult_transpose1xW_width   = 1;
     constexpr int mult_interleave4x4_height = 1;
+    rhs_info.n0                             = 16 / b->info()->element_size();
+    rhs_info.k0                             = 1;
+    rhs_info.h0                             = mult_transpose1xW_width;
+    rhs_info.interleave                     = false;
+    rhs_info.transpose                      = false;
 
     // Check if we need to reshape the matrix A and matrix B
     _is_interleaved_transposed = is_interleaved_transposed(m, n, k, _reshape_b_only_on_first_run, gpu_target);
@@ -142,7 +148,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
         _mtx_a_reshape_kernel.configure(a, &_tmp_a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d(), unroll_block);
 
         // Configure transpose kernel
-        _mtx_b_reshape_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
+        _mtx_b_reshape_kernel.configure(b, &_tmp_b, rhs_info);
     }
 
     // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
@@ -233,8 +239,9 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     const ITensorInfo *matrix_a_info = a;
     const ITensorInfo *matrix_b_info = b;
 
-    TensorInfo tmp_a_info{};
-    TensorInfo tmp_b_info{};
+    TensorInfo        tmp_a_info{};
+    TensorInfo        tmp_b_info{};
+    GEMMRHSMatrixInfo rhs_info;
 
     bool          reinterpret_input_as_3d   = gemm_info.reinterpret_input_as_3d();
     const int     m                         = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
@@ -243,6 +250,11 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     constexpr int mult_transpose1xW_width   = 1;
     constexpr int mult_interleave4x4_height = 1;
     const int     depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
+    rhs_info.n0                             = 16 / b->element_size();
+    rhs_info.k0                             = 1;
+    rhs_info.h0                             = mult_transpose1xW_width;
+    rhs_info.interleave                     = false;
+    rhs_info.transpose                      = false;
 
     bool reshape_matrices = is_interleaved_transposed(m, n, k, gemm_info.reshape_b_only_on_first_run(), CLScheduler::get().target());
 
@@ -264,8 +276,9 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()));
 
         // Validate transpose kernel
-        auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width)));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &tmp_b_info, mult_transpose1xW_width));
+
+        auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*b, rhs_info)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeRHSMatrixKernel::validate(b, &tmp_b_info, rhs_info));
     }
 
     TensorInfo info_vector_sum_col, info_vector_sum_row;

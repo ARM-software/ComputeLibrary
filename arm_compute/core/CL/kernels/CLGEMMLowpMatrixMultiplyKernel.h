@@ -58,7 +58,7 @@ public:
      * @param[in]  input0                    Input tensor containing the interleaved Matrix A. Data type supported: QASYMM8
      * @param[in]  input1                    Input tensor containing the transposed1xW Matrix B. Data type supported: same as @p input0
      * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: S32
-     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
+     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
      * @param[in]  reshape_info              (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
@@ -67,7 +67,7 @@ public:
      * @param[in] input0                    Input tensor info containing the interleaved Matrix A. Data type supported: QASYMM8
      * @param[in] input1                    Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
      * @param[in] output                    Output tensor info to store the result of matrix multiplication. Data type supported: S32
-     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
+     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
      * @param[in] reshape_info              GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      *
      * @return a status

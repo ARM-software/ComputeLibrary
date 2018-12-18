@@ -148,7 +148,7 @@ bool dot8_supported(const cl::Device &device)
     const GPUTarget gpu_target  = get_target_from_name(device_name);
 
     // SW_WORKAROUND: Workaround for DDK revision r14p0.to enable cl_arm_integer_dot_product_int8
-    std::set<GPUTarget> sw_workaround_issue = {GPUTarget::G76};
+    std::set<GPUTarget> sw_workaround_issue = { GPUTarget::G76 };
     return (device_supports_extension(device, "cl_arm_integer_dot_product_int8") || sw_workaround_issue.count(gpu_target) != 0);
 }
 
@@ -255,5 +255,4 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
             return 1;
     }
 }
-
 } // namespace arm_compute

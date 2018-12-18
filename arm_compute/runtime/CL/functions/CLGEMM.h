@@ -30,7 +30,6 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -44,8 +43,7 @@ class ICLTensor;
  *
  *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target is NOT Mali-G76)
  *  -# @ref CLGEMMReshapeLHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
- *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target is NOT Mali-G76)
- *  -# @ref CLGEMMReshapeRHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
+ *  -# @ref CLGEMMReshapeRHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model)
  *  -# @ref CLGEMMMatrixMultiplyKernel (if GPU target is NOT G76 or if the reshaped GEMM is NOT selected)
  *  -# @ref CLGEMMMatrixMultiplyReshapedKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
  *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
@@ -108,7 +106,6 @@ public:
 private:
     CLMemoryGroup                      _memory_group;
     CLGEMMInterleave4x4Kernel          _interleave_kernel; // TODO - COMPMID-1835: Remove this kernel and use CLGEMMReshapeLHSMatrixKernel
-    CLGEMMTranspose1xWKernel           _transpose_kernel;  // TODO - COMPMID-1836: Remove this kernel and use CLGEMMReshapeRHSMatrixKernel
     CLGEMMMatrixMultiplyKernel         _mm_kernel;
     CLGEMMMatrixAdditionKernel         _ma_kernel;
     CLGEMMReshapeLHSMatrixKernel       _reshape_lhs_kernel;

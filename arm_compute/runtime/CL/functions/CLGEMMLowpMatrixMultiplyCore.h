@@ -29,7 +29,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -42,7 +42,7 @@ class ICLTensor;
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLGEMMInterleave4x4Kernel  (if the output tensor is a matrix)
- *  -# @ref CLGEMMTranspose1xWKernel  (if the output tensor is a matrix)
+ *  -# @ref CLGEMMReshapeRHSMatrixKernel  (if the output tensor is a matrix)
  *  -# @ref CLGEMMLowpMatrixMultiplyKernel
  *  -# @ref CLGEMMLowpMatrixAReductionKernel (if the offset of matrix B is not 0)
  *  -# @ref CLGEMMLowpMatrixBReductionKernel (if the offset of matrix A is not 0)
@@ -102,7 +102,7 @@ private:
     CLMemoryGroup                                 _memory_group;
     CLGEMMLowpMatrixMultiplyKernel                _mm_kernel;
     CLGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
-    CLGEMMTranspose1xWKernel                      _mtx_b_reshape_kernel;
+    CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
     CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
     CLGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     CLGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
