@@ -895,7 +895,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
     }
 #endif // K0 > 4
 #if K0 > 8
-    if(y * (uint)K0 + 9 < SRC_HEIGHT)
+    if(y * (uint)K0 + 8 < SRC_HEIGHT)
     {
         a8 = VLOAD(N0)(0, (__global DATA_TYPE *)(input_ptr + 8 * src_stride_y));
     }

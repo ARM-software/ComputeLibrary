@@ -52,8 +52,23 @@ const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8
 /** Batch size values to test */
 const auto b_values = framework::dataset::make("batchsize", 1, 3);
 
-/** N0 values to test */
-const auto n0_values = framework::dataset::make("N0", { 2, 4, 8, 16 });
+/** N0 values to test - Precommit */
+const auto n0_values_precommit = framework::dataset::make("N0", { 2, 4 });
+
+/** N0 values to test - Nightly */
+const auto n0_values_nightly = framework::dataset::make("N0", { 2, 4, 8, 16 });
+
+/** K0 values to test (transpose=true) - Precommit */
+const auto k0_t_values_precommit = framework::dataset::make("K0", { 4 });
+
+/** K0 values to test (transpose=true) - Nightly */
+const auto k0_t_values_nightly = framework::dataset::make("K0", { 4, 8, 16 });
+
+/** K0 values to test (transpose=false) - Precommit */
+const auto k0_nt_values_precommit = framework::dataset::make("K0", { 1, 2, 4 });
+
+/** K0 values to test (transpose=false) - Nightly */
+const auto k0_nt_values_nightly = framework::dataset::make("K0", { 1, 2, 4, 8, 16 });
 
 /** H0 values to test */
 const auto h0_values = framework::dataset::make("H0", 1, 4);
@@ -78,8 +93,8 @@ TEST_SUITE(GEMMReshapeRHSMatrix)
 DATA_TEST_CASE(Configuration0, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    data_types),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   n0_values_nightly),
+                                                                   k0_t_values_nightly),
                                                                    h0_values),
                                                                    i_values),
 shape_in, b_value, data_type, n0_value, k0_value, h0_value, i_value)
@@ -110,8 +125,8 @@ shape_in, b_value, data_type, n0_value, k0_value, h0_value, i_value)
 DATA_TEST_CASE(Configuration1, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    data_types),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   n0_values_nightly),
+                                                                   k0_nt_values_nightly),
                                                                    h0_values),
                                                                    i_values),
 shape_in, b_value, data_type, n0_value, k0_value, h0_value, i_value)
@@ -140,12 +155,12 @@ shape_in, b_value, data_type, n0_value, k0_value, h0_value, i_value)
 
 TEST_SUITE(S32)
 // RunSmall tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    framework::dataset::make("DataType", DataType::S32)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   n0_values_precommit),
+                                                                   k0_nt_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -155,12 +170,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<int>, framework:
 }
 
 // RunSmall tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    framework::dataset::make("DataType", DataType::S32)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   n0_values_precommit),
+                                                                   k0_t_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
@@ -174,8 +189,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge0, CLGEMMReshapeRHSMatrixFixture<int>, framework:
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    framework::dataset::make("DataType", DataType::S32)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   n0_values_nightly),
+                                                                   k0_nt_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -189,8 +204,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge1, CLGEMMReshapeRHSMatrixFixture<int>, framework:
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
                                                                    framework::dataset::make("DataType", DataType::S32)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   n0_values_nightly),
+                                                                   k0_t_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
@@ -202,12 +217,12 @@ TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
 // RunSmall tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_precommit),
+                                                                   k0_nt_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -217,12 +232,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<short>, framewor
 }
 
 // RunSmall tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_precommit),
+                                                                   k0_t_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
@@ -235,9 +250,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<short>, framewor
 FIXTURE_DATA_TEST_CASE(RunLarge0, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_nightly),
+                                                                   k0_nt_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -250,9 +265,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge0, CLGEMMReshapeRHSMatrixFixture<short>, framewor
 FIXTURE_DATA_TEST_CASE(RunLarge1, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S16)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_nightly),
+                                                                   k0_t_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
@@ -264,12 +279,12 @@ TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
 // RunSmall tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_precommit),
+                                                                   k0_nt_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -279,12 +294,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall0, CLGEMMReshapeRHSMatrixFixture<char>, framework
 }
 
 // RunSmall tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::PRECOMMIT,
                 combine(combine(combine(combine(combine(combine(combine(datasets::SmallGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_precommit),
+                                                                   k0_t_values_precommit),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
@@ -297,9 +312,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall1, CLGEMMReshapeRHSMatrixFixture<char>, framework
 FIXTURE_DATA_TEST_CASE(RunLarge0, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 1, 2, 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_nightly),
+                                                                   k0_nt_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", false)))
@@ -312,9 +327,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge0, CLGEMMReshapeRHSMatrixFixture<char>, framework
 FIXTURE_DATA_TEST_CASE(RunLarge1, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::NIGHTLY,
                 combine(combine(combine(combine(combine(combine(combine(datasets::LargeGEMMReshape2DShapes(),
                                                                    b_values),
-                                                                   framework::dataset::make("DataType", DataType::S8)),
-                                                                   n0_values),
-                                                                   framework::dataset::make("K0", { 4, 8, 16 })),
+                                                                   framework::dataset::make("DataType", DataType::S32)),
+                                                                   n0_values_nightly),
+                                                                   k0_t_values_nightly),
                                                                    h0_values),
                                                                    i_values),
                                                                    framework::dataset::make("transpose", true)))
