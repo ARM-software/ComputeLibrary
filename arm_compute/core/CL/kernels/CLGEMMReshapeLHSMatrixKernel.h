@@ -56,7 +56,7 @@ public:
      *                                     lhs_info.m0: 2,3,4,5,6,7,8
      *                                     lhs_info.k0: 2,4,8,16
      *                                     lhs_info.v0: greater than 0
-     *                                     lhs_info.transpose: false
+     *                                     lhs_info.transpose: true, false
      *                                     lhs_info.interleave: true, false
      * @param[in]  reinterpret_input_as_3d (Optional) True if the input has to be reinterpreted as 3D tensor
      */
@@ -70,7 +70,7 @@ public:
      *                                    lhs_info.m0: 2,3,4,5,6,7,8
      *                                    lhs_info.k0: 2,4,8,16
      *                                    lhs_info.v0: greater than 0
-     *                                    lhs_info.transpose: false
+     *                                    lhs_info.transpose: true, false
      *                                    lhs_info.interleave: true, false
      * @param[in] reinterpret_input_as_3d True if the input has to be reinterpreted as 3D tensor
      *

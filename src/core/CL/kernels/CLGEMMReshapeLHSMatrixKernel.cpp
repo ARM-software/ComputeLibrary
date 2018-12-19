@@ -44,7 +44,6 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info, bool reinterpret_input_as_3d)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.transpose);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.v0 == 0);
