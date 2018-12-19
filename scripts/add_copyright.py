@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import glob
 import os.path
+import sys
 
 mit_copyright = open("scripts/copyright_mit.txt",'r').read()
 
@@ -56,27 +57,34 @@ def remove_comment_python( content ):
             out += line + "\n"
     return out
 
-for top in ['./arm_compute', './tests','./src','./examples','./utils/','./framework','./support']:
-    for root, _, files in os.walk(top):
-        for f in files:
-            path = os.path.join(root, f)
+def check_file( path ):
+    root, f = os.path.split(path)
+    if f in ['.clang-tidy', '.clang-format']:
+        print("Skipping file: {}".format(path))
+        return
 
-            if f in ['.clang-tidy', '.clang-format']:
-                print("Skipping file: {}".format(path))
-                continue
+    with open(path, 'r', encoding='utf-8') as fd:
+        content = fd.read()
+        _, extension = os.path.splitext(f)
 
-            with open(path, 'r', encoding='utf-8') as fd:
-                content = fd.read()
-                _, extension = os.path.splitext(f)
+        if extension in ['.cpp', '.h', '.hpp', '.inl', '.cl', '.in', '.cs']:
+            if not content.startswith('/*'):
+                add_cpp_copyright(path, content)
+        elif extension == '.py' or f in ['SConstruct', 'SConscript']:
+            if not content.startswith('# Copyright'):
+                add_python_copyright(path, content)
+        elif f == 'CMakeLists.txt':
+            if not content.startswith('# Copyright'):
+                add_python_copyright(path, content)
+        else:
+            raise Exception("Unhandled file: {}".format(path))
 
-                if extension in ['.cpp', '.h', '.hpp', '.inl', '.cl']:
-                    if not  content.startswith('/*'):
-                        add_cpp_copyright(path, content)
-                elif extension == '.py' or f in ['SConstruct', 'SConscript']:
-                    if not content.startswith('# Copyright'):
-                        add_python_copyright(path, content)
-                elif f == 'CMakeLists.txt':
-                    if not content.startswith('# Copyright'):
-                        add_python_copyright(path, content)
-                else:
-                    raise Exception("Unhandled file: {}".format(path))
+if len(sys.argv) > 1:
+    for path in sys.argv[1:]:
+        check_file(path)
+else:
+    for top in ['./arm_compute', './tests','./src','./examples','./utils/','./opencl-1.2-stubs/','./opengles-3.1-stubs/','./support']:
+        for root, _, files in os.walk(top):
+            for f in files:
+                path = os.path.join(root, f)
+                check_file(path)
