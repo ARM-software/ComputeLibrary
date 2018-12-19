@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,21 +34,21 @@ CLPadLayer::CLPadLayer()
 {
 }
 
-void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding)
+void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value)
 {
     // Copy the input to the output
     _copy_kernel.configure(input, output, padding);
 
     // Set the pages of the output to zero
-    _memset_kernel.configure(output, PixelValue());
+    _memset_kernel.configure(output, constant_value);
 
     // Fill padding on the first two dimensions with zeros
-    _fillborder_kernel.configure(input, input->info()->padding(), BorderMode::CONSTANT);
+    _fillborder_kernel.configure(input, input->info()->padding(), BorderMode::CONSTANT, constant_value);
 }
 
-Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding)
+Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(input, PixelValue()));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(input, constant_value));
     ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output, padding));
 
     return Status{};

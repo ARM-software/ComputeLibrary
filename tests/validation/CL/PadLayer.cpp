@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ const auto PaddingSizesDataset = framework::dataset::make("PaddingSize", { Paddi
 } // namespace
 
 TEST_SUITE(CL)
-TEST_SUITE(Padding)
+TEST_SUITE(PadLayer)
 
 // *INDENT-OFF*
 // clang-format off
@@ -140,7 +140,7 @@ FIXTURE_DATA_TEST_CASE(RunPadding, CLPaddingFixture<uint8_t>, framework::Dataset
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END() // Padding
+TEST_SUITE_END() // PadLayer
 TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test

@@ -1011,7 +1011,9 @@ inline TensorShape compute_padded_shape(const TensorShape &input_shape, const Pa
     TensorShape padded_shape = input_shape;
     for(size_t dim = 0; dim < padding.size(); ++dim)
     {
-        padded_shape.set(dim, padding[dim].first + input_shape[dim] + padding[dim].second);
+        const auto    &padding_pair   = padding[dim];
+        const uint32_t shape_on_index = (padded_shape.num_dimensions() <= dim) ? 1 : input_shape[dim];
+        padded_shape.set(dim, padding_pair.first + shape_on_index + padding_pair.second);
     }
     return padded_shape;
 }

@@ -99,6 +99,7 @@
 #include "arm_compute/runtime/NEON/functions/NENonMaximaSuppression3x3.h"
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEOpticalFlow.h"
+#include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/NEON/functions/NEPhase.h"
 #include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"

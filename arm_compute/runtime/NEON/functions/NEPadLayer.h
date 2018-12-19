@@ -21,32 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPADLAYER_H__
-#define __ARM_COMPUTE_CLPADLAYER_H__
+#ifndef __ARM_COMPUTE_NEPADLAYER_H__
+#define __ARM_COMPUTE_NEPADLAYER_H__
 
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
-#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/SubTensor.h"
+
+#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
+#include "arm_compute/core/NEON/kernels/NEMemsetKernel.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
-class ICLTensor;
+// Forward declarations
+class ITensor;
 
-/** Basic function to pad a tensor. This function calls the following OpenCL kernels:
+/** Basic function to pad a tensor. This function calls the following NEON kernels:
  *
- *  -# @ref CLMemsetKernel
- *  -# @ref CLFillBorderKernel
- *  -# @ref CLCopyKernel
+ *  -# @ref NEMemsetKernel
+ *  -# @ref NECopyKernel
  */
-class CLPadLayer : public IFunction
+class NEPadLayer : public IFunction
 {
 public:
     /** Default constructor*/
-    CLPadLayer();
-
+    NEPadLayer();
     /** Initialize the function
      *
      * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
@@ -55,15 +54,16 @@ public:
      *                            specifies the front and the end padding in the i-th dimension.
      * @param[in]  constant_value (Optional) Constant value to be used for the padding
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
-
-    /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
+    void configure(ITensor *input, ITensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
+    /**  Static function to check if given info will lead to a valid configuration of @ref NEPadLayer.
      *
      * @param[in] input          Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
      * @param[in] constant_value (Optional) Constant value to be used for the padding
+     *
+     * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
 
@@ -71,9 +71,9 @@ public:
     void run() override;
 
 private:
-    CLCopyKernel       _copy_kernel;
-    CLFillBorderKernel _fillborder_kernel;
-    CLMemsetKernel     _memset_kernel;
+    NEMemsetKernel _memset_kernel;
+    NECopyKernel   _copy_kernel;
+    SubTensor      _output_subtensor;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_PADLAYER_H__ */
+#endif /*__ARM_COMPUTE_NEPADLAYER_H__ */
