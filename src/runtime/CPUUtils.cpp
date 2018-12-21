@@ -95,6 +95,7 @@ bool model_supports_fp16(CPUModel model)
             return false;
     }
 }
+
 /* Convert an MIDR register value to a CPUModel enum value. */
 CPUModel midr_to_model(const unsigned int midr)
 {
@@ -138,6 +139,19 @@ CPUModel midr_to_model(const unsigned int midr)
             case 0xd06:
             case 0xd0c:
             case 0xd0d:
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
+    }
+    else if(implementer == 0x48) // HiSilicon CPUs
+    {
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0xd40: // A76 (Kirin 980)
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
             default:
