@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,11 +88,15 @@
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src1_pad_right                     Right paddings of the first input tensor in unit of elements
+ * @param[in]  src1_pad_left                      Left paddings of the second input tensor in unit of elements
  */
 __kernel void concatenate_width_x2(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    uint src1_pad_right,
+    uint src2_pad_left)
 {
     Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
 
@@ -101,8 +105,8 @@ __kernel void concatenate_width_x2(
     const int y  = get_global_id(1);
     const int z  = get_global_id(2) % (int)DEPTH;
     const int w  = get_global_id(2) / (int)DEPTH;
-    const int x1 = min(x, (int)INPUT1_WIDTH);
-    const int x2 = max(x - (int)INPUT1_WIDTH, -(int)VEC_SIZE);
+    const int x1 = min(x, (int)INPUT1_WIDTH + (int)src1_pad_right - (int)VEC_SIZE);
+    const int x2 = max(x - (int)INPUT1_WIDTH, -(int)src2_pad_left);
 
     // Calculate inputs and output addresses
     const __global uchar *in1_ptr = src1_ptr + (int)src1_offset_first_element_in_bytes + x1 * (int)src1_stride_x + y * (int)src1_stride_y + z * (int)src1_stride_z + w * (int)src1_stride_w;
@@ -180,13 +184,25 @@ __kernel void concatenate_width_x2(
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src1_pad_right                     Right paddings of the first input tensor in unit of elements
+ * @param[in]  src2_pad_left                      Left paddings of the second input tensor in unit of elements
+ * @param[in]  src2_pad_right                     Right paddings of the second input tensor in unit of elements
+ * @param[in]  src3_pad_left                      Left paddings of the third input tensor in unit of elements
+ * @param[in]  src3_pad_right                     Right paddings of the third input tensor in unit of elements
+ * @param[in]  src4_pad_left                      Left paddings of the fourth input tensor in unit of elements
  */
 __kernel void concatenate_width_x4(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
     TENSOR4D_DECLARATION(src3),
     TENSOR4D_DECLARATION(src4),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    uint src1_pad_right,
+    uint src2_pad_left,
+    uint src2_pad_right,
+    uint src3_pad_left,
+    uint src3_pad_right,
+    uint src4_pad_left)
 {
     Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
 
@@ -196,10 +212,10 @@ __kernel void concatenate_width_x4(
     const int z = get_global_id(2) % (int)DEPTH;
     const int w = get_global_id(2) / (int)DEPTH;
 
-    const int x1 = min(x, (int)INPUT1_WIDTH);
-    const int x2 = min(max(x - (int)INPUT1_WIDTH, -(int)VEC_SIZE), (int)INPUT2_WIDTH);
-    const int x3 = min(max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH, -(int)VEC_SIZE), (int)INPUT3_WIDTH);
-    const int x4 = max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH - (int)INPUT3_WIDTH, -(int)VEC_SIZE);
+    const int x1 = min(x, (int)INPUT1_WIDTH + (int)src1_pad_right - (int)VEC_SIZE);
+    const int x2 = min(max(x - (int)INPUT1_WIDTH, -(int)src2_pad_left), (int)INPUT2_WIDTH + (int)src2_pad_right - (int)VEC_SIZE);
+    const int x3 = min(max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH, -(int)src3_pad_left), (int)INPUT3_WIDTH + (int)src3_pad_right - (int)VEC_SIZE);
+    const int x4 = max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH - (int)INPUT3_WIDTH, -(int)src4_pad_left);
 
     // Calculate inputs and output addresses
     const __global uchar *in1_ptr = src1_ptr + (int)src1_offset_first_element_in_bytes + x1 * (int)src1_stride_x + y * (int)src1_stride_y + z * (int)src1_stride_z + w * (int)src1_stride_w;
