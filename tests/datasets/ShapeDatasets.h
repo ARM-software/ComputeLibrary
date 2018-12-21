@@ -946,6 +946,37 @@ public:
     {
     }
 };
+
+/** Data set containing small 2D tensor shapes. */
+class Small2DNonMaxSuppressionShapes final : public ShapeDataset
+{
+public:
+    Small2DNonMaxSuppressionShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 4U, 7U },
+                     TensorShape{ 4U, 13U },
+                     TensorShape{ 4U, 64U }
+    })
+    {
+    }
+};
+
+/** Data set containing large 2D tensor shapes. */
+class Large2DNonMaxSuppressionShapes final : public ShapeDataset
+{
+public:
+    Large2DNonMaxSuppressionShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 4U, 207U },
+                     TensorShape{ 4U, 113U },
+                     TensorShape{ 4U, 264U }
+    })
+    {
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
