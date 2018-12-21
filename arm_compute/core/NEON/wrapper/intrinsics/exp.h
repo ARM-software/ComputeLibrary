@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ VEXPQ_IMPL(float32x4_t, f32)
 VEXPQ_IMPL(float16x8_t, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 #undef VEXPQ_IMPL
+
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_EXP_H__ */

@@ -21,33 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_INVSQRT_H__
-#define __ARM_COMPUTE_WRAPPER_INVSQRT_H__
+#include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
 
-#include "arm_compute/core/NEON/NEMath.h"
-#include <arm_neon.h>
+#include "arm_compute/core/NEON/kernels/NEElementwiseUnaryKernel.h"
+#include "support/ToolchainSupport.h"
+
+#include <utility>
 
 namespace arm_compute
 {
-namespace wrapper
+void NERsqrtLayer::configure(const ITensor *input, ITensor *output)
 {
-#define VINVSQRT_IMPL(stype, vtype, prefix, postfix) \
-    inline vtype vinvsqrt(const vtype &a)            \
-    {                                                \
-        return prefix##_##postfix(a);                \
-    }
+    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    k->configure(ElementWiseUnary::RSQRT, input, output);
+    _kernel = std::move(k);
+}
+Status NERsqrtLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::RSQRT, input, output);
+}
 
-VINVSQRT_IMPL(float, float32x2_t, vinvsqrt, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VINVSQRT_IMPL(float16_t, float16x4_t, vinvsqrt, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-VINVSQRT_IMPL(float, float32x4_t, vinvsqrtq, f32)
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VINVSQRT_IMPL(float16_t, float16x8_t, vinvsqrtq, f16)
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-#undef VINVSQRT_IMPL
-} // namespace wrapper
+void NEExpLayer::configure(const ITensor *input, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    k->configure(ElementWiseUnary::EXP, input, output);
+    _kernel = std::move(k);
+}
+Status NEExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::EXP, input, output);
+}
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_INVSQRT_H__ */

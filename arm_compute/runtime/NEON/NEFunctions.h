@@ -57,6 +57,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDilate.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
+#include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEEqualizeHistogram.h"
 #include "arm_compute/runtime/NEON/functions/NEErode.h"
 #include "arm_compute/runtime/NEON/functions/NEFastCorners.h"
