@@ -851,6 +851,8 @@ private:
  *      "Rethinking the Inception Architecture for Computer Vision"
  *      Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, Zbigniew Wojna
  *
+ * Provenance: download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

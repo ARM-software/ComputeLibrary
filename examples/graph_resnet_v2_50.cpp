@@ -235,6 +235,8 @@ private:
  *      "Identity Mappings in Deep Residual Networks"
  *      Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
  *
+ * Provenance: download.tensorflow.org/models/resnet_v2_50_2017_04_14.tar.gz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

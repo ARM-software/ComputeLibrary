@@ -114,5 +114,60 @@ If the script runs successfully, it prints the names and shapes of each paramete
 
 The arm_compute::utils::load_trained_data shows how one could load
 the weights and biases into tensor from the .npy file by the help of Accessor.
+
+@section tf_frozen_model_extractor Extract data from pre-trained frozen tensorflow model
+
+The script tf_frozen_model_extractor.py extracts trainable parameters (e.g. values of weights and biases) from a
+frozen trained Tensorflow model.
+
+@subsection tensorflow_frozen_how_to How to use the script
+
+Install Tensorflow and NumPy.
+
+Download the pre-trained Tensorflow model and freeze the model using the architecture and the checkpoint file.
+
+Run tf_frozen_model_extractor.py with
+
+        python tf_frozen_model_extractor -m <path_to_frozen_pb_model_file> -d <path_to_store_parameters>
+
+For example, to extract the data from pre-trained Tensorflow model to binary files:
+
+        python tf_frozen_model_extractor -m /path/to/inceptionv3.pb -d ./data
+
+@subsection tensorflow_frozen_result What is the expected output from the script
+
+If the script runs successfully, it prints the names and shapes of each parameter onto the standard output and generates
+ *.npy files containing the weights and biases of each layer.
+
+The arm_compute::utils::load_trained_data shows how one could load
+the weights and biases into tensor from the .npy file by the help of Accessor.
+
+@section validate_examples Validating examples
+Using one of the provided scripts will generate files containing the trainable parameters.
+
+You can validate a given graph example on a list of inputs by running:
+
+    LD_LIBRARY_PATH=lib ./<graph_example> --validation-range='<validation_range>' --validation-file='<validation_file>' --validation-path='/path/to/test/images/' --data='/path/to/weights/'
+
+e.g:
+
+LD_LIBRARY_PATH=lib ./bin/graph_alexnet --target=CL --layout=NHWC --type=F32 --threads=4 --validation-range='16666,24998' --validation-file='val.txt' --validation-path='images/' --data='data/'
+
+where:
+    validation file is a plain document containing a list of images along with their expected label value.
+    e.g:
+
+        val_00000001.JPEG 65
+        val_00000002.JPEG 970
+        val_00000003.JPEG 230
+        val_00000004.JPEG 809
+        val_00000005.JPEG 516
+
+    --validation-range is the index range of the images within the validation file you want to check:
+    e.g:
+
+       --validation-range='100,200' will validate 100 images starting from 100th one in the validation file.
+
+    This can be useful when parallelizing the validation process is needed.
 */
 }

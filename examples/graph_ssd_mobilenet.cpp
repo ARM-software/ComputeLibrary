@@ -365,6 +365,8 @@ private:
  *      SSD: Single Shot MultiBox Detector
  *      Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian Szegedy, Scott Reed, Cheng-Yang Fu, Alexander C. Berg
  *
+ * Provenance: https://github.com/chuanqi305/MobileNet-SSD
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

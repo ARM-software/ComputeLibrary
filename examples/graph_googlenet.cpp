@@ -203,6 +203,8 @@ private:
  *      "Going deeper with convolutions"
  *      Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke, Andrew Rabinovich
  *
+ * Provenance: https://github.com/BVLC/caffe/tree/master/models/bvlc_googlenet
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

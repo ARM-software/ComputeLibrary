@@ -240,6 +240,8 @@ private:
  *      "Deep Residual Learning for Image Recognition"
  *      Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
  *
+ * Provenance: download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

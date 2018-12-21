@@ -244,6 +244,8 @@ private:
  *      "ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices"
  *      Xiangyu Zhang, Xinyu Zhou, Mengxiao Lin, Jian Sun
  *
+ * Provenance: https://s3.amazonaws.com/download.onnx/models/opset_9/shufflenet.tar.gz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

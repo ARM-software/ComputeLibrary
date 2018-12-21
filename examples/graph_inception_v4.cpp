@@ -725,6 +725,8 @@ private:
  *      "Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning"
  *      Christian Szegedy, Sergey Ioffe, Vincent Vanhoucke, Alex Alemi
  *
+ * Provenance: download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

@@ -251,6 +251,8 @@ private:
  *      "Very Deep Convolutional Networks for Large-Scale Image Recognition"
  *      Karen Simonyan, Andrew Zisserman
  *
+ * Provenance: www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_16_layers.caffemodel
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

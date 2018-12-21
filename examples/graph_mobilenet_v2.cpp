@@ -451,6 +451,8 @@ private:
  *      "MobileNetV2: Inverted Residuals and Linear Bottlenecks"
  *      Mark Sandler, Andrew Howard, Menglong Zhu, Andrey Zhmoginov, Liang-Chieh Chen
  *
+ * Provenance: https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments
