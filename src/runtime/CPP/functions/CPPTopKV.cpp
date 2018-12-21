@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
-#define __ARM_COMPUTE_CPPFUNCTIONS_H__
-
-/* Header regrouping all the CPP functions */
-#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
-#include "arm_compute/runtime/CPP/functions/CPPDetectionOutputLayer.h"
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
-#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
-#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */
+#include "arm_compute/core/CPP/kernels/CPPTopKVKernel.h"
+#include "support/ToolchainSupport.h"
+
+namespace arm_compute
+{
+void CPPTopKV::configure(const ITensor *predictions, const ITensor *targets, ITensor *output, const unsigned int k)
+{
+    auto kernel = arm_compute::support::cpp14::make_unique<CPPTopKVKernel>();
+    kernel->configure(predictions, targets, output, k);
+    _kernel = std::move(kernel);
+}
+
+Status CPPTopKV::validate(const ITensorInfo *predictions, const ITensorInfo *targets, ITensorInfo *output, const unsigned int k)
+{
+    return CPPTopKVKernel::validate(predictions, targets, output, k);
+}
+} // namespace arm_compute
