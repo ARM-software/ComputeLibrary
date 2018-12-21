@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,56 @@ class ITensor;
 using NormalizedBBox = std::array<float, 4>;
 // LabelBBox used for map label and bounding box
 using LabelBBox = std::map<int, std::vector<NormalizedBBox>>;
+
+/** CPP Function to perform non maximum suppression on the bounding boxes and scores
+ *
+ */
+class CPPNonMaximumSuppression : public IFunction
+{
+public:
+    /** Default constructor */
+    CPPNonMaximumSuppression();
+    /** Configure the function to perform non maximal suppression
+     *
+     * @param[in]  bboxes          The input bounding boxes. Data types supported: F32.
+     * @param[in]  scores          The corresponding input confidence. Same as @p scores.
+     * @param[out] indices         The kept indices of bboxes after nms. Data types supported: S32.
+     * @param[in]  max_output_size An integer tensor representing the maximum number of boxes to be selected by non max suppression.
+     * @param[in]  score_threshold The threshold used to filter detection results.
+     * @param[in]  nms_threshold   The threshold used in non maximum suppression.
+     *
+     */
+    void configure(const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size, const float score_threshold, const float nms_threshold);
+
+    /** Static function to check if given arguments will lead to a valid configuration of @ref CPPNonMaximumSuppression
+     *
+     * @param[in]  bboxes          The input bounding boxes. Data types supported: F32.
+     * @param[in]  scores          The corresponding input confidence. Same as @p scores.
+     * @param[out] indices         The kept indices of bboxes after nms. Data types supported: S32.
+     * @param[in]  max_output_size An integer tensor representing the maximum number of boxes to be selected by non max suppression.
+     * @param[in]  score_threshold The threshold used to filter detection results.
+     * @param[in]  nms_threshold   The threshold used in non maximum suppression.
+     *
+     */
+    static Status validate(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
+                           const float score_threshold, const float nms_threshold);
+
+    // Inherited methods overridden:
+    void run() override;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CPPNonMaximumSuppression(const CPPNonMaximumSuppression &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CPPNonMaximumSuppression &operator=(const CPPNonMaximumSuppression &) = delete;
+
+private:
+    const ITensor *_bboxes;
+    const ITensor *_scores;
+    ITensor       *_indices;
+    unsigned int   _max_output_size;
+
+    float _score_threshold;
+    float _nms_threshold;
+};
 
 /** CPP Function to generate the detection output based on location and confidence
  * predictions by doing non maximum suppression.

@@ -207,6 +207,9 @@ public:
     template <typename T, typename D>
     void fill(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const;
 
+    template <typename T, typename D>
+    void fill_boxes(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const;
+
     /** Fills the specified @p raw tensor with random values drawn from @p
      * distribution.
      *
@@ -479,6 +482,40 @@ void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std:
             store_value_with_data_type(out_ptr, value, tensor.data_type());
         }
     });
+}
+
+template <typename T, typename D>
+void AssetsLibrary::fill_boxes(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
+{
+    using ResultType = typename std::remove_reference<D>::type::result_type;
+    std::mt19937 gen(_seed + seed_offset);
+    TensorShape  shape(tensor.shape());
+    const int    num_boxes = tensor.num_elements() / 4;
+    // Iterate over all elements
+    std::uniform_real_distribution<> size_dist(0.f, 1.f);
+    for(int element_idx = 0; element_idx < num_boxes * 4; element_idx += 4)
+    {
+        const ResultType delta   = size_dist(gen);
+        const ResultType epsilon = size_dist(gen);
+        const ResultType left    = distribution(gen);
+        const ResultType top     = distribution(gen);
+        const ResultType right   = left + delta;
+        const ResultType bottom  = top + epsilon;
+        const std::tuple<ResultType, ResultType, ResultType, ResultType> box(left, top, right, bottom);
+        Coordinates x1              = index2coord(shape, element_idx);
+        Coordinates y1              = index2coord(shape, element_idx + 1);
+        Coordinates x2              = index2coord(shape, element_idx + 2);
+        Coordinates y2              = index2coord(shape, element_idx + 3);
+        ResultType &target_value_x1 = reinterpret_cast<ResultType *>(tensor(x1))[0];
+        ResultType &target_value_y1 = reinterpret_cast<ResultType *>(tensor(y1))[0];
+        ResultType &target_value_x2 = reinterpret_cast<ResultType *>(tensor(x2))[0];
+        ResultType &target_value_y2 = reinterpret_cast<ResultType *>(tensor(y2))[0];
+        store_value_with_data_type(&target_value_x1, std::get<0>(box), tensor.data_type());
+        store_value_with_data_type(&target_value_y1, std::get<1>(box), tensor.data_type());
+        store_value_with_data_type(&target_value_x2, std::get<2>(box), tensor.data_type());
+        store_value_with_data_type(&target_value_y2, std::get<3>(box), tensor.data_type());
+    }
+    fill_borders_with_garbage(tensor, distribution, seed_offset);
 }
 
 template <typename T, typename D>
