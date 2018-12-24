@@ -401,7 +401,7 @@ unsigned int get_threads_hint()
     // CPU part regex
     regex_t cpu_part_rgx;
     memset(&cpu_part_rgx, 0, sizeof(regex_t));
-    int ret_status = regcomp(&cpu_part_rgx, R"(.*CPU part.+?\:[[:space:]]+([[:alnum:]]+).*)", REG_EXTENDED);
+    int ret_status = regcomp(&cpu_part_rgx, R"(.*CPU part.+/?\:[[:space:]]+([[:alnum:]]+).*)", REG_EXTENDED);
     ARM_COMPUTE_UNUSED(ret_status);
     ARM_COMPUTE_ERROR_ON_MSG(ret_status != 0, "Regex compilation failed.");
 
