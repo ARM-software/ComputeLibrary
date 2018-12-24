@@ -95,7 +95,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     if(_needs_permute)
     {
         // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
-        _permuted_output.info()->set_data_layout(DataLayout::NHWC);
+        _permuted_output.info()->set_data_layout(DataLayout::NCHW);
         _permute_output_to_nhwc.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
 
         // Allocate tensors
@@ -109,7 +109,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     {
         zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
     }
-    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
+    _border_handler.configure(input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
 }
 
 Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
@@ -187,19 +187,6 @@ void CLDepthwiseConvolutionLayer3x3::prepare()
     }
 }
 
-namespace
-{
-inline bool can_run_optimised_3x3_kernel(const ITensorInfo *weights, unsigned int depth_multiplier)
-{
-    const DataLayout data_layout = weights->data_layout();
-    const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const Size2D     weights_size(weights->dimension(idx_w), weights->dimension(idx_h));
-    return weights_size == Size2D(3, 3) && (data_layout == DataLayout::NHWC && depth_multiplier <= 1);
-}
-
-} // namespace
-
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer()
     : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _activationlayer_function(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(),
       _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_prepared(false), _is_quantized(false), _is_activationlayer_enabled(false), _original_weights(nullptr),
@@ -214,7 +201,12 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
 
-    if(can_run_optimised_3x3_kernel(weights->info(), depth_multiplier))
+    const Status can_run_optimised_3x3_kernel = CLDepthwiseConvolutionLayer3x3::validate(input->info(),
+                                                                                         weights->info(),
+                                                                                         biases != nullptr ? biases->info() : nullptr,
+                                                                                         output->info(),
+                                                                                         conv_info, depth_multiplier, act_info);
+    if(bool(can_run_optimised_3x3_kernel))
     {
         auto f = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3>();
         f->configure(input, weights, biases, output, conv_info, depth_multiplier, act_info);
@@ -323,11 +315,7 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
 Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
-    if(can_run_optimised_3x3_kernel(weights, depth_multiplier))
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info));
-    }
-    else
+    if(!bool(CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info)))
     {
         const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
         const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
