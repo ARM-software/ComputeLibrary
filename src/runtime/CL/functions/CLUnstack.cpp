@@ -51,17 +51,6 @@ inline void setup_slice_coordinates_and_mask(Coordinates &slice_start, int32_t &
     }
     slice_end_mask = arm_compute::helpers::tensor_transform::construct_slice_end_mask(slice_end);
 }
-
-inline const std::vector<ITensorInfo *> get_tensor_info(const std::vector<ICLTensor *> &output_vector)
-{
-    // given a vector of tensors this function returns a vector to their ITensorInfo*
-    std::vector<ITensorInfo *> out_info(output_vector.size());
-    std::transform(output_vector.begin(), output_vector.end(), out_info.begin(), [](ICLTensor * t)
-    {
-        return t->info();
-    });
-    return out_info;
-}
 } // namespace
 
 CLUnstack::CLUnstack() // NOLINT
@@ -72,12 +61,21 @@ CLUnstack::CLUnstack() // NOLINT
 
 void CLUnstack::configure(const ICLTensor *input, const std::vector<ICLTensor *> &output_vector, int axis)
 {
+    std::vector<ITensorInfo *> outputs_vector_info(output_vector.size());
+    std::transform(output_vector.begin(), output_vector.end(), outputs_vector_info.begin(), [](ICLTensor * t)
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(t);
+        return t->info();
+    });
+
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_ERROR_THROW_ON(CLUnstack::validate(input->info(), get_tensor_info(output_vector), axis));
+    ARM_COMPUTE_ERROR_THROW_ON(CLUnstack::validate(input->info(), outputs_vector_info, axis));
+
     // Wrap around negative values
     const unsigned int axis_u = wrap_axis(axis, input->info());
-    _num_slices               = std::min(output_vector.size(), input->info()->dimension(axis_u));
+    _num_slices               = std::min(outputs_vector_info.size(), input->info()->dimension(axis_u));
     _strided_slice_vector     = arm_compute::support::cpp14::make_unique<CLStridedSlice[]>(_num_slices);
+
     Coordinates slice_start;
     int32_t     slice_end_mask;
     setup_slice_coordinates_and_mask(slice_start, slice_end_mask, input->info()->tensor_shape().num_dimensions());
