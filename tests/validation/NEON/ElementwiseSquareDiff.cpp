@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -43,6 +43,10 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+RelativeTolerance<float> tolerance_fp16(0.01f);
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+
 /** Input data sets **/
 const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                           framework::dataset::make("DataType",
@@ -207,7 +211,7 @@ TEST_SUITE(F16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP16Dataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_fp16, 0.01);
 }
 TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
