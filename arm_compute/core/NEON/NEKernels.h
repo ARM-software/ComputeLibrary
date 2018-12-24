@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,7 @@
 #include "arm_compute/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "arm_compute/core/NEON/kernels/NETableLookupKernel.h"
 #include "arm_compute/core/NEON/kernels/NEThresholdKernel.h"
 #include "arm_compute/core/NEON/kernels/NETileKernel.h"

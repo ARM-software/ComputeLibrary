@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,14 +114,18 @@
 #include "arm_compute/runtime/NEON/functions/NEScharr3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"
 #include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
+#include "arm_compute/runtime/NEON/functions/NESlice.h"
 #include "arm_compute/runtime/NEON/functions/NESobel3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
+#include "arm_compute/runtime/NEON/functions/NESplit.h"
+#include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 #include "arm_compute/runtime/NEON/functions/NETableLookup.h"
 #include "arm_compute/runtime/NEON/functions/NEThreshold.h"
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
+#include "arm_compute/runtime/NEON/functions/NEUnstack.h"
 #include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
