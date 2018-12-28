@@ -111,6 +111,7 @@
 #include "arm_compute/runtime/NEON/functions/NERemap.h"
 #include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEReverse.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/NEON/functions/NEScharr3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESelect.h"

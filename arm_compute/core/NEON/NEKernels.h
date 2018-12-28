@@ -109,6 +109,7 @@
 #include "arm_compute/core/NEON/kernels/NERemapKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReorgLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReshapeLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEReverseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 #include "arm_compute/core/NEON/kernels/NEScharr3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESelectKernel.h"

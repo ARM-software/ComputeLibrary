@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,11 +58,13 @@ protected:
     {
         library->fill_tensor_uniform(tensor, 0);
     }
-    template <typename U>
-    void fill_axis(U &&tensor)
+    std::vector<int> generate_random_axis()
     {
-        std::uniform_int_distribution<> distribution(0, 3);
-        library->fill(tensor, distribution, 0);
+        std::vector<int> axis_v = { 0, 1, 2, 3 };
+        std::mt19937     g(0);
+        std::shuffle(axis_v.begin(), axis_v.end(), g);
+
+        return axis_v;
     }
 
     TensorType compute_target(const TensorShape &shape, const TensorShape &axis_shape, DataType data_type)
@@ -91,7 +93,11 @@ protected:
 
         // Fill tensors
         fill(AccessorType(src));
-        fill_axis(AccessorType(axis));
+        {
+            auto axis_data = AccessorType(axis);
+            auto axis_v    = generate_random_axis();
+            std::copy(axis_v.begin(), axis_v.begin() + axis_shape.x(), static_cast<int32_t *>(axis_data.data()));
+        }
 
         // Compute function
         reverse_func.run();
@@ -107,7 +113,8 @@ protected:
 
         // Fill reference
         fill(src);
-        fill_axis(axis);
+        auto axis_v = generate_random_axis();
+        std::copy(axis_v.begin(), axis_v.begin() + axis_shape.x(), axis.data());
 
         return reference::reverse<T>(src, axis);
     }
