@@ -52,6 +52,7 @@
 #include "arm_compute/core/NEON/wrapper/intrinsics/pmin.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/pow.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/rev64.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/setlane.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 #include "arm_compute/core/NEON/wrapper/intrinsics/sub.h"
 

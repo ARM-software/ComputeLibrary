@@ -21,36 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLRangeKernel.h"
+#include "arm_compute/core/NEON/kernels/NERangeKernel.h"
 
-#include "arm_compute/core/CL/CLHelpers.h"
-#include "arm_compute/core/CL/CLValidate.h"
-#include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
+#include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Validate.h"
+
 #include "utils/Utils.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
-unsigned int get_num_elems_processed_per_iteration(const DataType dt)
+template <typename T>
+void range_function(ITensor *output, float start, float step, const Window &window)
 {
-    unsigned int num_elems_processed_per_iteration = preferred_vector_width(CLKernelLibrary::get().get_device(), dt);
-    if(num_elems_processed_per_iteration > 8)
+    const unsigned int num_elems_processed_per_iteration = 16 / sizeof(T);
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_bitvector<T, wrapper::traits::BitWidth::W128>::tag_type;
+
+    const auto step_vec  = wrapper::vdup_n(static_cast<T>(step), ExactTagType{});
+    const auto start_vec = wrapper::vdup_n(static_cast<T>(start), ExactTagType{});
+    auto       id_vec    = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+
+    Iterator output_it(output, window);
+    execute_window_loop(window, [&](const Coordinates & id)
     {
-        num_elems_processed_per_iteration = 8; //kernel uses only 8 lanes.
-    }
-    return num_elems_processed_per_iteration;
+        for(unsigned int count = 0; count < num_elems_processed_per_iteration; ++count)
+        {
+            id_vec = wrapper::vsetlane(static_cast<T>(id.x() + count), id_vec, count);
+        }
+        // start + step * id
+        const auto res_vec = wrapper::vmla(start_vec, id_vec, step_vec);
+        const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
+        wrapper::vstore(out_ptr, res_vec);
+    },
+    output_it);
 }
 
 Status validate_arguments(const ITensorInfo &output, const float start, const float end, const float step)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output,
                                                          1,
-                                                         DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::U8, DataType::S8,
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((start == end), "start of the requested sequence must not be equal to the end");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start < end) && (step <= 0)), "step must be greater than 0 when start < end");
@@ -70,13 +91,13 @@ Status validate_arguments(const ITensorInfo &output, const float start, const fl
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo &output, const float start, const float end, const float step)
 {
-    unsigned int num_elems_processed_per_iteration = get_num_elems_processed_per_iteration(output.data_type());
+    const unsigned int num_elems_processed_per_iteration = 16 / output.element_size();
+
     // Auto initialize output if not initialized
     auto_init_if_empty(output, TensorShape(utils::num_of_elements_in_range(start, end, step)), 1, output.data_type(), output.quantization_info());
 
     // Configure kernel window
-    Window win = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
-
+    Window                 win = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), TensorShape(utils::num_of_elements_in_range(start, end, step))));
@@ -85,12 +106,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &output, con
 }
 } // namespace
 
-CLRangeKernel::CLRangeKernel()
-    : _start(0), _end(1), _step(1), _output(nullptr)
+NERangeKernel::NERangeKernel()
+    : _func(nullptr), _start(0), _end(1), _step(1), _output(nullptr)
 {
 }
 
-void CLRangeKernel::configure(ICLTensor *output, const float start, const float end, const float step)
+void NERangeKernel::configure(ITensor *output, float start, float end, float step)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
@@ -104,35 +125,43 @@ void CLRangeKernel::configure(ICLTensor *output, const float start, const float 
     _end    = end;
     _step   = step;
     _output = output;
-
-    std::string kernel_name = "range";
-
-    unsigned int num_elems_processed_per_iteration = get_num_elems_processed_per_iteration(output->info()->data_type());
-    // Set build options
-    CLBuildOptions build_opts;
-    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(output->info()->data_type()));
-    build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.add_option("-DSTART=" + support::cpp11::to_string(start));
-    build_opts.add_option("-DSTEP=" + support::cpp11::to_string(step));
-    if(is_data_type_quantized_asymmetric(output->info()->data_type()))
+    switch(_output->info()->data_type())
     {
-        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
-        kernel_name += "_quantized";
+        case DataType::U8:
+            _func = &range_function<uint8_t>;
+            break;
+        case DataType::U16:
+            _func = &range_function<uint16_t>;
+            break;
+        case DataType::U32:
+            _func = &range_function<uint32_t>;
+            break;
+        case DataType::S8:
+            _func = &range_function<int8_t>;
+            break;
+        case DataType::S16:
+            _func = &range_function<int16_t>;
+            break;
+        case DataType::S32:
+            _func = &range_function<int32_t>;
+            break;
+        case DataType::F32:
+            _func = &range_function<float>;
+            break;
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            _func = &range_function<float16_t>;
+            break;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type.");
+            break;
     }
-    // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-    ICLKernel::configure_internal(win_config.second);
 
-    // Set config_id for enabling LWS tuning
-    _config_id = kernel_name;
-    _config_id += "_";
-    _config_id += lower_string(string_from_data_type(output->info()->data_type()));
-    _config_id += "_";
-    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    INEKernel::configure(win_config.second);
 }
 
-Status CLRangeKernel::validate(const ITensorInfo *output, const float start, const float end, const float step)
+Status NERangeKernel::validate(const ITensorInfo *output, float start, float end, float step)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
@@ -142,12 +171,13 @@ Status CLRangeKernel::validate(const ITensorInfo *output, const float start, con
     return Status{};
 }
 
-void CLRangeKernel::run(const Window &window, cl::CommandQueue &queue)
+void NERangeKernel::run(const Window &window, const ThreadInfo &info)
 {
+    ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
-    unsigned int idx = 0;
-    add_1D_tensor_argument(idx, _output, window);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+    ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    enqueue(queue, *this, window, lws_hint());
+    (*_func)(_output, _start, _step, window);
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,6 +192,20 @@ inline std::string get_typestring(DataType data_type)
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
     }
+}
+
+/** Returns the number of elements required to go from start to end with the wanted step
+ *
+ * @param[in] start start value
+ * @param[in] end   end value
+ * @param[in] step  step value between each number in the wanted sequence
+ *
+ * @return number of elements to go from start value to end value using the wanted step
+ */
+inline size_t num_of_elements_in_range(const float start, const float end, const float step)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(step == 0, "Range Step cannot be 0");
+    return size_t(std::ceil((end - start) / step));
 }
 
 /** Returns true if the value can be represented by the given data type

@@ -107,6 +107,7 @@
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
+#include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 #include "arm_compute/runtime/NEON/functions/NEReductionOperation.h"
 #include "arm_compute/runtime/NEON/functions/NERemap.h"
