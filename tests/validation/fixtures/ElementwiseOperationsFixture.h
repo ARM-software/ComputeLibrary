@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, i);
+        (_op == ArithmeticOperation::DIV) ? library->fill_tensor_uniform_ranged(tensor, i, { std::pair<float, float>(-0.001f, 0.001f) }) : library->fill_tensor_uniform(tensor, i);
     }
 
     TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type,

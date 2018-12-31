@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/Random.h"
 #include "libnpy/npy.hpp"
 #include "tests/RawTensor.h"
 #include "tests/TensorCache.h"
@@ -57,6 +58,9 @@ namespace test
  */
 class AssetsLibrary final
 {
+public:
+    using RangePair = std::pair<float, float>;
+
 public:
     /** Initialises the library with a @p path to the assets directory.
      * Furthermore, sets the seed for the random generator to @p seed.
@@ -312,7 +316,7 @@ public:
     template <typename T>
     void fill(T &&tensor, RawTensor raw) const;
 
-    /** Fill a tensor with uniform distribution across the range of its type
+    /** Fill a tensor with uniform distribution
      *
      * @param[in, out] tensor      To be filled tensor.
      * @param[in]      seed_offset The offset will be added to the global seed before initialising the random generator.
@@ -320,7 +324,7 @@ public:
     template <typename T>
     void fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset) const;
 
-    /** Fill a tensor with uniform distribution across the a specified range
+    /** Fill a tensor with uniform distribution
      *
      * @param[in, out] tensor      To be filled tensor.
      * @param[in]      seed_offset The offset will be added to the global seed before initialising the random generator.
@@ -331,6 +335,17 @@ public:
      */
     template <typename T, typename D>
     void fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset, D low, D high) const;
+
+    /** Fill a tensor with uniform distribution across the specified range
+     *
+     * @param[in, out] tensor               To be filled tensor.
+     * @param[in]      seed_offset          The offset will be added to the global seed before initialising the random generator.
+     * @param[in]      excluded_range_pairs Ranges to exclude from the generator
+     */
+    template <typename T>
+    void fill_tensor_uniform_ranged(T                                          &&tensor,
+                                    std::random_device::result_type              seed_offset,
+                                    const std::vector<AssetsLibrary::RangePair> &excluded_range_pairs) const;
 
     /** Fills the specified @p tensor with data loaded from .npy (numpy binary) in specified path.
      *
@@ -420,6 +435,23 @@ private:
     std::random_device::result_type _seed;
 };
 
+namespace detail
+{
+template <typename T>
+inline std::vector<std::pair<T, T>> convert_range_pair(const std::vector<AssetsLibrary::RangePair> &excluded_range_pairs)
+{
+    std::vector<std::pair<T, T>> converted;
+    std::transform(excluded_range_pairs.begin(),
+                   excluded_range_pairs.end(),
+                   std::back_inserter(converted),
+                   [](const AssetsLibrary::RangePair & p)
+    {
+        return std::pair<T, T>(static_cast<T>(p.first), static_cast<T>(p.second));
+    });
+    return converted;
+}
+} // namespace detail
+
 template <typename T, typename D>
 void AssetsLibrary::fill_borders_with_garbage(T &&tensor, D &&distribution, std::random_device::result_type seed_offset) const
 {
@@ -498,6 +530,7 @@ void AssetsLibrary::fill(RawTensor &raw, D &&distribution, std::random_device::r
     {
         using ResultType       = typename std::remove_reference<D>::type::result_type;
         const ResultType value = distribution(gen);
+
         store_value_with_data_type(raw.data() + offset, value, raw.data_type());
     }
 }
@@ -630,6 +663,91 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         {
             std::uniform_int_distribution<size_t> distribution_sizet(std::numeric_limits<size_t>::lowest(), std::numeric_limits<size_t>::max());
             fill(tensor, distribution_sizet, seed_offset);
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+}
+
+template <typename T>
+void AssetsLibrary::fill_tensor_uniform_ranged(T                                          &&tensor,
+                                               std::random_device::result_type              seed_offset,
+                                               const std::vector<AssetsLibrary::RangePair> &excluded_range_pairs) const
+{
+    using namespace arm_compute::utils::random;
+
+    switch(tensor.data_type())
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+        {
+            const auto                         converted_pairs = detail::convert_range_pair<uint8_t>(excluded_range_pairs);
+            RangedUniformDistribution<uint8_t> distribution_u8(std::numeric_limits<uint8_t>::lowest(),
+                                                               std::numeric_limits<uint8_t>::max(),
+                                                               converted_pairs);
+            fill(tensor, distribution_u8, seed_offset);
+            break;
+        }
+        case DataType::S8:
+        {
+            const auto                        converted_pairs = detail::convert_range_pair<int8_t>(excluded_range_pairs);
+            RangedUniformDistribution<int8_t> distribution_s8(std::numeric_limits<int8_t>::lowest(),
+                                                              std::numeric_limits<int8_t>::max(),
+                                                              converted_pairs);
+            fill(tensor, distribution_s8, seed_offset);
+            break;
+        }
+        case DataType::U16:
+        {
+            const auto                          converted_pairs = detail::convert_range_pair<uint16_t>(excluded_range_pairs);
+            RangedUniformDistribution<uint16_t> distribution_u16(std::numeric_limits<uint16_t>::lowest(),
+                                                                 std::numeric_limits<uint16_t>::max(),
+                                                                 converted_pairs);
+            fill(tensor, distribution_u16, seed_offset);
+            break;
+        }
+        case DataType::S16:
+        {
+            const auto                         converted_pairs = detail::convert_range_pair<int16_t>(excluded_range_pairs);
+            RangedUniformDistribution<int16_t> distribution_s16(std::numeric_limits<int16_t>::lowest(),
+                                                                std::numeric_limits<int16_t>::max(),
+                                                                converted_pairs);
+            fill(tensor, distribution_s16, seed_offset);
+            break;
+        }
+        case DataType::U32:
+        {
+            const auto                          converted_pairs = detail::convert_range_pair<uint32_t>(excluded_range_pairs);
+            RangedUniformDistribution<uint32_t> distribution_u32(std::numeric_limits<uint32_t>::lowest(),
+                                                                 std::numeric_limits<uint32_t>::max(),
+                                                                 converted_pairs);
+            fill(tensor, distribution_u32, seed_offset);
+            break;
+        }
+        case DataType::S32:
+        {
+            const auto                         converted_pairs = detail::convert_range_pair<int32_t>(excluded_range_pairs);
+            RangedUniformDistribution<int32_t> distribution_s32(std::numeric_limits<int32_t>::lowest(),
+                                                                std::numeric_limits<int32_t>::max(),
+                                                                converted_pairs);
+            fill(tensor, distribution_s32, seed_offset);
+            break;
+        }
+        case DataType::F16:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
+            RangedUniformDistribution<float> distribution_f16(-100.f, 100.f, converted_pairs);
+            fill(tensor, distribution_f16, seed_offset);
+            break;
+        }
+        case DataType::F32:
+        {
+            // It doesn't make sense to check [-inf, inf], so hard code it to a big number
+            const auto                       converted_pairs = detail::convert_range_pair<float>(excluded_range_pairs);
+            RangedUniformDistribution<float> distribution_f32(-1000.f, 1000.f, converted_pairs);
+            fill(tensor, distribution_f32, seed_offset);
             break;
         }
         default:
