@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,18 +60,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                      TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
-                                                     TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 0
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                                    }),
     framework::dataset::make("OutputInfo",         { TensorInfo(TensorShape(1U, 64U), 1, DataType::F16),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::S16),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32),
-                                                     TensorInfo(TensorShape(1U, 64U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(1U, 64U), 1, DataType::F32)
                                                    })),
-    framework::dataset::make("Axis",               { 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 1U, 0U })),
-    framework::dataset::make("Expected",           { false, false, false, false, false, true })),
+    framework::dataset::make("Axis",               { 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 0U })),
+    framework::dataset::make("Expected",           { false, false, false, false, true })),
     input_info, output_info, axis, expected)
 {
     bool is_valid = bool(NEReductionOperation::validate(&input_info.clone()->set_is_resizable(false),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,22 +45,31 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
     _reduced_outs      = arm_compute::support::cpp14::make_unique<CLTensor[]>(_reduction_ops - (keep_dims ? 1 : 0));
     _keep_dims         = keep_dims;
 
+    Coordinates axis_local = reduction_axis;
+    const int   input_dims = input->info()->num_dimensions();
+
+    // Convert negative axis
+    for(unsigned int i = 0; i < _reduction_ops; ++i)
+    {
+        axis_local[i] = wrap_around(axis_local[i], input_dims);
+    }
+
     // Perform reduction for every axis
     for(unsigned int i = 0; i < _reduction_ops; ++i)
     {
         TensorShape out_shape = i == 0 ? input->info()->tensor_shape() : (_reduced_outs.get() + i - 1)->info()->tensor_shape();
-        out_shape.set(reduction_axis[i], 1);
+        out_shape.set(axis_local[i], 1);
         auto in = (i == 0) ? input : (_reduced_outs.get() + i - 1);
 
         if(i == _reduction_ops - 1 && keep_dims)
         {
-            _reduction_kernels[i].configure(in, output, reduction_axis[i], ReductionOperation::MEAN_SUM);
+            _reduction_kernels[i].configure(in, output, axis_local[i], ReductionOperation::MEAN_SUM);
         }
         else
         {
             _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->quantization_info()));
             _memory_group.manage(_reduced_outs.get() + i);
-            _reduction_kernels[i].configure(in, _reduced_outs.get() + i, reduction_axis[i], ReductionOperation::MEAN_SUM);
+            _reduction_kernels[i].configure(in, _reduced_outs.get() + i, axis_local[i], ReductionOperation::MEAN_SUM);
         }
     }
 
@@ -77,11 +86,10 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
 
         // We have to sort the reduction axis vectors in order for remove_dimension
         // to work properly
-        Coordinates axis_copy = reduction_axis;
-        std::sort(axis_copy.begin(), axis_copy.begin() + _reduction_ops);
+        std::sort(axis_local.begin(), axis_local.begin() + _reduction_ops);
         for(unsigned int i = 0; i < _reduction_ops; ++i)
         {
-            out_shape.remove_dimension(axis_copy[i] - i);
+            out_shape.remove_dimension(axis_local[i] - i);
         }
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(out_shape));
         _reshape.configure(_reduced_outs.get() + _reduction_ops - 1, output);
@@ -90,21 +98,42 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
 
 Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
 {
-    ARM_COMPUTE_UNUSED(keep_dims);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() > input->num_dimensions());
 
-    for(unsigned int i = 0; i < reduction_axis.num_dimensions(); ++i)
+    TensorShape out_shape = input->tensor_shape();
+
+    Coordinates        axis_sorted   = reduction_axis;
+    const unsigned int reduction_ops = reduction_axis.num_dimensions();
+    const int          input_dims    = input->num_dimensions();
+
+    // Convert negative axis
+    for(unsigned int i = 0; i < reduction_ops; ++i)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis[i] > 3);
-        ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(reduction_axis[i]) > input->num_dimensions() - 1);
+        axis_sorted[i] = wrap_around(axis_sorted[i], input_dims);
+    }
+
+    std::sort(axis_sorted.begin(), axis_sorted.begin() + reduction_ops);
+    for(unsigned int i = 0; i < reduction_ops; ++i)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(axis_sorted[i] > 3);
+        ARM_COMPUTE_RETURN_ERROR_ON(static_cast<unsigned int>(axis_sorted[i]) > input->num_dimensions() - 1);
         if(output->total_size() > 0 && keep_dims)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(reduction_axis[i]) != 1);
+            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(axis_sorted[i]) != 1);
         }
-
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperation::validate(input, output, reduction_axis[i], ReductionOperation::MEAN_SUM));
+        if(keep_dims)
+        {
+            out_shape.set(axis_sorted[i], 1);
+        }
+        else
+        {
+            out_shape.remove_dimension(axis_sorted[i] - i);
+        }
     }
+
+    const TensorInfo out_info = input->clone()->set_tensor_shape(out_shape);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
 
     return Status{};
 }
