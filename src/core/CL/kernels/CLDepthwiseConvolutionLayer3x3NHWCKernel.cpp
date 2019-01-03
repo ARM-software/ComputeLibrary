@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,8 +112,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     AccessWindowStatic input_access(input, 0, -border_size.top, ceil_to_multiple(input->dimension(0), num_elems_accessed_per_iteration),
                                     ceil_to_multiple(input->dimension(1) + border_size.bottom, num_rows_read_per_iteration));
-    AccessWindowRectangle  output_access(output, 0, 0, num_elems_accessed_per_iteration, num_rows_written_per_iteration);
-    AccessWindowHorizontal weights_access(weights, 0, num_elems_accessed_per_iteration);
+    AccessWindowRectangle output_access(output, 0, 0, num_elems_accessed_per_iteration, num_rows_written_per_iteration);
+    AccessWindowStatic    weights_access(weights, 0, 0, ceil_to_multiple(weights->dimension(0), num_elems_accessed_per_iteration), weights->dimension(1));
 
     bool window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
 

@@ -94,14 +94,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
             num_elems_processed_per_iteration = 4;
             // Configure kernel window
-            win                                   = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            const ValidRegion &input_valid_region = input->valid_region();
-
-            // Reads can occur within the valid region of the input
+            win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
             AccessWindowStatic input_access(input,
-                                            input_valid_region.anchor[0] - border.left, input_valid_region.anchor[1] - border.top,
-                                            input_valid_region.anchor[0] + input_valid_region.shape[0] + border.right,
-                                            input_valid_region.anchor[1] + input_valid_region.shape[1] + border.bottom);
+                                            -border.left, -border.top,
+                                            input->dimension(0) + border.right,
+                                            input->dimension(1) + border.bottom);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
             output_access.set_valid_region(win, calculate_valid_region_scale(*(input),
@@ -118,7 +115,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             num_elems_processed_per_iteration = 1;
             // Configure kernel window
             win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            AccessWindowRectangle  input_access(input, -border.left, -border.top, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+            AccessWindowStatic input_access(input, -border.left, -border.top,
+                                            input->dimension(0) + border.right,
+                                            input->dimension(1) + border.bottom);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access);
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
@@ -230,10 +229,9 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     // Set config_id for enabling LWS tuning
     _config_id = "scale_";
-    _config_id += support::cpp11::to_string(border.right);
-    _config_id += (border_mode == BorderMode::REPLICATE? "Bord_rep":"");
+    _config_id += (border_mode == BorderMode::REPLICATE ? "Bord_rep" : "");
     _config_id += (sampling_policy == SamplingPolicy::CENTER ? "center" : "topleft");
-    _config_id += (is_nhwc? "nhwc":"nchw");
+    _config_id += (is_nhwc ? "nhwc" : "nchw");
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";

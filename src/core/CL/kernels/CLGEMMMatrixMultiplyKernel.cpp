@@ -166,10 +166,10 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
         win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-        AccessWindowRectangle input0_access(input0, 0, 0, num_elems_processed_per_iteration_y, 1, 1.f, 0.25f);
-        AccessWindowStatic    input1_access(input1, 0, 0,
-                                            ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
-                                            ceil_to_multiple(input1->dimension(1), num_elems_processed_per_iteration_y));
+        AccessWindowStatic input0_access(input0, 0, 0, input0->dimension(0), input0->dimension(1));
+        AccessWindowStatic input1_access(input1, 0, 0,
+                                         ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
+                                         ceil_to_multiple(input1->dimension(1), num_elems_processed_per_iteration_y));
         AccessWindowStatic output_access(output, 0, 0,
                                          ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
                                          output->dimension(1) + bottom_pad);
