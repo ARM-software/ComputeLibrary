@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,24 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
-#define __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
+#ifndef __ARM_COMPUTE_WRAPPER_ORR_H__
+#define __ARM_COMPUTE_WRAPPER_ORR_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include <arm_neon.h>
 
 namespace arm_compute
 {
-namespace test
+namespace wrapper
 {
-namespace validation
-{
-namespace reference
-{
-template <typename T, typename OT>
-SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
-} // namespace reference
-} // namespace validation
-} // namespace test
+#define VORR_IMPL(stype, vtype, prefix, postfix)      \
+    inline vtype vorr(const vtype &a, const vtype &b) \
+    {                                                 \
+        return prefix##_##postfix(a, b);              \
+    }
+
+VORR_IMPL(uint8_t, uint8x8_t, vorr, u8)
+VORR_IMPL(int8_t, int8x8_t, vorr, s8)
+VORR_IMPL(uint16_t, uint16x4_t, vorr, u16)
+VORR_IMPL(int16_t, int16x4_t, vorr, s16)
+VORR_IMPL(uint32_t, uint32x2_t, vorr, u32)
+VORR_IMPL(int32_t, int32x2_t, vorr, s32)
+VORR_IMPL(uint64_t, uint64x1_t, vorr, u64)
+VORR_IMPL(int64_t, int64x1_t, vorr, s64)
+
+VORR_IMPL(uint8_t, uint8x16_t, vorrq, u8)
+VORR_IMPL(int8_t, int8x16_t, vorrq, s8)
+VORR_IMPL(uint16_t, uint16x8_t, vorrq, u16)
+VORR_IMPL(int16_t, int16x8_t, vorrq, s16)
+VORR_IMPL(uint32_t, uint32x4_t, vorrq, u32)
+VORR_IMPL(int32_t, int32x4_t, vorrq, s32)
+VORR_IMPL(uint64_t, uint64x2_t, vorrq, u64)
+VORR_IMPL(int64_t, int64x2_t, vorrq, s64)
+
+#undef VORR_IMPL
+} // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_ORR_H__ */

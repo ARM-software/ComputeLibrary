@@ -1033,6 +1033,21 @@ inline TensorShape compute_tiled_shape(const TensorShape &input_shape, const Mul
     return tiled_shape;
 }
 
+/** Calculate the reduced shape of a tensor given an axis
+ *
+ * @param[in] input Input tensor info
+ * @param[in] axis  Axis on which to perform reduction
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_reduced_shape(const TensorShape &input, unsigned int axis)
+{
+    TensorShape output_shape{ input };
+    output_shape.set(axis, 1);
+
+    return output_shape;
+}
+
 /** Calculate the upsampled shape of a tensor
  *
  * @param[in] input Input tensor info

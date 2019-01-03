@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -14,9 +14,9 @@
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INNEUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY NEAIM, DAMAGES OR OTHER
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
@@ -67,7 +67,7 @@ void select_op(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITen
             const auto c = (*condition_conversion)(condition_ptr + x);
             const auto a = wrapper::vloadq(input1_ptr + x);
             const auto b = wrapper::vloadq(input2_ptr + x);
-            wrapper::vstore(output_ptr + x, wrapper::vbitselect(c, a, b));
+            wrapper::vstore(output_ptr + x, wrapper::vbsl(c, a, b));
         }
         for(; x < window_end_x; ++x)
         {
@@ -90,7 +90,7 @@ void select_op_8(const ITensor *cond, const ITensor *in1, const ITensor *in2, IT
     select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint8_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vgreaterthan(wrapper::vloadq(condition_ptr), zero);
+        return wrapper::vcgt(wrapper::vloadq(condition_ptr), zero);
     });
 }
 
@@ -104,7 +104,7 @@ void select_op_16(const ITensor *cond, const ITensor *in1, const ITensor *in2, I
     select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint16_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vgreaterthan(wrapper::vmovl(wrapper::vload(condition_ptr)), zero);
+        return wrapper::vcgt(wrapper::vmovl(wrapper::vload(condition_ptr)), zero);
     });
 }
 
@@ -118,7 +118,7 @@ void select_op_32(const ITensor *cond, const ITensor *in1, const ITensor *in2, I
     select_op<ScalarType, VectorType>(cond, in1, in2, out, window, window_step_x, window_start_x, window_end_x, window_end_x - window_step_x, [](const uint8_t *condition_ptr)
     {
         static const auto zero = wrapper::vdup_n(static_cast<uint32_t>(0), arm_compute::wrapper::traits::vector_128_tag());
-        return wrapper::vgreaterthan(wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vload(condition_ptr)))), zero);
+        return wrapper::vcgt(wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vload(condition_ptr)))), zero);
     });
 }
 

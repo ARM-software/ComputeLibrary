@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,7 +107,7 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::reduction_operation<T>(src, dst_shape, axis, op);
+        return reference::reduction_operation<T, T>(src, dst_shape, axis, op);
     }
 
     TensorType      _target{};

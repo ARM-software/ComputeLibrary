@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_CGT_H__
-#define __ARM_COMPUTE_WRAPPER_CGT_H__
+#ifndef __ARM_COMPUTE_WRAPPER_CEQ_H__
+#define __ARM_COMPUTE_WRAPPER_CEQ_H__
 
 #include <arm_neon.h>
 
@@ -30,35 +30,35 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VCGT_IMPL(stype, vtype, rtype, prefix, postfix)       \
-    inline rtype vgreaterthan(const vtype &a, const vtype &b) \
-    {                                                         \
-        return prefix##_##postfix(a, b);                      \
+#define VCEQ_IMPL(votype, vtype, prefix, postfix)      \
+    inline votype vceq(const vtype &a, const vtype &b) \
+    {                                                  \
+        return prefix##_##postfix(a, b);               \
     }
 
-VCGT_IMPL(uint8_t, uint8x8_t, uint8x8_t, vcgt, u8)
-VCGT_IMPL(int8_t, int8x8_t, uint8x8_t, vcgt, s8)
-VCGT_IMPL(uint16_t, uint16x4_t, uint16x4_t, vcgt, u16)
-VCGT_IMPL(int16_t, int16x4_t, uint16x4_t, vcgt, s16)
-VCGT_IMPL(uint32_t, uint32x2_t, uint32x2_t, vcgt, u32)
-VCGT_IMPL(int32_t, int32x2_t, uint32x2_t, vcgt, s32)
-VCGT_IMPL(float32x2_t, float32x2_t, uint32x2_t, vcgt, f32)
+VCEQ_IMPL(uint8x8_t, uint8x8_t, vceq, u8)
+VCEQ_IMPL(uint8x8_t, int8x8_t, vceq, s8)
+VCEQ_IMPL(uint16x4_t, uint16x4_t, vceq, u16)
+VCEQ_IMPL(uint16x4_t, int16x4_t, vceq, s16)
+VCEQ_IMPL(uint32x2_t, uint32x2_t, vceq, u32)
+VCEQ_IMPL(uint32x2_t, int32x2_t, vceq, s32)
+VCEQ_IMPL(uint32x2_t, float32x2_t, vceq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VCGT_IMPL(float16x4_t, float16x4_t, uint16x4_t, vcgt, f16)
+VCEQ_IMPL(uint16x4_t, float16x4_t, vceq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-VCGT_IMPL(uint8_t, uint8x16_t, uint8x16_t, vcgtq, u8)
-VCGT_IMPL(int8_t, int8x16_t, uint8x16_t, vcgtq, s8)
-VCGT_IMPL(uint16_t, uint16x8_t, uint16x8_t, vcgtq, u16)
-VCGT_IMPL(int16_t, int16x8_t, uint16x8_t, vcgtq, s16)
-VCGT_IMPL(uint32_t, uint32x4_t, uint32x4_t, vcgtq, u32)
-VCGT_IMPL(int32_t, int32x4_t, uint32x4_t, vcgtq, s32)
-VCGT_IMPL(float32x4_t, float32x4_t, uint32x4_t, vcgtq, f32)
+VCEQ_IMPL(uint8x16_t, uint8x16_t, vceqq, u8)
+VCEQ_IMPL(uint8x16_t, int8x16_t, vceqq, s8)
+VCEQ_IMPL(uint16x8_t, uint16x8_t, vceqq, u16)
+VCEQ_IMPL(uint16x8_t, int16x8_t, vceqq, s16)
+VCEQ_IMPL(uint32x4_t, uint32x4_t, vceqq, u32)
+VCEQ_IMPL(uint32x4_t, int32x4_t, vceqq, s32)
+VCEQ_IMPL(uint32x4_t, float32x4_t, vceqq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-VCGT_IMPL(float16x8_t, float16x8_t, uint16x8_t, vcgtq, f16)
+VCEQ_IMPL(uint16x8_t, float16x8_t, vceqq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-#undef VCGT_IMPL
+#undef VCEQ_IMPL
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_WRAPPER_CGT_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_CEQ_H__ */

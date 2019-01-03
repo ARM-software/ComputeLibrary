@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/NEON/functions/NEAbsoluteDifference.h"
 #include "arm_compute/runtime/NEON/functions/NEAccumulate.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ SimpleTensor<T> l2_normalize(const SimpleTensor<T> &src, unsigned int axis, floa
     SimpleTensor<T> dst{ src.shape(), src.data_type() };
 
     // Reduce across given axis
-    SimpleTensor<T> sum = reduction_operation(src, get_output_shape(src.shape(), axis), axis, ReductionOperation::SUM_SQUARE);
+    SimpleTensor<T> sum = reduction_operation<T, T>(src, get_output_shape(src.shape(), axis), axis, ReductionOperation::SUM_SQUARE);
 
     // Compute reference
     const int upper_dims     = src.shape().total_size_upper(axis + 1);

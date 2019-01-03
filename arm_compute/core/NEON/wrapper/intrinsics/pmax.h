@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,24 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
-#define __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__
+#ifndef __ARM_COMPUTE_WRAPPER_PMAX_H__
+#define __ARM_COMPUTE_WRAPPER_PMAX_H__
 
-#include "tests/SimpleTensor.h"
-#include "tests/validation/Helpers.h"
+#include <arm_neon.h>
 
 namespace arm_compute
 {
-namespace test
+namespace wrapper
 {
-namespace validation
-{
-namespace reference
-{
-template <typename T, typename OT>
-SimpleTensor<OT> reduction_operation(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
-} // namespace reference
-} // namespace validation
-} // namespace test
+#define VPMAX_IMPL(stype, vtype, prefix, postfix)      \
+    inline vtype vpmax(const vtype &a, const vtype &b) \
+    {                                                  \
+        return prefix##_##postfix(a, b);               \
+    }
+
+VPMAX_IMPL(uint8_t, uint8x8_t, vpmax, u8)
+VPMAX_IMPL(int8_t, int8x8_t, vpmax, s8)
+VPMAX_IMPL(uint16_t, uint16x4_t, vpmax, u16)
+VPMAX_IMPL(int16_t, int16x4_t, vpmax, s16)
+VPMAX_IMPL(uint32_t, uint32x2_t, vpmax, u32)
+VPMAX_IMPL(int32_t, int32x2_t, vpmax, s32)
+VPMAX_IMPL(float, float32x2_t, vpmax, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VPMAX_IMPL(float16_t, float16x4_t, vpmax, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+#undef VPMAX_IMPL
+} // namespace wrapper
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_REDUCTION_OPERATION_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_PMAX_H__ */
