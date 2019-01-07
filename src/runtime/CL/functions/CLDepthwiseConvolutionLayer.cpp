@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,13 +33,14 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
 
 CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _kernel(nullptr), _border_handler(), _permute_input_to_nchw(), _permute_weights_to_nchw(), _permute_output_to_nhwc(), _permuted_input(),
-      _permuted_weights(), _permuted_output(), _original_weights(nullptr), _needs_permute(false), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _kernel(nullptr), _border_handler(), _permute_input_to_nchw(), _permute_weights_to_nchw(), _permute_output_to_nhwc(), _reshape_weights(), _permuted_input(),
+      _permuted_weights(), _permuted_output(), _original_weights(nullptr), _needs_permute(false), _needs_weights_reshape(false), _is_prepared(false)
 {
 }
 
@@ -51,13 +52,21 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
 
     const bool is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
 
-    _needs_permute    = is_nhwc && (depth_multiplier > 1);
+    _needs_permute         = is_nhwc && (depth_multiplier > 1);
+    _needs_weights_reshape = is_nhwc && (depth_multiplier == 1)
+                             && is_data_type_quantized_asymmetric(input->info()->data_type());
     _is_prepared      = false;
     _original_weights = weights;
 
     ICLTensor       *input_to_use   = input;
     const ICLTensor *weights_to_use = weights;
     ICLTensor       *output_to_use  = output;
+
+    const bool                      is_stride_1       = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool                      is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
+    DepthwiseConvolutionReshapeInfo info;
+    info.c0        = 4;
+    info.transpose = is_stride_1 && is_dot8_supported;
 
     if(_needs_permute)
     {
@@ -80,6 +89,11 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     }
     else if(is_nhwc)
     {
+        if(_needs_weights_reshape)
+        {
+            _reshape_weights.configure(weights, &_permuted_weights, info);
+            weights_to_use = &_permuted_weights;
+        }
         _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
     }
     else
@@ -102,7 +116,6 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
         _permuted_input.allocator()->allocate();
         _permuted_output.allocator()->allocate();
     }
-
     // Configure border handler
     PixelValue &&zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()))
@@ -119,8 +132,14 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
-    const bool is_nhwc       = input->data_layout() == DataLayout::NHWC;
-    const bool needs_permute = is_nhwc && (depth_multiplier > 1);
+    const bool                      is_nhwc               = input->data_layout() == DataLayout::NHWC;
+    const bool                      needs_permute         = is_nhwc && (depth_multiplier > 1);
+    const bool                      needs_weights_reshape = is_nhwc && (depth_multiplier == 1);
+    const bool                      is_stride_1           = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
+    const bool                      is_dot8_supported     = dot8_supported(CLKernelLibrary::get().get_device());
+    DepthwiseConvolutionReshapeInfo info;
+    info.c0        = 4;
+    info.transpose = is_stride_1 && is_dot8_supported;
 
     if(needs_permute)
     {
@@ -140,6 +159,12 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
     }
     else if(is_nhwc)
     {
+        if(needs_weights_reshape)
+        {
+            auto reshaped_weights_shape = arm_compute::misc::shape_calculator::compute_reshaped_depthwise_weights_shape(*weights, info);
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, &weights->clone()->set_tensor_shape(reshaped_weights_shape), biases, output, conv_info, depth_multiplier,
+                                                                                           act_info));
+        }
         ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info));
     }
     else
@@ -183,6 +208,15 @@ void CLDepthwiseConvolutionLayer3x3::prepare()
             _permute_weights_to_nchw.run();
             _original_weights->mark_as_unused();
         }
+
+        if(_needs_weights_reshape)
+        {
+            ARM_COMPUTE_ERROR_ON(_needs_permute);
+            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+            _permuted_weights.allocator()->allocate();
+            CLScheduler::get().enqueue(_reshape_weights);
+            _original_weights->mark_as_unused();
+        }
         _is_prepared = true;
     }
 }
@@ -201,11 +235,11 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
 
-    const Status can_run_optimised_3x3_kernel = CLDepthwiseConvolutionLayer3x3::validate(input->info(),
-                                                                                         weights->info(),
-                                                                                         biases != nullptr ? biases->info() : nullptr,
-                                                                                         output->info(),
-                                                                                         conv_info, depth_multiplier, act_info);
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+
+    const bool can_run_optimised_3x3_kernel = (weights->info()->dimension(idx_w) == 3) && (weights->info()->dimension(idx_h) == 3);
+
     if(bool(can_run_optimised_3x3_kernel))
     {
         auto f = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3>();
@@ -214,8 +248,6 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     }
     else
     {
-        const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-        const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
         const size_t idx_c = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
 
         const size_t weights_w = weights->info()->dimension(idx_w);
@@ -315,10 +347,13 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
 Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
 {
-    if(!bool(CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info)))
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+
+    const bool can_run_optimised_3x3_kernel = (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3);
+
+    if(can_run_optimised_3x3_kernel)
     {
-        const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-        const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
         const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
 
         ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
@@ -344,7 +379,7 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
         const TensorShape shape_weights_reshape(patch_size, weights_z);
         TensorInfo        weights_reshaped(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseWeightsReshapeKernel::validate(weights, &weights_reshaped, append_bias ? biases : nullptr));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel::validate(weights, &weights_reshaped, append_bias ? biases : nullptr));
 
         DataType    v2mm_dt        = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
         TensorShape shape_v2mm_out = input->tensor_shape();
@@ -367,6 +402,10 @@ Status CLDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
         {
             ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
         }
+    }
+    else
+    {
+        CLDepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info, depth_multiplier, act_info);
     }
     return Status{};
 }
@@ -419,3 +458,4 @@ void CLDepthwiseConvolutionLayer::prepare()
         }
     }
 }
+} // namespace arm_compute

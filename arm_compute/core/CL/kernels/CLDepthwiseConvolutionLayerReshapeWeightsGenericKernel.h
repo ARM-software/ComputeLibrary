@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISEWEIGHTSRESHAPEKERNEL_H__
-#define __ARM_COMPUTE_CLDEPTHWISEWEIGHTSRESHAPEKERNEL_H__
+#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSGENERICKERNEL_H__
+#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSGENERICKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
@@ -35,19 +35,19 @@ class ICLTensor;
  *  have the second dimension as the original depth size.
  *
  **/
-class CLDepthwiseWeightsReshapeKernel : public ICLKernel
+class CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLDepthwiseWeightsReshapeKernel();
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseWeightsReshapeKernel(const CLDepthwiseWeightsReshapeKernel &) = delete;
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel(const CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseWeightsReshapeKernel &operator=(const CLDepthwiseWeightsReshapeKernel &) = delete;
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &operator=(const CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLDepthwiseWeightsReshapeKernel(CLDepthwiseWeightsReshapeKernel &&) = default;
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel(CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLDepthwiseWeightsReshapeKernel &operator=(CLDepthwiseWeightsReshapeKernel &&) = default;
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &operator=(CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel &&) = default;
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM].
@@ -56,7 +56,7 @@ public:
      * @param[in]  biases (Optional) The input biases to add. Shape [IFM]. Data type supported: same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *biases = nullptr);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseWeightsReshapeKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
      *
      * @param[in] input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM].
      *                   Data type supported: QASYMM8/F32.
@@ -76,4 +76,4 @@ private:
     ICLTensor       *_output;
 };
 } // arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHWISEWEIGHTSRESHAPEKERNEL_H__ */
+#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONLAYERRESHAPEWEIGHTSGENERICKERNEL_H__ */

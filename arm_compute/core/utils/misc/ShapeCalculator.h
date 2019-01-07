@@ -250,6 +250,30 @@ inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_inte
     return shape_interleaved_a;
 }
 
+/** Calculate the reshaped shape of the weights to use in depthwise convolution
+ *
+ * @param[in] input Input tensor info
+ * @param[in] info  Depthwise convolution information to be used for reshaping.
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_reshaped_depthwise_weights_shape(const ITensorInfo &input, const DepthwiseConvolutionReshapeInfo &info)
+{
+    const auto  data_layout = input.data_layout();
+    TensorShape weights_shape{};
+
+    const int    width_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int    height_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int    channel_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const size_t num_channels = input.dimension(channel_idx);
+    const size_t num_rows     = input.dimension(height_idx);
+    const size_t num_cols     = input.dimension(width_idx);
+
+    weights_shape.set(0, num_rows * num_cols * info.c0);
+    weights_shape.set(1, DIV_CEIL(num_channels, info.c0));
+    return weights_shape;
+}
+
 /** Calculate the transposed 1xW shape
  *
  * @param[in] b Input tensor info
@@ -396,6 +420,38 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
                                                               weights_shape[width_idx], weights_shape[height_idx],
                                                               conv_info);
+
+    TensorShape output_shape{ input_shape };
+    output_shape.set(width_idx, output_width);
+    output_shape.set(height_idx, output_height);
+    output_shape.set(channel_idx, input_shape[channel_idx] * depth_multiplier);
+
+    return output_shape;
+}
+
+/** Calculate the depthwise convolution output shape of a tensor
+ *
+ * @param[in] input            Input tensor info
+ * @param[in] weights_width    Weights width
+ * @param[in] weights_height   Weights height
+ * @param[in] conv_info        Padding and stride information to use for the convolution.
+ * @param[in] depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth.
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, int weights_width, int weights_height, PadStrideInfo conv_info, unsigned int depth_multiplier)
+{
+    const TensorShape input_shape{ input.tensor_shape() };
+
+    const DataLayout data_layout = input.data_layout();
+    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
+                                                              weights_width, weights_width, conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(width_idx, output_width);

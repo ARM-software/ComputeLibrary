@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthwiseWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -61,12 +61,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 } // namespace
 
-CLDepthwiseWeightsReshapeKernel::CLDepthwiseWeightsReshapeKernel()
+CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel::CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel()
     : _input(nullptr), _biases(nullptr), _output(nullptr)
 {
 }
 
-void CLDepthwiseWeightsReshapeKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *biases)
+void CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *biases)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), (biases != nullptr) ? biases->info() : nullptr));
@@ -88,23 +88,23 @@ void CLDepthwiseWeightsReshapeKernel::configure(const ICLTensor *input, ICLTenso
         build_opts.emplace("-DHAS_BIAS");
     }
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_weights_reshape", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_convolution_reshape_weights_generic", build_opts));
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
-    // The CLDepthwiseWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
+    // The CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
 }
 
-Status CLDepthwiseWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases)
+Status CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, biases));
     return Status{};
 }
 
-void CLDepthwiseWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
