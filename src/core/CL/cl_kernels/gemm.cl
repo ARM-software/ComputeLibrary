@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+#include "repeat.h"
 
 #if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE)
 
@@ -99,14 +100,7 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
     __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)BLOCK_SIZE * (uint)V0 * sizeof(DATA_TYPE)) + ((y / (uint)V0) * (uint)dst_stride_y) + ((y % V0) *
                                  (uint)OUTPUT_OFFSET_X * sizeof(DATA_TYPE));
 
-    uint zin0 = 0;
-    uint zin1 = 0;
-    uint zin2 = 0;
-    uint zin3 = 0;
-    uint zin4 = 0;
-    uint zin5 = 0;
-    uint zin6 = 0;
-    uint zin7 = 0;
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zin, 0); //uint zin0=0, zin1=0, zin2=0...zin(M0-1)=0;
 
 #if defined(REINTERPRET_INPUT_AS_3D)
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
@@ -164,7 +158,7 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
     zin6 = min((uint)(DEPTH_GEMM3D - 1), zin6);
     zin6 *= (cross_plane_pad * src_stride_y);
 #endif // M0 > 6
-#if M0 > 6
+#if M0 > 7
     zin7 = (7 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
     zin7 = min((uint)(DEPTH_GEMM3D - 1), zin7);
     zin7 *= (cross_plane_pad * src_stride_y);
@@ -609,38 +603,7 @@ __kernel void gemm_reshape_rhs_matrix_nt(TENSOR3D_DECLARATION(src),
 
     // ---------------------------Load input values --------------------------------
 
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a0 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a1 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a2 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a3 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a4 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a5 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a6 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a7 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a8 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a9 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aA = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aB = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aC = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aD = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aE = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aF = 0;
+    REPEAT_VAR_INIT_TO_CONST(K0, VEC_DATA_TYPE(DATA_TYPE, N0), a, 0); ////uint a0=0, a1=0, a2=0...a(M0-1)=0;
 
     // Load values from the RHS matrix
     a0 = VLOAD(N0)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
@@ -714,7 +677,6 @@ __kernel void gemm_reshape_rhs_matrix_nt(TENSOR3D_DECLARATION(src),
 #endif // K0 > 8
 
     // ---------------------------Store output values ------------------------------
-
     VSTORE(N0)
     (a0, 0, (__global DATA_TYPE *)(output_ptr + 0 * OUTPUT_STEP_X * sizeof(DATA_TYPE)));
 #if K0 > 1
@@ -828,39 +790,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
                                  (uint)H0) * (uint)dst_stride_y) + z * (uint)dst_stride_z;
 
     // ---------------------------Load input values --------------------------------
-
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a0 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a1 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a2 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a3 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a4 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a5 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a6 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a7 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a8 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    a9 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aA = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aB = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aC = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aD = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aE = 0;
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    aF = 0;
+    REPEAT_VAR_INIT_TO_CONST(K0, VEC_DATA_TYPE(DATA_TYPE, N0), a, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    a0=0, a1=0, ... a(K0-1)=0;
 
     // Load values from the RHS matrix
     a0 = VLOAD(N0)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
@@ -930,39 +860,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
 #endif // K0 > 8
 
     // ---------------------------Transpose the block ------------------------------
-
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res0 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res1 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res2 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res3 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res4 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res5 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res6 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res7 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res8 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    res9 = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resA = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resB = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resC = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resD = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resE = 0;
-    VEC_DATA_TYPE(DATA_TYPE, K0)
-    resF = 0;
+    REPEAT_VAR_INIT_TO_CONST(N0, VEC_DATA_TYPE(DATA_TYPE, K0), res, 0); //VEC_DATA_TYPE(DATA_TYPE, K0)    res0=0, res1=0, res2=0,... res(N0-1)=0;
 
 #if K0 == 4
     // This part computes the following transpositions:
@@ -1301,36 +1199,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(MATRIX_B_DEPTH)
 
     // Initialize the accumulators
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c0 = 0;
-#if M0 > 1
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c1 = 0;
-#endif // M0 > 1
-#if M0 > 2
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c2 = 0;
-#endif // M0 > 2
-#if M0 > 3
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c3 = 0;
-#endif // M0 > 3
-#if M0 > 4
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c4 = 0;
-#endif // M0 > 4
-#if M0 > 5
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c5 = 0;
-#endif // M0 > 5
-#if M0 > 6
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c6 = 0;
-#endif // M0 > 6
-#if M0 > 7
-    VEC_DATA_TYPE(DATA_TYPE, N0)
-    c7 = 0;
-#endif // M0 > 7
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(DATA_TYPE, N0), c, 0); //VEC_DATA_TYPE(DATA_TYPE, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
 
     for(int i = 0; i < K; i += K0)
     {
@@ -1442,14 +1311,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 
     __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (get_global_id(0) * (uint)N0 * sizeof(DATA_TYPE)) + (get_global_id(1) * (uint)M0 * dst_stride_y);
 
-    uint zout0 = 0;
-    uint zout1 = 0;
-    uint zout2 = 0;
-    uint zout3 = 0;
-    uint zout4 = 0;
-    uint zout5 = 0;
-    uint zout6 = 0;
-    uint zout7 = 0;
+    REPEAT_VAR_INIT_TO_CONST(8, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
@@ -1575,6 +1437,7 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
     VSTORE(N0)
     (c7, 0, (__global DATA_TYPE *)(dst_addr + 7 * dst_stride_y + zout7));
 #endif // M0 > 7
+
 
 #undef LHS_BLOCK_SIZE
 #undef LHS_OFFSET_X
