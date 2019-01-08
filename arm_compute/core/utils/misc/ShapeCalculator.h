@@ -745,6 +745,28 @@ inline TensorShape compute_pool_shape(const ITensorInfo &input, PoolingLayerInfo
     return output_shape;
 }
 
+/** Calculate the output roi align shape of a tensor
+ *
+ * @param[in] input     Input tensor info
+ * @param[in] rois      Rois tensor info
+ * @param[in] pool_info Pooling layer info
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_roi_align_shape(const ITensorInfo &input, const ITensorInfo &rois, ROIPoolingLayerInfo pool_info)
+{
+    TensorShape output_shape{ input.tensor_shape() };
+
+    const unsigned int idx_width  = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const unsigned int idx_height = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+
+    output_shape.set(idx_width, pool_info.pooled_width());
+    output_shape.set(idx_height, pool_info.pooled_height());
+    output_shape.set(3, rois.dimension(1));
+
+    return output_shape;
+}
+
 /** Calculate the RNN shape of a tensor
  *
  * @param[in] input      Input tensor info
