@@ -50,7 +50,7 @@ const auto MultiplesDataset = framework::dataset::make("Multiples", { Multiples{
                                                                       Multiples{ 2, 2, 2 }
                                                                     });
 } // namespace
-TEST_SUITE(NE)
+TEST_SUITE(NEON)
 TEST_SUITE(Tile)
 
 // *INDENT-OFF*
@@ -135,7 +135,7 @@ TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // Tile
-TEST_SUITE_END() // NE
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
