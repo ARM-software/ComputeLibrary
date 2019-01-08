@@ -616,10 +616,10 @@ void save_to_ppm(T &tensor, const std::string &ppm_filename)
  * @param[in] npy_filename  Filename of the file to create.
  * @param[in] fortran_order If true, save matrix in fortran order.
  */
-template <typename T>
+template <typename T, typename U = float>
 void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32, arm_compute::DataType::QASYMM8);
 
     std::ofstream fs;
     try
@@ -637,33 +637,25 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
         // Map buffer if creating a CLTensor
         map(tensor, true);
 
-        switch(tensor.info()->data_type())
+        using typestring_type = typename std::conditional<std::is_floating_point<U>::value, float, qasymm8_t>::type;
+
+        std::vector<typestring_type> tmp; /* Used only to get the typestring */
+        npy::Typestring              typestring_o{ tmp };
+        std::string                  typestring = typestring_o.str();
+
+        std::ofstream stream(npy_filename, std::ofstream::binary);
+        npy::write_header(stream, typestring, fortran_order, shape);
+
+        arm_compute::Window window;
+        window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+        arm_compute::Iterator in(&tensor, window);
+
+        arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
         {
-            case arm_compute::DataType::F32:
-            {
-                std::vector<float> tmp; /* Used only to get the typestring */
-                npy::Typestring    typestring_o{ tmp };
-                std::string        typestring = typestring_o.str();
-
-                std::ofstream stream(npy_filename, std::ofstream::binary);
-                npy::write_header(stream, typestring, fortran_order, shape);
-
-                arm_compute::Window window;
-                window.use_tensor_dimensions(tensor.info()->tensor_shape());
-
-                arm_compute::Iterator in(&tensor, window);
-
-                arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
-                {
-                    stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(float));
-                },
-                in);
-
-                break;
-            }
-            default:
-                ARM_COMPUTE_ERROR("Unsupported format");
-        }
+            stream.write(reinterpret_cast<const char *>(in.ptr()), sizeof(typestring_type));
+        },
+        in);
 
         // Unmap buffer if creating a CLTensor
         unmap(tensor);

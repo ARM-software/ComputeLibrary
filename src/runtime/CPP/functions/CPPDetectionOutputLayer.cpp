@@ -166,9 +166,9 @@ void retrieve_all_conf_scores(const ITensor *input_conf, const int num,
  * @param[out] all_location_predictions All the location predictions.
  *
  */
-void retrieve_all_priorbox(const ITensor               *input_priorbox,
-                           const int                    num_priors,
-                           std::vector<NormalizedBBox> &all_prior_bboxes,
+void retrieve_all_priorbox(const ITensor     *input_priorbox,
+                           const int          num_priors,
+                           std::vector<BBox> &all_prior_bboxes,
                            std::vector<std::array<float, 4>> &all_prior_variances)
 {
     for(int i = 0; i < num_priors; ++i)
@@ -206,9 +206,9 @@ void retrieve_all_priorbox(const ITensor               *input_priorbox,
  * @param[out] decode_bbox                The decoded bboxes.
  *
  */
-void DecodeBBox(const NormalizedBBox &prior_bbox, const std::array<float, 4> &prior_variance,
+void DecodeBBox(const BBox &prior_bbox, const std::array<float, 4> &prior_variance,
                 const DetectionOutputLayerCodeType code_type, const bool variance_encoded_in_target,
-                const bool clip_bbox, const NormalizedBBox &bbox, NormalizedBBox &decode_bbox)
+                const bool clip_bbox, const BBox &bbox, BBox &decode_bbox)
 {
     // if the variance is encoded in target, we simply need to add the offset predictions
     // otherwise we need to scale the offset accordingly.
@@ -287,7 +287,7 @@ void DecodeBBox(const NormalizedBBox &prior_bbox, const std::array<float, 4> &pr
  * @param[out] indices         The kept indices of bboxes after nms.
  *
  */
-void ApplyNMSFast(const std::vector<NormalizedBBox> &bboxes,
+void ApplyNMSFast(const std::vector<BBox> &bboxes,
                   const std::vector<float> &scores, const float score_threshold,
                   const float nms_threshold, const float eta, const int top_k,
                   std::vector<int> &indices)
@@ -329,7 +329,7 @@ void ApplyNMSFast(const std::vector<NormalizedBBox> &bboxes,
             if(keep)
             {
                 // Compute the jaccard (intersection over union IoU) overlap between two bboxes.
-                NormalizedBBox intersect_bbox = std::array<float, 4>({ { 0, 0, 0, 0 } });
+                BBox intersect_bbox = std::array<float, 4>({ 0, 0, 0, 0 });
                 if(bboxes[kept_idx][0] > bboxes[idx][2] || bboxes[kept_idx][2] < bboxes[idx][0] || bboxes[kept_idx][1] > bboxes[idx][3] || bboxes[kept_idx][3] < bboxes[idx][1])
                 {
                     intersect_bbox = std::array<float, 4>({ { 0, 0, 0, 0 } });
@@ -466,7 +466,7 @@ void CPPDetectionOutputLayer::run()
             }
             ARM_COMPUTE_ERROR_ON_MSG(_all_location_predictions[i].find(label) == _all_location_predictions[i].end(), "Could not find location predictions for label %d.", label);
 
-            const std::vector<NormalizedBBox> &label_loc_preds = _all_location_predictions[i].find(label)->second;
+            const std::vector<BBox> &label_loc_preds = _all_location_predictions[i].find(label)->second;
 
             const int num_bboxes = _all_prior_bboxes.size();
             ARM_COMPUTE_ERROR_ON(_all_prior_variances[i].size() != 4);
@@ -499,8 +499,8 @@ void CPPDetectionOutputLayer::run()
             {
                 ARM_COMPUTE_ERROR("Could not find predictions for label %d.", label);
             }
-            const std::vector<float>          &scores = conf_scores.find(c)->second;
-            const std::vector<NormalizedBBox> &bboxes = decode_bboxes.find(label)->second;
+            const std::vector<float> &scores = conf_scores.find(c)->second;
+            const std::vector<BBox> &bboxes = decode_bboxes.find(label)->second;
 
             ApplyNMSFast(bboxes, scores, _info.confidence_threshold(), _info.nms_threshold(), _info.eta(), _info.top_k(), indices[c]);
 
@@ -572,8 +572,8 @@ void CPPDetectionOutputLayer::run()
                 // or there are no location predictions for current label.
                 ARM_COMPUTE_ERROR("Could not find predictions for the label %d.", label);
             }
-            const std::vector<NormalizedBBox> &bboxes  = decode_bboxes.find(loc_label)->second;
-            const std::vector<int>            &indices = it.second;
+            const std::vector<BBox> &bboxes  = decode_bboxes.find(loc_label)->second;
+            const std::vector<int> &indices = it.second;
 
             for(auto idx : indices)
             {

@@ -34,6 +34,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -943,6 +944,11 @@ private:
     std::array<float, 2> _steps;
 };
 
+// Bounding Box [xmin, ymin, xmax, ymax]
+using BBox = std::array<float, 4>;
+// LabelBBox used for map label and bounding box
+using LabelBBox = std::map<int, std::vector<BBox>>;
+
 /** Available Detection Output code types */
 enum class DetectionOutputLayerCodeType
 {
@@ -1069,6 +1075,116 @@ private:
     bool                         _variance_encoded_in_target;
     float                        _eta;
     int                          _num_loc_classes;
+};
+
+/** Detection Output layer info */
+class DetectionPostProcessLayerInfo final
+{
+public:
+    /** Default Constructor */
+    DetectionPostProcessLayerInfo()
+        : _max_detections(),
+          _max_classes_per_detection(),
+          _nms_score_threshold(),
+          _iou_threshold(),
+          _num_classes(),
+          _scales_values(),
+          _use_regular_nms(),
+          _detection_per_class()
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] max_detections            Number of total detection.
+     * @param[in] max_classes_per_detection Number of total classes to be kept after NMS step. Used in the Fast Non-Max-Suppression
+     * @param[in] nms_score_threshold       Threshold to be used in NMS
+     * @param[in] iou_threshold             Threshold to be used during the intersection over union.
+     * @param[in] num_classes               Number of classes.
+     * @param[in] scales_values             Scales values used for decode center size boxes.
+     * @param[in] use_regular_nms           (Optional) Boolean to determinate if use regular or fast nms.
+     * @param[in] detection_per_class       (Optional) Number of detection per class. Used in the Regular Non-Max-Suppression
+     */
+    DetectionPostProcessLayerInfo(unsigned int max_detections, unsigned int max_classes_per_detection, float nms_score_threshold, float iou_threshold, unsigned int num_classes,
+                                  std::array<float, 4> scales_values, bool use_regular_nms = false, unsigned int detection_per_class = 100)
+        : _max_detections(max_detections),
+          _max_classes_per_detection(max_classes_per_detection),
+          _nms_score_threshold(nms_score_threshold),
+          _iou_threshold(iou_threshold),
+          _num_classes(num_classes),
+          _scales_values(scales_values),
+          _use_regular_nms(use_regular_nms),
+          _detection_per_class(detection_per_class)
+    {
+    }
+    /** Get max detections. */
+    unsigned int max_detections() const
+    {
+        return _max_detections;
+    }
+    /** Get max_classes per detection. Used in the Fast Non-Max-Suppression.*/
+    unsigned int max_classes_per_detection() const
+    {
+        return _max_classes_per_detection;
+    }
+    /** Get detection per class. Used in the Regular Non-Max-Suppression */
+    unsigned int detection_per_class() const
+    {
+        return _detection_per_class;
+    }
+    /** Get nms threshold. */
+    float nms_score_threshold() const
+    {
+        return _nms_score_threshold;
+    }
+    /** Get intersection over union threshold. */
+    float iou_threshold() const
+    {
+        return _iou_threshold;
+    }
+    /** Get num classes. */
+    unsigned int num_classes() const
+    {
+        return _num_classes;
+    }
+    /** Get if use regular nms. */
+    bool use_regular_nms() const
+    {
+        return _use_regular_nms;
+    }
+    /** Get y scale value. */
+    float scale_value_y() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[0];
+    }
+    /** Get x scale value. */
+    float scale_value_x() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[1];
+    }
+    /** Get h scale value. */
+    float scale_value_h() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[2];
+    }
+    /** Get w scale value. */
+    float scale_value_w() const
+    {
+        // Saved as [y,x,h,w]
+        return _scales_values[3];
+    }
+
+private:
+    unsigned int _max_detections;
+    unsigned int _max_classes_per_detection;
+    float        _nms_score_threshold;
+    float        _iou_threshold;
+    unsigned int _num_classes;
+    std::array<float, 4> _scales_values;
+    bool         _use_regular_nms;
+    unsigned int _detection_per_class;
 };
 
 /** Pooling Layer Information class */

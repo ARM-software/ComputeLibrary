@@ -145,9 +145,10 @@ public:
      * @param[in]  npy_path      Path to npy file.
      * @param[in]  shape         Shape of the numpy tensor data.
      * @param[in]  data_type     DataType of the numpy tensor data.
+     * @param[in]  data_layout   (Optional) DataLayout of the numpy tensor data.
      * @param[out] output_stream (Optional) Output stream
      */
-    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout);
+    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW, std::ostream &output_stream = std::cout);
     /** Allow instances of this class to be move constructed */
     NumPyAccessor(NumPyAccessor &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -567,11 +568,13 @@ inline std::unique_ptr<graph::ITensorAccessor> get_detection_output_accessor(con
  * @param[in]  npy_path      Path to npy file.
  * @param[in]  shape         Shape of the numpy tensor data.
  * @param[in]  data_type     DataType of the numpy tensor data.
+ * @param[in]  data_layout   DataLayout of the numpy tensor data.
  * @param[out] output_stream (Optional) Output stream
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout)
+inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, DataLayout data_layout = DataLayout::NCHW,
+                                                                       std::ostream &output_stream = std::cout)
 {
     if(npy_path.empty())
     {
@@ -579,7 +582,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, output_stream);
+        return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, data_layout, output_stream);
     }
 }
 

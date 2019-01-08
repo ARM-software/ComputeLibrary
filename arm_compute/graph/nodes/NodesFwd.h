@@ -40,6 +40,7 @@ class ConvolutionLayerNode;
 class DeconvolutionLayerNode;
 class DepthwiseConvolutionLayerNode;
 class DetectionOutputLayerNode;
+class DetectionPostProcessLayerNode;
 class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;

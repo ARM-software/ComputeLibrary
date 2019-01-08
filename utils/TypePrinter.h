@@ -2059,6 +2059,43 @@ inline std::string to_string(const DetectionOutputLayerInfo &detection_info)
     str << detection_info;
     return str.str();
 }
+/** Formatted output of the DetectionPostProcessLayerInfo type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_info Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionPostProcessLayerInfo &detection_info)
+{
+    os << "{MaxDetections=" << detection_info.max_detections() << ","
+       << "MaxClassesPerDetection=" << detection_info.max_classes_per_detection() << ","
+       << "NmsScoreThreshold=" << detection_info.nms_score_threshold() << ","
+       << "NmsIouThreshold=" << detection_info.iou_threshold() << ","
+       << "NumClasses=" << detection_info.num_classes() << ","
+       << "ScaleValue_y=" << detection_info.scale_value_y() << ","
+       << "ScaleValue_x=" << detection_info.scale_value_x() << ","
+       << "ScaleValue_h=" << detection_info.scale_value_h() << ","
+       << "ScaleValue_w=" << detection_info.scale_value_w() << ","
+       << "UseRegularNms=" << detection_info.use_regular_nms() << ","
+       << "DetectionPerClass=" << detection_info.detection_per_class()
+       << "}";
+
+    return os;
+}
+
+/** Formatted output of the DetectionPostProcessLayerInfo type.
+ *
+ * @param[in] detection_info Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionPostProcessLayerInfo &detection_info)
+{
+    std::stringstream str;
+    str << detection_info;
+    return str.str();
+}
 /** Formatted output of the DetectionWindow type.
  *
  * @param[in] detection_window Type to output

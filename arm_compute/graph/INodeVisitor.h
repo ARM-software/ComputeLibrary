@@ -76,6 +76,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(DetectionOutputLayerNode &n) = 0;
+    /** Visit DetectionPostProcessLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(DetectionPostProcessLayerNode &n) = 0;
     /** Visit EltwiseLayerNode.
      *
      * @param[in] n Node to visit.
@@ -196,6 +201,10 @@ public:
         default_visit();
     }
     virtual void visit(DetectionOutputLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(DetectionPostProcessLayerNode &n) override
     {
         default_visit();
     }

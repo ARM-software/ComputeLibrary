@@ -140,12 +140,14 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream)
+NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, DataLayout data_layout, std::ostream &output_stream)
     : _npy_tensor(), _filename(std::move(npy_path)), _output_stream(output_stream)
 {
-    NumPyBinLoader loader(_filename);
+    NumPyBinLoader loader(_filename, data_layout);
 
     TensorInfo info(shape, 1, data_type);
+    info.set_data_layout(data_layout);
+
     _npy_tensor.allocator()->init(info);
     _npy_tensor.allocator()->allocate();
 

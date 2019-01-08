@@ -217,6 +217,21 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info);
+    /** Adds a detection post process layer node to the graph
+     *
+     * @param[in] g                      Graph to add the node to
+     * @param[in] params                 Common node parameters
+     * @param[in] input_box_encoding     Boxes input to the detection output layer node as a NodeID-Index pair
+     * @param[in] input_class_prediction Class prediction input to the detection output layer node as a NodeID-Index pair
+     * @param[in] detect_info            Detection output layer parameters
+     * @param[in] anchors_accessor       (Optional) Const Node ID that contains the anchor values
+     * @param[in] anchor_quant_info      (Optional) Anchor quantization info
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_detection_post_process_node(Graph &g, NodeParams params, NodeIdxPair input_box_encoding, NodeIdxPair input_class_prediction,
+                                                  const DetectionPostProcessLayerInfo &detect_info, ITensorAccessorUPtr anchors_accessor = nullptr,
+                                                  const QuantizationInfo &anchor_quant_info = QuantizationInfo());
     /** Adds a Dummy node to the graph
      *
      * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.

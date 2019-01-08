@@ -166,6 +166,62 @@ std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer
 
     return std::move(wrap_function);
 }
+template <>
+std::unique_ptr<IFunction> create_detection_post_process_layer<CPPDetectionPostProcessLayer, CLTargetInfo>(DetectionPostProcessLayerNode &node)
+{
+    validate_node<CLTargetInfo>(node, 3 /* expected inputs */, 4 /* expected outputs */);
+
+    // Extract IO and info
+    CLTargetInfo::TensorType           *input0      = get_backing_tensor<CLTargetInfo>(node.input(0));
+    CLTargetInfo::TensorType           *input1      = get_backing_tensor<CLTargetInfo>(node.input(1));
+    CLTargetInfo::TensorType           *input2      = get_backing_tensor<CLTargetInfo>(node.input(2));
+    CLTargetInfo::TensorType           *output0     = get_backing_tensor<CLTargetInfo>(node.output(0));
+    CLTargetInfo::TensorType           *output1     = get_backing_tensor<CLTargetInfo>(node.output(1));
+    CLTargetInfo::TensorType           *output2     = get_backing_tensor<CLTargetInfo>(node.output(2));
+    CLTargetInfo::TensorType           *output3     = get_backing_tensor<CLTargetInfo>(node.output(3));
+    const DetectionPostProcessLayerInfo detect_info = node.detection_post_process_info();
+
+    ARM_COMPUTE_ERROR_ON(input0 == nullptr);
+    ARM_COMPUTE_ERROR_ON(input1 == nullptr);
+    ARM_COMPUTE_ERROR_ON(input2 == nullptr);
+    ARM_COMPUTE_ERROR_ON(output0 == nullptr);
+    ARM_COMPUTE_ERROR_ON(output1 == nullptr);
+    ARM_COMPUTE_ERROR_ON(output2 == nullptr);
+    ARM_COMPUTE_ERROR_ON(output3 == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<CPPDetectionPostProcessLayer>();
+    func->configure(input0, input1, input2, output0, output1, output2, output3, detect_info);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << CLTargetInfo::TargetType
+                               << " Data Type: " << input0->info()->data_type()
+                               << " Input0 shape: " << input0->info()->tensor_shape()
+                               << " Input1 shape: " << input1->info()->tensor_shape()
+                               << " Input2 shape: " << input2->info()->tensor_shape()
+                               << " Output0 shape: " << output0->info()->tensor_shape()
+                               << " Output1 shape: " << output1->info()->tensor_shape()
+                               << " Output2 shape: " << output2->info()->tensor_shape()
+                               << " Output3 shape: " << output3->info()->tensor_shape()
+                               << " DetectionPostProcessLayer info: " << detect_info
+                               << std::endl);
+
+    auto wrap_function = support::cpp14::make_unique<CPPWrapperFunction>();
+
+    wrap_function->register_function(std::move(func));
+    wrap_function->register_tensor(input0);
+    wrap_function->register_tensor(input1);
+    wrap_function->register_tensor(input2);
+    wrap_function->register_tensor(output0);
+    wrap_function->register_tensor(output1);
+    wrap_function->register_tensor(output2);
+    wrap_function->register_tensor(output3);
+
+    return std::move(wrap_function);
+}
 } // namespace detail
 
 std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &ctx)
@@ -196,6 +252,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayerFunctions, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::DetectionOutputLayer:
             return detail::create_detection_output_layer<CPPDetectionOutputLayer, CLTargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
+        case NodeType::DetectionPostProcessLayer:
+            return detail::create_detection_post_process_layer<CPPDetectionPostProcessLayer, CLTargetInfo>(*polymorphic_downcast<DetectionPostProcessLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<CLEltwiseFunctions, CLTargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:

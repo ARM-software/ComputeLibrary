@@ -28,16 +28,9 @@
 
 #include "arm_compute/core/Types.h"
 
-#include <map>
-
 namespace arm_compute
 {
 class ITensor;
-
-// Normalized Bounding Box [xmin, ymin, xmax, ymax]
-using NormalizedBBox = std::array<float, 4>;
-// LabelBBox used for map label and bounding box
-using LabelBBox = std::map<int, std::vector<NormalizedBBox>>;
 
 /** CPP Function to generate the detection output based on location and confidence
  * predictions by doing non maximum suppression.
@@ -91,7 +84,7 @@ private:
 
     std::vector<LabelBBox> _all_location_predictions;
     std::vector<std::map<int, std::vector<float>>> _all_confidence_scores;
-    std::vector<NormalizedBBox> _all_prior_bboxes;
+    std::vector<BBox> _all_prior_bboxes;
     std::vector<std::array<float, 4>> _all_prior_variances;
     std::vector<LabelBBox> _all_decode_bboxes;
     std::vector<std::map<int, std::vector<int>>> _all_indices;
