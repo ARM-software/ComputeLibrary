@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,9 @@
 
 #include "arm_compute/core/NEON/kernels/assembly/Helpers.h"
 #include "arm_compute/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
+#include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedMatrixMultiplyWrapper.h"
+#include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedPrepareBWrapperKernel.h"
+#include "arm_compute/core/NEON/kernels/assembly/NEGEMMInterleavedTransformAWrapper.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/IScheduler.h"
@@ -36,13 +39,8 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
-class NEGEMMInterleavedPrepareBWrapperKernel;
-class PrepareBWorkload;
-class TransformAWorkload;
-class MatrixMultiplyWorkload;
-class NEGEMMInterleavedTransformAWrapper;
-class NEGEMMInterleavedMatrixMultiplyWrapper;
 
 /** Buffer manager used when reshaping B on the fly
  *
@@ -97,6 +95,7 @@ class NEGEMMInterleavedWrapper : public IFunction
 {
 public:
     NEGEMMInterleavedWrapper(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    ~NEGEMMInterleavedWrapper()                                             = default;
 
     NEGEMMInterleavedWrapper(const NEGEMMInterleavedWrapper &) = delete;
     NEGEMMInterleavedWrapper &operator=(const NEGEMMInterleavedWrapper &) = delete;
@@ -111,9 +110,8 @@ public:
      * @param[in]  alpha          Scalar multiplier to apply to AB matrix product.
      * @param[in]  beta           Scalar multiplier to apply to input C matrix before adding product.
      * @param[in]  pretranspose_b If true, pretranspose B once during the prepare() stage instead of on the fly every time.
-     * @param[in]  use_dot        (Optional) If the input's type is U8/S8/QASYMM8 then use the dot product flavour or the matrix multiply routine. (Must be supported by the hardware).
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, bool pretranspose_b, bool use_dot = false);
+    void configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, bool pretranspose_b);
 
     // Inherited methods overridden:
     void run() override;
@@ -143,6 +141,5 @@ private:
     std::vector<IScheduler::Workload>                       _workloads{};
     std::string                                             _tag{};
 };
-
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGEMMINTERLEAVEDWRAPPER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ public:
         GemmArgs<Tr> newargs = args;
         newargs._Msize = args._nbatches;
         newargs._nbatches = 1;
-        _subgemm = gemm<To,Tr>(newargs, nullptr);
+        _subgemm = gemm<To,Tr>(newargs);
     }
 
     void set_arrays(const To *A, const int lda, const int A_batch_stride, const int A_multi_stride,

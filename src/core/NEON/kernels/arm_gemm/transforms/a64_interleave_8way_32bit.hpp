@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#ifdef __aarch64__
+#if defined(__aarch64__) && !defined(__ARM_FEATURE_SVE)
 
 #include <arm_neon.h>
 
@@ -173,4 +173,4 @@ inline void TransformImpl<8, 1, false, 4, 4, false>::Transform(T *out, const T *
     }
 }
 
-#endif  // __aarch64__
+#endif  // __aarch64__ && !__ARM_FEATURE_SVE

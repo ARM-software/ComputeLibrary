@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,50 +23,56 @@
  */
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-
-
-#include "../std_transforms_sve.hpp"
+#ifdef __aarch64__
 
 namespace arm_gemm {
 
 // Actual kernel implementations
-void sve_interleaved_fp32_mla_3VLx8(const float *, const float *, float *, int, int, int);
+void a64_sgemm_nativeA_pretransposeB_16x4(const float *, int, const float *, float *, int, float, unsigned int, unsigned int, unsigned int);
 
-class interleaved_fp32_mla_3VLx8 {
+// Native A/Pretranspose B SGEMM "strategy" class.
+//
+// This describes the characteristics of a family of kernels, in terms of
+// the required interleave properties and the output block size.
+//
+// All kernels in the family must share these characteristics.  The actual
+// kernel to be used can be chosen at runtime, based on the CPUInfo
+// structure.
+class sgemm_nativeA_pretransposeB_16x4 {
 public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
+    typedef void (*kern_type)(const float *, int, const float *, float *, int, float, unsigned int, unsigned int, unsigned int);
+
+    /* Desired data layout for B buffer (used for pretranspose) */
+    static const int  B_interleave = 16;
+    static const int  B_block = 1;
+    static const bool B_transpose = true;
 
     /* Kernel blocking parameters */
-    static int out_width()
-    {
-        return get_vector_length<float>() * 3;
+    static int out_width() {
+        return 16;
     }
 
-    static int out_height()
-    {
-        return 8;
+    static int out_height() {
+        return 4;
     }
 
-    static int k_unroll()
-    {
+    static int k_unroll() {
         return 1;
     }
 
-    // Use the standard fixed size transforms.
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 4, 16> transforms = {};
 
-    kern_type kernel=sve_interleaved_fp32_mla_3VLx8;
+    // Default to the generic kernel
+    kern_type kernel=a64_sgemm_nativeA_pretransposeB_16x4;
 
-    interleaved_fp32_mla_3VLx8(const CPUInfo *ci)
-    {
+    sgemm_nativeA_pretransposeB_16x4(const CPUInfo *ci) {
 
     }
 };
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // __aarch64__

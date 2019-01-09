@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,29 +26,30 @@
 #ifdef __ARM_FEATURE_SVE
 
 
-#include "../std_transforms_sve.hpp"
 
-namespace arm_gemm {
+namespace arm_gemm
+{
 
 // Actual kernel implementations
-void sve_interleaved_fp32_mla_3VLx8(const float *, const float *, float *, int, int, int);
+void sve_smallK_fp32_mla_1VLx4(const float *, int, const float *, int ldb, float *, int, float, int, int, int);
 
-class interleaved_fp32_mla_3VLx8 {
+class smallK_fp32_mla_1VLx4
+{
 public:
     typedef float operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
+    typedef void (*kern_type)(const float *, int, const float *, int ldb, float *, int, float, int, int, int);
 
     /* Kernel blocking parameters */
-    static int out_width()
-    {
-        return get_vector_length<float>() * 3;
-    }
-
     static int out_height()
     {
-        return 8;
+        return 4;
+    }
+
+    static int out_width()
+    {
+        return get_vector_length<float>() * 1;
     }
 
     static int k_unroll()
@@ -56,12 +57,12 @@ public:
         return 1;
     }
 
-    // Use the standard fixed size transforms.
-    StdTransformsSVE<operand_type, result_type, 8, 3, 1, 1> transforms = {};
 
-    kern_type kernel=sve_interleaved_fp32_mla_3VLx8;
 
-    interleaved_fp32_mla_3VLx8(const CPUInfo *ci)
+    // Default to the generic kernel
+    kern_type kernel=sve_smallK_fp32_mla_1VLx4;
+
+    smallK_fp32_mla_1VLx4(const CPUInfo *ci)
     {
 
     }

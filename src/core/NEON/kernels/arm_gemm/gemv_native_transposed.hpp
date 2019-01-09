@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,10 +64,11 @@ public:
     GemvNativeTransposed(GemvNativeTransposed &) = delete;
     GemvNativeTransposed & operator= (GemvNativeTransposed &) = delete;
 
-    GemvNativeTransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const unsigned int nmultis, const Tr beta) : _Nsize(N), _Ksize(K), _nmultis(nmultis), _beta(beta), _ci(ci) {
+    GemvNativeTransposed(const GemmArgs<Tr> &args)
+            : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {
         /* For now don't do any blocking. TODO: figure out if we should. */
-        m_block = K;
-        n_block = N;
+        m_block = _Ksize;
+        n_block = _Nsize;
     }
 
     // Window is number of out_width blocks times number of multis.

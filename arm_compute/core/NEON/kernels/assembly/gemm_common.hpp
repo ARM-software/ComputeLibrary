@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,11 +88,11 @@ public:
      * This has an empty default implementation, as GEMMs which don't care
      * about thread count can safely ignore this.
      */
-    virtual void set_nthreads(int nthreads) { };
+    virtual void set_nthreads(int) { };
 
     /* Actually do the work.  Provide a threadid to index any per-thread
      * buffers, and a start/end range to indicate which work to do.  */
-    virtual void execute(unsigned int start, unsigned int end, int threadid) = 0;
+    virtual void execute(unsigned int, unsigned int, int) = 0;
 
     /*** Working space interface (optional) ***/
     /* Total number of bytes of temporary working space needed.  If zero, it's not necessary to call set_working_space(). */
@@ -108,9 +108,10 @@ public:
     /* Total number of bytes of space needed for pretransposed arrays. */
     virtual size_t get_B_pretransposed_array_size() const { return 0; }
     /* Perform pretranspose - the void * passed in must remain allocated for the duration of any execute calls. */
-    virtual void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) { };
+    /* Arguments are: output buffer pointer, source pointer, source row stride, source multi stride */
+    virtual void pretranspose_B_array(void *, const To *, const int, const int) { };
     /* Set pretransposed data - the void * passed in must previously have been passed to pretranspose_B_array() for the same or a similar GEMM. */
-    virtual void set_pretransposed_B_data(void *buffer) { }
+    virtual void set_pretransposed_B_data(void *) { }
 
     // Destructor
     virtual ~GemmCommon() { }

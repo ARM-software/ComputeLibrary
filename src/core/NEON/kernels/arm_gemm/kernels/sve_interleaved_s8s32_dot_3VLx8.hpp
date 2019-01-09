@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     /* Kernel blocking parameters */
     static int out_width()
     {
-        return svcntw() * 3;
+        return get_vector_length<int32_t>() * 3;
     }
 
     static int out_height()
