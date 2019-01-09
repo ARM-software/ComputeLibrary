@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,8 +83,12 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     const size_t input_size  = data_size_from_type(input->info()->data_type());
     const size_t output_size = data_size_from_type(output->info()->data_type());
 
+    // Get number of elements to process per iterations
+    const unsigned int num_elems_processed_per_iteration = 16;
+
     // Set build options
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
     // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
@@ -96,12 +100,16 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set shift arg
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
     // Configure kernel
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
+    ICLSimple3DKernel::configure(input, output, num_elems_processed_per_iteration);
+
+    // Collapse window
+    const Window &full_window      = window();
+    Window        collapsed_window = full_window.collapse_if_possible(full_window, Window::DimZ);
+    ICLKernel::configure_internal(collapsed_window);
 }
 
 Status CLDepthConvertLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)

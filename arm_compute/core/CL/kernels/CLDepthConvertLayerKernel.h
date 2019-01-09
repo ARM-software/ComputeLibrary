@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
 #define __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "arm_compute/core/CL/ICLSimple3DKernel.h"
 #include "arm_compute/core/Types.h"
 
 #include <cstdint>
@@ -33,10 +33,8 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the depth conversion kernel.
- *
- */
-class CLDepthConvertLayerKernel : public ICLSimple2DKernel
+/** Interface for the depth conversion kernel. */
+class CLDepthConvertLayerKernel : public ICLSimple3DKernel
 {
 public:
     /** Set the input and output of the kernel.
