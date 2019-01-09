@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,24 @@ namespace depthwise
 
 const unsigned int CHANNEL_BLOCK = 16;
 
+namespace
+{
+  inline int pad_along_dim(
+    const bool padding_same,
+    const int kernel_dim,
+    const int stride_dim,
+    const int input_dim
+  )
+  {
+    if (!padding_same)
+      return 0;
+    if (input_dim % stride_dim)
+      return std::max(kernel_dim - (input_dim % stride_dim), 0);
+    else
+      return std::max(kernel_dim - stride_dim, 0);
+  }
+}  // namespace
+
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_output_size(
   const int dim_size, const bool same_padding
@@ -49,6 +67,13 @@ int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_output_size(
   return iceildiv(dim_size - (same_padding ? 0 : (KC - 1)), SR);
 }
 
+template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
+int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_output_size(
+  const int dim_size, const unsigned int padding_before, const unsigned int padding_after
+)
+{
+  return iceildiv(dim_size + padding_before + padding_after - KR + 1, SR);
+}
 
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
@@ -65,16 +90,54 @@ DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
   const int output_col_stride,
   const int output_row_stride,
   const int output_batch_stride
+) : DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>(
+  n_batches, n_input_rows, n_input_cols,
+  n_channels,
+  pad_along_dim(padding_same, KR, SR, n_input_rows) / 2,  /* top padding */
+  pad_along_dim(padding_same, KC, SC, n_input_cols) / 2,  /* left padding */
+  iceildiv(pad_along_dim(padding_same, KR, SR, n_input_rows), 2),  /* bottom padding */
+  iceildiv(pad_along_dim(padding_same, KC, SC, n_input_cols), 2),  /* right padding */
+  weights, input, output,
+  weight_col_stride, weight_row_stride,
+  input_col_stride, input_row_stride, input_batch_stride,
+  output_col_stride, output_row_stride, output_batch_stride
+)
+{
+}
+
+
+template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
+DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
+  const int n_batches, const int n_input_rows, const int n_input_cols,
+  const int n_channels,
+  const unsigned int padding_top,
+  const unsigned int padding_left,
+  const unsigned int padding_bottom,
+  const unsigned int padding_right,
+  const TIn* const weights,
+  const TIn* const input,
+  TOut* const output,
+  const int weight_col_stride,
+  const int weight_row_stride,
+  const int input_col_stride,
+  const int input_row_stride,
+  const int input_batch_stride,
+  const int output_col_stride,
+  const int output_row_stride,
+  const int output_batch_stride
 ) : _weights(weights), _input(input), _output(output),
     _n_batches(n_batches),
     _n_input_rows(n_input_rows),
     _n_input_cols(n_input_cols),
     _n_channels(n_channels),
-    _n_output_rows(get_output_size(n_input_rows, padding_same)),
-    _n_output_cols(get_output_size(n_input_cols, padding_same)),
+    _n_output_rows(get_output_size(n_input_rows, padding_top, padding_bottom)),
+    _n_output_cols(get_output_size(n_input_cols, padding_left, padding_right)),
     _n_tile_rows(iceildiv(_n_output_rows, output_tile_rows)),
     _n_tile_cols(iceildiv(_n_output_cols, output_tile_cols)),
-    _padding_same(padding_same),
+    _padding_top(padding_top),
+    _padding_left(padding_left),
+    _padding_bottom(padding_bottom),
+    _padding_right(padding_right),
     _weight_col_stride(weight_col_stride ? weight_col_stride : _n_channels),
     _weight_row_stride(weight_row_stride ? weight_row_stride : KC * _weight_col_stride),
     _input_col_stride(input_col_stride ? input_col_stride : _n_channels),
@@ -113,10 +176,8 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::run(
   const auto stop_channel = std::min<unsigned int>(_n_channels, CHANNEL_BLOCK * stop);
 
   // Compute top and bottom padding for input and output
-  const int input_pad_top = _padding_same ?
-    ((_n_output_rows - 1)*stride_rows + kernel_rows - _n_input_rows) / 2 : 0;
-  const int input_pad_left = _padding_same ?
-    ((_n_output_cols - 1)*stride_cols + kernel_cols - _n_input_cols) / 2 : 0;
+  const int input_pad_top = _padding_top;
+  const int input_pad_left = _padding_left;
   constexpr int tile_overlap = kernel_rows - stride_rows;
 
   // Perform the convolution by calling `process_tile_row` for each tile row in
