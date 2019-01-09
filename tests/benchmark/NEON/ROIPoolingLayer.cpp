@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/ArrayAccessor.h"
 #include "tests/benchmark/fixtures/ROIPoolingLayerFixture.h"
-#include "tests/datasets/ROIPoolingLayerDataset.h"
+#include "tests/datasets/ROIDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "utils/TypePrinter.h"
@@ -41,16 +41,17 @@ namespace test
 {
 namespace benchmark
 {
-using NEROIPoolingLayerFixture = ROIPoolingLayerFixture<Tensor, NEROIPoolingLayer, Accessor, Array<ROI>, ArrayAccessor<ROI>>;
+template <typename T>
+using NEROIPoolingLayerFixture = ROIPoolingLayerFixture<Tensor, NEROIPoolingLayer, Accessor, T>;
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayer, NEROIPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIPoolingLayerDataset(),
+REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerFloat, NEROIPoolingLayerFixture<float>, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
                                                                                         framework::dataset::make("DataType", { DataType::F32 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-TEST_SUITE_END()
+TEST_SUITE_END() // NEON
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute

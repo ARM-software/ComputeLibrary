@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,10 +105,12 @@ inline DATA_TYPE roi_pool_1x1(const Tensor3D *input, int region_start_x, int reg
  * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the pooled region of the source image as specifed by ROI
- * @param[in]  rois_ptr                             Pointer to the rois array. Layout: {x, y, width, height, batch_indx}
- * @param[in]  rois_stride_x                        Stride of the rois array in X dimension (in bytes)
- * @param[in]  rois_step_x                          rois_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  rois_offset_first_element_in_bytes   The offset of the first element in the rois array
+ * @param[in]  rois_ptr                             Pointer to the ROIs tensor. Layout: { batch_index, x1, y1, x2, y2 }. Supported data types: same as @p input_ptr
+ * @param[in]  rois_stride_x                        Stride of the ROIs tensor in X dimension (in bytes)
+ * @param[in]  rois_step_x                          Step of the ROIs tensor in X dimension (in bytes)
+ * @param[in]  rois_stride_y                        Stride of the ROIs tensor in Y dimension (in bytes)
+ * @param[in]  rois_step_y                          Step of the ROIs tensor in Y dimension (in bytes)
+ * @param[in]  rois_offset_first_element_in_bytes   The offset of the first element in the ROIs tensor
  * @param[out] output_ptr                           Pointer to the destination image. Supported data types: F16, F32
  * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
@@ -122,13 +124,13 @@ inline DATA_TYPE roi_pool_1x1(const Tensor3D *input, int region_start_x, int reg
  */
 __kernel void roi_pooling_layer(
     TENSOR3D_DECLARATION(input),
-    VECTOR_DECLARATION(rois),
+    IMAGE_DECLARATION(rois),
     TENSOR3D_DECLARATION(output),
     unsigned int input_stride_w, unsigned int output_stride_w)
 {
     // Get pixels pointer
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
-    Vector   rois   = CONVERT_TO_VECTOR_STRUCT_NO_STEP(rois);
+    Image    rois   = CONVERT_TO_IMAGE_STRUCT_NO_STEP(rois);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
 
     const int px = get_global_id(0);
@@ -136,12 +138,12 @@ __kernel void roi_pooling_layer(
     const int pw = get_global_id(2);
 
     // Load roi parameters
-    // roi is laid out as follows:
-    // { x, y, width, height, batch_index }
-    const ushort4 roi      = vload4(0, (__global ushort *)vector_offset(&rois, pw));
-    const ushort roi_batch = *((__global ushort *)vector_offset(&rois, pw) + 4);
-    const int2 roi_anchor  = convert_int2_sat(round(convert_float2(roi.s01) * (float)SPATIAL_SCALE));
-    const int2 roi_dims    = convert_int2_sat(fmax(round(convert_float2(roi.s23) * (float)SPATIAL_SCALE), 1.f));
+    // roi is laid out as follows { batch_index, x1, y1, x2, y2 }
+    const ushort roi_batch = (ushort) * ((__global DATA_TYPE *)offset(&rois, 0, pw));
+    const VEC_DATA_TYPE(DATA_TYPE, 4)
+    roi               = vload4(0, (__global DATA_TYPE *)offset(&rois, 1, pw));
+    const int2 roi_anchor = convert_int2_sat(round(convert_float2(roi.s01) * (float)SPATIAL_SCALE));
+    const int2 roi_dims   = convert_int2_sat(fmax(round(convert_float2(roi.s23 - roi.s01) * (float)SPATIAL_SCALE), 1.f));
 
     // Calculate pooled region start and end
     const float2 spatial_indx     = (float2)(px, py);

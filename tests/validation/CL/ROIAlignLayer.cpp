@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #include "arm_compute/runtime/CL/functions/CLROIAlignLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/Globals.h"
-#include "tests/datasets/ROIAlignLayerDataset.h"
+#include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -100,14 +100,14 @@ using CLROIAlignLayerFixture = ROIAlignLayerFixture<CLTensor, CLAccessor, CLROIA
 
 TEST_SUITE(Float)
 FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, CLROIAlignLayerFixture<float>, framework::DatasetMode::ALL,
-                       framework::dataset::combine(datasets::SmallROIAlignLayerDataset(),
+                       framework::dataset::combine(datasets::SmallROIDataset(),
                                                    framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, CLROIAlignLayerFixture<half>, framework::DatasetMode::ALL,
-                       framework::dataset::combine(datasets::SmallROIAlignLayerDataset(),
+                       framework::dataset::combine(datasets::SmallROIDataset(),
                                                    framework::dataset::make("DataType", { DataType::F16 })))
 {
     // Validate output

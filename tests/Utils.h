@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -645,52 +645,6 @@ inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int 
             conv[i * width + j] = conv_col[i] * conv_row[j];
         }
     }
-}
-
-/** Create a vector of random ROIs.
- *
- * @param[in] shape     The shape of the input tensor.
- * @param[in] pool_info The ROI pooling information.
- * @param[in] num_rois  The number of ROIs to be created.
- * @param[in] seed      The random seed to be used.
- *
- * @return A vector that contains the requested number of random ROIs
- */
-inline std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, unsigned int num_rois, std::random_device::result_type seed)
-{
-    ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() < 4) || (pool_info.pooled_height() < 4));
-
-    std::vector<ROI> rois;
-    std::mt19937     gen(seed);
-    const int        pool_width  = pool_info.pooled_width();
-    const int        pool_height = pool_info.pooled_height();
-    const float      roi_scale   = pool_info.spatial_scale();
-
-    // Calculate distribution bounds
-    const auto scaled_width  = static_cast<int>((shape.x() / roi_scale) / pool_width);
-    const auto scaled_height = static_cast<int>((shape.y() / roi_scale) / pool_height);
-    const auto min_width     = static_cast<int>(pool_width / roi_scale);
-    const auto min_height    = static_cast<int>(pool_height / roi_scale);
-
-    // Create distributions
-    std::uniform_int_distribution<int> dist_batch(0, shape[3] - 1);
-    std::uniform_int_distribution<int> dist_x(0, scaled_width);
-    std::uniform_int_distribution<int> dist_y(0, scaled_height);
-    std::uniform_int_distribution<int> dist_w(min_width, std::max(min_width, (pool_width - 2) * scaled_width));
-    std::uniform_int_distribution<int> dist_h(min_height, std::max(min_height, (pool_height - 2) * scaled_height));
-
-    for(unsigned int r = 0; r < num_rois; ++r)
-    {
-        ROI roi;
-        roi.batch_idx   = dist_batch(gen);
-        roi.rect.x      = dist_x(gen);
-        roi.rect.y      = dist_y(gen);
-        roi.rect.width  = dist_w(gen);
-        roi.rect.height = dist_h(gen);
-        rois.push_back(roi);
-    }
-
-    return rois;
 }
 
 /** Create a vector with a uniform distribution of floating point values across the specified range.

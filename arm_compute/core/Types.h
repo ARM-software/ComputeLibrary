@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -500,13 +500,6 @@ using PaddingList = std::vector<PaddingInfo>;
 
 /** Information to produce a tiled version of a Tensor */
 using Multiples = std::vector<uint32_t>;
-
-/** Region of interest */
-struct ROI
-{
-    Rectangle rect;      /**< Rectangle specifying the region of interest */
-    uint16_t  batch_idx; /**< The batch index of the region of interest */
-};
 
 /** Available channels */
 enum class Channel

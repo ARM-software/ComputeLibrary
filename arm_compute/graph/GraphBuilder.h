@@ -369,7 +369,7 @@ public:
      * @param[in] g         Graph to add the node to
      * @param[in] params    Common node parameters
      * @param[in] input     Input to the reshape layer node as a NodeID-Index pair
-     * @param[in] rois      Input containing @ref ROI.
+     * @param[in] rois      Input containing the ROIs.
      * @param[in] pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
      * @return Node ID of the created node, EmptyNodeID in case of error

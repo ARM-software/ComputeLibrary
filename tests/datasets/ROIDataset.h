@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace test
 {
 namespace datasets
 {
-class ROIAlignLayerDataset
+class ROIDataset
 {
 public:
     using type = std::tuple<TensorShape, ROIPoolingLayerInfo, TensorShape>;
@@ -60,7 +60,7 @@ public:
             return description.str();
         }
 
-        ROIAlignLayerDataset::type operator*() const
+        ROIDataset::type operator*() const
         {
             return std::make_tuple(*_tensor_shape_it, *_infos_it, *_rois_shape_it);
         }
@@ -98,8 +98,8 @@ public:
     }
 
 protected:
-    ROIAlignLayerDataset()                        = default;
-    ROIAlignLayerDataset(ROIAlignLayerDataset &&) = default;
+    ROIDataset()              = default;
+    ROIDataset(ROIDataset &&) = default;
 
 private:
     std::vector<TensorShape>         _tensor_shapes{};
@@ -107,10 +107,10 @@ private:
     std::vector<TensorShape>         _rois_shape{};
 };
 
-class SmallROIAlignLayerDataset final : public ROIAlignLayerDataset
+class SmallROIDataset final : public ROIDataset
 {
 public:
-    SmallROIAlignLayerDataset()
+    SmallROIDataset()
     {
         add_config(TensorShape(50U, 47U, 1U, 1U), ROIPoolingLayerInfo(7U, 7U, 1.f / 4.f), TensorShape(5U, 1U));
         add_config(TensorShape(50U, 47U, 3U, 4U), ROIPoolingLayerInfo(7U, 7U, 1.f / 4.f), TensorShape(5U, 1U));
