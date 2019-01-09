@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,6 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
                 default:
                     return RelativeTolerance<float>(0.05f);
             }
-            break;
         default:
             return RelativeTolerance<float>(0.f);
     }
@@ -93,7 +92,6 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
                 default:
                     return AbsoluteTolerance<float>(0.00001f);
             }
-            break;
         default:
             return AbsoluteTolerance<float>(0.f);
     }
@@ -217,8 +215,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::Dat
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;
@@ -249,11 +247,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ActivationLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

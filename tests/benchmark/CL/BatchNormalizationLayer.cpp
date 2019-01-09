@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -15,10 +15,10 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITCLSS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/TensorShape.h"
@@ -43,7 +43,13 @@ namespace benchmark
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types   = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_layouts = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto data_act     = framework::dataset::make("ActivationInfo", ActivationLayerInfo());
+const auto data_GB      = combine(framework::dataset::make("UseGamma", { false, true }),
+                                  framework::dataset::make("UseBeta", { false, true }));
+const auto batch_one        = combine(combine(data_types, data_layouts), framework::dataset::make("Batches", 1));
+const auto batch_four_eight = combine(combine(data_types, data_layouts), framework::dataset::make("Batches", { 4, 8 }));
 } // namespace
 
 using CLBatchNormalizationLayerFixture = BatchNormalizationLayerFixture<CLTensor, CLBatchNormalizationLayer, CLAccessor>;
@@ -51,60 +57,28 @@ using CLBatchNormalizationLayerFixture = BatchNormalizationLayerFixture<CLTensor
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                combine(combine(combine(combine(combine(datasets::MobileNetBatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", 1)));
+                                combine(combine(combine(datasets::MobileNetBatchNormalizationLayerDataset(), data_GB),
+                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                        batch_one));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                combine(combine(combine(combine(combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", 1)));
+                                combine(combine(combine(datasets::YOLOV2BatchNormalizationLayerDataset(), data_GB), data_act), batch_one));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                combine(combine(combine(combine(combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", 1)));
+                                combine(combine(combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(), data_GB), data_act), batch_one));
 
 TEST_SUITE(NIGHTLY)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                combine(combine(combine(combine(combine(datasets::MobileNetBatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", { 4, 8 })));
+                                combine(combine(combine(datasets::MobileNetBatchNormalizationLayerDataset(), data_GB),
+                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                        batch_four_eight));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                combine(combine(combine(combine(combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", { 4, 8 })));
+                                combine(combine(combine(datasets::YOLOV2BatchNormalizationLayerDataset(), data_GB), data_act), batch_four_eight));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                combine(combine(combine(combine(combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
-                                                                        combine(framework::dataset::make("UseGamma", { false, true }),
-                                                                                framework::dataset::make("UseBeta", { false, true }))),
-                                                                framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                        data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                        framework::dataset::make("Batches", { 4, 8 })));
+                                combine(combine(combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(), data_GB), data_act), batch_four_eight));
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace benchmark

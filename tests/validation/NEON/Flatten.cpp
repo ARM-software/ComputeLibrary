@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,25 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(FlattenLayer)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
+                                                       TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U), 1, DataType::F32),
+                                                     })),
+               framework::dataset::make("Expected", { false, false, true})),
+               input_info, output_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEFlattenLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 template <typename T>
 using NEFlattenLayerFixture = FlattenLayerValidationFixture<Tensor, Accessor, NEFlattenLayer, T>;
 
@@ -60,7 +79,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<float>, framework::Datase
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
@@ -76,12 +95,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<half>, framework::Dataset
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FlattenLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

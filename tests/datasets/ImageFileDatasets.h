@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,7 +98,6 @@ public:
     {
         add_image_file("640x480.ppm");
         add_image_file("800x600.ppm");
-        add_image_file("1280x720.ppm");
     }
 };
 
@@ -108,6 +107,7 @@ class LargeImageFiles final : public ImageFileDataset
 public:
     LargeImageFiles()
     {
+        add_image_file("1280x720.ppm");
         add_image_file("1920x1080.ppm");
         add_image_file("4160x3120.ppm");
         add_image_file("5120x3200.ppm");

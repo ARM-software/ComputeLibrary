@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,8 +88,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateFixture<uint8_t>, framework::Datase
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // Accumulate
 
 TEST_SUITE(AccumulateWeighted)
 
@@ -134,8 +134,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateWeightedFixture<uint8_t>, framework
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // AccumulateWeighted
 
 TEST_SUITE(AccumulateSquared)
 
@@ -180,10 +180,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateSquaredFixture<uint8_t>, framework:
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // AccumulateSquared
 
-TEST_SUITE_END()
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
