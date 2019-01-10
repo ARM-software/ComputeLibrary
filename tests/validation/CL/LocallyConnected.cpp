@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,7 +115,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallLocallyConnectedDataset(), datasets::LargeLocallyConnectedDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallLocallyConnectedDataset(),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                src_shape, weights_shape, bias_shape, dst_shape, info, dilation, data_type)
 {

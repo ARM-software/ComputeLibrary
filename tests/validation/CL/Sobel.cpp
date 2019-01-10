@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ TEST_SUITE(Sobel)
 TEST_SUITE(W3x3)
 using CLSobel3x3Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel3x3, uint8_t, int16_t>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), datasets::BorderModes()), framework::dataset::make("Format",
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                    Format::U8)),
                shape, border_mode, format)
 {
@@ -170,7 +170,7 @@ TEST_SUITE_END()
 TEST_SUITE(W5x5)
 using CLSobel5x5Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel5x5, uint8_t, int16_t>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), datasets::BorderModes()), framework::dataset::make("Format",
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                    Format::U8)),
                shape, border_mode, format)
 {
@@ -288,7 +288,7 @@ TEST_SUITE_END()
 TEST_SUITE(W7x7)
 using CLSobel7x7Fixture = SobelValidationFixture<CLTensor, CLAccessor, CLSobel7x7, uint8_t, int32_t>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), datasets::BorderModes()), framework::dataset::make("Format",
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                    Format::U8)),
                shape, border_mode, format)
 {

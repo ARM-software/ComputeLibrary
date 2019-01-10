@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,6 +150,12 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SOFT_RELU)
 });
+const auto ActivationFunctionsSmallDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+});
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -196,31 +202,6 @@ using CLWinogradInputTransformFixtureFP32 = WinogradInputTransformValidationFixt
 using CLWinogradInputTransformFixtureFP16 = WinogradInputTransformValidationFixture<CLTensor, CLAccessor, CLWinogradInputTransform, half>;
 
 TEST_SUITE(NCHW)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(SmallWinogradInputTransformDatasetNCHW,
-                                                                                                      LargeWinogradInputTransformDatasetNCHW),
-                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                           framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_in, winograd_info, data_layout, data_type)
-{
-    TensorInfo  tensor_info_in(shape_in, 1, data_type);
-    tensor_info_in.set_data_layout(data_layout);
-
-    TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
-
-    // Create tensors
-    CLTensor in  = create_tensor<CLTensor>(shape_in, data_type, 1, QuantizationInfo(), data_layout);
-    CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradInputTransform winograd_input_transform;
-
-    // Configure the function
-    winograd_input_transform.configure(&in, &out, winograd_info);
-}
-
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixtureFP32, framework::DatasetMode::PRECOMMIT, combine(combine(SmallWinogradInputTransformDatasetNCHW,
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
@@ -255,37 +236,6 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // NCHW
 
 TEST_SUITE(NHWC)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(SmallWinogradInputTransformDatasetNHWC,
-                                                                                                      LargeWinogradInputTransformDatasetNHWC),
-                                                                           framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                                           framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_in, winograd_info, data_layout, data_type)
-{
-    TensorShape shape_in_nhwc(shape_in);
-
-    // Convert the shape to NHWC
-    permute(shape_in_nhwc, PermutationVector(2U, 0U, 1U));
-
-    // TensorInfo
-    TensorInfo  tensor_info_in(shape_in_nhwc, 1, data_type);
-    tensor_info_in.set_data_layout(data_layout);
-
-    TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
-
-    // Create tensors
-    CLTensor in  = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
-    CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
-
-    ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(out.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradInputTransform winograd_input_transform;
-
-    // Configure the function
-    winograd_input_transform.configure(&in, &out, winograd_info);
-}
-
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixtureFP16, framework::DatasetMode::PRECOMMIT, combine(combine(SmallWinogradInputTransformDatasetNHWC,
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NHWC })),
@@ -359,29 +309,6 @@ using CLWinogradFilterTransformFixtureFP32 = WinogradFilterTransformValidationFi
 using CLWinogradFilterTransformFixtureFP16 = WinogradFilterTransformValidationFixture<CLTensor, CLAccessor, CLWinogradFilterTransform, half>;
 
 TEST_SUITE(NCHW)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
-               combine(combine(framework::dataset::concat(SmallWinogradFilterTransformDatasetNCHW,
-                                                          LargeWinogradFilterTransformDatasetNCHW),
-                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                          framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_a, output_tile, data_layout, data_type)
-{
-    WinogradInfo winograd_info(output_tile, Size2D(shape_a[0], shape_a[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, data_layout /* Not needed */);
-
-    TensorShape shape_b = compute_winograd_filter_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
-
-    // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_a, data_type, 1, QuantizationInfo(), data_layout);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradFilterTransform winograd_filter_transform;
-    winograd_filter_transform.configure(&a, &b, winograd_info);
-}
-
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP32, framework::DatasetMode::PRECOMMIT,
                        combine(combine(SmallWinogradFilterTransformDatasetNCHW,
@@ -423,38 +350,6 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // NCHW
 
 TEST_SUITE(NHWC)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
-               combine(combine(framework::dataset::concat(SmallWinogradFilterTransformDatasetNHWC,
-                                                          LargeWinogradFilterTransformDatasetNHWC),
-                                                          framework::dataset::make("DataLayout", { DataLayout::NHWC })),
-                                                          framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_in, output_tile, data_layout, data_type)
-{
-    TensorShape shape_in_nhwc(shape_in);
-
-    // Convert the shape to NHWC
-    permute(shape_in_nhwc, PermutationVector(2U, 0U, 1U));
-
-    // TensorInfo
-    TensorInfo  tensor_info_in(shape_in_nhwc, 1, data_type);
-    tensor_info_in.set_data_layout(data_layout);
-
-    WinogradInfo winograd_info(output_tile, Size2D(shape_in[0], shape_in[1]), Size2D() /* Not needed */, PadStrideInfo() /* Not needed */, data_layout /* Not needed */);
-
-    TensorShape shape_b = compute_winograd_filter_transform_shape(tensor_info_in, winograd_info);
-
-    // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradFilterTransform winograd_filter_transform;
-    winograd_filter_transform.configure(&a, &b, winograd_info);
-}
-
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(SmallWinogradFilterTransformDatasetNHWC,
@@ -553,24 +448,6 @@ using CLWinogradOutputTransformFixtureFP32 = WinogradOutputTransformValidationFi
 using CLWinogradOutputTransformFixtureFP16 = WinogradOutputTransformValidationFixture<CLTensor, CLAccessor, CLWinogradOutputTransform, half>;
 
 TEST_SUITE(NCHW)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(SmallWinogradOutputTransformDatasetNCHW,
-                                                                                              LargeWinogradOutputTransformDatasetNCHW),
-                                                                                              framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_a, winograd_info, data_type)
-{
-    TensorShape shape_b = compute_winograd_output_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
-
-    // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradOutputTransform winograd_output_transform;
-    winograd_output_transform.configure(&a, nullptr, &b, winograd_info);
-}
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP16, framework::DatasetMode::ALL,
                        combine(combine(SmallWinogradOutputTransformDatasetNCHW,
@@ -612,25 +489,6 @@ TEST_SUITE_END() // FP32
 TEST_SUITE_END() // NCHW
 
 TEST_SUITE(NHWC)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(SmallWinogradOutputTransformDatasetNHWC,
-                                                                                              LargeWinogradOutputTransformDatasetNHWC),
-                                                                                              framework::dataset::make("DataType", { DataType::F32, DataType::F16 })),
-               shape_a, winograd_info, data_type)
-{
-    TensorShape shape_b = compute_winograd_output_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
-
-    // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLWinogradOutputTransform winograd_output_transform;
-    winograd_output_transform.configure(&a, nullptr, &b, winograd_info);
-}
-
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP16, framework::DatasetMode::ALL,
                        combine(combine(SmallWinogradOutputTransformDatasetNHWC,
@@ -721,7 +579,7 @@ TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
-                                               ActivationFunctionsDataset),
+                                               ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -743,7 +601,7 @@ TEST_SUITE(Conv3x1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                       ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -765,7 +623,7 @@ TEST_SUITE(Conv1x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
-                                       ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -787,7 +645,7 @@ TEST_SUITE(Conv5x5)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
-                                               ActivationFunctionsDataset ),
+                                               ActivationFunctionsSmallDataset ),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
@@ -811,7 +669,7 @@ TEST_SUITE(Conv5x1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x1Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
-                                               ActivationFunctionsDataset),
+                                               ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
@@ -835,7 +693,7 @@ TEST_SUITE(Conv1x5)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
-                                               ActivationFunctionsDataset),
+                                               ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
@@ -864,7 +722,7 @@ TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                                framework::dataset::make("DataType", { DataType::F16 })),
-                                               ActivationFunctionsDataset),
+                                               ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -886,7 +744,7 @@ TEST_SUITE(Conv3x1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                       ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -908,7 +766,7 @@ TEST_SUITE(Conv1x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F16 })),
-                                       ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
@@ -930,7 +788,7 @@ TEST_SUITE(Conv5x5)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F16 })),
-                                               ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
@@ -954,7 +812,7 @@ TEST_SUITE(Conv5x1)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x1Dataset(),
                                                framework::dataset::make("DataType", { DataType::F16 })),
-                                               ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
@@ -978,7 +836,7 @@ TEST_SUITE(Conv1x5)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture16, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F16 })),
-                                               ActivationFunctionsDataset),
+                                       ActivationFunctionsSmallDataset),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {

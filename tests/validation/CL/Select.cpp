@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,8 +43,6 @@ namespace validation
 {
 namespace
 {
-auto configuration_dataset = combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
-                                     framework::dataset::make("has_same_rank", { false, true }));
 auto run_small_dataset = combine(datasets::SmallShapes(), framework::dataset::make("has_same_rank", { false, true }));
 auto run_large_dataset = combine(datasets::LargeShapes(), framework::dataset::make("has_same_rank", { false, true }));
 
@@ -100,7 +98,7 @@ using CLSelectFixture = SelectValidationFixture<CLTensor, CLAccessor, CLSelect, 
 
 TEST_SUITE(Float)
 TEST_SUITE(F16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configuration_dataset,
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
                shape, same_rank)
 {
     const DataType dt = DataType::F16;
@@ -151,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 TEST_SUITE_END() // F16
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configuration_dataset,
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
                shape, same_rank)
 {
     const DataType dt = DataType::F32;
@@ -204,7 +202,7 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, configuration_dataset,
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, run_small_dataset,
                shape, same_rank)
 {
     const DataType dt = DataType::QASYMM8;

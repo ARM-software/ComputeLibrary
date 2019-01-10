@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,7 +183,6 @@ public:
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 31U, 27U, 17U, 2U },
                      // Batch size 4
-                     TensorShape{ 11U, 11U, 3U, 4U },
                      TensorShape{ 27U, 13U, 2U, 4U },
                      // Arbitrary batch size
                      TensorShape{ 11U, 11U, 3U, 5U }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace validation
 {
 namespace
 {
-const auto configure_dataset = combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+const auto configure_dataset = combine(datasets::SmallShapes(),
                                        framework::dataset::make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 }));
 
 const auto run_small_dataset = combine(datasets::ComparisonOperations(), datasets::SmallShapes());

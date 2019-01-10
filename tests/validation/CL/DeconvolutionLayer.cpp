@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,45 +66,6 @@ const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataL
 
 TEST_SUITE(CL)
 TEST_SUITE(DeconvolutionLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::SmallDeconvolutionShapes(), framework::dataset::make("DataType", DataType::F32))),
-               input_shape, data_type)
-{
-    // Create shapes
-    const unsigned int kernel_size_x = 3;
-    const unsigned int kernel_size_y = 3;
-    const unsigned int num_kernels   = 1;
-    const TensorShape  weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
-    const TensorShape  bias_shape(num_kernels);
-    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 1, 1);
-    TensorShape        output_shape = compute_deconvolution_output_shape(out_dim, TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type));
-
-    // Create tensors
-    CLTensor src     = create_tensor<CLTensor>(input_shape, data_type, 1);
-    CLTensor weights = create_tensor<CLTensor>(weights_shape, data_type, 1);
-    CLTensor bias    = create_tensor<CLTensor>(bias_shape, data_type, 1);
-    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLDeconvolutionLayer deconv;
-    deconv.configure(&src, &weights, &bias, &dst, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), 0, 0);
-
-    // Validate valid region
-    const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
-    const ValidRegion weights_valid_region = shape_to_valid_region(weights_shape);
-    const ValidRegion bias_valid_region    = shape_to_valid_region(bias_shape);
-    const ValidRegion dst_valid_region     = shape_to_valid_region(output_shape);
-
-    validate(src.info()->valid_region(), src_valid_region);
-    validate(weights.info()->valid_region(), weights_valid_region);
-    validate(bias.info()->valid_region(), bias_valid_region);
-    validate(dst.info()->valid_region(), dst_valid_region);
-}
 
 // *INDENT-OFF*
 // clang-format off

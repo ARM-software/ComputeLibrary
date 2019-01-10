@@ -50,7 +50,7 @@ RelativeTolerance<float> tolerance_fp16(0.01f);
 TEST_SUITE(NEON)
 TEST_SUITE(RsqrtLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);

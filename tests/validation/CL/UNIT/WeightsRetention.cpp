@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ using CLWeightsRetentionFixture = WeightsRetentionReconfigureTestCaseFixture<CLT
       CLFullyConnectedLayer>;
 FIXTURE_TEST_CASE(WeightsRetention,
                   CLWeightsRetentionFixture,
-                  framework::DatasetMode::ALL)
+                  framework::DatasetMode::NIGHTLY)
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ template <typename T>
 using CLElementwiseMaxFixture = ElementwiseMaxValidationFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors
@@ -132,7 +132,7 @@ using CLElementwiseMaxQuantizedFixture = ElementwiseMaxValidationQuantizedFixtur
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors
@@ -170,7 +170,7 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                shape, data_type)
 {
     // Create tensors
@@ -216,7 +216,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<half>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors

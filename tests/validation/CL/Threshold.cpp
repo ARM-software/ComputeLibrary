@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(Threshold)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), datasets::MixedThresholdDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), datasets::MixedThresholdDataset()),
                                                                    framework::dataset::make("DataType", DataType::U8)),
                shape, threshold, false_value, true_value, type, upper, data_type)
 {

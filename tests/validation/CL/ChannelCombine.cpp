@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,58 +42,11 @@ namespace test
 {
 namespace validation
 {
-namespace
-{
-inline void validate_configuration(const TensorShape &shape, Format format)
-{
-    const int num_planes = num_planes_from_format(format);
-
-    // Create tensors
-    CLMultiImage          dst     = create_multi_image<CLMultiImage>(shape, format);
-    std::vector<CLTensor> ref_src = create_tensor_planes<CLTensor>(shape, format);
-
-    // Create and configure function
-    CLChannelCombine channel_combine;
-
-    if(num_planes == 1)
-    {
-        const CLTensor *tensor_extra = ((Format::RGBA8888 == format) ? &ref_src[3] : nullptr);
-
-        channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], tensor_extra, dst.cl_plane(0));
-    }
-    else
-    {
-        channel_combine.configure(&ref_src[0], &ref_src[1], &ref_src[2], &dst);
-    }
-
-    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
-}
-} // namespace
-
 TEST_SUITE(CL)
 TEST_SUITE(ChannelCombine)
 
 template <typename T>
 using CLChannelCombineFixture = ChannelCombineValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLChannelCombine, T>;
-
-TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 })),
-               shape, format)
-{
-    validate_configuration(shape, format);
-}
-TEST_SUITE_END()
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })))
@@ -112,7 +65,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelCombineFixture<uint8_t>, framework::Da
         validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })))
@@ -131,7 +84,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelCombineFixture<uint8_t>, framework::Da
         validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::NV12, Format::NV21, Format::IYUV, Format::YUV444 })))
@@ -150,10 +103,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelCombineFixture<uint8_t>, framework::Da
         validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUVPlanar
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ChannelCombine
+TEST_SUITE_END() // CL
 
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,7 +99,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticDivisionFixture<half>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors

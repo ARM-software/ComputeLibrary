@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ TEST_SUITE(MatrixMultiplyCore)
 
 using CLGEMMLowpMatrixMultiplyCoreFixture = GEMMLowpMatrixMultiplyCoreValidationFixture<CLTensor, CLAccessor, CLGEMMLowpMatrixMultiplyCore>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallGEMMLowpDataset(),
                shape_a, shape_b, shape_c, a_offset, b_offset)
 {
     // Create tensors
@@ -125,7 +125,7 @@ const auto quantize_down_int32_to_uint8_scale_relu_cases = framework::dataset::m
 
 using CLGEMMLowpQuantizeDownInt32ToUint8ScaleFixture = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToUint8Scale>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), quantize_down_int32_to_uint8_scale_cases),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), quantize_down_int32_to_uint8_scale_cases),
                shape, result_offset, result_mult_int, result_shift, min, max, add_bias)
 {
     TensorShape shape_bias(shape[0]);
@@ -207,7 +207,7 @@ const auto quantize_down_int32_to_uint8_scale_by_fixedpoint_relu_cases = framewo
 using CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture =
     GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
                                                                    quantize_down_int32_to_uint8_scale_by_fixedpoint_cases),
                shape, result_fixedpoint_multiplier, result_shift, result_offset_after_shift, min, max, add_bias)
 {
