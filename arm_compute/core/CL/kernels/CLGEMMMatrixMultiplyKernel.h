@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@ class ICLTensor;
 
 /** OpenCL kernel to multiply two input matrices "A" and "B" . All elements of the output matrix will be multiplied by alpha
  *
- * @note If the input tensors @p input0 and @p input1 have been reshaped respectively with @ref CLGEMMInterleave4x4Kernel" and @ref CLGEMMReshapeRHSMatrixKernel,
+ * @note If the input tensors @p input0 and @p input1 have been reshaped respectively with @ref CLGEMMReshapeLHSMatrixKernel" and @ref CLGEMMReshapeRHSMatrixKernel,
  *       the flag @p is_interleaved_transposed must be set to true
  *
  * @attention The second input tensor must have at least 2 dimensions (matrix)
@@ -57,7 +57,7 @@ public:
      * @param[in]  input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha                     Weight of the matrix product
-     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
+     * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMReshapeLHSMatrixKernel and @ref CLGEMMReshapeRHSMatrixKernel
      * @param[in]  reshape_info              (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      * @param[in]  fp_mixed_precision        (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy
      *
@@ -70,7 +70,7 @@ public:
      * @param[in] input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
      * @param[in] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in] alpha                     Weight of the matrix product
-     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMReshapeRHSMatrixKernel
+     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref CLGEMMReshapeLHSMatrixKernel and @ref CLGEMMReshapeRHSMatrixKernel
      * @param[in] reshape_info              GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      * @param[in] gpu_target                GPU Target
      * @param[in] fp_mixed_precision        (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy

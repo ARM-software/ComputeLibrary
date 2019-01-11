@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_CLGEMM_H__
 #define __ARM_COMPUTE_CLGEMM_H__
 
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
@@ -41,8 +40,7 @@ class ICLTensor;
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target is NOT Mali-G76)
- *  -# @ref CLGEMMReshapeLHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
+ *  -# @ref CLGEMMReshapeLHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model)
  *  -# @ref CLGEMMReshapeRHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model)
  *  -# @ref CLGEMMMatrixMultiplyKernel (if GPU target is NOT G76 or if the reshaped GEMM is NOT selected)
  *  -# @ref CLGEMMMatrixMultiplyReshapedKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
@@ -86,13 +84,13 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
-     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor info. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     * @param[in] a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a.
+     * @param[in] c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[in] output    Output tensor info. Data type supported: same as @p a
+     * @param[in] alpha     Weight of the matrix product
+     * @param[in] beta      Weight of matrix C
+     * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should happen only for the first run
      *
      * @return a status
@@ -105,7 +103,6 @@ public:
 
 private:
     CLMemoryGroup                      _memory_group;
-    CLGEMMInterleave4x4Kernel          _interleave_kernel; // TODO - COMPMID-1835: Remove this kernel and use CLGEMMReshapeLHSMatrixKernel
     CLGEMMMatrixMultiplyKernel         _mm_kernel;
     CLGEMMMatrixAdditionKernel         _ma_kernel;
     CLGEMMReshapeLHSMatrixKernel       _reshape_lhs_kernel;
@@ -118,8 +115,8 @@ private:
     bool                               _run_addition;
     bool                               _reshape_b_only_on_first_run;
     bool                               _is_prepared;
-    bool                               _is_G76_path; // TODO: To be removed once completed COMPMID-1835 and COMPMID-1836
+    bool                               _is_G76_path;
 };
-}
+} // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_CLGEMM_H__ */

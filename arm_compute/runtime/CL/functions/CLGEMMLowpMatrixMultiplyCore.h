@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,11 @@
 #ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 #define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -41,7 +41,7 @@ class ICLTensor;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel  (if the output tensor is a matrix)
+ *  -# @ref CLGEMMReshapeLHSMatrixKernel  (if the output tensor is a matrix)
  *  -# @ref CLGEMMReshapeRHSMatrixKernel  (if the output tensor is a matrix)
  *  -# @ref CLGEMMLowpMatrixMultiplyKernel
  *  -# @ref CLGEMMLowpMatrixAReductionKernel (if the offset of matrix B is not 0)
@@ -101,7 +101,7 @@ public:
 private:
     CLMemoryGroup                                 _memory_group;
     CLGEMMLowpMatrixMultiplyKernel                _mm_kernel;
-    CLGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
+    CLGEMMReshapeLHSMatrixKernel                  _mtx_a_reshape_kernel;
     CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
     CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
     CLGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,8 @@
 #include <set>
 #include <string>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -67,6 +68,7 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
     else
     {
         GEMMRHSMatrixInfo rhs_info;
+        GEMMLHSMatrixInfo lhs_info;
         const int         m                         = reshape_info.m();
         const int         n                         = reshape_info.n();
         const int         k                         = reshape_info.k();
@@ -77,6 +79,11 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
         rhs_info.h0                                 = mult_transpose1xW_width;
         rhs_info.interleave                         = false;
         rhs_info.transpose                          = false;
+        lhs_info.m0                                 = 4;
+        lhs_info.k0                                 = 4;
+        lhs_info.v0                                 = mult_interleave4x4_height;
+        lhs_info.interleave                         = true;
+        lhs_info.transpose                          = true;
 
         TensorShape tensor_shape0{ input0->tensor_shape() };
         tensor_shape0.set(0, k);
@@ -89,7 +96,7 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
         const TensorInfo tensor_info0 = input0->clone()->set_tensor_shape(tensor_shape0);
         const TensorInfo tensor_info1 = input1->clone()->set_tensor_shape(tensor_shape1);
 
-        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
+        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(compute_lhs_reshaped_shape(tensor_info0, lhs_info));
         const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_rhs_reshaped_shape(tensor_info1, rhs_info));
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
@@ -439,3 +446,4 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
     }
     while(window.slide_window_slice_3D(slice));
 }
+} // namespace arm_compute

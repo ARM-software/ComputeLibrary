@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,8 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -117,7 +118,6 @@ inline void select_gemm_configuration(unsigned int m, unsigned int n, GEMMLHSMat
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)),
-      _interleave_kernel(),
       _mm_kernel(),
       _ma_kernel(),
       _reshape_lhs_kernel(),
@@ -153,7 +153,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     const GPUTarget gpu_target = CLScheduler::get().target();
 
     // Set the target for the kernels
-    _interleave_kernel.set_target(gpu_target);
+    _reshape_lhs_kernel.set_target(gpu_target);
     _mm_kernel.set_target(gpu_target);
 
     // Arguments used by GEMMReshapeInfo
@@ -179,6 +179,13 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     rhs_info.h0         = mult_transpose1xW_width;
     rhs_info.interleave = false;
     rhs_info.transpose  = false;
+
+    GEMMLHSMatrixInfo lhs_info;
+    lhs_info.m0         = 4;
+    lhs_info.k0         = 4;
+    lhs_info.v0         = mult_interleave4x4_height;
+    lhs_info.interleave = true;
+    lhs_info.transpose  = true;
 
     // Check if we need to reshape the matrix A and matrix B
     _is_interleaved_transposed = is_interleaved_transposed(m, n, k, a->info()->data_type(), _reshape_b_only_on_first_run, gpu_target);
@@ -219,8 +226,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         else
         {
             // Configure interleave kernel
-            _interleave_kernel.configure(a, &_tmp_a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d());
-
+            _reshape_lhs_kernel.configure(a, &_tmp_a, lhs_info, gemm_info.reinterpret_input_as_3d());
             // Configure transpose kernel
             _reshape_rhs_kernel.configure(b, &_tmp_b, rhs_info);
         }
@@ -296,6 +302,13 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     rhs_info.interleave = false;
     rhs_info.transpose  = false;
 
+    GEMMLHSMatrixInfo lhs_info;
+    lhs_info.m0         = 4;
+    lhs_info.k0         = 4;
+    lhs_info.v0         = mult_interleave4x4_height;
+    lhs_info.interleave = true;
+    lhs_info.transpose  = true;
+
     // Check if we need to reshape the matrix A and matrix B
     const bool run_interleave_transpose = is_interleaved_transposed(m, n, k, a->data_type(), reshape_b_only_on_first_run, gpu_target);
 
@@ -335,8 +348,8 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         else
         {
             // Validate interleave kernel
-            auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d())));
-            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height, gemm_info.reinterpret_input_as_3d()));
+            auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_lhs_reshaped_shape(*a, lhs_info, gemm_info.reinterpret_input_as_3d())));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeLHSMatrixKernel::validate(a, &tmp_a_info, lhs_info, gemm_info.reinterpret_input_as_3d()));
             // Validate transpose kernel
             auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_rhs_reshaped_shape(*b, rhs_info)));
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeRHSMatrixKernel::validate(b, &tmp_b_info, rhs_info));
@@ -367,14 +380,7 @@ void CLGEMM::run()
     if(_is_interleaved_transposed)
     {
         // Run interleave kernel
-        if(_is_G76_path)
-        {
-            CLScheduler::get().enqueue(_reshape_lhs_kernel, false);
-        }
-        else
-        {
-            CLScheduler::get().enqueue(_interleave_kernel, false);
-        }
+        CLScheduler::get().enqueue(_reshape_lhs_kernel, false);
 
         if(!_reshape_b_only_on_first_run)
         {
@@ -417,3 +423,4 @@ void CLGEMM::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute
