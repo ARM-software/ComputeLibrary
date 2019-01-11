@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,8 +52,8 @@ public:
      * @param[out] output   Output tensor. Data type supported: same as @p input
      * @param[in]  rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                                      information to reshape the input tensor. Only the following values are supported:
-     *                                      rhs_info.n0: 2,4,8,16
-     *                                      rhs_info.k0: 1,2,4,8,16 (k0 = 1 and k0 = 2 only if rhs_info.transpose = false)
+     *                                      rhs_info.n0: 2,3,4,8,16
+     *                                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
      *                                      rhs_info.h0: greater than 0
      *                                      rhs_info.transpose: true, false
      *                                      rhs_info.interleave: true, false
@@ -65,8 +65,8 @@ public:
      * @param[in] output   Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
      *                                      information to reshape the input tensor. Only the following values are supported:
-     *                                      rhs_info.n0: 2,4,8,16
-     *                                      rhs_info.k0: 1,2,4,8,16 (k0 = 1 and k0 = 2 only if rhs_info.transpose = false)
+     *                                      rhs_info.n0: 2,3,4,8,16
+     *                                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
      *                                      rhs_info.h0: greater than 0
      *                                      rhs_info.transpose: true, false
      *                                      rhs_info.interleave: true, false

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,12 +47,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.h0 == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.n0 & (rhs_info.n0 - 1)), "Only power of two values are allowed for n0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((rhs_info.k0 & (rhs_info.k0 - 1)), "Only power of two values are allowed for k0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.k0 & (rhs_info.k0 - 1)) && (rhs_info.k0 != 1) && (rhs_info.k0 != 3)), "Only 1,2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 1) && (rhs_info.transpose));
-    ARM_COMPUTE_RETURN_ERROR_ON((rhs_info.k0 == 2) && (rhs_info.transpose));
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S8,

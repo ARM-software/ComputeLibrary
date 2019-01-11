@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.v0 == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((lhs_info.k0 & (lhs_info.k0 - 1)), "Only power of two values are allowed for k0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((lhs_info.k0 & (lhs_info.k0 - 1)) && lhs_info.k0 != 3), "Only 2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 2 || lhs_info.m0 > 8);
 

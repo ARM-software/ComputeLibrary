@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,7 @@ private:
     ICLTensor       *_output;
     bool             _slide_matrix_b;
     bool             _reinterpret_output_as_3d;
+    unsigned int     _k;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDKERNEL_H__*/

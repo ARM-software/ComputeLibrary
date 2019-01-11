@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,10 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.transpose);
     ARM_COMPUTE_RETURN_ERROR_ON(!rhs_info.transpose);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 != rhs_info.k0);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((lhs_info.k0 & (lhs_info.k0 - 1)) && lhs_info.k0 != 3), "Only 2,3,4,8,16 are supported for k0");
+    ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 2 || lhs_info.m0 > 8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
 
     const int m = gemm_info.m();
     const int n = gemm_info.n();
@@ -163,7 +166,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 } // namespace
 
 CLGEMMMatrixMultiplyReshapedKernel::CLGEMMMatrixMultiplyReshapedKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false)
+    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _k(1)
 {
 }
 
@@ -178,6 +181,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     _input1                   = input1;
     _output                   = output;
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
+    _k                        = gemm_info.k();
 
     // Check if we need to slide the matrix B
     const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
@@ -200,7 +204,6 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(lhs_info.interleave, "-DLHS_INTERLEAVE");
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
-    build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k()));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
@@ -280,7 +283,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
     if(_reinterpret_output_as_3d)
     {
         // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
-        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 3;
+        const unsigned int idx0                  = 3 * num_arguments_per_2D_tensor() + 4;
         const unsigned int total_cross_plane_pad = _output->info()->padding().top + _output->info()->padding().bottom;
         _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(total_cross_plane_pad));
     }
@@ -299,6 +302,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         add_2D_tensor_argument(idx, _input0, slice);
         add_2D_tensor_argument(idx, _input1, slice_b);
         add_2D_tensor_argument(idx, _output, slice);
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_k));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));

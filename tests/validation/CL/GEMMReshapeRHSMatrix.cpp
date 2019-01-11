@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,19 +56,19 @@ const auto b_values = framework::dataset::make("batchsize", 1, 3);
 const auto n0_values_precommit = framework::dataset::make("N0", { 2, 4 });
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 2, 4, 8, 16 });
+const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8, 16 });
 
 /** K0 values to test (transpose=true) - Precommit */
 const auto k0_t_values_precommit = framework::dataset::make("K0", { 4 });
 
 /** K0 values to test (transpose=true) - Nightly */
-const auto k0_t_values_nightly = framework::dataset::make("K0", { 4, 8, 16 });
+const auto k0_t_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8, 16 });
 
 /** K0 values to test (transpose=false) - Precommit */
 const auto k0_nt_values_precommit = framework::dataset::make("K0", { 1, 2, 4 });
 
 /** K0 values to test (transpose=false) - Nightly */
-const auto k0_nt_values_nightly = framework::dataset::make("K0", { 1, 2, 4, 8, 16 });
+const auto k0_nt_values_nightly = framework::dataset::make("K0", { 1, 2, 3, 4, 8, 16 });
 
 /** H0 values to test */
 const auto h0_values = framework::dataset::make("H0", 1, 4);

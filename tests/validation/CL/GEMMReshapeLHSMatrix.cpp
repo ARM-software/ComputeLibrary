@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,7 +75,7 @@ const auto k0_values_precommit = framework::dataset::make("K0", { 2, 4 });
 const auto m0_values_nightly = framework::dataset::make("M0", 2, 9);
 
 /** K0 values to test - Precommit */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 4, 8, 16 });
+const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8, 16 });
 
 /** V0 values to test */
 const auto v0_values = framework::dataset::make("V0", 1, 4);

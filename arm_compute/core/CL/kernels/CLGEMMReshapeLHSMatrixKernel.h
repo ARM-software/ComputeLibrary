@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
      * @param[in]  lhs_info                LHS matrix information to be used for reshaping. This object contains all the necessary
      *                                     information to reshape the input tensor. Only the following values are supported:
      *                                     lhs_info.m0: 2,3,4,5,6,7,8
-     *                                     lhs_info.k0: 2,4,8,16
+     *                                     lhs_info.k0: 2,3,4,8,16
      *                                     lhs_info.v0: greater than 0
      *                                     lhs_info.transpose: true, false
      *                                     lhs_info.interleave: true, false
@@ -68,7 +68,7 @@ public:
      * @param[in] lhs_info                LHS matrix information to be used for reshaping. This object contains all the necessary
      *                                    information to reshape the input tensor. Only the following values are supported:
      *                                    lhs_info.m0: 2,3,4,5,6,7,8
-     *                                    lhs_info.k0: 2,4,8,16
+     *                                    lhs_info.k0: 2,3,4,8,16
      *                                    lhs_info.v0: greater than 0
      *                                    lhs_info.transpose: true, false
      *                                    lhs_info.interleave: true, false
