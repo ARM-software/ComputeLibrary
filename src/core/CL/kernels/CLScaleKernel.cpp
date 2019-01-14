@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -227,6 +227,21 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     _kernel.setArg<float>(idx++, input_height);
     _kernel.setArg<float>(idx++, scale_x);
     _kernel.setArg<float>(idx++, scale_y);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "scale_";
+    _config_id += support::cpp11::to_string(border.right);
+    _config_id += (border_mode == BorderMode::REPLICATE? "Bord_rep":"");
+    _config_id += (sampling_policy == SamplingPolicy::CENTER ? "center" : "topleft");
+    _config_id += (is_nhwc? "nhwc":"nchw");
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(3));
 }
 
 void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
