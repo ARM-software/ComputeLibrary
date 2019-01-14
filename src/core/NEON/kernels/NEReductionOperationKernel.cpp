@@ -74,10 +74,13 @@ uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x
     {
         mask_u8 = wrapper::vclt(b, a);
     }
-    mask.val[0]          = wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vgetlow(mask_u8))));
-    mask.val[1]          = wrapper::vmovl(wrapper::vgethigh(wrapper::vmovl(wrapper::vgetlow(mask_u8))));
-    mask.val[2]          = wrapper::vmovl(wrapper::vgetlow(wrapper::vmovl(wrapper::vgethigh(mask_u8))));
-    mask.val[3]          = wrapper::vmovl(wrapper::vgethigh(wrapper::vmovl(wrapper::vgethigh(mask_u8))));
+    auto wide_u16_1 = wrapper::vorr(vshll_n_u8(wrapper::vgetlow(mask_u8), 8), wrapper::vmovl(wrapper::vgetlow(mask_u8)));
+    auto wide_u16_2 = wrapper::vorr(vshll_n_u8(wrapper::vgethigh(mask_u8), 8), wrapper::vmovl(wrapper::vgethigh(mask_u8)));
+    mask.val[0]     = wrapper::vorr(vshll_n_u16(wrapper::vgetlow(wide_u16_1), 16), wrapper::vmovl(wrapper::vgetlow(wide_u16_1)));
+    mask.val[1]     = wrapper::vorr(vshll_n_u16(wrapper::vgethigh(wide_u16_1), 16), wrapper::vmovl(wrapper::vgethigh(wide_u16_1)));
+    mask.val[2]     = wrapper::vorr(vshll_n_u16(wrapper::vgetlow(wide_u16_2), 16), wrapper::vmovl(wrapper::vgetlow(wide_u16_2)));
+    mask.val[3]     = wrapper::vorr(vshll_n_u16(wrapper::vgethigh(wide_u16_2), 16), wrapper::vmovl(wrapper::vgethigh(wide_u16_2)));
+
     uint32x4x4_t vec_idx = { { { idx + 0, idx + 1, idx + 2, idx + 3 },
             { idx + 4, idx + 5, idx + 6, idx + 7 },
             { idx + 8, idx + 9, idx + 10, idx + 11 },
