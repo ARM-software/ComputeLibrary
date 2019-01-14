@@ -75,6 +75,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMTranspose1xW.h"
+#include "arm_compute/runtime/NEON/functions/NEGather.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian3x3.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussian5x5.h"
 #include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"

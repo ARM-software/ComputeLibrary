@@ -79,6 +79,7 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/NEON/kernels/NEGatherKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussian3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussian5x5Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGaussianPyramidKernel.h"
