@@ -49,7 +49,21 @@ RelativeTolerance<float> rel_tolerance_f32(0.00001f);
 RelativeTolerance<float> tolerance_qasymm8(1);
 
 const auto ReductionOperations = framework::dataset::make("ReductionOperation",
-{ ReductionOperation::SUM });
+{
+    ReductionOperation::SUM,
+    ReductionOperation::PROD
+});
+
+const auto QuantizationInfos = framework::dataset::make("QuantizationInfo",
+{
+    QuantizationInfo(1.f / 128, -10),
+    QuantizationInfo(1.f / 64, -5),
+    QuantizationInfo(1.f / 32, -2)
+});
+
+const auto Axises = framework::dataset::make("Axis",
+{ 0, 1, 2, 3 });
+
 } // namespace
 
 TEST_SUITE(NEON)
@@ -88,13 +102,13 @@ using NEReductionOperationFixture = ReductionOperationFixture<Tensor, Accessor, 
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::F32)), Axises), ReductionOperations))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::F32)), Axises), ReductionOperations))
 {
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);
@@ -106,17 +120,17 @@ using NEReductionOperationQuantizedFixture = ReductionOperationQuantizedFixture<
 
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                       combine(combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), Axises),
                                        ReductionOperations),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+                               QuantizationInfos))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEReductionOperationQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), framework::dataset::make("Axis", { 0, 1, 2, 3 })),
+                       combine(combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::QASYMM8)), Axises),
                                        ReductionOperations),
-                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })))
+                               QuantizationInfos))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);

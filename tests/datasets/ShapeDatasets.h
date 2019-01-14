@@ -148,7 +148,7 @@ public:
     Small4DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 1U, 7U, 1U, 3U },
+        TensorShape{ 2U, 7U, 1U, 3U },
                      TensorShape{ 7U, 7U, 5U, 3U },
                      TensorShape{ 27U, 13U, 37U, 2U },
                      TensorShape{ 128U, 64U, 21U, 3U }

@@ -41,10 +41,11 @@ public:
     }
     /** Initialize the union with a pixel value of chosen datatype
      *
-     * @param[in] v        int value.
-     * @param[in] datatype DataType that @p v have to be stored
+     * @param[in] v          int value.
+     * @param[in] datatype   DataType that @p v have to be stored
+     * @param[in] quant_info QuantizationInfo to apply in case of QASYMM8 datatype to @p v
      */
-    PixelValue(uint64_t v, DataType datatype)
+    PixelValue(uint64_t v, DataType datatype, QuantizationInfo quant_info = QuantizationInfo())
         : PixelValue()
     {
         switch(datatype)
@@ -54,6 +55,9 @@ public:
                 break;
             case DataType::S8:
                 value.s8 = static_cast<int8_t>(v);
+                break;
+            case DataType::QASYMM8:
+                value.u8 = sqcvt_qasymm8_f32(v, quant_info.scale, quant_info.offset);
                 break;
             case DataType::U16:
                 value.u16 = static_cast<uint16_t>(v);
