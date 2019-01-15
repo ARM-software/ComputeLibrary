@@ -165,13 +165,13 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                 first_kernel_op        = ReductionOperation::SUM;
                 intermediate_kernel_op = ReductionOperation::SUM;
                 last_kernel_op         = op;
-                pixelValue             = PixelValue(0);
+                pixelValue             = PixelValue();
                 break;
             case ReductionOperation::SUM_SQUARE:
                 first_kernel_op        = ReductionOperation::SUM_SQUARE;
                 intermediate_kernel_op = ReductionOperation::SUM;
                 last_kernel_op         = ReductionOperation::SUM;
-                pixelValue             = PixelValue(0);
+                pixelValue             = PixelValue();
                 break;
             case ReductionOperation::PROD:
                 first_kernel_op        = ReductionOperation::PROD;

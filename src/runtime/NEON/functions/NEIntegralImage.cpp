@@ -36,5 +36,5 @@ void NEIntegralImage::configure(const ITensor *input, ITensor *output)
     auto k = arm_compute::support::cpp14::make_unique<NEIntegralImageKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
-    _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
 }

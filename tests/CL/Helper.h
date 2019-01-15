@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ public:
         auto k = arm_compute::support::cpp14::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
     }
 };
 
@@ -102,8 +102,8 @@ public:
         k->set_target(CLScheduler::get().target());
         k->configure(first, second, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
-        _memset_kernel.configure(second, PixelValue(0));
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
+        _memset_kernel.configure(second, PixelValue());
     }
 
     // Inherited method overridden:
