@@ -67,6 +67,18 @@ Status NEElementwiseSquaredDiff::validate(const ITensorInfo *input1, const ITens
     return NEArithmeticOperationKernel::validate(ArithmeticOperation::SQUARED_DIFF, input1, input2, output);
 }
 
+void NEElementwiseDivision::configure(ITensor *input1, ITensor *input2, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEDivisionOperationKernel>();
+    k->configure(input1, input2, output);
+    _kernel = std::move(k);
+}
+
+Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+{
+    return NEDivisionOperationKernel::validate(input1, input2, output);
+}
+
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *input2, ITensor *output)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ T arithm_op(ArithmeticOperation op, T src1, T src2, ConvertPolicy convert_policy
     }
 
     T result;
-    if(op == ArithmeticOperation::ADD || op == ArithmeticOperation::SUB)
+    if(op == ArithmeticOperation::ADD || op == ArithmeticOperation::SUB || op == ArithmeticOperation::DIV)
     {
         result = (convert_policy == ConvertPolicy::SATURATE) ? saturate_cast<T>(val) : static_cast<T>(val);
     }

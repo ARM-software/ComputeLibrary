@@ -94,10 +94,8 @@ protected:
 class NEArithmeticOperationKernel : public NEElementwiseOperationKernel
 {
 public:
-    NEArithmeticOperationKernel()
-        : NEElementwiseOperationKernel()
-    {
-    }
+    /** Default constructor */
+    NEArithmeticOperationKernel() = default;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
      *
@@ -126,13 +124,40 @@ protected:
     static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
 };
 
+class NEDivisionOperationKernel : public NEArithmeticOperationKernel
+{
+public:
+    /** Default constructor */
+    NEDivisionOperationKernel() = default;
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+     *
+     * @param[in] input1 First tensor input. Data types supported: F16/F32.
+     * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor. Data types supported: Same as @p input1.
+     */
+    void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticOperationKernel
+     *
+     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input1.
+     *
+     * @return a Status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+
+protected:
+    // Inherited methods overridden:
+    static Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output);
+};
+
 class NEComparisonOperationKernel : public NEElementwiseOperationKernel
 {
 public:
-    NEComparisonOperationKernel()
-        : NEElementwiseOperationKernel()
-    {
-    }
+    /** Default constructor */
+    NEComparisonOperationKernel() = default;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEComparisonOperationKernel
      *
