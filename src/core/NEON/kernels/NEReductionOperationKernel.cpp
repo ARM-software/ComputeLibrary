@@ -443,7 +443,7 @@ struct RedOpX_qasymm8
         auto vec_res_value3 = vdupq_n_u32(static_cast<uint32_t>(0.f));
         auto vec_res_value4 = vdupq_n_u32(static_cast<uint32_t>(0.f));
 
-        uint8x16_t vec_res_value;
+        uint8x16_t vec_res_value = { 0 };
         if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
         {
             vec_res_value = wrapper::vdup_n(*input.ptr(), wrapper::traits::vector_128_tag{});
@@ -530,7 +530,7 @@ struct RedOpYZW
 
         execute_window_loop(in_slice, [&](const Coordinates & id)
         {
-            neon_vector vec_res_value;
+            neon_vector vec_res_value = { 0 };
             if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
             {
                 vec_res_value = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
