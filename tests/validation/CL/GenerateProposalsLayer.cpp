@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 #include "arm_compute/runtime/CL/functions/CLGenerateProposalsLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLArrayAccessor.h"
@@ -46,6 +47,31 @@ template <typename U, typename T>
 inline void fill_tensor(U &&tensor, const std::vector<T> &v)
 {
     std::memcpy(tensor.data(), v.data(), sizeof(T) * v.size());
+}
+
+template <typename T>
+inline void fill_tensor(CLAccessor &&tensor, const std::vector<T> &v)
+{
+    if(tensor.data_layout() == DataLayout::NCHW)
+    {
+        std::memcpy(tensor.data(), v.data(), sizeof(T) * v.size());
+    }
+    else
+    {
+        const int channels = tensor.shape()[0];
+        const int width    = tensor.shape()[1];
+        const int height   = tensor.shape()[2];
+        for(int x = 0; x < width; ++x)
+        {
+            for(int y = 0; y < height; ++y)
+            {
+                for(int c = 0; c < channels; ++c)
+                {
+                    *(reinterpret_cast<T *>(tensor(Coordinates(c, x, y)))) = *(reinterpret_cast<const T *>(v.data() + x + y * width + c * height * width));
+                }
+            }
+        }
+    }
 }
 
 const auto ComputeAllInfoDataset = framework::dataset::make("ComputeAllInfo",
@@ -165,8 +191,9 @@ DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, frame
     validate(CLAccessor(all_anchors), anchors_expected);
 }
 
-DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, framework::dataset::make("DataType", { DataType::F32 }),
-               data_type)
+DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, combine(framework::dataset::make("DataType", { DataType::F32 }),
+                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+               data_type, data_layout)
 {
     const int values_per_roi = 4;
     const int num_anchors    = 2;
@@ -260,9 +287,17 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
         8.91025957e-06f
     });
 
+    TensorShape scores_shape = TensorShape(feature_width, feature_height, num_anchors);
+    TensorShape deltas_shape = TensorShape(feature_width, feature_height, values_per_roi * num_anchors);
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(scores_shape, PermutationVector(2U, 0U, 1U));
+        permute(deltas_shape, PermutationVector(2U, 0U, 1U));
+    }
+
     // Inputs
-    CLTensor scores      = create_tensor<CLTensor>(TensorShape(feature_width, feature_height, num_anchors), data_type);
-    CLTensor bbox_deltas = create_tensor<CLTensor>(TensorShape(feature_width, feature_height, values_per_roi * num_anchors), data_type);
+    CLTensor scores      = create_tensor<CLTensor>(scores_shape, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor bbox_deltas = create_tensor<CLTensor>(deltas_shape, data_type, 1, QuantizationInfo(), data_layout);
     CLTensor anchors     = create_tensor<CLTensor>(TensorShape(values_per_roi, num_anchors), data_type);
 
     // Outputs
@@ -282,7 +317,6 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
     proposals.allocator()->allocate();
     num_valid_proposals.allocator()->allocate();
     scores_out.allocator()->allocate();
-
     // Fill inputs
     fill_tensor(CLAccessor(scores), scores_vector);
     fill_tensor(CLAccessor(bbox_deltas), bbx_vector);
@@ -290,7 +324,6 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 
     // Run operator
     generate_proposals.run();
-
     // Gather num_valid_proposals
     num_valid_proposals.map();
     const uint32_t N = *reinterpret_cast<uint32_t *>(num_valid_proposals.ptr_to_element(Coordinates(0, 0)));
