@@ -246,7 +246,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             for(; x < window_end_x; ++x)
             {
                 const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = std::max(0, std::min(static_cast<int32_t>((afs + bfs) * invoutput_scale + output_offset), 255));
+                *(output_ptr + x) = std::max<int32_t>(0, std::min<int32_t>((afs + bfs) * invoutput_scale + output_offset, 255));
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -317,7 +317,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             {
                 const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - input1_qinfo.offset) * input1_qinfo.scale;
                 const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - input2_qinfo.offset) * input2_qinfo.scale;
-                *(output_ptr + x) = std::max(0, std::min(static_cast<int32_t>((afs + bfs) * invoutput_scale + output_offset), 255));
+                *(output_ptr + x) = std::max<int32_t>(0, std::min<int32_t>((afs + bfs) * invoutput_scale + output_offset, 255));
             }
         },
         input1, input2, output);

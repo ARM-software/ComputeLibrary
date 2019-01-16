@@ -371,17 +371,17 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             if(act == ActivationFunction::RELU)
             {
                 tmp = std::max(const_0, in);
-                tmp = std::max(0, std::min(static_cast<int32_t>(tmp * s + o), 255));
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
             }
             else if(act == ActivationFunction::BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(const_0, in));
-                tmp = std::max(0, std::min(static_cast<int32_t>(tmp * s + o), 255));
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
             }
             else if(act == ActivationFunction::LU_BOUNDED_RELU)
             {
                 tmp = std::min(a, std::max(b, in));
-                tmp = std::max(0, std::min(static_cast<int32_t>(tmp * s + o), 255));
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
             }
             else
             {
