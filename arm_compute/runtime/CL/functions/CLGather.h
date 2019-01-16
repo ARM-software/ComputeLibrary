@@ -38,7 +38,7 @@ public:
     /** Initialise the kernel's inputs and outputs
      *
      * @param[in]  input   Source tensor. Supported tensor rank: up to 4. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
-     * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following type: S64. Each value Must be in range [0, input.shape[@p axis])
+     * @param[in]  indices Indices tensor. Supported tensor rank: up to 1. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
      * @param[out] output  Destination tensor. Data type supported: Same as @p input
      * @param[in]  axis    (Optional) The axis in @p input to gather @p indices from. Defaults to 0
      */
@@ -47,7 +47,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLGatherKernel
      *
      * @param[in] input   Source tensor info. Supported tensor rank: up to 4. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
-     * @param[in] indices Indices tensor info. Supported tensor rank: up to 4. Must be one of the following types: S64. Each value Must be in range [0, input.shape[@p axis])
+     * @param[in] indices Indices tensor info. Supported tensor rank: up to 4. Must be one of the following types: U32/S32. Each value must be in range [0, input.shape[@p axis])
      * @param[in] output  Destination tensor info. Data type supported: Same as @p input
      * @param[in] axis    (Optional) The axis in @p input to gather @p indices from. Defaults to 0
      *

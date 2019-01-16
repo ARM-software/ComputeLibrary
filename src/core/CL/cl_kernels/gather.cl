@@ -42,7 +42,7 @@
  * @param[in]  input_stride_w                        Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  input_step_w                          input_stride_w * number of elements along W processed per work item (in bytes)
  * @param[in]  input_offset_first_element_in_bytes   Offset of the first element in the source tensor
- * @param[in]  indices_ptr                           Pointer to the indices vector. Supported data types: U32.
+ * @param[in]  indices_ptr                           Pointer to the indices vector. Supported data types: S32/U32.
  * @param[in]  indices_stride_x                      Stride of the indices vector in X dimension (in bytes)
  * @param[in]  indices_step_x                        input_stride_x * number of elements along X processed per work item (in bytes)
  * @param[in]  indices_offset_first_element_in_bytes Offset of the first element in the indices vector
