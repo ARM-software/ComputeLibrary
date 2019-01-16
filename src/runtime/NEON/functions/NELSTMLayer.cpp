@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -246,7 +246,6 @@ void NELSTMLayer::configure(const ITensor *input,
         _output1.allocator()->allocate();
     }
     _activation_output.configure(output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    output_gate_out->allocator()->allocate();
 
     // Configure block that calculates the output state
     /** lstm_res = PixelwiseMul(output, Activation(cell_state))
@@ -265,6 +264,7 @@ void NELSTMLayer::configure(const ITensor *input,
     _activation_output_state.configure(&_cell_state_out1, &_cell_state_activation, activation_info);
     _pixelwise_mul_output_state2.configure(&_cell_state_activation, output_gate_out, output_state_out_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _cell_state_activation.allocator()->allocate();
+    output_gate_out->allocator()->allocate();
 
     if(lstm_params.has_projection())
     {
