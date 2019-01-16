@@ -44,12 +44,6 @@ namespace
 {
 /** Tolerance for float operations */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
-
-const auto DequantizationShapes = concat(concat(concat(datasets::Small3DShapes(),
-                                                       datasets::Large3DShapes()),
-                                                datasets::Small4DShapes()),
-                                         datasets::Large4DShapes());
-
 } // namespace
 
 TEST_SUITE(NEON)
@@ -87,7 +81,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(DequantizationShapes, framework::dataset::make("DataType", DataType::U8)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     TensorShape shape_min_max = shape;
     shape_min_max.set(Window::DimX, 2);

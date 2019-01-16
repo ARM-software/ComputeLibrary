@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ AbsoluteTolerance<T> tolerance(MagnitudeType magnitude_type)
 TEST_SUITE(NEON)
 TEST_SUITE(Magnitude)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::S16)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::S16)), shape, data_type)
 {
     // Create tensors
     Tensor src1 = create_tensor<Tensor>(shape, data_type);

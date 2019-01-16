@@ -113,7 +113,7 @@ const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace
 TEST_SUITE(NEON)
 TEST_SUITE(ActivationLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
     // Create tensors

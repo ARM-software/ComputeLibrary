@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,32 +79,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-TEST_CASE(Configuration, framework::DatasetMode::ALL)
-{
-    // Create tensors
-    Tensor src1 = create_tensor<Tensor>(TensorShape(128U, 32U, 32U), DataType::F32, 1);
-    Tensor src2 = create_tensor<Tensor>(TensorShape(32U, 32U, 32U), DataType::F32, 1);
-    Tensor src3 = create_tensor<Tensor>(TensorShape(15U, 32U, 32U), DataType::F32, 1);
-    Tensor dst;
-
-    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(src3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEWidthConcatenateLayer concat_layer;
-
-    concat_layer.configure({ &src1, &src2, &src3 }, &dst);
-}
-
 template <typename T>
 using NEWidthConcatenateLayerFixture = WidthConcatenateLayerValidationFixture<Tensor, ITensor, Accessor, NEWidthConcatenateLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make("DataType",
-                                                                                                                   DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -120,8 +102,9 @@ TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make("DataType",
-                                                                                                                     DataType::QASYMM8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

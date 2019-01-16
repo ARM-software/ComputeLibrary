@@ -72,8 +72,6 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value 
 TEST_SUITE(NEON)
 TEST_SUITE(PoolingLayer)
 
-//TODO(COMPMID-415): Configuration tests?
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(

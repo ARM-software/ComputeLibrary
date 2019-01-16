@@ -325,7 +325,7 @@ TEST_SUITE_END() // WinogradLayer
 
 TEST_SUITE(GEMMConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                            CNNDataTypes),
                                                                    framework::dataset::make("ActivationInfo",
 { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),

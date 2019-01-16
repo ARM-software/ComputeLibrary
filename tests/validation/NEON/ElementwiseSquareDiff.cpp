@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,7 +101,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(S32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors
@@ -126,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<int32_t>, frame
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::S16 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S16 })),
                shape, data_type)
 {
     // Create tensors
@@ -161,7 +161,7 @@ using NEElementwiseSquaredDiffQuantizedFixture = ElementwiseSquaredDiffValidatio
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors
@@ -217,7 +217,7 @@ TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
 {
     // Create tensors

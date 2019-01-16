@@ -88,18 +88,18 @@ template <typename T>
 using NEChannelExtractFixture = ChannelExtractValidationFixture<MultiImage, Tensor, Accessor, NEChannelExtract, T>;
 
 TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractRGBADataset),
+DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);
 }
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVDataset),
+DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);
 }
 
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVPlanarDataset),
+DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);

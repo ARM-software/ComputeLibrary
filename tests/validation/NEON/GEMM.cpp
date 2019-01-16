@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,26 +99,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE_END() // INTERLEAVE_4X4
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
-               shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
-{
-    // Create tensors
-    Tensor a   = create_tensor<Tensor>(shape_a, data_type, 1);
-    Tensor b   = create_tensor<Tensor>(shape_b, data_type, 1);
-    Tensor c   = create_tensor<Tensor>(shape_c, data_type, 1);
-    Tensor dst = create_tensor<Tensor>(output_shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEGEMM gemm;
-    gemm.configure(&a, &b, &c, &dst, alpha, beta);
-
-    //TODO(COMPMID-415): Validate valid region
-}
+//TODO(COMPMID-415): Validate valid region
 
 template <typename T>
 using NEGEMMFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T>;

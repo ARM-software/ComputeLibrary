@@ -108,7 +108,7 @@ TEST_SUITE_END() // DilatedConvolutionLayer
 
 TEST_SUITE(GEMMDilatedConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallDilatedConvolutionLayerDataset(), datasets::LargeDilatedConvolutionLayerDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallDilatedConvolutionLayerDataset(),
                                                                    CNNDataTypes),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
 {

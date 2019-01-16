@@ -45,10 +45,8 @@ namespace
 /** Tolerance for quantization */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 
-const auto QuantizationShapes = concat(concat(concat(datasets::Small3DShapes(),
-                                                     datasets::Large3DShapes()),
-                                              datasets::Small4DShapes()),
-                                       datasets::Large4DShapes());
+const auto QuantizationShapes = concat(datasets::Small3DShapes(),
+                                       datasets::Small4DShapes());
 } // namespace
 
 TEST_SUITE(NEON)
