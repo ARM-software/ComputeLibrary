@@ -194,69 +194,6 @@ inline std::string get_typestring(DataType data_type)
     }
 }
 
-/** Returns the number of elements required to go from start to end with the wanted step
- *
- * @param[in] start start value
- * @param[in] end   end value
- * @param[in] step  step value between each number in the wanted sequence
- *
- * @return number of elements to go from start value to end value using the wanted step
- */
-inline size_t num_of_elements_in_range(const float start, const float end, const float step)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(step == 0, "Range Step cannot be 0");
-    return size_t(std::ceil((end - start) / step));
-}
-
-/** Returns true if the value can be represented by the given data type
- *
- * @param[in] val        value to be checked
- * @param[in] dt         data type that is checked
- * @param[in] quant_info quantization info if the data type is QASYMM8
- *
- * @return true if the data type can hold the value.
- */
-template <typename T>
-bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = QuantizationInfo())
-{
-    switch(dt)
-    {
-        case DataType::U8:
-            return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
-        case DataType::QASYMM8:
-        {
-            double min = static_cast<double>(quant_info.dequantize(0));
-            double max = static_cast<double>(quant_info.dequantize(std::numeric_limits<uint8_t>::max()));
-            return ((double)val >= min && (double)val <= max);
-        }
-        case DataType::S8:
-            return ((static_cast<int8_t>(val) == val) && val >= std::numeric_limits<int8_t>::lowest() && val <= std::numeric_limits<int8_t>::max());
-        case DataType::U16:
-            return ((static_cast<uint16_t>(val) == val) && val >= std::numeric_limits<uint16_t>::lowest() && val <= std::numeric_limits<uint16_t>::max());
-        case DataType::S16:
-            return ((static_cast<int16_t>(val) == val) && val >= std::numeric_limits<int16_t>::lowest() && val <= std::numeric_limits<int16_t>::max());
-        case DataType::U32:
-            return ((static_cast<uint32_t>(val) == val) && val >= std::numeric_limits<uint32_t>::lowest() && val <= std::numeric_limits<uint32_t>::max());
-        case DataType::S32:
-            return ((static_cast<int32_t>(val) == val) && val >= std::numeric_limits<int32_t>::lowest() && val <= std::numeric_limits<int32_t>::max());
-        case DataType::U64:
-            return (val >= std::numeric_limits<uint64_t>::lowest() && val <= std::numeric_limits<uint64_t>::max());
-        case DataType::S64:
-            return (val >= std::numeric_limits<int64_t>::lowest() && val <= std::numeric_limits<int64_t>::max());
-        case DataType::F16:
-            return (val >= std::numeric_limits<half>::lowest() && val <= std::numeric_limits<half>::max());
-        case DataType::F32:
-            return (val >= std::numeric_limits<float>::lowest() && val <= std::numeric_limits<float>::max());
-        case DataType::F64:
-            return (val >= std::numeric_limits<double>::lowest() && val <= std::numeric_limits<double>::max());
-        case DataType::SIZET:
-            return ((static_cast<size_t>(val) == val) && val >= std::numeric_limits<size_t>::lowest() && val <= std::numeric_limits<size_t>::max());
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-            return false;
-    }
-}
-
 /** Maps a tensor if needed
  *
  * @param[in] tensor   Tensor to be mapped

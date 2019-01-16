@@ -26,7 +26,7 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "utils/Utils.h"
+#include "arm_compute/core/Utils.h"
 
 using namespace arm_compute;
 
@@ -56,14 +56,14 @@ Status validate_arguments(const ITensorInfo &output, const float start, const fl
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start < end) && (step <= 0)), "step must be greater than 0 when start < end");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((start > end) && (step >= 0)), "step must be less than 0 when start > end");
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!utils::check_value_range(start, output.data_type(), output.quantization_info()), "start value is outside the range of the data type");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!utils::check_value_range(end, output.data_type(), output.quantization_info()), "end value is outside the range of the data type");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!utils::check_value_range(step, output.data_type(), output.quantization_info()), "step value is outside the range of the data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(start, output.data_type(), output.quantization_info()), "start value is outside the range of the data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(end, output.data_type(), output.quantization_info()), "end value is outside the range of the data type");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!check_value_range(step, output.data_type(), output.quantization_info()), "step value is outside the range of the data type");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((start == end), "start of the requested sequence must not be equal to the end");
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output.num_dimensions() != 1, "Output has to be a 1-D tensor");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output.tensor_shape().total_size() < utils::num_of_elements_in_range(start, end, step), "Output tensor size is incorrect");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output.tensor_shape().total_size() < num_of_elements_in_range(start, end, step), "Output tensor size is incorrect");
 
     return Status{};
 }
@@ -72,14 +72,14 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo &output, con
 {
     unsigned int num_elems_processed_per_iteration = get_num_elems_processed_per_iteration(output.data_type());
     // Auto initialize output if not initialized
-    auto_init_if_empty(output, TensorShape(utils::num_of_elements_in_range(start, end, step)), 1, output.data_type(), output.quantization_info());
+    auto_init_if_empty(output, TensorShape(num_of_elements_in_range(start, end, step)), 1, output.data_type(), output.quantization_info());
 
     // Configure kernel window
     Window win = calculate_max_window(output, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal output_access(&output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), TensorShape(utils::num_of_elements_in_range(start, end, step))));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), TensorShape(num_of_elements_in_range(start, end, step))));
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
