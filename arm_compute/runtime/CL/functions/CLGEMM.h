@@ -115,7 +115,7 @@ private:
     bool                               _run_addition;
     bool                               _reshape_b_only_on_first_run;
     bool                               _is_prepared;
-    bool                               _is_G76_path;
+    bool                               _is_new_gemm_reshaped; // Removed when COMPMID-1892 is completed
 };
 } // namespace arm_compute
 

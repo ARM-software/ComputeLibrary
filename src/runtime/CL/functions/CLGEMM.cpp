@@ -33,11 +33,13 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/gemm_reshaped/CLGEMMReshapedConfiguration.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 namespace arm_compute
 {
 using namespace arm_compute::misc::shape_calculator;
+using namespace arm_compute::cl_gemm;
 
 namespace
 {
@@ -77,43 +79,6 @@ inline bool is_interleaved_transposed(unsigned int m, unsigned int n, unsigned i
 
     return flag;
 }
-
-inline void select_gemm_configuration(unsigned int m, unsigned int n, GEMMLHSMatrixInfo &lhs_info, GEMMRHSMatrixInfo &rhs_info)
-{
-    // Heuristic selection for GEMM
-    if(n <= 4)
-    {
-        // Configure GEMMLHSMatrixInfo
-        lhs_info.m0         = 4;
-        lhs_info.k0         = 8;
-        lhs_info.v0         = lhs_info.m0 * 16 < m ? 2 : 16;
-        lhs_info.interleave = true;
-        lhs_info.transpose  = false;
-
-        // Configure GEMMRHSMatrixInfo
-        rhs_info.n0         = 2;
-        rhs_info.k0         = lhs_info.k0;
-        rhs_info.h0         = rhs_info.n0 * 16 < n ? 2 : 16;
-        rhs_info.interleave = false;
-        rhs_info.transpose  = true;
-    }
-    else
-    {
-        // Configure GEMMLHSMatrixInfo
-        lhs_info.m0         = (m * n) / 24 > 2048 ? 6 : 5;
-        lhs_info.k0         = 4;
-        lhs_info.v0         = 32;
-        lhs_info.interleave = false;
-        lhs_info.transpose  = false;
-
-        // Configure GEMMRHSMatrixInfo
-        rhs_info.n0         = 4;
-        rhs_info.k0         = lhs_info.k0;
-        rhs_info.h0         = 32;
-        rhs_info.interleave = true;
-        rhs_info.transpose  = true;
-    }
-}
 } // namespace
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
@@ -130,7 +95,7 @@ CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
       _run_addition(false),
       _reshape_b_only_on_first_run(false),
       _is_prepared(false),
-      _is_G76_path(false)
+      _is_new_gemm_reshaped(false)
 {
 }
 
@@ -164,6 +129,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     const unsigned int m                         = reinterpret_input_as_3d ? (a->info()->dimension(1) * a->info()->dimension(2)) : a->info()->dimension(1);
     const unsigned int n                         = b->info()->dimension(0);
     const unsigned int k                         = a->info()->dimension(0);
+    const unsigned int batch_size                = reinterpret_input_as_3d ? a->info()->dimension(3) : a->info()->dimension(2);
     const int          depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
     int                mult_transpose1xW_width   = 1;
     int                mult_interleave4x4_height = 1;
@@ -191,7 +157,8 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     _is_interleaved_transposed = is_interleaved_transposed(m, n, k, a->info()->data_type(), _reshape_b_only_on_first_run, gpu_target);
 
     // Check if we can run the new reshaped GEMM
-    _is_G76_path = (gpu_target == GPUTarget::G76) && _is_interleaved_transposed && (data_type == DataType::F32);
+    const auto workload   = static_cast<float>((m * n) / 20.0f);
+    _is_new_gemm_reshaped = (workload > 1600.0f) && (get_arch_from_target(gpu_target) == GPUTarget::BIFROST) && _is_interleaved_transposed && (data_type == DataType::F32);
 
     // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
     if(_is_interleaved_transposed)
@@ -209,12 +176,12 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         }
         // _tmp_a and _tmp_b will be auto configured in _interleave_kernel and in _transpose_kernel
 
-        if(_is_G76_path)
+        if(_is_new_gemm_reshaped)
         {
             GEMMLHSMatrixInfo lhs_info;
 
-            // Pick up the GEMM configuration based on M,N and K
-            select_gemm_configuration(m, n, lhs_info, rhs_info);
+            // Pick up the GEMM configuration
+            std::tie(lhs_info, rhs_info) = CLGEMMReshapedConfigurationFactory::create()->configure(m, n, k, batch_size, data_type);
 
             _reshape_lhs_kernel.configure(a, &_tmp_a, lhs_info, gemm_info.reinterpret_input_as_3d());
             _reshape_rhs_kernel.configure(b, &_tmp_b, rhs_info);
@@ -232,7 +199,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         }
     }
 
-    if(!_is_G76_path)
+    if(!_is_new_gemm_reshaped)
     {
         // Configure and tune matrix multiply kernel
         _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k,
@@ -285,6 +252,7 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     const unsigned int m                         = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
     const unsigned int n                         = b->dimension(0);
     const unsigned int k                         = a->dimension(0);
+    const unsigned int batch_size                = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
     int                mult_transpose1xW_width   = 1;
     int                mult_interleave4x4_height = 1;
     const int          depth_output_gemm3d       = gemm_info.depth_output_gemm3d();
@@ -313,7 +281,8 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     const bool run_interleave_transpose = is_interleaved_transposed(m, n, k, a->data_type(), reshape_b_only_on_first_run, gpu_target);
 
     // Check if we can run the new reshaped GEMM
-    const bool is_G76_path = (gpu_target == GPUTarget::G76) && run_interleave_transpose && (data_type == DataType::F32);
+    const auto workload             = static_cast<float>((m * n) / 20.0f);
+    const bool is_new_gemm_reshaped = (workload > 1600.f) && (get_arch_from_target(gpu_target) == GPUTarget::BIFROST) && run_interleave_transpose && (data_type == DataType::F32);
 
     // if _is_interleaved_transposed is set, force reinterpret_input_as_3d to be false as the output of CLGEMMInterleaveKernel will be 2D
     if(run_interleave_transpose)
@@ -328,12 +297,12 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         matrix_a_info = &tmp_a_info;
         matrix_b_info = &tmp_b_info;
 
-        if(is_G76_path)
+        if(is_new_gemm_reshaped)
         {
             GEMMLHSMatrixInfo lhs_info;
 
-            // Pick up the GEMM configuration based on M,N and K
-            select_gemm_configuration(m, n, lhs_info, rhs_info);
+            // Pick up the GEMM configuration
+            std::tie(lhs_info, rhs_info) = CLGEMMReshapedConfigurationFactory::create()->configure(m, n, k, batch_size, data_type);
 
             auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_lhs_reshaped_shape(*a, lhs_info, gemm_info.reinterpret_input_as_3d())));
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeLHSMatrixKernel::validate(a, &tmp_a_info, lhs_info, gemm_info.reinterpret_input_as_3d()));
@@ -356,7 +325,7 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         }
     }
 
-    if(!is_G76_path)
+    if(!is_new_gemm_reshaped)
     {
         // Validate matrix multiply
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target, gemm_info.fp_mixed_precision()));
@@ -390,7 +359,7 @@ void CLGEMM::run()
     }
 
     // Run matrix multiply kernel
-    if(_is_G76_path)
+    if(_is_new_gemm_reshaped)
     {
         CLScheduler::get().enqueue(_mm_reshaped_kernel, !_run_addition);
     }
