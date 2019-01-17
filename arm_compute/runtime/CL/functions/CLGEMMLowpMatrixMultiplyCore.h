@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
@@ -43,7 +44,8 @@ class ICLTensor;
  *
  *  -# @ref CLGEMMReshapeLHSMatrixKernel  (if the output tensor is a matrix)
  *  -# @ref CLGEMMReshapeRHSMatrixKernel  (if the output tensor is a matrix)
- *  -# @ref CLGEMMLowpMatrixMultiplyKernel
+ *  -# @ref CLGEMMLowpMatrixMultiplyKernel (if the input matrix is a vector or for Midgard architectures)
+ *  -# @ref CLGEMMLowpMatrixMultiplyReshapedKernel (if the input matrix is not a vector and if the GPU architecture is not Midgard)
  *  -# @ref CLGEMMLowpMatrixAReductionKernel (if the offset of matrix B is not 0)
  *  -# @ref CLGEMMLowpMatrixBReductionKernel (if the offset of matrix A is not 0)
  *  -# @ref CLGEMMLowpOffsetContributionKernel (if gemm_info.gemmlowp_output_stage == NONE)
@@ -101,6 +103,7 @@ public:
 private:
     CLMemoryGroup                                 _memory_group;
     CLGEMMLowpMatrixMultiplyKernel                _mm_kernel;
+    CLGEMMLowpMatrixMultiplyReshapedKernel        _mm_reshaped_kernel;
     CLGEMMReshapeLHSMatrixKernel                  _mtx_a_reshape_kernel;
     CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
     CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
@@ -115,7 +118,7 @@ private:
     const ICLTensor                              *_original_b;
     int32_t                                       _a_offset;
     int32_t                                       _b_offset;
-    bool                                          _is_interleaved_transposed;
+    bool                                          _is_gemm_reshaped;
     bool                                          _reshape_b_only_on_first_run;
     bool                                          _is_prepared;
     bool                                          _fuse_output_stage;
