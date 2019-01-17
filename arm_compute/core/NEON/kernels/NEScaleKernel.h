@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,6 +110,7 @@ private:
     InterpolationPolicy _policy;
     BorderSize          _border_size;
     BorderMode          _border_mode;
+    float               _sampling_offset;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESCALEKERNEL_H__ */
