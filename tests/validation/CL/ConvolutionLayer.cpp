@@ -230,7 +230,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<half>, framework:
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(framework::dataset::concat(datasets::SmallGroupedConvolutionLayerDataset(), datasets::LargeGroupedConvolutionLayerDataset()),
+                       combine(combine(combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType",
                                                                         DataType::F16)),
@@ -256,7 +256,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixture<float>, framework
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(framework::dataset::concat(datasets::SmallGroupedConvolutionLayerDataset(), datasets::LargeGroupedConvolutionLayerDataset()),
+                       combine(combine(combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType",
                                                                         DataType::F32)),
@@ -306,7 +306,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(framework::dataset::concat(datasets::SmallGroupedConvolutionLayerDataset(), datasets::LargeGroupedConvolutionLayerDataset()),
+                       combine(combine(combine(combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
                                                                framework::dataset::make("ReshapeWeights", { true })),
                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -326,7 +326,7 @@ using CLGEMMGroupedConvolutionLayerFixture = ConvolutionValidationFixture<CLTens
 
 TEST_SUITE(GroupedGEMMConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
                                                                            GroupedCNNDataTypes),
                                                                    ActivationFunctionsDataset),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
@@ -369,7 +369,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datas
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::F32)),
                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
@@ -393,7 +393,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
                                                                                                                         framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                         framework::dataset::make("DataType", DataType::F16)),
                                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW })),
