@@ -182,9 +182,9 @@ __kernel void roi_align_layer(
     for(int pz = 0; pz < MAX_DIM_Z; ++pz)
     {
 #if defined(NHWC)
-        DATA_TYPE *_output_ptr = (__global DATA_TYPE *)tensor3D_offset(&output, pz, px, py);
+        __global DATA_TYPE *_output_ptr = (__global DATA_TYPE *)tensor3D_offset(&output, pz, px, py);
 #else  // !defined(NHWC)
-        DATA_TYPE *_output_ptr  = (__global DATA_TYPE *)tensor3D_offset(&output, px, py, pz);
+        __global DATA_TYPE *_output_ptr  = (__global DATA_TYPE *)tensor3D_offset(&output, px, py, pz);
 #endif // defined(NHWC)
         *_output_ptr = (__global DATA_TYPE)roi_align_1x1(&input,
                                                          region_start.x,
