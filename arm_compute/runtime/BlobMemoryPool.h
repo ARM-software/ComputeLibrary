@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,17 +37,6 @@ namespace arm_compute
 {
 // Forward declaration
 class IAllocator;
-
-/** Meta-data information for each blob */
-struct BlobInfo
-{
-    BlobInfo(size_t size_ = 0, size_t alignment_ = 0)
-        : size(size_), alignment(alignment_)
-    {
-    }
-    size_t size;      /**< Blob size */
-    size_t alignment; /**< Blob alignment */
-};
 
 /** Blob memory pool */
 class BlobMemoryPool : public IMemoryPool

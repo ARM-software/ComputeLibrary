@@ -83,8 +83,8 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
     {
         MemoryManagerContext mm_ctx;
         mm_ctx.target      = Target::NEON;
-        mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
-        mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
+        mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
         mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
         mm_ctx.allocator   = &_allocator;
 

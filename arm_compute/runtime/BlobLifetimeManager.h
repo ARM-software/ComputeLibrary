@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,15 +26,16 @@
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
-#include "arm_compute/runtime/BlobMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
+// Forward declarations
+class IMemoryPool;
+
 /** Concrete class that tracks the lifetime of registered tensors and
  *  calculates the systems memory requirements in terms of blobs */
 class BlobLifetimeManager : public ISimpleLifetimeManager

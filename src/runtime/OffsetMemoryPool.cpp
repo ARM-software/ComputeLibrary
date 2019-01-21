@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,11 +34,11 @@
 
 using namespace arm_compute;
 
-OffsetMemoryPool::OffsetMemoryPool(IAllocator *allocator, size_t blob_size)
-    : _allocator(allocator), _blob(), _blob_size(blob_size)
+OffsetMemoryPool::OffsetMemoryPool(IAllocator *allocator, BlobInfo blob_info)
+    : _allocator(allocator), _blob(), _blob_info(blob_info)
 {
     ARM_COMPUTE_ERROR_ON(!allocator);
-    _blob = _allocator->make_region(blob_size, 0);
+    _blob = _allocator->make_region(blob_info.size, blob_info.alignment);
 }
 
 void OffsetMemoryPool::acquire(MemoryMappings &handles)
@@ -49,7 +49,7 @@ void OffsetMemoryPool::acquire(MemoryMappings &handles)
     for(auto &handle : handles)
     {
         ARM_COMPUTE_ERROR_ON(handle.first == nullptr);
-        handle.first->set_owned_region(_blob->extract_subregion(handle.second, _blob_size - handle.second));
+        handle.first->set_owned_region(_blob->extract_subregion(handle.second, _blob_info.size - handle.second));
     }
 }
 
@@ -70,5 +70,5 @@ MappingType OffsetMemoryPool::mapping_type() const
 std::unique_ptr<IMemoryPool> OffsetMemoryPool::duplicate()
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
-    return support::cpp14::make_unique<OffsetMemoryPool>(_allocator, _blob_size);
+    return support::cpp14::make_unique<OffsetMemoryPool>(_allocator, _blob_info);
 }
