@@ -24,12 +24,30 @@
 #include "helpers.h"
 #include "repeat.h"
 
-#if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE)
+#if defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH)
+#define INC2 (VEC_DATA_TYPE(uint, 2))(0, 1)
+#define INC3 (VEC_DATA_TYPE(uint, 3))(0, 1, 2)
+#define INC4 (VEC_DATA_TYPE(uint, 4))(0, 1, 2, 3)
+#define INC8 (VEC_DATA_TYPE(uint, 8))(0, 1, 2, 3, 4, 5, 6, 7)
+#define INC16 (VEC_DATA_TYPE(uint, 16))(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+#define CONCAT_INC(K0) INC##K0
+#define INC(K0) CONCAT_INC(K0)
+
+#if(SRC_WIDTH % K0)
+#define BOUNDARY_CONDITION_X(x, a)                                                                                                                   \
+    ({                                                                                                                                               \
+        a = select(0, a, CONVERT(((x * (VEC_DATA_TYPE(uint, K0))K0 + INC(K0)) < (VEC_DATA_TYPE(uint, K0))SRC_WIDTH), VEC_DATA_TYPE(DATA_TYPE, K0))); \
+    })
+#else // (SRC_WIDTH % K0)
+#define BOUNDARY_CONDITION_X(x, a) \
+    ({})
+#endif // (SRC_WIDTH % K0)
 
 /** This OpenCL kernel reshapes the lhs input matrix. The kernel splits the input matrix in blocks of size M0xK0 and stores each one (not transposed) in
  *  the output matrix unrolling the values.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=float)
+ * @note The width of the input tensor must be passed at compile time using -DSRC_WIDTH (i.e. -DSRC_WIDTH=16)
  * @note The block's dimensions (M0 and K0) must be passed at compile time using -DM0 and -DK0 (i.e. -DM0=2, -DK0=2).
  * @note The number of M0xK0 vertical blocks to store on the same output row must be passed at compile time using -DV0 (i.e. -DV0=2)
  * @note Only the following values for M0, K0 and V0 are supported:
@@ -179,33 +197,41 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
     // Load values from the LHS matrix
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a0 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y + zin0));
+    BOUNDARY_CONDITION_X(x, a0);
 #if M0 > 1
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a1 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y + zin1));
+    BOUNDARY_CONDITION_X(x, a1);
 #endif // M0 > 1
 #if M0 > 2
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a2 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 2 * src_stride_y + zin2));
+    BOUNDARY_CONDITION_X(x, a2);
 #endif // M0 > 2
 #if M0 > 3
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a3 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 3 * src_stride_y + zin3));
+    BOUNDARY_CONDITION_X(x, a3);
 #endif // M0 > 3
 #if M0 > 4
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a4 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 4 * src_stride_y + zin4));
+    BOUNDARY_CONDITION_X(x, a4);
 #endif // M0 > 4
 #if M0 > 5
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a5 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 5 * src_stride_y + zin5));
+    BOUNDARY_CONDITION_X(x, a5);
 #endif // M0 > 5
 #if M0 > 6
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a6 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 6 * src_stride_y + zin6));
+    BOUNDARY_CONDITION_X(x, a6);
 #endif // M0 > 6
 #if M0 > 7
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a7 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 7 * src_stride_y + zin7));
+    BOUNDARY_CONDITION_X(x, a7);
 #endif // M0 > 7
 
     // ---------------------------Store output values ------------------------------
@@ -320,6 +346,7 @@ __kernel void gemm_reshape_lhs_matrix_nt(TENSOR3D_DECLARATION(src),
  *  the output matrix unrolling the values.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=float)
+ * @note The width of the input tensor must be passed at compile time using -DSRC_WIDTH (i.e. -DSRC_WIDTH=16)
  * @note The block's dimensions (M0 and K0) must be passed at compile time using -DM0 and -DK0 (i.e. -DM0=2, -DK0=2).
  * @note The number of M0xK0 vertical blocks to store on the same output row must be passed at compile time using -DV0 (i.e. -DV0=2)
  * @note Only the following values for M0, K0 and V0 are supported:
@@ -469,33 +496,41 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
     // Load values from the LHS matrix
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a0 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y + zin0));
+    BOUNDARY_CONDITION_X(x, a0);
 #if M0 > 1
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a1 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 1 * src_stride_y + zin1));
+    BOUNDARY_CONDITION_X(x, a1);
 #endif // M0 > 1
 #if M0 > 2
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a2 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 2 * src_stride_y + zin2));
+    BOUNDARY_CONDITION_X(x, a2);
 #endif // M0 > 2
 #if M0 > 3
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a3 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 3 * src_stride_y + zin3));
+    BOUNDARY_CONDITION_X(x, a3);
 #endif // M0 > 3
 #if M0 > 4
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a4 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 4 * src_stride_y + zin4));
+    BOUNDARY_CONDITION_X(x, a4);
 #endif // M0 > 4
 #if M0 > 5
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a5 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 5 * src_stride_y + zin5));
+    BOUNDARY_CONDITION_X(x, a5);
 #endif // M0 > 5
 #if M0 > 6
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a6 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 6 * src_stride_y + zin6));
+    BOUNDARY_CONDITION_X(x, a6);
 #endif // M0 > 6
 #if M0 > 7
     VEC_DATA_TYPE(DATA_TYPE, K0)
     a7 = VLOAD(K0)(0, (__global DATA_TYPE *)(input_ptr + 7 * src_stride_y + zin7));
+    BOUNDARY_CONDITION_X(x, a7);
 #endif // M0 > 7
 
     // ---------------------------Transpose and store block -----------------------
@@ -529,7 +564,7 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
 #undef OUTPUT_OFFSET_X
 #undef OUTPUT_STEP_X
 }
-#endif // defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE)
+#endif // defined(M0) && defined(K0) && defined(V0) && defined(DATA_TYPE) && defined(SRC_WIDTH)
 
 #if defined(K0) && defined(N0) && defined(H0) && defined(DATA_TYPE) && defined(SRC_HEIGHT)
 /** This OpenCL kernel reshapes the rhs input matrix. The kernel splits the input matrix in blocks of size K0xN0 and stores each one (not transposed) in

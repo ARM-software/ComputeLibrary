@@ -133,6 +133,7 @@ void CLGEMMReshapeLHSMatrixKernel::configure(const ICLTensor *input, ICLTensor *
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
     build_opts.add_option("-DV0=" + support::cpp11::to_string(lhs_info.v0));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option_if(lhs_info.interleave, "-DINTERLEAVE");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(input->info()->dimension(1)));
