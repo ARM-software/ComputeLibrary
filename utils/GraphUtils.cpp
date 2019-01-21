@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -604,6 +604,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
 {
     switch(tensor.info()->data_type())
     {
+        case DataType::QASYMM8:
         case DataType::U8:
         {
             std::uniform_int_distribution<uint8_t> distribution_u8(_lower.get<uint8_t>(), _upper.get<uint8_t>());
@@ -654,7 +655,7 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
         }
         case DataType::F16:
         {
-            std::uniform_real_distribution<float> distribution_f16(_lower.get<float>(), _upper.get<float>());
+            std::uniform_real_distribution<float> distribution_f16(_lower.get<half>(), _upper.get<half>());
             fill<half>(tensor, distribution_f16);
             break;
         }

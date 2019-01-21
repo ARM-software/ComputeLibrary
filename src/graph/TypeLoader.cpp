@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -17,7 +17,7 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWNISE, ARISING FROM,
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
@@ -91,6 +91,31 @@ Target target_from_name(const std::string &name)
     {
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         return targets.at(arm_compute::utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    }
+    catch(const std::out_of_range &)
+    {
+        throw std::invalid_argument(name);
+    }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+}
+
+ConvolutionMethod Convolution_method_from_name(const std::string &name)
+{
+    static const std::map<std::string, ConvolutionMethod> methods =
+    {
+        { "default", ConvolutionMethod::Default },
+        { "direct", ConvolutionMethod::Direct },
+        { "gemm", ConvolutionMethod::GEMM },
+        { "winograd", ConvolutionMethod::Winograd },
+    };
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    try
+    {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+        return methods.at(arm_compute::utility::tolower(name));
 
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }

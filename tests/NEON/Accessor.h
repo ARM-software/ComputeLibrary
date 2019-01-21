@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ public:
      *
      * @param[in, out] tensor To be accessed tensor.
      */
-    Accessor(Tensor &tensor);
+    Accessor(ITensor &tensor);
 
     /** Prevent instances of this class from being copy constructed */
     Accessor(const Accessor &) = delete;
@@ -75,10 +75,10 @@ public:
     void *operator()(const Coordinates &coord) override;
 
 private:
-    Tensor &_tensor;
+    ITensor &_tensor;
 };
 
-inline Accessor::Accessor(Tensor &tensor)
+inline Accessor::Accessor(ITensor &tensor)
     : _tensor{ tensor }
 {
 }

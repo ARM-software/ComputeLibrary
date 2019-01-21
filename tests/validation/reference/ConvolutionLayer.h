@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace reference
 {
 template <typename T, typename TB>
 SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                  const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1);
+                                  const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, QuantizationInfo out_quant_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test
