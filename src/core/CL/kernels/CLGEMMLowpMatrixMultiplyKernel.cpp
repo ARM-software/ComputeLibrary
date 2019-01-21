@@ -89,7 +89,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
         lhs_info.k0         = 4;
         lhs_info.v0         = mult_interleave4x4_height;
         lhs_info.interleave = true;
-        lhs_info.transpose  = unroll_block;
+        lhs_info.transpose  = !unroll_block;
 
         TensorShape tensor_shape0{ input0->tensor_shape() };
         tensor_shape0.set(0, k);

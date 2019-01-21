@@ -132,7 +132,7 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     lhs_info.k0                             = 4;
     lhs_info.v0                             = mult_interleave4x4_height;
     lhs_info.interleave                     = true;
-    lhs_info.transpose                      = unroll_block;
+    lhs_info.transpose                      = !unroll_block;
 
     // Check if we need to reshape the matrix A and matrix B
     _is_interleaved_transposed = is_interleaved_transposed(m, n, k, _reshape_b_only_on_first_run, gpu_target);
@@ -268,7 +268,7 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     lhs_info.k0                             = 4;
     lhs_info.v0                             = mult_interleave4x4_height;
     lhs_info.interleave                     = true;
-    lhs_info.transpose                      = unroll_block;
+    lhs_info.transpose                      = !unroll_block;
 
     bool reshape_matrices = is_interleaved_transposed(m, n, k, gemm_info.reshape_b_only_on_first_run(), CLScheduler::get().target());
 
