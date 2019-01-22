@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,11 @@
 #include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #endif /* ARM_COMPUTE_CL */
 #ifdef ARM_COMPUTE_GC
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
@@ -90,7 +93,10 @@ int main(int argc, char **argv)
     CLTuner cl_tuner(false);
     if(opencl_is_available())
     {
-        CLScheduler::get().default_init(&cl_tuner);
+        auto ctx_dev_err = create_opencl_context_and_device();
+        ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
+        CLScheduler::get()
+        .default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner);
     }
 #endif /* ARM_COMPUTE_CL */
 
@@ -287,6 +293,5 @@ int main(int argc, char **argv)
 
         return 1;
     }
-
     return 0;
 }

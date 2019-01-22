@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,14 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
      */
     void default_init(ICLTuner *cl_tuner = nullptr);
+    /** Initialises the scheduler with context and device provided by the user
+     *
+     * @param[in] device   OpenCL device to be used
+     * @param[in] ctx      OpenCL ctx to be used
+     * @param[in] cl_tuner (Optional) Pointer to ICLTuner (default=nullptr)
+     */
+    void default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner = nullptr);
+
     /** Schedule the execution of the passed kernel if possible.
      *
      * @param[in] kernel Kernel to execute.
@@ -74,14 +82,7 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
      *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
      */
-    void init(cl::Context context, cl::CommandQueue queue, cl::Device device, ICLTuner *cl_tuner = nullptr)
-    {
-        set_context(context);
-        _queue          = std::move(queue);
-        _target         = get_target_from_device(device);
-        _is_initialised = true;
-        _cl_tuner       = cl_tuner;
-    }
+    void init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner = nullptr);
 
     /** Accessor for the associated CL context.
      *
@@ -117,11 +118,7 @@ public:
      *
      * @param[in] context A CL context.
      */
-    void set_context(cl::Context context)
-    {
-        _context = std::move(context);
-        CLKernelLibrary::get().set_context(_context);
-    }
+    void set_context(cl::Context context);
 
     /** Accessor to set the CL command queue to be used by the scheduler.
      *
