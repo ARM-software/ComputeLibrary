@@ -480,7 +480,7 @@ void elementwise_op(const ITensor *in1, const ITensor *in2, ITensor *out, const 
     Window win = window;
     win.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const int  window_step_x         = std::min(16 / static_cast<int32_t>(sizeof(OutputScalarType)), 8);
+    const int  window_step_x         = std::min(16 / static_cast<int>(sizeof(OutputScalarType)), 8);
     const auto window_start_x        = static_cast<int>(window.x().start());
     const auto window_end_x          = static_cast<int>(window.x().end());
     const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
