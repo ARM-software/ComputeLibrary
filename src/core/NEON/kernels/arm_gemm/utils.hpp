@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,8 @@
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
 
-inline int iceildiv(const int a, const int b) {
+template<typename T>
+inline T iceildiv(const T a, const T b) {
     return (a + b - 1) / b;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,13 +46,26 @@ public:
      * terms of this standard arrangement, so if the A matrix is in fact the
      * B matrix from a GEMM call, the sense of the transpose needs to be
      * reversed.  */
-    static const int A_interleave = 32;
-    static const int A_block = 1;
-    static const bool A_transpose = false;
+    static constexpr unsigned int A_interleave() {
+        return 32;
+    }
+
+    static constexpr unsigned int A_block() {
+        return 1;
+    }
+
+    static constexpr bool A_transpose() {
+        return false;
+    }
 
     /* Kernel blocking parameters */
-    static const int out_width = 32;
-    static const int k_unroll = 1;
+    static constexpr unsigned int out_width() {
+        return 32;
+    }
+
+    static constexpr unsigned int k_unroll() {
+        return 1;
+    }
 
     kern_type kernel = a64_sgemv_pretransposed;
 

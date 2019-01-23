@@ -23,23 +23,25 @@
  */
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
+#ifdef __aarch64__
 
-
+#include <cstdint>
+#include "../std_transforms_fixed.hpp"
 
 namespace arm_gemm
 {
 
 // Actual kernel implementations
-void sve_smallK_hybrid_fp32_mla_1VLx4(const float *, int, const float *, float *, int, float, int, int, int);
+void a64_hybrid_s8s32_dot_16x4(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
+void a64_hybrid_s8s32_dot_16x4_a55(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
 
-class smallK_hybrid_fp32_mla_1VLx4
+class hybrid_s8s32_dot_16x4
 {
 public:
-    typedef float operand_type;
-    typedef float result_type;
+    typedef int8_t operand_type;
+    typedef int32_t result_type;
 
-    typedef void (*kern_type)(const float *, int, const float *, float *, int, float, int, int, int);
+    typedef void (*kern_type)(const int8_t *, int, const int8_t *, int32_t *, int, int32_t, int, int, int);
 
     /* Kernel blocking parameters */
     static unsigned int out_height()
@@ -49,25 +51,27 @@ public:
 
     static unsigned int out_width()
     {
-        return get_vector_length<float>() * 1;
+        return 16;
     }
 
     static unsigned int k_unroll()
     {
-        return 1;
+        return 4;
     }
 
-    StdTransformsSVE<operand_type, result_type, 4, 1, 1> transforms = {};
+    StdTransformsFixed<operand_type, result_type, 4, 16, 4> transforms = {};
 
     // Default to the generic kernel
-    kern_type kernel=sve_smallK_hybrid_fp32_mla_1VLx4;
+    kern_type kernel=a64_hybrid_s8s32_dot_16x4;
 
-    smallK_hybrid_fp32_mla_1VLx4(const CPUInfo *ci)
+    hybrid_s8s32_dot_16x4(const CPUInfo *ci)
     {
-
+        if (ci->get_cpu_model() == CPUModel::A55r1) {
+            kernel = a64_hybrid_s8s32_dot_16x4_a55;
+        }
     }
 };
 
 } // namespace arm_gemm
 
-#endif // __ARM_FEATURE_SVE
+#endif // __aarch64__

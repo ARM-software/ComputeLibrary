@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,8 +39,13 @@ public:
     typedef void (*kern_type)(const float *, const float *, float *, float, int, int, int);
 
     /* Kernel blocking parameters */
-    static const int out_width = 96;
-    static const int k_unroll = 1;
+    static unsigned int out_width() {
+        return 96;
+    }
+
+    static unsigned int k_unroll() {
+        return 1;
+    }
 
     kern_type kernel=a64_sgemv_trans;
 

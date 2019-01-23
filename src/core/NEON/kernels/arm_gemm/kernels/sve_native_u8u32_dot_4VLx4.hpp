@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,17 +43,17 @@ public:
     typedef void (*kern_type)(const uint8_t *, int, const uint8_t *, int ldb, uint32_t *, int, uint32_t, int, int, int);
 
     /* Kernel blocking parameters */
-    static int out_height()
+    static unsigned int out_height()
     {
         return 4;
     }
 
-    static int out_width()
+    static unsigned int out_width()
     {
         return get_vector_length<uint32_t>() * 4;
     }
 
-    static int k_unroll()
+    static unsigned int k_unroll()
     {
         return 4;
     }

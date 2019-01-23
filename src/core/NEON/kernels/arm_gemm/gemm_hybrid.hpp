@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include "arm_gemm.hpp"
+#include "ndrange.hpp"
 #include "utils.hpp"
 
 #include "mergeresults.hpp"
@@ -60,69 +61,66 @@ class GemmHybrid : public GemmCommon<To, Tr> {
     const Tr _beta;
 
     /* Blocking info */
-    unsigned int _k_block=0;
-    unsigned int _x_block=0;
-    unsigned int _Mround=0;
+    const unsigned int _k_block;
+    const unsigned int _n_block;
+    const unsigned int _Mround;
 
     /* Pretransposed buffer. */
     const Toi *_B_transposed=nullptr;
 
-    unsigned int _B_per_multi = 0;
+    const NDRange<4> _window_range;
 
-    /* We will need to walk through the blocks of B in a few contexts, so
-     * factor that out.  */
-    class blockwalker {
-    private:
-        /* Size loops, etc. based on our parent's configuration */
-        const GemmHybrid<strategy, To, Tr> &_parent;
-
-        /* K, X and multi parameters for current iteration. */
-        unsigned int _k0=0, _x0=0;
-
-        unsigned int _index=0;
-        bool _done=false;
-        bool _newkblock=true;
-
-    public:
-        blockwalker(const GemmHybrid<strategy, To, Tr> &parent) : _parent(parent) { }
-
-        unsigned int xmax() {
-            return std::min(_x0 + _parent._x_block, _parent._Nsize);
+    static unsigned int compute_k_block(const GemmArgs<Tr> &args) {
+        if (args._cfg && args._cfg->inner_block_size) {
+            return args._cfg->inner_block_size;
         }
 
-        unsigned int kmax() {
-            return std::min(_k0 + _parent._k_block, _parent._Ksize);
+        const unsigned int L1_size = args._ci->get_L1_cache_size();
+
+        // k_block: Find out how much of the larger array can be loaded into half the cache.
+        // This should account for associative caches.
+        unsigned int k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
+
+        // Needs to be (at least a single) multiple of the K unroll level.
+        k_block /= strategy::k_unroll();
+        k_block = std::max(k_block, 1U) * strategy::k_unroll();
+
+        // Now tune to presented problem size; this is how many blocks we need.
+        unsigned int numk_blocks = iceildiv(args._Ksize, k_block);
+
+        // So divide the space equally into that many blocks.
+        k_block = iceildiv(args._Ksize, numk_blocks);
+
+        // And round UP to the K unroll level required.
+        k_block = roundup(k_block, strategy::k_unroll());
+
+        return k_block;
+    }
+
+    static unsigned int compute_n_block(const GemmArgs<Tr> &args) {
+        if (args._cfg && args._cfg->outer_block_size) {
+            return args._cfg->outer_block_size;
         }
 
-        /* Advance to the next block, return false at the end. */
-        bool advance(void) {
-            if (_done) {
-                return false;
-            }
+        const unsigned int k_block = compute_k_block(args);
+        const unsigned int L2_size = args._ci->get_L2_cache_size();
 
-            _newkblock=false;
-            _x0 += _parent._x_block;
-            if (_x0 >= _parent._Nsize) {
-                _x0=0;
-                _k0 += _parent._k_block;
-                if (_k0 >= _parent._Ksize) {
-                    _done=true;
-                    return false;
-                }
-                _newkblock=true;
-            }
-            _index++;
+        // n_block: Work out how many rows (of length k_block) will fit in the L2
+        // Don't allocate more than 90% of the L2 to allow for overheads, and subtract off the L1 contents.
+        unsigned int n_block = (((L2_size * 9) / 10) - (k_block * sizeof(Toi) * (strategy::out_width() + strategy::out_height()))) /
+                               (sizeof(Toi) * k_block);
 
-            return true;
-        }
+        // Needs to be (at least a single) multiple of the kernel output width.
+        n_block /= strategy::out_width();
+        n_block = std::max(n_block, 1U) * strategy::out_width();
 
-        unsigned int k0(void) { return _k0; }
-        unsigned int x0(void) { return _x0; }
-        unsigned int index(void) { return _index; }
-        bool done(void) { return _done; }
-        bool newkblock(void) { return _newkblock; }
-    };
+        // And tune to the presented problem size.
+        unsigned int numblocks = iceildiv(args._Nsize, n_block);
+        n_block = iceildiv(args._Nsize, numblocks);
+        n_block = roundup(n_block, strategy::out_width());
 
+        return n_block;
+    }
 
 public:
     GemmHybrid(GemmHybrid &) = delete;
@@ -130,71 +128,20 @@ public:
 
     /* Constructor */
     GemmHybrid(const GemmArgs<Tr> &args)
-              : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize), _nbatches(args._nbatches), 
-                _nmulti(args._nmulti), _trB(args._trB), _beta(args._beta) {
-        const unsigned int L1_size = _ci->get_L1_cache_size();
-        const unsigned int L2_size = _ci->get_L2_cache_size();
-
-        _B_per_multi = (iceildiv(_Nsize, strategy::out_width()) * strategy::out_width()) *
-                       (iceildiv(_Ksize, strategy::k_unroll()) * strategy::k_unroll());
-
-        // Work out blocking parameters, or override from config.
-
-        if (args._cfg && args._cfg->inner_block_size) {
-            _k_block = args._cfg->inner_block_size;
-        } else {
-            // k_block: Find out how much of the larger array can be loaded into half the cache.
-            // This should account for associative caches.
-            _k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
-
-            // Needs to be (at least a single) multiple of the K unroll level.
-            _k_block /= strategy::k_unroll();
-            _k_block = std::max(_k_block, 1U) * strategy::k_unroll();
-
-            // Now tune to presented problem size; this is how many blocks we need.
-            int num_k_blocks = iceildiv(_Ksize, _k_block);
-
-            // So divide the space equally into that many blocks.
-            _k_block = iceildiv(_Ksize, num_k_blocks);
-
-            // And round UP to the K unroll level required.
-            _k_block = iceildiv(_k_block, strategy::k_unroll());
-            _k_block *= strategy::k_unroll();
-        }
-
-        if (args._cfg && args._cfg->outer_block_size) {
-            _x_block = args._cfg->outer_block_size;
-        } else {
-            // x_block: Work out how many rows (of length k_block) will fit in the L2
-            // Don't allocate more than 90% of the L2 to allow for overheads, and subtract off the L1 contents.
-            _x_block = (((L2_size * 9) / 10) - (_k_block * sizeof(Toi) * (strategy::out_width() + strategy::out_height()))) /
-                      (sizeof(Toi) * _k_block);
-
-            // Needs to be (at least a single) multiple of the kernel output width.
-            _x_block /= strategy::out_width();
-            _x_block = std::max(_x_block, 1U) * strategy::out_width();
-
-            // And tune to the presented problem size.
-            int num_x_blocks = iceildiv(_Nsize, _x_block);
-            _x_block = iceildiv(_Nsize, num_x_blocks);
-
-            _x_block = iceildiv(_x_block, strategy::out_width());
-            _x_block *= strategy::out_width();
-        }
-
-        // Work out the rounded size of M - needed for some buffers.
-        _Mround = iceildiv(_Msize, strategy::out_height());
-        _Mround *= strategy::out_height();
-    }
+            : _ci(args._ci), _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
+              _nbatches(args._nbatches), _nmulti(args._nmulti), _trB(args._trB), _beta(args._beta),
+              _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
+              _Mround(roundup(args._Msize, strategy::out_height())),
+              _window_range(iceildiv(args._Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmulti) { }
 
     // Interface implementation - Compulsory functions
-
-    // Window size: Only the last thread should do a ragged block, so dole
-    // out work in units of out_height.  Factor batches and multi into the
-    // window too.
     unsigned int get_window_size() const override {
-        // _Mround is a multiple of out_height by definition.
-        return (_Mround / strategy::out_height()) * _nbatches * _nmulti;
+        return _window_range.total_size();
+    }
+
+    // This kernel can always be dynamically scheduled.
+    bool supports_dynamic_scheduling() const override {
+        return true;
     }
 
     // Execute
@@ -206,50 +153,45 @@ public:
 
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
-
-        const unsigned int window_per_batch = iceildiv(_Msize, strategy::out_height());
-        const unsigned int window_per_multi = window_per_batch * _nbatches;
-
-        const unsigned int first_multi = start / window_per_multi;
-        const unsigned int last_multi  = end / window_per_multi;
-
-        const unsigned int first_batch = (start - (first_multi * window_per_multi)) / window_per_batch;
-        const unsigned int last_batch  = (end - (last_multi * window_per_multi)) / window_per_batch;
-
-        const unsigned int first_row = ((start - (first_multi * window_per_multi)) % window_per_batch) * strategy::out_height();
-        const unsigned int last_row  = ((end   - (last_multi  * window_per_multi)) % window_per_batch) * strategy::out_height();
-
         static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 
-        for (unsigned int multi = first_multi; multi <= last_multi; multi++) {
-            const unsigned int batch_0   = (multi == first_multi) ? first_batch : 0;
-            const unsigned int batch_max = (multi == last_multi)  ? last_batch : (_nbatches - 1);
+        /* For now, each work item implies all the K for a given output
+         * pixel (so we don't need to synchronize access to the output
+         * array).  So separate the loop over K blocks here.  */
+        for (unsigned int k0=0; k0<_Ksize; k0+=_k_block) {
+            unsigned int kmax   = std::min(k0 + _k_block, _Ksize);
+            unsigned int kern_k = roundup(kmax-k0, strategy::k_unroll());
 
-            const Toi *b_panel = _B_transposed + (multi * _B_per_multi);
+            auto p = _window_range.iterator(start, end);
 
-            for (blockwalker current(*this); !current.done(); current.advance()) {
-                int kern_k = iceildiv(current.kmax() - current.k0(), strategy::k_unroll());
-                kern_k *= strat.k_unroll();
+            if (p.done()) {
+                return;
+            }
 
-                int bblocks = iceildiv(current.xmax() - current.x0(), strategy::out_width());
+            do {
+                const unsigned int m_start = p.dim(0) * strategy::out_height();
+                const unsigned int m_end   = std::min(p.dim0_max() * strategy::out_height(), _Msize);
+                const unsigned int batch   = p.dim(1);
+                const unsigned int n0      = p.dim(2) * _n_block;
+                const unsigned int nmax    = std::min(n0 + _n_block, _Nsize);
+                const unsigned int multi   = p.dim(3);
 
-                for (unsigned int batch = batch_0; batch <= batch_max; batch++) {
-                    const unsigned int m_start = ((multi == first_multi) && (batch == first_batch)) ? first_row : 0;
-                    const unsigned int m_end   = ((multi == last_multi)  && (batch == last_batch) ) ? last_row  : _Msize;
+                const Toi *b_panel = _B_transposed +
+                                     (multi * roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll())) +
+                                     (k0 * roundup(_Nsize, strategy::out_width())) +
+                                     (n0 * kern_k);
+
 #ifdef CYCLE_PROFILING
-                    auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * bblocks * strategy::out_width());
+                auto p = prof.ScopedProfiler(PROFILE_KERNEL, (m_end - m_start) * kern_k * roundup(nmax-n0, strategy::out_width()));
 #endif
 
-                    strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + current.k0(), this->_lda,
-                                 b_panel,
-                                 this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + current.x0(), this->_ldc,
-                                 (current.k0() == 0) ? _beta : static_cast<Tr>(1),
-                                 (m_end - m_start), (current.xmax() - current.x0()), kern_k);
-                }
-
-                b_panel += (bblocks * strat.out_width() * kern_k);
-            }
+                strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
+                             b_panel,
+                             this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (m_start * this->_ldc) + n0, this->_ldc,
+                             (k0 == 0) ? _beta : static_cast<Tr>(1),
+                             (m_end - m_start), (nmax - n0), kern_k);
+            } while (p.next_dim1());
         }
     }
 
@@ -263,35 +205,31 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        return _B_per_multi * _nmulti * sizeof(Toi);
+        return roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Toi);
     }
 
+    using GemmCommon<To, Tr>::pretranspose_B_array;
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         Toi *buffer = reinterpret_cast<Toi *>(in_buffer);
         _B_transposed = buffer;
         strategy strat(_ci);
 
-        for (unsigned int multi=0; multi < _nmulti; multi++) {
-            blockwalker current(*this);
+        for (unsigned int multi=0; multi<_nmulti; multi++) {
+            for (unsigned int k0=0; k0<_Ksize; k0+=_k_block) {
+                const unsigned int kmax = std::min(k0 + _k_block, _Ksize);
+                const unsigned int k_size = roundup(kmax-k0, strategy::k_unroll());
 
-            do {
-                /* Figure out the size of each block. */
-                size_t x_size = (current.xmax() - current.x0());
-                size_t k_size = (current.kmax() - current.k0());
+                for (unsigned int x0=0; x0<_Nsize; x0+=_n_block) {
+                    const unsigned int xmax = std::min(x0+_n_block, _Nsize);
 
-                /* Round sizes up as needed. */
-                x_size = iceildiv(x_size, strategy::out_width());
-                x_size *= strategy::out_width();
+                    const unsigned int size = roundup(xmax-x0, strategy::out_width()) * k_size;
 
-                k_size = iceildiv(k_size, strategy::k_unroll());
-                k_size *= strategy::k_unroll();
+                    strat.transforms.PrepareB( buffer, B + (multi * B_multi_stride), ldb,
+                                               x0, xmax, k0, kmax, _trB);
 
-                strat.transforms.PrepareB(
-                               buffer, B + (multi * B_multi_stride), ldb,
-                               current.x0(), current.xmax(), current.k0(), current.kmax(), _trB);
-
-                buffer += (x_size * k_size);
-            } while (current.advance());
+                    buffer += size;
+                }
+            }
         }
     }
 

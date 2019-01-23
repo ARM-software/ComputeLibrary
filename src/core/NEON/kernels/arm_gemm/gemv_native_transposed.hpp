@@ -73,7 +73,7 @@ public:
 
     // Window is number of out_width blocks times number of multis.
     unsigned int get_window_size() const override {
-        return iceildiv(_Nsize, strategy::out_width) * _nmultis;
+        return iceildiv(_Nsize, strategy::out_width()) * _nmultis;
     }
 
     // Actually execute the GEMV.
@@ -83,12 +83,12 @@ public:
 #endif
         strategy strat(_ci);
 
-        const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width);
+        const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width());
         const unsigned int multi_0   = start / window_per_multi;
         const unsigned int multi_end = end   / window_per_multi;
 
-        const unsigned int n_0   = (start - (multi_0 * window_per_multi)) * strategy::out_width;
-        const unsigned int n_max = (end - (multi_end * window_per_multi)) * strategy::out_width;
+        const unsigned int n_0   = (start - (multi_0 * window_per_multi)) * strategy::out_width();
+        const unsigned int n_max = (end - (multi_end * window_per_multi)) * strategy::out_width();
 
         static_assert(std::is_same<To, Toi>::value, "gemv_transposed: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemv_transposed: Result types must be the same.");

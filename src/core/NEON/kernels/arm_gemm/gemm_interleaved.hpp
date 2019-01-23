@@ -340,7 +340,7 @@ public:
             _k_block = std::max(_k_block, 1U) * strategy::k_unroll();
 
             // Now tune to presented problem size; this is how many blocks we need.
-            int num_k_blocks = iceildiv(_Ksize, _k_block);
+            unsigned int num_k_blocks = iceildiv(_Ksize, _k_block);
 
             // So divide the space equally into that many blocks.
             _k_block = iceildiv(_Ksize, num_k_blocks);
@@ -363,7 +363,7 @@ public:
             _x_block = std::max(_x_block, 1U) * strategy::out_width();
 
             // And tune to the presented problem size.
-            int num_x_blocks = iceildiv(_Nsize, _x_block);
+            unsigned int num_x_blocks = iceildiv(_Nsize, _x_block);
             _x_block = iceildiv(_Nsize, num_x_blocks);
 
             _x_block = iceildiv(_x_block, strategy::out_width());
@@ -464,8 +464,8 @@ public:
 
         do {
             /* Figure out the size of each block. */
-            size_t x_size = (current.xmax() - current.x0());
-            size_t k_size = (current.kmax() - current.k0());
+            unsigned int x_size = (current.xmax() - current.x0());
+            unsigned int k_size = (current.kmax() - current.k0());
 
             /* Round sizes up as needed. */
             x_size = iceildiv(x_size, strategy::out_width());
@@ -480,6 +480,7 @@ public:
         return total;
     }
 
+    using GemmCommon<To, Tr>::pretranspose_B_array;
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         blockwalker current(*this);
         Toi *buffer = reinterpret_cast<Toi *>(in_buffer);
@@ -488,8 +489,8 @@ public:
 
         do {
             /* Figure out the size of each block. */
-            size_t x_size = (current.xmax() - current.x0());
-            size_t k_size = (current.kmax() - current.k0());
+            unsigned int x_size = (current.xmax() - current.x0());
+            unsigned int k_size = (current.kmax() - current.k0());
 
             /* Round sizes up as needed. */
             x_size = iceildiv(x_size, strategy::out_width());

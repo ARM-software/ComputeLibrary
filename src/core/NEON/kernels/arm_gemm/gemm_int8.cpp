@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_gemm.hpp"
 #include "gemm_common.hpp"
+#include "gemm_hybrid.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 #include "gemm_native.hpp"
@@ -32,6 +33,7 @@
 #include "kernels/a64_gemm_s16_12x8.hpp"
 #include "kernels/a64_gemm_s8_12x8.hpp"
 #include "kernels/a64_gemm_s8_4x4.hpp"
+#include "kernels/a64_hybrid_s8s32_dot_16x4.hpp"
 #include "kernels/sve_interleaved_s8s32_dot_3VLx8.hpp"
 #include "kernels/sve_native_s8s32_dot_4VLx4.hpp"
 
@@ -54,6 +56,13 @@ static const GemmImplementation<int8_t, int32_t> gemm_s8_methods[] = {
     [](const GemmArgs<int32_t> &args) { return new GemmInterleaved<interleaved_s8s32_dot_3VLx8, int8_t, int32_t>(args); }
 },
 #endif
+{
+    GemmMethod::GEMM_HYBRID,
+    "hybrid_s8s32_dot_16x4",
+    [](const GemmArgs<int32_t> &args) { return args._ci->has_dotprod() && args._Ksize>=16 && (args._Ksize % 16 == 0) && (args._Nsize % 16 == 0) && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs<int32_t> &args) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs<int32_t> &args) { return new GemmHybrid<hybrid_s8s32_dot_16x4, int8_t, int32_t>(args); }
+},
 {
     GemmMethod::GEMM_INTERLEAVED,
     "gemm_s8_12x8",
