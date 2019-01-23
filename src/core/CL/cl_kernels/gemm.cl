@@ -476,7 +476,7 @@ __kernel void gemm_reshape_lhs_matrix_t(TENSOR3D_DECLARATION(src),
     zin6 = min((uint)(DEPTH_GEMM3D - 1), zin6);
     zin6 *= (cross_plane_pad * src_stride_y);
 #endif // M0 > 6
-#if M0 > 6
+#if M0 > 7
     zin7 = (7 + (uint)(y * M0)) / (uint)HEIGHT_GEMM3D;
     zin7 = min((uint)(DEPTH_GEMM3D - 1), zin7);
     zin7 *= (cross_plane_pad * src_stride_y);
