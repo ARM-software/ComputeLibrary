@@ -54,6 +54,18 @@ Binaries available here:
 - [v17.04](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.04/arm_compute-v17.04-bin.tar.gz)
 - [v17.03.1](https://github.com/ARM-software/ComputeLibrary/releases/download/v17.03.1/arm_compute-v17.03.1-bin.tar.gz)
 
-Contact: developer-compute@arm.com
-
 License & Contributions: The software is provided under MIT license. Contributions to this project are accepted under the same license.
+
+### Public mailing list
+For technical discussion, the ComputeLibrary project has a public mailing list: acl-dev@lists.linaro.org
+The list is open to anyone inside or outside of Arm to self subscribe.  In order to subscribe, please visit the following website:
+https://lists.linaro.org/mailman/listinfo/acl-dev
+
+### Developer Certificate of Origin (DCO)
+Before the ComputeLibrary project accepts your contribution, you need to certify its origin and give us your permission. To manage this process we use the Developer Certificate of Origin (DCO) V1.1 (https://developercertificate.org/)
+
+To indicate that you agree to the the terms of the DCO, you "sign off" your contribution by adding a line with your name and e-mail address to every git commit message:
+
+```Signed-off-by: John Doe <john.doe@example.org>```
+
+You must use your real name, no pseudonyms or anonymous contributions are accepted.
