@@ -74,19 +74,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
 template <typename T>
 using CLBitwiseAndFixture = BitwiseAndValidationFixture<CLTensor, CLAccessor, CLBitwiseAnd, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::U8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

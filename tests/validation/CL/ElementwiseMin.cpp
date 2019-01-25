@@ -193,13 +193,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMinS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -239,30 +233,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMinFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMinFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMinFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
 template <typename T>
 using CLElementwiseMinBroadcastFixture = ElementwiseMinBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseMin, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMinBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseMinFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLElementwiseMinBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       ElementwiseMinFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMinBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                                                                                                                        ElementwiseMinFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

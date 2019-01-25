@@ -194,13 +194,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseSquaredDiffS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -240,29 +234,15 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseSquaredDiffFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseSquaredDiffFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
 template <typename T>
 using CLElementwiseSquaredDiffBroadcastFixture = ElementwiseSquaredDiffBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseSquaredDiffFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLElementwiseSquaredDiffBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
                        ElementwiseSquaredDiffFP32Dataset))
 {
     // Validate output

@@ -61,18 +61,13 @@ const auto data       = combine(datasets::SmallDirectConvolutionShapes(), combin
 const auto data_small = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_one_small));
 
 /** Direct convolution nightly data set. */
-const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
+const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
 /** Direct convolution precommit data set. */
 const auto data_precommit = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
 } // namespace
 
 TEST_SUITE(CL)

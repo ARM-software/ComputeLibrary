@@ -193,13 +193,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxS16Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMaxFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMaxS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -239,13 +233,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->padding(), padding);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMaxFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMaxFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseMaxFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMaxFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -254,15 +242,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLElementwiseMaxFixture<float>, framework::Data
 template <typename T>
 using CLElementwiseMaxBroadcastFixture = ElementwiseMaxBroadcastValidationFixture<CLTensor, CLAccessor, CLElementwiseMax, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseMaxFP32Dataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       ElementwiseMaxFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseMaxBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                                                                                                                        ElementwiseMaxFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

@@ -70,21 +70,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
 template <typename T>
 using NEBitwiseNotFixture = BitwiseNotValidationFixture<Tensor, Accessor, NEBitwiseNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseNotFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBitwiseNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEBitwiseNotFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::U8)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // BitwiseNot
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -143,13 +143,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     validate(dst.info()->valid_region(), valid_region);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseSquaredDiffS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -234,18 +228,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     validate(dst.info()->valid_region(), valid_region);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseSquaredDiffFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseSquaredDiffFP32Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseSquaredDiffFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseSquaredDiffFP32Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
 template <typename T>
 using NEElementwiseSquaredDiffBroadcastFixture = ElementwiseSquaredDiffBroadcastValidationFixture<Tensor, Accessor, NEElementwiseSquaredDiff, T>;
 

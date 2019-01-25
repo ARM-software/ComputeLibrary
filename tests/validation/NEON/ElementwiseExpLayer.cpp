@@ -92,19 +92,12 @@ TEST_SUITE_END() // FP16
 #endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEExpLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                      DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEExpLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEExpLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                    DataType::F32)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp32);
-}
-
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 

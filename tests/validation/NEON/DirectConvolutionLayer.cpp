@@ -85,19 +85,14 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                   combine(framework::dataset::make("PadY", { 1 }),
                                                           framework::dataset::make("KernelSize", 3))))));
 
-const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4, 8 }));
-const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4, 8 }));
+const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4 }));
 
 const auto data_precommit = combine(data, framework::dataset::make("NumKernels", { 1 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
 } // namespace
 
 TEST_SUITE(NEON)

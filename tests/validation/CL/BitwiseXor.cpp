@@ -74,19 +74,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
 template <typename T>
 using CLBitwiseXorFixture = BitwiseXorValidationFixture<CLTensor, CLAccessor, CLBitwiseXor, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseXorFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseXorFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBitwiseXorFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::U8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

@@ -102,13 +102,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinFixture<int32_t>, framework::Da
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseMinFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMinS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinS16Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -159,13 +153,7 @@ TEST_SUITE_END() // F16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseMinFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseMinFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseMinFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseMinFP32Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -174,15 +162,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseMinFixture<float>, framework::Data
 template <typename T>
 using NEElementwiseMinBroadcastFixture = ElementwiseMinBroadcastValidationFixture<Tensor, Accessor, NEElementwiseMin, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMinBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseMinFP32Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEElementwiseMinBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
-                       ElementwiseMinFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseMinBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
+                                                                                                                        ElementwiseMinFP32Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);

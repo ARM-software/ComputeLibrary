@@ -117,13 +117,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
     validate(dst.info()->valid_region(), valid_region);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseDivisionFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), ElementwiseDivisionFP32Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseDivisionFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), ElementwiseDivisionFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEElementwiseDivisionFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), ElementwiseDivisionFP32Dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -132,14 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEElementwiseDivisionFixture<float>, framework:
 template <typename T>
 using NEElementwiseDivisionBroadcastFixture = ElementwiseDivisionBroadcastValidationFixture<Tensor, Accessor, NEElementwiseDivision, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseDivisionBroadcastFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapesBroadcast(),
-                       ElementwiseDivisionFP32Dataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLargeBroadcast, NEElementwiseDivisionBroadcastFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapesBroadcast(),
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NEElementwiseDivisionBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
                        ElementwiseDivisionFP32Dataset))
 {
     // Validate output

@@ -68,14 +68,8 @@ template <typename T>
 using CLCopyFixture = CopyFixture<CLTensor, CLAccessor, CLCopy, T>;
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<float>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                  DataType::F32)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCopyFixture<float>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<float>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                            DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -83,14 +77,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLCopyFixture<float>, framework::DatasetMode::N
 TEST_SUITE_END() // F32
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                    DataType::U8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCopyFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                  DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<uint8_t>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                              DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -98,14 +86,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLCopyFixture<uint8_t>, framework::DatasetMode:
 TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                     DataType::U16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLCopyFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                   DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLCopyFixture<uint16_t>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                               DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
