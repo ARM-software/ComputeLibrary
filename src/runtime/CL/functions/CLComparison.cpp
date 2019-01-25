@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,4 +75,12 @@ Status CLComparisonStatic<COP>::validate(const ITensorInfo *input1, const ITenso
 {
     return CLComparisonKernel::validate(input1, input2, output, COP);
 }
+
+// Supported Specializations
+template class CLComparisonStatic<ComparisonOperation::Equal>;
+template class CLComparisonStatic<ComparisonOperation::NotEqual>;
+template class CLComparisonStatic<ComparisonOperation::Greater>;
+template class CLComparisonStatic<ComparisonOperation::GreaterEqual>;
+template class CLComparisonStatic<ComparisonOperation::Less>;
+template class CLComparisonStatic<ComparisonOperation::LessEqual>;
 } // namespace arm_compute

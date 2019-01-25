@@ -104,4 +104,12 @@ Status NEElementwiseComparison::validate(const ITensorInfo *input1, const ITenso
 {
     return NEComparisonOperationKernel::validate(op, input1, input2, output);
 }
+
+// Supported Specializations
+template class NEElementwiseComparisonStatic<ComparisonOperation::Equal>;
+template class NEElementwiseComparisonStatic<ComparisonOperation::NotEqual>;
+template class NEElementwiseComparisonStatic<ComparisonOperation::Greater>;
+template class NEElementwiseComparisonStatic<ComparisonOperation::GreaterEqual>;
+template class NEElementwiseComparisonStatic<ComparisonOperation::Less>;
+template class NEElementwiseComparisonStatic<ComparisonOperation::LessEqual>;
 } // namespace arm_compute
