@@ -97,14 +97,17 @@ NEScale::NEScale() // NOLINT
       _dx(),
       _dy(),
       _scale_kernel(),
-      _border_handler()
+      _border_handler(),
+      _use_padding(true)
 {
 }
 
-void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), policy, border_mode, constant_border_value, sampling_policy));
+    ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), policy, border_mode, constant_border_value, sampling_policy, use_padding));
+
+    _use_padding = use_padding;
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
@@ -134,7 +137,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
 
-            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_mode, sampling_policy);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -152,7 +155,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, sampling_policy);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -165,18 +168,20 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         }
         case InterpolationPolicy::AREA:
         {
-            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_mode);
+            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_mode, constant_border_value);
             break;
         }
         default:
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
-
-    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, constant_border_value);
+    if(use_padding)
+    {
+        _border_handler.configure(input, _scale_kernel.border_size(), border_mode, constant_border_value);
+    }
 }
 
 Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
-                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
@@ -213,12 +218,15 @@ Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, In
     }
 
     ARM_COMPUTE_RETURN_ON_ERROR(NEScaleKernel::validate(input->clone().get(), dx, dy, offsets, output->clone().get(),
-                                                        policy, border_mode, sampling_policy));
+                                                        policy, border_mode, constant_border_value, sampling_policy, use_padding));
     return Status{};
 }
 
 void NEScale::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    if(_use_padding)
+    {
+        NEScheduler::get().schedule(&_border_handler, Window::DimZ);
+    }
     NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,9 +53,10 @@ public:
      * @param[in]      border_mode           Strategy to use for borders.
      * @param[in]      constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in]      sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in]      use_padding           (Optional) Is padding in use or not. Defaults to true.
      */
     void configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value = PixelValue(),
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScale
      *
      * @param[in] input                 Source tensor. Data type supported: U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
@@ -64,11 +65,12 @@ public:
      * @param[in] border_mode           Strategy to use for borders.
      * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode,
-                           PixelValue constant_border_value = PixelValue(), SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+                           PixelValue constant_border_value = PixelValue(), SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool use_padding = true);
 
     // Inherited methods overridden:
     void run() override;
@@ -79,6 +81,7 @@ private:
     Tensor             _dy;             /**< Element's distance between the Y real coordinate and the smallest Y following integer */
     NEScaleKernel      _scale_kernel;   /**< Kernel to perform the scaling */
     NEFillBorderKernel _border_handler; /**< kernel to handle tensor borders */
+    bool               _use_padding;    /**< Is padding used on the tensors */
 };
 }
 #endif /*__ARM_COMPUTE_NESCALEIMAGE_H__ */
