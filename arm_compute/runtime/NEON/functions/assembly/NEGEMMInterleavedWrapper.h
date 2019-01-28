@@ -140,6 +140,7 @@ private:
     std::vector<MatrixMultiplyWorkload>                     _mm_workloads{};
     std::vector<IScheduler::Workload>                       _workloads{};
     std::string                                             _tag{};
+    unsigned int                                            _num_windows{ 1 };
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGEMMINTERLEAVEDWRAPPER_H__ */

@@ -52,6 +52,11 @@ class IInterleavedStrategy
 public:
     /** Virtual Destructor */
     virtual ~IInterleavedStrategy() = default;
+    /** Return output height of the interleaved strategy
+     *
+     * @return Output height of strategy
+     */
+    virtual unsigned int out_height() const = 0;
     /** Instantiate and configure a prepareB Kernel
      *
      * @param[in] b             Input tensor B.
@@ -117,6 +122,10 @@ public:
 
 public:
     // Inherited methods overridden
+    unsigned int out_height() const override
+    {
+        return strategy::out_height();
+    }
     std::unique_ptr<NEGEMMInterleavedPrepareBWrapperKernel> instantiate_prepareB(const ITensor                      *b,
                                                                                  ITensor                            *transformed_b,
                                                                                  const INEGEMMWrapperKernel::Params &params,

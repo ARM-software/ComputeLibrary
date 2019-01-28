@@ -207,7 +207,7 @@ void NEGEMMInterleavedWrapper::prepare()
 
         //Maximum number of workloads to create:
         const unsigned int num_threads    = NEScheduler::get().num_threads();
-        const unsigned int max_iterations = num_threads == 1 ? 1 : num_threads;
+        const unsigned int max_iterations = std::max(num_threads, _num_windows);
         //Maximum number of iterations the parameters allow:
         const unsigned int num_iterations = _batch_window.num_iterations_total();
         // Keep the smallest of the two:
@@ -357,6 +357,7 @@ void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITe
 
     // Get strategy
     std::unique_ptr<detail::IInterleavedStrategy> strategy = detail::create_strategy(gemm_kernel_info.name);
+    _num_windows                                           = iceildiv(_params.M, strategy->out_height()) * _params.batches;
     ARM_COMPUTE_ERROR_ON(strategy == nullptr);
 
     if(!_pretranspose_b)
