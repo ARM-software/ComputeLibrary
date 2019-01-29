@@ -140,6 +140,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     // Activation functions : QASYMM8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
     {
+        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
     };
