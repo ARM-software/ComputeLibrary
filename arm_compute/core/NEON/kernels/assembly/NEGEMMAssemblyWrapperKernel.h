@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,8 @@
 #define __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
 
 #include "gemm_common.hpp"
 
@@ -52,20 +52,28 @@ class NEGEMMAssemblyWrapperKernel final : public INEKernel
 public:
     /** Constructor
      */
-    NEGEMMAssemblyWrapperKernel() : _kernel(nullptr) {}
+    NEGEMMAssemblyWrapperKernel()
+        : _kernel(nullptr), _kernel_name_tag()
+    {
+    }
 
-    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &) = delete;
+    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &)  = delete;
     NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &&) = default;
-    NEGEMMAssemblyWrapperKernel & operator=(NEGEMMAssemblyWrapperKernel &) = delete;
+    NEGEMMAssemblyWrapperKernel &operator=(NEGEMMAssemblyWrapperKernel &) = delete;
 
     const char *name() const override
     {
-        return "NEGEMMAssemblyWrapperKernel";
+        std::string name = "NEGEMMAssemblyWrapperKernel";
+        if(!_kernel_name_tag.empty())
+        {
+            name += "/" + _kernel_name_tag;
+        }
+        return name.c_str();
     }
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override
     {
-        ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void*>(_kernel)));
+        ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(_kernel)));
         ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
         auto first = window.x().start();
         auto last  = window.x().end();
@@ -76,18 +84,20 @@ public:
      * @param[in] kernel      Pointer to an assembly kernel implementation.
      * @param[in] num_threads Number of concurrent threads which will execute the kernel.
      */
-    void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel)
+    void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel, std::string kernel_name_tag)
     {
-        ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void*>(kernel)));
-        _kernel = kernel;
-        auto   win_last = _kernel->get_window_size();
+        ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(kernel)));
+        _kernel          = kernel;
+        _kernel_name_tag = kernel_name_tag;
+        auto   win_last  = _kernel->get_window_size();
         Window win;
         win.set(Window::DimX, Window::Dimension(0, win_last, 1));
         INEKernel::configure(win);
     }
-private:
-    arm_gemm::GemmCommon<TypeInput, TypeOutput>* _kernel;
-};
 
+private:
+    arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;
+    std::string _kernel_name_tag;
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__ */
