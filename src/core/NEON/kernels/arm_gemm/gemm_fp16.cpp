@@ -63,6 +63,15 @@ static const GemmImplementation<__fp16, __fp16> gemm_fp16_methods[] = {
     [](const GemmArgs<__fp16> &args) { return new GemmInterleaved<hgemm_24x8, __fp16, __fp16>(args); }
 },
 #endif
+#if defined(__arm__)
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "sgemm_8x6",
+    [](const GemmArgs<__fp16> &args) { return true; },
+    [](const GemmArgs<__fp16> &args) { return true; },
+    [](const GemmArgs<__fp16> &args) { return new GemmInterleaved<sgemm_8x6, __fp16, __fp16>(args); }
+},
+#endif
 {
     GemmMethod::DEFAULT,
     "",
