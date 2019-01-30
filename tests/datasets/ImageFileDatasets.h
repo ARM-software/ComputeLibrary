@@ -101,7 +101,7 @@ public:
     }
 };
 
-/** Data set containing names of small image files. */
+/** Data set containing names of large image files. */
 class LargeImageFiles final : public ImageFileDataset
 {
 public:
@@ -110,7 +110,6 @@ public:
         add_image_file("1280x720.ppm");
         add_image_file("1920x1080.ppm");
         add_image_file("4160x3120.ppm");
-        add_image_file("5120x3200.ppm");
     }
 };
 
