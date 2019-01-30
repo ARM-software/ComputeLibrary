@@ -827,10 +827,11 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
  * @param[in] input_shape   Input shape
  * @param[in] weights_shape Weights shape
  * @param[in] conv_info     Convolution information (containing strides)
+ * @param[in] data_layout   (Optional) Data layout of the input and weights tensor
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info);
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW);
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *

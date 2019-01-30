@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Helpers.h"
 
+#include "arm_compute/core/Utils.h"
 #include "support/ToolchainSupport.h"
 
 #include <algorithm>
@@ -325,17 +326,19 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
-PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
+PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout)
 {
-    const auto &strides         = conv_info.stride();
-    const int   out_width       = std::ceil(float(input_shape.x()) / float(strides.first));
-    const int   out_height      = std::ceil(float(input_shape.y()) / float(strides.second));
-    const int   pad_width       = ((out_width - 1) * strides.first + weights_shape.x() - input_shape.x());
-    const int   pad_height      = ((out_height - 1) * strides.second + weights_shape.y() - input_shape.y());
-    const int   same_pad_left   = pad_width / 2;
-    const int   same_pad_top    = pad_height / 2;
-    const int   same_pad_right  = pad_width - same_pad_left;
-    const int   same_pad_bottom = pad_height - same_pad_top;
+    const unsigned int width_idx       = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx      = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto        &strides         = conv_info.stride();
+    const int          out_width       = std::ceil(float(input_shape[width_idx]) / float(strides.first));
+    const int          out_height      = std::ceil(float(input_shape[height_idx]) / float(strides.second));
+    const int          pad_width       = ((out_width - 1) * strides.first + weights_shape[width_idx] - input_shape[width_idx]);
+    const int          pad_height      = ((out_height - 1) * strides.second + weights_shape[height_idx] - input_shape[height_idx]);
+    const int          same_pad_left   = pad_width / 2;
+    const int          same_pad_top    = pad_height / 2;
+    const int          same_pad_right  = pad_width - same_pad_left;
+    const int          same_pad_bottom = pad_height - same_pad_top;
 
     return PadStrideInfo(strides.first, strides.second, same_pad_left, same_pad_right, same_pad_top, same_pad_bottom, DimensionRoundingType::CEIL);
 }
