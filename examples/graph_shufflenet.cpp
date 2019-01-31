@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ public:
         // Set default layout if needed (Single kernel grouped convolution not yet supported int NHWC)
         if(!common_opts.data_layout->is_set())
         {
-            common_params.data_layout = DataLayout::NCHW;
+            common_params.data_layout = DataLayout::NHWC;
         }
 
         // Checks
