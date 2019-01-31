@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,8 +148,7 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
         return (*found).second;
     }
 
-    if(dilation != Size2D(1U, 1U) || Scheduler::get().cpu_info().get_cpu_model() == CPUModel::A53
-       || input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) <= 16)
+    if(dilation != Size2D(1U, 1U) || input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) <= 16)
     {
         return ConvolutionMethod::GEMM;
     }
