@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,6 +156,18 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info, weights_info);
     _scaled_output.allocator()->allocate();
+}
+
+void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
+                                     const WeightsInfo &weights_info)
+{
+    configure(input, weights, bias, output, info, 0, 0, weights_info);
+}
+
+Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &info,
+                                      const WeightsInfo &weights_info)
+{
+    return CLDeconvolutionLayer::validate(input, weights, bias, output, info, 0, 0, weights_info);
 }
 
 void CLDeconvolutionLayer::run()

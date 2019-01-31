@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ namespace reference
 {
 template <typename T, typename TB>
 SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
-                                    const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a)
+                                    const PadStrideInfo &info)
 {
     // Create reference
     const int stride_x           = info.stride().first;
@@ -45,8 +45,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     const int weights_upper_dims = weights.shape().total_size() / (weights_width * weights_height);
 
     // Find the upsampled dimensions
-    unsigned int out_x = (src.shape().x() - 1) * stride_x + a.first + 1;
-    unsigned int out_y = (src.shape().y() - 1) * stride_y + a.second + 1;
+    unsigned int out_x = (src.shape().x() - 1) * stride_x + 1;
+    unsigned int out_y = (src.shape().y() - 1) * stride_y + 1;
 
     // Find the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int padx = output_shape.x() - (out_x - weights_width + 1);
@@ -64,12 +64,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     const int width_scaled  = scaled.shape().x();
     const int height_scaled = scaled.shape().y();
     const int num_2d_slices = src.shape().total_size() / (width_in * height_in);
-    const int ax            = a.first;  // The number of zeros added to right edge of the input.
-    const int ay            = a.second; // The number of zeros added to top edge of the input.
     ARM_COMPUTE_ERROR_ON(info.pad().first > (weights.shape().x() - 1));
-
-    ARM_COMPUTE_ERROR_ON_MSG(ax > stride_x - 1, "ax must be smaller than stride_x");
-    ARM_COMPUTE_ERROR_ON_MSG(ay > stride_y - 1, "ay must be smaller than stride_y");
 
     if(src.data_type() == DataType::QASYMM8)
     {
@@ -100,9 +95,9 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
         const int offset_slice_in  = slice * width_in * height_in;
         const int offset_slice_out = slice * width_scaled * height_scaled;
         const int start_x          = padx / 2;
-        const int start_y          = ay + pady / 2;
+        const int start_y          = pady / 2;
         const int end_y            = height_scaled - pady / 2;
-        const int end_x            = width_scaled - ax - padx / 2;
+        const int end_x            = width_scaled - padx / 2;
 
         for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
         {
@@ -120,11 +115,11 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 }
 
 template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                   const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
+                                                   const PadStrideInfo &info);
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
+                                                 const PadStrideInfo &info);
 template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                                const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
+                                                const PadStrideInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

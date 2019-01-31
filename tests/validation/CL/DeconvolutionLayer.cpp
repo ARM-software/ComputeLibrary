@@ -50,16 +50,16 @@ constexpr AbsoluteTolerance<float>  tolerance_qasymm8(0.0);               /**< T
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
-                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
-                     * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+                     * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
-                               * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+                               * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
-                     * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+                     * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW });
 } // namespace
@@ -74,12 +74,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),  // Invalid bias shape
                                             TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32), // Window shrink
+                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32), // Inner border different from 0
                                             TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                           }),
     framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                               TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
@@ -88,11 +90,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(4U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(4U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
@@ -100,20 +104,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 1, 1),
                                                 PadStrideInfo(1, 1, 0, 0),
+                                                PadStrideInfo(1, 1, 0, 0),
                                            })),
-    framework::dataset::make("ax",          {   1U,
-                                                1U,
-                                                1U,
+    framework::dataset::make("ax",          {   0U,
+                                                0U,
+                                                0U,
                                                 0U,
                                                 0U,
                                             })),
-   framework::dataset::make("ay",           {   1U,
-                                                1U,
-                                                1U,
+   framework::dataset::make("ay",           {   0U,
                                                 0U,
+                                                0U,
+                                                0U,
+                                                1U,
                                                 0U,
                                             })),
-    framework::dataset::make("Expected", { false, false, false, false, true })),
+    framework::dataset::make("Expected", { false, false, false, false, false, true })),
     input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)
 {
     bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info, ax, ay));

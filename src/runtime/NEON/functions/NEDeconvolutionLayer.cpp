@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,6 +144,15 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info);
     _scaled_output.allocator()->allocate();
+}
+Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info)
+{
+    return NEDeconvolutionLayer::validate(input, weights, bias, output, info, 0, 0);
+}
+
+void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info)
+{
+    configure(input, weights, bias, output, info, 0, 0);
 }
 
 void NEDeconvolutionLayer::run()

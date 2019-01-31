@@ -238,6 +238,10 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.02 Public major release
+ - Deprecated functions/interfaces
+    - Usage of inner_border_right and inner_border_top has been deprecated in @ref CLDeconvolutionLayer and @ref NEDeconvolutionLayer
+
 v18.11 Public major release
  - Various bug fixes.
  - Various optimisations.
