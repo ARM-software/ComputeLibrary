@@ -100,8 +100,9 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
 
     ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                             "For QASYMM8 only relu and lower/upper bounded relu are supported");
+                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                             "For QASYMM8 only logistic, relu and lower/upper bounded relu are supported");
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -140,6 +141,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     // Activation functions : QASYMM8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
     {
+        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qasymm8_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
@@ -357,6 +359,44 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
                 // Re-quantize to new output space
                 tmp = vmlaq_qasymm8(tmp, vs, vo);
             }
+            else if(act == ActivationFunction::LOGISTIC)
+            {
+                const auto scale_in  = vdupq_n_f32(qi_in.scale);
+                const auto off_in    = vdupq_n_f32(qi_in.offset);
+                const auto scale_out = vdupq_n_f32(qi_out.scale);
+                const auto off_out   = vdupq_n_f32(qi_out.offset);
+                const auto vconst_1  = vdupq_n_f32(1.f);
+
+                const auto vin_low        = wrapper::vgetlow(vin);
+                const auto vin_high       = wrapper::vgethigh(vin);
+                uint16x8_t vin_low_u16x8  = wrapper::vmovl(vin_low);
+                uint16x8_t vin_high_u16x8 = wrapper::vmovl(vin_high);
+                // Convert uint16 vectors to uint32 vectors
+                uint32x4_t A_u32x4 = wrapper::vmovl(wrapper::vgetlow(vin_low_u16x8));
+                uint32x4_t B_u32x4 = wrapper::vmovl(wrapper::vgethigh(vin_low_u16x8));
+                uint32x4_t C_u32x4 = wrapper::vmovl(wrapper::vgetlow(vin_high_u16x8));
+                uint32x4_t D_u32x4 = wrapper::vmovl(wrapper::vgethigh(vin_high_u16x8));
+                // Convert uint32 vectors to float32 vectors
+                float32x4_t A_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(A_u32x4), off_in), scale_in);
+                float32x4_t B_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(B_u32x4), off_in), scale_in);
+                float32x4_t C_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(C_u32x4), off_in), scale_in);
+                float32x4_t D_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(D_u32x4), off_in), scale_in);
+                // Perform activation
+                A_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(A_f32x4))));
+                B_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(B_f32x4))));
+                C_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(C_f32x4))));
+                D_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(D_f32x4))));
+                // Convert float32 vectors to uint32 vectors
+                A_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(A_f32x4, scale_out), off_out));
+                B_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(B_f32x4, scale_out), off_out));
+                C_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(C_f32x4, scale_out), off_out));
+                D_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(D_f32x4, scale_out), off_out));
+                // Convert uint32 vectors to uint16 vectors (with saturation)
+                vin_low_u16x8  = wrapper::vcombine(wrapper::vqmovn(A_u32x4), wrapper::vqmovn(B_u32x4));
+                vin_high_u16x8 = wrapper::vcombine(wrapper::vqmovn(C_u32x4), wrapper::vqmovn(D_u32x4));
+                // convert uint16 vectors to uint8 vectors (with saturation)
+                tmp = wrapper::vcombine(wrapper::vqmovn(vin_low_u16x8), wrapper::vqmovn(vin_high_u16x8));
+            }
             else
             {
                 ARM_COMPUTE_ERROR("Unsupported activation function");
@@ -383,6 +423,12 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             {
                 tmp = std::min(a, std::max(b, in));
                 tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+            }
+            else if(act == ActivationFunction::LOGISTIC)
+            {
+                float tmp_f = scvt_f32_qasymm8(in, qi_in.scale, qi_in.offset);
+                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
+                tmp         = sqcvt_qasymm8_f32(tmp_f, qi_out.scale, qi_out.offset);
             }
             else
             {
