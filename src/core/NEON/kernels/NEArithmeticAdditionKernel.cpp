@@ -166,7 +166,6 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
     const float output_scale    = out->info()->quantization_info().scale;
-    const float invoutput_scale = 1.f / output_scale;
     const int   output_offset   = out->info()->quantization_info().offset;
 
     const float32x4_t vscale1    = vdupq_n_f32(in1->info()->quantization_info().scale);
@@ -230,10 +229,17 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
                 const int32x4x4_t rf =
                 {
                     {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#else //__aarch64__
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#endif //__aarch64__
                     }
                 };
 
@@ -246,7 +252,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             for(; x < window_end_x; ++x)
             {
                 const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = std::max<int32_t>(0, std::min<int32_t>((afs + bfs) * invoutput_scale + output_offset, 255));
+                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs),RoundingPolicy::TO_NEAREST_UP);
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -300,10 +306,17 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
                 const int32x4x4_t rf =
                 {
                     {
+#ifdef __aarch64__
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
+                        vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#else //__aarch64__
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
+#endif //__aarch64__
                     }
                 };
 
@@ -317,7 +330,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             {
                 const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - input1_qinfo.offset) * input1_qinfo.scale;
                 const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - input2_qinfo.offset) * input2_qinfo.scale;
-                *(output_ptr + x) = std::max<int32_t>(0, std::min<int32_t>((afs + bfs) * invoutput_scale + output_offset, 255));
+                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs),RoundingPolicy::TO_NEAREST_UP);
             }
         },
         input1, input2, output);
