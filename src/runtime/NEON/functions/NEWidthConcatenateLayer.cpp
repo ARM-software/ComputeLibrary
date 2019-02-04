@@ -40,7 +40,8 @@ NEWidthConcatenateLayer::NEWidthConcatenateLayer()
 {
 }
 
-Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+template <typename TensorInfoType, typename>
+inline Status NEWidthConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
@@ -60,8 +61,8 @@ Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &input
 
     return Status{};
 }
-
-void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+template <typename TensorType, typename>
+inline void NEWidthConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output)
 {
     _num_inputs = inputs_vector.size();
 
@@ -85,6 +86,26 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
         _concat_kernels_vector[i].configure(inputs_vector.at(i), width_offset, output);
         width_offset += inputs_vector.at(i)->info()->dimension(0);
     }
+}
+
+void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+{
+    configure_internal(std::move(inputs_vector), output);
+}
+
+void NEWidthConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, ITensor *output)
+{
+    configure_internal(std::move(inputs_vector), output);
+}
+
+Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+{
+    return validate_internal(inputs_vector, output);
+}
+
+Status NEWidthConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+{
+    return validate_internal(inputs_vector, output);
 }
 
 void NEWidthConcatenateLayer::run()
