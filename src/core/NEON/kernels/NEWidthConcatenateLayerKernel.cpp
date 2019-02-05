@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -110,15 +111,28 @@ void NEWidthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &
     uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _width_offset * _output->info()->strides_in_bytes()[0];
 
     // Create iterators
-    Iterator input(_input, window);
-    Iterator output(_output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
+    Iterator                input(_input, window);
+    Iterator                output(_output, window);
+    const DataType          dt           = _input->info()->data_type();
+    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
+    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
-        const auto in_ptr  = input.ptr();
-        const auto out_ptr = output_ptr + output.offset();
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            vst1q_u8(output_ptr + output.offset(), vquantize(vdequantize(vld1q_u8(input.ptr()), input_qinfo), output_qinfo));
+        },
+        input, output);
+    }
+    else
+    {
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            const auto in_ptr  = input.ptr();
+            const auto out_ptr = output_ptr + output.offset();
 
-        wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
-    },
-    input, output);
+            wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
+        },
+        input, output);
+    }
 }
