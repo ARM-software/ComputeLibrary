@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f);
+RelativeTolerance<float> tolerance_f32(0.00001f);
 RelativeTolerance<half>  tolerance_f16(half(0.1));
 } // namespace
 
@@ -160,6 +160,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<float>, framework::DatasetMo
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target_scratch), _reference_scratch, tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
@@ -171,6 +172,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMod
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target_scratch), _reference_scratch, tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

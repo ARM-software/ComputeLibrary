@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,8 +111,8 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _forget_gate_out2.allocator()->allocate();
     _memory_group.manage(&_forget_gate_out5);
     _accum_forget_gate1.configure(ArithmeticOperation::ADD, &_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out5, ConvertPolicy::SATURATE);
+    _forget_gate_out1.allocator()->allocate();
     CLTensor *forget_gate_out = &_forget_gate_out5;
-
     if(lstm_params.has_peephole_opt())
     {
         _forget_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
@@ -129,17 +129,18 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     {
         _forget_gate_out3.allocator()->allocate();
     }
-    _activation_forget_gate.configure(forget_gate_out, &_forget_gate_out1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+    _activation_forget_gate.configure(forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
     // Configure block that calculates the input gate
     // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
     // input_gate = 1 - forget_gate, with CIFG
     _input_gate_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    CLTensor *input_gate_out = &_input_gate_out1;
     if(lstm_params.has_cifg_opt())
     {
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-        _subtract_input_gate.configure(ArithmeticOperation::SUB, &_ones, &_forget_gate_out1, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _subtract_input_gate.configure(ArithmeticOperation::SUB, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
     }
@@ -161,16 +162,22 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         _input_gate_out2.allocator()->allocate();
         _memory_group.manage(&_input_gate_out4);
         _accum_input_gate1.configure(ArithmeticOperation::ADD, &_input_gate_out1, &_input_gate_out3, &_input_gate_out4, ConvertPolicy::SATURATE);
+        _input_gate_out3.allocator()->allocate();
+        input_gate_out = &_input_gate_out4;
         if(_run_peephole_opt)
         {
             _memory_group.manage(&_input_gate_out5);
             _pixelwise_mul_input_gate.configure(cell_state_in, lstm_params.cell_to_input_weights(), &_input_gate_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
             _accum_input_gate2.configure(&_input_gate_out4, &_input_gate_out5, &_input_gate_out1, ConvertPolicy::SATURATE);
+            _input_gate_out4.allocator()->allocate();
             _input_gate_out5.allocator()->allocate();
+            input_gate_out = &_input_gate_out1;
         }
-        _input_gate_out3.allocator()->allocate();
-        _input_gate_out4.allocator()->allocate();
-        _activation_input_gate.configure(&_input_gate_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+        else
+        {
+            _input_gate_out1.allocator()->allocate();
+        }
+        _activation_input_gate.configure(input_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     }
 
     // Configure block that calculates the cell state
@@ -193,10 +200,9 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     _accum_cell_state1.configure(ArithmeticOperation::ADD, &_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
     _activation_cell_state.configure(&_cell_state_out4, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
-    _pixelwise_mul_cell_state1.configure(&_cell_state_out4, &_input_gate_out1, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+    _pixelwise_mul_cell_state1.configure(&_cell_state_out4, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _cell_state_out4.allocator()->allocate();
-    _pixelwise_mul_cell_state2.configure(&_forget_gate_out1, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
-    _forget_gate_out1.allocator()->allocate();
+    _pixelwise_mul_cell_state2.configure(forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _accum_cell_state2.configure(ArithmeticOperation::ADD, &_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
     _cell_state_out5.allocator()->allocate();
@@ -284,13 +290,13 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     std::vector<ICLTensor *> scratch_inputs;
     if(!lstm_params.has_cifg_opt())
     {
-        scratch_inputs.emplace_back(&_input_gate_out1);
+        scratch_inputs.emplace_back(input_gate_out);
     }
     scratch_inputs.emplace_back(&_cell_state_out1);
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
     _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer);
-    _input_gate_out1.allocator()->allocate();
+    input_gate_out->allocator()->allocate();
     _cell_state_out1.allocator()->allocate();
     forget_gate_out->allocator()->allocate();
     output_gate_out->allocator()->allocate();
