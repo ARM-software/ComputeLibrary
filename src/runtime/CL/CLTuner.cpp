@@ -66,7 +66,7 @@ void initialize_lws_values(std::vector<unsigned int> &lws, unsigned int gws, uns
 } // namespace
 
 CLTuner::CLTuner(bool tune_new_kernels)
-    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _queue(), _queue_profiler(), _kernel_event(), _tune_new_kernels(tune_new_kernels)
+    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels)
 {
 }
 
@@ -132,26 +132,31 @@ void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal
 
 cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
 {
+    // Profiling queue
+    cl::CommandQueue queue_profiler;
+
+    // Extract real OpenCL function to intercept
     if(real_clEnqueueNDRangeKernel == nullptr)
     {
         real_clEnqueueNDRangeKernel = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
-
-        // Get the default queue
-        _queue = CLScheduler::get().queue();
-
-        // Check if we can use the OpenCL timer with the default queue
-        cl_command_queue_properties props = _queue.getInfo<CL_QUEUE_PROPERTIES>();
-
-        if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
-        {
-            // Set the queue for profiling
-            _queue_profiler = cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE);
-        }
-        else
-        {
-            _queue_profiler = _queue;
-        }
     }
+
+    // Get the default queue
+    cl::CommandQueue default_queue = CLScheduler::get().queue();
+
+    // Check if we can use the OpenCL timer with the default queue
+    cl_command_queue_properties props = default_queue.getInfo<CL_QUEUE_PROPERTIES>();
+
+    if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
+    {
+        // Set the queue for profiling
+        queue_profiler = cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE);
+    }
+    else
+    {
+        queue_profiler = default_queue;
+    }
+
     // Start intercepting enqueues:
     auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
                               const cl_event * event_wait_list, cl_event * event)
@@ -212,9 +217,9 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
                 kernel.set_lws_hint(lws_test);
 
                 // Run the kernel
-                kernel.run(kernel.window(), _queue_profiler);
+                kernel.run(kernel.window(), queue_profiler);
 
-                _queue_profiler.finish();
+                queue_profiler.finish();
 
                 const cl_ulong start = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
                 const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
