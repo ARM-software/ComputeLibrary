@@ -161,8 +161,6 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
     auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
                               const cl_event * event_wait_list, cl_event * event)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-        ARM_COMPUTE_UNUSED(event);
         if(this->kernel_event_is_set())
         {
             // If the event is already set it means the kernel enqueue is sliced: given that we only time the first slice we can save time by skipping the other enqueues.
@@ -174,6 +172,12 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         // Set OpenCL event
         this->set_cl_kernel_event(tmp);
 
+        if(event != nullptr)
+        {
+            //return cl_event from the intercepted call
+            clRetainEvent(tmp);
+            *event = tmp;
+        }
         return retval;
     };
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
