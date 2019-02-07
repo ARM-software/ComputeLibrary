@@ -133,6 +133,20 @@ void CLWidthConcatenate4TensorsKernel::configure(const ICLTensor *input1, const 
     build_opts.add_option("-DINPUT3_WIDTH=" + support::cpp11::to_string(input3->info()->dimension(0)));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input1->info()->element_size()));
 
+    if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && input1->info()->quantization_info() != output->info()->quantization_info())
+    {
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().scale));
+        build_opts.add_option("-DOFFSET_IN3=" + float_to_string_with_full_precision(input3->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN3=" + float_to_string_with_full_precision(input3->info()->quantization_info().scale));
+        build_opts.add_option("-DOFFSET_IN4=" + float_to_string_with_full_precision(input4->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN4=" + float_to_string_with_full_precision(input4->info()->quantization_info().scale));
+    }
+
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width_x4", build_opts.options()));
 
