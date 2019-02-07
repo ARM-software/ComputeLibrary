@@ -634,10 +634,10 @@ inline uint32_t calculate_matrix_scale(const int16_t *matrix, unsigned int matri
 /** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
  *
  * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
- *       Android Source: https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java
- *       WebM: https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM
- *       libYUV: https://bugs.chromium.org/p/libyuv/issues/detail?id=198&can=1&q=odd%20width
- *       YUVPlayer: https://sourceforge.net/p/raw-yuvplayer/bugs/1/
+ *       <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java">Android Source</a>
+ *       <a href="https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM">WebM</a>
+ *       <a href="https://bugs.chromium.org/p/libyuv/issues/detail?id=198&amp;can=1&amp;q=odd%20width">libYUV</a>
+ *       <a href="https://sourceforge.net/p/raw-yuvplayer/bugs/1/">YUVPlayer</a> *
  *
  * @param[in, out] shape  Tensor shape of 2D size
  * @param[in]      format Format of the tensor

@@ -85,7 +85,7 @@ public:
     CLDeconvolutionLayer &operator=(CLDeconvolutionLayer &&) = default;
     /** Set the input, weights, biases and output tensors.
      *
-     * @note This method will be deprecated in the next release.
+     * @deprecated This method is deprecated and will be removed in release 19.05
      *
      * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in]     weights            The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
@@ -101,7 +101,7 @@ public:
                    unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
-     * @note This method will be deprecated in the next release.
+     * @deprecated This method is deprecated and will be removed in release 19.05
      *
      * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in] weights            The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.

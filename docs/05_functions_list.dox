@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2018 ARM Limited.
+/// Copyright (c) 2018-2019 ARM Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -91,7 +91,7 @@ namespace arm_compute
     - @ref NEConvertFullyConnectedWeights
     - @ref NEConvolutionLayer
     - @ref NEConvolutionLayerReshapeWeights
-    - @ref NEConvolutionSquare&lt;matrix_size&gt;
+    - @ref NEConvolutionSquare &lt;matrix_size&gt;
     - @ref NEDeconvolutionLayer
     - @ref NEDepthConcatenateLayer
     - @ref NEDepthwiseConvolutionLayer
@@ -153,7 +153,7 @@ namespace arm_compute
     - @ref CLConcatenateLayer
     - @ref CLConvolutionLayer
     - @ref CLConvolutionLayerReshapeWeights
-    - @ref CLConvolutionSquare&lt;matrix_size&gt;
+    - @ref CLConvolutionSquare &lt;matrix_size&gt;
     - @ref CLDeconvolutionLayer
     - @ref CLDeconvolutionLayerUpsample
     - @ref CLDepthConcatenateLayer

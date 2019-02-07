@@ -1455,7 +1455,7 @@ public:
         RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
         BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
         LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
-        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
