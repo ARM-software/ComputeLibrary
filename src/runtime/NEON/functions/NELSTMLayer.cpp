@@ -130,7 +130,6 @@ void NELSTMLayer::configure(const ITensor *input,
         _forget_gate_out3.allocator()->allocate();
     }
     _activation_forget_gate.configure(forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    forget_gate_out->allocator()->allocate();
 
     // Configure block that calculates the input gate
     // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
