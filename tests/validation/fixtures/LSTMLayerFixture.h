@@ -415,7 +415,7 @@ protected:
         scratch_inputs.emplace_back(std::move(cell_state_out));
         scratch_inputs.emplace_back(std::move(forget_gate));
         scratch_inputs.emplace_back(std::move(output));
-        scratch            = reference::widthconcatenate_layer(scratch_inputs);
+        scratch            = reference::widthconcatenate_layer(scratch_inputs, scratch);
         _reference_scratch = std::move(scratch);
         return output_state_out;
     }
