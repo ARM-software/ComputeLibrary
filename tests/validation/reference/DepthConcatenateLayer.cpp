@@ -52,8 +52,25 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     const int out_stride_z = width_out * height_out;
     const int batches      = dst.shape().total_size_upper(3);
 
-    // Set output tensor to 0
-    std::fill_n(dst.data(), dst.num_elements(), 0);
+    if(srcs[0].data_type() == DataType::QASYMM8 && srcs[0].quantization_info() != dst.quantization_info())
+    {
+        // input tensors can have smaller width and height than the output, so for each output's slice we need to requantize 0 (as this is the value
+        // used in NEFillBorderKernel by NEDepthConcatenateLayer) using the corresponding quantization info for that particular slice/input tensor.
+        int slice = 0;
+        for(const auto &src : srcs)
+        {
+            auto ptr_slice = static_cast<T *>(dst(Coordinates(0, 0, slice)));
+            std::transform(ptr_slice, ptr_slice + dst.num_elements() / depth_out, ptr_slice, [src, dst](T t)
+            {
+                return dst.quantization_info().quantize(src.quantization_info().dequantize(0), RoundingPolicy::TO_NEAREST_UP);
+            });
+            slice += src.shape().z();
+        }
+    }
+    else
+    {
+        std::fill_n(dst.data(), dst.num_elements(), 0);
+    }
 
     for(const auto &src : srcs)
     {
