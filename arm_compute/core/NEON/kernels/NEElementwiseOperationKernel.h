@@ -101,7 +101,6 @@ public:
      *
      * @param[in] op     Arithmetic operation to be executed.
      * @param[in] input1 First tensor input. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in] input1 First tensor input. Data types supported: Same as @p input1.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      */
@@ -111,7 +110,6 @@ public:
      *
      * @param[in] op     Arithmetic operation to be executed.
      * @param[in] input1 First tensor input info. Data types supported: QASYMM8/S16/F16/S32/F32.
-     * @param[in] input1 First tensor input info. Data types supported: Same as @p input1
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *

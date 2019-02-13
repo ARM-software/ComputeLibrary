@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,7 +173,6 @@ convolution9x1(
  * @param[in] mat4  Coefficient from the convolution matrix
  * @param[in] mat5  Coefficient from the convolution matrix
  * @param[in] mat6  Coefficient from the convolution matrix
- * @param[in] mat0  Coefficient from the convolution matrix
  * @param[in] mat7  Coefficient from the convolution matrix
  * @param[in] mat8  Coefficient from the convolution matrix
  * @param[in] mat9  Coefficient from the convolution matrix
@@ -184,7 +183,6 @@ convolution9x1(
  * @param[in] mat14 Coefficient from the convolution matrix
  * @param[in] mat15 Coefficient from the convolution matrix
  * @param[in] mat16 Coefficient from the convolution matrix
- * @param[in] mat10 Coefficient from the convolution matrix
  * @param[in] mat17 Coefficient from the convolution matrix
  * @param[in] mat18 Coefficient from the convolution matrix
  * @param[in] mat19 Coefficient from the convolution matrix
@@ -244,7 +242,6 @@ convolution9x1(
  * @param[in] mat73 Coefficient from the convolution matrix
  * @param[in] mat74 Coefficient from the convolution matrix
  * @param[in] mat75 Coefficient from the convolution matrix
- * @param[in] mat76 Coefficient from the convolution matrix
  * @param[in] mat76 Coefficient from the convolution matrix
  * @param[in] mat77 Coefficient from the convolution matrix
  * @param[in] mat78 Coefficient from the convolution matrix
