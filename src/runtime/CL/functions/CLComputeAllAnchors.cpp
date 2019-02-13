@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,47 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
+
+#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
-namespace graph
+void CLComputeAllAnchors::configure(const ICLTensor *anchors, ICLTensor *all_anchors, const ComputeAnchorsInfo &info)
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class BoundingBoxTransformLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DetectionOutputLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class GenerateProposalsLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PadLayerNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class PriorBoxLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class ROIAlignLayerNode;
-class SoftmaxLayerNode;
-class SliceLayerNode;
-class SplitLayerNode;
-class UpsampleLayerNode;
-class YOLOLayerNode;
-} // namespace graph
+    // Configure ComputeAllAnchors kernel
+    auto k = arm_compute::support::cpp14::make_unique<CLComputeAllAnchorsKernel>();
+    k->configure(anchors, all_anchors, info);
+    _kernel = std::move(k);
+}
+
+Status CLComputeAllAnchors::validate(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)
+{
+    return CLComputeAllAnchorsKernel::validate(anchors, all_anchors, info);
+}
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */

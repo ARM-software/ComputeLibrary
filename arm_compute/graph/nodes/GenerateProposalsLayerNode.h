@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,47 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+
+#ifndef __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__
+#define __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class BoundingBoxTransformLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DetectionOutputLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class GenerateProposalsLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PadLayerNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class PriorBoxLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class ROIAlignLayerNode;
-class SoftmaxLayerNode;
-class SliceLayerNode;
-class SplitLayerNode;
-class UpsampleLayerNode;
-class YOLOLayerNode;
+/** Generate Proposals Layer node */
+class GenerateProposalsLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] info Generate proposals operation information.
+     */
+    GenerateProposalsLayerNode(GenerateProposalsInfo &info);
+    /** GenerateProposalsInfo accessor
+     *
+     * @return GenerateProposalsInfo
+     */
+    const GenerateProposalsInfo &info() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    GenerateProposalsInfo _info;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GENERATE_PROPOSALS_NODE_H__ */

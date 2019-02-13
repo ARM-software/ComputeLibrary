@@ -98,6 +98,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::FullyConnectedLayer:
             os << "FullyConnectedLayer";
             break;
+        case NodeType::GenerateProposalsLayer:
+            os << "GenerateProposalsLayer";
+            break;
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";
             break;

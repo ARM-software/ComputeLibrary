@@ -228,6 +228,33 @@ Status validate_detection_output_layer(DetectionOutputLayerNode &node)
     return DetectionOutputLayer::validate(input0, input1, input2, output, detect_info);
 }
 
+/** Validates a Generate Proposals layer node
+ *
+ * @tparam GenerateProposalsLayer Generate Proposals layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename GenerateProposalsLayer>
+Status validate_generate_proposals_layer(GenerateProposalsLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating GenerateProposalsLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 3);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo   *scores              = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo   *deltas              = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo   *anchors             = detail::get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo   *proposals           = get_backing_tensor_info(node.output(0));
+    arm_compute::ITensorInfo   *scores_out          = get_backing_tensor_info(node.output(1));
+    arm_compute::ITensorInfo   *num_valid_proposals = get_backing_tensor_info(node.output(2));
+    const GenerateProposalsInfo info                = node.info();
+
+    return GenerateProposalsLayer::validate(scores, deltas, anchors, proposals, scores_out, num_valid_proposals, info);
+}
+
 /** Validates a NormalizePlanarYUV layer node
  *
  * @tparam NormalizePlanarYUVLayer layer type

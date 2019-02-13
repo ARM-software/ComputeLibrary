@@ -28,11 +28,11 @@
 /** Perform a padded copy of input tensor to the output tensor. Padding values are defined at compile time
  *
  * @attention The following variables must be passed at compile time:
- * -# -DDATA_TYPE = Tensor data type. Supported data types: F16/F32
+ * -# -DDATA_TYPE= Tensor data type. Supported data types: F16/F32
  * -# -DWEIGHT{X,Y,W,H}= Weights [wx, wy, ww, wh] for the deltas
  * -# -DIMG_WIDTH= Original image width
  * -# -DIMG_HEIGHT= Original image height
- * -# -DBOX_FIELDS=Number of fields that are used to represent a box in boxes
+ * -# -DBOX_FIELDS= Number of fields that are used to represent a box in boxes
  *
  * @param[in]  boxes_ptr                                Pointer to the boxes tensor. Supported data types: F16/F32
  * @param[in]  boxes_stride_x                           Stride of the boxes tensor in X dimension (in bytes)
