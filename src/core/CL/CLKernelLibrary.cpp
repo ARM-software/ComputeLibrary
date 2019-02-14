@@ -149,6 +149,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "accumulate_weighted", "accumulate.cl" },
     { "activation_layer", "activation_layer.cl" },
     { "activation_layer_qa8", "activation_layer_qa8.cl" },
+    { "activation_layer_logistic_qa8", "activation_layer_qa8.cl" },
     { "batch_to_space_nchw", "batch_to_space.cl" },
     { "batch_to_space_static_nchw", "batch_to_space.cl" },
     { "batch_to_space_nhwc", "batch_to_space.cl" },
