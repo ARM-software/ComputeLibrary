@@ -1,3 +1,7 @@
+<div align="center">
+ <img src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png"><br><br>
+</div>
+
 Release repository: https://github.com/arm-software/ComputeLibrary
 
 Development repository: https://review.mlplatform.org/#/admin/projects/ml/ComputeLibrary

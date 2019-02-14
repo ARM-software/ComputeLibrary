@@ -1043,10 +1043,8 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 - Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
-<!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
 
-<!-- End of the 2 blank lines --!>
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17b --stl libc++ --api 21
 
