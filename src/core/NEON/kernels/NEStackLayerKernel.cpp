@@ -55,6 +55,7 @@ Status validate_arguments(const ITensorInfo *input, unsigned int axis, unsigned 
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_stack_shape(*input, axis, num_tensors));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
     return Status{};
@@ -73,8 +74,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
 
 inline Coordinates shift_from_axis_and_replace_coordinate(const Coordinates &id, unsigned int axis, unsigned int idx_input)
 {
-    constexpr int   max_out_coord = 5; // Input shape is max a 4D shape, output is max 5D
-    Coordinates id_out        = id;
+    constexpr int max_out_coord = 5; // Input shape is max a 4D shape, output is max 5D
+    Coordinates   id_out        = id;
     for(unsigned int i = max_out_coord - 1; i > axis; --i)
     {
         id_out.set(i, id[i - 1]);

@@ -71,6 +71,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
     return Status{};

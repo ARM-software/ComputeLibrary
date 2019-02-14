@@ -922,6 +922,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         if(!is_arg_min_max)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         }
         else
         {
@@ -945,7 +946,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     // Output auto initialization if not yet initialized
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     DataType   output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
-    auto_init_if_empty(*output, output_shape, 1, output_data_type);
+    auto_init_if_empty(*output, output_shape, 1, output_data_type, input->quantization_info());
 
     unsigned int num_elems_processed_per_iteration = 16 / data_size_from_type(input->data_type());
 

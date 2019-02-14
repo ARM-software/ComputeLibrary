@@ -62,6 +62,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         else
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         }
     }
 
@@ -75,7 +76,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     output_shape.set(axis, 1);
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     DataType   output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
-    auto_init_if_empty(*output, output_shape, 1, output_data_type);
+    auto_init_if_empty(*output, output_shape, 1, output_data_type, input->quantization_info());
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));

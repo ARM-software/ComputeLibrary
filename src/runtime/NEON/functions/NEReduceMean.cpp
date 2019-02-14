@@ -106,7 +106,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
         }
         else
         {
-            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type()));
+            _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->quantization_info()));
             _memory_group.manage(_reduced_outs.get() + i);
             _reduction_kernels[i].configure(in, _reduced_outs.get() + i, axis_local[i], ReductionOperation::MEAN_SUM);
         }

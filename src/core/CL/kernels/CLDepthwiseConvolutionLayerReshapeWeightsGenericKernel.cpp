@@ -49,6 +49,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (biases != nullptr));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(idx_w) * input->dimension(idx_h) + ((biases != nullptr) ? 1 : 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
 
     if(biases != nullptr)
     {
