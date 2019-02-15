@@ -50,6 +50,7 @@
 #include "arm_compute/runtime/CL/functions/CLConvolution.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLCopy.h"
+#include "arm_compute/runtime/CL/functions/CLCropResize.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"

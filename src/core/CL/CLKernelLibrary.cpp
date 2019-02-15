@@ -212,6 +212,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
+    { "crop_tensor", "crop_tensor.cl" },
     { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
@@ -607,6 +608,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "copy_tensor.cl",
 #include "./cl_kernels/copy_tensor.clembed"
+    },
+    {
+        "crop_tensor.cl",
+#include "./cl_kernels/crop_tensor.clembed"
     },
     {
         "upsample_layer.cl",

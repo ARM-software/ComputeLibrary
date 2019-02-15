@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,24 +41,27 @@
  * @param[in] value                                The value used to fill the pages of the tensor
  */
 __kernel void memset(
-    IMAGE_DECLARATION(tensor))
+    TENSOR3D_DECLARATION(tensor))
 {
-    Image tensor = CONVERT_TO_IMAGE_STRUCT(tensor);
+    Tensor3D tensor = CONVERT_TO_TENSOR3D_STRUCT(tensor);
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(VEC_SIZE)
+
+#if defined(LAST_ACCESSED_X)
     // Check if access on width gets out of bounds
     // If it does shift access vector to access elements within bounds
     const int xi = (int)(get_global_id(0) * VEC_SIZE);
     tensor.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * tensor_stride_x;
+#endif // defined(LAST_ACCESSED_X)
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     data = (DATA_TYPE)(CONSTANT_VALUE);
 
     VSTORE(VEC_SIZE)
     (data, 0, (__global DATA_TYPE *)tensor.ptr);
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
+#else  // !defined(VEC_SIZE)
     *((__global DATA_TYPE *)(tensor.ptr)) = (DATA_TYPE)(CONSTANT_VALUE);
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#endif // defined(VEC_SIZE)
 }
 
 #endif // Check for compile time constants
