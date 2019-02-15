@@ -113,7 +113,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<float>, framework::DatasetMode:
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()), framework::dataset::make("DataType",
                                                                                                           DataType::F32)),
                                                                                                   conv_args))
 {
@@ -129,7 +129,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<half>, framework::DatasetMode::
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()), framework::dataset::make("DataType",
                                                                                                          DataType::F16)),
                                                                                                  conv_args))
 {
@@ -146,7 +146,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<uint8_t>, framework::DatasetMod
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::MediumShapes()),
                                                                                                             framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                     conv_args))
 {

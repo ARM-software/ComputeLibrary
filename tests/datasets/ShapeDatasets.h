@@ -231,7 +231,6 @@ public:
                      TensorShape{ 128U, 64U, 1U, 3U },
                      // Batch size 4
                      TensorShape{ 37U, 37U, 3U, 4U },
-                     TensorShape{ 27U, 33U, 2U, 4U },
                      // Arbitrary batch size
                      TensorShape{ 37U, 37U, 3U, 5U }
     })
