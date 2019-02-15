@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ namespace arm_compute
 {
 namespace
 {
-Status detection_layer_validate_arguments(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output, DetectionOutputLayerInfo info)
+Status validate_arguments(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output, DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_loc, 1, DataType::F32);
@@ -366,102 +366,13 @@ void ApplyNMSFast(const std::vector<NormalizedBBox> &bboxes,
             indices.push_back(idx);
         }
         score_index_vec.erase(score_index_vec.begin());
-        if(keep && eta < 1.f && adaptive_threshold > 0.5f)
+        if(keep && eta < 1 && adaptive_threshold > 0.5)
         {
             adaptive_threshold *= eta;
         }
     }
 }
-
-Status non_max_suppression_validate_arguments(const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
-                                              const float score_threshold, const float nms_threshold)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(bboxes, scores, indices);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bboxes, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::S32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(bboxes->num_dimensions() > 2, "The bboxes tensor must be a 2-D float tensor of shape [4, num_boxes].");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(scores->num_dimensions() > 1, "The scores tensor must be a 1-D float tensor of shape [num_boxes].");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices->num_dimensions() > 1, "The indices must be 1-D integer tensor of shape [M], where max_output_size <= M");
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(bboxes, scores);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(scores->num_dimensions() > 1, "Scores must be a 1D float tensor");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(indices->dimension(0) == 0, "Indices tensor must be bigger than 0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(max_output_size == 0, "Max size cannot be 0");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(nms_threshold < 0.f || nms_threshold > 1.f, "Threshould must be in [0,1]");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(score_threshold < 0.f || score_threshold > 1.f, "Threshould must be in [0,1]");
-
-    return Status{};
-}
 } // namespace
-
-CPPNonMaximumSuppression::CPPNonMaximumSuppression()
-    : _bboxes(nullptr), _scores(nullptr), _indices(nullptr), _max_output_size(0), _score_threshold(0.f), _nms_threshold(0.f)
-{
-}
-
-void CPPNonMaximumSuppression::configure(
-    const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size,
-    const float score_threshold, const float nms_threshold)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(bboxes, scores, indices);
-    ARM_COMPUTE_ERROR_THROW_ON(non_max_suppression_validate_arguments(bboxes->info(), scores->info(), indices->info(), max_output_size, score_threshold, nms_threshold));
-
-    // copy scores also to a vector
-    _bboxes  = bboxes;
-    _scores  = scores;
-    _indices = indices;
-
-    _nms_threshold   = nms_threshold;
-    _max_output_size = max_output_size;
-    _score_threshold = score_threshold;
-}
-
-Status CPPNonMaximumSuppression::validate(
-    const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
-    const float score_threshold, const float nms_threshold)
-{
-    ARM_COMPUTE_RETURN_ON_ERROR(non_max_suppression_validate_arguments(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold));
-    return Status{};
-}
-
-void extract_bounding_boxes_from_tensor(const ITensor *bboxes, std::vector<NormalizedBBox> &bboxes_vector)
-{
-    Window input_win;
-    input_win.use_tensor_dimensions(bboxes->info()->tensor_shape());
-    input_win.set_dimension_step(0U, 4U);
-    input_win.set_dimension_step(1U, 1U);
-    Iterator input(bboxes, input_win);
-    auto     f = [&bboxes_vector, &input](const Coordinates &)
-    {
-        const auto input_ptr = reinterpret_cast<const float *>(input.ptr());
-        bboxes_vector.push_back(NormalizedBBox({ *input_ptr, *(input_ptr + 1), *(2 + input_ptr), *(3 + input_ptr) }));
-    };
-    execute_window_loop(input_win, f, input);
-}
-
-void extract_scores_from_tensor(const ITensor *scores, std::vector<float> &scores_vector)
-{
-    Window window;
-    window.use_tensor_dimensions(scores->info()->tensor_shape());
-    Iterator it(scores, window);
-    auto     f = [&it, &scores_vector](const Coordinates &)
-    {
-        const auto input_ptr = reinterpret_cast<const float *>(it.ptr());
-        scores_vector.push_back(*input_ptr);
-    };
-    execute_window_loop(window, f, it);
-}
-
-void CPPNonMaximumSuppression::run()
-{
-    std::vector<NormalizedBBox> bboxes_vector;
-    std::vector<float>          scores_vector;
-    std::vector<int>            indices_vector;
-    extract_bounding_boxes_from_tensor(_bboxes, bboxes_vector);
-    extract_scores_from_tensor(_scores, scores_vector);
-    ApplyNMSFast(bboxes_vector, scores_vector, _score_threshold, _nms_threshold, 1, -1 /* disable top_k */, indices_vector);
-    std::copy_n(indices_vector.begin(), std::min(indices_vector.size(), _indices->info()->dimension(0)), reinterpret_cast<int *>(_indices->ptr_to_element(Coordinates(0))));
-}
 
 CPPDetectionOutputLayer::CPPDetectionOutputLayer()
     : _input_loc(nullptr), _input_conf(nullptr), _input_priorbox(nullptr), _output(nullptr), _info(), _num_priors(), _num(), _all_location_predictions(), _all_confidence_scores(), _all_prior_bboxes(),
@@ -480,7 +391,7 @@ void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor 
     auto_init_if_empty(*output->info(), input_loc->info()->clone()->set_tensor_shape(TensorShape(7U, max_size)));
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(detection_layer_validate_arguments(input_loc->info(), input_conf->info(), input_priorbox->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input_loc->info(), input_conf->info(), input_priorbox->info(), output->info(), info));
 
     _input_loc      = input_loc;
     _input_conf     = input_conf;
@@ -518,7 +429,7 @@ void CPPDetectionOutputLayer::configure(const ITensor *input_loc, const ITensor 
 
 Status CPPDetectionOutputLayer::validate(const ITensorInfo *input_loc, const ITensorInfo *input_conf, const ITensorInfo *input_priorbox, const ITensorInfo *output, DetectionOutputLayerInfo info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(detection_layer_validate_arguments(input_loc, input_conf, input_priorbox, output, info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input_loc, input_conf, input_priorbox, output, info));
     return Status{};
 }
 
