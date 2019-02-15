@@ -65,7 +65,7 @@ void initialise_context_properties(const cl::Platform &platform, const cl::Devic
             CL_PRINTF_BUFFERSIZE_ARM, 0x1000,
             0
         };
-        std::copy_n(prop, 7, properties_printf);
+        std::copy_n(properties_printf, 7, prop);
     }
     else
 #endif // defined(ARM_COMPUTE_ASSERTS_ENABLED)
@@ -75,7 +75,7 @@ void initialise_context_properties(const cl::Platform &platform, const cl::Devic
             CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform()),
             0
         };
-        std::copy_n(prop, 3, properties);
+        std::copy_n(properties, 3, prop);
     };
 }
 } //namespace
