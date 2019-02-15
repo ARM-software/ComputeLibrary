@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -253,19 +253,6 @@ public:
                                             const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
                                             const QuantizationInfo        weights_quant_info = QuantizationInfo(),
                                             const QuantizationInfo        out_quant_info     = QuantizationInfo());
-    /** Adds a generate proposals layer node to the graph
-     *
-     * @param[in] g       Graph to add the layer to
-     * @param[in] params  Common node parameters
-     * @param[in] scores  Input scores to the generate proposals layer node as a NodeID-Index pair
-     * @param[in] deltas  Input deltas to the generate proposals layer node as a NodeID-Index pair
-     * @param[in] anchors Input anchors to the generate proposals layer node as a NodeID-Index pair
-     * @param[in] info    Generate proposals operation information
-     *
-     * @return Node ID of the created node, EmptyNodeID in case of error
-     */
-    static NodeID add_generate_proposals_node(Graph &g, NodeParams params, NodeIdxPair scores, NodeIdxPair deltas,
-                                              NodeIdxPair anchors, GenerateProposalsInfo info);
     /** Adds a normalization layer node to the graph
      *
      * @param[in] g         Graph to add the node to

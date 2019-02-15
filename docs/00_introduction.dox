@@ -290,7 +290,6 @@ v19.02 Public major release
  - New CPP kernels / functions:
     - @ref CPPDetectionOutputLayer
     - @ref CPPTopKV / @ref CPPTopKVKernel
-    - @ref CPPNonMaximumSuppression
  - Added new examples:
     - graph_ssd_mobilenet.cpp
     - graph_mobilenet_v2.cpp
@@ -314,7 +313,6 @@ v19.02 Public major release
     - @ref NEL2NormalizeLayer for FP32/FP16
     - @ref NENormalizationLayer IN_MAP_2D for FP32/FP16
     - @ref CLROIAlignLayer
-    - @ref CLGenerateProposalsLayer
  - Added QASYMM8 support to the following kernels:
     - @ref NEArithmeticAdditionKernel
     - @ref NEScale
@@ -335,8 +333,6 @@ v18.11 Public major release
  - New OpenCL kernels / functions:
     - @ref CLBatchToSpaceLayer / @ref CLBatchToSpaceLayerKernel
     - @ref CLBoundingBoxTransform / @ref CLBoundingBoxTransformKernel
-    - @ref CLComputeAllAnchorsKernel
-    - @ref CLGenerateProposalsLayer
     - @ref CLNormalizePlanarYUVLayer / @ref CLNormalizePlanarYUVLayerKernel
     - @ref CLReorgLayer / @ref CLReorgLayerKernel
     - @ref CLSpaceToBatchLayer / @ref CLSpaceToBatchLayerKernel

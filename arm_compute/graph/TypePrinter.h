@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,9 +97,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::FullyConnectedLayer:
             os << "FullyConnectedLayer";
-            break;
-        case NodeType::GenerateProposalsLayer:
-            os << "GenerateProposalsLayer";
             break;
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";

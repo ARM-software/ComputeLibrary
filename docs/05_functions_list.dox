@@ -195,7 +195,6 @@ namespace arm_compute
     - @ref CLGEMM
     - @ref CLGEMMConvolutionLayer
     - @ref CLGEMMLowpMatrixMultiplyCore
-    - @ref CLGenerateProposalsLayer
     - @ref CLHarrisCorners
     - @ref CLHistogram
     - @ref CLHOGDescriptor
@@ -251,7 +250,6 @@ namespace arm_compute
         - @ref CLColorConvert
         - @ref CLComparison
         - @ref CLComparisonStatic
-        - @ref CLComputeAllAnchors
         - @ref CLConvertFullyConnectedWeights
         - @ref CLConvolution3x3
         - @ref CLConvolutionRectangle
@@ -339,7 +337,6 @@ namespace arm_compute
 @section S5_4 CPP functions
 
  - @ref IFunction
-    - @ref CPPNonMaximumSuppression
     - @ref CPPDetectionOutputLayer
     - @ref ICPPSimpleFunction
         - @ref CPPBoxWithNonMaximaSuppressionLimit

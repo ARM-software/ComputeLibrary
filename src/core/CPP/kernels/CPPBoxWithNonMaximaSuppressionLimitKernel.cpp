@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ std::vector<int> SoftNMS(const ITensor *proposals, std::vector<std::vector<T>> &
         areas[i] = (x2[i] - x1[i] + 1.0) * (y2[i] - y1[i] + 1.0);
     }
 
-    // Note: Soft NMS scores have already been initialized with input scores
+    // Note: Soft NMS scores have already been initialize with input scores
 
     while(!inds.empty())
     {
@@ -150,21 +150,17 @@ std::vector<int> NonMaximaSuppression(const ITensor *proposals, std::vector<int>
 
         for(unsigned int j = 0; j < sorted_indices_temp.size(); ++j)
         {
-            const float xx1 = std::max(x1[sorted_indices_temp.at(j)], x1[i]);
-            const float yy1 = std::max(y1[sorted_indices_temp.at(j)], y1[i]);
-            const float xx2 = std::min(x2[sorted_indices_temp.at(j)], x2[i]);
-            const float yy2 = std::min(y2[sorted_indices_temp.at(j)], y2[i]);
+            const auto xx1 = std::max(x1[sorted_indices_temp.at(j)], x1[i]);
+            const auto yy1 = std::max(y1[sorted_indices_temp.at(j)], y1[i]);
+            const auto xx2 = std::min(x2[sorted_indices_temp.at(j)], x2[i]);
+            const auto yy2 = std::min(y2[sorted_indices_temp.at(j)], y2[i]);
 
-            const float w     = std::max((xx2 - xx1 + 1.f), 0.f);
-            const float h     = std::max((yy2 - yy1 + 1.f), 0.f);
-            const float inter = w * h;
-            const float ovr   = inter / (areas[i] + areas[sorted_indices_temp.at(j)] - inter);
-            const float ctr_x = xx1 + (w / 2);
-            const float ctr_y = yy1 + (h / 2);
+            const auto w     = std::max((xx2 - xx1 + 1.f), 0.f);
+            const auto h     = std::max((yy2 - yy1 + 1.f), 0.f);
+            const auto inter = w * h;
+            const auto ovr   = inter / (areas[i] + areas[sorted_indices_temp.at(j)] - inter);
 
-            // If suppress_size is specified, filter the boxes based on their size and position
-            const bool keep_size = !info.suppress_size() || (w >= info.min_size() && h >= info.min_size() && ctr_x < info.im_width() && ctr_y < info.im_height());
-            if(ovr <= info.nms() && keep_size)
+            if(ovr <= info.nms())
             {
                 new_indices.push_back(j);
             }
@@ -218,9 +214,8 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()
     for(int b = 0; b < batch_size; ++b)
     {
         const int num_boxes = _batch_splits_in == nullptr ? 1 : static_cast<int>(*reinterpret_cast<T *>(_batch_splits_in->ptr_to_element(Coordinates(b))));
-        // Skip first class if there is more than 1 except if the number of classes is 1.
-        const int j_start = (num_classes == 1 ? 0 : 1);
-        for(int j = j_start; j < num_classes; ++j)
+        // Skip first class
+        for(int j = 1; j < num_classes; ++j)
         {
             std::vector<T>   cur_scores(scores_count);
             std::vector<int> inds;
@@ -295,7 +290,7 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()
 
         // Write results
         int cur_out_idx = 0;
-        for(int j = j_start; j < num_classes; ++j)
+        for(int j = 1; j < num_classes; ++j)
         {
             auto     &cur_keep        = keeps[j];
             auto      cur_out_scores  = reinterpret_cast<T *>(_scores_out->ptr_to_element(Coordinates(cur_start_idx + cur_out_idx)));

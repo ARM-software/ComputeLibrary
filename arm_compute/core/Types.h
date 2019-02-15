@@ -634,17 +634,13 @@ public:
      * @param[in] soft_nms_method          (Optional) Soft NMS method
      * @param[in] soft_nms_sigma           (Optional) Soft NMS sigma value
      * @param[in] soft_nms_min_score_thres (Optional) Soft NMS minimum score threshold
-     * @param[in] suppress_size            (Optional) Filter out boxes based on their size. Defaults to false
-     * @param[in] min_size                 (Optional) Smaller boxes than min_size will be filtered out. Defaults to 1
-     * @param[in] im_width                 (Optional) Boxes whose centers (on the x axis) is beyond im_width will be filtered. Defaults to 1
-     * @param[in] im_height                (Optional) Boxes whose centers (on the y axis) is beyond im_height will be filtered. Defaults to 1
      */
     BoxNMSLimitInfo(float score_thresh = 0.05f, float nms = 0.3f,
                     int detections = 100, bool soft_nms_enabled = false,
                     NMSType soft_nms_method = NMSType::LINEAR,
-                    float soft_nms_sigma = 0.5f, float soft_nms_min_score_thres = 0.001f, bool suppress_size = false, float min_size = 1.0f, float im_width = 1.0f, float im_height = 1.0f)
+                    float soft_nms_sigma = 0.5f, float soft_nms_min_score_thres = 0.001f)
         : _score_thresh(score_thresh), _nms(nms), _detections_per_im(detections), _soft_nms_enabled(soft_nms_enabled), _soft_nms_method(soft_nms_method), _soft_nms_sigma(soft_nms_sigma),
-          _soft_nms_min_score_thres(soft_nms_min_score_thres), _suppress_size(suppress_size), _min_size(min_size), _im_width(im_width), _im_height(im_height)
+          _soft_nms_min_score_thres(soft_nms_min_score_thres)
     {
     }
     /** Get the score threshold */
@@ -682,26 +678,6 @@ public:
     {
         return _soft_nms_min_score_thres;
     }
-    /** Get if NMS will suppress boxes based on their size/position */
-    bool suppress_size() const
-    {
-        return _suppress_size;
-    }
-    /** Get size suppression threshold */
-    float min_size() const
-    {
-        return _min_size;
-    }
-    /** Get image width (NMS may suppress boxes whose center sits beyond the image width) */
-    float im_width() const
-    {
-        return _im_width;
-    }
-    /** Get image height (NMS may suppress boxes whose center sits beyond the image height) */
-    float im_height() const
-    {
-        return _im_height;
-    }
 
 private:
     float   _score_thresh;
@@ -711,10 +687,6 @@ private:
     NMSType _soft_nms_method;
     float   _soft_nms_sigma;
     float   _soft_nms_min_score_thres;
-    bool    _suppress_size;
-    float   _min_size;
-    float   _im_width;
-    float   _im_height;
 };
 
 /** Padding and stride information class */
@@ -1243,137 +1215,6 @@ private:
     unsigned int _pooled_height;
     float        _spatial_scale;
     unsigned int _sampling_ratio;
-};
-
-/** Generate Proposals Information class */
-class GenerateProposalsInfo
-{
-public:
-    /** Constructor
-     *
-     * @param[in] im_width       Width of the original image
-     * @param[in] im_height      Height of the original image
-     * @param[in] im_scale       Scale applied to the original image
-     * @param[in] spatial_scale  (Optional)Scale applied to the feature map. Defaults to 1.0
-     * @param[in] pre_nms_topN   (Optional)Number of the best scores to be selected from the transformations. Defaults to 6000.
-     * @param[in] post_nms_topN  (Optional)Number of the best scores to be selected from the NMS operation. Defaults to 300.
-     * @param[in] nms_thres      (Optional)NMS overlap threshold. Defaults to 0.7.
-     * @param[in] min_size       (Optional)Size used to validate the anchors produced. Defaults to 16.
-     * @param[in] values_per_roi (Optional)Values used to represent a ROI(Region of interest). Defaults to 4.
-     */
-    GenerateProposalsInfo(float im_width, float im_height, float im_scale, float spatial_scale = 1.0, int pre_nms_topN = 6000, int post_nms_topN = 300, float nms_thres = 0.7, float min_size = 16.0,
-                          size_t values_per_roi = 4)
-        : _im_height(im_height), _im_width(im_width), _im_scale(im_scale), _spatial_scale(spatial_scale), _pre_nms_topN(pre_nms_topN), _post_nms_topN(post_nms_topN), _nms_thres(nms_thres),
-          _min_size(min_size), _values_per_roi(values_per_roi)
-    {
-    }
-
-    /* Get the original height */
-    float im_height() const
-    {
-        return _im_height;
-    }
-    /* Get the original width */
-    float im_width() const
-    {
-        return _im_width;
-    }
-    /* Get the image scale */
-    float im_scale() const
-    {
-        return _im_scale;
-    }
-    /* Get the value of how many best scores to select (before NMS) */
-    int pre_nms_topN() const
-    {
-        return _pre_nms_topN;
-    }
-    /* Get the value of how many best scores to select (after NMS) */
-    int post_nms_topN() const
-    {
-        return _post_nms_topN;
-    }
-    /* Get the NMS overlap threshold */
-    float nms_thres() const
-    {
-        return _nms_thres;
-    }
-    /* Get the minimal size */
-    float min_size() const
-    {
-        return _min_size;
-    }
-    /* Get the spatial scale to be applied to the feature maps */
-    float spatial_scale() const
-    {
-        return _spatial_scale;
-    }
-    /* Get the values used to represent a ROI(Region of interest)*/
-    size_t values_per_roi() const
-    {
-        return _values_per_roi;
-    }
-
-private:
-    float  _im_height;
-    float  _im_width;
-    float  _im_scale;
-    float  _spatial_scale;
-    int    _pre_nms_topN;
-    int    _post_nms_topN;
-    float  _nms_thres;
-    float  _min_size;
-    size_t _values_per_roi;
-};
-
-/** ComputeAnchors information class */
-class ComputeAnchorsInfo
-{
-public:
-    /** Constructor
-     *
-     * @param[in] feat_width     Feature map width
-     * @param[in] feat_height    Feature map height
-     * @param[in] spatial_scale  Feature map scale
-     * @param[in] values_per_roi (Optional)Values used to represent a ROI(Region Of Interest). Defaults to 4
-     */
-    ComputeAnchorsInfo(float feat_width, float feat_height, float spatial_scale, size_t values_per_roi = 4)
-        : _feat_height(feat_height),
-          _feat_width(feat_width),
-          _spatial_scale(spatial_scale),
-          _values_per_roi(values_per_roi)
-    {
-    }
-
-    /* Get the height of the feature map */
-    float feat_height() const
-    {
-        return _feat_height;
-    }
-
-    /* Get the width of the feature map */
-    float feat_width() const
-    {
-        return _feat_width;
-    }
-
-    /* Get the scale of the feature map */
-    float spatial_scale() const
-    {
-        return _spatial_scale;
-    }
-
-    /* Get the values used to represent a ROI(Region Of Interest)*/
-    size_t values_per_roi() const
-    {
-        return _values_per_roi;
-    }
-
-private:
-    float  _feat_height;
-    float  _feat_width;
-    float  _spatial_scale;
-    size_t _values_per_roi;
 };
 
 /** Bounding Box Transform information class */

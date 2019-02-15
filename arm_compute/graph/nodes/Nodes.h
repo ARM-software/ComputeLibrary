@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,6 @@
 #include "arm_compute/graph/nodes/EltwiseLayerNode.h"
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
-#include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
 #include "arm_compute/graph/nodes/NormalizePlanarYUVLayerNode.h"
