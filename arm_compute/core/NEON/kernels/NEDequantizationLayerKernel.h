@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
-/** Interface for the dequantization layer kernel.
- *
- * @note The implementation supports only 3D input tensors
- *
- */
+/** Interface for the dequantization layer kernel. */
 class NEDequantizationLayerKernel : public INEKernel
 {
 public:
@@ -54,24 +50,20 @@ public:
     NEDequantizationLayerKernel &operator=(NEDequantizationLayerKernel &&) = default;
     /** Default destructor */
     ~NEDequantizationLayerKernel() = default;
-    /** Set input, output, min and max.
+    /** Set input, output tensors.
      *
-     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data type supported: U8.
-     * @param[out] output  Destination tensor with the same dimensions of input. Data type supported: F32.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32
+     * @param[in]  input  Source tensor. Data type supported: QASYMM8.
+     * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *min_max);
+    void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDequantizationLayerKernel
      *
-     * @param[in] input   Input tensor info. Data types supported: U8.
-     * @param[in] output  Output tensor info. Data types supported: F32.
-     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8.
+     * @param[in] output Output tensor info. Data types supported: F16/F32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -79,7 +71,6 @@ public:
 private:
     const ITensor *_input;
     ITensor       *_output;
-    const ITensor *_min_max;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEDEQUANTIZATIONLAYERKERNEL_H__ */

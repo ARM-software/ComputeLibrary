@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,34 +24,20 @@
 
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
-NEDequantizationLayer::NEDequantizationLayer()
-    : _dequantize_kernel()
+namespace arm_compute
 {
+void NEDequantizationLayer::configure(const ITensor *input, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEDequantizationLayerKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
 }
 
-Status NEDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+Status NEDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDequantizationLayerKernel::validate(input, output, min_max));
-
-    return Status{};
+    return NEDequantizationLayerKernel::validate(input, output);
 }
-
-void NEDequantizationLayer::configure(const ITensor *input, ITensor *output, const ITensor *min_max)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
-
-    // Configure kernel
-    _dequantize_kernel.configure(input, output, min_max);
-}
-
-void NEDequantizationLayer::run()
-{
-    NEScheduler::get().schedule(&_dequantize_kernel, Window::DimY);
-}
+} // namespace arm_compute

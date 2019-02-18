@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,55 +24,33 @@
 #ifndef __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
 #define __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLDequantizationLayerKernel.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ICLTensor;
 
-/** Basic function to simulate a dequantization layer. This function calls the following CL kernels:
- *
- * -# @ref CLDequantizationLayerKernel
- *
- */
-class CLDequantizationLayer : public IFunction
+/** Basic function to run @ref CLDequantizationLayerKernel that dequantizes an input tensor */
+class CLDequantizationLayer : public ICLSimpleFunction
 {
 public:
-    /** Default constructor */
-    CLDequantizationLayer();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDequantizationLayer(const CLDequantizationLayer &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDequantizationLayer &operator=(const CLDequantizationLayer &) = delete;
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: U8.
-     * @param[out] output  Destination tensor with the same dimensions of input. Data type supported: F32.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QASYMM8.
+     * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *min_max);
+    void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayer
      *
-     * @param[in] input   Input tensor info. Data types supported: U8.
-     * @param[in] output  Output tensor info. Data type supported: F32.
-     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8.
+     * @param[in] output Output tensor info. Data type supported: F16/F32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    CLDequantizationLayerKernel _dequantize_kernel;
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLDEQUANTIZATIONLAYER_H__ */

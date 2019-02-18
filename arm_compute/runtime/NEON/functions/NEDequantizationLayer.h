@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,52 +24,33 @@
 #ifndef __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__
 #define __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/NEON/kernels/NEDequantizationLayerKernel.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
-/** Basic function to simulate a dequantization layer. This function calls the following NEON kernels:
- *
- * @note The implementation supports only 3D input tensors
- *
- * -# @ref NEDequantizationLayerKernel
- *
- */
-class NEDequantizationLayer : public IFunction
+/** Basic function to run @ref NEDequantizationLayerKernel that dequantizes an input tensor */
+class NEDequantizationLayer : public INESimpleFunctionNoBorder
 {
 public:
-    /** Default constructor */
-    NEDequantizationLayer();
     /** Configure the kernel.
      *
-     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: U8.
-     * @param[out] output  Destination tensor with the same dimensions of input. Data type supported: F32.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8.
+     * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *min_max);
+    void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEDequantizationLayer
      *
-     * @param[in] input   Input tensor info. Data types supported: U8.
-     * @param[in] output  Output tensor info. Data type supported: F32.
-     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8.
+     * @param[in] output Output tensor info. Data type supported: F16/F32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    NEDequantizationLayerKernel _dequantize_kernel;
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__ */

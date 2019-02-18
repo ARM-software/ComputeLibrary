@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,11 +30,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the dequantization layer kernel.
- *
- * @note The implementation supports only 3D input tensors.
- *
- */
+/** Interface for the dequantization layer kernel. */
 class CLDequantizationLayerKernel : public ICLKernel
 {
 public:
@@ -52,22 +48,18 @@ public:
     ~CLDequantizationLayerKernel() = default;
     /** Set the input, output, min and max.
      *
-     * @param[in]  input   Source tensor. Data types supported: U8.
-     * @param[out] output  Destination tensor. Data types supported: F32.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8.
+     * @param[out] output Destination tensor. Data types supported: F16/F32.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *min_max);
+    void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDequantizationLayerKernel
      *
-     * @param[in] input   Input tensor info. Data types supported: U8.
-     * @param[in] output  Output tensor info. Data types supported: F32.
-     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in] input  Input tensor info. Data types supported: QASYMM8.
+     * @param[in] output Output tensor info. Data types supported: F16/F32.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -75,7 +67,6 @@ public:
 private:
     const ICLTensor *_input;
     ICLTensor       *_output;
-    const ICLTensor *_min_max;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEQUANTIZATIONLAYERKERNEL_H__ */

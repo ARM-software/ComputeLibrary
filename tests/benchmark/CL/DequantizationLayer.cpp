@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,8 +41,8 @@ namespace benchmark
 {
 namespace
 {
-const auto data_types_src = framework::dataset::make("DataType", { DataType::U8 });
-const auto data_types_dst = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types_src = framework::dataset::make("DataType", { DataType::QASYMM8 });
+const auto data_types_dst = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
 using CLDequantizationLayerFixture = DequantizationLayerFixture<CLTensor, CLDequantizationLayer, CLAccessor>;
@@ -53,7 +53,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(DequantizationLayer, CLDequantizationLayerFixtur
                                 framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::Small3DShapes(), data_types_src), data_types_dst));
 
-TEST_SUITE_END()
+TEST_SUITE_END() // CL
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute

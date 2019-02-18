@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,36 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/core/CL/kernels/CLDequantizationLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
-CLDequantizationLayer::CLDequantizationLayer()
-    : _dequantize_kernel()
+namespace arm_compute
 {
+void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLDequantizationLayerKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
 }
 
-Status CLDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+Status CLDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDequantizationLayerKernel::validate(input, output, min_max));
-
-    return Status{};
+    return CLDequantizationLayerKernel::validate(input, output);
 }
-
-void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *min_max)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
-
-    _dequantize_kernel.configure(input, output, min_max);
-}
-
-void CLDequantizationLayer::run()
-{
-    // Run dequantization kernel
-    CLScheduler::get().enqueue(_dequantize_kernel, false);
-}
+} // namespace arm_compute
