@@ -32,6 +32,7 @@
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticSubtraction.h"
 #include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEBatchToSpaceLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseAnd.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseNot.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseOr.h"

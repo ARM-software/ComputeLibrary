@@ -31,6 +31,7 @@
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEBatchToSpaceLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseAndKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseNotKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseOrKernel.h"
