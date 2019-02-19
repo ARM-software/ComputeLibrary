@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
             accum_layout = DataLayout::NCHW;
         }
 
-        _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, input->info()->quantization_info()));
+        _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, output->info()->quantization_info()));
         _accumulator.info()->set_data_layout(accum_layout);
         zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
     }
