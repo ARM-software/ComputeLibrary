@@ -125,6 +125,7 @@
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"
 #include "arm_compute/runtime/NEON/functions/NESoftmaxLayer.h"
+#include "arm_compute/runtime/NEON/functions/NESpaceToBatchLayer.h"
 #include "arm_compute/runtime/NEON/functions/NESplit.h"
 #include "arm_compute/runtime/NEON/functions/NEStackLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"

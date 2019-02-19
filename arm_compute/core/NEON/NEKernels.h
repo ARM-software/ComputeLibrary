@@ -120,6 +120,7 @@
 #include "arm_compute/core/NEON/kernels/NESobel5x5Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESobel7x7Kernel.h"
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NESpaceToBatchLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEStackLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEStridedSliceKernel.h"
 #include "arm_compute/core/NEON/kernels/NETableLookupKernel.h"
