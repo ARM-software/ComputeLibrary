@@ -97,9 +97,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         else
         {
             // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-            TensorInfo info_a = a->info()->clone()->set_tensor_shape(compute_interleaved_shape(*a->info()));
+            TensorInfo info_a = a->info()->clone()->set_tensor_shape(compute_interleaved_shape(*a->info())).set_is_resizable(true);
             // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-            TensorInfo info_b = b->info()->clone()->set_tensor_shape(compute_transpose1xW_shape(*b->info()));
+            TensorInfo info_b = b->info()->clone()->set_tensor_shape(compute_transpose1xW_shape(*b->info())).set_is_resizable(true);
             _tmp_a.allocator()->init(info_a);
             _tmp_b.allocator()->init(info_b);
             _memory_group.manage(&_tmp_a);
@@ -241,8 +241,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             shape_tmp_b.set(0, b->dimension(1) * 16);
             shape_tmp_b.set(1, std::ceil(b->dimension(0) / 16.f));
 
-            TensorInfo info_a = a->clone()->set_tensor_shape(shape_tmp_a);
-            TensorInfo info_b = b->clone()->set_tensor_shape(shape_tmp_b);
+            TensorInfo info_a = a->clone()->set_tensor_shape(shape_tmp_a).set_is_resizable(true);
+            TensorInfo info_b = b->clone()->set_tensor_shape(shape_tmp_b).set_is_resizable(true);
 
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(a, &info_a));
             ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(b, &info_b));
