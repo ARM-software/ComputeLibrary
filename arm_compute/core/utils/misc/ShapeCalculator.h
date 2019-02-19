@@ -1162,12 +1162,11 @@ inline TensorShape extract_shape(T *data)
     return data->info()->tensor_shape();
 }
 
-inline TensorShape extract_shape(const ITensorInfo *data)
+inline TensorShape extract_shape(ITensorInfo *data)
 {
     return data->tensor_shape();
 }
-
-inline TensorShape extract_shape(ITensorInfo *data)
+inline TensorShape extract_shape(const ITensorInfo *data)
 {
     return data->tensor_shape();
 }
