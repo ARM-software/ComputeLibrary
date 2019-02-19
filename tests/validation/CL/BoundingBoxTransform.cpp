@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,12 +46,14 @@ AbsoluteTolerance<float> absolute_tolerance_f32(0.001f);
 RelativeTolerance<half>  relative_tolerance_f16(half(0.2));
 AbsoluteTolerance<float> absolute_tolerance_f16(half(0.02f));
 
+// *INDENT-OFF*
+// clang-format off
 const auto BboxInfoDataset = framework::dataset::make("BboxInfo", { BoundingBoxTransformInfo(20U, 20U, 2U, true),
                                                                     BoundingBoxTransformInfo(128U, 128U, 4U, true),
                                                                     BoundingBoxTransformInfo(800U, 600U, 1U, false),
-                                                                    BoundingBoxTransformInfo(800U, 600U, 2U, true, { 1.0, 0.5, 1.5, 2.0 }),
-                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 }),
-                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { 1.0, 0.5, 1.5, 2.0 }, true)
+                                                                    BoundingBoxTransformInfo(800U, 600U, 2U, true, { { 1.0, 0.5, 1.5, 2.0 } }),
+                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { { 1.0, 0.5, 1.5, 2.0 } }),
+                                                                    BoundingBoxTransformInfo(800U, 600U, 4U, false, { { 1.0, 0.5, 1.5, 2.0 } }, true)
                                                                   });
 
 const auto DeltaDataset = framework::dataset::make("DeltasShape", { TensorShape(36U, 1U),
@@ -62,7 +64,8 @@ const auto DeltaDataset = framework::dataset::make("DeltasShape", { TensorShape(
                                                                     TensorShape(40U, 100U),
                                                                     TensorShape(40U, 200U)
                                                                   });
-
+// clang-format on
+// *INDENT-ON*
 } // namespace
 
 TEST_SUITE(CL)

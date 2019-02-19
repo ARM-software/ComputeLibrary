@@ -79,10 +79,12 @@ void store_quantized(uint8_t *output_ptr, const float32x4x4_t &rf, const float32
 {
     int32x4x4_t out =
     {
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[0], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[1], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[2], invscale)),
-        vcvtq_s32_f32(vmlaq_f32(offset, rf.val[3], invscale)),
+        {
+            vcvtq_s32_f32(vmlaq_f32(offset, rf.val[0], invscale)),
+            vcvtq_s32_f32(vmlaq_f32(offset, rf.val[1], invscale)),
+            vcvtq_s32_f32(vmlaq_f32(offset, rf.val[2], invscale)),
+            vcvtq_s32_f32(vmlaq_f32(offset, rf.val[3], invscale)),
+        }
     };
     store_quantized(output_ptr, out);
 }
@@ -185,10 +187,12 @@ inline float32x4x4_t elementwise_arithm_op(const float32x4x4_t &a, const float32
 {
     float32x4x4_t out =
     {
-        elementwise_arithm_op<op>(a.val[0], b.val[0]),
-        elementwise_arithm_op<op>(a.val[1], b.val[1]),
-        elementwise_arithm_op<op>(a.val[2], b.val[2]),
-        elementwise_arithm_op<op>(a.val[3], b.val[3]),
+        {
+            elementwise_arithm_op<op>(a.val[0], b.val[0]),
+            elementwise_arithm_op<op>(a.val[1], b.val[1]),
+            elementwise_arithm_op<op>(a.val[2], b.val[2]),
+            elementwise_arithm_op<op>(a.val[3], b.val[3]),
+        }
     };
     return out;
 }
@@ -275,10 +279,12 @@ inline uint32x4x4_t elementwise_comp_op(const float32x4x4_t &a, const float32x4x
 {
     uint32x4x4_t out =
     {
-        elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[0], b.val[0]),
-        elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[1], b.val[1]),
-        elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[2], b.val[2]),
-        elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[3], b.val[3])
+        {
+            elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[0], b.val[0]),
+            elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[1], b.val[1]),
+            elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[2], b.val[2]),
+            elementwise_comp_op<op, float32x4_t, uint32x4_t>(a.val[3], b.val[3])
+        }
     };
     return out;
 }

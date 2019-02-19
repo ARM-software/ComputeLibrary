@@ -57,14 +57,14 @@ uint32x4x4_t calculate_index(uint32_t idx, float32x4_t a, float32x4_t b, uint32x
     {
         vec_idx = wrapper::vdup_n(idx, wrapper::traits::vector_128_tag{});
     }
-    uint32x4x4_t res = { wrapper::vbsl(mask, vec_idx, c.val[0]), 0, 0, 0 };
+    uint32x4x4_t res = { { wrapper::vbsl(mask, vec_idx, c.val[0]), 0, 0, 0 } };
 
     return res;
 }
 
 uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x4_t c, ReductionOperation op, int axis)
 {
-    uint32x4x4_t mask{ 0 };
+    uint32x4x4_t mask{ { 0 } };
     uint8x16_t   mask_u8{ 0 };
     if(op == ReductionOperation::ARG_IDX_MIN)
     {
@@ -94,11 +94,15 @@ uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x
         vec_idx.val[2] = wrapper::vdup_n(idx, wrapper::traits::vector_128_tag{});
         vec_idx.val[3] = wrapper::vdup_n(idx, wrapper::traits::vector_128_tag{});
     }
-    uint32x4x4_t res = { vbslq_u32(mask.val[0], vec_idx.val[0], c.val[0]),
-                         vbslq_u32(mask.val[1], vec_idx.val[1], c.val[1]),
-                         vbslq_u32(mask.val[2], vec_idx.val[2], c.val[2]),
-                         vbslq_u32(mask.val[3], vec_idx.val[3], c.val[3])
-                       };
+    uint32x4x4_t res =
+    {
+        {
+            vbslq_u32(mask.val[0], vec_idx.val[0], c.val[0]),
+            vbslq_u32(mask.val[1], vec_idx.val[1], c.val[1]),
+            vbslq_u32(mask.val[2], vec_idx.val[2], c.val[2]),
+            vbslq_u32(mask.val[3], vec_idx.val[3], c.val[3])
+        }
+    };
 
     return res;
 }
@@ -133,7 +137,7 @@ uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, float32x4_t vec_res_va
 
 uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, uint8x16_t vec_res_value, ReductionOperation op)
 {
-    uint32x4x4_t res_idx_mask{ 0 };
+    uint32x4x4_t res_idx_mask{ { 0 } };
     uint32x4_t   mask_ones = vdupq_n_u32(0xFFFFFFFF);
     uint8x16_t   mask_u8{ 0 };
     if(op == ReductionOperation::ARG_IDX_MIN)
@@ -367,7 +371,7 @@ struct RedOpX
             init_res_value = static_cast<T>(1.f);
         }
         auto         vec_res_value = wrapper::vdup_n(init_res_value, ExactTagType{});
-        uint32x4x4_t vec_res_idx{ 0 };
+        uint32x4x4_t vec_res_idx{ { 0 } };
 
         execute_window_loop(in_slice, [&](const Coordinates & id)
         {
@@ -473,7 +477,7 @@ struct RedOpX_qasymm8
             vec_res_value = wrapper::vdup_n(*input.ptr(), wrapper::traits::vector_128_tag{});
         }
 
-        uint32x4x4_t vec_res_idx{ 0 };
+        uint32x4x4_t vec_res_idx{ { 0 } };
         execute_window_loop(in_slice, [&](const Coordinates & id)
         {
             const auto vec_elements = wrapper::vloadq(input.ptr());
@@ -612,7 +616,7 @@ struct RedOpYZW
             {
                 vec_res_value = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
             }
-            uint32x4x4_t vec_res_idx{ 0 };
+            uint32x4x4_t vec_res_idx{ { 0 } };
 
             for(unsigned int dim = 0; dim < in_info.dimension(axis); ++dim)
             {
@@ -691,7 +695,7 @@ struct RedOpYZW_qasymm8
 
         execute_window_loop(in_slice, [&](const Coordinates & id)
         {
-            uint32x4x4_t vec_res_idx{ 0 };
+            uint32x4x4_t vec_res_idx{ { 0 } };
             auto         vec_res_value1 = vdupq_n_u32(0);
             auto         vec_res_value2 = vdupq_n_u32(0);
             auto         vec_res_value3 = vdupq_n_u32(0);

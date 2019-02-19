@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,7 +109,7 @@ public:
         std::vector<float> var          = { 0.1, 0.1, 0.2, 0.2 };
         std::vector<float> max_val      = { 60.f };
         std::vector<float> aspect_ratio = { 2.f };
-        std::array<float, 2> steps = { 8.f, 8.f };
+        std::array<float, 2> steps = { { 8.f, 8.f } };
         add_config(TensorShape(4U, 4U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio, Coordinates2D{ 8, 8 }, steps));
     }
 };
@@ -123,7 +123,7 @@ public:
         std::vector<float> var          = { 0.1, 0.1, 0.2, 0.2 };
         std::vector<float> max_val      = { 60.f };
         std::vector<float> aspect_ratio = { 2.f };
-        std::array<float, 2> steps = { 8.f, 8.f };
+        std::array<float, 2> steps = { { 8.f, 8.f } };
         add_config(TensorShape(150U, 245U, 4U, 12U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio, Coordinates2D{ 8, 8 }, steps));
     }
 };

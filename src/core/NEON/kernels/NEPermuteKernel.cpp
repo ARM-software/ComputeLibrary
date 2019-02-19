@@ -47,39 +47,43 @@ inline bool is_permutation_supported(const PermutationVector &v)
 {
     static const std::array<PermutationVector, 6> permutations3 =
     {
-        PermutationVector(2U, 0U, 1U),
-        PermutationVector(1U, 2U, 0U),
-        PermutationVector(0U, 1U, 2U),
-        PermutationVector(0U, 2U, 1U),
-        PermutationVector(1U, 0U, 2U),
-        PermutationVector(2U, 1U, 0U),
+        {
+            PermutationVector(2U, 0U, 1U),
+            PermutationVector(1U, 2U, 0U),
+            PermutationVector(0U, 1U, 2U),
+            PermutationVector(0U, 2U, 1U),
+            PermutationVector(1U, 0U, 2U),
+            PermutationVector(2U, 1U, 0U),
+        }
     };
     static const std::array<PermutationVector, 24> permutations4 =
     {
-        PermutationVector(0U, 1U, 2U, 3U),
-        PermutationVector(1U, 0U, 2U, 3U),
-        PermutationVector(2U, 0U, 1U, 3U),
-        PermutationVector(0U, 2U, 1U, 3U),
-        PermutationVector(1U, 2U, 0U, 3U),
-        PermutationVector(2U, 1U, 0U, 3U),
-        PermutationVector(2U, 1U, 3U, 0U),
-        PermutationVector(1U, 2U, 3U, 0U),
-        PermutationVector(3U, 2U, 1U, 0U),
-        PermutationVector(2U, 3U, 1U, 0U),
-        PermutationVector(1U, 3U, 2U, 0U),
-        PermutationVector(3U, 1U, 2U, 0U),
-        PermutationVector(3U, 0U, 2U, 1U),
-        PermutationVector(0U, 3U, 2U, 1U),
-        PermutationVector(2U, 3U, 0U, 1U),
-        PermutationVector(3U, 2U, 0U, 1U),
-        PermutationVector(0U, 2U, 3U, 1U),
-        PermutationVector(2U, 0U, 3U, 1U),
-        PermutationVector(1U, 0U, 3U, 2U),
-        PermutationVector(0U, 1U, 3U, 2U),
-        PermutationVector(3U, 1U, 0U, 2U),
-        PermutationVector(1U, 3U, 0U, 2U),
-        PermutationVector(0U, 3U, 1U, 2U),
-        PermutationVector(3U, 0U, 1U, 2U)
+        {
+            PermutationVector(0U, 1U, 2U, 3U),
+            PermutationVector(1U, 0U, 2U, 3U),
+            PermutationVector(2U, 0U, 1U, 3U),
+            PermutationVector(0U, 2U, 1U, 3U),
+            PermutationVector(1U, 2U, 0U, 3U),
+            PermutationVector(2U, 1U, 0U, 3U),
+            PermutationVector(2U, 1U, 3U, 0U),
+            PermutationVector(1U, 2U, 3U, 0U),
+            PermutationVector(3U, 2U, 1U, 0U),
+            PermutationVector(2U, 3U, 1U, 0U),
+            PermutationVector(1U, 3U, 2U, 0U),
+            PermutationVector(3U, 1U, 2U, 0U),
+            PermutationVector(3U, 0U, 2U, 1U),
+            PermutationVector(0U, 3U, 2U, 1U),
+            PermutationVector(2U, 3U, 0U, 1U),
+            PermutationVector(3U, 2U, 0U, 1U),
+            PermutationVector(0U, 2U, 3U, 1U),
+            PermutationVector(2U, 0U, 3U, 1U),
+            PermutationVector(1U, 0U, 3U, 2U),
+            PermutationVector(0U, 1U, 3U, 2U),
+            PermutationVector(3U, 1U, 0U, 2U),
+            PermutationVector(1U, 3U, 0U, 2U),
+            PermutationVector(0U, 3U, 1U, 2U),
+            PermutationVector(3U, 0U, 1U, 2U)
+        }
     };
 
     return (permutations3.end() != std::find(permutations3.begin(), permutations3.end(), v)) || (permutations4.end() != std::find(permutations4.begin(), permutations4.end(), v));

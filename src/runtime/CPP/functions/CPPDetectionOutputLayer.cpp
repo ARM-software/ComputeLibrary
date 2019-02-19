@@ -173,14 +173,18 @@ void retrieve_all_priorbox(const ITensor               *input_priorbox,
 {
     for(int i = 0; i < num_priors; ++i)
     {
-        all_prior_bboxes[i] = { *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4))),
-                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 1))),
-                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 2))),
-                                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 3)))
-                              };
+        all_prior_bboxes[i] =
+        {
+            {
+                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4))),
+                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 1))),
+                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 2))),
+                *reinterpret_cast<float *>(input_priorbox->ptr_to_element(Coordinates(i * 4 + 3)))
+            }
+        };
     }
 
-    std::array<float, 4> var({ 0, 0, 0, 0 });
+    std::array<float, 4> var({ { 0, 0, 0, 0 } });
     for(int i = 0; i < num_priors; ++i)
     {
         for(int j = 0; j < 4; ++j)
@@ -325,16 +329,20 @@ void ApplyNMSFast(const std::vector<NormalizedBBox> &bboxes,
             if(keep)
             {
                 // Compute the jaccard (intersection over union IoU) overlap between two bboxes.
-                NormalizedBBox intersect_bbox = std::array<float, 4>({ 0, 0, 0, 0 });
+                NormalizedBBox intersect_bbox = std::array<float, 4>({ { 0, 0, 0, 0 } });
                 if(bboxes[kept_idx][0] > bboxes[idx][2] || bboxes[kept_idx][2] < bboxes[idx][0] || bboxes[kept_idx][1] > bboxes[idx][3] || bboxes[kept_idx][3] < bboxes[idx][1])
                 {
-                    intersect_bbox = std::array<float, 4>({ 0, 0, 0, 0 });
+                    intersect_bbox = std::array<float, 4>({ { 0, 0, 0, 0 } });
                 }
                 else
                 {
-                    intersect_bbox = std::array<float, 4>({ std::max(bboxes[idx][0], bboxes[kept_idx][0]), std::max(bboxes[idx][1], bboxes[kept_idx][1]), std::min(bboxes[idx][2], bboxes[kept_idx][2]), std::min(bboxes[idx][3],
-                                                            bboxes[kept_idx][3])
-                                                          });
+                    intersect_bbox = std::array<float, 4>({ {
+                            std::max(bboxes[idx][0], bboxes[kept_idx][0]),
+                            std::max(bboxes[idx][1], bboxes[kept_idx][1]),
+                            std::min(bboxes[idx][2], bboxes[kept_idx][2]),
+                            std::min(bboxes[idx][3], bboxes[kept_idx][3])
+                        }
+                    });
                 }
 
                 float intersect_width  = intersect_bbox[2] - intersect_bbox[0];
@@ -434,7 +442,7 @@ void extract_bounding_boxes_from_tensor(const ITensor *bboxes, std::vector<Norma
     auto     f = [&bboxes_vector, &input](const Coordinates &)
     {
         const auto input_ptr = reinterpret_cast<const float *>(input.ptr());
-        bboxes_vector.push_back(NormalizedBBox({ *input_ptr, *(input_ptr + 1), *(2 + input_ptr), *(3 + input_ptr) }));
+        bboxes_vector.push_back(NormalizedBBox({ { *input_ptr, *(input_ptr + 1), *(2 + input_ptr), *(3 + input_ptr) } }));
     };
     execute_window_loop(input_win, f, input);
 }
