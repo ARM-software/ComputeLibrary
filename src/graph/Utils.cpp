@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,13 +104,14 @@ void release_default_graph_context(GraphContext &ctx)
     }
 }
 
-void setup_default_graph_context(GraphContext &ctx)
+void setup_requested_backend_context(GraphContext &ctx, Target target)
 {
-    for(const auto &backend : backends::BackendRegistry::get().backends())
+    if(backends::BackendRegistry::get().contains(target))
     {
-        if(backend.second->is_backend_supported())
+        const auto &backend = backends::BackendRegistry::get().find_backend(target);
+        if(backend->is_backend_supported())
         {
-            backend.second->setup_backend_context(ctx);
+            backend->setup_backend_context(ctx);
         }
     }
 }

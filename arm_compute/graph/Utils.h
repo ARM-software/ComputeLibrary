@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,11 +89,12 @@ void force_target_to_graph(Graph &g, Target target);
  * @return A PassManager with default mutating passes
  */
 PassManager create_default_pass_manager(Target target);
-/** Default setups the graph context if not done manually
+/** Setups requested backend context if it exists, is supported and hasn't been initialized already.
  *
- * @param[in,out] ctx Graph Context
+ * @param[in,out] ctx    Graph Context.
+ * @param[in]     target Target to setup the backend for.
  */
-void setup_default_graph_context(GraphContext &ctx);
+void setup_requested_backend_context(GraphContext &ctx, Target target);
 /** Default releases the graph context if not done manually
  *
  * @param[in,out] ctx Graph Context
