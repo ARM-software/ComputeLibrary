@@ -45,13 +45,17 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     }
 
     // Compute reference
-    int       depth_offset = 0;
-    const int width_out    = dst.shape().x();
-    const int height_out   = dst.shape().y();
-    const int depth_out    = dst.shape().z();
-    const int out_stride_z = width_out * height_out;
-    const int batches      = dst.shape().total_size_upper(3);
-    if(srcs[0].data_type() == DataType::QASYMM8 && srcs[0].quantization_info() != dst.quantization_info())
+    int       depth_offset                = 0;
+    const int width_out                   = dst.shape().x();
+    const int height_out                  = dst.shape().y();
+    const int depth_out                   = dst.shape().z();
+    const int out_stride_z                = width_out * height_out;
+    const int batches                     = dst.shape().total_size_upper(3);
+    auto have_different_quantization_info = [&](const SimpleTensor<T> &tensor)
+    {
+        return tensor.quantization_info() != dst.quantization_info();
+    };
+    if(srcs[0].data_type() == DataType::QASYMM8 && std::any_of(srcs.cbegin(), srcs.cend(), have_different_quantization_info))
     {
         for(int b = 0; b < batches; ++b)
         {
