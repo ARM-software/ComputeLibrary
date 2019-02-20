@@ -43,10 +43,9 @@ namespace
 {
 const auto MultiplesDataset = framework::dataset::make("Multiples", { Multiples{ 3 },
                                                                       Multiples{ 2, 2 },
-                                                                      Multiples{ 2, 3, 4, 5 },
+                                                                      Multiples{ 1, 1, 3, 4 },
                                                                       Multiples{ 2, 1, 2, 2 },
                                                                       Multiples{ 2, 1, 3 },
-                                                                      Multiples{ 3, 3, 3 },
                                                                       Multiples{ 2, 2, 2 }
                                                                     });
 } // namespace
