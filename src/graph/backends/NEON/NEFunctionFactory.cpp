@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,8 @@ namespace backends
 /** Target specific information structure used to pass information to the layer templates */
 struct NETargetInfo
 {
-    using TensorType = arm_compute::ITensor;
+    using TensorType         = arm_compute::ITensor;
+    using TensorConcreteType = arm_compute::Tensor;
     static Target TargetType;
 };
 
@@ -74,6 +75,13 @@ struct NEEltwiseFunctions
     using Addition       = NEArithmeticAddition;
     using Subtraction    = NEArithmeticSubtraction;
     using Multiplication = NEPixelWiseMultiplication;
+};
+
+/** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
+struct NEFusedLayerTypes
+{
+    using ConvolutionLayer       = NEConvolutionLayer;
+    using FuseBatchNormalization = NEFuseBatchNormalization;
 };
 
 namespace detail
@@ -210,6 +218,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_flatten_layer<NEFlattenLayer, NETargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:
             return detail::create_fully_connected_layer<NEFullyConnectedLayer, NETargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
+        case NodeType::FusedConvolutionBatchNormalizationLayer:
+            return detail::create_fused_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node));
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
         case NodeType::PermuteLayer:

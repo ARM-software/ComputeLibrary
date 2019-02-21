@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,9 @@ public:
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
+
+public:
+    static constexpr NodeType node_type = NodeType::ActivationLayer;
 
 private:
     ActivationLayerInfo _info;

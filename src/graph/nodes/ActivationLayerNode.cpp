@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,7 +67,7 @@ TensorDescriptor ActivationLayerNode::configure_output(size_t idx) const
 
 NodeType ActivationLayerNode::type() const
 {
-    return NodeType::ActivationLayer;
+    return ActivationLayerNode::node_type;
 }
 
 void ActivationLayerNode::accept(INodeVisitor &v)

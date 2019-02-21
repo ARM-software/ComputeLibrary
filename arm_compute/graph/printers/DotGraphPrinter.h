@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,7 @@ public:
     void visit(ConvolutionLayerNode &n) override;
     void visit(DepthwiseConvolutionLayerNode &n) override;
     void visit(EltwiseLayerNode &n) override;
+    void visit(FusedConvolutionBatchNormalizationNode &n) override;
     void visit(NormalizationLayerNode &n) override;
     void visit(PoolingLayerNode &n) override;
     void default_visit() override;

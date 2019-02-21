@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,6 +91,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FullyConnectedLayerNode &n) = 0;
+    /** Visit FusedConvolutionBatchNormalizationNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
     /** Visit InputNode.
      *
      * @param[in] n Node to visit.
@@ -192,6 +197,10 @@ public:
         default_visit();
     }
     virtual void visit(FullyConnectedLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(FusedConvolutionBatchNormalizationNode &n) override
     {
         default_visit();
     }
