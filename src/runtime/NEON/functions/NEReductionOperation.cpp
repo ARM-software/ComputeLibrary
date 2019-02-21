@@ -77,7 +77,7 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     {
         // Configure fill border kernel
         const BorderSize fill_border_size = _reduction_kernel.border_size();
-        const PixelValue pixelValue       = PixelValue((op == ReductionOperation::PROD) ? 1 : 0, input->info()->data_type(), input->info()->quantization_info());
+        const PixelValue pixelValue       = (op == ReductionOperation::PROD) ? PixelValue(1, input->info()->data_type(), input->info()->quantization_info()) : PixelValue(0, input->info()->data_type());
         _fill_border_kernel.configure(input, fill_border_size, BorderMode::CONSTANT, pixelValue);
     }
 }
