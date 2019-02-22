@@ -43,7 +43,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
                           int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16,

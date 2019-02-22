@@ -48,8 +48,7 @@ TEST_SUITE(Gather)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
-                                                TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),     // Invalid Indices data type
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),     // Invalid Indices dimensionality
@@ -61,7 +60,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         framework::dataset::make("IndicesInfo", {
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
-                                                TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10U, 10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
@@ -70,7 +68,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
         })),
         framework::dataset::make("OutputInfo", {
-                                                TensorInfo(TensorShape(10U, 27U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(27U, 10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10U, 27U), 1, DataType::F32),
@@ -91,7 +88,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             2,
                                             -3,
         })),
-        framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, false })),
+        framework::dataset::make("Expected", { true, true, false, false, false, false, false, false })),
         input_info, indices_info, output_info, axis, expected)
 {
     const Status status = NEGather::validate(&input_info.clone()->set_is_resizable(true), &indices_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), axis);
@@ -102,7 +99,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 DATA_TEST_CASE(Configuration,
                framework::DatasetMode::ALL,
-               combine(arm_compute::test::datasets::SmallGatherDataset(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+               combine(arm_compute::test::datasets::SmallGatherDataset(), framework::dataset::make("DataType", { DataType::F32 })),
                input_shape, indices_shape, axis, data_type)
 {
     const uint32_t actual_axis = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));

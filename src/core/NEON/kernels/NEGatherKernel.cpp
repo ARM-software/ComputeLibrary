@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGatherKernel.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -174,6 +175,7 @@ Status NEGatherKernel::validate(const ITensorInfo *input, const ITensorInfo *ind
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON(0 > axis || axis >= static_cast<int32_t>(input->num_dimensions()));
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32, DataType::F16, DataType::F32);

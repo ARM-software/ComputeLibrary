@@ -23,15 +23,15 @@
  */
 #include "arm_compute/core/NEON/kernels/NEFuseBatchNormalizationKernel.h"
 
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/core/Window.h"
-
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/core/Window.h"
 #include "arm_compute/core/Window.h"
 
 #include "support/ToolchainSupport.h"
@@ -48,6 +48,7 @@ Status validate_arguments(const ITensorInfo *conv_weights, const ITensorInfo *bn
                           float epsilon)
 {
     ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(conv_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(conv_weights, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(bn_mean, bn_var);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(conv_weights, bn_mean, bn_var);

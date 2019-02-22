@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -51,6 +52,7 @@ void NEROIPoolingLayerKernel::configure(const ITensor *input, const ITensor *roi
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::U16);
     ARM_COMPUTE_ERROR_ON(rois->info()->dimension(0) != 5);
     ARM_COMPUTE_ERROR_ON(rois->info()->num_dimensions() > 2);
+    ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 

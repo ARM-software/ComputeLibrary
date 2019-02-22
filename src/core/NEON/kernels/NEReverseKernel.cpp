@@ -48,7 +48,8 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *axis)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, axis);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, axis);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,

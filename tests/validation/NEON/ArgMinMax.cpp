@@ -69,7 +69,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 DATA_TEST_CASE(Configuration,
                framework::DatasetMode::ALL,
-               combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+               combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F32 })),
                shape, data_type)
 {
     // Create tensors
