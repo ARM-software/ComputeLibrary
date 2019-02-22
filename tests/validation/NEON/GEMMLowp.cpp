@@ -30,6 +30,7 @@
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/GEMMLowpFusedOffsetOutputDataset.h"
 #include "tests/datasets/LargeGEMMLowpDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SmallGEMMLowpDataset.h"
@@ -144,6 +145,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFixture, framework:
     validate(Accessor(_target), _reference);
 }
 
+using NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture<Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore>;
+TEST_SUITE(FusedOffsetOutput)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::ALL, datasets::SmallGEMMLowpFusedOffsetOutputDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture, framework::DatasetMode::NIGHTLY, datasets::LargeGEMMLowpFusedOffsetOutputDataset())
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // FusedOffsetOutput
 TEST_SUITE_END() // MatrixMultiplyCore
 
 TEST_SUITE(OutputStage)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -151,44 +151,51 @@ private:
      *
      * @param[in]  input         Input tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[in]  biases        Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                           Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[out] output        Output tensor. Data types supported: Same as @p input,
      *                           except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in]  act_info      (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in]  gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
      */
-    void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, int gemm_3d_depth = 1);
+    void configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act_info = ActivationLayerInfo(), int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer matrix multiply routines
      *
      * @param[in] input         Input tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in] weights       Weights tensor. Data type supported: Same as @p input.
+     * @param[in] biases        Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
+     *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[in] output        Output tensor. Data types supported: Same as @p input,
      *                          except for input of QASYMM8 type where output should be of S32 type.
+     * @param[in] act_info      (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in] gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
      * @param[in] skip_im2col   (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
+                              int gemm_3d_depth = 1, bool skip_im2col = false);
     /** Static function to check if GEMM3D is supported in @ref NEGEMM or in @ref NEGEMMLowpMatrixMultiplyCore
      *
-     * @param[in] data_type     Input data type
+     * @param[in] input_info    Input tensor info. Data types supported: QASYMM8/F16/F32.
+     * @param[in] act_info      Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in] gemm_3d_depth Depth of GEMM 3D
      * @param[in] skip_im2col   Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout
      *
      * @return a status
      */
-    static Status validate_gemm3d(DataType data_type, int gemm_3d_depth, bool skip_im2col);
+    static Status validate_gemm3d(const ITensorInfo *input_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col);
 
 private:
-    MemoryGroup                                         _memory_group;
-    NEConvolutionLayerReshapeWeights                    _reshape_weights;
-    NEIm2ColKernel                                      _im2col_kernel;
-    NEGEMM                                              _mm_gemm;
-    NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
-    NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    NECol2ImKernel                                      _col2im_kernel;
-    NEActivationLayer                                   _activationlayer_function;
-    NEArithmeticAdditionKernel                          _add_bias_kernel;
-    NEReshapeLayer                                      _reshape_layer;
+    MemoryGroup                      _memory_group;
+    NEConvolutionLayerReshapeWeights _reshape_weights;
+    NEIm2ColKernel                   _im2col_kernel;
+    NEGEMM                           _mm_gemm;
+    NEGEMMLowpMatrixMultiplyCore     _mm_gemmlowp;
+    NECol2ImKernel                   _col2im_kernel;
+    NEActivationLayer                _activationlayer_function;
+    NEArithmeticAdditionKernel       _add_bias_kernel;
+    NEReshapeLayer                   _reshape_layer;
 
     const ITensor *_original_weights;
 

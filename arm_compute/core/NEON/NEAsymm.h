@@ -45,6 +45,17 @@ using qasymm8x16_t  = uint8x16_t;  /**< 8 bit quantized asymmetric vector with 1
  */
 int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
 
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Element to divide.
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32_t rounding_divide_by_pow2(int32_t x, int exponent);
+
 /** Perform a multiply-accumulate on all 16 components of a QASYMM8 vector
  *
  * vd*vs + vo
@@ -120,6 +131,45 @@ uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
     {
         out_u8 = vmaxq_u8(out_u8, min_u8);
         out_u8 = vminq_u8(out_u8, max_u8);
+    }
+
+    return out_u8;
+}
+
+/** Performs final quantization step on single element
+ *
+ * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
+ *
+ * @param[in] in_value                      Input to be quantized.
+ * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
+ * @param[in] result_shift                  Result shift parameter
+ * @param[in] result_offset_after_shift_s32 Result offset parameter
+ * @param[in] min_u8                        Relu lower bound
+ * @param[in] max_u8                        Relu upper bound
+ *
+ * @return Quantized value
+ */
+template <bool is_bounded_relu>
+inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
+                                     int32_t result_shift, int32_t result_offset_after_shift_s32,
+                                     uint8_t min_u8, uint8_t max_u8)
+{
+    int32x4_t in_s32 = vdupq_n_s32(in_value);
+
+    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+    in_value = vgetq_lane_s32(vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
+
+    // Shift value by result_shift_s32
+    in_value = rounding_divide_by_pow2(in_value, result_shift);
+
+    // Add the offset term
+    in_value += result_offset_after_shift_s32;
+
+    // Bound the result
+    uint8_t out_u8 = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
+    if(is_bounded_relu)
+    {
+        out_u8 = static_cast<uint8_t>(std::max(min_u8, std::min(max_u8, out_u8)));
     }
 
     return out_u8;
