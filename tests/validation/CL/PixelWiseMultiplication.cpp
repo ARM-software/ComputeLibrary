@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,7 +129,7 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPixelWiseMultiplicationQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("Scale", { 1.f, 2.f })),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                        framework::dataset::make("RoundingPolicy", RoundingPolicy::TO_NEAREST_EVEN)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
