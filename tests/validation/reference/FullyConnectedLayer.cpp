@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,10 +105,16 @@ void vector_matrix_multiply(const SimpleTensor<T> &src, const SimpleTensor<T> &w
 } // namespace
 
 template <typename T, typename TB>
-SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &dst_shape)
+SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &dst_shape, QuantizationInfo out_quant_info)
 {
+    // if no explicit quantization has been set you the same as src
+    if(out_quant_info == QuantizationInfo())
+    {
+        out_quant_info = src.quantization_info();
+    }
+
     // Create reference
-    SimpleTensor<T> dst{ TensorShape{ dst_shape }, src.data_type(), 1, src.quantization_info() };
+    SimpleTensor<T> dst{ TensorShape{ dst_shape }, src.data_type(), 1, out_quant_info };
 
     // Sanity checks
     const int          num_batch_dimensions = std::max(0, static_cast<int>(dst_shape.num_dimensions()) - 1);
@@ -145,9 +151,12 @@ SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTe
     return dst;
 }
 
-template SimpleTensor<float> fully_connected_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &dst_shape);
-template SimpleTensor<half> fully_connected_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &dst_shape);
-template SimpleTensor<uint8_t> fully_connected_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &dst_shape);
+template SimpleTensor<float> fully_connected_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &dst_shape,
+                                                   QuantizationInfo out_quant_info);
+template SimpleTensor<half> fully_connected_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &dst_shape,
+                                                  QuantizationInfo out_quant_info);
+template SimpleTensor<uint8_t> fully_connected_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &dst_shape,
+                                                     QuantizationInfo out_quant_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
