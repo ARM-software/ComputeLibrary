@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,6 +165,20 @@ public:
         ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(reference::ArithmeticOperation::SUB, shape0, shape1,
                                                                                             data_type0, data_type1, output_data_type, convert_policy,
                                                                                             QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType>
+class ArithmeticSubtractionQuantValidationFixture : public ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, qasymm8_t>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
+               QuantizationInfo in1_qua_info, QuantizationInfo in2_qua_info, QuantizationInfo out_qua_info)
+    {
+        ArithmeticOperationGenericFixture<TensorType, AccessorType, FunctionType, qasymm8_t>::setup(reference::ArithmeticOperation::SUB, shape, shape,
+                                                                                                    data_type0, data_type1, output_data_type, convert_policy,
+                                                                                                    in1_qua_info, in2_qua_info, out_qua_info);
     }
 };
 

@@ -131,7 +131,7 @@ using CLArithmeticSubtractionQuantizedFixture = ArithmeticSubtractionValidationQ
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                shape, policy)
 {
     // Create tensors
@@ -156,7 +156,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallShapes(),
                        ArithmeticSubtractionQASYMM8Dataset),
-                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))

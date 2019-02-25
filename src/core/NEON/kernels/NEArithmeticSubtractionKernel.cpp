@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -76,6 +77,34 @@ void sub_saturate_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out,
         const uint8x16_t ta2 = vld1q_u8(input2.ptr());
 
         vst1q_u8(output.ptr(), vqsubq_u8(ta1, ta2));
+    },
+    input1, input2, output);
+}
+
+void sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
+{
+    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
+    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
+    Iterator output(out, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float32x4x4_t ta1 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input1.ptr())), in1->info()->quantization_info());
+        const float32x4x4_t ta2 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input2.ptr())), in2->info()->quantization_info());
+
+        const float32x4x4_t ta3 =
+        {
+            {
+                vsubq_f32(ta1.val[0], ta2.val[0]),
+                vsubq_f32(ta1.val[1], ta2.val[1]),
+                vsubq_f32(ta1.val[2], ta2.val[2]),
+                vsubq_f32(ta1.val[3], ta2.val[3]),
+            }
+        };
+
+        const uint8x16_t result = vquantize(ta3, out->info()->quantization_info());
+
+        vst1q_u8(reinterpret_cast<qasymm8_t *>(output.ptr()), result);
     },
     input1, input2, output);
 }
@@ -324,18 +353,34 @@ inline Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &i
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
+        && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8)
+        && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8)
+        && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16)
+        && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8)
+        && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16)
+        && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32)
+        && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16),
+        "You called subtract with the wrong image formats");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+        input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && policy == ConvertPolicy::WRAP,
+        "Convert policy cannot be WRAP if datatype is QASYMM8");
 
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
             !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::U8)
+            && !(input1.data_type() == DataType::QASYMM8 && input2.data_type() == DataType::QASYMM8 && output.data_type() == DataType::QASYMM8)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
@@ -413,6 +458,7 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         { "sub_wrap_U8_U8_S16", &sub_wrap_U8_U8_S16 },
         { "sub_saturate_U8_U8_U8", &sub_saturate_U8_U8_U8 },
         { "sub_saturate_U8_U8_S16", &sub_saturate_U8_U8_S16 },
+        { "sub_saturate_QASYMM8_QASYMM8_QASYMM8", &sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8 },
         { "sub_wrap_U8_S16_S16", &sub_wrap_U8_S16_S16 },
         { "sub_wrap_S16_U8_S16", &sub_wrap_S16_U8_S16 },
         { "sub_saturate_U8_S16_S16", &sub_saturate_U8_S16_S16 },
