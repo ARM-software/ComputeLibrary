@@ -147,14 +147,14 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SOFT_RELU)
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
 });
 const auto ActivationFunctionsSmallDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU)
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::SOFT_RELU)
 });
 } // namespace
 
