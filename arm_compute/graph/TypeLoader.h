@@ -123,6 +123,30 @@ inline ::std::istream &operator>>(::std::istream &stream, ConvolutionMethod &tar
     target = Convolution_method_from_name(value);
     return stream;
 }
+
+/** Converts a string to a strong types enumeration @ref DepthwiseConvolutionMethod
+ *
+ * @param[in] name String to convert
+ *
+ * @return Converted Target enumeration
+ */
+DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::string &name);
+
+/** Input Stream operator for @ref DepthwiseConvolutionMethod
+ *
+ * @param[in]  stream Stream to parse
+ * @param[out] target Output target
+ *
+ * @return Updated stream
+ */
+inline ::std::istream &operator>>(::std::istream &stream, DepthwiseConvolutionMethod &target)
+{
+    std::string value;
+    stream >> value;
+    target = depthwise_convolution_method_from_name(value);
+    return stream;
+}
+
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_TYPE_LOADER_H__ */

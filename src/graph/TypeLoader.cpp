@@ -125,5 +125,30 @@ ConvolutionMethod Convolution_method_from_name(const std::string &name)
     }
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
+
+DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::string &name)
+{
+    static const std::map<std::string, DepthwiseConvolutionMethod> methods =
+    {
+        { "default", DepthwiseConvolutionMethod::Default },
+        { "gemv", DepthwiseConvolutionMethod::GEMV },
+        { "optimized3x3", DepthwiseConvolutionMethod::Optimized3x3 },
+    };
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    try
+    {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+        return methods.at(arm_compute::utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+    }
+    catch(const std::out_of_range &)
+    {
+        throw std::invalid_argument(name);
+    }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+}
+
 } // namespace graph
 } // namespace arm_compute
