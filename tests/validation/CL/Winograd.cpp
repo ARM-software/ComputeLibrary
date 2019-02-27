@@ -118,7 +118,7 @@ const auto SmallWinogradFilterTransformDatasetNCHW =
            framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
                                       combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
 
-const auto SmallWinogradFilterTransformDatasetNHWC =
+const auto SmallWinogradFilterTransformDatasetNHWC_F16 =
            framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Small3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
            framework::dataset::concat(combine(datasets::Small1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
@@ -126,6 +126,11 @@ const auto SmallWinogradFilterTransformDatasetNHWC =
            framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
                                      (combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) }))))))));
 
+const auto SmallWinogradFilterTransformDatasetNHWC_F32 =
+           framework::dataset::concat(SmallWinogradFilterTransformDatasetNHWC_F16,
+           framework::dataset::concat(combine(datasets::Small7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })),
+           framework::dataset::concat(combine(datasets::Small7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })),
+                                      combine(datasets::Small1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })))));
 
 const auto LargeWinogradFilterTransformDatasetNCHW =
            framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
@@ -135,13 +140,19 @@ const auto LargeWinogradFilterTransformDatasetNCHW =
            framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
                                       combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
 
-const auto LargeWinogradFilterTransformDatasetNHWC =
+const auto LargeWinogradFilterTransformDatasetNHWC_F16 =
            framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Large3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
            framework::dataset::concat(combine(datasets::Large1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
            framework::dataset::concat(combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
                                       combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
+
+const auto LargeWinogradFilterTransformDatasetNHWC_F32 =
+           framework::dataset::concat(LargeWinogradFilterTransformDatasetNHWC_F16,
+           framework::dataset::concat(combine(datasets::Large7x7Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U) })),
+           framework::dataset::concat(combine(datasets::Large7x1Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 1U) })),
+                                      combine(datasets::Large1x7Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 2U) })))));
 
 // Output transform
 const auto SmallWinogradOutputTransformDatasetNCHW = datasets::SmallWinogradOutputTransformDatasetNCHW();
@@ -364,7 +375,7 @@ TEST_SUITE_END() // NCHW
 TEST_SUITE(NHWC)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP16, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(SmallWinogradFilterTransformDatasetNHWC,
+                       combine(combine(SmallWinogradFilterTransformDatasetNHWC_F16,
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                        framework::dataset::make("DataType", { DataType::F16 })))
 {
@@ -373,7 +384,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP16, framework
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixtureFP16, framework::DatasetMode::NIGHTLY,
-                       combine(combine(LargeWinogradFilterTransformDatasetNHWC,
+                       combine(combine(LargeWinogradFilterTransformDatasetNHWC_F16,
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                        framework::dataset::make("DataType", { DataType::F16 })))
 {
@@ -383,7 +394,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixtureFP16, framework
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP32, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(SmallWinogradFilterTransformDatasetNHWC,
+                       combine(combine(SmallWinogradFilterTransformDatasetNHWC_F32,
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                        framework::dataset::make("DataType", { DataType::F32 })))
 {
@@ -392,7 +403,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixtureFP32, framework
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixtureFP32, framework::DatasetMode::NIGHTLY,
-                       combine(combine(LargeWinogradFilterTransformDatasetNHWC,
+                       combine(combine(LargeWinogradFilterTransformDatasetNHWC_F32,
                                        framework::dataset::make("DataLayout", { DataLayout::NHWC })),
                                        framework::dataset::make("DataType", { DataType::F32 })))
 {
