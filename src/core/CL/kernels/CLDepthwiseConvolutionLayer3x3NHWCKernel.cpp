@@ -252,9 +252,21 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     build_opts.add_option_if(_input->info()->tensor_shape().total_size_upper(3) > 1,
                              "-DDST_DEPTH=" + support::cpp11::to_string(static_cast<int>(std::ceil(_output->info()->dimension(2) / static_cast<float>(_num_planes_processed_per_iteration)))));
 
+    std::string kernel_name;
     // Create kernel
-    std::string kernel_name = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
-                                                                                                                    && is_stride_1) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
+    if(is_qasymm)
+    {
+        kernel_name = std::string("dwc_3x3_reshaped_qasymm8");
+        kernel_name += (is_dot8_supported && is_stride_1 ? "_dot8" : "");
+        kernel_name += (is_stride_1 ? "_stride1" : "");
+        kernel_name += "_nhwc";
+    }
+    else
+    {
+        kernel_name = std::string("depthwise_convolution_3x3_nhwc");
+        kernel_name += (is_stride_1 ? "_stride1" : "");
+    }
+
     ICLKernel::configure_internal(win_config.second);
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 

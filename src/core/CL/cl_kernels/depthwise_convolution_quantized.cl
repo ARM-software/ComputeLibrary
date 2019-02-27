@@ -117,7 +117,7 @@
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
 
-__kernel void depthwise_convolution_3x3_quantized_nchw(
+__kernel void dwc_3x3_native_qasymm8_nchw(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -254,7 +254,7 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values0 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+    values0                  = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -271,7 +271,7 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 
 #else // defined(REAL_MULTIPLIER)
 
-    values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
+    values1                  = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -349,7 +349,7 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
 
-__kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
+__kernel void dwc_3x3_native_qasymm8_dot8_nchw(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -597,9 +597,10 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
 
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
-#if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
+#if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && VEC_SIZE == 4
 /** This function computes the depthwise convolution quantized for NHWC data layout when the stride along the width or height is not 1.
  *
+ * @note This kernel assumes VEC_SIZE is 4.
  * @note The weights tensor is expected to be reshaped using @ref CLDepthwiseConvolutionLayerReshapeWeightsKernel.
  * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
  * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
@@ -640,7 +641,7 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  * @param[in] max_offset                            Max offset for the input tensor
  */
-__kernel void depthwise_convolution_3x3_quantized_nhwc(
+__kernel void dwc_3x3_reshaped_qasymm8_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
     IMAGE_DECLARATION(weights),
@@ -654,9 +655,9 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
-#else // defined(DST_DEPTH)
-    int z = get_global_id(2); // spatial coordinate y
-#endif // defined(DST_DEPTH)
+#else                                          // defined(DST_DEPTH)
+    int      z               = get_global_id(2); // spatial coordinate y
+#endif                                         // defined(DST_DEPTH)
 
     __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x * weights_stride_y;
 
@@ -682,15 +683,19 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
     VEC_INT acc = 0, sum = 0;
 
     // Load weights
-    VEC_UCHAR w0 = VLOAD(VEC_SIZE)(0, weights_addr + 0);
-    VEC_UCHAR w1 = VLOAD(VEC_SIZE)(0, weights_addr + VEC_SIZE);
-    VEC_UCHAR w2 = VLOAD(VEC_SIZE)(0, weights_addr + 2 * VEC_SIZE);
-    VEC_UCHAR w3 = VLOAD(VEC_SIZE)(0, weights_addr + 3 * VEC_SIZE);
-    VEC_UCHAR w4 = VLOAD(VEC_SIZE)(0, weights_addr + 4 * VEC_SIZE);
-    VEC_UCHAR w5 = VLOAD(VEC_SIZE)(0, weights_addr + 5 * VEC_SIZE);
-    VEC_UCHAR w6 = VLOAD(VEC_SIZE)(0, weights_addr + 6 * VEC_SIZE);
-    VEC_UCHAR w7 = VLOAD(VEC_SIZE)(0, weights_addr + 7 * VEC_SIZE);
-    VEC_UCHAR w8 = VLOAD(VEC_SIZE)(0, weights_addr + 8 * VEC_SIZE);
+    uchar16 w0_tmp = VLOAD(16)(0, weights_addr);
+    uchar16 w1_tmp = VLOAD(16)(0, weights_addr + 16);
+    uchar4  w8     = VLOAD(4)(0, weights_addr + 2 * 16);
+
+    uchar4 w0 = w0_tmp.s0123;
+    uchar4 w1 = w0_tmp.s4567;
+    uchar4 w2 = w0_tmp.s89AB;
+    uchar4 w3 = w0_tmp.sCDEF;
+
+    uchar4 w4 = w1_tmp.s0123;
+    uchar4 w5 = w1_tmp.s4567;
+    uchar4 w6 = w1_tmp.s89AB;
+    uchar4 w7 = w1_tmp.sCDEF;
 
 #if INPUT_OFFSET != 0
     VEC_INT sum_we = CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT)
@@ -766,7 +771,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
 
 #else  // defined(REAL_MULTIPLIER)
 
-    acc = asymm_mult_by_quant_multiplier_less_than_one(acc, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc                      = asymm_mult_by_quant_multiplier_less_than_one(acc, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
 #endif // defined(REAL_MULTIPLIER)
 
     acc += (VEC_INT)OUTPUT_OFFSET;
@@ -785,9 +790,10 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
-#if defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED)
+#if defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED) && VEC_SIZE == 4
 /** This function computes the depthwise convolution quantized for NHWC data layout when the stride along the width and height is 1.
  *
+ * @note This kernel assumes VEC_SIZE is 4.
  * @note The weights tensor is expected to be reshaped using @ref CLDepthwiseConvolutionLayerReshapeWeightsKernel.
  * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
  * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
@@ -829,7 +835,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc(
  * @param[in] max_offset                            Max offset for the input tensor
  */
 
-__kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
+__kernel void dwc_3x3_reshaped_qasymm8_stride1_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
     IMAGE_DECLARATION(weights),
@@ -843,9 +849,9 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
-#else // defined(DST_DEPTH)
-    int z = get_global_id(2); // spatial coordinate y
-#endif // defined(DST_DEPTH)
+#else                                          // defined(DST_DEPTH)
+    int             z        = get_global_id(2); // spatial coordinate y
+#endif                                         // defined(DST_DEPTH)
 
     __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x * weights_stride_y;
 
@@ -874,15 +880,19 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     VEC_INT acc3 = 0, sum3 = 0;
 
     // Load weights
-    VEC_UCHAR w0 = VLOAD(VEC_SIZE)(0, weights_addr + 0);
-    VEC_UCHAR w1 = VLOAD(VEC_SIZE)(0, weights_addr + VEC_SIZE);
-    VEC_UCHAR w2 = VLOAD(VEC_SIZE)(0, weights_addr + 2 * VEC_SIZE);
-    VEC_UCHAR w3 = VLOAD(VEC_SIZE)(0, weights_addr + 3 * VEC_SIZE);
-    VEC_UCHAR w4 = VLOAD(VEC_SIZE)(0, weights_addr + 4 * VEC_SIZE);
-    VEC_UCHAR w5 = VLOAD(VEC_SIZE)(0, weights_addr + 5 * VEC_SIZE);
-    VEC_UCHAR w6 = VLOAD(VEC_SIZE)(0, weights_addr + 6 * VEC_SIZE);
-    VEC_UCHAR w7 = VLOAD(VEC_SIZE)(0, weights_addr + 7 * VEC_SIZE);
-    VEC_UCHAR w8 = VLOAD(VEC_SIZE)(0, weights_addr + 8 * VEC_SIZE);
+    uchar16 w0_tmp = VLOAD(16)(0, weights_addr);
+    uchar16 w1_tmp = VLOAD(16)(0, weights_addr + 16);
+    uchar4  w8     = VLOAD(4)(0, weights_addr + 2 * 16);
+
+    uchar4 w0 = w0_tmp.s0123;
+    uchar4 w1 = w0_tmp.s4567;
+    uchar4 w2 = w0_tmp.s89AB;
+    uchar4 w3 = w0_tmp.sCDEF;
+
+    uchar4 w4 = w1_tmp.s0123;
+    uchar4 w5 = w1_tmp.s4567;
+    uchar4 w6 = w1_tmp.s89AB;
+    uchar4 w7 = w1_tmp.sCDEF;
 
 #if INPUT_OFFSET != 0
     VEC_INT sum_we = CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT)
@@ -1020,10 +1030,10 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
 
 #else // defined(REAL_MULTIPLIER)
 
-    acc0 = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
-    acc1 = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
-    acc2 = asymm_mult_by_quant_multiplier_less_than_one(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
-    acc3 = asymm_mult_by_quant_multiplier_less_than_one(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc0                     = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc1                     = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc2                     = asymm_mult_by_quant_multiplier_less_than_one(acc2, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc3                     = asymm_mult_by_quant_multiplier_less_than_one(acc3, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
 
 #endif // defined(REAL_MULTIPLIER)
 
@@ -1110,7 +1120,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  * @param[in] max_offset                            The maximum allowed offset for the input tensor
  */
-__kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
+__kernel void dwc_3x3_reshaped_qasymm8_dot8_stride1_nhwc(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst),
     IMAGE_DECLARATION(weights),
@@ -1124,9 +1134,9 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
-#else // defined(DST_DEPTH)
-    int z = get_global_id(2); // spatial coordinate y
-#endif // defined(DST_DEPTH)
+#else                                          // defined(DST_DEPTH)
+    int      z               = get_global_id(2); // spatial coordinate y
+#endif                                         // defined(DST_DEPTH)
 
     __global uchar *weights_addr = weights_ptr + weights_offset_first_element_in_bytes + x * weights_stride_y;
 
@@ -1255,8 +1265,8 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
 
 #else // defined(REAL_MULTIPLIER)
 
-    acc0 = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
-    acc1 = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc0                     = asymm_mult_by_quant_multiplier_less_than_one(acc0, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
+    acc1                     = asymm_mult_by_quant_multiplier_less_than_one(acc1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT);
 
 #endif // defined(REAL_MULTIPLIER)
     acc0 += (VEC_INT)OUTPUT_OFFSET;
