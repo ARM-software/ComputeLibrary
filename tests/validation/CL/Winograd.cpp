@@ -54,7 +54,7 @@ namespace
 {
 // *INDENT-OFF*
 // clang-format off
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
+constexpr AbsoluteTolerance<float> tolerance_f32(0.002f);
 const AbsoluteTolerance<half> tolerance_f16(half(0.5f));
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
 const AbsoluteTolerance<half> tolerance_convolution_layer_f16(half(0.4f));
