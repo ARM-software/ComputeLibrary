@@ -173,7 +173,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
         kernel_name = is_qasymm ? "dwc_3x3_native_qasymm8" : "depthwise_convolution_3x3";
         kernel_name += (is_qasymm && is_dot8_supported ? "_dot8" : "");
-        kernel_name += "_nchw";
+        kernel_name += (is_qasymm ? "_nchw" : "");
 
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
         num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y == 1) ? 2 : 1;
