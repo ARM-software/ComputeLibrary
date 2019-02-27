@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -256,29 +256,18 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 
         if(act_info.enabled())
         {
-            const int a_val = input->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_val = input->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
-            const int o1    = input->info()->quantization_info().offset;
+            const int a_val = output->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_val = output->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int o1    = output->info()->quantization_info().offset;
 
             build_opts.add_option("-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
             build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
 
-            if(output != nullptr)
-            {
-                const float s1 = input->info()->quantization_info().scale;
-                const float s2 = output->info()->quantization_info().scale;
-                const int   o2 = output->info()->quantization_info().offset;
-
-                build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
-                build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
-                if(o1 != o2 || s1 != s2)
-                {
-                    build_opts.add_option("-DS2_VAL=" + float_to_string_with_full_precision(s2));
-                    build_opts.add_option("-DO2_VAL=" + support::cpp11::to_string(o2));
-                }
-            }
+            const float s1 = input->info()->quantization_info().scale;
+            build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
+            build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
         }
     }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
