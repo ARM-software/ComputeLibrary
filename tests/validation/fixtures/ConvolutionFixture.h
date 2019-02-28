@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,9 +52,8 @@ protected:
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
         const uint8_t                          constant_border_value = distribution(gen);
 
-        // Generate random scale value between 1 and 255.
-        std::uniform_int_distribution<uint8_t> distribution_scale(1, 255);
-        const uint32_t                         scale = distribution_scale(gen);
+        // Generate random scale value between 0 and 255.
+        const uint32_t scale = distribution(gen);
 
         ARM_COMPUTE_ERROR_ON(3 != width && 5 != width && 7 != width && 9 != width);
         ARM_COMPUTE_ERROR_ON(3 != height && 5 != height && 7 != height && 9 != height);

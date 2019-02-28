@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -634,10 +634,10 @@ inline uint32_t calculate_matrix_scale(const int16_t *matrix, unsigned int matri
 /** Adjust tensor shape size if width or height are odd for a given multi-planar format. No modification is done for other formats.
  *
  * @note Adding here a few links discussing the issue of odd size and sharing the same solution:
- *       Android Source: https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java
- *       WebM: https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM
- *       libYUV: https://bugs.chromium.org/p/libyuv/issues/detail?id=198&can=1&q=odd%20width
- *       YUVPlayer: https://sourceforge.net/p/raw-yuvplayer/bugs/1/
+ *       <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/graphics/java/android/graphics/YuvImage.java">Android Source</a>
+ *       <a href="https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/LaCKpqiDTXM">WebM</a>
+ *       <a href="https://bugs.chromium.org/p/libyuv/issues/detail?id=198&amp;can=1&amp;q=odd%20width">libYUV</a>
+ *       <a href="https://sourceforge.net/p/raw-yuvplayer/bugs/1/">YUVPlayer</a> *
  *
  * @param[in, out] shape  Tensor shape of 2D size
  * @param[in]      format Format of the tensor
@@ -805,15 +805,33 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
     }
 }
 
+/** Permutes the given dimensions according the permutation vector
+ *
+ * @param[in,out] dimensions Dimensions to be permuted.
+ * @param[in]     perm       Vector describing the permutation.
+ *
+ */
+template <typename T>
+inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &perm)
+{
+    const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
+    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
+    {
+        T dimension_val = old_dim[i];
+        dimensions.set(perm[i], dimension_val);
+    }
+}
+
 /** Calculate padding requirements in case of SAME padding
  *
  * @param[in] input_shape   Input shape
  * @param[in] weights_shape Weights shape
  * @param[in] conv_info     Convolution information (containing strides)
+ * @param[in] data_layout   (Optional) Data layout of the input and weights tensor
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info);
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW);
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *
@@ -1013,7 +1031,7 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
 inline std::string float_to_string_with_full_precision(float val)
 {
     std::stringstream ss;
-    ss.precision(std::numeric_limits<float>::digits10 + 1);
+    ss.precision(std::numeric_limits<float>::max_digits10);
     ss << val;
 
     if(val != static_cast<int>(val))
@@ -1024,6 +1042,70 @@ inline std::string float_to_string_with_full_precision(float val)
     return ss.str();
 }
 
+/** Returns the number of elements required to go from start to end with the wanted step
+ *
+ * @param[in] start start value
+ * @param[in] end   end value
+ * @param[in] step  step value between each number in the wanted sequence
+ *
+ * @return number of elements to go from start value to end value using the wanted step
+ */
+inline size_t num_of_elements_in_range(const float start, const float end, const float step)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(step == 0, "Range Step cannot be 0");
+    return size_t(std::ceil((end - start) / step));
+}
+
+/** Returns true if the value can be represented by the given data type
+ *
+ * @param[in] val        value to be checked
+ * @param[in] dt         data type that is checked
+ * @param[in] quant_info quantization info if the data type is QASYMM8
+ *
+ * @return true if the data type can hold the value.
+ */
+template <typename T>
+bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = QuantizationInfo())
+{
+    switch(dt)
+    {
+        case DataType::U8:
+            return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
+        case DataType::QASYMM8:
+        {
+            double min = static_cast<double>(quant_info.dequantize(0));
+            double max = static_cast<double>(quant_info.dequantize(std::numeric_limits<uint8_t>::max()));
+            return ((double)val >= min && (double)val <= max);
+        }
+        case DataType::S8:
+            return ((static_cast<int8_t>(val) == val) && val >= std::numeric_limits<int8_t>::lowest() && val <= std::numeric_limits<int8_t>::max());
+        case DataType::U16:
+            return ((static_cast<uint16_t>(val) == val) && val >= std::numeric_limits<uint16_t>::lowest() && val <= std::numeric_limits<uint16_t>::max());
+        case DataType::S16:
+            return ((static_cast<int16_t>(val) == val) && val >= std::numeric_limits<int16_t>::lowest() && val <= std::numeric_limits<int16_t>::max());
+        case DataType::U32:
+            return ((static_cast<uint32_t>(val) == val) && val >= std::numeric_limits<uint32_t>::lowest() && val <= std::numeric_limits<uint32_t>::max());
+        case DataType::S32:
+            return ((static_cast<int32_t>(val) == val) && val >= std::numeric_limits<int32_t>::lowest() && val <= std::numeric_limits<int32_t>::max());
+        case DataType::U64:
+            return (val >= std::numeric_limits<uint64_t>::lowest() && val <= std::numeric_limits<uint64_t>::max());
+        case DataType::S64:
+            return (val >= std::numeric_limits<int64_t>::lowest() && val <= std::numeric_limits<int64_t>::max());
+        case DataType::F16:
+            return (val >= std::numeric_limits<half>::lowest() && val <= std::numeric_limits<half>::max());
+        case DataType::F32:
+            return (val >= std::numeric_limits<float>::lowest() && val <= std::numeric_limits<float>::max());
+        case DataType::F64:
+            return (val >= std::numeric_limits<double>::lowest() && val <= std::numeric_limits<double>::max());
+        case DataType::SIZET:
+            return ((static_cast<size_t>(val) == val) && val >= std::numeric_limits<size_t>::lowest() && val <= std::numeric_limits<size_t>::max());
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+            return false;
+    }
+}
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
 /** Print consecutive elements to an output stream.
  *
  * @param[out] s             Output stream to print the elements to.
@@ -1112,5 +1194,6 @@ void print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr
  * @return The maximum width of the elements.
  */
 int max_consecutive_elements_display_width(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n);
+#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 }
 #endif /*__ARM_COMPUTE_UTILS_H__ */

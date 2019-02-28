@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,9 +70,9 @@ public:
     MeasurementsMap measurements() const override;
 
 private:
-    std::chrono::high_resolution_clock::time_point _start{};
-    std::chrono::high_resolution_clock::time_point _stop{};
-    float                                          _scale_factor{};
+    std::chrono::system_clock::time_point _start{};
+    std::chrono::system_clock::time_point _stop{};
+    float                                 _scale_factor{};
 };
 
 using WallClockTimer      = WallClock<false>;

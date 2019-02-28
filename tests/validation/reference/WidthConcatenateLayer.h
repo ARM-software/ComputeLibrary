@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs);
+SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs, SimpleTensor<T> &dst);
 } // namespace reference
 } // namespace validation
 } // namespace test

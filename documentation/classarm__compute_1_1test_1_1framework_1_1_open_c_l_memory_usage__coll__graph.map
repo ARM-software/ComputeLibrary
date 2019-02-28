@@ -1,3 +1,4 @@
 <map id="OpenCLMemoryUsage" name="OpenCLMemoryUsage">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="41,5,125,32"/>
+<area shape="rect" id="node1" title="Instrument collecting memory usage information for OpenCL." alt="" coords="5,80,171,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="42,5,134,32"/>
 </map>

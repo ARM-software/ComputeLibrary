@@ -1,4 +1,5 @@
 <map id="CLReshapeLayerKernel" name="CLReshapeLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="45,80,125,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="54,5,117,32"/>
+<area shape="rect" id="node1" title="Interface for the kernel to perform tensor reshaping." alt="" coords="5,155,172,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="49,80,129,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="57,5,121,32"/>
 </map>

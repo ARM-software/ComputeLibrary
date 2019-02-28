@@ -14,7 +14,7 @@ var searchData=
   ['locallyconnected_2ecpp',['LocallyConnected.cpp',['../_c_l_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_locally_connected_8cpp.xhtml',1,'(Global Namespace)']]],
   ['locallyconnected_2eh',['LocallyConnected.h',['../_locally_connected_8h.xhtml',1,'']]],
   ['locallyconnectedlayer_2ecpp',['LocallyConnectedLayer.cpp',['../_c_l_2_locally_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_locally_connected_layer_8cpp.xhtml',1,'(Global Namespace)']]],
-  ['log_2eh',['Log.h',['../_log_8h.xhtml',1,'']]],
+  ['log_2eh',['Log.h',['../_log_8h.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2wrapper_2intrinsics_2_log_8h.xhtml',1,'(Global Namespace)']]],
   ['logger_2ecpp',['Logger.cpp',['../_logger_8cpp.xhtml',1,'']]],
   ['logger_2eh',['Logger.h',['../core_2utils_2logging_2_logger_8h.xhtml',1,'(Global Namespace)'],['../graph_2_logger_8h.xhtml',1,'(Global Namespace)']]],
   ['loggerregistry_2ecpp',['LoggerRegistry.cpp',['../_logger_registry_8cpp.xhtml',1,'']]],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,9 @@
 
 /* Header regrouping all the CPP functions */
 #include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
+#include "arm_compute/runtime/CPP/functions/CPPDetectionOutputLayer.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
+#include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
 #include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
 #endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */

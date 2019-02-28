@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,7 @@ void validate_configuration(const Tensor &src, TensorShape shape)
 }
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -87,7 +87,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEMinMaxLocationFixture<uint8_t>, framework::Da
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", DataType::S16)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::S16)), shape, data_type)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
@@ -111,7 +111,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEMinMaxLocationFixture<int16_t>, framework::Da
 TEST_SUITE_END() // S16
 
 TEST_SUITE(Float)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", DataType::F32)), shape, data_type)
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);

@@ -1,3 +1,4 @@
 <map id="CLTensorAllocator" name="CLTensorAllocator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors. " alt="" coords="12,5,129,32"/>
+<area shape="rect" id="node1" title="Basic implementation of a CL memory tensor allocator." alt="" coords="5,80,139,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors." alt="" coords="11,5,133,32"/>
 </map>

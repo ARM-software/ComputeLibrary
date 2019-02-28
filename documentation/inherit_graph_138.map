@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_scheduler_1_1_hints.xhtml" title="Scheduler hints. " alt="" coords="5,5,128,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_pyramid.xhtml" title="Interface for pyramid data&#45;object." alt="" coords="5,31,83,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_pyramid.xhtml" title="Basic implementation of the OpenCL pyramid interface." alt="" coords="131,5,221,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_pyramid.xhtml" title="Basic implementation of the pyramid interface." alt="" coords="139,56,213,83"/>
 </map>

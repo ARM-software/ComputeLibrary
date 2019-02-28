@@ -1,13 +1,14 @@
 var _n_e_o_n_2_channel_combine_8cpp =
 [
-    [ "NEChannelCombineFixture", "_n_e_o_n_2_channel_combine_8cpp.xhtml#af3d8b7240e257828d0c3a662f213ea66", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a0324d8b990822bf5a4198dbd314c3bb6", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a95cb3ec331c9716238f345cf079ebb63", null ],
-    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a4718e06b14b31bf5ee5327d5d7bd01d4", null ],
+    [ "combine", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a8e77ed62c2a00d8d5107bd0c0f8aeb91", null ],
+    [ "combine", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a0ba5167b02b0536eda5cca1ee83baec4", null ],
+    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#ab4f1e8c8d3eef49fdc3b0afd81c15ba0", null ],
+    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#aefb03bbb428b161af375b97d075c9a13", null ],
+    [ "DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#aae6e852b77301ed37776a2f7cd93b064", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a2b381c0e11d4641305585a59dffd4b1e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a7c6ffa079dade532fe1fffc4a7192fee", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a100795fba7ec1bc258969c72d2667662", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a3c7795cb106db7470f962bfe680dfd86", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a4e5c2ec288d121704c2bc4e3fc44a25b", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a39ef331b5d20b816e8911446c019f67e", null ]
+    [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a39ef331b5d20b816e8911446c019f67e", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "NEChannelCombineFixture< uint8_t >", "_n_e_o_n_2_channel_combine_8cpp.xhtml#a4a9059cbc39b738c5394cb497e76e4e5", null ]
 ];

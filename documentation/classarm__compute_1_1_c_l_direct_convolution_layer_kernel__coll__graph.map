@@ -1,7 +1,8 @@
 <map id="CLDirectConvolutionLayerKernel" name="CLDirectConvolutionLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="5,81,85,108"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="14,5,77,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor. " alt="" coords="109,81,192,108"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor. " alt="" coords="117,5,184,32"/>
-<area shape="rect" id="node6" href="$structarm__compute_1_1_border_size.xhtml" title="Container for 2D border size. " alt="" coords="217,81,303,108"/>
+<area shape="rect" id="node1" title="Interface for the direct convolution kernel." alt="" coords="56,215,243,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="5,81,85,108"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="13,5,77,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_tensor.xhtml" title="Interface for OpenCL tensor." alt="" coords="109,81,189,108"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="116,5,183,32"/>
+<area shape="rect" id="node6" href="$structarm__compute_1_1_border_size.xhtml" title="Container for 2D border size." alt="" coords="214,81,306,108"/>
 </map>

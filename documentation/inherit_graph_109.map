@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lut.xhtml" title="Lookup Table object interface. " alt="" coords="5,31,49,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_lut.xhtml" title="Interface for OpenCL LUT. " alt="" coords="97,5,159,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_lut.xhtml" title="Basic implementation of the LUT interface. " alt="" coords="108,56,148,83"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_lut.xhtml" title="Basic implementation of the OpenCL lut interface. " alt="" coords="207,5,264,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_h_o_g.xhtml" title="Interface for HOG data&#45;object." alt="" coords="5,31,60,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data&#45;object." alt="" coords="117,5,169,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_h_o_g.xhtml" title="Interface for OpenCL HOG data&#45;object." alt="" coords="108,56,179,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_c_l_h_o_g.xhtml" title="OpenCL implementation of HOG data&#45;object." alt="" coords="227,56,295,83"/>
 </map>

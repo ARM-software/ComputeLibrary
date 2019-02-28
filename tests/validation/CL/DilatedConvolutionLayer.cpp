@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -113,7 +113,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(GEMMDilatedConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallDilatedConvolutionLayerDataset(), datasets::LargeDilatedConvolutionLayerDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallDilatedConvolutionLayerDataset(),
                                                                    CNNDataTypes),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
 {

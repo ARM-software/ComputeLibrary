@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,34 +51,6 @@ const auto ChannelExtractYUVDataset = combine(framework::dataset::make("FormatTy
                                               framework::dataset::make("ChannelType", { Channel::Y, Channel::U, Channel::V }));
 const auto ChannelExtractYUVPlanarDataset = combine(framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 }),
                                                     framework::dataset::make("ChannelType", { Channel::Y, Channel::U, Channel::V }));
-
-inline void validate_configuration(const TensorShape &shape, Format format, Channel channel)
-{
-    const unsigned int num_planes = num_planes_from_format(format);
-
-    TensorShape dst_shape = adjust_odd_shape(shape, format);
-    dst_shape             = calculate_subsampled_shape(dst_shape, format, channel);
-
-    // Create tensors
-    CLMultiImage ref_src = create_multi_image<CLMultiImage>(shape, format);
-    CLTensor     dst     = create_tensor<CLTensor>(dst_shape, Format::U8);
-
-    // Create and Configure function
-    CLChannelExtract channel_extract;
-
-    if(1U == num_planes)
-    {
-        const CLTensor *plane_src = ref_src.cl_plane(0);
-
-        channel_extract.configure(plane_src, channel, &dst);
-    }
-    else
-    {
-        channel_extract.configure(&ref_src, channel, &dst);
-    }
-
-    // TODO(bsgcomp): Add validation for padding and shape (COMPMID-659)
-}
 } // namespace
 
 TEST_SUITE(CL)
@@ -86,25 +58,6 @@ TEST_SUITE(ChannelExtract)
 
 template <typename T>
 using CLChannelExtractFixture = ChannelExtractValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLChannelExtract, T>;
-
-TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractRGBADataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVDataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVPlanarDataset),
-               shape, format, channel)
-{
-    validate_configuration(shape, format, channel);
-}
-TEST_SUITE_END()
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
@@ -117,7 +70,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
@@ -130,7 +83,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
@@ -143,10 +96,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUVPlanar
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ChannelExtract
+TEST_SUITE_END() // CL
 
 } // namespace validation
 } // namespace test

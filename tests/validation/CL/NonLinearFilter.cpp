@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(NonLinearFilter)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), datasets::NonLinearFilterFunctions()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), datasets::NonLinearFilterFunctions()),
                                                                                    framework::dataset::make("MaskSize", { 3U, 5U })),
                                                                            datasets::MatrixPatterns()),
                                                                    datasets::BorderModes()),

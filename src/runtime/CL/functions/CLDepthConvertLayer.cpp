@@ -28,8 +28,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLDepthConvertLayer::configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
@@ -41,3 +41,4 @@ Status CLDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo
 {
     return CLDepthConvertLayerKernel::validate(input, output, policy, shift);
 }
+} // namespace arm_compute

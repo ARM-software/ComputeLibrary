@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,22 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEBatchNormalizationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEFuseBatchNormalization.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/RandomBatchNormalizationLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFixture.h"
+#include "tests/validation/fixtures/BatchNormalizationLayerFusionFixture.h"
 
 namespace arm_compute
 {
@@ -44,16 +48,21 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>           rel_tolerance_f32(0.05f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                   /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+#endif                                                   // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const auto act_infos = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
 });
+const auto common_fusion_dataset = combine(combine(combine(framework::dataset::make("UseBias", { false, true }),
+                                                           framework::dataset::make("UseBeta", { false, true })),
+                                                   framework::dataset::make("UseGamma", { false, true })),
+                                           framework::dataset::make("Epsilon", { 0.001f }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -62,7 +71,7 @@ TEST_SUITE(BatchNormalizationLayer)
 template <typename T>
 using NEBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<Tensor, Accessor, NEBatchNormalizationLayer, T>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
                                                                                    combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
                                                                            framework::dataset::make("DataType", { DataType::F32 })),
                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -142,36 +151,110 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
-                                                                                                                   act_infos),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RandomSmall, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
+                                                                                                                        combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                                framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                        act_infos),
+                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32, 0);
+    validate(Accessor(_target), _reference, abs_tolerance_f32, 0);
 }
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RandomLarge, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeRandomBatchNormalizationLayerDataset(),
+                                                                                                                      combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                              framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                      act_infos),
+                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, abs_tolerance_f32, 0);
+}
+TEST_SUITE_END() // F32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                                                          framework::dataset::make("UseGamma", { false, true }))),
-                                                                                                                  framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RandomSmall, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
+                                                                                                                       combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                               framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16, 0);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+FIXTURE_DATA_TEST_CASE(RandomLarge, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::LargeRandomBatchNormalizationLayerDataset(),
+                                                                                                                       combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                               framework::dataset::make("UseGamma", { false, true }))),
+                                                                                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16, 0);
+}
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // BatchNormalizationLayer
+
+TEST_SUITE(BatchNormalizationLayerFusion)
+template <typename T>
+using NEBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<Tensor, Accessor, NEConvolutionLayer, NEFuseBatchNormalization, T>;
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("Weights", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),      // Valid
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 1U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
+                                                     }),
+               framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(5U), 1, DataType::F32),
+                                                   })),
+               framework::dataset::make("Expected", { true, false, false, false})),
+               weights_info, mvbg_info, expected)
+{
+    const auto &weights_in_info = weights_info;
+    const auto &mean_info = mvbg_info;
+    const auto &var_info = mvbg_info;
+    const auto &fused_weights_info = weights_info;
+    const auto &fused_bias_info = mvbg_info;
+    const auto &conv_bias_info = mvbg_info;
+    const auto &beta_info = mvbg_info;
+    const auto &gamma_info = mvbg_info;
+    bool has_error = bool(NEFuseBatchNormalization::validate(
+            &weights_in_info.clone()->set_is_resizable(false), &mean_info.clone()->set_is_resizable(false),
+            &var_info.clone()->set_is_resizable(false), &fused_weights_info.clone()->set_is_resizable(false),
+            &fused_bias_info.clone()->set_is_resizable(false), &conv_bias_info.clone()->set_is_resizable(false),
+            &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallConvolutionLayerDataset(), common_fusion_dataset),
+                                       framework::dataset::make("DataType", DataType::F32)),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // BatchNormalizationLayerFusion
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

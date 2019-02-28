@@ -1,4 +1,5 @@
 <map id="CLMultiHOG" name="CLMultiHOG">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects. " alt="" coords="5,80,107,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects. " alt="" coords="14,5,98,32"/>
+<area shape="rect" id="node1" title="Basic implementation of the CL multi HOG data&#45;objects." alt="" coords="7,155,105,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects." alt="" coords="5,80,107,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects." alt="" coords="13,5,99,32"/>
 </map>

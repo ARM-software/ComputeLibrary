@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 TEST_SUITE(CL)
 TEST_SUITE(SoftmaxLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SoftmaxLayerSmallShapes(), datasets::SoftmaxLayerLargeShapes()), CNNDataTypes), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SoftmaxLayerSmallShapes(), CNNDataTypes), shape, data_type)
 {
     const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(1.f / 255.f, 0) : QuantizationInfo();
 

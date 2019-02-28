@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -178,6 +178,7 @@ public:
      * @param[in] input                 Input to the depthwise convolution layer node as a NodeID-Index pair
      * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
      * @param[in] conv_info             Convolution layer information
+     * @param[in] depth_multiplier      (Optional) Depth multiplier parameter.
      * @param[in] method                (Optional) Convolution method to use
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
@@ -186,7 +187,7 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                                 Size2D kernel_spatial_extend, PadStrideInfo conv_info,
+                                                 Size2D kernel_spatial_extend, PadStrideInfo conv_info, int depth_multiplier = 1,
                                                  DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::Default,
                                                  ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo());
     /** Adds an element-wise layer node to the graph
@@ -200,6 +201,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
+    /** Adds a detection output layer node to the graph
+     *
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input_loc      Location input to the detection output layer node as a NodeID-Index pair
+     * @param[in] input_conf     Confidence input to the detection output layer node as a NodeID-Index pair
+     * @param[in] input_priorbox PriorBox input to the detection output layer node as a NodeID-Index pair
+     * @param[in] detect_info    Detection output layer parameters
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info);
     /** Adds a Dummy node to the graph
      *
      * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.
@@ -356,7 +369,7 @@ public:
      * @param[in] g         Graph to add the node to
      * @param[in] params    Common node parameters
      * @param[in] input     Input to the reshape layer node as a NodeID-Index pair
-     * @param[in] rois      Input containing @ref ROI.
+     * @param[in] rois      Input containing the ROIs.
      * @param[in] pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
      * @return Node ID of the created node, EmptyNodeID in case of error

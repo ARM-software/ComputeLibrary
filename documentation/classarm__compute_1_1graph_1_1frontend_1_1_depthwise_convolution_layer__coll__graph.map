@@ -1,3 +1,4 @@
 <map id="DepthwiseConvolutionLayer" name="DepthwiseConvolutionLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface. " alt="" coords="69,5,127,32"/>
+<area shape="rect" id="node1" title="Depthwise Convolution Layer." alt="" coords="5,80,204,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface." alt="" coords="75,5,135,32"/>
 </map>

@@ -1,5 +1,6 @@
 <map id="NEWarpPerspectiveKernel&lt; interpolation &gt;" name="NEWarpPerspectiveKernel&lt; interpolation &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_n_e_warp_kernel.xhtml" title="Common interface for warp affine and warp perspective. " alt="" coords="38,155,151,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="53,80,136,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,126,32"/>
+<area shape="rect" id="node1" title="Template interface for the kernel to compute warp perspective." alt="" coords="5,229,189,271"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_n_e_warp_kernel.xhtml" title="Common interface for warp affine and warp perspective." alt="" coords="41,155,154,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="56,80,139,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="65,5,129,32"/>
 </map>

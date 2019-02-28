@@ -42,10 +42,29 @@ namespace validation
 {
 namespace
 {
-const auto PermuteParametersSmall = combine(concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U) }));
-const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U) }));
+const auto PermuteVectors3 = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(2U, 0U, 1U),
+    PermutationVector(1U, 2U, 0U),
+    PermutationVector(0U, 1U, 2U),
+    PermutationVector(0U, 2U, 1U),
+    PermutationVector(1U, 0U, 2U),
+    PermutationVector(2U, 1U, 0U),
+});
+const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(3U, 2U, 0U, 1U),
+    PermutationVector(3U, 2U, 1U, 0U),
+    PermutationVector(2U, 3U, 1U, 0U),
+    PermutationVector(1U, 3U, 2U, 0U),
+    PermutationVector(3U, 1U, 2U, 0U),
+    PermutationVector(3U, 0U, 2U, 1U),
+    PermutationVector(0U, 3U, 2U, 1U)
+});
+const auto PermuteVectors         = concat(PermuteVectors3, PermuteVectors4);
+const auto PermuteInputLayout     = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteInputLayout * PermuteVectors;
+const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteInputLayout * PermuteVectors;
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Permute)
@@ -61,7 +80,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
                                                                                         TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::S16),     // permutation not supported
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
+                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
+                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32)  // permutation not supported
+
                                                                                     }),
                                                 framework::dataset::make("OutputInfo", { 
                                                                                         TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),     
@@ -71,7 +94,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                         TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
                                                                                         TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
                                                                                         TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
+                                                                                        TensorInfo(TensorShape(3U, 5U, 7U, 7U), 1, DataType::S16), 
                                                                                         TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
+                                                                                        TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32)
+
                                                                                     })),
                                                 framework::dataset::make("PermutationVector", { 
                                                                                                 PermutationVector(2U, 1U, 0U),
@@ -81,9 +108,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                                                                 PermutationVector(2U, 0U, 1U), 
                                                                                                 PermutationVector(1U, 2U, 0U),
                                                                                                 PermutationVector(3U, 2U, 0U, 1U),
-                                                                                                PermutationVector(2U, 3U, 1U, 0U)
+                                                                                                PermutationVector(3U, 2U, 0U, 1U),
+                                                                                                PermutationVector(2U, 3U, 1U, 0U),
+                                                                                                PermutationVector(2U, 3U, 1U, 0U),
+                                                                                                PermutationVector(0U, 0U, 0U, 1000U)
                                                                                     })),
-                                                framework::dataset::make("Expected", { false, false, false, false, true, true, false, false })),
+                                                framework::dataset::make("Expected", { true, false, false, false, true, true, false,true, false, true, false })),
                                             input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);
@@ -118,12 +148,15 @@ template <typename T>
 using NEPermuteFixture = PermuteValidationFixture<Tensor, Accessor, NEPermute, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U8)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -131,12 +164,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint8_t>, framework::DatasetMo
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -144,12 +179,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint16_t>, framework::DatasetM
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);

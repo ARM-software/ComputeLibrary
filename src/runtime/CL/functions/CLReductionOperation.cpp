@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,15 +56,19 @@ unsigned int calculate_number_of_stages(const ITensorInfo *input, unsigned int a
 } // namespace
 
 CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _sums_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _num_of_stages(), _reduction_axis(), _is_quantized()
+    : _memory_group(std::move(memory_manager)), _results_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _num_of_stages(), _reduction_axis(), _is_serial()
 {
 }
 
 Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     const unsigned int num_of_stages = calculate_number_of_stages(input, axis);
-
-    if(axis == 0 && !is_data_type_quantized(input->data_type()))
+    bool               is_serial     = is_data_type_quantized(input->data_type()) || axis != 0;
+    if(is_serial)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, output, axis, op));
+    }
+    else
     {
         // Create temporary tensor infos
         auto sums_vector = arm_compute::support::cpp14::make_unique<TensorInfo[]>(num_of_stages - 1);
@@ -81,17 +85,25 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
         }
 
         ReductionOperation first_kernel_op;
+        ReductionOperation intermediate_kernel_op;
         ReductionOperation last_kernel_op;
         switch(op)
         {
             case ReductionOperation::SUM:
             case ReductionOperation::MEAN_SUM:
-                first_kernel_op = ReductionOperation::SUM;
-                last_kernel_op  = op;
+                first_kernel_op        = ReductionOperation::SUM;
+                intermediate_kernel_op = ReductionOperation::SUM;
+                last_kernel_op         = op;
                 break;
             case ReductionOperation::SUM_SQUARE:
-                first_kernel_op = ReductionOperation::SUM_SQUARE;
-                last_kernel_op  = ReductionOperation::SUM;
+                first_kernel_op        = ReductionOperation::SUM_SQUARE;
+                intermediate_kernel_op = ReductionOperation::SUM;
+                last_kernel_op         = ReductionOperation::SUM;
+                break;
+            case ReductionOperation::PROD:
+                first_kernel_op        = ReductionOperation::PROD;
+                intermediate_kernel_op = ReductionOperation::PROD;
+                last_kernel_op         = ReductionOperation::PROD;
                 break;
             default:
                 ARM_COMPUTE_ERROR("Not supported");
@@ -103,16 +115,12 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
         // Validate ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < num_of_stages - 1; ++i)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + i - 1, sums_vector.get() + i, axis, ReductionOperation::SUM));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + i - 1, sums_vector.get() + i, axis, intermediate_kernel_op));
         }
 
         // Validate ReductionOperation on the last stage
         const unsigned int last_stage = num_of_stages - 1;
         ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + last_stage - 1, output, axis, last_kernel_op, input->dimension(0)));
-    }
-    else
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, output, axis, op));
     }
 
     return Status{};
@@ -122,65 +130,77 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
 {
     _num_of_stages  = calculate_number_of_stages(input->info(), axis);
     _reduction_axis = axis;
-    _is_quantized   = is_data_type_quantized(input->info()->data_type());
+    _is_serial      = is_data_type_quantized(input->info()->data_type()) || axis != 0;
 
     // Configure reduction operation kernels
     _reduction_kernels_vector = arm_compute::support::cpp14::make_unique<CLReductionOperationKernel[]>(_num_of_stages);
 
     // Create temporary tensors
-    if(axis == 0 && !_is_quantized)
+    if(_is_serial)
+    {
+        _reduction_kernels_vector[0].configure(input, output, axis, op, 0);
+    }
+    else
     {
         _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_of_stages);
-        _sums_vector            = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_of_stages - 1);
+        _results_vector         = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_of_stages - 1);
         TensorShape shape{ input->info()->tensor_shape() };
         for(unsigned int i = 0; i < _num_of_stages - 1; i++)
         {
             shape.set(0, ceil(shape.x() / 128.f));
-            _sums_vector[i].allocator()->init(input->info()->clone()->set_tensor_shape(shape));
+            _results_vector[i].allocator()->init(input->info()->clone()->set_tensor_shape(shape));
         }
 
         // Apply ReductionOperation only on first kernel
-        _memory_group.manage(_sums_vector.get());
+        _memory_group.manage(_results_vector.get());
 
         ReductionOperation first_kernel_op;
+        ReductionOperation intermediate_kernel_op;
         ReductionOperation last_kernel_op;
+        PixelValue         pixelValue;
         switch(op)
         {
             case ReductionOperation::SUM:
             case ReductionOperation::MEAN_SUM:
-                first_kernel_op = ReductionOperation::SUM;
-                last_kernel_op  = op;
+                first_kernel_op        = ReductionOperation::SUM;
+                intermediate_kernel_op = ReductionOperation::SUM;
+                last_kernel_op         = op;
+                pixelValue             = PixelValue();
                 break;
             case ReductionOperation::SUM_SQUARE:
-                first_kernel_op = ReductionOperation::SUM_SQUARE;
-                last_kernel_op  = ReductionOperation::SUM;
+                first_kernel_op        = ReductionOperation::SUM_SQUARE;
+                intermediate_kernel_op = ReductionOperation::SUM;
+                last_kernel_op         = ReductionOperation::SUM;
+                pixelValue             = PixelValue();
+                break;
+            case ReductionOperation::PROD:
+                first_kernel_op        = ReductionOperation::PROD;
+                intermediate_kernel_op = ReductionOperation::PROD;
+                last_kernel_op         = ReductionOperation::PROD;
+                pixelValue             = PixelValue(1, input->info()->data_type());
                 break;
             default:
                 ARM_COMPUTE_ERROR("Not supported");
         }
 
-        _reduction_kernels_vector[0].configure(input, _sums_vector.get(), axis, first_kernel_op);
-        _border_handlers_vector[0].configure(input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, PixelValue(0));
+        _reduction_kernels_vector[0].configure(input, _results_vector.get(), axis, first_kernel_op);
+        _border_handlers_vector[0].configure(input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, pixelValue);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
-            _memory_group.manage(_sums_vector.get() + i);
-            _reduction_kernels_vector[i].configure(_sums_vector.get() + i - 1, _sums_vector.get() + i, axis, ReductionOperation::SUM);
-            _border_handlers_vector[i].configure(_sums_vector.get() + i - 1, _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(0));
-            _sums_vector[i - 1].allocator()->allocate();
+            _memory_group.manage(_results_vector.get() + i);
+            _reduction_kernels_vector[i].configure(_results_vector.get() + i - 1, _results_vector.get() + i, axis, intermediate_kernel_op);
+            _border_handlers_vector[i].configure(_results_vector.get() + i - 1, _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
+            _results_vector[i - 1].allocator()->allocate();
         }
 
         // Apply ReductionOperation on the last stage
         const unsigned int last_stage  = _num_of_stages - 1;
         const unsigned int input_width = input->info()->dimension(0);
-        _reduction_kernels_vector[last_stage].configure(_sums_vector.get() + last_stage - 1, output, axis, last_kernel_op, input_width);
-        _border_handlers_vector[last_stage].configure(_sums_vector.get() + last_stage - 1, _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, PixelValue(0));
-        _sums_vector[last_stage - 1].allocator()->allocate();
-    }
-    else
-    {
-        _reduction_kernels_vector[0].configure(input, output, axis, op, 0);
+        _reduction_kernels_vector[last_stage].configure(_results_vector.get() + last_stage - 1, output, axis, last_kernel_op, input_width);
+        _border_handlers_vector[last_stage].configure(_results_vector.get() + last_stage - 1, _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
+        _results_vector[last_stage - 1].allocator()->allocate();
     }
 }
 
@@ -188,17 +208,17 @@ void CLReductionOperation::run()
 {
     _memory_group.acquire();
 
-    if(_reduction_axis == 0 && !_is_quantized)
+    if(_is_serial)
+    {
+        CLScheduler::get().enqueue(_reduction_kernels_vector[0], false);
+    }
+    else
     {
         for(unsigned int i = 0; i < _num_of_stages; ++i)
         {
             CLScheduler::get().enqueue(_border_handlers_vector[i], false);
             CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
         }
-    }
-    else
-    {
-        CLScheduler::get().enqueue(_reduction_kernels_vector[0], false);
     }
 
     _memory_group.release();

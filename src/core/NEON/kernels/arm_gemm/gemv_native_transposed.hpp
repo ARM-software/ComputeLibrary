@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,15 +64,16 @@ public:
     GemvNativeTransposed(GemvNativeTransposed &) = delete;
     GemvNativeTransposed & operator= (GemvNativeTransposed &) = delete;
 
-    GemvNativeTransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const unsigned int nmultis, const Tr beta) : _Nsize(N), _Ksize(K), _nmultis(nmultis), _beta(beta), _ci(ci) {
+    GemvNativeTransposed(const GemmArgs<Tr> &args)
+            : _Nsize(args._Nsize), _Ksize(args._Ksize), _nmultis(args._nmulti), _beta(args._beta), _ci(args._ci) {
         /* For now don't do any blocking. TODO: figure out if we should. */
-        m_block = K;
-        n_block = N;
+        m_block = _Ksize;
+        n_block = _Nsize;
     }
 
     // Window is number of out_width blocks times number of multis.
     unsigned int get_window_size() const override {
-        return iceildiv(_Nsize, strategy::out_width) * _nmultis;
+        return iceildiv(_Nsize, strategy::out_width()) * _nmultis;
     }
 
     // Actually execute the GEMV.
@@ -82,12 +83,12 @@ public:
 #endif
         strategy strat(_ci);
 
-        const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width);
+        const unsigned int window_per_multi = iceildiv(_Nsize, strategy::out_width());
         const unsigned int multi_0   = start / window_per_multi;
         const unsigned int multi_end = end   / window_per_multi;
 
-        const unsigned int n_0   = (start - (multi_0 * window_per_multi)) * strategy::out_width;
-        const unsigned int n_max = (end - (multi_end * window_per_multi)) * strategy::out_width;
+        const unsigned int n_0   = (start - (multi_0 * window_per_multi)) * strategy::out_width();
+        const unsigned int n_max = (end - (multi_end * window_per_multi)) * strategy::out_width();
 
         static_assert(std::is_same<To, Toi>::value, "gemv_transposed: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemv_transposed: Result types must be the same.");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ constexpr BorderSize   border_size(filter_size / 2); /* Border size of the kerne
 TEST_SUITE(NEON)
 TEST_SUITE(Dilate)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)),
                                                                    datasets::BorderModes()),
                shape, data_type, border_mode)
 {
@@ -103,8 +103,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDilateFixture<uint8_t>, framework::DatasetMod
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), border_size));
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // Dilate
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

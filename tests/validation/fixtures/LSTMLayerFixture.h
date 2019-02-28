@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/PixelWiseMultiplication.h"
 #include "tests/validation/reference/Transpose.h"
+#include "tests/validation/reference/WidthConcatenateLayer.h"
 
 namespace arm_compute
 {
@@ -237,7 +238,8 @@ protected:
             cell_to_output_w.allocator()->allocate();
             ARM_COMPUTE_EXPECT(!cell_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
             ARM_COMPUTE_EXPECT(!cell_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-            fill(AccessorType(cell_to_output_w), 18);
+            fill(AccessorType(cell_to_forget_w), 18);
+            fill(AccessorType(cell_to_output_w), 19);
         }
 
         if(projection_opt)
@@ -251,13 +253,14 @@ protected:
             ARM_COMPUTE_EXPECT(!projection_w.info()->is_resizable(), framework::LogLevel::ERRORS);
             ARM_COMPUTE_EXPECT(!projection_bias.info()->is_resizable(), framework::LogLevel::ERRORS);
 
-            fill(AccessorType(projection_w), 19);
-            fill(AccessorType(projection_bias), 20);
+            fill(AccessorType(projection_w), 20);
+            fill(AccessorType(projection_bias), 21);
         }
 
         // Compute function
         lstm.run();
 
+        _target_scratch = std::move(scratch);
         return output;
     }
 
@@ -322,11 +325,12 @@ protected:
         fill(cell_to_input_w, 15);
         fill(recurrent_to_input_w, 16);
         fill(input_gate_bias, 17);
-        fill(cell_to_output_w, 18);
-        fill(projection_w, 19);
-        fill(projection_bias, 20);
+        fill(cell_to_forget_w, 18);
+        fill(cell_to_output_w, 19);
+        fill(projection_w, 20);
+        fill(projection_bias, 21);
 
-        bool cifg_opt = scratch_shape.x() == cell_bias_shape.x() * 4 ? true : false;
+        bool cifg_opt = scratch_shape.x() == cell_bias_shape.x() * 4 ? false : true;
 
         // Compute forget_gate
         SimpleTensor<T> fully_connected_forget = reference::fully_connected_layer(input, input_to_forget_w, forget_gate_bias, output_cell_shape);
@@ -336,7 +340,7 @@ protected:
 
         if(peephole_opt)
         {
-            SimpleTensor<T> pixelwise_mul_forget_gate = reference::pixel_wise_multiplication(cell_state_in, cell_to_forget_w, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+            SimpleTensor<T> pixelwise_mul_forget_gate = reference::pixel_wise_multiplication(cell_state_in, cell_to_forget_w, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
             forget_gate                               = reference::arithmetic_operation(reference::ArithmeticOperation::ADD, forget_gate, pixelwise_mul_forget_gate, data_type, ConvertPolicy::SATURATE);
         }
 
@@ -402,11 +406,24 @@ protected:
                 output_state_out = reference::activation_layer(fully_connected_projection, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, -projection_threshold, projection_threshold));
             }
         }
+
+        std::vector<SimpleTensor<T>> scratch_inputs;
+        if(!cifg_opt)
+        {
+            scratch_inputs.emplace_back(std::move(input_gate));
+        }
+        scratch_inputs.emplace_back(std::move(cell_state_out));
+        scratch_inputs.emplace_back(std::move(forget_gate));
+        scratch_inputs.emplace_back(std::move(output));
+        scratch            = reference::widthconcatenate_layer(scratch_inputs, scratch);
+        _reference_scratch = std::move(scratch);
         return output_state_out;
     }
 
     TensorType      _target{};
+    TensorType      _target_scratch{};
     SimpleTensor<T> _reference{};
+    SimpleTensor<T> _reference_scratch{};
 };
 } // namespace validation
 } // namespace test

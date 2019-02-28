@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1detail_1_1compare__dimension.xhtml" title="Function to compare two Dimensions objects and throw an error on mismatch. " alt="" coords="5,5,176,32"/>
+<area shape="rect" id="node1" href="$structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" title=" " alt="" coords="5,5,247,47"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1compare_3_01_relative_tolerance_3_01_u_01_4_01_4.xhtml" title="Compare values with a relative tolerance." alt="" coords="295,5,497,47"/>
 </map>

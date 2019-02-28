@@ -1,4 +1,5 @@
 <map id="GCFullyConnectedLayerReshapeWeights" name="GCFullyConnectedLayerReshapeWeights">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel. " alt="" coords="46,80,182,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="76,5,152,32"/>
+<area shape="rect" id="node1" title="Basic function to reshape the weights of Fully Connected layer with OpenGL ES." alt="" coords="5,155,232,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel." alt="" coords="48,80,189,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="79,5,158,32"/>
 </map>

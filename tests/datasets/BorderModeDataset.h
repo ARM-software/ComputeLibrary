@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,13 +28,6 @@
 #include "tests/framework/datasets/ContainerDataset.h"
 
 #include "utils/TypePrinter.h"
-
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-#include <vector>
 
 namespace arm_compute
 {

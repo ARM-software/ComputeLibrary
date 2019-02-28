@@ -1,4 +1,5 @@
 <map id="CLGaussianPyramidOrb" name="CLGaussianPyramidOrb">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_gaussian_pyramid.xhtml" title="Common interface for all Gaussian pyramid functions. " alt="" coords="15,80,158,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="49,5,125,32"/>
+<area shape="rect" id="node1" title="Basic function to execute gaussian pyramid with ORB scale factor." alt="" coords="5,155,177,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_gaussian_pyramid.xhtml" title="Common interface for all Gaussian pyramid functions." alt="" coords="17,80,166,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="52,5,131,32"/>
 </map>

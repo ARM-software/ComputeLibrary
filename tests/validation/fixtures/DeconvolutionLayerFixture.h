@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,15 +51,15 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
-               const std::pair<unsigned int, unsigned int> &inner_border, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         _data_type         = data_type;
         _bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
         _data_layout       = data_layout;
         _quantization_info = quantization_info;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, inner_border);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, inner_border);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info);
     }
 
 protected:
@@ -94,7 +94,7 @@ protected:
     }
 
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape bias_shape, TensorShape output_shape,
-                              const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &inner_border)
+                              const PadStrideInfo &info)
     {
         if(_data_layout == DataLayout::NHWC)
         {
@@ -111,7 +111,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info, inner_border.first, inner_border.second);
+        conv.configure(&src, &weights, &bias, &dst, info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -141,7 +141,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                      const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> inner_border)
+                                      const PadStrideInfo &info)
     {
         // Create reference
         SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };
@@ -153,7 +153,7 @@ protected:
         fill(weights, 1);
         fill(bias, 2);
 
-        return reference::deconvolution_layer<T>(src, weights, bias, output_shape, info, inner_border);
+        return reference::deconvolution_layer<T>(src, weights, bias, output_shape, info);
     }
 
     TensorType       _target{};
@@ -170,18 +170,17 @@ class DeconvolutionValidationFixture : public DeconvolutionLayerFixtureBase<Tens
 public:
     template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int inner_border_right, unsigned int inner_border_top, unsigned int num_kernels, DataType data_type, DataLayout data_layout)
+               unsigned int num_kernels, DataType data_type, DataLayout data_layout)
     {
         ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
-        auto        out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
-        TensorInfo  input_info(input_shape, 1, data_type);
-        TensorInfo  weights_info(weights_shape, 1, data_type);
-        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, data_layout, QuantizationInfo());
+        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
+        TensorInfo          input_info(input_shape, 1, data_type);
+        TensorInfo          weights_info(weights_shape, 1, data_type);
+        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, QuantizationInfo());
     }
 };
 
@@ -191,18 +190,17 @@ class DeconvolutionValidationQuantizedFixture : public DeconvolutionLayerFixture
 public:
     template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int inner_border_right, unsigned int inner_border_top, unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+               unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
         ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        const std::pair<unsigned int, unsigned int> inner_border(inner_border_right, inner_border_top);
-        auto        out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
-        TensorInfo  input_info(input_shape, 1, data_type, quantization_info);
-        TensorInfo  weights_info(weights_shape, 1, data_type, quantization_info);
-        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, inner_border, data_type, data_layout, quantization_info);
+        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, padx, pady, sx, sy);
+        TensorInfo          input_info(input_shape, 1, data_type, quantization_info);
+        TensorInfo          weights_info(weights_shape, 1, data_type, quantization_info);
+        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, quantization_info);
     }
 };
 

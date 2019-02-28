@@ -1,3 +1,4 @@
 <map id="OMPScheduler" name="OMPScheduler">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_scheduler.xhtml" title="Scheduler interface to run kernels. " alt="" coords="19,5,103,32"/>
+<area shape="rect" id="node1" title="Pool of threads to automatically split a kernel&#39;s execution among several threads." alt="" coords="5,80,120,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_scheduler.xhtml" title="Scheduler interface to run kernels." alt="" coords="18,5,107,32"/>
 </map>

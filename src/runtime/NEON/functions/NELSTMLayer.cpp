@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,8 +111,8 @@ void NELSTMLayer::configure(const ITensor *input,
     _forget_gate_out2.allocator()->allocate();
     _memory_group.manage(&_forget_gate_out5);
     _accum_forget_gate1.configure(&_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out5, ConvertPolicy::SATURATE);
+    _forget_gate_out1.allocator()->allocate();
     Tensor *forget_gate_out = &_forget_gate_out5;
-
     if(lstm_params.has_peephole_opt())
     {
         _forget_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
@@ -129,18 +129,18 @@ void NELSTMLayer::configure(const ITensor *input,
     {
         _forget_gate_out3.allocator()->allocate();
     }
-    _activation_forget_gate.configure(forget_gate_out, &_forget_gate_out1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    forget_gate_out->allocator()->allocate();
+    _activation_forget_gate.configure(forget_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
 
     // Configure block that calculates the input gate
     // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
     // input_gate = 1 - forget_gate, with CIFG
     _input_gate_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    Tensor *input_gate_out = &_input_gate_out1;
     if(lstm_params.has_cifg_opt())
     {
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-        _subtract_input_gate.configure(&_ones, &_forget_gate_out1, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _subtract_input_gate.configure(&_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
     }
@@ -162,16 +162,22 @@ void NELSTMLayer::configure(const ITensor *input,
         _input_gate_out2.allocator()->allocate();
         _memory_group.manage(&_input_gate_out4);
         _accum_input_gate1.configure(&_input_gate_out1, &_input_gate_out3, &_input_gate_out4, ConvertPolicy::SATURATE);
+        _input_gate_out3.allocator()->allocate();
+        input_gate_out = &_input_gate_out4;
         if(_run_peephole_opt)
         {
             _memory_group.manage(&_input_gate_out5);
             _pixelwise_mul_input_gate.configure(cell_state_in, lstm_params.cell_to_input_weights(), &_input_gate_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
             _accum_input_gate2.configure(&_input_gate_out4, &_input_gate_out5, &_input_gate_out1, ConvertPolicy::SATURATE);
+            _input_gate_out4.allocator()->allocate();
             _input_gate_out5.allocator()->allocate();
+            input_gate_out = &_input_gate_out1;
         }
-        _input_gate_out3.allocator()->allocate();
-        _input_gate_out4.allocator()->allocate();
-        _activation_input_gate.configure(&_input_gate_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
+        else
+        {
+            _input_gate_out1.allocator()->allocate();
+        }
+        _activation_input_gate.configure(input_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     }
 
     // Configure block that calculates the cell state
@@ -194,11 +200,9 @@ void NELSTMLayer::configure(const ITensor *input,
     _accum_cell_state1.configure(&_cell_state_out1, &_cell_state_out3, &_cell_state_out4, ConvertPolicy::SATURATE);
     _activation_cell_state.configure(&_cell_state_out4, nullptr, activation_info);
     _memory_group.manage(&_cell_state_out5);
-    _pixelwise_mul_cell_state1.configure(&_cell_state_out4, &_input_gate_out1, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-    _input_gate_out1.allocator()->allocate();
+    _pixelwise_mul_cell_state1.configure(&_cell_state_out4, input_gate_out, &_cell_state_out5, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _cell_state_out4.allocator()->allocate();
-    _pixelwise_mul_cell_state2.configure(&_forget_gate_out1, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
-    _forget_gate_out1.allocator()->allocate();
+    _pixelwise_mul_cell_state2.configure(forget_gate_out, cell_state_in, &_cell_state_out3, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _accum_cell_state2.configure(&_cell_state_out5, &_cell_state_out3, &_cell_state_out1, ConvertPolicy::SATURATE);
     _cell_state_out3.allocator()->allocate();
     _cell_state_out5.allocator()->allocate();
@@ -246,7 +250,6 @@ void NELSTMLayer::configure(const ITensor *input,
         _output1.allocator()->allocate();
     }
     _activation_output.configure(output_gate_out, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
-    output_gate_out->allocator()->allocate();
 
     // Configure block that calculates the output state
     /** lstm_res = PixelwiseMul(output, Activation(cell_state))
@@ -265,6 +268,7 @@ void NELSTMLayer::configure(const ITensor *input,
     _activation_output_state.configure(&_cell_state_out1, &_cell_state_activation, activation_info);
     _pixelwise_mul_output_state2.configure(&_cell_state_activation, output_gate_out, output_state_out_tmp, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _cell_state_activation.allocator()->allocate();
+    output_gate_out->allocator()->allocate();
 
     if(lstm_params.has_projection())
     {
@@ -281,19 +285,22 @@ void NELSTMLayer::configure(const ITensor *input,
 
     // Copy cell state and output
     _copy_cell_state.configure(&_cell_state_out1, cell_state_out);
-    _cell_state_out1.allocator()->allocate();
     _copy_output.configure(output_state_out, output);
 
     // Vector for holding the tensors to store in scratch buffer
     std::vector<ITensor *> scratch_inputs;
     if(!lstm_params.has_cifg_opt())
     {
-        scratch_inputs.emplace_back(&_input_gate_out1);
+        scratch_inputs.emplace_back(input_gate_out);
     }
     scratch_inputs.emplace_back(&_cell_state_out1);
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
     _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer);
+    input_gate_out->allocator()->allocate();
+    _cell_state_out1.allocator()->allocate();
+    forget_gate_out->allocator()->allocate();
+    output_gate_out->allocator()->allocate();
 }
 
 Status NELSTMLayer::validate(const ITensorInfo *input,

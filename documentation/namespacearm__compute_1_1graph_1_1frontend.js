@@ -8,6 +8,7 @@ var namespacearm__compute_1_1graph_1_1frontend =
     [ "ConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_convolution_layer" ],
     [ "DeconvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_deconvolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_deconvolution_layer" ],
     [ "DepthwiseConvolutionLayer", "classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer" ],
+    [ "DetectionOutputLayer", "classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_detection_output_layer" ],
     [ "DummyLayer", "classarm__compute_1_1graph_1_1frontend_1_1_dummy_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_dummy_layer" ],
     [ "EltwiseLayer", "classarm__compute_1_1graph_1_1frontend_1_1_eltwise_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_eltwise_layer" ],
     [ "FlattenLayer", "classarm__compute_1_1graph_1_1frontend_1_1_flatten_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_flatten_layer" ],

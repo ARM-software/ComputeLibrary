@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -160,6 +160,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMo
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target_scratch), _reference_scratch, tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
@@ -170,6 +171,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<half>, framework::DatasetMod
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
+    validate(CLAccessor(_target_scratch), _reference_scratch, tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // LSTMLayer

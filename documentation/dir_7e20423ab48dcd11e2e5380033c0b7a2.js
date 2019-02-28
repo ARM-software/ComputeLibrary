@@ -7,7 +7,9 @@ var dir_7e20423ab48dcd11e2e5380033c0b7a2 =
     [ "EnumListOption.h", "_enum_list_option_8h.xhtml", [
       [ "EnumListOption", "classarm__compute_1_1utils_1_1_enum_list_option.xhtml", "classarm__compute_1_1utils_1_1_enum_list_option" ]
     ] ],
-    [ "EnumOption.h", "_enum_option_8h.xhtml", "_enum_option_8h" ],
+    [ "EnumOption.h", "_enum_option_8h.xhtml", [
+      [ "EnumOption", "classarm__compute_1_1utils_1_1_enum_option.xhtml", "classarm__compute_1_1utils_1_1_enum_option" ]
+    ] ],
     [ "ListOption.h", "_list_option_8h.xhtml", [
       [ "ListOption", "classarm__compute_1_1utils_1_1_list_option.xhtml", "classarm__compute_1_1utils_1_1_list_option" ]
     ] ],

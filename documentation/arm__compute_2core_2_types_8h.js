@@ -7,12 +7,12 @@ var arm__compute_2core_2_types_8h =
     [ "Rectangle", "structarm__compute_1_1_rectangle.xhtml", "structarm__compute_1_1_rectangle" ],
     [ "Coordinates2D", "structarm__compute_1_1_coordinates2_d.xhtml", "structarm__compute_1_1_coordinates2_d" ],
     [ "Coordinates3D", "structarm__compute_1_1_coordinates3_d.xhtml", "structarm__compute_1_1_coordinates3_d" ],
-    [ "ROI", "structarm__compute_1_1_r_o_i.xhtml", "structarm__compute_1_1_r_o_i" ],
     [ "DetectionWindow", "structarm__compute_1_1_detection_window.xhtml", "structarm__compute_1_1_detection_window" ],
     [ "BoxNMSLimitInfo", "classarm__compute_1_1_box_n_m_s_limit_info.xhtml", "classarm__compute_1_1_box_n_m_s_limit_info" ],
     [ "PadStrideInfo", "classarm__compute_1_1_pad_stride_info.xhtml", "classarm__compute_1_1_pad_stride_info" ],
     [ "FullyConnectedLayerInfo", "structarm__compute_1_1_fully_connected_layer_info.xhtml", "structarm__compute_1_1_fully_connected_layer_info" ],
     [ "PriorBoxLayerInfo", "classarm__compute_1_1_prior_box_layer_info.xhtml", "classarm__compute_1_1_prior_box_layer_info" ],
+    [ "DetectionOutputLayerInfo", "classarm__compute_1_1_detection_output_layer_info.xhtml", "classarm__compute_1_1_detection_output_layer_info" ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", "classarm__compute_1_1_pooling_layer_info" ],
     [ "ROIPoolingLayerInfo", "classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml", "classarm__compute_1_1_r_o_i_pooling_layer_info" ],
     [ "GenerateProposalsInfo", "classarm__compute_1_1_generate_proposals_info.xhtml", "classarm__compute_1_1_generate_proposals_info" ],
@@ -22,17 +22,29 @@ var arm__compute_2core_2_types_8h =
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", "classarm__compute_1_1_weights_info" ],
     [ "GEMMReshapeInfo", "classarm__compute_1_1_g_e_m_m_reshape_info.xhtml", "classarm__compute_1_1_g_e_m_m_reshape_info" ],
+    [ "DepthwiseConvolutionReshapeInfo", "structarm__compute_1_1_depthwise_convolution_reshape_info.xhtml", "structarm__compute_1_1_depthwise_convolution_reshape_info" ],
     [ "GEMMLowpOutputStageInfo", "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml", "structarm__compute_1_1_g_e_m_m_lowp_output_stage_info" ],
+    [ "GEMMLHSMatrixInfo", "structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml", "structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info" ],
+    [ "GEMMRHSMatrixInfo", "structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml", "structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info" ],
     [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", "classarm__compute_1_1_g_e_m_m_info" ],
     [ "WinogradInfo", "structarm__compute_1_1_winograd_info.xhtml", "structarm__compute_1_1_winograd_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
     [ "BiStrides", "arm__compute_2core_2_types_8h.xhtml#a11916d4148a39a67794050373f54825a", null ],
     [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
     [ "InternalKeypoint", "arm__compute_2core_2_types_8h.xhtml#a2ab89a5d0959531aac270879cdd3ed78", null ],
+    [ "Multiples", "arm__compute_2core_2_types_8h.xhtml#afe9e10e5fdfd1e2665ac17c75c0cacd8", null ],
     [ "PaddingInfo", "arm__compute_2core_2_types_8h.xhtml#a669b5d3c5994f9ae3be31df9a1014297", null ],
     [ "PaddingList", "arm__compute_2core_2_types_8h.xhtml#ac1a1b012674e0f1de071a611391828ad", null ],
     [ "PaddingSize", "arm__compute_2core_2_types_8h.xhtml#a4467b302fc9ec312c40580336ab783da", null ],
     [ "PermutationVector", "arm__compute_2core_2_types_8h.xhtml#a33e65be485104e2e9e69fca551d6f492", null ],
+    [ "ArithmeticOperation", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8ae", [
+      [ "ADD", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea9eeb52badb613229884838847294b90d", null ],
+      [ "SUB", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea241dd841abade20fcb27b8a9f494e1eb", null ],
+      [ "DIV", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea29bbf66f7f8529ec47e394fb5a36c646", null ],
+      [ "MIN", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aeace31e2a082d17e038fcc6e3006166653", null ],
+      [ "MAX", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea26a4b44a837bf97b972628509912b4a5", null ],
+      [ "SQUARED_DIFF", "arm__compute_2core_2_types_8h.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916", null ]
+    ] ],
     [ "BilinearInterpolation", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202", [
       [ "BILINEAR_OLD_NEW", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202a856d68c521c4c85363f54d95a33b7532", null ],
       [ "BILINEAR_SCHARR", "arm__compute_2core_2_types_8h.xhtml#a2d8a00f1d80a53ce8f75fa929c873202a731cb35d2d520920db9ab20dfc5edc64", null ]
@@ -55,6 +67,14 @@ var arm__compute_2core_2_types_8h =
       [ "Y", "arm__compute_2core_2_types_8h.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa57cec4137b614c87cb4e24a3d003a3e0", null ],
       [ "U", "arm__compute_2core_2_types_8h.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb", null ],
       [ "V", "arm__compute_2core_2_types_8h.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa5206560a306a2e085a437fd258eb57ce", null ]
+    ] ],
+    [ "ComparisonOperation", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58c", [
+      [ "Equal", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58caf5f286e73bda105e538310b3190f75c5", null ],
+      [ "NotEqual", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58ca19bb0af2c3c530538cb41aff7f235b96", null ],
+      [ "Greater", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58ca8768a6821cd735aea4f5b0df88c1fc6a", null ],
+      [ "GreaterEqual", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58ca758b05d899def79c9eb864ad4f96be1f", null ],
+      [ "Less", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58ca1cfdf0e8d0c87a228c1f40d9bee7888b", null ],
+      [ "LessEqual", "arm__compute_2core_2_types_8h.xhtml#a2d299363c9fc33334c571fa29ca4f58cad3e6fdac55bb7b0edd7834c968ba1f38", null ]
     ] ],
     [ "ConvertPolicy", "arm__compute_2core_2_types_8h.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6f", [
       [ "WRAP", "arm__compute_2core_2_types_8h.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fae1c8555fcf0ea2bb648a6fd527d658c0", null ],
@@ -92,9 +112,19 @@ var arm__compute_2core_2_types_8h =
       [ "F64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a1ad5f6f3069070ec4cbbdc94d5e61e0e", null ],
       [ "SIZET", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1", null ]
     ] ],
+    [ "DetectionOutputLayerCodeType", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830", [
+      [ "CORNER", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ac411afd31d32cec664d372acc12f404a", null ],
+      [ "CENTER_SIZE", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830a1150a8d7752b01d30d91fe18fe9d8a54", null ],
+      [ "CORNER_SIZE", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830afbc6c35854fe02eb9e792f897399c42a", null ],
+      [ "TF_CENTER", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ae65a115db9b4bcc4ae0aa0b989089d16", null ]
+    ] ],
     [ "DimensionRoundingType", "arm__compute_2core_2_types_8h.xhtml#a1fece1bd804e64f39f602d1c3969849a", [
       [ "FLOOR", "arm__compute_2core_2_types_8h.xhtml#a1fece1bd804e64f39f602d1c3969849aa56c1e354d36beb85b0d881c5b2e24cbe", null ],
       [ "CEIL", "arm__compute_2core_2_types_8h.xhtml#a1fece1bd804e64f39f602d1c3969849aa5bdce8e6d9dc3efbbd31e90a8a181dff", null ]
+    ] ],
+    [ "ElementWiseUnary", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936d", [
+      [ "RSQRT", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da66bac724670f51e77f3688d33ca0d781", null ],
+      [ "EXP", "arm__compute_2core_2_types_8h.xhtml#a5dad01b7eab116403241313417e0936da8c670f8c37b95e1ed14a0ce414b049c7", null ]
     ] ],
     [ "Format", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58", [
       [ "UNKNOWN", "arm__compute_2core_2_types_8h.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a696b031073e74bf2cb98e5ef201d4aa3", null ],
@@ -166,9 +196,12 @@ var arm__compute_2core_2_types_8h =
       [ "L2", "arm__compute_2core_2_types_8h.xhtml#a9172da722f0a434e5cc07c0a3c115d93a7e6aa2d53f6ee2b1a34b017fa403cb76", null ]
     ] ],
     [ "ReductionOperation", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45b", [
+      [ "ARG_IDX_MAX", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba654fed6e9b6c154d04bcaa439e32d0d5", null ],
+      [ "ARG_IDX_MIN", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba39102811589b9a0d7a6aa8721663b4d1", null ],
+      [ "MEAN_SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bafc54513dae613e117ffc4169e48bfce5", null ],
+      [ "PROD", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bac8074bb318fb85693233e64acc64c1ed", null ],
       [ "SUM_SQUARE", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64", null ],
-      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ],
-      [ "MEAN_SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45bafc54513dae613e117ffc4169e48bfce5", null ]
+      [ "SUM", "arm__compute_2core_2_types_8h.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a", null ]
     ] ],
     [ "SamplingPolicy", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7b", [
       [ "CENTER", "arm__compute_2core_2_types_8h.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e", null ],

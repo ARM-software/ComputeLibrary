@@ -44,6 +44,5 @@ void Allocator::free(void *ptr)
 
 std::unique_ptr<IMemoryRegion> Allocator::make_region(size_t size, size_t alignment)
 {
-    ARM_COMPUTE_UNUSED(alignment);
-    return arm_compute::support::cpp14::make_unique<MemoryRegion>(size);
+    return arm_compute::support::cpp14::make_unique<MemoryRegion>(size, alignment);
 }

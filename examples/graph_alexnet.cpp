@@ -176,6 +176,8 @@ private:
  *      "ImageNet Classification with Deep Convolutional Neural Networks"
  *      Alex Krizhevsky and Sutskever, Ilya and Hinton, Geoffrey E
  *
+ * Provenance: https://github.com/BVLC/caffe/tree/master/models/bvlc_alexnet
+ *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *
  * @param[in] argc Number of arguments

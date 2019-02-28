@@ -6,5 +6,6 @@ var dir_7c33ef795f818fa46460e86a2608dc00 =
     [ "CPPFlipWeightsKernel.cpp", "_c_p_p_flip_weights_kernel_8cpp.xhtml", null ],
     [ "CPPPermuteKernel.cpp", "_c_p_p_permute_kernel_8cpp.xhtml", null ],
     [ "CPPSortEuclideanDistanceKernel.cpp", "_c_p_p_sort_euclidean_distance_kernel_8cpp.xhtml", null ],
+    [ "CPPTopKVKernel.cpp", "_c_p_p_top_k_v_kernel_8cpp.xhtml", null ],
     [ "CPPUpsampleKernel.cpp", "_c_p_p_upsample_kernel_8cpp.xhtml", null ]
 ];

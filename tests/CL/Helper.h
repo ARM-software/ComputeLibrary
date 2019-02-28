@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,13 @@
 #ifndef __ARM_COMPUTE_TEST_CL_HELPER_H__
 #define __ARM_COMPUTE_TEST_CL_HELPER_H__
 
+#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
+#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
+
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
@@ -74,8 +80,46 @@ public:
         auto k = arm_compute::support::cpp14::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
         _kernel = std::move(k);
-        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue(0));
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
     }
+};
+
+/** As above but this also initializes to zero the input tensor */
+template <typename K, int bordersize>
+class CLSynthetizeFunctionInitOutputWithZeroAndWithZeroConstantBorder : public IFunction
+{
+public:
+    /** Configure the kernel.
+     *
+     * @param[in] first  First input argument.
+     * @param[in] second Second input argument.
+     * @param[in] args   Rest of the configuration arguments.
+     */
+    template <typename T, typename... Args>
+    void configure(T first, T second, Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->set_target(CLScheduler::get().target());
+        k->configure(first, second, std::forward<Args>(args)...);
+        _kernel = std::move(k);
+        _border_handler.configure(first, BorderSize(bordersize), BorderMode::CONSTANT, PixelValue());
+        _memset_kernel.configure(second, PixelValue());
+    }
+
+    // Inherited method overridden:
+    void run() override final
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The CL kernel or function isn't configured");
+
+        CLScheduler::get().enqueue(_memset_kernel, false);
+        CLScheduler::get().enqueue(_border_handler, false);
+        CLScheduler::get().enqueue(*_kernel);
+    }
+
+private:
+    CLMemsetKernel             _memset_kernel{};  /**< Kernel to initialize the tensor */
+    CLFillBorderKernel         _border_handler{}; /**< Kernel to handle  borders */
+    std::unique_ptr<ICLKernel> _kernel{};         /**< Kernel to run */
 };
 } // namespace test
 } // namespace arm_compute

@@ -7,8 +7,10 @@ var classarm__compute_1_1_c_l_lut =
     [ "clear", "classarm__compute_1_1_c_l_lut.xhtml#aee7cb2065b88d21ac4ad05bc997ecf82", null ],
     [ "index_offset", "classarm__compute_1_1_c_l_lut.xhtml#aaf3f51cd25e1651cccf04064a9888f4e", null ],
     [ "map", "classarm__compute_1_1_c_l_lut.xhtml#a14c53d2d17be6fa8a2c9861527c7b002", null ],
+    [ "map", "classarm__compute_1_1_c_l_lut.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0", null ],
     [ "num_elements", "classarm__compute_1_1_c_l_lut.xhtml#a6dac829b4ddf4a5729ac090e73696958", null ],
     [ "size_in_bytes", "classarm__compute_1_1_c_l_lut.xhtml#a68f33e9afee896dc24b32093d25c6766", null ],
     [ "type", "classarm__compute_1_1_c_l_lut.xhtml#a6dc9c052a2732f899adccfaeee468364", null ],
-    [ "unmap", "classarm__compute_1_1_c_l_lut.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ]
+    [ "unmap", "classarm__compute_1_1_c_l_lut.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ],
+    [ "unmap", "classarm__compute_1_1_c_l_lut.xhtml#af974a2360069c2ef8df4496d00e4f6cc", null ]
 ];

@@ -54,5 +54,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLPERMUTE_H__ */

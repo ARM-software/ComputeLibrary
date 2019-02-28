@@ -1,4 +1,5 @@
 <map id="CPPBoxWithNonMaximaSuppressionLimitKernel" name="CPPBoxWithNonMaximaSuppressionLimitKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="81,80,172,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="95,5,158,32"/>
+<area shape="rect" id="node1" title="CPP kernel to perform computation of BoxWithNonMaximaSuppressionLimit." alt="" coords="5,155,259,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="87,80,177,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="100,5,164,32"/>
 </map>

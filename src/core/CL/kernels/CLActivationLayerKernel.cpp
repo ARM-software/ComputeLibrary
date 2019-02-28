@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,24 +129,25 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
     }
 
+    const bool is_logistic_activation_quantized = is_data_type_quantized_asymmetric(dt) && act_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC;
     // Set build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DACT=" + lower_string(string_from_activation_func(act_info.activation()))));
-    build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
-    build_opts.emplace(("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt)));
-    build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
+    CLBuildOptions build_opts;
+    build_opts.add_option_if(!is_logistic_activation_quantized, "-DACT=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
+    build_opts.add_option(("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt)));
+    build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
     if(is_data_type_quantized(dt))
     {
-        build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
-        build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
+        build_opts.add_option(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
+        build_opts.add_option(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
         const int   o1 = input->info()->quantization_info().offset;
         const float s1 = input->info()->quantization_info().scale;
         // Quantized value of 0 corresponds to the offset o1
-        build_opts.emplace(("-DCONST_0=" + support::cpp11::to_string(o1)));
-        build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
-        build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
+        build_opts.add_option(("-DCONST_0=" + support::cpp11::to_string(o1)));
+        build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
+        build_opts.add_option(("-DO1_VAL=" + support::cpp11::to_string(o1)));
 
         // Set scale and offset of the input and output if they have different quantization info
         if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
@@ -156,22 +157,26 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
             if(o1 != o2 || s1 != s2)
             {
-                build_opts.emplace(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
-                build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+                build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
+                build_opts.add_option(("-DO2_VAL=" + support::cpp11::to_string(o2)));
             }
         }
     }
     else
     {
-        build_opts.emplace(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
-        build_opts.emplace(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
+        build_opts.add_option(("-DA_VAL=" + float_to_string_with_full_precision(a_const)));
+        build_opts.add_option(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
     }
 
-    build_opts.emplace((_run_in_place) ? "-DIN_PLACE" : "");
+    build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
 
     // Create kernel
-    std::string kernel_name = is_data_type_quantized_asymmetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    std::string kernel_name = std::string("activation_layer");
+    if(is_data_type_quantized_asymmetric(dt))
+    {
+        kernel_name += is_logistic_activation_quantized ? std::string("_logistic_qa8") : std::string("_qa8");
+    }
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Make sure _kernel is initialized before calling the parent's configure
     _input  = input;

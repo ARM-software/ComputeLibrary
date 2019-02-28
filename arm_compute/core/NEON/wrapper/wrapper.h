@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,5 +29,6 @@
 
 // Intrinsics Overloads
 #include "arm_compute/core/NEON/wrapper/intrinsics/intrinsics.h"
+#include "arm_compute/core/NEON/wrapper/scalar/scalar.h"
 
 #endif /* __ARM_COMPUTE_WRAPPER_H__ */

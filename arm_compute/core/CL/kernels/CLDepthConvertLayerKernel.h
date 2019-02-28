@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
 #define __ARM_COMPUTE_CLDEPTHCONVERTKERNEL_H__
 
-#include "arm_compute/core/CL/ICLSimple2DKernel.h"
+#include "arm_compute/core/CL/ICLSimple3DKernel.h"
 #include "arm_compute/core/Types.h"
 
 #include <cstdint>
@@ -33,34 +33,32 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the depth conversion kernel.
- *
- */
-class CLDepthConvertLayerKernel : public ICLSimple2DKernel
+/** Interface for the depth conversion kernel. */
+class CLDepthConvertLayerKernel : public ICLSimple3DKernel
 {
 public:
     /** Set the input and output of the kernel.
      *
      * Valid conversions Input -> Output :
      *
-     *   - U8 -> U16, S16, U32, S32
-     *   - U16 -> U8, U32, S32
-     *   - S16 -> U8, U32, S32
-     *   - U32 -> U8, U16, S16
-     *   - S32 -> U8, U16, S16
-     *   - F16 -> F32
-     *   - F32 -> F16
+     *   - U8  -> S8, U16, S16, U32, S32, F16, F32
+     *   - U16 -> U8, S8, S16, U32, S32, F16, F32
+     *   - S16 -> U8, S8, U16, U32, S32, F16, F32
+     *   - U32 -> U8, S8, U16, S16, S32, F16, F32
+     *   - S32 -> U8, S8, U16, S16, U32, F16, F32
+     *   - F16 -> U8, S8, U16, S16, U32, F32
+     *   - F32 -> U8, S8, U16, S16, U32, F16
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: U8/U16/S16/U32/S32/F16/F32.
-     * @param[out] output The output tensor. Data types supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayerKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: U8/U16/S16/U32/S32/F16/F32.
-     * @param[in] output Destination tensor info. Data type supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy
      * @param[in] shift  Value for down/up conversions. Must be 0 <= shift < 8.
      *

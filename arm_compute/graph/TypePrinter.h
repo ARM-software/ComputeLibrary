@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::DeconvolutionLayer:
             os << "DeconvolutionLayer";
+            break;
+        case NodeType::DetectionOutputLayer:
+            os << "DetectionOutputLayer";
             break;
         case NodeType::DepthwiseConvolutionLayer:
             os << "DepthwiseConvolutionLayer";

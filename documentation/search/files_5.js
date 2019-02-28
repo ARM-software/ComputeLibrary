@@ -1,6 +1,20 @@
 var searchData=
 [
   ['edge_2eh',['Edge.h',['../_edge_8h.xhtml',1,'']]],
+  ['elementwise_5foperation_2ecl',['elementwise_operation.cl',['../elementwise__operation_8cl.xhtml',1,'']]],
+  ['elementwise_5foperation_5fquantized_2ecl',['elementwise_operation_quantized.cl',['../elementwise__operation__quantized_8cl.xhtml',1,'']]],
+  ['elementwise_5funary_2ecl',['elementwise_unary.cl',['../elementwise__unary_8cl.xhtml',1,'']]],
+  ['elementwisedivision_2ecpp',['ElementwiseDivision.cpp',['../_elementwise_division_8cpp.xhtml',1,'']]],
+  ['elementwiseexplayer_2ecpp',['ElementwiseExpLayer.cpp',['../_elementwise_exp_layer_8cpp.xhtml',1,'']]],
+  ['elementwisemax_2ecpp',['ElementwiseMax.cpp',['../_c_l_2_elementwise_max_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_elementwise_max_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['elementwisemin_2ecpp',['ElementwiseMin.cpp',['../_c_l_2_elementwise_min_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_elementwise_min_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['elementwiseoperations_2ecpp',['ElementwiseOperations.cpp',['../_elementwise_operations_8cpp.xhtml',1,'']]],
+  ['elementwiseoperations_2eh',['ElementwiseOperations.h',['../_elementwise_operations_8h.xhtml',1,'']]],
+  ['elementwisersqrtlayer_2ecpp',['ElementwiseRsqrtLayer.cpp',['../_elementwise_rsqrt_layer_8cpp.xhtml',1,'']]],
+  ['elementwisesquareddiff_2ecpp',['ElementwiseSquaredDiff.cpp',['../_elementwise_squared_diff_8cpp.xhtml',1,'']]],
+  ['elementwisesquarediff_2ecpp',['ElementwiseSquareDiff.cpp',['../_elementwise_square_diff_8cpp.xhtml',1,'']]],
+  ['elementwiseunary_2ecpp',['ElementWiseUnary.cpp',['../_element_wise_unary_8cpp.xhtml',1,'']]],
+  ['elementwiseunary_2eh',['ElementWiseUnary.h',['../_element_wise_unary_8h.xhtml',1,'']]],
   ['eltwiselayernode_2ecpp',['EltwiseLayerNode.cpp',['../_eltwise_layer_node_8cpp.xhtml',1,'']]],
   ['eltwiselayernode_2eh',['EltwiseLayerNode.h',['../_eltwise_layer_node_8h.xhtml',1,'']]],
   ['enumlistoption_2eh',['EnumListOption.h',['../_enum_list_option_8h.xhtml',1,'']]],
@@ -16,5 +30,6 @@ var searchData=
   ['exceptions_2eh',['Exceptions.h',['../_exceptions_8h.xhtml',1,'']]],
   ['executionhelpers_2ecpp',['ExecutionHelpers.cpp',['../_execution_helpers_8cpp.xhtml',1,'']]],
   ['executionhelpers_2eh',['ExecutionHelpers.h',['../_execution_helpers_8h.xhtml',1,'']]],
-  ['exp_2eh',['exp.h',['../exp_8h.xhtml',1,'']]]
+  ['exp_2eh',['exp.h',['../exp_8h.xhtml',1,'']]],
+  ['explayer_2ecpp',['ExpLayer.cpp',['../_exp_layer_8cpp.xhtml',1,'']]]
 ];

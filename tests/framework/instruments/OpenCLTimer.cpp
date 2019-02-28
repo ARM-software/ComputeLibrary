@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,9 +107,6 @@ void           OpenCLClock<output_timestamps>::test_start()
     {
         if(this->_timer_enabled)
         {
-            ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-            ARM_COMPUTE_UNUSED(event);
-
             kernel_info       info;
             cl::Kernel        cpp_kernel(kernel, true);
             std::stringstream ss;
@@ -127,6 +124,13 @@ void           OpenCLClock<output_timestamps>::test_start()
             cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
             info.event      = tmp;
             this->_kernels.push_back(std::move(info));
+
+            if(event != nullptr)
+            {
+                //return cl_event from the intercepted call
+                clRetainEvent(tmp);
+                *event = tmp;
+            }
             return retval;
         }
         else

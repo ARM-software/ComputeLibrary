@@ -1,6 +1,8 @@
 <map id="compare&lt; AbsoluteTolerance&lt; U &gt; &gt;" name="compare&lt; AbsoluteTolerance&lt; U &gt; &gt;">
-<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" title="compare_base\&lt; AbsoluteTolerance\l\&lt; U \&gt; \&gt;" alt="" coords="61,213,287,255"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml" title="AbsoluteTolerance\&lt; U \&gt;" alt="" coords="5,95,169,121"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml" title="Class reprensenting an absolute tolerance value. " alt="" coords="6,5,169,32"/>
-<area shape="rect" id="node5" href="$structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" title="compare_base\&lt; T \&gt;" alt="" coords="194,95,333,121"/>
+<area shape="rect" id="node1" title="Compare values with an absolute tolerance." alt="" coords="96,304,307,345"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" title=" " alt="" coords="77,213,325,255"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml" title=" " alt="" coords="5,95,184,121"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1validation_1_1_absolute_tolerance.xhtml" title="Class reprensenting an absolute tolerance value." alt="" coords="7,5,182,32"/>
+<area shape="rect" id="node5" href="$structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" title=" " alt="" coords="208,95,363,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="266,5,305,32"/>
 </map>

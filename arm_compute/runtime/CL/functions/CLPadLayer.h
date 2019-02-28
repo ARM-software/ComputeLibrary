@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,21 +49,23 @@ public:
 
     /** Initialize the function
      *
-     * @param[in]  input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[out] output  Output tensor. Data type supported: same as @p input
-     * @param[in]  padding The padding for each spatial dimension of the input tensor. The pair padding[i]
-     *                     specifies the front and the end padding in the i-th dimension.
+     * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[out] output         Output tensor. Data type supported: same as @p input
+     * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                            specifies the front and the end padding in the i-th dimension.
+     * @param[in]  constant_value (Optional) Constant value to be used for the padding
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding);
+    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *
-     * @param[in] input   Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[in] output  Output tensor info. Data type supported: same as @p input
-     * @param[in] padding The padding for each spatial dimension of the input tensor. The pair padding[i]
-     *                     specifies the front and the end padding in the i-th dimension.
+     * @param[in] input          Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] output         Output tensor info. Data type supported: same as @p input
+     * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
+     *                           specifies the front and the end padding in the i-th dimension.
+     * @param[in] constant_value (Optional) Constant value to be used for the padding
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
 
     // Inherited methods overridden:
     void run() override;

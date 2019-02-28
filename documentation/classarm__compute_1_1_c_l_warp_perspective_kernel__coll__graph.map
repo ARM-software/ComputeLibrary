@@ -1,6 +1,7 @@
 <map id="CLWarpPerspectiveKernel" name="CLWarpPerspectiveKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="25,229,162,256"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="33,155,153,181"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="53,80,133,107"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="62,5,125,32"/>
+<area shape="rect" id="node1" title="Interface for the warp perspective kernel." alt="" coords="5,304,187,331"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="25,229,167,256"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="34,155,158,181"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="56,80,136,107"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="64,5,128,32"/>
 </map>

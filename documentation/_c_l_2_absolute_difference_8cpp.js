@@ -1,10 +1,25 @@
 var _c_l_2_absolute_difference_8cpp =
 [
     [ "CLAbsoluteDifferenceFixture", "_c_l_2_absolute_difference_8cpp.xhtml#a17967f86f28154a67d49e4056c80b7d3", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a35d3ab6d678579401ec6efeccd788c3b", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#ab71f703bd3f185e8d06c405e0d15d52a", null ],
+    [ "combine", "_c_l_2_absolute_difference_8cpp.xhtml#a9b472964f8df2137f3f7f92cf3dd8d9a", null ],
+    [ "DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a1f1266d183bfb4d479ec334fed85dc27", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a6b5e9878192726548c5546a4cbc175ab", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#af1f8bdc666967b22610ba7524cc85612", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a28b7052dc7ccce757d1136d18b7efbb4", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a57567d8110f0996b4af4589bb360ca46", null ]
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_absolute_difference_8cpp.xhtml#a57567d8110f0996b4af4589bb360ca46", null ],
+    [ "TEST_SUITE_END", "_c_l_2_absolute_difference_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "validate", "_c_l_2_absolute_difference_8cpp.xhtml#ae02c6fc90d9c60c634bfa258049eb46b", null ],
+    [ "validate", "_c_l_2_absolute_difference_8cpp.xhtml#a9fd3a8f060f8fcf2ab4ec7d9d14c1f30", null ],
+    [ "validate", "_c_l_2_absolute_difference_8cpp.xhtml#aed61c5c2a9205b62faca59381ac185b1", null ],
+    [ "validate", "_c_l_2_absolute_difference_8cpp.xhtml#a091613692766d1e34ad31fe0f403a01b", null ],
+    [ "abs_diff", "_c_l_2_absolute_difference_8cpp.xhtml#af25a92263ec1a123d1377e01792ef461", null ],
+    [ "data_type0", "_c_l_2_absolute_difference_8cpp.xhtml#adb235ab252392709d8cc3e4d24ad66ed", null ],
+    [ "data_type1", "_c_l_2_absolute_difference_8cpp.xhtml#a65ecc2dc1be4f6de6dbc1c132702d192", null ],
+    [ "dst", "_c_l_2_absolute_difference_8cpp.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4", null ],
+    [ "output_data_type", "_c_l_2_absolute_difference_8cpp.xhtml#aa30f40707893f8201695a2c20e2d8c7d", null ],
+    [ "padding", "_c_l_2_absolute_difference_8cpp.xhtml#a735a025fce26c1ef147b54426df18181", null ],
+    [ "ref_src1", "_c_l_2_absolute_difference_8cpp.xhtml#a1314e5082ccbc5c77c154d3417533493", null ],
+    [ "ref_src2", "_c_l_2_absolute_difference_8cpp.xhtml#a32648f11269b827fefc288e4d60a3507", null ],
+    [ "shape", "_c_l_2_absolute_difference_8cpp.xhtml#a45cde9abb508c62d67c3bb2b9bf566a5", null ],
+    [ "valid_region", "_c_l_2_absolute_difference_8cpp.xhtml#a7819bcbbf45c2e7c1396a137dce54422", null ]
 ];

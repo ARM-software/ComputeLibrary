@@ -1,4 +1,5 @@
 <map id="CLWinogradInputTransformKernel" name="CLWinogradInputTransformKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="57,80,137,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="65,5,128,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform Winograd input transform." alt="" coords="5,155,196,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="61,80,141,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="69,5,133,32"/>
 </map>

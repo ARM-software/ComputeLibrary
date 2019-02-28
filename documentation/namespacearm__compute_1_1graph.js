@@ -13,6 +13,7 @@ var namespacearm__compute_1_1graph =
     [ "DefaultNodeVisitor", "classarm__compute_1_1graph_1_1_default_node_visitor.xhtml", "classarm__compute_1_1graph_1_1_default_node_visitor" ],
     [ "DepthConcatSubTensorMutator", "classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml", "classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator" ],
     [ "DepthwiseConvolutionLayerNode", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node" ],
+    [ "DetectionOutputLayerNode", "classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml", "classarm__compute_1_1graph_1_1_detection_output_layer_node" ],
     [ "DotGraphPrinter", "classarm__compute_1_1graph_1_1_dot_graph_printer.xhtml", "classarm__compute_1_1graph_1_1_dot_graph_printer" ],
     [ "DotGraphVisitor", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml", "classarm__compute_1_1graph_1_1_dot_graph_visitor" ],
     [ "DummyNode", "classarm__compute_1_1graph_1_1_dummy_node.xhtml", "classarm__compute_1_1graph_1_1_dummy_node" ],

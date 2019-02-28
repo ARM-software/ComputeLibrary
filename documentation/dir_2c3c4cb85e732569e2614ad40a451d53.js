@@ -93,6 +93,15 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEDirectConvolutionLayerOutputStageKernel.h", "_n_e_direct_convolution_layer_output_stage_kernel_8h.xhtml", [
       [ "NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel" ]
     ] ],
+    [ "NEElementwiseOperationKernel.h", "_n_e_elementwise_operation_kernel_8h.xhtml", [
+      [ "NEElementwiseOperationKernel", "classarm__compute_1_1_n_e_elementwise_operation_kernel.xhtml", "classarm__compute_1_1_n_e_elementwise_operation_kernel" ],
+      [ "NEArithmeticOperationKernel", "classarm__compute_1_1_n_e_arithmetic_operation_kernel.xhtml", "classarm__compute_1_1_n_e_arithmetic_operation_kernel" ],
+      [ "NEDivisionOperationKernel", "classarm__compute_1_1_n_e_division_operation_kernel.xhtml", "classarm__compute_1_1_n_e_division_operation_kernel" ],
+      [ "NEComparisonOperationKernel", "classarm__compute_1_1_n_e_comparison_operation_kernel.xhtml", "classarm__compute_1_1_n_e_comparison_operation_kernel" ]
+    ] ],
+    [ "NEElementwiseUnaryKernel.h", "_n_e_elementwise_unary_kernel_8h.xhtml", [
+      [ "NEElementwiseUnaryKernel", "classarm__compute_1_1_n_e_elementwise_unary_kernel.xhtml", "classarm__compute_1_1_n_e_elementwise_unary_kernel" ]
+    ] ],
     [ "NEErodeKernel.h", "_n_e_erode_kernel_8h.xhtml", [
       [ "NEErodeKernel", "classarm__compute_1_1_n_e_erode_kernel.xhtml", "classarm__compute_1_1_n_e_erode_kernel" ]
     ] ],
@@ -113,6 +122,12 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEFloorKernel.h", "_n_e_floor_kernel_8h.xhtml", [
       [ "NEFloorKernel", "classarm__compute_1_1_n_e_floor_kernel.xhtml", "classarm__compute_1_1_n_e_floor_kernel" ]
+    ] ],
+    [ "NEFuseBatchNormalizationKernel.h", "_n_e_fuse_batch_normalization_kernel_8h.xhtml", [
+      [ "NEFuseBatchNormalizationKernel", "classarm__compute_1_1_n_e_fuse_batch_normalization_kernel.xhtml", "classarm__compute_1_1_n_e_fuse_batch_normalization_kernel" ]
+    ] ],
+    [ "NEGatherKernel.h", "_n_e_gather_kernel_8h.xhtml", [
+      [ "NEGatherKernel", "classarm__compute_1_1_n_e_gather_kernel.xhtml", "classarm__compute_1_1_n_e_gather_kernel" ]
     ] ],
     [ "NEGaussian3x3Kernel.h", "_n_e_gaussian3x3_kernel_8h.xhtml", [
       [ "NEGaussian3x3Kernel", "classarm__compute_1_1_n_e_gaussian3x3_kernel.xhtml", "classarm__compute_1_1_n_e_gaussian3x3_kernel" ]
@@ -199,6 +214,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEMedian3x3Kernel.h", "_n_e_median3x3_kernel_8h.xhtml", [
       [ "NEMedian3x3Kernel", "classarm__compute_1_1_n_e_median3x3_kernel.xhtml", "classarm__compute_1_1_n_e_median3x3_kernel" ]
     ] ],
+    [ "NEMemsetKernel.h", "_n_e_memset_kernel_8h.xhtml", [
+      [ "NEMemsetKernel", "classarm__compute_1_1_n_e_memset_kernel.xhtml", "classarm__compute_1_1_n_e_memset_kernel" ]
+    ] ],
     [ "NEMinMaxLayerKernel.h", "_n_e_min_max_layer_kernel_8h.xhtml", [
       [ "NEMinMaxLayerKernel", "classarm__compute_1_1_n_e_min_max_layer_kernel.xhtml", "classarm__compute_1_1_n_e_min_max_layer_kernel" ]
     ] ],
@@ -228,6 +246,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEQuantizationLayerKernel.h", "_n_e_quantization_layer_kernel_8h.xhtml", [
       [ "NEQuantizationLayerKernel", "classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_quantization_layer_kernel" ]
     ] ],
+    [ "NERangeKernel.h", "_n_e_range_kernel_8h.xhtml", [
+      [ "NERangeKernel", "classarm__compute_1_1_n_e_range_kernel.xhtml", "classarm__compute_1_1_n_e_range_kernel" ]
+    ] ],
     [ "NEReductionOperationKernel.h", "_n_e_reduction_operation_kernel_8h.xhtml", [
       [ "NEReductionOperationKernel", "classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml", "classarm__compute_1_1_n_e_reduction_operation_kernel" ]
     ] ],
@@ -240,6 +261,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEReshapeLayerKernel.h", "_n_e_reshape_layer_kernel_8h.xhtml", [
       [ "NEReshapeLayerKernel", "classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml", "classarm__compute_1_1_n_e_reshape_layer_kernel" ]
     ] ],
+    [ "NEReverseKernel.h", "_n_e_reverse_kernel_8h.xhtml", [
+      [ "NEReverseKernel", "classarm__compute_1_1_n_e_reverse_kernel.xhtml", "classarm__compute_1_1_n_e_reverse_kernel" ]
+    ] ],
     [ "NEROIPoolingLayerKernel.h", "_n_e_r_o_i_pooling_layer_kernel_8h.xhtml", [
       [ "NEROIPoolingLayerKernel", "classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml", "classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel" ]
     ] ],
@@ -248,6 +272,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEScharr3x3Kernel.h", "_n_e_scharr3x3_kernel_8h.xhtml", [
       [ "NEScharr3x3Kernel", "classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml", "classarm__compute_1_1_n_e_scharr3x3_kernel" ]
+    ] ],
+    [ "NESelectKernel.h", "_n_e_select_kernel_8h.xhtml", [
+      [ "NESelectKernel", "classarm__compute_1_1_n_e_select_kernel.xhtml", "classarm__compute_1_1_n_e_select_kernel" ]
     ] ],
     [ "NESobel3x3Kernel.h", "_n_e_sobel3x3_kernel_8h.xhtml", [
       [ "NESobel3x3Kernel", "classarm__compute_1_1_n_e_sobel3x3_kernel.xhtml", "classarm__compute_1_1_n_e_sobel3x3_kernel" ]
@@ -264,11 +291,20 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "NELogits1DMaxKernel", "classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_max_kernel" ],
       [ "NELogits1DSoftmaxKernel", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel" ]
     ] ],
+    [ "NEStackLayerKernel.h", "_n_e_stack_layer_kernel_8h.xhtml", [
+      [ "NEStackLayerKernel", "classarm__compute_1_1_n_e_stack_layer_kernel.xhtml", "classarm__compute_1_1_n_e_stack_layer_kernel" ]
+    ] ],
+    [ "NEStridedSliceKernel.h", "_n_e_strided_slice_kernel_8h.xhtml", [
+      [ "NEStridedSliceKernel", "classarm__compute_1_1_n_e_strided_slice_kernel.xhtml", "classarm__compute_1_1_n_e_strided_slice_kernel" ]
+    ] ],
     [ "NETableLookupKernel.h", "_n_e_table_lookup_kernel_8h.xhtml", [
       [ "NETableLookupKernel", "classarm__compute_1_1_n_e_table_lookup_kernel.xhtml", "classarm__compute_1_1_n_e_table_lookup_kernel" ]
     ] ],
     [ "NEThresholdKernel.h", "_n_e_threshold_kernel_8h.xhtml", [
       [ "NEThresholdKernel", "classarm__compute_1_1_n_e_threshold_kernel.xhtml", "classarm__compute_1_1_n_e_threshold_kernel" ]
+    ] ],
+    [ "NETileKernel.h", "_n_e_tile_kernel_8h.xhtml", [
+      [ "NETileKernel", "classarm__compute_1_1_n_e_tile_kernel.xhtml", "classarm__compute_1_1_n_e_tile_kernel" ]
     ] ],
     [ "NETransposeKernel.h", "_n_e_transpose_kernel_8h.xhtml", [
       [ "NETransposeKernel", "classarm__compute_1_1_n_e_transpose_kernel.xhtml", "classarm__compute_1_1_n_e_transpose_kernel" ]

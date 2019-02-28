@@ -1,4 +1,5 @@
 <map id="CLArray&lt; T &gt;" name="CLArray&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_array.xhtml" title="Interface for OpenCL Array. " alt="" coords="5,80,112,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_array.xhtml" title="Array of type T. " alt="" coords="14,5,103,32"/>
+<area shape="rect" id="node1" title="CLArray implementation." alt="" coords="7,155,116,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_array.xhtml" title="Interface for OpenCL Array." alt="" coords="5,80,117,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_array.xhtml" title="Array of type T." alt="" coords="13,5,109,32"/>
 </map>

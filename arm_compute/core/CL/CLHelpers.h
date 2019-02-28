@@ -135,5 +135,14 @@ bool dot8_acc_supported(const cl::Device &device);
  * @return True if the configuration is supported
  */
 bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout);
+
+/** Helper function to get the preferred native vector width size for built-in scalar types that can be put into vectors
+ *
+ * @param[in] device A CL device
+ * @param[in] dt     data type
+ *
+ * @return preferred vector width
+ */
+size_t preferred_vector_width(const cl::Device &device, DataType dt);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

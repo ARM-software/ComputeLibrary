@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,10 @@ namespace arm_compute
 class ITensor;
 /** OpenCL kernel to accumulate the biases, if provided, or downscale in case of quantized input.
  *
+ * @deprecated This kernel is deprecated and will be removed in release 19.05
+ *
  * @note We assume bias to be shared
+ *
  */
 class CLDirectConvolutionLayerOutputStageKernel : public ICLKernel
 {

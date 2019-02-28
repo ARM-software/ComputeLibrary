@@ -1,3 +1,4 @@
 <map id="SimpleOption&lt; T &gt;" name="SimpleOption&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option. " alt="" coords="41,5,101,32"/>
+<area shape="rect" id="node1" title="Implementation of an option that accepts a single value." alt="" coords="5,80,151,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option." alt="" coords="46,5,110,32"/>
 </map>

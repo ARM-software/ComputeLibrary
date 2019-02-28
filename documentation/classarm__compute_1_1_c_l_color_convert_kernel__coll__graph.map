@@ -1,4 +1,5 @@
 <map id="CLColorConvertKernel" name="CLColorConvertKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="42,80,122,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="51,5,113,32"/>
+<area shape="rect" id="node1" title="Interface for the color convert kernel." alt="" coords="5,155,165,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="45,80,125,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="53,5,117,32"/>
 </map>

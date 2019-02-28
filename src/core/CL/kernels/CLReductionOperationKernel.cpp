@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -45,6 +46,7 @@ constexpr unsigned int border_val = 64;
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
@@ -53,29 +55,41 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+        if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8, "Not supported operation for QASYMM8");
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        }
     }
 
     return Status{};
 }
 
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int axis)
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     // Output tensor auto initialization if not yet initialized
     TensorShape output_shape{ input->tensor_shape() };
     output_shape.set(axis, 1);
-    auto_init_if_empty(*output, output_shape, 1, input->data_type());
+    const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
+    DataType   output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
+    auto_init_if_empty(*output, output_shape, 1, output_data_type, input->quantization_info());
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool               window_changed                    = false;
+    const bool         is_serial_op                      = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(input->data_type()));
 
     switch(axis)
     {
         case 0:
         {
-            if(is_data_type_quantized(input->data_type()))
+            if(is_serial_op)
             {
                 AccessWindowHorizontal input_access(input, 0, input->dimension(0));
                 AccessWindowHorizontal output_access(output, 0, 1);
@@ -136,14 +150,17 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Set build options
     CLBuildOptions build_opts;
     std::string    data_type_promoted = get_cl_type_from_data_type(input->info()->data_type());
-    if(is_data_type_quantized(input->info()->data_type()) && axis != 0)
+    if(is_data_type_quantized(input->info()->data_type()))
     {
         data_type_promoted = "uint";
     }
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_PROMOTED=" + data_type_promoted);
-    build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE=");
+    build_opts.add_option_if(op == ReductionOperation::SUM_SQUARE, "-DSUM_SQUARE");
     build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DMEAN");
+    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX");
+    build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
+    build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
 
     switch(op)
     {
@@ -154,6 +171,12 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         case ReductionOperation::MEAN_SUM:
             build_opts.add_option(("-DOPERATION=sum"));
             break;
+        case ReductionOperation::ARG_IDX_MAX:
+        case ReductionOperation::ARG_IDX_MIN:
+            break;
+        case ReductionOperation::PROD:
+            build_opts.add_option(("-DOPERATION=product"));
+            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported reduction operation");
     }
@@ -161,11 +184,18 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
     std::string kernel_axis_name;
+    const bool  is_serial_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(input->info()->data_type()));
     switch(axis)
     {
         case 0:
         {
-            if(!is_data_type_quantized(input->info()->data_type()))
+            if(is_serial_op)
+            {
+                build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+                build_opts.add_option_if_else(_input->info()->data_type() == DataType::F32, "-DCOND_DATA_TYPE=int", "-DCOND_DATA_TYPE=short");
+                kernel_axis_name = "non_parallel_x";
+            }
+            else
             {
                 build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DWIDTH=" + support::cpp11::to_string(width));
                 const unsigned int width_leftover = input->info()->dimension(0) % border_val;
@@ -177,11 +207,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
                 // we can use fewer threads than 8.
                 lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
                 _border_size = BorderSize(0, border_width, 0, 0);
-            }
-            else
-            {
-                build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-                kernel_axis_name = "quantized_x";
             }
         }
         break;
@@ -204,7 +229,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reduction_operation_" + kernel_axis_name, build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis);
+    auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis, op);
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
@@ -214,7 +239,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 Status CLReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, op, width));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), axis)));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), axis, op)));
 
     return Status{};
 }
@@ -224,39 +249,13 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
+    const bool is_serial_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN || is_data_type_quantized(_input->info()->data_type()));
     switch(_reduction_axis)
     {
         case 0:
         {
             // We use parallel reduction only in non quantized types
-            if(!is_data_type_quantized(_input->info()->data_type()))
-            {
-                // Set out window
-                Window out_window(window);
-                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
-
-                // Get first input and output slices
-                Window in_slice  = window.first_slice_window_2D();
-                Window out_slice = out_window.first_slice_window_2D();
-
-                // Reshape window
-                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
-                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
-
-                // Set local sums buffer
-                unsigned int local_sum_size = lws_hint()[0] * _input->info()->element_size();
-                _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_sum_size, nullptr);
-
-                do
-                {
-                    unsigned int idx = 0;
-                    add_2D_tensor_argument(idx, _input, in_slice);
-                    add_2D_tensor_argument(idx, _output, out_slice);
-                    enqueue(queue, *this, in_slice, lws_hint());
-                }
-                while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
-            }
-            else
+            if(is_serial_op)
             {
                 // Get first input and output slices
                 Window window_in{ window };
@@ -273,6 +272,33 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                     enqueue(queue, *this, in_slice);
                 }
                 while(window_in.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(out_slice));
+            }
+            else
+            {
+                // Set out window
+                Window out_window(window);
+                out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
+
+                // Get first input and output slices
+                Window in_slice  = window.first_slice_window_2D();
+                Window out_slice = out_window.first_slice_window_2D();
+
+                // Reshape window
+                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
+                in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
+
+                // Set local sums buffer
+                unsigned int local_res_size = lws_hint()[0] * _input->info()->element_size();
+                _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_res_size, nullptr);
+
+                do
+                {
+                    unsigned int idx = 0;
+                    add_2D_tensor_argument(idx, _input, in_slice);
+                    add_2D_tensor_argument(idx, _output, out_slice);
+                    enqueue(queue, *this, in_slice, lws_hint());
+                }
+                while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
             }
         }
         break;

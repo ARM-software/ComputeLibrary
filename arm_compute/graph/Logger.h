@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/utils/logging/Macros.h"
 
+#ifdef ARM_COMPUTE_LOGGING_ENABLED
 /** Create a default core logger
  *
  * @note It will eventually create all default loggers in don't exist
@@ -38,6 +39,9 @@
             arm_compute::logging::LoggerRegistry::get().create_reserved_loggers(); \
         }                                                                          \
     } while(false)
+#else /* ARM_COMPUTE_LOGGING_ENABLED */
+#define ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER()
+#endif /* ARM_COMPUTE_LOGGING_ENABLED */
 
 #define ARM_COMPUTE_LOG_GRAPH(log_level, x)    \
     ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \

@@ -1,7 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1logging_1_1_i_decorator.xhtml" title="Log message decorator interface. " alt="" coords="5,81,88,108"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1logging_1_1_date_decorator.xhtml" title="Date Decorator. " alt="" coords="148,5,255,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1logging_1_1_log_level_decorator.xhtml" title="Log Level Decorator. " alt="" coords="136,56,267,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1logging_1_1_string_decorator.xhtml" title="String Decorator. " alt="" coords="145,107,258,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml" title="Thread ID Decorator. " alt="" coords="136,157,267,184"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_i_array_accessor.xhtml" title="Common interface to provide information and access to array like structures." alt="" coords="5,31,160,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_array_accessor.xhtml" title="ArrayAccessor implementation for Array objects." alt="" coords="216,5,367,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml" title="Accessor implementation for CLArray objects." alt="" coords="208,56,375,83"/>
 </map>

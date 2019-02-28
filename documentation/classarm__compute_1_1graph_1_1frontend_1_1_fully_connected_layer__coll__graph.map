@@ -1,3 +1,4 @@
 <map id="FullyConnectedLayer" name="FullyConnectedLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface. " alt="" coords="49,5,107,32"/>
+<area shape="rect" id="node1" title="Fully Connected Layer." alt="" coords="5,80,159,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface." alt="" coords="52,5,112,32"/>
 </map>

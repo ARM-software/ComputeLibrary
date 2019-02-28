@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,23 +88,23 @@ template <typename T>
 using NEChannelExtractFixture = ChannelExtractValidationFixture<MultiImage, Tensor, Accessor, NEChannelExtract, T>;
 
 TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractRGBADataset),
+DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);
 }
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVDataset),
+DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);
 }
 
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ChannelExtractYUVPlanarDataset),
+DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset),
                shape, format, channel)
 {
     validate_configuration(shape, format, channel);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // Configuration
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractRGBADataset))
@@ -117,7 +117,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVDataset))
@@ -130,7 +130,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelExtractFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ChannelExtractYUVPlanarDataset))
@@ -143,10 +143,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelExtractFixture<uint8_t>, framework::Da
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUVPlanar
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ChannelExtract
+TEST_SUITE_END() // NEON
 
 } // namespace validation
 } // namespace test

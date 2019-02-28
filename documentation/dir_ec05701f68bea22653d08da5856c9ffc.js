@@ -16,7 +16,6 @@ var dir_ec05701f68bea22653d08da5856c9ffc =
     [ "FullyConnectedLayer.cpp", "tests_2benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml", "tests_2benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp" ],
     [ "GaussianPyramid.cpp", "benchmark_2_n_e_o_n_2_gaussian_pyramid_8cpp.xhtml", "benchmark_2_n_e_o_n_2_gaussian_pyramid_8cpp" ],
     [ "GEMM.cpp", "benchmark_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml", "benchmark_2_n_e_o_n_2_g_e_m_m_8cpp" ],
-    [ "GEMMInterleave4x4.cpp", "_n_e_o_n_2_g_e_m_m_interleave4x4_8cpp.xhtml", "_n_e_o_n_2_g_e_m_m_interleave4x4_8cpp" ],
     [ "GEMMLowp.cpp", "benchmark_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml", "benchmark_2_n_e_o_n_2_g_e_m_m_lowp_8cpp" ],
     [ "HarrisCorners.cpp", "benchmark_2_n_e_o_n_2_harris_corners_8cpp.xhtml", "benchmark_2_n_e_o_n_2_harris_corners_8cpp" ],
     [ "Histogram.cpp", "benchmark_2_n_e_o_n_2_histogram_8cpp.xhtml", "benchmark_2_n_e_o_n_2_histogram_8cpp" ],

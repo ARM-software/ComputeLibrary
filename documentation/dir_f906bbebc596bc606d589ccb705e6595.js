@@ -11,15 +11,6 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLActivationLayerKernel.h", "_c_l_activation_layer_kernel_8h.xhtml", [
       [ "CLActivationLayerKernel", "classarm__compute_1_1_c_l_activation_layer_kernel.xhtml", "classarm__compute_1_1_c_l_activation_layer_kernel" ]
     ] ],
-    [ "CLArithmeticAdditionKernel.h", "_c_l_arithmetic_addition_kernel_8h.xhtml", [
-      [ "CLArithmeticAdditionKernel", "classarm__compute_1_1_c_l_arithmetic_addition_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition_kernel" ]
-    ] ],
-    [ "CLArithmeticDivisionKernel.h", "_c_l_arithmetic_division_kernel_8h.xhtml", [
-      [ "CLArithmeticDivisionKernel", "classarm__compute_1_1_c_l_arithmetic_division_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_division_kernel" ]
-    ] ],
-    [ "CLArithmeticSubtractionKernel.h", "_c_l_arithmetic_subtraction_kernel_8h.xhtml", [
-      [ "CLArithmeticSubtractionKernel", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction_kernel" ]
-    ] ],
     [ "CLBatchNormalizationLayerKernel.h", "_c_l_batch_normalization_layer_kernel_8h.xhtml", [
       [ "CLBatchNormalizationLayerKernel", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer_kernel" ]
     ] ],
@@ -64,6 +55,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLColorConvertKernel.h", "_c_l_color_convert_kernel_8h.xhtml", [
       [ "CLColorConvertKernel", "classarm__compute_1_1_c_l_color_convert_kernel.xhtml", "classarm__compute_1_1_c_l_color_convert_kernel" ]
     ] ],
+    [ "CLComparisonKernel.h", "_c_l_comparison_kernel_8h.xhtml", [
+      [ "CLComparisonKernel", "classarm__compute_1_1_c_l_comparison_kernel.xhtml", "classarm__compute_1_1_c_l_comparison_kernel" ]
+    ] ],
     [ "CLConvertFullyConnectedWeightsKernel.h", "_c_l_convert_fully_connected_weights_kernel_8h.xhtml", [
       [ "CLConvertFullyConnectedWeightsKernel", "classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel" ]
     ] ],
@@ -86,14 +80,17 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLDepthwiseConvolutionLayer3x3NHWCKernel.h", "_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel_8h.xhtml", [
       [ "CLDepthwiseConvolutionLayer3x3NHWCKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel" ]
     ] ],
+    [ "CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel.h", "_c_l_depthwise_convolution_layer_reshape_weights_generic_kernel_8h.xhtml", [
+      [ "CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_generic_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_generic_kernel" ]
+    ] ],
+    [ "CLDepthwiseConvolutionLayerReshapeWeightsKernel.h", "_c_l_depthwise_convolution_layer_reshape_weights_kernel_8h.xhtml", [
+      [ "CLDepthwiseConvolutionLayerReshapeWeightsKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer_reshape_weights_kernel" ]
+    ] ],
     [ "CLDepthwiseIm2ColKernel.h", "_c_l_depthwise_im2_col_kernel_8h.xhtml", [
       [ "CLDepthwiseIm2ColKernel", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel" ]
     ] ],
     [ "CLDepthwiseVectorToTensorKernel.h", "_c_l_depthwise_vector_to_tensor_kernel_8h.xhtml", [
       [ "CLDepthwiseVectorToTensorKernel", "classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel" ]
-    ] ],
-    [ "CLDepthwiseWeightsReshapeKernel.h", "_c_l_depthwise_weights_reshape_kernel_8h.xhtml", [
-      [ "CLDepthwiseWeightsReshapeKernel", "classarm__compute_1_1_c_l_depthwise_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_weights_reshape_kernel" ]
     ] ],
     [ "CLDequantizationLayerKernel.h", "_c_l_dequantization_layer_kernel_8h.xhtml", [
       [ "CLDequantizationLayerKernel", "classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_dequantization_layer_kernel" ]
@@ -109,6 +106,14 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLDirectConvolutionLayerOutputStageKernel.h", "_c_l_direct_convolution_layer_output_stage_kernel_8h.xhtml", [
       [ "CLDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml", "classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel" ]
+    ] ],
+    [ "CLElementwiseOperationKernel.h", "_c_l_elementwise_operation_kernel_8h.xhtml", [
+      [ "CLElementwiseOperationKernel", "classarm__compute_1_1_c_l_elementwise_operation_kernel.xhtml", "classarm__compute_1_1_c_l_elementwise_operation_kernel" ],
+      [ "CLSaturatedArithmeticOperationKernel", "classarm__compute_1_1_c_l_saturated_arithmetic_operation_kernel.xhtml", "classarm__compute_1_1_c_l_saturated_arithmetic_operation_kernel" ],
+      [ "CLArithmeticOperationKernel", "classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml", "classarm__compute_1_1_c_l_arithmetic_operation_kernel" ]
+    ] ],
+    [ "CLElementWiseUnaryLayerKernel.h", "_c_l_element_wise_unary_layer_kernel_8h.xhtml", [
+      [ "CLElementWiseUnaryLayerKernel", "classarm__compute_1_1_c_l_element_wise_unary_layer_kernel.xhtml", "classarm__compute_1_1_c_l_element_wise_unary_layer_kernel" ]
     ] ],
     [ "CLErodeKernel.h", "_c_l_erode_kernel_8h.xhtml", [
       [ "CLErodeKernel", "classarm__compute_1_1_c_l_erode_kernel.xhtml", "classarm__compute_1_1_c_l_erode_kernel" ]
@@ -129,6 +134,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLFuseBatchNormalizationKernel.h", "_c_l_fuse_batch_normalization_kernel_8h.xhtml", [
       [ "CLFuseBatchNormalizationKernel", "classarm__compute_1_1_c_l_fuse_batch_normalization_kernel.xhtml", "classarm__compute_1_1_c_l_fuse_batch_normalization_kernel" ]
     ] ],
+    [ "CLGatherKernel.h", "_c_l_gather_kernel_8h.xhtml", [
+      [ "CLGatherKernel", "classarm__compute_1_1_c_l_gather_kernel.xhtml", "classarm__compute_1_1_c_l_gather_kernel" ]
+    ] ],
     [ "CLGaussian3x3Kernel.h", "_c_l_gaussian3x3_kernel_8h.xhtml", [
       [ "CLGaussian3x3Kernel", "classarm__compute_1_1_c_l_gaussian3x3_kernel.xhtml", "classarm__compute_1_1_c_l_gaussian3x3_kernel" ]
     ] ],
@@ -145,6 +153,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLGEMMLowpMatrixMultiplyKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_kernel_8h.xhtml", [
       [ "CLGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel" ]
+    ] ],
+    [ "CLGEMMLowpMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel_8h.xhtml", [
+      [ "CLGEMMLowpMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel" ]
     ] ],
     [ "CLGEMMLowpOffsetContributionKernel.h", "_c_l_g_e_m_m_lowp_offset_contribution_kernel_8h.xhtml", [
       [ "CLGEMMLowpOffsetContributionKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel" ]
@@ -175,8 +186,17 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLGEMMMatrixMultiplyKernel.h", "_c_l_g_e_m_m_matrix_multiply_kernel_8h.xhtml", [
       [ "CLGEMMMatrixMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel" ]
     ] ],
+    [ "CLGEMMMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8h.xhtml", [
+      [ "CLGEMMMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel" ]
+    ] ],
     [ "CLGEMMMatrixVectorMultiplyKernel.h", "_c_l_g_e_m_m_matrix_vector_multiply_kernel_8h.xhtml", [
       [ "CLGEMMMatrixVectorMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel" ]
+    ] ],
+    [ "CLGEMMReshapeLHSMatrixKernel.h", "_c_l_g_e_m_m_reshape_l_h_s_matrix_kernel_8h.xhtml", [
+      [ "CLGEMMReshapeLHSMatrixKernel", "classarm__compute_1_1_c_l_g_e_m_m_reshape_l_h_s_matrix_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_reshape_l_h_s_matrix_kernel" ]
+    ] ],
+    [ "CLGEMMReshapeRHSMatrixKernel.h", "_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel_8h.xhtml", [
+      [ "CLGEMMReshapeRHSMatrixKernel", "classarm__compute_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel" ]
     ] ],
     [ "CLGEMMTranspose1xWKernel.h", "_c_l_g_e_m_m_transpose1x_w_kernel_8h.xhtml", [
       [ "CLGEMMTranspose1xWKernel", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel" ]
@@ -258,6 +278,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLQuantizationLayerKernel.h", "_c_l_quantization_layer_kernel_8h.xhtml", [
       [ "CLQuantizationLayerKernel", "classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_quantization_layer_kernel" ]
     ] ],
+    [ "CLRangeKernel.h", "_c_l_range_kernel_8h.xhtml", [
+      [ "CLRangeKernel", "classarm__compute_1_1_c_l_range_kernel.xhtml", "classarm__compute_1_1_c_l_range_kernel" ]
+    ] ],
     [ "CLReductionOperationKernel.h", "_c_l_reduction_operation_kernel_8h.xhtml", [
       [ "CLReductionOperationKernel", "classarm__compute_1_1_c_l_reduction_operation_kernel.xhtml", "classarm__compute_1_1_c_l_reduction_operation_kernel" ]
     ] ],
@@ -270,6 +293,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLReshapeLayerKernel.h", "_c_l_reshape_layer_kernel_8h.xhtml", [
       [ "CLReshapeLayerKernel", "classarm__compute_1_1_c_l_reshape_layer_kernel.xhtml", "classarm__compute_1_1_c_l_reshape_layer_kernel" ]
     ] ],
+    [ "CLReverseKernel.h", "_c_l_reverse_kernel_8h.xhtml", [
+      [ "CLReverseKernel", "classarm__compute_1_1_c_l_reverse_kernel.xhtml", "classarm__compute_1_1_c_l_reverse_kernel" ]
+    ] ],
     [ "CLROIAlignLayerKernel.h", "_c_l_r_o_i_align_layer_kernel_8h.xhtml", [
       [ "CLROIAlignLayerKernel", "classarm__compute_1_1_c_l_r_o_i_align_layer_kernel.xhtml", "classarm__compute_1_1_c_l_r_o_i_align_layer_kernel" ]
     ] ],
@@ -281,6 +307,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLScharr3x3Kernel.h", "_c_l_scharr3x3_kernel_8h.xhtml", [
       [ "CLScharr3x3Kernel", "classarm__compute_1_1_c_l_scharr3x3_kernel.xhtml", "classarm__compute_1_1_c_l_scharr3x3_kernel" ]
+    ] ],
+    [ "CLSelectKernel.h", "_c_l_select_kernel_8h.xhtml", [
+      [ "CLSelectKernel", "classarm__compute_1_1_c_l_select_kernel.xhtml", "classarm__compute_1_1_c_l_select_kernel" ]
     ] ],
     [ "CLSobel3x3Kernel.h", "_c_l_sobel3x3_kernel_8h.xhtml", [
       [ "CLSobel3x3Kernel", "classarm__compute_1_1_c_l_sobel3x3_kernel.xhtml", "classarm__compute_1_1_c_l_sobel3x3_kernel" ]
@@ -302,6 +331,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLSpaceToBatchLayerKernel.h", "_c_l_space_to_batch_layer_kernel_8h.xhtml", [
       [ "CLSpaceToBatchLayerKernel", "classarm__compute_1_1_c_l_space_to_batch_layer_kernel.xhtml", "classarm__compute_1_1_c_l_space_to_batch_layer_kernel" ]
     ] ],
+    [ "CLStackLayerKernel.h", "_c_l_stack_layer_kernel_8h.xhtml", [
+      [ "CLStackLayerKernel", "classarm__compute_1_1_c_l_stack_layer_kernel.xhtml", "classarm__compute_1_1_c_l_stack_layer_kernel" ]
+    ] ],
     [ "CLStridedSliceKernel.h", "_c_l_strided_slice_kernel_8h.xhtml", [
       [ "CLStridedSliceKernel", "classarm__compute_1_1_c_l_strided_slice_kernel.xhtml", "classarm__compute_1_1_c_l_strided_slice_kernel" ]
     ] ],
@@ -310,6 +342,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLThresholdKernel.h", "_c_l_threshold_kernel_8h.xhtml", [
       [ "CLThresholdKernel", "classarm__compute_1_1_c_l_threshold_kernel.xhtml", "classarm__compute_1_1_c_l_threshold_kernel" ]
+    ] ],
+    [ "CLTileKernel.h", "_c_l_tile_kernel_8h.xhtml", [
+      [ "CLTileKernel", "classarm__compute_1_1_c_l_tile_kernel.xhtml", "classarm__compute_1_1_c_l_tile_kernel" ]
     ] ],
     [ "CLTransposeKernel.h", "_c_l_transpose_kernel_8h.xhtml", [
       [ "CLTransposeKernel", "classarm__compute_1_1_c_l_transpose_kernel.xhtml", "classarm__compute_1_1_c_l_transpose_kernel" ]

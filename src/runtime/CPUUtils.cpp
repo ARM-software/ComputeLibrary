@@ -39,7 +39,8 @@
 #include <unistd.h>
 
 #ifndef BARE_METAL
-#include <regex>
+/* C++ std::regex takes up a lot of space in the standalone builds */
+#include <regex.h>
 #include <thread>
 #endif /* BARE_METAL */
 
@@ -94,6 +95,7 @@ bool model_supports_fp16(CPUModel model)
             return false;
     }
 }
+
 /* Convert an MIDR register value to a CPUModel enum value. */
 CPUModel midr_to_model(const unsigned int midr)
 {
@@ -144,6 +146,19 @@ CPUModel midr_to_model(const unsigned int midr)
                 break;
         }
     }
+    else if(implementer == 0x48) // HiSilicon CPUs
+    {
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0xd40: // A76 (Kirin 980)
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
+    }
 
     return model;
 }
@@ -172,12 +187,27 @@ void populate_models_cpuid(std::vector<CPUModel> &cpusv)
 
 void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 {
+    regex_t proc_regex;
+    regex_t imp_regex;
+    regex_t var_regex;
+    regex_t part_regex;
+    regex_t rev_regex;
+
+    memset(&proc_regex, 0, sizeof(regex_t));
+    memset(&imp_regex, 0, sizeof(regex_t));
+    memset(&var_regex, 0, sizeof(regex_t));
+    memset(&part_regex, 0, sizeof(regex_t));
+    memset(&rev_regex, 0, sizeof(regex_t));
+
+    int ret_status = 0;
     // If "long-form" cpuinfo is present, parse that to populate models.
-    std::regex proc_regex(R"(^processor.*(\d+)$)");
-    std::regex imp_regex(R"(^CPU implementer.*0x(..)$)");
-    std::regex var_regex(R"(^CPU variant.*0x(.)$)");
-    std::regex part_regex(R"(^CPU part.*0x(...)$)");
-    std::regex rev_regex(R"(^CPU revision.*(\d+)$)");
+    ret_status |= regcomp(&proc_regex, R"(^processor.*([[:digit:]]+)$)", REG_EXTENDED);
+    ret_status |= regcomp(&imp_regex, R"(^CPU implementer.*0x(..)$)", REG_EXTENDED);
+    ret_status |= regcomp(&var_regex, R"(^CPU variant.*0x(.)$)", REG_EXTENDED);
+    ret_status |= regcomp(&part_regex, R"(^CPU part.*0x(...)$)", REG_EXTENDED);
+    ret_status |= regcomp(&rev_regex, R"(^CPU revision.*([[:digit:]]+)$)", REG_EXTENDED);
+    ARM_COMPUTE_UNUSED(ret_status);
+    ARM_COMPUTE_ERROR_ON_MSG(ret_status != 0, "Regex compilation failed.");
 
     std::ifstream file;
     file.open("/proc/cpuinfo", std::ios::in);
@@ -190,11 +220,11 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 
         while(bool(getline(file, line)))
         {
-            std::smatch match;
-
-            if(std::regex_match(line, match, proc_regex))
+            regmatch_t match[2];
+            ret_status = regexec(&proc_regex, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                std::string id     = match[1];
+                std::string id     = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 int         newcpu = support::cpp11::stoi(id, nullptr);
 
                 if(curcpu >= 0 && midr == 0)
@@ -214,32 +244,44 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                 continue;
             }
 
-            if(std::regex_match(line, match, imp_regex))
+            ret_status = regexec(&imp_regex, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                int impv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
+                std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
+                int         impv   = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (impv << 24);
+
                 continue;
             }
 
-            if(std::regex_match(line, match, var_regex))
+            ret_status = regexec(&var_regex, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                int varv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
+                std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
+                int         varv   = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (varv << 20);
+
                 continue;
             }
 
-            if(std::regex_match(line, match, part_regex))
+            ret_status = regexec(&part_regex, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                int partv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
+                std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
+                int         partv  = support::cpp11::stoi(subexp, nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (partv << 4);
+
                 continue;
             }
 
-            if(std::regex_match(line, match, rev_regex))
+            ret_status = regexec(&rev_regex, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                int regv = support::cpp11::stoi(match[1], nullptr);
+                std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
+                int         regv   = support::cpp11::stoi(subexp, nullptr);
                 midr |= (regv);
                 midr |= (0xf << 16);
+
                 continue;
             }
         }
@@ -249,6 +291,13 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
             cpusv[curcpu] = midr_to_model(midr);
         }
     }
+
+    // Free allocated memory
+    regfree(&proc_regex);
+    regfree(&imp_regex);
+    regfree(&var_regex);
+    regfree(&part_regex);
+    regfree(&rev_regex);
 }
 
 int get_max_cpus()
@@ -364,8 +413,11 @@ unsigned int get_threads_hint()
     std::map<std::string, unsigned int> cpu_part_occurrence_map;
 
     // CPU part regex
-    std::regex  cpu_part_rgx(R"(.*CPU part.+?(?=:).+?(?=\w+)(\w+).*)");
-    std::smatch cpu_part_match;
+    regex_t cpu_part_rgx;
+    memset(&cpu_part_rgx, 0, sizeof(regex_t));
+    int ret_status = regcomp(&cpu_part_rgx, R"(.*CPU part.+/?\:[[:space:]]+([[:alnum:]]+).*)", REG_EXTENDED);
+    ARM_COMPUTE_UNUSED(ret_status);
+    ARM_COMPUTE_ERROR_ON_MSG(ret_status != 0, "Regex compilation failed.");
 
     // Read cpuinfo and get occurrence of each core
     std::ifstream cpuinfo;
@@ -375,9 +427,11 @@ unsigned int get_threads_hint()
         std::string line;
         while(bool(getline(cpuinfo, line)))
         {
-            if(std::regex_search(line.cbegin(), line.cend(), cpu_part_match, cpu_part_rgx))
+            regmatch_t match[2];
+            ret_status = regexec(&cpu_part_rgx, line.c_str(), 2, match, 0);
+            if(ret_status == 0)
             {
-                std::string cpu_part = cpu_part_match[1];
+                std::string cpu_part = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
                 if(cpu_part_occurrence_map.find(cpu_part) != cpu_part_occurrence_map.end())
                 {
                     cpu_part_occurrence_map[cpu_part]++;
@@ -389,6 +443,7 @@ unsigned int get_threads_hint()
             }
         }
     }
+    regfree(&cpu_part_rgx);
 
     // Get min number of threads
     auto min_common_cores = std::min_element(cpu_part_occurrence_map.begin(), cpu_part_occurrence_map.end(),

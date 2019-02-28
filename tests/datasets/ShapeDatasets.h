@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,20 @@ namespace datasets
 {
 /** Parent type for all for shape datasets. */
 using ShapeDataset = framework::dataset::ContainerDataset<std::vector<TensorShape>>;
+
+/** Data set containing tiny 1D tensor shapes. */
+class Tiny1DShapes final : public ShapeDataset
+{
+public:
+    Tiny1DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 2U },
+                     TensorShape{ 3U },
+    })
+    {
+    }
+};
 
 /** Data set containing small 1D tensor shapes. */
 class Small1DShapes final : public ShapeDataset
@@ -104,9 +118,10 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 1U, 7U, 7U },
+                     TensorShape{ 2U, 5U, 4U },
+
                      TensorShape{ 7U, 7U, 5U },
                      TensorShape{ 27U, 13U, 37U },
-                     TensorShape{ 128U, 64U, 21U }
     })
     {
     }
@@ -132,7 +147,7 @@ public:
     Small4DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 1U, 7U, 1U, 3U },
+        TensorShape{ 2U, 7U, 1U, 3U },
                      TensorShape{ 7U, 7U, 5U, 3U },
                      TensorShape{ 27U, 13U, 37U, 2U },
                      TensorShape{ 128U, 64U, 21U, 3U }
@@ -167,7 +182,6 @@ public:
                      TensorShape{ 27U, 13U, 7U },
                      TensorShape{ 31U, 27U, 17U, 2U },
                      // Batch size 4
-                     TensorShape{ 11U, 11U, 3U, 4U },
                      TensorShape{ 27U, 13U, 2U, 4U },
                      // Arbitrary batch size
                      TensorShape{ 11U, 11U, 3U, 5U }
@@ -217,7 +231,6 @@ public:
                      TensorShape{ 128U, 64U, 1U, 3U },
                      // Batch size 4
                      TensorShape{ 37U, 37U, 3U, 4U },
-                     TensorShape{ 27U, 33U, 2U, 4U },
                      // Arbitrary batch size
                      TensorShape{ 37U, 37U, 3U, 5U }
     })
@@ -609,7 +622,6 @@ public:
                      // Batch size 4
                      TensorShape{ 32U, 37U, 3U, 4U },
                      // Batch size 8
-                     TensorShape{ 32U, 37U, 3U, 8U },
                      TensorShape{ 33U, 35U, 8U, 8U }
     })
     {
@@ -629,7 +641,6 @@ public:
                      // Batch size 4
                      TensorShape{ 32U, 37U, 3U, 4U },
                      // Batch size 8
-                     TensorShape{ 32U, 37U, 3U, 8U },
                      TensorShape{ 33U, 35U, 3U, 8U },
                      // Arbitrary batch size
                      TensorShape{ 32U, 37U, 3U, 8U }
@@ -878,6 +889,93 @@ public:
     {
     }
 };
+
+/** Data set containing small tensor shapes to be used with the GEMM reshaping kernel */
+class SmallGEMMReshape2DShapes final : public ShapeDataset
+{
+public:
+    SmallGEMMReshape2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 63U, 72U },
+    })
+    {
+    }
+};
+
+/** Data set containing small tensor shapes to be used with the GEMM reshaping kernel when the input has to be reinterpreted as 3D */
+class SmallGEMMReshape3DShapes final : public ShapeDataset
+{
+public:
+    SmallGEMMReshape3DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 63U, 9U, 8U },
+    })
+    {
+    }
+};
+
+/** Data set containing large tensor shapes to be used with the GEMM reshaping kernel */
+class LargeGEMMReshape2DShapes final : public ShapeDataset
+{
+public:
+    LargeGEMMReshape2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 16U, 27U },
+                     TensorShape{ 533U, 171U },
+                     TensorShape{ 345U, 612U }
+    })
+    {
+    }
+};
+
+/** Data set containing large tensor shapes to be used with the GEMM reshaping kernel when the input has to be reinterpreted as 3D */
+class LargeGEMMReshape3DShapes final : public ShapeDataset
+{
+public:
+    LargeGEMMReshape3DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 16U, 3U, 9U },
+                     TensorShape{ 533U, 19U, 9U },
+                     TensorShape{ 345U, 34U, 18U }
+    })
+    {
+    }
+};
+
+/** Data set containing small 2D tensor shapes. */
+class Small2DNonMaxSuppressionShapes final : public ShapeDataset
+{
+public:
+    Small2DNonMaxSuppressionShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 4U, 7U },
+                     TensorShape{ 4U, 13U },
+                     TensorShape{ 4U, 64U }
+    })
+    {
+    }
+};
+
+/** Data set containing large 2D tensor shapes. */
+class Large2DNonMaxSuppressionShapes final : public ShapeDataset
+{
+public:
+    Large2DNonMaxSuppressionShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 4U, 207U },
+                     TensorShape{ 4U, 113U },
+                     TensorShape{ 4U, 264U }
+    })
+    {
+    }
+};
+
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

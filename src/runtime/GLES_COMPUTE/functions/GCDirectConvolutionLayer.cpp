@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ void GCDirectConvolutionLayer::configure(IGCTensor *input, const IGCTensor *weig
         return;
     }
 
-    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
 
     _shift_handler.configure(input);
 }

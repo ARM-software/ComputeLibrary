@@ -1,3 +1,4 @@
 <map id="DeconvolutionLayerNode" name="DeconvolutionLayerNode">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface. " alt="" coords="61,5,118,32"/>
+<area shape="rect" id="node1" title="Deconvolution Layer node." alt="" coords="5,80,188,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="67,5,126,32"/>
 </map>

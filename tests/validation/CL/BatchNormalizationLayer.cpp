@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,7 @@ TEST_SUITE(BatchNormalizationLayer)
 template <typename T>
 using CLBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLBatchNormalizationLayer, T>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
                                                                                    combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                            framework::dataset::make("UseGamma", { false, true }))),
                                                                            framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
@@ -152,7 +152,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
                                                                                                                    combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                                                            framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
@@ -165,7 +165,7 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framewor
 TEST_SUITE_END() //FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
@@ -181,12 +181,51 @@ TEST_SUITE_END() // Float
 TEST_SUITE_END() // BatchNormalizationLayer
 
 TEST_SUITE(BatchNormalizationLayerFusion)
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("Weights", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),      // Valid
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 1U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
+                                                     }),
+               framework::dataset::make("MVBGInfo",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F16),
+                                                     TensorInfo(TensorShape(5U), 1, DataType::F32),
+                                                   })),
+               framework::dataset::make("Expected", { true, false, false})),
+               weights_info, mvbg_info, expected)
+{
+    const auto &weights_in_info = weights_info;
+    const auto &mean_info = mvbg_info;
+    const auto &var_info = mvbg_info;
+    const auto &fused_weights_info = weights_info;
+    const auto &fused_bias_info = mvbg_info;
+    const auto &conv_bias_info = mvbg_info;
+    const auto &beta_info = mvbg_info;
+    const auto &gamma_info = mvbg_info;
+    bool has_error = bool(CLFuseBatchNormalization::validate(
+            &weights_in_info.clone()->set_is_resizable(false), &mean_info.clone()->set_is_resizable(false),
+            &var_info.clone()->set_is_resizable(false), &fused_weights_info.clone()->set_is_resizable(false),
+            &fused_bias_info.clone()->set_is_resizable(false), &conv_bias_info.clone()->set_is_resizable(false),
+            &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 template <typename T>
 using CLBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<CLTensor, CLAccessor, CLConvolutionLayer, CLFuseBatchNormalization, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallConvolutionLayerReducedDataset(), common_fusion_dataset),
+                                       framework::dataset::make("DataType", DataType::F32)),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(datasets::SmallConvolutionLayerDataset(), common_fusion_dataset),
                                        framework::dataset::make("DataType", DataType::F32)),
                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))

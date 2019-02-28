@@ -1,7 +1,15 @@
 var dir_36bd1941057d7130e210a25993eacc69 =
 [
-    [ "add.h", "add_8h.xhtml", "add_8h" ],
+    [ "abs.h", "abs_8h.xhtml", "abs_8h" ],
+    [ "add.h", "intrinsics_2add_8h.xhtml", "intrinsics_2add_8h" ],
     [ "and.h", "and_8h.xhtml", "and_8h" ],
+    [ "bsl.h", "bsl_8h.xhtml", "bsl_8h" ],
+    [ "ceq.h", "ceq_8h.xhtml", "ceq_8h" ],
+    [ "cge.h", "cge_8h.xhtml", "cge_8h" ],
+    [ "cgt.h", "cgt_8h.xhtml", "cgt_8h" ],
+    [ "clt.h", "clt_8h.xhtml", "clt_8h" ],
+    [ "combine.h", "combine_8h.xhtml", "combine_8h" ],
+    [ "div.h", "div_8h.xhtml", "div_8h" ],
     [ "dup_n.h", "dup__n_8h.xhtml", "dup__n_8h" ],
     [ "exp.h", "exp_8h.xhtml", "exp_8h" ],
     [ "gethigh.h", "gethigh_8h.xhtml", "gethigh_8h" ],
@@ -9,7 +17,9 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "getlow.h", "getlow_8h.xhtml", "getlow_8h" ],
     [ "intrinsics.h", "intrinsics_8h.xhtml", null ],
     [ "inv.h", "inv_8h.xhtml", "inv_8h" ],
+    [ "invsqrt.h", "invsqrt_8h.xhtml", "invsqrt_8h" ],
     [ "load.h", "load_8h.xhtml", "load_8h" ],
+    [ "log.h", "_n_e_o_n_2wrapper_2intrinsics_2_log_8h.xhtml", "_n_e_o_n_2wrapper_2intrinsics_2_log_8h" ],
     [ "max.h", "max_8h.xhtml", "max_8h" ],
     [ "min.h", "min_8h.xhtml", "min_8h" ],
     [ "mla.h", "mla_8h.xhtml", "mla_8h" ],
@@ -17,6 +27,15 @@ var dir_36bd1941057d7130e210a25993eacc69 =
     [ "movn.h", "movn_8h.xhtml", "movn_8h" ],
     [ "mul.h", "mul_8h.xhtml", "mul_8h" ],
     [ "neg.h", "neg_8h.xhtml", "neg_8h" ],
+    [ "not.h", "not_8h.xhtml", "not_8h" ],
+    [ "orr.h", "orr_8h.xhtml", "orr_8h" ],
     [ "padd.h", "padd_8h.xhtml", "padd_8h" ],
-    [ "store.h", "store_8h.xhtml", "store_8h" ]
+    [ "pmax.h", "pmax_8h.xhtml", "pmax_8h" ],
+    [ "pmin.h", "pmin_8h.xhtml", "pmin_8h" ],
+    [ "pow.h", "pow_8h.xhtml", "pow_8h" ],
+    [ "rev64.h", "rev64_8h.xhtml", "rev64_8h" ],
+    [ "setlane.h", "setlane_8h.xhtml", "setlane_8h" ],
+    [ "store.h", "store_8h.xhtml", "store_8h" ],
+    [ "sub.h", "sub_8h.xhtml", "sub_8h" ],
+    [ "tanh.h", "tanh_8h.xhtml", "tanh_8h" ]
 ];

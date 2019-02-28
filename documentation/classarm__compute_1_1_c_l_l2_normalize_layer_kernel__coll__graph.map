@@ -1,4 +1,5 @@
 <map id="CLL2NormalizeLayerKernel" name="CLL2NormalizeLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="56,80,136,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="65,5,127,32"/>
+<area shape="rect" id="node1" title="Interface for performing a L2 normalize on a given axis given the square sum of it in this axis." alt="" coords="5,155,197,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="61,80,141,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="69,5,133,32"/>
 </map>

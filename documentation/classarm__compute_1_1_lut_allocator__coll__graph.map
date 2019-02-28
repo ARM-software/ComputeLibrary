@@ -1,3 +1,4 @@
 <map id="LutAllocator" name="LutAllocator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;. " alt="" coords="5,5,100,32"/>
+<area shape="rect" id="node1" title="Basic implementation of a CPU memory LUT allocator." alt="" coords="7,80,105,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;." alt="" coords="5,5,107,32"/>
 </map>

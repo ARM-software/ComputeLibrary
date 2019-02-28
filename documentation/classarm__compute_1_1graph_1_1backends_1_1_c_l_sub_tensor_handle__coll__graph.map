@@ -1,3 +1,4 @@
 <map id="CLSubTensorHandle" name="CLSubTensorHandle">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml" title="Tensor handle interface object. " alt="" coords="23,5,130,32"/>
+<area shape="rect" id="node1" title="OpenCL Sub&#45;Tensor handle interface object." alt="" coords="5,80,155,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml" title="Tensor handle interface object." alt="" coords="25,5,135,32"/>
 </map>

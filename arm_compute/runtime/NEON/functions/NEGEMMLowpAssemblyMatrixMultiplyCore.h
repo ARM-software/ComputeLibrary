@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +49,7 @@ public:
      *
      * @param[in]  a      First input tensor  (Matrix A). Data type supported: U8, S8.
      * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
-     * @param[out] output Output tensor. Data type supported: Data type supported: S32
+     * @param[out] output Output tensor. Data type supported: Data type supported: U32, S32
      */
     void configure(const ITensor *a, const ITensor *b, ITensor *output);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/NEMath.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -60,29 +61,21 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-    Window                 win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    bool                   window_changed                    = false;
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps());
 
-    if(output != nullptr && (output->total_size() != 0))
+    if(output != nullptr)
     {
-        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output, *input->clone());
 
-        window_changed = update_window_and_padding(win,
-                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration),
-                                                   output_access);
-
-        output_access.set_valid_region(win, input->valid_region());
-    }
-    else
-    {
-        // In-place computation
-        window_changed = update_window_and_padding(win,
-                                                   AccessWindowHorizontal(input, 0, num_elems_processed_per_iteration));
+        // NEActivationLayerKernel doesn't need padding so update_window_and_padding() can be skipped
+        Coordinates coord;
+        coord.set_num_dimensions(output->num_dimensions());
+        output->set_valid_region(ValidRegion(coord, output->tensor_shape()));
     }
 
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(Status{}, win);
 }
 } // namespace
 
@@ -101,16 +94,15 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
 
     if(output != nullptr)
     {
-        // Output auto inizialitation if not yet initialized
-        auto_init_if_empty(*output->info(), *input->info()->clone());
         _output = output;
     }
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
 
-    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
-                             "For QASYMM8 only relu and lower/upper bounded relu are supported");
+    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                             "For QASYMM8 only logistic, relu and lower/upper bounded relu are supported");
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -149,6 +141,8 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     // Activation functions : QASYMM8
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
     {
+        { ActivationFunction::LOGISTIC, &NEActivationLayerKernel::activation<ActivationFunction::LOGISTIC, qasymm8_t> },
+        { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
     };
@@ -176,337 +170,129 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     ICPPKernel::configure(win_config.second);
 }
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
+typename std::enable_if<arm_compute::utils::traits::is_floating_point<T>::value, void>::type
+NEActivationLayerKernel::activation(const Window &window)
 {
-    Iterator input(_input, window);
-    Iterator output(_output, window);
+    /** NEON vector tag type. */
+    using ExactTagType = typename wrapper::traits::neon_bitvector_tag_t<T, wrapper::traits::BitWidth::W128>;
 
-    static const float16x8_t CONST_0   = vdupq_n_f16(0.f);
-    static const float16x8_t CONST_1_H = vdupq_n_f16(1.f);
+    const int                window_step_x  = 16 / sizeof(T);
+    const auto               window_start_x = static_cast<int>(window.x().start());
+    const auto               window_end_x   = static_cast<int>(window.x().end());
+    const ActivationFunction act            = F;
 
-    static const float32x4_t CONST_1_F32 = vdupq_n_f32(1.f);
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
-    const float16x8_t a   = vdupq_n_f16(_act_info.a());
-    const float16x4_t a_h = vdup_n_f16(_act_info.a());
-    const float16x8_t b   = vdupq_n_f16(_act_info.b());
+    Iterator input(_input, win_collapsed);
+    Iterator output(_output, win_collapsed);
 
-    execute_window_loop(window, [&](const Coordinates &)
+    const auto const_1 = wrapper::vdup_n(static_cast<T>(1.f), ExactTagType{});
+    const auto const_0 = wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{});
+    const auto va      = wrapper::vdup_n(static_cast<T>(_act_info.a()), ExactTagType{});
+    const auto vb      = wrapper::vdup_n(static_cast<T>(_act_info.b()), ExactTagType{});
+    const auto a       = static_cast<T>(_act_info.a());
+    const auto b       = static_cast<T>(_act_info.b());
+
+    execute_window_loop(win_collapsed, [&](const Coordinates & id)
     {
-        const auto input_ptr  = reinterpret_cast<const float16_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<float16_t *>(output.ptr());
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-        const float16x8x2_t in  = vld2q_f16(input_ptr);
-        float16x8x2_t       tmp = { {} };
+        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
 
-        switch(F)
+        // Compute S elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            case ActivationFunction::ABS:
-                tmp =
-                {
-                    {
-                        vabsq_f16(in.val[0]),
-                        vabsq_f16(in.val[1]),
-                    }
-                };
-                break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_f16(a, vmaxq_f16(CONST_0, in.val[0])),
-                        vminq_f16(a, vmaxq_f16(CONST_0, in.val[1]))
-                    }
-                };
-                break;
-            case ActivationFunction::LU_BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_f16(a, vmaxq_f16(b, in.val[0])),
-                        vminq_f16(a, vmaxq_f16(b, in.val[1]))
-                    }
-                };
-                break;
-            case ActivationFunction::LINEAR:
-                tmp =
-                {
-                    {
-                        vaddq_f16(b, vmulq_f16(a, in.val[0])),
-                        vaddq_f16(b, vmulq_f16(a, in.val[1]))
-                    }
-                };
-                break;
-            case ActivationFunction::LOGISTIC:
+            const auto vin = wrapper::vloadq(input_ptr + x);
+            switch(act)
             {
-                tmp =
-                {
-                    {
-                        vinvq_f16(vaddq_f16(CONST_1_H, vexpq_f16(vnegq_f16(in.val[0])))),
-                        vinvq_f16(vaddq_f16(CONST_1_H, vexpq_f16(vnegq_f16(in.val[1]))))
-                    }
-                };
+                case ActivationFunction::ABS:
+                    tmp = wrapper::vabs(vin);
+                    break;
+                case ActivationFunction::LINEAR:
+                    tmp = wrapper::vmla(vb, va, vin);
+                    break;
+                case ActivationFunction::LOGISTIC:
+                    tmp = wrapper::vinv(wrapper::vadd(const_1, wrapper::vexpq(wrapper::vneg(vin))));
+                    break;
+                case ActivationFunction::RELU:
+                    tmp = wrapper::vmax(const_0, vin);
+                    break;
+                case ActivationFunction::BOUNDED_RELU:
+                    tmp = wrapper::vmin(va, wrapper::vmax(const_0, vin));
+                    break;
+                case ActivationFunction::LU_BOUNDED_RELU:
+                    tmp = wrapper::vmin(va, wrapper::vmax(vb, vin));
+                    break;
+                case ActivationFunction::LEAKY_RELU:
+                    tmp = wrapper::vbsl(wrapper::vcgt(vin, const_0), vin, wrapper::vmul(va, vin));
+                    break;
+                case ActivationFunction::SOFT_RELU:
+                    tmp = wrapper::vlog(wrapper::vadd(const_1, wrapper::vexpq(vin)));
+                    break;
+                case ActivationFunction::SQRT:
+                    tmp = wrapper::vinv(wrapper::vinvsqrt(vin));
+                    break;
+                case ActivationFunction::SQUARE:
+                    tmp = wrapper::vmul(vin, vin);
+                    break;
+                case ActivationFunction::TANH:
+                    tmp = wrapper::vmul(va, wrapper::vtanh(wrapper::vmul(vb, vin)));
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Unsupported activation function");
             }
-            break;
-            case ActivationFunction::RELU:
-                tmp =
-                {
-                    {
-                        vmaxq_f16(CONST_0, in.val[0]),
-                        vmaxq_f16(CONST_0, in.val[1])
-                    }
-                };
-                break;
-            case ActivationFunction::LEAKY_RELU:
-                tmp =
-                {
-                    {
-                        vbslq_f16(vcgtq_f16(in.val[0], CONST_0), in.val[0], vmulq_f16(a, in.val[0])),
-                        vbslq_f16(vcgtq_f16(in.val[1], CONST_0), in.val[1], vmulq_f16(a, in.val[1]))
-                    }
-                };
-                break;
-            case ActivationFunction::SOFT_RELU:
-            {
-                // TODO (COMPMID-1535) : Revisit FP16 approximations
-                const float16x4x2_t in0 =
-                {
-                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[0])))))),
-                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[0])))))),
-                };
-
-                const float16x4x2_t in1 =
-                {
-                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[1])))))),
-                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[1])))))),
-                };
-
-                tmp =
-                {
-                    {
-                        vcombine_f16(in0.val[0], in0.val[1]),
-                        vcombine_f16(in1.val[0], in1.val[1]),
-                    }
-                };
-            }
-            break;
-            case ActivationFunction::SQRT:
-                tmp =
-                {
-                    {
-                        vinvq_f16(vinvsqrtq_f16(in.val[0])),
-                        vinvq_f16(vinvsqrtq_f16(in.val[1])),
-                    }
-                };
-                break;
-            case ActivationFunction::SQUARE:
-                tmp =
-                {
-                    {
-                        vmulq_f16(in.val[0], in.val[0]),
-                        vmulq_f16(in.val[1], in.val[1])
-                    }
-                };
-                break;
-            case ActivationFunction::TANH:
-            {
-                // TODO (COMPMID-1535) : Revisit FP16 approximations
-                const float16x8x2_t mul =
-                {
-                    vmulq_f16(b, in.val[0]),
-                    vmulq_f16(b, in.val[1])
-                };
-                const float16x4x2_t in0 =
-                {
-                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[0]))))),
-                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[0]))))),
-                };
-
-                const float16x4x2_t in1 =
-                {
-                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[1]))))),
-                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[1]))))),
-                };
-
-                tmp =
-                {
-                    {
-                        vcombine_f16(in0.val[0], in0.val[1]),
-                        vcombine_f16(in1.val[0], in1.val[1]),
-                    }
-                };
-            }
-            break;
-            default:
-                ARM_COMPUTE_ERROR("Not implemented");
-                break;
+            wrapper::vstore(output_ptr + x, tmp);
         }
 
-        vst2q_f16(output_ptr, tmp);
-    },
-    input, output);
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
-template <ActivationLayerInfo::ActivationFunction F, typename T>
-typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
-{
-    Iterator input(_input, window);
-    Iterator output(_output, window);
-
-    static const float32x4_t CONST_1 = vdupq_n_f32(1.f);
-    static const float32x4_t CONST_0 = vdupq_n_f32(0.f);
-    const float32x4_t        a       = vdupq_n_f32(_act_info.a());
-    const float32x4_t        b       = vdupq_n_f32(_act_info.b());
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<float *>(output.ptr());
-
-        const float32x4x4_t in =
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
         {
+            const T in = *(reinterpret_cast<const T *>(input_ptr + x));
+            T       tmp;
+            switch(act)
             {
-                vld1q_f32(input_ptr),
-                vld1q_f32(input_ptr + 4),
-                vld1q_f32(input_ptr + 8),
-                vld1q_f32(input_ptr + 12)
+                case ActivationFunction::ABS:
+                    tmp = std::abs(in);
+                    break;
+                case ActivationFunction::LINEAR:
+                    tmp = a * in + b;
+                    break;
+                case ActivationFunction::LOGISTIC:
+                    tmp = static_cast<T>(1) / (static_cast<T>(1) + std::exp(-in));
+                    break;
+                case ActivationFunction::RELU:
+                    tmp = std::max<T>(static_cast<T>(0), in);
+                    break;
+                case ActivationFunction::BOUNDED_RELU:
+                    tmp = std::min<T>(a, std::max(static_cast<T>(0), in));
+                    break;
+                case ActivationFunction::LU_BOUNDED_RELU:
+                    tmp = std::min<T>(a, std::max<T>(b, in));
+                    break;
+                case ActivationFunction::LEAKY_RELU:
+                    tmp = (in > 0) ? in : a * in;
+                    break;
+                case ActivationFunction::SOFT_RELU:
+                    tmp = std::log(static_cast<T>(1) + std::exp(in));
+                    break;
+                case ActivationFunction::SQRT:
+                    tmp = std::sqrt(in);
+                    break;
+                case ActivationFunction::SQUARE:
+                    tmp = in * in;
+                    break;
+                case ActivationFunction::TANH:
+                    tmp = a * std::tanh(b * in);
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Unsupported activation function");
             }
-        };
-        float32x4x4_t tmp = { {} };
-
-        switch(F)
-        {
-            case ActivationFunction::ABS:
-                tmp =
-                {
-                    {
-                        vabsq_f32(in.val[0]),
-                        vabsq_f32(in.val[1]),
-                        vabsq_f32(in.val[2]),
-                        vabsq_f32(in.val[3]),
-                    }
-                };
-                break;
-            case ActivationFunction::LINEAR:
-                tmp =
-                {
-                    {
-                        vmlaq_f32(b, a, in.val[0]),
-                        vmlaq_f32(b, a, in.val[1]),
-                        vmlaq_f32(b, a, in.val[2]),
-                        vmlaq_f32(b, a, in.val[3]),
-                    }
-                };
-                break;
-            case ActivationFunction::LOGISTIC:
-                tmp =
-                {
-                    {
-                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[0])))),
-                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[1])))),
-                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[2])))),
-                        vinvq_f32(vaddq_f32(CONST_1, vexpq_f32(vnegq_f32(in.val[3])))),
-                    }
-                };
-                break;
-            case ActivationFunction::RELU:
-                tmp =
-                {
-                    {
-                        vmaxq_f32(CONST_0, in.val[0]),
-                        vmaxq_f32(CONST_0, in.val[1]),
-                        vmaxq_f32(CONST_0, in.val[2]),
-                        vmaxq_f32(CONST_0, in.val[3]),
-                    }
-                };
-                break;
-            case ActivationFunction::BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[0])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[1])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[2])),
-                        vminq_f32(a, vmaxq_f32(CONST_0, in.val[3])),
-                    }
-                };
-                break;
-            case ActivationFunction::LU_BOUNDED_RELU:
-                tmp =
-                {
-                    {
-                        vminq_f32(a, vmaxq_f32(b, in.val[0])),
-                        vminq_f32(a, vmaxq_f32(b, in.val[1])),
-                        vminq_f32(a, vmaxq_f32(b, in.val[2])),
-                        vminq_f32(a, vmaxq_f32(b, in.val[3])),
-                    }
-                };
-                break;
-            case ActivationFunction::LEAKY_RELU:
-                tmp =
-                {
-                    {
-                        vbslq_f32(vcgtq_f32(in.val[0], CONST_0), in.val[0], vmulq_f32(a, in.val[0])),
-                        vbslq_f32(vcgtq_f32(in.val[1], CONST_0), in.val[1], vmulq_f32(a, in.val[1])),
-                        vbslq_f32(vcgtq_f32(in.val[2], CONST_0), in.val[2], vmulq_f32(a, in.val[2])),
-                        vbslq_f32(vcgtq_f32(in.val[3], CONST_0), in.val[3], vmulq_f32(a, in.val[3])),
-                    }
-                };
-                break;
-            case ActivationFunction::SOFT_RELU:
-                tmp =
-                {
-                    {
-                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[0]))),
-                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[1]))),
-                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[2]))),
-                        vlogq_f32(vaddq_f32(CONST_1, vexpq_f32(in.val[3]))),
-                    }
-                };
-                break;
-            case ActivationFunction::SQRT:
-                tmp =
-                {
-                    {
-                        vinvq_f32(vinvsqrtq_f32(in.val[0])),
-                        vinvq_f32(vinvsqrtq_f32(in.val[1])),
-                        vinvq_f32(vinvsqrtq_f32(in.val[2])),
-                        vinvq_f32(vinvsqrtq_f32(in.val[3])),
-                    }
-                };
-                break;
-            case ActivationFunction::SQUARE:
-                tmp =
-                {
-                    {
-                        vmulq_f32(in.val[0], in.val[0]),
-                        vmulq_f32(in.val[1], in.val[1]),
-                        vmulq_f32(in.val[2], in.val[2]),
-                        vmulq_f32(in.val[3], in.val[3]),
-                    }
-                };
-                break;
-            case ActivationFunction::TANH:
-                tmp =
-                {
-                    {
-                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[0]))),
-                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[1]))),
-                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[2]))),
-                        vmulq_f32(a, vtanhq_f32(vmulq_f32(b, in.val[3]))),
-                    }
-                };
-                break;
-            default:
-                break;
+            *(output_ptr + x) = tmp;
         }
-
-        vst1q_f32(output_ptr, tmp.val[0]);
-        vst1q_f32(output_ptr + 4, tmp.val[1]);
-        vst1q_f32(output_ptr + 8, tmp.val[2]);
-        vst1q_f32(output_ptr + 12, tmp.val[3]);
     },
     input, output);
 }
@@ -514,13 +300,25 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
-    Iterator               input(_input, window);
-    Iterator               output(_output, window);
-    const QuantizationInfo qi_in   = _input->info()->quantization_info();
-    const QuantizationInfo qi_out  = _output->info()->quantization_info();
-    const qasymm8x16_t     a       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
-    const qasymm8x16_t     b       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
-    const qasymm8x16_t     CONST_0 = vdupq_n_u8(sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset));
+    const int                window_step_x  = 16 / sizeof(T);
+    const auto               window_start_x = static_cast<int>(window.x().start());
+    const auto               window_end_x   = static_cast<int>(window.x().end());
+    const ActivationFunction act            = F;
+
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(_input, win_collapsed);
+    Iterator output(_output, win_collapsed);
+
+    const QuantizationInfo qi_in    = _input->info()->quantization_info();
+    const QuantizationInfo qi_out   = _output->info()->quantization_info();
+    const qasymm8x16_t     va       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
+    const qasymm8x16_t     vb       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
+    const qasymm8_t        a        = sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset);
+    const qasymm8_t        b        = sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset);
+    const qasymm8_t        const_0  = sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset);
+    const qasymm8x16_t     vconst_0 = vdupq_n_u8(const_0);
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -528,34 +326,116 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
     float32x4_t vs = vdupq_n_f32(s);
     float32x4_t vo = vdupq_n_f32(o);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(win_collapsed, [&](const Coordinates & id)
     {
-        const auto input_ptr  = reinterpret_cast<const qasymm8_t *>(input.ptr());
-        const auto output_ptr = reinterpret_cast<qasymm8_t *>(output.ptr());
+        const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        const auto output_ptr = reinterpret_cast<T *>(output.ptr());
 
-        const qasymm8x16_t in  = vld1q_u8(input_ptr);
-        qasymm8x16_t       tmp = {};
+        wrapper::traits::neon_bitvector_t<T, wrapper::traits::BitWidth::W128> tmp;
 
-        switch(F)
+        // Compute S elements per iteration
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step_x); x += window_step_x)
         {
-            case ActivationFunction::LU_BOUNDED_RELU:
+            const auto vin = wrapper::vloadq(input_ptr + x);
+            if(act == ActivationFunction::RELU)
+            {
                 // Perform activation
-                tmp = vminq_u8(a, vmaxq_u8(b, in));
+                tmp = vmaxq_u8(vconst_0, vin);
                 // Re-quantize to new output space
                 tmp = vmlaq_qasymm8(tmp, vs, vo);
-                break;
-            case ActivationFunction::RELU:
+            }
+            else if(act == ActivationFunction::BOUNDED_RELU)
+            {
                 // Perform activation
-                tmp = vmaxq_u8(CONST_0, in);
+                tmp = vminq_u8(va, vmaxq_u8(vconst_0, vin));
                 // Re-quantize to new output space
                 tmp = vmlaq_qasymm8(tmp, vs, vo);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Function not implemented");
-                break;
+            }
+            else if(act == ActivationFunction::LU_BOUNDED_RELU)
+            {
+                // Perform activation
+                tmp = vminq_u8(va, vmaxq_u8(vb, vin));
+                // Re-quantize to new output space
+                tmp = vmlaq_qasymm8(tmp, vs, vo);
+            }
+            else if(act == ActivationFunction::LOGISTIC)
+            {
+                const auto scale_in  = vdupq_n_f32(qi_in.scale);
+                const auto off_in    = vdupq_n_f32(qi_in.offset);
+                const auto scale_out = vdupq_n_f32(qi_out.scale);
+                const auto off_out   = vdupq_n_f32(qi_out.offset);
+                const auto vconst_1  = vdupq_n_f32(1.f);
+
+                const auto vin_low        = wrapper::vgetlow(vin);
+                const auto vin_high       = wrapper::vgethigh(vin);
+                uint16x8_t vin_low_u16x8  = wrapper::vmovl(vin_low);
+                uint16x8_t vin_high_u16x8 = wrapper::vmovl(vin_high);
+                // Convert uint16 vectors to uint32 vectors
+                uint32x4_t A_u32x4 = wrapper::vmovl(wrapper::vgetlow(vin_low_u16x8));
+                uint32x4_t B_u32x4 = wrapper::vmovl(wrapper::vgethigh(vin_low_u16x8));
+                uint32x4_t C_u32x4 = wrapper::vmovl(wrapper::vgetlow(vin_high_u16x8));
+                uint32x4_t D_u32x4 = wrapper::vmovl(wrapper::vgethigh(vin_high_u16x8));
+                // Convert uint32 vectors to float32 vectors
+                float32x4_t A_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(A_u32x4), off_in), scale_in);
+                float32x4_t B_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(B_u32x4), off_in), scale_in);
+                float32x4_t C_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(C_u32x4), off_in), scale_in);
+                float32x4_t D_f32x4 = wrapper::vmul(wrapper::vsub(vcvtq_f32_u32(D_u32x4), off_in), scale_in);
+                // Perform activation
+                A_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(A_f32x4))));
+                B_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(B_f32x4))));
+                C_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(C_f32x4))));
+                D_f32x4 = wrapper::vdiv(vconst_1, wrapper::vadd(vconst_1, wrapper::vexpq(wrapper::vneg(D_f32x4))));
+                // Convert float32 vectors to uint32 vectors
+                A_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(A_f32x4, scale_out), off_out));
+                B_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(B_f32x4, scale_out), off_out));
+                C_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(C_f32x4, scale_out), off_out));
+                D_u32x4 = vcvtq_u32_f32(wrapper::vadd(wrapper::vdiv(D_f32x4, scale_out), off_out));
+                // Convert uint32 vectors to uint16 vectors (with saturation)
+                vin_low_u16x8  = wrapper::vcombine(wrapper::vqmovn(A_u32x4), wrapper::vqmovn(B_u32x4));
+                vin_high_u16x8 = wrapper::vcombine(wrapper::vqmovn(C_u32x4), wrapper::vqmovn(D_u32x4));
+                // convert uint16 vectors to uint8 vectors (with saturation)
+                tmp = wrapper::vcombine(wrapper::vqmovn(vin_low_u16x8), wrapper::vqmovn(vin_high_u16x8));
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Unsupported activation function");
+            }
+            wrapper::vstore(output_ptr + x, tmp);
         }
 
-        vst1q_u8(output_ptr, tmp);
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            T in = *(reinterpret_cast<const T *>(input_ptr + x));
+            T tmp;
+            if(act == ActivationFunction::RELU)
+            {
+                tmp = std::max(const_0, in);
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+            }
+            else if(act == ActivationFunction::BOUNDED_RELU)
+            {
+                tmp = std::min(a, std::max(const_0, in));
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+            }
+            else if(act == ActivationFunction::LU_BOUNDED_RELU)
+            {
+                tmp = std::min(a, std::max(b, in));
+                tmp = std::max<int32_t>(0, std::min<int32_t>(tmp * s + o, 255));
+            }
+            else if(act == ActivationFunction::LOGISTIC)
+            {
+                float tmp_f = scvt_f32_qasymm8(in, qi_in.scale, qi_in.offset);
+                tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
+                tmp         = sqcvt_qasymm8_f32(tmp_f, qi_out.scale, qi_out.offset);
+            }
+            else
+            {
+                ARM_COMPUTE_ERROR("Unsupported activation function");
+            }
+            *(output_ptr + x) = tmp;
+        }
     },
     input, output);
 }

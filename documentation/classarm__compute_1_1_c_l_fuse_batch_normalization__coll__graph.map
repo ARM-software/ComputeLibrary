@@ -1,3 +1,4 @@
 <map id="CLFuseBatchNormalization" name="CLFuseBatchNormalization">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="59,5,135,32"/>
+<area shape="rect" id="node1" title="Basic function to fuse the batch normalization node to a preceding convolution node." alt="" coords="5,80,199,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="63,5,141,32"/>
 </map>

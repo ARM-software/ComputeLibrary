@@ -1,4 +1,5 @@
 <map id="GCGEMMInterleave4x4" name="GCGEMMInterleave4x4">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel. " alt="" coords="18,80,154,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="48,5,124,32"/>
+<area shape="rect" id="node1" title="Basic function to execute GCGEMMInterleave4x4Kernel." alt="" coords="5,155,172,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel." alt="" coords="18,80,159,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="49,5,128,32"/>
 </map>

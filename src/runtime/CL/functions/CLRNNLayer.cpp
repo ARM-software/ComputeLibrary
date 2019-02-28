@@ -60,7 +60,7 @@ Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(hidden_state, recurrent_weights, nullptr, &shape_info, 1.f, 0.f));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAdditionKernel::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, &shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
     ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&shape_info, &shape_info, info));
 
     return Status{};
@@ -90,7 +90,7 @@ void CLRNNLayer::configure(const ICLTensor *input, const ICLTensor *weights, con
     _add_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_add_output);
 
-    _add_kernel.configure(&_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
+    _add_kernel.configure(ArithmeticOperation::ADD, &_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
 
     _fully_connected_out.allocator()->allocate();
     _gemm_output.allocator()->allocate();

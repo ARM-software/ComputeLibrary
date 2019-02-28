@@ -1,4 +1,5 @@
 <map id="ICLSVMMemoryRegion" name="ICLSVMMemoryRegion">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface. " alt="" coords="20,80,151,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface. " alt="" coords="28,5,143,32"/>
+<area shape="rect" id="node1" title="OpenCL SVM memory region interface." alt="" coords="5,155,169,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface." alt="" coords="20,80,155,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface." alt="" coords="28,5,147,32"/>
 </map>

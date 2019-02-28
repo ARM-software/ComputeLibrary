@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,58 @@ public:
     PixelValue()
         : value{ uint64_t(0) }
     {
+    }
+    /** Initialize the union with a pixel value of chosen datatype
+     *
+     * @param[in] v          int value.
+     * @param[in] datatype   DataType that @p v have to be stored
+     * @param[in] quant_info QuantizationInfo to apply in case of QASYMM8 datatype to @p v
+     */
+    PixelValue(uint64_t v, DataType datatype, QuantizationInfo quant_info = QuantizationInfo())
+        : PixelValue()
+    {
+        switch(datatype)
+        {
+            case DataType::U8:
+                value.u8 = static_cast<uint8_t>(v);
+                break;
+            case DataType::S8:
+                value.s8 = static_cast<int8_t>(v);
+                break;
+            case DataType::QASYMM8:
+                value.u8 = sqcvt_qasymm8_f32(v, quant_info.scale, quant_info.offset);
+                break;
+            case DataType::U16:
+                value.u16 = static_cast<uint16_t>(v);
+                break;
+            case DataType::S16:
+                value.s16 = static_cast<int16_t>(v);
+                break;
+            case DataType::U32:
+                value.u32 = static_cast<uint32_t>(v);
+                break;
+            case DataType::S32:
+                value.s32 = static_cast<int32_t>(v);
+                break;
+            case DataType::U64:
+                value.u64 = static_cast<uint64_t>(v);
+                break;
+            case DataType::S64:
+                value.s16 = static_cast<int64_t>(v);
+                break;
+            case DataType::F16:
+                value.f16 = static_cast<half>(v);
+                break;
+            case DataType::F32:
+                value.f32 = static_cast<float>(v);
+                break;
+            case DataType::F64:
+                value.f64 = static_cast<double>(v);
+                break;
+            default:
+                value.u64 = v;
+                break;
+        }
     }
     /** Initialize the union with a U8 pixel value
      *

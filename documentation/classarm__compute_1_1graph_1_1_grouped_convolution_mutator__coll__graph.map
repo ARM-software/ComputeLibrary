@@ -1,3 +1,4 @@
 <map id="GroupedConvolutionMutator" name="GroupedConvolutionMutator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface. " alt="" coords="45,5,150,32"/>
+<area shape="rect" id="node1" title="Mutation pass to implement/optimize grouped convolutions." alt="" coords="5,80,208,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface." alt="" coords="49,5,164,32"/>
 </map>

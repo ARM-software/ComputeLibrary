@@ -35,6 +35,13 @@ namespace wrapper
     {                                                                 \
         return prefix##_##postfix(a, b, c);                           \
     }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#define VMLA_IMPL2(stype, vtype, prefix1, prefix2, postfix)           \
+    inline vtype vmla(const vtype &a, const vtype &b, const vtype &c) \
+    {                                                                 \
+        return prefix1##_##postfix(a, prefix2##_##postfix(b, c));     \
+    }
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VMLA_IMPL(uint8x8_t, uint8x8_t, vmla, u8)
 VMLA_IMPL(int8x8_t, int8x8_t, vmla, s8)
@@ -43,6 +50,9 @@ VMLA_IMPL(int16x4_t, int16x4_t, vmla, s16)
 VMLA_IMPL(uint32x2_t, uint32x2_t, vmla, u32)
 VMLA_IMPL(int32x2_t, int32x2_t, vmla, s32)
 VMLA_IMPL(float32x2_t, float32x2_t, vmla, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMLA_IMPL2(float16x4_t, float16x4_t, vadd, vmul, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VMLA_IMPL(uint8x16_t, uint8x16_t, vmlaq, u8)
 VMLA_IMPL(int8x16_t, int8x16_t, vmlaq, s8)
@@ -51,6 +61,9 @@ VMLA_IMPL(int16x8_t, int16x8_t, vmlaq, s16)
 VMLA_IMPL(uint32x4_t, uint32x4_t, vmlaq, u32)
 VMLA_IMPL(int32x4_t, int32x4_t, vmlaq, s32)
 VMLA_IMPL(float32x4_t, float32x4_t, vmlaq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMLA_IMPL2(float16x8_t, float16x8_t, vaddq, vmulq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VMLA_IMPL
 } // namespace wrapper

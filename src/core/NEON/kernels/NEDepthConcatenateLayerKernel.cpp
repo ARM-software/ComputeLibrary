@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -57,14 +58,30 @@ void depth_concat(const ITensor *in, ITensor *out, std::pair<int, int> start_xy,
     Iterator input(in, window);
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    const DataType          dt           = in->info()->data_type();
+    const QuantizationInfo &input_qinfo  = in->info()->quantization_info();
+    const QuantizationInfo &output_qinfo = out->info()->quantization_info();
+    if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
-        const auto in_ptr  = reinterpret_cast<const T *>(input_ptr + input.offset());
-        const auto out_ptr = reinterpret_cast<T *>(output_ptr + output.offset());
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            const auto in_ptr  = reinterpret_cast<const uint8_t *>(input_ptr + input.offset());
+            const auto out_ptr = reinterpret_cast<uint8_t *>(output_ptr + output.offset());
+            vst1q_u8(out_ptr, vquantize(vdequantize(vld1q_u8(in_ptr), input_qinfo), output_qinfo));
+        },
+        input, output);
+    }
+    else
+    {
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            const auto in_ptr  = reinterpret_cast<const T *>(input_ptr + input.offset());
+            const auto out_ptr = reinterpret_cast<T *>(output_ptr + output.offset());
 
-        wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
-    },
-    input, output);
+            wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
+        },
+        input, output);
+    }
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)

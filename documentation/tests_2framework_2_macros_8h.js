@@ -29,6 +29,7 @@ var tests_2framework_2_macros_8h =
     [ "JOIN_PARAM", "tests_2framework_2_macros_8h.xhtml#adbfdccc4c864135d8020801232d54bd1", null ],
     [ "JOIN_PARAM1", "tests_2framework_2_macros_8h.xhtml#acdd2ac75560db81371f4053e6465a0eb", null ],
     [ "JOIN_PARAM10", "tests_2framework_2_macros_8h.xhtml#a4d997912b340aca63b12b84330f8a4bc", null ],
+    [ "JOIN_PARAM11", "tests_2framework_2_macros_8h.xhtml#a09c3797bb57c8135de9f9e9557e66bab", null ],
     [ "JOIN_PARAM2", "tests_2framework_2_macros_8h.xhtml#a35d1497660f569a76fe4de6bebf67c9a", null ],
     [ "JOIN_PARAM3", "tests_2framework_2_macros_8h.xhtml#afedfb2831ec629f6445b1d4d5ed30154", null ],
     [ "JOIN_PARAM4", "tests_2framework_2_macros_8h.xhtml#a43ee597995dd64cfabd52d2342342855", null ],
@@ -52,5 +53,5 @@ var tests_2framework_2_macros_8h =
     [ "TEST_SUITE", "tests_2framework_2_macros_8h.xhtml#acd09bed517e43d28823e69494f259835", null ],
     [ "TEST_SUITE_END", "tests_2framework_2_macros_8h.xhtml#a603cb7f45efd81606e51686da9aeebd9", null ],
     [ "VARIADIC_SIZE", "tests_2framework_2_macros_8h.xhtml#a69f74358d42fc010bd8807d07436d7b5", null ],
-    [ "VARIADIC_SIZE_IMPL", "tests_2framework_2_macros_8h.xhtml#a8adf1132623f898e2088899490ef7bd6", null ]
+    [ "VARIADIC_SIZE_IMPL", "tests_2framework_2_macros_8h.xhtml#a1667c2513ea4d07e8c042cb7d703b03e", null ]
 ];

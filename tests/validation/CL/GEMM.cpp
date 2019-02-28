@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,27 +82,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInterleave4x4Fixture, framework::DatasetM
 TEST_SUITE_END() // FP32
 
 TEST_SUITE_END() // INTERLEAVE_4X4
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
-               shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
-{
-    // Create tensors
-    CLTensor a   = create_tensor<CLTensor>(shape_a, data_type, 1);
-    CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1);
-    CLTensor c   = create_tensor<CLTensor>(shape_c, data_type, 1);
-    CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1);
-
-    ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLGEMM gemm;
-    gemm.configure(&a, &b, &c, &dst, alpha, beta);
-
-    //TODO(COMPMID-415): Validate valid region
-}
 
 template <typename T>
 using CLGEMMFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T>;

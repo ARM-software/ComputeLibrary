@@ -1,3 +1,26 @@
+/*
+@ @licstart  The following is the entire license notice for the
+JavaScript code in this file.
+
+Copyright (C) 1997-2017 by Dimitri van Heesch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+@licend  The above is the entire license notice
+for the JavaScript code in this file
+*/
 var NAVTREE =
 [
   [ "Compute Library", "index.xhtml", [
@@ -41,7 +64,8 @@ var NAVTREE =
     [ "List of functions", "functions_list.xhtml", [
       [ "NEON functions", "functions_list.xhtml#S5_1", null ],
       [ "OpenCL functions", "functions_list.xhtml#S5_2", null ],
-      [ "GLES Compute functions", "functions_list.xhtml#S5_3", null ]
+      [ "GLES Compute functions", "functions_list.xhtml#S5_3", null ],
+      [ "CPP functions", "functions_list.xhtml#S5_4", null ]
     ] ],
     [ "Library architecture", "architecture.xhtml", [
       [ "Core vs Runtime libraries", "architecture.xhtml#S4_1", null ],
@@ -125,14 +149,20 @@ var NAVTREE =
       [ "Extract data from pre-trained tensorflow model", "data_import.xhtml#tensorflow_data_extractor", [
         [ "How to use the script", "data_import.xhtml#tensorflow_how_to", null ],
         [ "What is the expected output from the script", "data_import.xhtml#tensorflow_result", null ]
-      ] ]
+      ] ],
+      [ "Extract data from pre-trained frozen tensorflow model", "data_import.xhtml#tf_frozen_model_extractor", [
+        [ "How to use the script", "data_import.xhtml#tensorflow_frozen_how_to", null ],
+        [ "What is the expected output from the script", "data_import.xhtml#tensorflow_frozen_result", null ]
+      ] ],
+      [ "Validating examples", "data_import.xhtml#validate_examples", null ]
     ] ],
-    [ "Namespaces", null, [
-      [ "Namespace List", "namespaces.xhtml", "namespaces" ],
+    [ "Deprecated List", "deprecated.xhtml", null ],
+    [ "Namespaces", "namespaces.xhtml", [
+      [ "Namespace List", "namespaces.xhtml", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.xhtml", [
         [ "All", "namespacemembers.xhtml", "namespacemembers_dup" ],
         [ "Functions", "namespacemembers_func.xhtml", "namespacemembers_func" ],
-        [ "Variables", "namespacemembers_vars.xhtml", null ],
+        [ "Variables", "namespacemembers_vars.xhtml", "namespacemembers_vars" ],
         [ "Typedefs", "namespacemembers_type.xhtml", "namespacemembers_type" ],
         [ "Enumerations", "namespacemembers_enum.xhtml", null ]
       ] ]
@@ -150,8 +180,8 @@ var NAVTREE =
         [ "Related Functions", "functions_rela.xhtml", null ]
       ] ]
     ] ],
-    [ "Files", null, [
-      [ "File List", "files.xhtml", "files" ],
+    [ "Files", "files.xhtml", [
+      [ "File List", "files.xhtml", "files_dup" ],
       [ "Globals", "globals.xhtml", [
         [ "All", "globals.xhtml", "globals_dup" ],
         [ "Functions", "globals_func.xhtml", "globals_func" ],
@@ -166,75 +196,83 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_absolute_difference_8h.xhtml",
-"_c_l_2_batch_to_space_layer_8cpp.xhtml#acc070dfe82e8e6f33802197244d1c194",
-"_c_l_2_l_s_t_m_layer_8cpp.xhtml#a15221160dbe648335c35231c529f65d7",
-"_c_l_2_winograd_8cpp.xhtml#ade3cccfc740829a3b6ed570a3c4efeec",
-"_c_l_copy_kernel_8cpp_source.xhtml",
-"_c_l_gaussian5x5_8cpp_source.xhtml",
-"_c_l_normalization_layer_kernel_8h_source.xhtml",
-"_c_l_types_8h.xhtml#a3a440b3893fa10608d4428958be1c52e",
-"_color_convert_helper_8h_source.xhtml",
-"_fast_corners_8h.xhtml",
-"_g_c_normalize_planar_y_u_v_layer_kernel_8cpp.xhtml",
-"_helpers_8inl.xhtml#ab7b3af731907e85fcaf72555c446176b",
-"_initializer_list_dataset_8h_source.xhtml",
-"_n_e_bitwise_xor_8h_source.xhtml",
-"_n_e_direct_convolution_layer_output_stage_kernel_8h.xhtml",
-"_n_e_l_k_tracker_kernel_8h.xhtml",
-"_n_e_o_n_2_deconvolution_layer_8cpp.xhtml#a3ba5002c3abe00c29ed121456da6bef8",
-"_n_e_o_n_2_threshold_8cpp.xhtml",
-"_n_e_softmax_layer_kernel_8cpp.xhtml#ab11431f1a64a618e5ed1d37634d0e0fe",
-"_open_g_l_e_s_8cpp.xhtml#a0f290b0be95432b64e73ead723a947b7",
-"_reorg_layer_8h_source.xhtml",
-"_toolchain_support_8h.xhtml",
-"_window_8inl_source.xhtml",
-"arithmetic__op__quantized_8cl_source.xhtml",
-"arm__compute_2graph_2_type_printer_8h.xhtml#abcd88ed51472e534decef274fb32bcaa",
-"benchmark_2_c_l_2_floor_8cpp.xhtml#a4a14e383a632057e99845c74a72a6454",
-"benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_scale_8cpp_source.xhtml",
-"benchmark_2_n_e_o_n_2_pooling_layer_8cpp.xhtml#a3c3bb6166f756cef06811f326a7d9c46",
-"classarm__compute_1_1_c_l_activation_layer_kernel.xhtml#a25c6b2015d9ec0c05a1f561458b445f0",
-"classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel.xhtml#afccf9b2ebcad0e6b3049b138fb6b800b",
-"classarm__compute_1_1_c_l_fast_corners_kernel.xhtml#ac18eae467f4bbad88cbf69c5b835926b",
-"classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml#a9f1c2312374125fd95ee145a4f07515c",
-"classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml#a65a94de36a0b70e490bcdee287ff6c4d",
-"classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#a33657445d6cf5905c0b74e566f769069",
-"classarm__compute_1_1_c_l_symbols.xhtml#a3085f45d872eda6b1adf8557fd4915b9",
-"classarm__compute_1_1_c_p_p_permute.xhtml#a93c836ab36443b23753d99495761daf7",
-"classarm__compute_1_1_g_c_fully_connected_layer_reshape_weights.xhtml",
-"classarm__compute_1_1_g_e_m_m_info.xhtml#a11d8f855e323a8396fe6944edcef4238",
-"classarm__compute_1_1_i_g_c_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a",
-"classarm__compute_1_1_i_tensor_info.xhtml#a9273842d8e5dc1a3c7fab727176fd7fe",
-"classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml#a837b139cf977a6c4530e3d574fcceef2",
-"classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml#a29a958bbfd9d88bebd984b833603c15c",
-"classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml#a7d07d7fef064043cb810851831be5868",
-"classarm__compute_1_1_n_e_integral_image_kernel.xhtml#a83a344e60eb7db895953a942abf16628",
-"classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml#a56c4b1f3df503c5f6308c318e305d7f8",
-"classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml#a7337b121d4f8ca7978ed617297e6397b",
-"classarm__compute_1_1_semaphore.xhtml#aa3b21853f890838c88d047d6c2786917",
-"classarm__compute_1_1gles_1_1_n_d_range.xhtml#a259cb5a711406a8c3e5d937eb9350cca",
-"classarm__compute_1_1graph_1_1_i_node_visitor.xhtml",
-"classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#a6e509c2a177b0b29e9e2369535094dee",
-"classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml#a220e3aa92e1b83c41e0df00505894a5a",
-"classarm__compute_1_1test_1_1_lut_accessor.xhtml#ac8490a0e13403aa46250b736a3a9b1cc",
-"classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml#a8c528baf37154d347366083f0f816846",
-"classarm__gemm_1_1_buffer.xhtml#a427705bf76071f12aa29992bd5cffa73",
-"dir_4d03f28cfd35f8f734a3b0a2f1168d27.xhtml",
-"gemm__fp32_8cpp.xhtml#a409b3529a2cd017beac811d67006a7da",
-"helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928",
-"mul_8h.xhtml#a4f2e93cec76891a55fde0d4ead3f7728",
-"optical__flow__pyramid__lk_8cl.xhtml#ae0b2360d4b8e961bf2709b0663fd9f2a",
-"reference_2_table_lookup_8cpp_source.xhtml",
-"store_8h.xhtml#ad417a154c619b3568b9eb97fc475a20c",
-"structarm__compute_1_1graph_1_1_execution_task.xhtml",
-"tensor__transform_8cpp.xhtml",
-"tests_2validation_2_helpers_8cpp.xhtml#ad03c1c39d75226aecd5acd8e3959b02a",
-"utils_2_utils_8h.xhtml#af214346f90d640ac468dd90fa2a275cc",
-"validation_2_c_l_2_g_e_m_m_8cpp.xhtml#a8c12b8c19f4e7f45756d4a4dcb4c3156",
-"validation_2_c_l_2_softmax_layer_8cpp.xhtml#a9c8bb6887ae1f3c848e04ec4c71324ff",
-"validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp.xhtml#a77380f19fffc5978baf99cf01c239736",
-"validation_2_n_e_o_n_2_softmax_layer_8cpp.xhtml#aa2cd1d5c891efd016370b418b5cd0c4c",
-"warp__helpers__quantized_8h.xhtml#ac05d99f194a7cf429a7ecbadd1ffb018"
+"_c_l_2_batch_to_space_layer_8cpp.xhtml#a157af9e1f21df8785893e442409a4435",
+"_c_l_2_g_e_m_m_reshape_l_h_s_matrix_8cpp.xhtml#a15438f2dd36e0e42c2e8aaf4b19e4f3c",
+"_c_l_2_scharr_8cpp.xhtml",
+"_c_l_absolute_difference_8cpp_source.xhtml",
+"_c_l_depth_convert_layer_kernel_8h_source.xhtml",
+"_c_l_g_e_m_m_transpose1x_w_kernel_8cpp.xhtml",
+"_c_l_normalize_planar_y_u_v_layer_kernel_8h.xhtml",
+"_c_l_tensor_handle_8cpp.xhtml",
+"_cast_8cpp.xhtml#a0ed7521147c7992d5f65b360cd2812f5",
+"_derivative_8h.xhtml#aeae8f44225b61c5a6b05fdfcd82ae3d1",
+"_fully_connected_layer_8h_source.xhtml",
+"_g_c_scheduler_8cpp.xhtml",
+"_helpers_8inl.xhtml#a46e938020a3ac8c926d0590b7fe957db",
+"_i_tensor_info_8h_source.xhtml",
+"_n_e_bitwise_not_8cpp_source.xhtml",
+"_n_e_direct_convolution_detail_8h.xhtml#ab7e696498dc262dc55dc90e8d4a2fc77",
+"_n_e_h_o_g_detector_8cpp.xhtml",
+"_n_e_o_n_2_arithmetic_subtraction_8cpp.xhtml#acb5454ca4d9a7aac50c9b24ab9a0f514",
+"_n_e_o_n_2_gaussian3x3_8cpp.xhtml#afad045c7bea57340a4532a78a6b04e7c",
+"_n_e_o_n_2_stack_layer_8cpp.xhtml#aefbc705cede4006a11ee179b95d6468b",
+"_n_e_sobel5x5_kernel_8h_source.xhtml",
+"_node_fusion_mutator_8cpp_source.xhtml",
+"_p_m_u_8h_source.xhtml",
+"_single_thread_scheduler_8h_source.xhtml",
+"_validate_8h.xhtml#a693decaffb042b3ff76e274f983e8ac1",
+"a64__sgemm__12x8_2a53_8cpp.xhtml",
+"arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517d",
+"arm__compute_2graph_2frontend_2_types_8h_source.xhtml",
+"benchmark_2_c_l_2_normalization_layer_8cpp.xhtml#acec794dbb7f6c77bdefa188d83fc80c9",
+"benchmark_2_n_e_o_n_2_convolution_8cpp_source.xhtml",
+"canny_8cl.xhtml#a64ee229d1bcee88c8017356d5d485650",
+"classarm__compute_1_1_c_l_arithmetic_operation_kernel.xhtml",
+"classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7",
+"classarm__compute_1_1_c_l_exp_layer.xhtml",
+"classarm__compute_1_1_c_l_g_e_m_m_reshape_r_h_s_matrix_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e",
+"classarm__compute_1_1_c_l_l_k_tracker_init_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e",
+"classarm__compute_1_1_c_l_permute_kernel.xhtml",
+"classarm__compute_1_1_c_l_sobel5x5_hor_kernel.xhtml#a0d2de1f5a7010147dc1d6c11eaaeda37",
+"classarm__compute_1_1_c_l_warp_perspective_kernel.xhtml",
+"classarm__compute_1_1_dimensions.xhtml#a0d3c59537291735849c740364496a41c",
+"classarm__compute_1_1_g_c_kernel.xhtml#af29ae815590ed07fc2ce2dc3f77a23a7",
+"classarm__compute_1_1_i_array.xhtml#aac8e28a698cd201286d75eb3f5ad3e1c",
+"classarm__compute_1_1_i_lut.xhtml#a5eeb94d22b8366d1b68d0614384802fe",
+"classarm__compute_1_1_lut_allocator.xhtml#a5fdb67ad7cf44fcbc5bf7bd0a7a1ca09",
+"classarm__compute_1_1_n_e_channel_shuffle_layer_kernel.xhtml#a3a050bd26e07d30bf7e578ecf1174d05",
+"classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a537ba0d35bcc8d5488da55d1a27c89a3",
+"classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml",
+"classarm__compute_1_1_n_e_im2_col.xhtml",
+"classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ac23503429643fa0415fd64b1fc17e40c",
+"classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#ace7523f9c3073ad82b77e46318a1ea77",
+"classarm__compute_1_1_pad_stride_info.xhtml#ad71c061b948d43c30e489e15fee6dc8b",
+"classarm__compute_1_1_tensor_info.xhtml",
+"classarm__compute_1_1graph_1_1_dummy_node.xhtml#aefa24b710045e042672a5e887c3efaef",
+"classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml#adb48b5745c55605a2d4ec6f665bb7f3f",
+"classarm__compute_1_1graph_1_1frontend_1_1_concat_layer.xhtml",
+"classarm__compute_1_1test_1_1_array_accessor.xhtml#aa733629a56800aca0b5cb4608069718b",
+"classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml",
+"classarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset.xhtml#a0c62c15c8ed609e7e5e9518cf5f5c712",
+"classarm__gemm_1_1_gemv_pretransposed.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c",
+"dir_3cbe5b6455504b72bdad57647abe41ab.xhtml",
+"functions_v.xhtml",
+"graph__mobilenet_8cpp_source.xhtml",
+"magnitude__phase_8cl.xhtml#a02ff978b574e44604d625dbd470ab870",
+"namespacemembers_i.xhtml",
+"pooling__layer__quantized_8cl.xhtml#a5c74cefcb6318451b5785dd00bd9b05f",
+"reference_2_reorg_layer_8cpp_source.xhtml",
+"softmax__layer_8cl.xhtml#af5b2e33e3c5fcaab3a213f26c2300170",
+"structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a7d24a8e7bad9b4d51aae3af31072d896",
+"structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c51674930e03c276344d19f9e4398fb",
+"tests_2_utils_8h.xhtml",
+"tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml",
+"validation_2_c_l_2_activation_layer_8cpp.xhtml#a0b8743d7c78a9fa2c303aa1b255a1b8e",
+"validation_2_c_l_2_g_e_m_m_8cpp.xhtml",
+"validation_2_c_l_2_softmax_layer_8cpp.xhtml",
+"validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#af3c1de77fd86df539395c75c17ec230e",
+"validation_2_n_e_o_n_2_sobel_8cpp.xhtml",
+"validation_2reference_2_transpose_8cpp.xhtml#af5f82318aa0982e38535d512accf3177"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -1,4 +1,5 @@
 <map id="AccessWindowTranspose" name="AccessWindowTranspose">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_access_window_rectangle.xhtml" title="Implementation of a rectangular access pattern. " alt="" coords="7,80,179,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters. " alt="" coords="34,5,151,32"/>
+<area shape="rect" id="node1" title="Implementation of a XY&#45;transpose access pattern." alt="" coords="5,155,184,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_access_window_rectangle.xhtml" title="Implementation of a rectangular access pattern." alt="" coords="7,80,183,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters." alt="" coords="36,5,153,32"/>
 </map>

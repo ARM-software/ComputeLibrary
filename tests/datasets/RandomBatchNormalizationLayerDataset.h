@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,14 +37,23 @@ namespace test
 {
 namespace datasets
 {
-class RandomBatchNormalizationLayerDataset final : public BatchNormalizationLayerDataset
+class SmallRandomBatchNormalizationLayerDataset final : public BatchNormalizationLayerDataset
 {
 public:
-    RandomBatchNormalizationLayerDataset()
+    SmallRandomBatchNormalizationLayerDataset()
     {
         add_config(TensorShape(15U, 16U, 2U, 12U), TensorShape(2U), 0.1f);
         add_config(TensorShape(21U, 11U, 12U, 7U), TensorShape(12U), 0.1f);
         add_config(TensorShape(7U, 3U, 6U, 11U), TensorShape(6U), 0.1f);
+    }
+};
+class LargeRandomBatchNormalizationLayerDataset final : public BatchNormalizationLayerDataset
+{
+public:
+    LargeRandomBatchNormalizationLayerDataset()
+    {
+        add_config(TensorShape(111U, 47U, 21U, 11U), TensorShape(21U), 0.1f);
+        add_config(TensorShape(236U, 3U, 169U, 7U), TensorShape(169U), 0.1f);
     }
 };
 } // namespace datasets

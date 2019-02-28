@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }),
 TEST_SUITE(CL)
 TEST_SUITE(CannyEdge)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), data), framework::dataset::make("Format", Format::U8)),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), data), framework::dataset::make("Format", Format::U8)),
                shape, gradient_size, normalization, border_mode, format)
 {
     CannyEdgeParameters params = canny_edge_parameters();

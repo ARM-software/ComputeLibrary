@@ -1,5 +1,6 @@
 <map id="CLFineSVMMemoryRegion" name="CLFineSVMMemoryRegion">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml" title="OpenCL SVM memory region interface. " alt="" coords="16,155,176,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface. " alt="" coords="31,80,161,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface. " alt="" coords="39,5,153,32"/>
+<area shape="rect" id="node1" title="OpenCL fine&#45;grain SVM memory region implementation." alt="" coords="5,229,192,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml" title="OpenCL SVM memory region interface." alt="" coords="17,155,181,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface." alt="" coords="31,80,166,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface." alt="" coords="39,5,158,32"/>
 </map>

@@ -2,7 +2,7 @@ var validation_2_c_l_2_softmax_layer_8cpp =
 [
     [ "CLSoftmaxLayerFixture", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#a83163dd1af81a83de6d951b1f3f86f8a", null ],
     [ "CLSoftmaxLayerQuantizedFixture", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#a9c8bb6887ae1f3c848e04ec4c71324ff", null ],
-    [ "DATA_TEST_CASE", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#a824b5a8e3c4e7db5fb9e67ebae18e396", null ],
+    [ "DATA_TEST_CASE", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#ab4c6b8066352bd78793a4673ccedfb8c", null ],
     [ "DATA_TEST_CASE", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#aa43a1389ad43d3659384478c104f81e4", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#a3e765e0db83c0d047b82e547c78e99b2", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_softmax_layer_8cpp.xhtml#aa1773da1ec7f37513cda8c31fa6f2f01", null ],

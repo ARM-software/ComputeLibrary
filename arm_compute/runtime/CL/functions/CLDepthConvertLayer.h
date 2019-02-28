@@ -43,24 +43,24 @@ public:
      *
      * Valid conversions Input -> Output :
      *
-     *   - U8 -> U16, S16, U32, S32
-     *   - U16 -> U8, U32, S32
-     *   - S16 -> U8, U32, S32
-     *   - U32 -> U8, U16, S16
-     *   - S32 -> U8, U16, S16
-     *   - F16 -> F32
-     *   - F32 -> F16
+     *   - U8  -> S8, U16, S16, U32, S32, F16, F32
+     *   - U16 -> U8, S8, S16, U32, S32, F16, F32
+     *   - S16 -> U8, S8, U16, U32, S32, F16, F32
+     *   - U32 -> U8, S8, U16, S16, S32, F16, F32
+     *   - S32 -> U8, S8, U16, S16, U32, F16, F32
+     *   - F16 -> U8, S8, U16, S16, U32, F32
+     *   - F32 -> U8, S8, U16, S16, U32, F16
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: U8/U16/S16/U32/S32/F16/F32.
-     * @param[out] output The output tensor. Data types supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[out] output The output tensor. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in]  policy Conversion policy.
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConvertLayer
      *
-     * @param[in] input  Source tensor info. Data types supported: U8/U16/S16/U32/S32/F16/F32.
-     * @param[in] output Destination tensor info. Data type supported: U8/U16/S16/U32/S32/F16/F32.
+     * @param[in] input  Source tensor info. Data types supported: U8/S8/U16/S16/U32/S32/F16/F32.
+     * @param[in] output Destination tensor info. Data type supported: U8/S8/U16/S16/U32/S32/F16/F32.
      * @param[in] policy Conversion policy.
      * @param[in] shift  Value for down/up conversions. Must be 0 <= shift < 8.
      *
@@ -68,5 +68,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHCONVERT_H__*/

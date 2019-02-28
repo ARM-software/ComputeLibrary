@@ -1,3 +1,4 @@
 <map id="CLNormalizePlanarYUVLayer" name="CLNormalizePlanarYUVLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="65,5,141,32"/>
+<area shape="rect" id="node1" title="Basic function to run CLNormalizePlanarYUVLayerKernel." alt="" coords="5,80,209,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="68,5,147,32"/>
 </map>

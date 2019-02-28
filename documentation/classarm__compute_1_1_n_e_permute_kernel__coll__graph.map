@@ -1,4 +1,5 @@
 <map id="NEPermuteKernel" name="NEPermuteKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="27,80,110,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="37,5,100,32"/>
+<area shape="rect" id="node1" title="NEON kernel to perform tensor permutation." alt="" coords="5,155,140,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="31,80,114,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="41,5,105,32"/>
 </map>

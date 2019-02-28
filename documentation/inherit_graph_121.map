@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml" title="Iterator for the dataset. " alt="" coords="5,5,147,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory.xhtml" title="Memory interface." alt="" coords="5,56,83,83"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_memory.xhtml" title="OpenCL implementation of memory object." alt="" coords="132,5,223,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_g_c_memory.xhtml" title="GLES implementation of memory object." alt="" coords="131,56,224,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_memory.xhtml" title="CPU implementation of memory object." alt="" coords="140,107,215,133"/>
 </map>

@@ -7,7 +7,6 @@ var _i_c_l_array_8h =
     [ "ICLInt16Array", "_i_c_l_array_8h.xhtml#a67328fa21e30aecd0c27d6d2e63a2b9c", null ],
     [ "ICLInt32Array", "_i_c_l_array_8h.xhtml#ab95380ecf1c0253f6c785c0f59194066", null ],
     [ "ICLKeyPointArray", "_i_c_l_array_8h.xhtml#adb969f0e554bf563f2fa671399d59280", null ],
-    [ "ICLROIArray", "_i_c_l_array_8h.xhtml#a64e11fcdd0f4a3f7d832495b7053fbe9", null ],
     [ "ICLSize2DArray", "_i_c_l_array_8h.xhtml#a68396eee600b3d23bf7f95a802e65dff", null ],
     [ "ICLUInt16Array", "_i_c_l_array_8h.xhtml#aed5c7222c31a34327f00de37d8c4f4fc", null ],
     [ "ICLUInt32Array", "_i_c_l_array_8h.xhtml#a6b5f839e8d27c6351e8d58812dd46c97", null ],

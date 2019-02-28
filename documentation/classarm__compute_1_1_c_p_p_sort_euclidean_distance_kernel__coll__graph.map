@@ -1,4 +1,5 @@
 <map id="CPPSortEuclideanDistanceKernel" name="CPPSortEuclideanDistanceKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="51,80,142,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="65,5,128,32"/>
+<area shape="rect" id="node1" title="CPP kernel to perform sorting and euclidean distance." alt="" coords="5,155,196,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="56,80,145,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="69,5,133,32"/>
 </map>

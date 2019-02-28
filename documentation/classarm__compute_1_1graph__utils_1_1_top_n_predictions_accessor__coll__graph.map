@@ -1,3 +1,4 @@
 <map id="TopNPredictionsAccessor" name="TopNPredictionsAccessor">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml" title="Tensor accessor interface. " alt="" coords="32,5,153,32"/>
+<area shape="rect" id="node1" title="Result accessor class." alt="" coords="5,80,187,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml" title="Tensor accessor interface." alt="" coords="34,5,158,32"/>
 </map>

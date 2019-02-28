@@ -38,14 +38,19 @@ arm_compute::DataType data_type_from_name(const std::string &name)
         { "qasymm8", DataType::QASYMM8 },
     };
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         return data_types.at(arm_compute::utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
 
 arm_compute::DataLayout data_layout_from_name(const std::string &name)
@@ -56,14 +61,19 @@ arm_compute::DataLayout data_layout_from_name(const std::string &name)
         { "nchw", DataLayout::NCHW },
     };
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         return data_layouts.at(arm_compute::utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
 namespace graph
 {
@@ -73,17 +83,22 @@ Target target_from_name(const std::string &name)
     {
         { "neon", Target::NEON },
         { "cl", Target::CL },
-        { "gles", Target::GC },
+        { "gc", Target::GC },
     };
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         return targets.at(arm_compute::utility::tolower(name));
+
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 }
 } // namespace graph
 } // namespace arm_compute

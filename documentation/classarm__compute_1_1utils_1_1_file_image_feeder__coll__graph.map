@@ -1,3 +1,4 @@
 <map id="FileImageFeeder" name="FileImageFeeder">
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_i_image_data_feeder.xhtml" title="Image feeder interface. " alt="" coords="5,5,136,32"/>
+<area shape="rect" id="node1" title="File Image feeder concrete implementation." alt="" coords="12,80,137,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_i_image_data_feeder.xhtml" title="Image feeder interface." alt="" coords="5,5,144,32"/>
 </map>

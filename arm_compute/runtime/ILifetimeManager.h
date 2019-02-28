@@ -58,8 +58,9 @@ public:
      * @param[in] obj        Object
      * @param[in] obj_memory Object memory
      * @param[in] size       Size of the given object at given time
+     * @param[in] alignment  Alignment requirements for the object
      */
-    virtual void end_lifetime(void *obj, IMemory &obj_memory, size_t size) = 0;
+    virtual void end_lifetime(void *obj, IMemory &obj_memory, size_t size, size_t alignment) = 0;
     /** Checks if the lifetime of the registered object is complete
      *
      * @return True if all object lifetimes are finalized else false.

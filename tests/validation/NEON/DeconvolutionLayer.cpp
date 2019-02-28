@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,16 +46,16 @@ namespace
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
-                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
+                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
-                     * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
+                     * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
-                               * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 3 });
+                               * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
-                     * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
+                     * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
 const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW });
 } // namespace

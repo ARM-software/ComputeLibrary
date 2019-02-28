@@ -1,3 +1,4 @@
 <map id="ICLKernel" name="ICLKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="14,5,77,32"/>
+<area shape="rect" id="node1" title="Common interface for all the OpenCL kernels." alt="" coords="5,80,85,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="13,5,77,32"/>
 </map>

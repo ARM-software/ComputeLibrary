@@ -18,6 +18,7 @@ var _error_8h =
     [ "ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG", "_error_8h.xhtml#ab4ebbfbeedd9d66614ddbfdb14199cbf", null ],
     [ "ARM_COMPUTE_RETURN_ERROR_ON_MSG", "_error_8h.xhtml#a86084036bd3851575ef871ad5bf079a7", null ],
     [ "ARM_COMPUTE_RETURN_ON_ERROR", "_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4", null ],
+    [ "ARM_COMPUTE_THROW", "_error_8h.xhtml#ad5518fdae84a33ce6fbed540c6e89479", null ],
     [ "ARM_COMPUTE_THROW_ON_ERROR", "_error_8h.xhtml#a51e206ee52bcfb358919ee478d9fdc47", null ],
     [ "ARM_COMPUTE_UNUSED", "_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6", null ],
     [ "ErrorCode", "_error_8h.xhtml#a59e56af19e754a6aa26a612ebf91d05f", [

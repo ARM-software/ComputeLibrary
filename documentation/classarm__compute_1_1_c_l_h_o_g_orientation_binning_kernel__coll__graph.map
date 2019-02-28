@@ -1,4 +1,5 @@
 <map id="CLHOGOrientationBinningKernel" name="CLHOGOrientationBinningKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="71,80,151,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="80,5,143,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform HOG Orientation Binning." alt="" coords="5,155,231,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="78,80,158,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="86,5,150,32"/>
 </map>

@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['u',['U',['../namespacearm__compute_1_1utils_1_1cast.xhtml#a2ea3d1fc01a3a442900249ca182ffa5e',1,'arm_compute::utils::cast']]],
   ['u16',['u16',['../classarm__compute_1_1_pixel_value.xhtml#a1234f83efa812e259523c91799614a3c',1,'arm_compute::PixelValue']]],
   ['u32',['u32',['../classarm__compute_1_1_pixel_value.xhtml#ae65af0c4a8ee050043fe4b575f0a26a0',1,'arm_compute::PixelValue']]],
   ['u64',['u64',['../classarm__compute_1_1_pixel_value.xhtml#a91ee3b6e2425e78feef03fb5c69d63e5',1,'arm_compute::PixelValue']]],

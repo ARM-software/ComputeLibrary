@@ -33,11 +33,11 @@
 
 using namespace arm_compute;
 
-BlobMemoryPool::BlobMemoryPool(IAllocator *allocator, std::vector<size_t> blob_sizes)
-    : _allocator(allocator), _blobs(), _blob_sizes(std::move(blob_sizes))
+BlobMemoryPool::BlobMemoryPool(IAllocator *allocator, std::vector<BlobInfo> blob_info)
+    : _allocator(allocator), _blobs(), _blob_info(std::move(blob_info))
 {
     ARM_COMPUTE_ERROR_ON(!allocator);
-    allocate_blobs(_blob_sizes);
+    allocate_blobs(_blob_info);
 }
 
 BlobMemoryPool::~BlobMemoryPool()
@@ -73,16 +73,16 @@ MappingType BlobMemoryPool::mapping_type() const
 std::unique_ptr<IMemoryPool> BlobMemoryPool::duplicate()
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
-    return support::cpp14::make_unique<BlobMemoryPool>(_allocator, _blob_sizes);
+    return support::cpp14::make_unique<BlobMemoryPool>(_allocator, _blob_info);
 }
 
-void BlobMemoryPool::allocate_blobs(const std::vector<size_t> &sizes)
+void BlobMemoryPool::allocate_blobs(const std::vector<BlobInfo> &blob_info)
 {
     ARM_COMPUTE_ERROR_ON(!_allocator);
 
-    for(const auto &size : sizes)
+    for(const auto &bi : blob_info)
     {
-        _blobs.push_back(_allocator->make_region(size, 0));
+        _blobs.push_back(_allocator->make_region(bi.size, bi.alignment));
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,7 @@ void GCNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, 
     _norm_kernel.configure(input, &_squared_input, output, norm_info);
     _multiply_kernel.configure(input, input, &_squared_input, 1.0f);
     // Fill the border by 3 elements since we need vload4 in the IN_MAP normalization kernel
-    _border_handler.configure(&_squared_input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _border_handler.configure(&_squared_input, _norm_kernel.border_size(), BorderMode::CONSTANT, PixelValue());
 
     // Allocate intermediate buffers
     _squared_input.allocator()->allocate();

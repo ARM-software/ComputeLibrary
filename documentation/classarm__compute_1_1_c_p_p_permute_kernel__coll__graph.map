@@ -1,4 +1,5 @@
 <map id="CPPPermuteKernel" name="CPPPermuteKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="28,80,119,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="42,5,105,32"/>
+<area shape="rect" id="node1" title="CPP kernel to perform tensor permutation." alt="" coords="5,155,147,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="31,80,121,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="44,5,108,32"/>
 </map>

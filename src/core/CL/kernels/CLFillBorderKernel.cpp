@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,25 +75,18 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     // Select appropriate kernel
     std::string kernel_name = "fill_image_borders_" + lower_string(string_from_border_mode(border_mode));
 
-    // Define select type required by replicate border > 1
-    const DataType dt          = tensor->info()->data_type();
-    std::string    select_type = get_underlying_cl_type_from_data_type(dt);
-    if(is_data_type_float(dt))
-    {
-        select_type = (DataType::F32 == dt) ? "int" : "short";
-    }
+    const DataType dt = tensor->info()->data_type();
 
     // Define build options
-    std::set<std::string> build_opts;
-    build_opts.emplace(("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(dt)));
-    build_opts.emplace(("-DSELECT_TYPE=" + select_type));
-    build_opts.emplace(("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top)));
-    build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom)));
-    build_opts.emplace(("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left)));
-    build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right)));
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(dt));
+    build_opts.add_option("-DBORDER_SIZE_TOP=" + support::cpp11::to_string(border_size.top));
+    build_opts.add_option("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom));
+    build_opts.add_option("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left));
+    build_opts.add_option("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
     _tensor = tensor;
 
     // Create static kernel arguments
@@ -141,8 +134,9 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
                 set_constant_border<float>(idx, constant_border_value);
                 break;
             case DataType::F16:
+                static_assert(sizeof(cl_half) == sizeof(half), "Half must be same size as cl_half");
                 static_assert(sizeof(cl_half) == 2, "Half must be 16 bit");
-                set_constant_border<cl_half>(idx, constant_border_value);
+                set_constant_border<half>(idx, constant_border_value);
                 break;
             default:
                 ARM_COMPUTE_ERROR("Not handled");

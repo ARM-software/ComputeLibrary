@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,9 +32,9 @@
 // Kernel implementation.
 //
 // Assume that "Apanel" points to a chunk of A blocks (each size 8xK) in read-order.
-// Assume that "Bpanel" points to a chunk of B blocks (each size 12xK) in read-order.
+// Assume that "Bpanel" points to a chunk of B blocks (each size 24xK) in read-order.
 // Assume that "Cpanel" points to a chunk of C output blocks (each size
-// 12x8), the chunks being arranged in a row major fashion.
+// 24x8), the chunks being arranged in a row major fashion.
 //
 // Note that the intent of this is that either ablocks or bblocks will be 1
 // - this construction allows the output loop to proceed in either order.

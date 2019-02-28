@@ -25,14 +25,14 @@
 #define __ARM_COMPUTE_NERESHAPELAYER_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEReshapeLayerKernel */
-class NEReshapeLayer : public INESimpleFunction
+class NEReshapeLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and outputs
@@ -51,5 +51,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NERESHAPELAYER_H__ */

@@ -1,3 +1,4 @@
 <map id="PadLayer" name="PadLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface. " alt="" coords="15,5,73,32"/>
+<area shape="rect" id="node1" title="Pad Layer." alt="" coords="5,80,85,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface." alt="" coords="15,5,75,32"/>
 </map>

@@ -82,20 +82,13 @@ private:
      * @param[in]  width      Input width.
      * @param[in]  height     Input height.
      */
-    template <DataLayout DL>
     void store_coordinates(float *out, const int offset, const float center_x, const float center_y, const float box_width, const float box_height, const int width, const int height);
     /** Function to calculate prior boxes.
      *
      * @param[in] window Input region on which to execute the kernel.
      */
-    template <DataLayout DL>
     void calculate_prior_boxes(const Window &window);
-    /** Common signature for all the specialised PriorBox functions
-     *
-     * @param[in] window Input region on which to execute the kernel..
-     */
-    using PriorBoxFunction = void (NEPriorBoxLayerKernel::*)(const Window &window);
-    PriorBoxFunction  _func;
+
     const ITensor    *_input1;
     const ITensor    *_input2;
     ITensor          *_output;

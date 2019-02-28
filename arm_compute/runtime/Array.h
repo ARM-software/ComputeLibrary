@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,8 +67,6 @@ using KeyPointArray = Array<KeyPoint>;
 using Coordinates2DArray = Array<Coordinates2D>;
 /** Array of Detection Windows. */
 using DetectionWindowArray = Array<DetectionWindow>;
-/** Array of ROIs. */
-using ROIArray = Array<ROI>;
 /** Array of 2D Sizes. */
 using Size2DArray = Array<Size2D>;
 /** Array of uint8s. */

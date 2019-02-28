@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,8 +37,8 @@
 #include <set>
 #include <string>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
@@ -46,41 +46,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, C
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input == output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16,
-                                                         DataType::U16, DataType::U32, DataType::S32,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input,
+                                                         1,
+                                                         DataType::U8, DataType::S8, DataType::S16,
+                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
+                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output,
+                                                         1,
+                                                         DataType::U8, DataType::S8, DataType::S16,
+                                                         DataType::U16, DataType::U32, DataType::S32, DataType::F16,
+                                                         DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == output->data_type(), "Input and output data types must be different");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_float(input->data_type()) && shift != 0, "Shift is used only with integer inputs");
     ARM_COMPUTE_RETURN_ERROR_ON(shift >= 8);
-
-    // Check if convertion is supported
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U8 && (output->data_type() != DataType::U16 && output->data_type() != DataType::S16
-                                                                           && output->data_type() != DataType::U32 && output->data_type() != DataType::S32),
-                                    "Only data types supported [in] U8 -> [out] U16, S16, U32, S32");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U32
-                                                                            && output->data_type() != DataType::S32),
-                                    "Only data types supported [in] U16 ->  [out] U8, U32, S32");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S16 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U32
-                                                                            && output->data_type() != DataType::S32),
-                                    "Only data types supported [in] S16 ->  [out] U8, U32, S32");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::U32 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U16
-                                                                            && output->data_type() != DataType::S16),
-                                    "Only data types supported [in] U32 ->  [out] U8, U16, S16");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::S32 && (output->data_type() != DataType::U8 && output->data_type() != DataType::U16
-                                                                            && output->data_type() != DataType::S16),
-                                    "Only data types supported [in] S32 ->  [out] U8, U16, S16");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F16 && output->data_type() != DataType::F32,
-                                    "Only data types supported [in] F16 ->  [out] F32");
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::F32 && output->data_type() != DataType::F16,
-                                    "Only data types supported [in] F32 ->  [out] F16");
 
     // Validate in case of configured output
     if(output->total_size() > 0)
@@ -105,25 +83,33 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     const size_t input_size  = data_size_from_type(input->info()->data_type());
     const size_t output_size = data_size_from_type(output->info()->data_type());
 
+    // Get number of elements to process per iterations
+    const unsigned int num_elems_processed_per_iteration = 16;
+
     // Set build options
     CLBuildOptions build_opts;
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DDATA_TYPE_IN=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
-    // Down conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
-    build_opts.add_option_if(input_size > output_size, ((policy == ConvertPolicy::WRAP) && !is_data_type_float(input->info()->data_type())) ? "-DWRAP" : "-DSATURATE");
-    build_opts.add_option_if(is_data_type_float(input->info()->data_type()), "-DIS_DATA_TYPE_FLOAT");
+    // Conversions from float always SATURATE as out-of-bounds conversion from float->integer is implementation defined
+    build_opts.add_option_if(is_data_type_float(input->info()->data_type()) || policy == ConvertPolicy::SATURATE, "-DSATURATE");
+    build_opts.add_option_if(is_data_type_float(input->info()->data_type()) || is_data_type_float(output->info()->data_type()), "-DIS_DATA_TYPE_FLOAT");
 
     // Create kernel
-    const std::string kernel_name = (input_size > output_size) ? "convert_depth_down" : "convert_depth_up";
+    const std::string kernel_name = (input_size >= output_size) ? "convert_depth_down" : "convert_depth_up";
     _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set shift arg
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the input and output parameters
     _kernel.setArg(idx++, shift);
 
     // Configure kernel
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-    ICLSimple2DKernel::configure(input, output, num_elems_processed_per_iteration);
+    ICLSimple3DKernel::configure(input, output, num_elems_processed_per_iteration);
+
+    // Collapse window
+    const Window &full_window      = window();
+    Window        collapsed_window = full_window.collapse_if_possible(full_window, Window::DimZ);
+    ICLKernel::configure_internal(collapsed_window);
 }
 
 Status CLDepthConvertLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
@@ -132,3 +118,4 @@ Status CLDepthConvertLayerKernel::validate(const ITensorInfo *input, const ITens
 
     return Status{};
 }
+} // namespace arm_compute

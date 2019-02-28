@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLArrayAccessor.h"
 #include "tests/benchmark/fixtures/ROIPoolingLayerFixture.h"
-#include "tests/datasets/ROIPoolingLayerDataset.h"
+#include "tests/datasets/ROIDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "utils/TypePrinter.h"
@@ -41,16 +41,20 @@ namespace test
 {
 namespace benchmark
 {
-using CLROIPoolingLayerFixture = ROIPoolingLayerFixture<CLTensor, CLROIPoolingLayer, CLAccessor, CLArray<ROI>, CLArrayAccessor<ROI>>;
+template <typename T>
+using CLROIPoolingLayerFixture = ROIPoolingLayerFixture<CLTensor, CLROIPoolingLayer, CLAccessor, T>;
 
 TEST_SUITE(CL)
-
-REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayer, CLROIPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIPoolingLayerDataset(),
-                                                                                        framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerHalf, CLROIPoolingLayerFixture<half>, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
+                                                                                        framework::dataset::make("DataType", { DataType::F16 })),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
-TEST_SUITE_END()
+REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerFloat, CLROIPoolingLayerFixture<float>, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+TEST_SUITE_END() // CL
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute

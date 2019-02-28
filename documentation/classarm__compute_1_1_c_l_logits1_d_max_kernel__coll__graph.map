@@ -1,7 +1,8 @@
 <map id="CLLogits1DMaxKernel" name="CLLogits1DMaxKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple3_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="13,304,151,331"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="13,229,151,256"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="22,155,142,181"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="42,80,122,107"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="51,5,113,32"/>
+<area shape="rect" id="node1" title="Interface for the identifying the max value of 1D Logits." alt="" coords="5,379,164,405"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple3_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="13,304,156,331"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="13,229,156,256"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="23,155,147,181"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="45,80,125,107"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="53,5,117,32"/>
 </map>

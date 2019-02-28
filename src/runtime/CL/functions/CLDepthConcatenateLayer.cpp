@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ void CLDepthConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_v
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
         _concat_kernels_vector[i].configure(inputs_vector.at(i), depth_offset, output);
-        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(0));
+        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue());
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }

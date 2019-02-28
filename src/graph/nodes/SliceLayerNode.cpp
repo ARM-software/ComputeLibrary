@@ -24,7 +24,7 @@
 #include "arm_compute/graph/nodes/SliceLayerNode.h"
 
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/utils/helpers/tensor_transform.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/INodeVisitor.h"
 
@@ -52,16 +52,12 @@ Coordinates SliceLayerNode::ends() const
 TensorDescriptor SliceLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                            const Coordinates &starts, const Coordinates &ends)
 {
-    // Get absolute end coordinates
-    const Coordinates ends_abs = arm_compute::helpers::tensor_transform::slice_absolute_end_coords(input_descriptor.shape, ends);
+    using namespace arm_compute::helpers::tensor_transform;
 
-    TensorDescriptor output_descriptor = input_descriptor;
-    for(unsigned int i = 0; i < starts.num_dimensions(); ++i)
-    {
-        output_descriptor.shape.set(i, ends_abs[i] - starts[i]);
-    }
+    TensorDescriptor output_desc = input_descriptor;
+    output_desc.shape            = arm_compute::misc::shape_calculator::compute_slice_shape(input_descriptor.shape, starts, ends);
 
-    return output_descriptor;
+    return output_desc;
 }
 
 bool SliceLayerNode::forward_descriptors()

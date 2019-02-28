@@ -1,3 +1,4 @@
 <map id="ListOption&lt; T &gt;" name="ListOption&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option. " alt="" coords="32,5,92,32"/>
+<area shape="rect" id="node1" title="Implementation of an option that accepts any number of values." alt="" coords="5,80,128,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_option.xhtml" title="Abstract base class for a command line option." alt="" coords="35,5,99,32"/>
 </map>

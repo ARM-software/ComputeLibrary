@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,11 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 {
     ARM_COMPUTE_ERROR_ON(nullptr == offsets);
     ARM_COMPUTE_UNUSED(sampling_policy);
+    float sampling_offset = 0.0f;
+    if(sampling_policy == SamplingPolicy::CENTER)
+    {
+        sampling_offset = 0.5f;
+    }
 
     Window win;
     win.set(Window::DimX, Window::Dimension(0, offsets->info()->dimension(0), 1));
@@ -60,8 +65,8 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 
         execute_window_loop(win, [&](const Coordinates & id)
         {
-            const float in_x  = (id.x() + 0.5f) * wr - 0.5f;
-            const float in_y  = (id.y() + 0.5f) * hr - 0.5f;
+            const float in_x  = (id.x() + sampling_offset) * wr - sampling_offset;
+            const float in_y  = (id.y() + sampling_offset) * hr - sampling_offset;
             const int   in_xi = std::floor(in_x);
             const int   in_yi = std::floor(in_y);
 
@@ -167,14 +172,14 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             ARM_COMPUTE_ERROR("Unsupported interpolation mode");
     }
 
-    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, PixelValue(constant_border_value));
+    _border_handler.configure(input, _scale_kernel.border_size(), border_mode, constant_border_value);
 }
 
 Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
                          BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
+    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
     ARM_COMPUTE_UNUSED(border_mode, constant_border_value);
 
     ITensorInfo *offsets = nullptr;

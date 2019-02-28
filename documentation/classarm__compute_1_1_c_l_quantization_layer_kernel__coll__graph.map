@@ -1,4 +1,5 @@
 <map id="CLQuantizationLayerKernel" name="CLQuantizationLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="56,80,136,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="65,5,127,32"/>
+<area shape="rect" id="node1" title="Interface for the quantization layer kernel." alt="" coords="5,155,199,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="62,80,142,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="70,5,134,32"/>
 </map>

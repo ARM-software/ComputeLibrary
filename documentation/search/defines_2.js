@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['cast_5fsuite',['CAST_SUITE',['../_cast_8cpp.xhtml#a661883c3cf746d2388310db13b77817e',1,'Cast.cpp']]],
   ['check_5fcorner',['CHECK_CORNER',['../fast__corners_8cl.xhtml#a2e2df45f46c673a1a5a1c8f4eb06aa09',1,'fast_corners.cl']]],
   ['check_5fnodeidx_5fpair',['CHECK_NODEIDX_PAIR',['../_graph_builder_8cpp.xhtml#aecb5b9d224c1c27edf84cfdd4944fa37',1,'GraphBuilder.cpp']]],
   ['check_5fpixel',['check_pixel',['../canny_8cl.xhtml#a64ee229d1bcee88c8017356d5d485650',1,'canny.cl']]],
@@ -13,12 +14,12 @@ var searchData=
   ['compute_5ftype',['COMPUTE_TYPE',['../convolution5x5_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875',1,'COMPUTE_TYPE():&#160;convolution5x5.cl'],['../convolution7x7_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875',1,'COMPUTE_TYPE():&#160;convolution7x7.cl'],['../convolution9x9_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875',1,'COMPUTE_TYPE():&#160;convolution9x9.cl']]],
   ['concat',['CONCAT',['../tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f',1,'Macros.h']]],
   ['convert',['CONVERT',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#aa8d95ba04fc73845abc6045952cae5be',1,'helpers.h']]],
-  ['convert_5fdown',['CONVERT_DOWN',['../arithmetic__op__quantized_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d',1,'CONVERT_DOWN():&#160;arithmetic_op_quantized.cl'],['../depth__convert_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d',1,'CONVERT_DOWN():&#160;depth_convert.cl']]],
+  ['convert_5fdown',['CONVERT_DOWN',['../depth__convert_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d',1,'CONVERT_DOWN():&#160;depth_convert.cl'],['../elementwise__operation__quantized_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d',1,'CONVERT_DOWN():&#160;elementwise_operation_quantized.cl']]],
   ['convert_5fop_5ffloat',['CONVERT_OP_FLOAT',['../pixelwise__mul__float_8cl.xhtml#ae564a6abd6049a086c7933daa40c8eb8',1,'pixelwise_mul_float.cl']]],
   ['convert_5fop_5ffloat_5fstr',['CONVERT_OP_FLOAT_STR',['../pixelwise__mul__float_8cl.xhtml#aa79b968718a9e073dd6f14a15a6f3e8b',1,'pixelwise_mul_float.cl']]],
   ['convert_5fop_5fint',['CONVERT_OP_INT',['../pixelwise__mul__int_8cl.xhtml#a0a99388febbdc0cb5b9e664faf79233c',1,'pixelwise_mul_int.cl']]],
   ['convert_5fop_5fint_5fstr',['CONVERT_OP_INT_STR',['../pixelwise__mul__int_8cl.xhtml#ab958e43cb87518ce5dd73c7233bbf003',1,'pixelwise_mul_int.cl']]],
-  ['convert_5frte',['CONVERT_RTE',['../arithmetic__op__quantized_8cl.xhtml#ab448fef4390583fc4b3832f8c590a2b0',1,'arithmetic_op_quantized.cl']]],
+  ['convert_5frte',['CONVERT_RTE',['../elementwise__operation__quantized_8cl.xhtml#ab448fef4390583fc4b3832f8c590a2b0',1,'elementwise_operation_quantized.cl']]],
   ['convert_5fsat',['CONVERT_SAT',['../direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2',1,'CONVERT_SAT():&#160;direct_convolution1x1.cl'],['../direct__convolution3x3_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2',1,'CONVERT_SAT():&#160;direct_convolution3x3.cl'],['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a23fb01b6f3453cc0e48a026fd44f6acd',1,'CONVERT_SAT():&#160;helpers.h']]],
   ['convert_5fsat_5fround',['CONVERT_SAT_ROUND',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a28b2b123792a5b11a32cb05a6d327437',1,'helpers.h']]],
   ['convert_5fsat_5fround_5fstr',['CONVERT_SAT_ROUND_STR',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a341a0c28698c3f6bd171df1771c5a512',1,'helpers.h']]],

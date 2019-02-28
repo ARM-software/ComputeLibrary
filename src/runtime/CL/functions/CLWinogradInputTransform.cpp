@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ void CLWinogradInputTransform::configure(ICLTensor *input, ICLTensor *output, co
     auto k = arm_compute::support::cpp14::make_unique<CLWinogradInputTransformKernel>();
     k->configure(input, output, winograd_info);
     _kernel = std::move(k);
-    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
+    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
 }
 
 Status CLWinogradInputTransform::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)

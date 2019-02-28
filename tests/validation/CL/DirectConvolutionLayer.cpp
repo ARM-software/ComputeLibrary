@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,27 +49,25 @@ RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance f
 constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
-const auto data_strides     = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
-const auto data_ksize_one   = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
-const auto data_ksize_three = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
-const auto data_ksize_five  = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
-const auto data_all_kernels = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
+const auto data_strides         = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
+const auto data_strides_small   = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
+const auto data_ksize_one       = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_one_small = combine(framework::dataset::make("PadX", 0), combine(framework::dataset::make("PadY", 0), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_three     = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
+const auto data_ksize_five      = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
+const auto data_all_kernels     = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
 
-const auto data = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_all_kernels));
+const auto data       = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_all_kernels));
+const auto data_small = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_one_small));
 
 /** Direct convolution nightly data set. */
-const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
+const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
 /** Direct convolution precommit data set. */
-const auto data_precommit = combine(data, framework::dataset::make("NumKernels", { 4 }));
+const auto data_precommit = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
 } // namespace
 
 TEST_SUITE(CL)
@@ -193,7 +191,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framewo
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP32_CustomDataset)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::DirectConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::DirectConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::F32)),
                        ActivationFunctionsDataset))
 {
@@ -235,7 +233,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerQuantizedFixture<uint8_
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_CustomDataset)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })),
                        QuantizedActivationFunctionsDataset))

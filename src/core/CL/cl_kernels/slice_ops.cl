@@ -64,7 +64,9 @@ __kernel void strided_slice(
     int offset = 0;
 
     // Offset X
-#if defined(START_0) && defined(STRIDE_0) && defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(SHRINK_0)
+    input.ptr += (int)START_0 * input_stride_x;
+#elif defined(START_0) && defined(STRIDE_0) && defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
     // Check if access on width gets out of bounds
     // If it does shift access vector to access elements within bounds
     const int xi = (int)(get_global_id(0) * VEC_SIZE);
@@ -77,20 +79,46 @@ __kernel void strided_slice(
 #endif // defined(START_0) && defined(STRIDE_0)
 
     // Offset Y
-#if defined(START_1) && defined(STRIDE_1)
+#if defined(SHRINK_1)
+    input.ptr += (int)START_1 * input_stride_y;
+#elif defined(START_1) && defined(STRIDE_1)
+#if defined(SHRINK_0)
+    offset = (int)START_1 + (int)get_global_id(0) * (int)STRIDE_1;
+#else  // defined(SHRINK_0)
     offset = (int)START_1 + (int)get_global_id(1) * (int)STRIDE_1;
+#endif // defined(SHRINK_0)
     input.ptr += offset * input_stride_y;
 #endif // defined(START_1) && defined(STRIDE_1)
 
     // Offset Z
-#if defined(START_2) && defined(STRIDE_2)
+#if defined(SHRINK_2)
+    input.ptr += (int)START_2 * input_stride_z;
+#elif defined(START_2) && defined(STRIDE_2)
+
+#if defined(SHRINK_1) && defined(SHRINK_0)
+    offset = (int)START_2 + (int)get_global_id(0) * (int)STRIDE_2;
+#elif defined(SHRINK_1) || defined(SHRINK_0)
+    offset = (int)START_2 + (int)get_global_id(1) * (int)STRIDE_2;
+#else  // defined(SHRINK_1) && defined(SHRINK_0)
     offset = (int)START_2 + ((int)get_global_id(2) % (int)DST_DEPTH) * (int)STRIDE_2;
+#endif // defined(SHRINK_1) && defined(SHRINK_0)
+
     input.ptr += offset * input_stride_z;
 #endif // defined(START_2) && defined(STRIDE_2)
 
     // Offset depth
-#if defined(START_3) && defined(STRIDE_3)
+#if defined(SHRINK_3)
+    input.ptr += (int)START_3 * input_stride_w;
+#elif defined(START_3) && defined(STRIDE_3)
+#if defined(SHRINK_2) && defined(SHRINK_1) && defined(SHRINK_0)
+    offset = (int)START_3 + (int)get_global_id(0) * (int)STRIDE_3;
+#elif !defined(SHRINK_2) && !defined(SHRINK_1) && !defined(SHRINK_0)
     offset = (int)START_3 + ((int)get_global_id(2) / (int)DST_DEPTH) * (int)STRIDE_3;
+#elif(defined(SHRINK_0) && defined(SHRINK_1)) || (defined(SHRINK_1) && defined(SHRINK_2)) || (defined(SHRINK_0) && defined(SHRINK_2))
+    offset = (int)START_3 + (int)get_global_id(1) * (int)STRIDE_3;
+#else  // defined(SHRINK_2) && defined(SHRINK_1) && defined(SHRINK_0)
+    offset = (int)START_3 + ((int)get_global_id(2) % (int)DST_DEPTH) * (int)STRIDE_3;
+#endif // defined(SHRINK_2) && defined(SHRINK_1) && defined(SHRINK_0)
     input.ptr += offset * input_stride_w;
 #endif // defined(START_3) && defined(STRIDE_3)
 

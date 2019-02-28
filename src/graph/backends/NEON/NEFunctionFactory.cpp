@@ -31,6 +31,7 @@
 #include "arm_compute/graph/backends/FunctionHelpers.h"
 #include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
+#include "arm_compute/runtime/CPP/CPPFunctions.h"
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 #include "support/ToolchainSupport.h"
 
@@ -77,7 +78,7 @@ struct NEEltwiseFunctions
 
 namespace detail
 {
-// Specialize functions
+// Specialized functions
 template <>
 std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(ConvolutionLayerNode &node,
                                                                                                GraphContext &ctx)
@@ -201,6 +202,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DetectionOutputLayer:
+            return detail::create_detection_output_layer<CPPDetectionOutputLayer, NETargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<NEEltwiseFunctions, NETargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:

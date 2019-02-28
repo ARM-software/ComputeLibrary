@@ -26,7 +26,6 @@ var tests_2_utils_8h =
     [ "foldl", "tests_2_utils_8h.xhtml#a92a5aaf033153828aef41d3354c204d9", null ],
     [ "generate_random_keypoints", "tests_2_utils_8h.xhtml#a6fca44ec6b8d63994a8b16012a73f666", null ],
     [ "generate_random_real", "tests_2_utils_8h.xhtml#a000a9b9acb976222ee72275cf8852a3f", null ],
-    [ "generate_random_rois", "tests_2_utils_8h.xhtml#ac7324cc960068b65c558b7d25dfe2914", null ],
     [ "get_channel_format", "tests_2_utils_8h.xhtml#ac7dbe33793790fc37a5eda11ed6b0273", null ],
     [ "get_format_for_channel", "tests_2_utils_8h.xhtml#aa337ab76176f3c4193642ac6de3a61cf", null ],
     [ "get_typestring", "tests_2_utils_8h.xhtml#ae47155d6186155ec4da9295764b3c05a", null ],

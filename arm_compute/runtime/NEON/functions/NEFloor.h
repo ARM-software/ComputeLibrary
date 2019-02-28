@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEFLOOR_H__
 #define __ARM_COMPUTE_NEFLOOR_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
 
@@ -33,7 +33,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEFloorKernel */
-class NEFloor : public INESimpleFunction
+class NEFloor : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the source, destination of the kernel
@@ -51,5 +51,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFLOOR_H__ */

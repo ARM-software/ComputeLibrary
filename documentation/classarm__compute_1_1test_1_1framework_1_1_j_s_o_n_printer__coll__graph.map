@@ -1,3 +1,4 @@
 <map id="JSONPrinter" name="JSONPrinter">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_printer.xhtml" title="Abstract printer class used by the Framework to present output. " alt="" coords="23,5,83,32"/>
+<area shape="rect" id="node1" title="Implementation of a Printer that produces JSON output." alt="" coords="5,80,101,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_printer.xhtml" title="Abstract printer class used by the Framework to present output." alt="" coords="21,5,85,32"/>
 </map>

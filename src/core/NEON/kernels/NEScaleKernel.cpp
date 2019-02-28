@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEScaleKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -46,11 +47,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
                           const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
                           BorderMode border_mode, SamplingPolicy sampling_policy)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
-    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
+    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
     ARM_COMPUTE_UNUSED(border_mode);
 
     const DataLayout data_layout = input->data_layout();
@@ -72,6 +74,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
     if(policy == InterpolationPolicy::AREA)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     }
 
     return Status{};
@@ -182,7 +185,7 @@ inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets
 
 template <typename T>
 inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offsets, const ITensor *dx, const ITensor *dy, ITensor *output,
-                                     float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c, BorderMode border_mode)
+                                     float hr, float sampling_offset, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c, BorderMode border_mode)
 {
     Iterator in(input, win_in);
     Iterator out(output, window);
@@ -202,12 +205,16 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
     int border_size = (border_mode == BorderMode::UNDEFINED) ? 0 : 1;
 
+    const bool             is_quantized = (input->info()->data_type() == DataType::QASYMM8);
+    const QuantizationInfo iq_info      = input->info()->quantization_info();
+    const QuantizationInfo oq_info      = output->info()->quantization_info();
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const auto offset     = (*reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())))) / static_cast<int>(sizeof(T));
         const auto dx_scale   = *reinterpret_cast<const float *>(dx->ptr_to_element(Coordinates(id.y(), id.z())));
         const auto dy_scale   = *reinterpret_cast<const float *>(dy->ptr_to_element(Coordinates(id.y(), id.z())));
-        const int  in_yi      = std::floor((id.z() + 0.5f) * hr - 0.5f);
+        const int  in_yi      = std::floor((id.z() + sampling_offset) * hr - sampling_offset);
         const int  offset_row = in_yi * stride_h + id.x() * stride_c;
         const T   *in_ptr     = reinterpret_cast<T *>(in.ptr() + offset * stride_w + offset_row);
 
@@ -251,8 +258,22 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
             const float w3 = dx1 * dy_scale;
             const float w4 = dx_scale * dy_scale;
 
+            T res = 0;
+            //dequantize quantized input
+            if(is_quantized)
+            {
+                float inp00 = iq_info.dequantize(a00);
+                float inp01 = iq_info.dequantize(a01);
+                float inp10 = iq_info.dequantize(a10);
+                float inp11 = iq_info.dequantize(a11);
+                res         = static_cast<T>(oq_info.quantize((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), RoundingPolicy::TO_NEAREST_UP));
+            }
+            else
+            {
+                res = static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
+            }
             // Store result
-            *reinterpret_cast<T *>(out.ptr()) = static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
+            *reinterpret_cast<T *>(out.ptr()) = res;
         }
         else
         {
@@ -273,7 +294,7 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 } // namespace
 
 NEScaleKernel::NEScaleKernel()
-    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode()
+    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _sampling_offset(0)
 {
 }
 
@@ -308,6 +329,11 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     _policy      = policy;
     _border_size = BorderSize(1);
     _border_mode = border_mode;
+
+    if(sampling_policy == SamplingPolicy::CENTER)
+    {
+        _sampling_offset = 0.5f;
+    }
 
     // Compute the ratio between source width/height and destination width/height
     const auto wr = static_cast<float>(input->info()->dimension(idx_width)) / static_cast<float>(output->info()->dimension(idx_width));
@@ -387,6 +413,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8:
         case DataType::U8:
         {
             uint8x16_t tmp = vdupq_n_u8(0);
@@ -463,6 +490,48 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             in, offsets, out);
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            float16x8x2_t tmp =
+            {
+                {
+                    vdupq_n_f16(0),
+                    vdupq_n_f16(0)
+                }
+            };
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+
+                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int offset_row = in_yi * input_stride;
+
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[2] + offset_row), tmp.val[0], 1);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[4] + offset_row), tmp.val[0], 2);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[6] + offset_row), tmp.val[0], 3);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[8] + offset_row), tmp.val[0], 4);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[10] + offset_row), tmp.val[0], 5);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[12] + offset_row), tmp.val[0], 6);
+                tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[14] + offset_row), tmp.val[0], 7);
+
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[1] + offset_row), tmp.val[1], 0);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[3] + offset_row), tmp.val[1], 1);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[5] + offset_row), tmp.val[1], 2);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[7] + offset_row), tmp.val[1], 3);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[9] + offset_row), tmp.val[1], 4);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[11] + offset_row), tmp.val[1], 5);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[13] + offset_row), tmp.val[1], 6);
+                tmp.val[1] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[15] + offset_row), tmp.val[1], 7);
+
+                vst2q_f16(reinterpret_cast<__fp16 *>(out.ptr()), tmp);
+            },
+            in, offsets, out);
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             float32x4x4_t tmp =
@@ -515,7 +584,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
 
 void NEScaleKernel::scale_bilinear_nchw(const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
 
     // Compute the ratio between source height and destination height
     const auto hr = static_cast<float>(_input->info()->dimension(1)) / static_cast<float>(_output->info()->dimension(1));
@@ -545,8 +614,13 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     const size_t in_stide_in_bytes = _input->info()->strides_in_bytes()[1];
     const size_t in_stride         = in_stide_in_bytes / _input->info()->element_size();
 
+    const bool             is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
+    const QuantizationInfo iq_info      = _input->info()->quantization_info();
+    const QuantizationInfo oq_info      = _output->info()->quantization_info();
+
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8:
         case DataType::U8:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -556,29 +630,55 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                 const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
                 const auto in_ptr      = reinterpret_cast<const uint8_t *>(in.ptr());
 
-                const int in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
                 const int offset_row = in_yi * in_stide_in_bytes;
 
                 uint8x8_t tmp0 = vdup_n_u8(0);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
-                tmp0           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
-
+                if(is_quantized)
+                {
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0], iq_info, oq_info), tmp0, 0);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1], iq_info, oq_info), tmp0, 1);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2], iq_info, oq_info), tmp0, 2);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3], iq_info, oq_info), tmp0, 3);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4], iq_info, oq_info), tmp0, 4);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5], iq_info, oq_info), tmp0, 5);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6], iq_info, oq_info), tmp0, 6);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7], iq_info, oq_info), tmp0, 7);
+                }
+                else
+                {
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[0] + offset_row], in_stride, dx_ptr[0], dy_ptr[0]), tmp0, 0);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[1] + offset_row], in_stride, dx_ptr[1], dy_ptr[1]), tmp0, 1);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[2] + offset_row], in_stride, dx_ptr[2], dy_ptr[2]), tmp0, 2);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[3] + offset_row], in_stride, dx_ptr[3], dy_ptr[3]), tmp0, 3);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[4] + offset_row], in_stride, dx_ptr[4], dy_ptr[4]), tmp0, 4);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[5] + offset_row], in_stride, dx_ptr[5], dy_ptr[5]), tmp0, 5);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[6] + offset_row], in_stride, dx_ptr[6], dy_ptr[6]), tmp0, 6);
+                    tmp0 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[7] + offset_row], in_stride, dx_ptr[7], dy_ptr[7]), tmp0, 7);
+                }
                 uint8x8_t tmp1 = vdup_n_u8(0);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
-                tmp1           = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
-
+                if(is_quantized)
+                {
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8], iq_info, oq_info), tmp1, 0);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9], iq_info, oq_info), tmp1, 1);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10], iq_info, oq_info), tmp1, 2);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11], iq_info, oq_info), tmp1, 3);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12], iq_info, oq_info), tmp1, 4);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13], iq_info, oq_info), tmp1, 5);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14], iq_info, oq_info), tmp1, 6);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1_quantized(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15], iq_info, oq_info), tmp1, 7);
+                }
+                else
+                {
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[8] + offset_row], in_stride, dx_ptr[8], dy_ptr[8]), tmp1, 0);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[9] + offset_row], in_stride, dx_ptr[9], dy_ptr[9]), tmp1, 1);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[10] + offset_row], in_stride, dx_ptr[10], dy_ptr[10]), tmp1, 2);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[11] + offset_row], in_stride, dx_ptr[11], dy_ptr[11]), tmp1, 3);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[12] + offset_row], in_stride, dx_ptr[12], dy_ptr[12]), tmp1, 4);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[13] + offset_row], in_stride, dx_ptr[13], dy_ptr[13]), tmp1, 5);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[14] + offset_row], in_stride, dx_ptr[14], dy_ptr[14]), tmp1, 6);
+                    tmp1 = vset_lane_u8(delta_bilinear_c1(&in_ptr[offsets_ptr[15] + offset_row], in_stride, dx_ptr[15], dy_ptr[15]), tmp1, 7);
+                }
                 vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
             },
             in, offsets, dx, dy, out);
@@ -592,7 +692,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                 const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
                 const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
 
-                const int in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
                 const int offset_row = in_yi * in_stide_in_bytes;
 
                 int16x8x2_t tmp =
@@ -626,6 +726,50 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
             in, offsets, dx, dy, out);
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
+                const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
+                const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
+
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
+                const int offset_row = in_yi * in_stide_in_bytes;
+
+                float16x8x2_t tmp =
+                {
+                    {
+                        vdupq_n_f16(0),
+                        vdupq_n_f16(0)
+                    }
+                };
+
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), in_stride, dx_ptr[0], dy_ptr[0]), tmp.val[0], 0);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[2] + offset_row), in_stride, dx_ptr[2], dy_ptr[2]), tmp.val[0], 1);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[4] + offset_row), in_stride, dx_ptr[4], dy_ptr[4]), tmp.val[0], 2);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[6] + offset_row), in_stride, dx_ptr[6], dy_ptr[6]), tmp.val[0], 3);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[8] + offset_row), in_stride, dx_ptr[8], dy_ptr[8]), tmp.val[0], 4);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[10] + offset_row), in_stride, dx_ptr[10], dy_ptr[10]), tmp.val[0], 5);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[12] + offset_row), in_stride, dx_ptr[12], dy_ptr[12]), tmp.val[0], 6);
+                tmp.val[0] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[14] + offset_row), in_stride, dx_ptr[14], dy_ptr[14]), tmp.val[0], 7);
+
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[1] + offset_row), in_stride, dx_ptr[1], dy_ptr[1]), tmp.val[1], 0);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[3] + offset_row), in_stride, dx_ptr[3], dy_ptr[3]), tmp.val[1], 1);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[5] + offset_row), in_stride, dx_ptr[5], dy_ptr[5]), tmp.val[1], 2);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[7] + offset_row), in_stride, dx_ptr[7], dy_ptr[7]), tmp.val[1], 3);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[9] + offset_row), in_stride, dx_ptr[9], dy_ptr[9]), tmp.val[1], 4);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[11] + offset_row), in_stride, dx_ptr[11], dy_ptr[11]), tmp.val[1], 5);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[13] + offset_row), in_stride, dx_ptr[13], dy_ptr[13]), tmp.val[1], 6);
+                tmp.val[1] = vsetq_lane_f16(delta_bilinear_c1(reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[15] + offset_row), in_stride, dx_ptr[15], dy_ptr[15]), tmp.val[1], 7);
+
+                vst2q_f16(reinterpret_cast<__fp16 *>(out.ptr()), tmp);
+            },
+            in, offsets, dx, dy, out);
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             execute_window_loop(window, [&](const Coordinates & id)
@@ -634,7 +778,7 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
                 const auto dx_ptr      = reinterpret_cast<const float *>(dx.ptr());
                 const auto dy_ptr      = reinterpret_cast<const float *>(dy.ptr());
 
-                const int in_yi      = std::floor((id.y() + 0.5f) * hr - 0.5f);
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr - _sampling_offset);
                 const int offset_row = in_yi * in_stide_in_bytes;
 
                 float32x4x4_t tmp =
@@ -751,6 +895,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
 
     switch(_input->info()->data_type())
     {
+        case DataType::QASYMM8:
         case DataType::U8:
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
@@ -759,7 +904,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<uint8_t>(_input, _offsets, _dx, _dy, _output, hr,
+                scale_bilinear_nhwc_core<uint8_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
             }
             break;
@@ -772,11 +917,27 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<int16_t>(_input, _offsets, _dx, _dy, _output, hr,
+                scale_bilinear_nhwc_core<int16_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
             }
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+        {
+            if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+            {
+                scale_nearest_nhwc_core<float16_t>(_input, _offsets, _output, hr,
+                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c);
+            }
+            else
+            {
+                scale_bilinear_nhwc_core<float16_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                    window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+            }
+            break;
+        }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         case DataType::F32:
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
@@ -785,7 +946,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<float>(_input, _offsets, _dx, _dy, _output, hr,
+                scale_bilinear_nhwc_core<float>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
                                                 window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
             }
             break;

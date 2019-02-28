@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['half1',['half1',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6083fd110e3a4572725f6a020c1681ae',1,'helpers.h']]],
   ['half_5fround_5fstyle',['HALF_ROUND_STYLE',['../_half_8h.xhtml#af470ed60568b3e7f4fde6092d22abbde',1,'Half.h']]],
   ['half_5fround_5fties_5fto_5feven',['HALF_ROUND_TIES_TO_EVEN',['../_half_8h.xhtml#ab0c3c06432f0247f22594abe3df0ebfe',1,'Half.h']]],
   ['hwcap_5fasimddp',['HWCAP_ASIMDDP',['../_c_p_u_utils_8cpp.xhtml#af2e3430d5d0940d0a78029eb50f69234',1,'CPUUtils.cpp']]],

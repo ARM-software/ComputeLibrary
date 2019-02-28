@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,7 +170,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     {
         BorderSize border_size = BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
         input->info()->extend_padding(border_size);
-        _fill_border.configure(input, border_size, BorderMode::CONSTANT, PixelValue(0)); // for PAD of im2col fp16: consider it as border
+        _fill_border.configure(input, border_size, BorderMode::CONSTANT, PixelValue()); // for PAD of im2col fp16: consider it as border
     }
     // Configure im2col
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation);

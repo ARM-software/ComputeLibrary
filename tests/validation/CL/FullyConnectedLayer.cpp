@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ const auto FullyConnectedParameters = combine(framework::dataset::make("Transpos
 TEST_SUITE(CL)
 TEST_SUITE(FullyConnectedLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallFullyConnectedLayerDataset(), datasets::LargeFullyConnectedLayerDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                                                                            FullyConnectedParameters),
                                                                    CNNDataTypes),
                src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)

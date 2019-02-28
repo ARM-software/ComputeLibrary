@@ -14,6 +14,7 @@ var namespacearm__compute_1_1test =
     [ "CLHOGAccessor", "classarm__compute_1_1test_1_1_c_l_h_o_g_accessor.xhtml", "classarm__compute_1_1test_1_1_c_l_h_o_g_accessor" ],
     [ "CLLutAccessor", "classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_c_l_lut_accessor" ],
     [ "CLSynthetizeFunction", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function" ],
+    [ "CLSynthetizeFunctionInitOutputWithZeroAndWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_init_output_with_zero_and_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_init_output_with_zero_and_with_zero_constant_border" ],
     [ "CLSynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border" ],
     [ "common_promoted_signed_type", "structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml", "structarm__compute_1_1test_1_1common__promoted__signed__type" ],
     [ "common_promoted_unsigned_type", "structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml", "structarm__compute_1_1test_1_1common__promoted__unsigned__type" ],

@@ -6,10 +6,12 @@ var searchData=
   ['iarray',['IArray',['../classarm__compute_1_1_i_array.xhtml',1,'arm_compute']]],
   ['iarray_3c_20nelkinternalkeypoint_20_3e',['IArray&lt; NELKInternalKeypoint &gt;',['../classarm__compute_1_1_i_array.xhtml',1,'arm_compute']]],
   ['iarrayaccessor',['IArrayAccessor',['../classarm__compute_1_1test_1_1_i_array_accessor.xhtml',1,'arm_compute::test']]],
+  ['ibuffermanager',['IBufferManager',['../classarm__compute_1_1_i_buffer_manager.xhtml',1,'arm_compute']]],
   ['iclarray',['ICLArray',['../classarm__compute_1_1_i_c_l_array.xhtml',1,'arm_compute']]],
   ['icldepthwiseconvolutionlayer3x3kernel',['ICLDepthwiseConvolutionLayer3x3Kernel',['../classarm__compute_1_1_i_c_l_depthwise_convolution_layer3x3_kernel.xhtml',1,'arm_compute']]],
   ['icldistribution1d',['ICLDistribution1D',['../classarm__compute_1_1_i_c_l_distribution1_d.xhtml',1,'arm_compute']]],
   ['iclgemmlowpreductionkernel',['ICLGEMMLowpReductionKernel',['../classarm__compute_1_1_i_c_l_g_e_m_m_lowp_reduction_kernel.xhtml',1,'arm_compute']]],
+  ['iclgemmreshapedconfiguration',['ICLGEMMReshapedConfiguration',['../classarm__compute_1_1_i_c_l_g_e_m_m_reshaped_configuration.xhtml',1,'arm_compute']]],
   ['iclhog',['ICLHOG',['../classarm__compute_1_1_i_c_l_h_o_g.xhtml',1,'arm_compute']]],
   ['iclkernel',['ICLKernel',['../classarm__compute_1_1_i_c_l_kernel.xhtml',1,'arm_compute']]],
   ['icllut',['ICLLut',['../classarm__compute_1_1_i_c_l_lut.xhtml',1,'arm_compute']]],
@@ -67,6 +69,7 @@ var searchData=
   ['inegemmlowpreductionkernel',['INEGEMMLowpReductionKernel',['../classarm__compute_1_1_i_n_e_g_e_m_m_lowp_reduction_kernel.xhtml',1,'arm_compute']]],
   ['ineharrisscorekernel',['INEHarrisScoreKernel',['../classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml',1,'arm_compute']]],
   ['inesimplefunction',['INESimpleFunction',['../classarm__compute_1_1_i_n_e_simple_function.xhtml',1,'arm_compute']]],
+  ['inesimplefunctionnoborder',['INESimpleFunctionNoBorder',['../classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml',1,'arm_compute']]],
   ['inewarpkernel',['INEWarpKernel',['../classarm__compute_1_1_i_n_e_warp_kernel.xhtml',1,'arm_compute']]],
   ['inewinogradlayertransforminputkernel',['INEWinogradLayerTransformInputKernel',['../classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml',1,'arm_compute']]],
   ['inewinogradlayertransformoutputkernel',['INEWinogradLayerTransformOutputKernel',['../classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml',1,'arm_compute']]],
@@ -91,8 +94,8 @@ var searchData=
   ['is_5fcontained_3c_20t_2c_20std_3a_3atuple_3c_3e_20_3e',['is_contained&lt; T, std::tuple&lt;&gt; &gt;',['../structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_4_01_4.xhtml',1,'arm_compute::traits']]],
   ['is_5fcontainer',['is_container',['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['is_5fcontainer_3c_20std_3a_3avector_3c_20v_2c_20a_20_3e_20_3e',['is_container&lt; std::vector&lt; V, A &gt; &gt;',['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml',1,'arm_compute::test::framework::dataset']]],
-  ['is_5ffloating_5fpoint',['is_floating_point',['../structarm__compute_1_1test_1_1validation_1_1is__floating__point.xhtml',1,'arm_compute::test::validation']]],
-  ['is_5ffloating_5fpoint_3c_20half_20_3e',['is_floating_point&lt; half &gt;',['../structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml',1,'arm_compute::test::validation']]],
+  ['is_5ffloating_5fpoint',['is_floating_point',['../structarm__compute_1_1test_1_1validation_1_1is__floating__point.xhtml',1,'is_floating_point&lt; T &gt;'],['../structarm__compute_1_1utils_1_1traits_1_1is__floating__point.xhtml',1,'is_floating_point&lt; T &gt;']]],
+  ['is_5ffloating_5fpoint_3c_20half_20_3e',['is_floating_point&lt; half &gt;',['../structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml',1,'is_floating_point&lt; half &gt;'],['../structarm__compute_1_1utils_1_1traits_1_1is__floating__point_3_01half_01_4.xhtml',1,'is_floating_point&lt; half &gt;']]],
   ['ischeduler',['IScheduler',['../classarm__compute_1_1_i_scheduler.xhtml',1,'arm_compute']]],
   ['isimplelifetimemanager',['ISimpleLifetimeManager',['../classarm__compute_1_1_i_simple_lifetime_manager.xhtml',1,'arm_compute']]],
   ['istream',['IStream',['../classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml',1,'arm_compute::graph::frontend']]],
@@ -101,5 +104,5 @@ var searchData=
   ['itensorallocator',['ITensorAllocator',['../classarm__compute_1_1_i_tensor_allocator.xhtml',1,'arm_compute']]],
   ['itensorhandle',['ITensorHandle',['../classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml',1,'arm_compute::graph']]],
   ['itensorinfo',['ITensorInfo',['../classarm__compute_1_1_i_tensor_info.xhtml',1,'arm_compute']]],
-  ['iterator',['iterator',['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml',1,'RangeDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml',1,'SingletonDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset_1_1iterator.xhtml',1,'ZipDataset&lt; T, U &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml',1,'ContainerDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml',1,'InitializerListDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml',1,'JoinDataset&lt; T, U &gt;::iterator'],['../classarm__compute_1_1_iterator.xhtml',1,'Iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml',1,'CartesianProductDataset&lt; T, U &gt;::iterator']]]
+  ['iterator',['iterator',['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml',1,'CartesianProductDataset&lt; T, U &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml',1,'JoinDataset&lt; T, U &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml',1,'RangeDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml',1,'SingletonDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset_1_1iterator.xhtml',1,'ZipDataset&lt; T, U &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml',1,'ContainerDataset&lt; T &gt;::iterator'],['../structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml',1,'InitializerListDataset&lt; T &gt;::iterator'],['../classarm__compute_1_1_iterator.xhtml',1,'Iterator']]]
 ];

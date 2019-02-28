@@ -62,7 +62,6 @@ public:
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type == DataType::F16 && common_params.target == Target::NEON, "F16 NEON not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -787,6 +786,8 @@ private:
  *      https://arxiv.org/abs/1602.07261
  *      "Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning"
  *      Christian Szegedy, Sergey Ioffe, Vincent Vanhoucke, Alex Alemi
+ *
+ * Provenance: download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

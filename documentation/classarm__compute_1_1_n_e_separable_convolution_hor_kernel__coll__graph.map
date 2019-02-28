@@ -1,5 +1,6 @@
 <map id="NESeparableConvolutionHorKernel&lt; matrix_size &gt;" name="NESeparableConvolutionHorKernel&lt; matrix_size &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output. " alt="" coords="39,155,161,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="55,80,145,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="69,5,131,32"/>
+<area shape="rect" id="node1" title="Kernel for the Horizontal pass of a Separable Convolution." alt="" coords="5,229,208,271"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output." alt="" coords="43,155,170,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="62,80,151,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="75,5,139,32"/>
 </map>

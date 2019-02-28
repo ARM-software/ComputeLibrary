@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,39 +43,12 @@ namespace validation
 {
 namespace
 {
-/** Define tolerance of the yolo layer.
- *
- * @param[in] activation The activation function used.
- * @param[in] data_type  Data type.
- *
- * @return Tolerance depending on the activation function.
- */
-AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
-{
-    constexpr float epsilon = 1e-6f;
-
-    switch(activation)
-    {
-        case ActivationLayerInfo::ActivationFunction::LINEAR:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.2f : epsilon);
-        case ActivationLayerInfo::ActivationFunction::SQUARE:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.1f : epsilon);
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : epsilon);
-        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.00001f : epsilon);
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
-        case ActivationLayerInfo::ActivationFunction::TANH:
-            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : 0.00001f);
-        default:
-            return AbsoluteTolerance<float>(epsilon);
-    }
-}
+constexpr AbsoluteTolerance<float> tolerance_f32(1e-6f);
+constexpr RelativeTolerance<float> tolerance_f16(0.01f);
 
 /** Floating point data sets. */
-const auto YOLODataset = combine(combine(combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctions()),
+const auto YOLODataset = combine(combine(combine(combine(framework::dataset::make("InPlace", { false, true }), framework::dataset::make("ActivationFunction",
+                                                         ActivationLayerInfo::ActivationFunction::LOGISTIC)),
                                                  framework::dataset::make("AlphaBeta", { 0.5f, 1.f })),
                                          framework::dataset::make("Classes", 40)),
                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
@@ -83,6 +56,46 @@ const auto YOLODataset = combine(combine(combine(combine(framework::dataset::mak
 
 TEST_SUITE(CL)
 TEST_SUITE(YOLOLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::U8),  // Wrong input data type
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Invalid activation info
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Wrong output data type
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // wrong number of classes
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Mismatching shapes
+                                                       TensorInfo(TensorShape(17U, 16U, 6U), 1, DataType::F32),  // Shrink window
+                                                       TensorInfo(TensorShape(17U, 16U, 7U), 1, DataType::F32),  // Channels not multiple of (num_classes + 5)
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::U16),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 11U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 7U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                     })),
+               framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                     })),
+               framework::dataset::make("Numclasses", { 1, 1, 1, 0, 1, 1, 1, 1
+                                                     })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, true})),
+               input_info, output_info, act_info, num_classes, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLYOLOLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), act_info, num_classes)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using CLYOLOLayerFixture = YOLOValidationFixture<CLTensor, CLAccessor, CLYOLOLayer, T>;
@@ -93,14 +106,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLYOLOLayerFixture<float>, framework::DatasetMo
                                                                                                        DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLYOLOLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeYOLOShapes(), YOLODataset), framework::dataset::make("DataType",
                                                                                                      DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // FP32
 
@@ -109,13 +122,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLYOLOLayerFixture<half>, framework::DatasetMod
                                                                                                       DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+    validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLYOLOLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeYOLOShapes(), YOLODataset), framework::dataset::make("DataType",
                                                                                                     DataType::F16)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
+    validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float

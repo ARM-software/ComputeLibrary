@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,7 +170,7 @@ public:
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv2d_59")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_59/Linear")
-              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80)
+              << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo1")
               << OutputLayer(get_output_accessor(common_params, 5));
         route_1 << ConvolutionLayer(
                     1U, 1U, 256U,
@@ -188,7 +188,7 @@ public:
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_60/LeakyRelu")
                 << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_60");
         SubStream concat_1(route_1);
-        concat_1 << ConcatLayer(std::move(route_1), std::move(intermediate_layers.second))
+        concat_1 << ConcatLayer(std::move(route_1), std::move(intermediate_layers.second)).set_name("Route1")
                  << ConvolutionLayer(
                      1U, 1U, 256U,
                      get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_61_w.npy", weights_layout),
@@ -281,7 +281,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_67")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_67/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80)
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo2")
                  << OutputLayer(get_output_accessor(common_params, 5));
         route_2 << ConvolutionLayer(
                     1U, 1U, 128U,
@@ -299,7 +299,7 @@ public:
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_68/LeakyRelu")
                 << UpsampleLayer(Size2D(2, 2), InterpolationPolicy::NEAREST_NEIGHBOR).set_name("Upsample_68");
         SubStream concat_2(route_2);
-        concat_2 << ConcatLayer(std::move(route_2), std::move(intermediate_layers.first))
+        concat_2 << ConcatLayer(std::move(route_2), std::move(intermediate_layers.first)).set_name("Route2")
                  << ConvolutionLayer(
                      1U, 1U, 128U,
                      get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_69_w.npy", weights_layout),
@@ -391,7 +391,7 @@ public:
                      PadStrideInfo(1, 1, 0, 0))
                  .set_name("conv2d_75")
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 1.f)).set_name("conv2d_75/Linear")
-                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80)
+                 << YOLOLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC, 0.1f), 80).set_name("Yolo3")
                  << OutputLayer(get_output_accessor(common_params, 5));
 
         // Finalize graph
@@ -423,7 +423,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_1_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(1, 1, 1, 1))
-              .set_name("conv2d_1")
+              .set_name("conv2d_1/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_1_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_1_var.npy"),
@@ -437,7 +437,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_2_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 1, 1))
-              .set_name("conv2d_2")
+              .set_name("conv2d_2/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_2_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_2_var.npy"),
@@ -452,7 +452,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_5_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 1, 1))
-              .set_name("conv2d_5")
+              .set_name("conv2d_5/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_5_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_5_var.npy"),
@@ -468,7 +468,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_10_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 1, 1))
-              .set_name("conv2d_10")
+              .set_name("conv2d_10/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_10_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_10_var.npy"),
@@ -491,7 +491,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_27_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 1, 1))
-              .set_name("conv2d_27")
+              .set_name("conv2d_27/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_27_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_27_var.npy"),
@@ -514,7 +514,7 @@ private:
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/conv2d_44_w.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 1, 1))
-              .set_name("conv2d_44")
+              .set_name("conv2d_44/Conv2D")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_44_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/yolov3_model/batch_normalization_44_var.npy"),
@@ -543,6 +543,7 @@ private:
                 get_weights_accessor(data_path, total_path + "conv2d_" + param_path + "_w.npy", weights_layout),
                 std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                 PadStrideInfo(1, 1, 0, 0))
+            .set_name("conv2d_" + param_path + "/Conv2D")
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "batch_normalization_" + param_path + "_mean.npy"),
                 get_weights_accessor(data_path, total_path + "batch_normalization_" + param_path + "_var.npy"),
@@ -550,12 +551,13 @@ private:
                 get_weights_accessor(data_path, total_path + "batch_normalization_" + param_path + "_beta.npy"),
                 0.000001f)
             .set_name("conv2d_" + param_path + "/BatchNorm")
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d" + param_path + "/LeakyRelu")
+            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_" + param_path + "/LeakyRelu")
             << ConvolutionLayer(
                 3U, 3U, filter_size * 2,
                 get_weights_accessor(data_path, total_path + "conv2d_" + param_path2 + "_w.npy", weights_layout),
                 std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                 PadStrideInfo(1, 1, 1, 1))
+            .set_name("conv2d_" + param_path2 + "/Conv2D")
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "batch_normalization_" + param_path2 + "_mean.npy"),
                 get_weights_accessor(data_path, total_path + "batch_normalization_" + param_path2 + "_var.npy"),
@@ -565,7 +567,7 @@ private:
             .set_name("conv2d_" + param_path2 + "/BatchNorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LEAKY_RELU, 0.1f)).set_name("conv2d_" + param_path2 + "/LeakyRelu");
 
-        graph << EltwiseLayer(std::move(i_a), std::move(i_b), EltwiseOperation::Add);
+        graph << EltwiseLayer(std::move(i_a), std::move(i_b), EltwiseOperation::Add).set_name("").set_name("add_" + param_path + "_" + param_path2);
     }
 };
 

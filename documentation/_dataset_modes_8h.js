@@ -7,7 +7,7 @@ var _dataset_modes_8h =
       [ "NIGHTLY", "_dataset_modes_8h.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfad791cd54143e331164a2b216451a5dd3", null ]
     ] ],
     [ "dataset_mode_from_name", "_dataset_modes_8h.xhtml#a1afd1c498fb3a1d2315e4c6d87d15754", null ],
-    [ "operator &", "_dataset_modes_8h.xhtml#a54873f7d8b0103a09a589b01e8cdd31f", null ],
+    [ "operator &", "_dataset_modes_8h.xhtml#afe6212a8969f1c67ad9dc905e0259211", null ],
     [ "operator<<", "_dataset_modes_8h.xhtml#a9a57b6c1d3a82001ad4f83676fbb9302", null ],
     [ "operator>>", "_dataset_modes_8h.xhtml#aecd1325e94d00cb3d986e766000b3e38", null ],
     [ "operator|", "_dataset_modes_8h.xhtml#ab41cdda516d16fb4d7f1217fc93c7814", null ],

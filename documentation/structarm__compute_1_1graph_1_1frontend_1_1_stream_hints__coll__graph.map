@@ -1,2 +1,7 @@
 <map id="StreamHints" name="StreamHints">
+<area shape="rect" id="node1" title="Hints that can be passed to the stream to expose parameterization." alt="" coords="183,109,286,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,67,32"/>
+<area shape="rect" id="node3" title=" " alt="" coords="91,5,197,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="221,5,432,32"/>
+<area shape="rect" id="node5" title=" " alt="" coords="457,5,602,32"/>
 </map>

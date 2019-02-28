@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,5 +47,16 @@ using MemoryMappings = std::map<IMemory *, size_t>;
 /** A map of the groups and memory mappings */
 using GroupMappings = std::map<size_t, MemoryMappings>;
 
-} // arm_compute
+/** Meta-data information for each blob */
+struct BlobInfo
+{
+    BlobInfo(size_t size_ = 0, size_t alignment_ = 0, size_t owners_ = 1)
+        : size(size_), alignment(alignment_), owners(owners_)
+    {
+    }
+    size_t size;      /**< Blob size */
+    size_t alignment; /**< Blob alignment */
+    size_t owners;    /**< Number of owners in parallel of the blob */
+};
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_TYPES_H__ */

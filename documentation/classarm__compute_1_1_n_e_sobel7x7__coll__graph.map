@@ -1,3 +1,4 @@
 <map id="NESobel7x7" name="NESobel7x7">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="15,5,91,32"/>
+<area shape="rect" id="node1" title="Basic function to execute sobel 7x7 filter." alt="" coords="5,80,104,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="15,5,94,32"/>
 </map>

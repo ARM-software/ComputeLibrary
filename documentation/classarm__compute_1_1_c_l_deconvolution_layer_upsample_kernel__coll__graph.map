@@ -1,4 +1,5 @@
 <map id="CLDeconvolutionLayerUpsampleKernel" name="CLDeconvolutionLayerUpsampleKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="72,80,152,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="81,5,143,32"/>
+<area shape="rect" id="node1" title="Interface for the Deconvolution layer kernel on OpenCL." alt="" coords="5,155,235,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="80,80,160,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="88,5,152,32"/>
 </map>

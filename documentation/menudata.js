@@ -1,3 +1,26 @@
+/*
+@ @licstart  The following is the entire license notice for the
+JavaScript code in this file.
+
+Copyright (C) 1997-2017 by Dimitri van Heesch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+@licend  The above is the entire license notice
+for the JavaScript code in this file
+*/
 var menudata={children:[
 {text:"Main Page",url:"index.xhtml"},
 {text:"Related Pages",url:"pages.xhtml"},
@@ -5,8 +28,7 @@ var menudata={children:[
 {text:"Namespace List",url:"namespaces.xhtml"},
 {text:"Namespace Members",url:"namespacemembers.xhtml",children:[
 {text:"All",url:"namespacemembers.xhtml",children:[
-{text:"_",url:"namespacemembers.xhtml#index__"},
-{text:"a",url:"namespacemembers_a.xhtml#index_a"},
+{text:"a",url:"namespacemembers.xhtml#index_a"},
 {text:"b",url:"namespacemembers_b.xhtml#index_b"},
 {text:"c",url:"namespacemembers_c.xhtml#index_c"},
 {text:"d",url:"namespacemembers_d.xhtml#index_d"},
@@ -57,27 +79,28 @@ var menudata={children:[
 {text:"y",url:"namespacemembers_func_y.xhtml#index_y"},
 {text:"z",url:"namespacemembers_func_z.xhtml#index_z"}]},
 {text:"Variables",url:"namespacemembers_vars.xhtml",children:[
-{text:"_",url:"namespacemembers_vars.xhtml#index__"},
 {text:"a",url:"namespacemembers_vars.xhtml#index_a"},
-{text:"b",url:"namespacemembers_vars.xhtml#index_b"},
-{text:"c",url:"namespacemembers_vars.xhtml#index_c"},
-{text:"d",url:"namespacemembers_vars.xhtml#index_d"},
-{text:"e",url:"namespacemembers_vars.xhtml#index_e"},
-{text:"f",url:"namespacemembers_vars.xhtml#index_f"},
-{text:"g",url:"namespacemembers_vars.xhtml#index_g"},
-{text:"h",url:"namespacemembers_vars.xhtml#index_h"},
-{text:"i",url:"namespacemembers_vars.xhtml#index_i"},
-{text:"l",url:"namespacemembers_vars.xhtml#index_l"},
-{text:"m",url:"namespacemembers_vars.xhtml#index_m"},
-{text:"n",url:"namespacemembers_vars.xhtml#index_n"},
-{text:"o",url:"namespacemembers_vars.xhtml#index_o"},
-{text:"p",url:"namespacemembers_vars.xhtml#index_p"},
-{text:"q",url:"namespacemembers_vars.xhtml#index_q"},
-{text:"r",url:"namespacemembers_vars.xhtml#index_r"},
-{text:"s",url:"namespacemembers_vars.xhtml#index_s"},
-{text:"t",url:"namespacemembers_vars.xhtml#index_t"},
-{text:"v",url:"namespacemembers_vars.xhtml#index_v"},
-{text:"w",url:"namespacemembers_vars.xhtml#index_w"}]},
+{text:"b",url:"namespacemembers_vars_b.xhtml#index_b"},
+{text:"c",url:"namespacemembers_vars_c.xhtml#index_c"},
+{text:"d",url:"namespacemembers_vars_d.xhtml#index_d"},
+{text:"e",url:"namespacemembers_vars_e.xhtml#index_e"},
+{text:"f",url:"namespacemembers_vars_f.xhtml#index_f"},
+{text:"g",url:"namespacemembers_vars_g.xhtml#index_g"},
+{text:"h",url:"namespacemembers_vars_h.xhtml#index_h"},
+{text:"i",url:"namespacemembers_vars_i.xhtml#index_i"},
+{text:"k",url:"namespacemembers_vars_k.xhtml#index_k"},
+{text:"l",url:"namespacemembers_vars_l.xhtml#index_l"},
+{text:"m",url:"namespacemembers_vars_m.xhtml#index_m"},
+{text:"n",url:"namespacemembers_vars_n.xhtml#index_n"},
+{text:"o",url:"namespacemembers_vars_o.xhtml#index_o"},
+{text:"p",url:"namespacemembers_vars_p.xhtml#index_p"},
+{text:"q",url:"namespacemembers_vars_q.xhtml#index_q"},
+{text:"r",url:"namespacemembers_vars_r.xhtml#index_r"},
+{text:"s",url:"namespacemembers_vars_s.xhtml#index_s"},
+{text:"t",url:"namespacemembers_vars_t.xhtml#index_t"},
+{text:"u",url:"namespacemembers_vars_u.xhtml#index_u"},
+{text:"v",url:"namespacemembers_vars_v.xhtml#index_v"},
+{text:"w",url:"namespacemembers_vars_w.xhtml#index_w"}]},
 {text:"Typedefs",url:"namespacemembers_type.xhtml",children:[
 {text:"a",url:"namespacemembers_type.xhtml#index_a"},
 {text:"b",url:"namespacemembers_type_b.xhtml#index_b"},
@@ -95,7 +118,6 @@ var menudata={children:[
 {text:"o",url:"namespacemembers_type_o.xhtml#index_o"},
 {text:"p",url:"namespacemembers_type_p.xhtml#index_p"},
 {text:"q",url:"namespacemembers_type_q.xhtml#index_q"},
-{text:"r",url:"namespacemembers_type_r.xhtml#index_r"},
 {text:"s",url:"namespacemembers_type_s.xhtml#index_s"},
 {text:"t",url:"namespacemembers_type_t.xhtml#index_t"},
 {text:"u",url:"namespacemembers_type_u.xhtml#index_u"},
@@ -125,7 +147,7 @@ var menudata={children:[
 {text:"Class Hierarchy",url:"inherits.xhtml"},
 {text:"Data Fields",url:"functions.xhtml",children:[
 {text:"All",url:"functions.xhtml",children:[
-{text:"_",url:"functions.xhtml#index__"},
+{text:"_",url:"functions.xhtml#index__5F"},
 {text:"a",url:"functions_a.xhtml#index_a"},
 {text:"b",url:"functions_b.xhtml#index_b"},
 {text:"c",url:"functions_c.xhtml#index_c"},
@@ -152,7 +174,7 @@ var menudata={children:[
 {text:"x",url:"functions_x.xhtml#index_x"},
 {text:"y",url:"functions_y.xhtml#index_y"},
 {text:"z",url:"functions_z.xhtml#index_z"},
-{text:"~",url:"functions_0x7e.xhtml#index_0x7e"}]},
+{text:"~",url:"functions_~.xhtml#index__7E"}]},
 {text:"Functions",url:"functions_func.xhtml",children:[
 {text:"a",url:"functions_func.xhtml#index_a"},
 {text:"b",url:"functions_func_b.xhtml#index_b"},
@@ -180,9 +202,9 @@ var menudata={children:[
 {text:"x",url:"functions_func_x.xhtml#index_x"},
 {text:"y",url:"functions_func_y.xhtml#index_y"},
 {text:"z",url:"functions_func_z.xhtml#index_z"},
-{text:"~",url:"functions_func_0x7e.xhtml#index_0x7e"}]},
+{text:"~",url:"functions_func_~.xhtml#index__7E"}]},
 {text:"Variables",url:"functions_vars.xhtml",children:[
-{text:"_",url:"functions_vars.xhtml#index__"},
+{text:"_",url:"functions_vars.xhtml#index__5F"},
 {text:"a",url:"functions_vars_a.xhtml#index_a"},
 {text:"b",url:"functions_vars_b.xhtml#index_b"},
 {text:"c",url:"functions_vars_c.xhtml#index_c"},
@@ -210,9 +232,10 @@ var menudata={children:[
 {text:"y",url:"functions_vars_y.xhtml#index_y"},
 {text:"z",url:"functions_vars_z.xhtml#index_z"}]},
 {text:"Typedefs",url:"functions_type.xhtml",children:[
-{text:"_",url:"functions_type.xhtml#index__"},
+{text:"_",url:"functions_type.xhtml#index__5F"},
 {text:"b",url:"functions_type.xhtml#index_b"},
 {text:"c",url:"functions_type.xhtml#index_c"},
+{text:"d",url:"functions_type.xhtml#index_d"},
 {text:"e",url:"functions_type.xhtml#index_e"},
 {text:"f",url:"functions_type.xhtml#index_f"},
 {text:"i",url:"functions_type.xhtml#index_i"},
@@ -228,7 +251,7 @@ var menudata={children:[
 {text:"File List",url:"files.xhtml"},
 {text:"Globals",url:"globals.xhtml",children:[
 {text:"All",url:"globals.xhtml",children:[
-{text:"_",url:"globals.xhtml#index__"},
+{text:"_",url:"globals.xhtml#index__5F"},
 {text:"a",url:"globals_a.xhtml#index_a"},
 {text:"b",url:"globals_b.xhtml#index_b"},
 {text:"c",url:"globals_c.xhtml#index_c"},
@@ -289,7 +312,7 @@ var menudata={children:[
 {text:"t",url:"globals_type.xhtml#index_t"},
 {text:"v",url:"globals_type.xhtml#index_v"}]},
 {text:"Macros",url:"globals_defs.xhtml",children:[
-{text:"_",url:"globals_defs.xhtml#index__"},
+{text:"_",url:"globals_defs.xhtml#index__5F"},
 {text:"a",url:"globals_defs_a.xhtml#index_a"},
 {text:"c",url:"globals_defs_c.xhtml#index_c"},
 {text:"d",url:"globals_defs_d.xhtml#index_d"},

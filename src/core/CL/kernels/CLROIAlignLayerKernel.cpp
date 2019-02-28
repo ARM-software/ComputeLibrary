@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,9 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
+using namespace arm_compute::misc::shape_calculator;
 
 namespace arm_compute
 {
@@ -47,18 +50,15 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *rois, ITe
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NCHW);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC, DataLayout::NCHW);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) || (output->dimension(1) != pool_info.pooled_height()));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
-        ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info), output->tensor_shape());
     }
-
     return Status{};
 }
 
@@ -67,8 +67,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2), rois->dimension(1));
+    const TensorShape output_shape = compute_roi_align_shape(*input, *rois, pool_info);
     auto_init_if_empty((*output), output_shape, 1, input->data_type());
+    output->set_data_layout(input->data_layout());
 
     // Configure kernel window
     const unsigned int num_elems_processed_per_iteration = 1;
@@ -107,12 +108,13 @@ void CLROIAlignLayerKernel::configure(const ICLTensor *input, const ICLTensor *r
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_SIZE=" + get_data_size_from_data_type(input->info()->data_type()));
-    build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(Window::DimX)));
-    build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(Window::DimY)));
-    build_opts.add_option("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(Window::DimZ)));
+    build_opts.add_option("-DMAX_DIM_X=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH))));
+    build_opts.add_option("-DMAX_DIM_Y=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT))));
+    build_opts.add_option("-DMAX_DIM_Z=" + support::cpp11::to_string(_input->info()->dimension(get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL))));
     build_opts.add_option("-DPOOLED_DIM_X=" + support::cpp11::to_string(pool_info.pooled_width()));
     build_opts.add_option("-DPOOLED_DIM_Y=" + support::cpp11::to_string(pool_info.pooled_height()));
     build_opts.add_option("-DSPATIAL_SCALE=" + float_to_string_with_full_precision(pool_info.spatial_scale()));
+    build_opts.add_option_if(input->info()->data_layout() == DataLayout::NHWC, "-DNHWC");
     build_opts.add_option_if(pool_info.sampling_ratio() > 0, "-DSAMPLING_RATIO=" + support::cpp11::to_string(pool_info.sampling_ratio()));
 
     // Create kernel
@@ -137,7 +139,7 @@ void CLROIAlignLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     Window slice_rois = slice;
     // Parallelize spatially and across the fourth dimension of the output tensor (also across ROITensor)
     slice_rois.set_dimension_step(Window::DimX, _rois->info()->dimension(0));
-    slice.set(Window::DimZ, window[3]);
+    slice.set(get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL), window[3]);
 
     // Set arguments
     unsigned int idx = 0;

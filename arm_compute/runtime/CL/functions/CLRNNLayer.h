@@ -25,8 +25,8 @@
 #define __ARM_COMPUTE_CLRNN_LAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
+#include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
@@ -72,16 +72,16 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup              _memory_group;
-    CLGEMM                     _gemm_state_f;
-    CLArithmeticAdditionKernel _add_kernel;
-    CLActivationLayerKernel    _activation_kernel;
-    CLFullyConnectedLayer      _fully_connected_kernel;
-    CLCopyKernel               _copy_kernel;
-    CLTensor                   _fully_connected_out;
-    CLTensor                   _gemm_output;
-    CLTensor                   _add_output;
-    bool                       _is_prepared;
+    CLMemoryGroup                        _memory_group;
+    CLGEMM                               _gemm_state_f;
+    CLSaturatedArithmeticOperationKernel _add_kernel;
+    CLActivationLayerKernel              _activation_kernel;
+    CLFullyConnectedLayer                _fully_connected_kernel;
+    CLCopyKernel                         _copy_kernel;
+    CLTensor                             _fully_connected_out;
+    CLTensor                             _gemm_output;
+    CLTensor                             _add_output;
+    bool                                 _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_CLRNN_LAYER_H__ */

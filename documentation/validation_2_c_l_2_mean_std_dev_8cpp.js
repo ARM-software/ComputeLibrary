@@ -2,8 +2,9 @@ var validation_2_c_l_2_mean_std_dev_8cpp =
 [
     [ "CLMeanStdDevFixture", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a631f2be1b59ac1d5df3361b5440664da", null ],
     [ "combine", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#adf46d39c97281c672f724cdae74d651e", null ],
-    [ "combine", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a416fc2009eae84996b15c051f768639b", null ],
-    [ "DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a7240e6d673468111723e7b4a20145aeb", null ],
+    [ "combine", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a2fb5fe73a5c8287a2b91c01e3de7b41a", null ],
+    [ "DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#ab437980729c1a4aca8155d3bf96f40d1", null ],
+    [ "DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a327ea02cf18e7b8abed280f64b6e6d07", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a07b92ba1fb6599236c1accbde21a0f75", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a2e07f795abdc267b579e8768d134923c", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_mean_std_dev_8cpp.xhtml#a2391398d95aaadc49fddc3c77d189cf0", null ],

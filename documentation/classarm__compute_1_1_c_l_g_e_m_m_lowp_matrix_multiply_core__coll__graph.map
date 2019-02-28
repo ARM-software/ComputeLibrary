@@ -1,3 +1,4 @@
 <map id="CLGEMMLowpMatrixMultiplyCore" name="CLGEMMLowpMatrixMultiplyCore">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="77,5,153,32"/>
+<area shape="rect" id="node1" title="Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL." alt="" coords="5,80,232,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="79,5,158,32"/>
 </map>

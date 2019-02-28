@@ -1,3 +1,4 @@
 <map id="CLBufferAllocator" name="CLBufferAllocator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface. " alt="" coords="29,5,107,32"/>
+<area shape="rect" id="node1" title="Default OpenCL cl buffer allocator implementation." alt="" coords="5,80,137,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface." alt="" coords="31,5,112,32"/>
 </map>

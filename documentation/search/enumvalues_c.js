@@ -11,6 +11,7 @@ var searchData=
   ['normalizationlayer',['NormalizationLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a227ecc6e858c8d1f61664f1967173bea',1,'arm_compute::graph']]],
   ['normalizeplanaryuvlayer',['NormalizePlanarYUVLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a7844e69eea1226939211d12a975aa512',1,'arm_compute::graph']]],
   ['not_5frun',['NOT_RUN',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bad3cbb6cb9043ad908cdd5414236e6603',1,'arm_compute::test::framework::TestResult']]],
+  ['notequal',['NotEqual',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca19bb0af2c3c530538cb41aff7f235b96',1,'arm_compute']]],
   ['nv12',['NV12',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a202f5d8c2c70d31048154d8b8b28e755',1,'arm_compute']]],
   ['nv21',['NV21',['../namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58a8e9f6aa1af7e0abbc7e64521e6ffe1b4',1,'arm_compute']]]
 ];

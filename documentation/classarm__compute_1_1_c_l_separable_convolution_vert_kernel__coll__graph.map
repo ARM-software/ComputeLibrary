@@ -1,6 +1,7 @@
 <map id="CLSeparableConvolutionVertKernel&lt; matrix_size &gt;" name="CLSeparableConvolutionVertKernel&lt; matrix_size &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="32,229,169,256"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="41,155,161,181"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="61,80,141,107"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="69,5,132,32"/>
+<area shape="rect" id="node1" title="Kernel for the Vertical pass of a Separable Convolution." alt="" coords="5,304,209,345"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="36,229,179,256"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="45,155,169,181"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="67,80,147,107"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="75,5,139,32"/>
 </map>

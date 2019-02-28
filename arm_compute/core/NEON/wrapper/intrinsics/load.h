@@ -67,7 +67,6 @@ VLOADQ_IMPL(float, float32x4_t, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VLOADQ_IMPL(float16_t, float16x8_t, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 #undef VLOAD_IMPL
 } // namespace wrapper
 } // namespace arm_compute

@@ -41,6 +41,7 @@ var arm__compute_2graph_2_types_8h =
       [ "ConvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16aa252659b59a03bc61e5ec827ab4448b7", null ],
       [ "DeconvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ac814c26a7c5317e2a2f58fe0e5a0d410", null ],
       [ "DepthwiseConvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a5b7955cb74be105cc7e044a370d4fce8", null ],
+      [ "DetectionOutputLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ae1b0b91c003f871664a4e289977ef02e", null ],
       [ "EltwiseLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ad1b3837fe6a80018e7002c7f7905439d", null ],
       [ "FlattenLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16ad87240455a60f188b358a370fe1a83a5", null ],
       [ "FullyConnectedLayer", "arm__compute_2graph_2_types_8h.xhtml#acac9cbaeea226ed297804c012dc12b16a658061ff1dac70c02116fae6c044da1a", null ],

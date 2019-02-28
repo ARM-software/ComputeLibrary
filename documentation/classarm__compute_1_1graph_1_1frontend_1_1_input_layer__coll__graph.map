@@ -1,3 +1,4 @@
 <map id="InputLayer" name="InputLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface. " alt="" coords="17,5,76,32"/>
+<area shape="rect" id="node1" title="Input Layer." alt="" coords="5,80,95,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml" title="ILayer interface." alt="" coords="20,5,80,32"/>
 </map>

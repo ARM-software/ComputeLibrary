@@ -1,3 +1,4 @@
 <map id="MemoryManagerContext" name="MemoryManagerContext">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface. " alt="" coords="49,5,127,32"/>
+<area shape="rect" id="node1" title="Contains structs required for memory management." alt="" coords="5,95,185,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface." alt="" coords="55,5,136,32"/>
 </map>

@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v18.11"
-SONAME_VERSION="13.0.0"
+VERSION = "v19.02"
+SONAME_VERSION="14.0.0"
 
 Import('env')
 Import('vars')
@@ -161,7 +161,11 @@ arm_compute_env.Append(LIBS = ['dl'])
 core_files = Glob('src/core/*.cpp')
 core_files += Glob('src/core/CPP/*.cpp')
 core_files += Glob('src/core/CPP/kernels/*.cpp')
-core_files += Glob('src/core/utils/*/*.cpp')
+core_files += Glob('src/core/utils/helpers/*.cpp')
+core_files += Glob('src/core/utils/io/*.cpp')
+core_files += Glob('src/core/utils/quantization/*.cpp')
+if env["logging"]:
+    core_files += Glob('src/core/utils/logging/*.cpp')
 
 runtime_files = Glob('src/runtime/*.cpp')
 runtime_files += Glob('src/runtime/CPP/ICPPSimpleFunction.cpp')
@@ -186,6 +190,7 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
     runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
+    runtime_files += Glob('src/runtime/CL/gemm_reshaped/*.cpp')
 
     graph_files += Glob('src/graph/backends/CL/*.cpp')
 

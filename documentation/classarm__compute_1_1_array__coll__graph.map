@@ -1,3 +1,4 @@
 <map id="Array&lt; T &gt;" name="Array&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_array.xhtml" title="Array of type T. " alt="" coords="5,5,95,32"/>
+<area shape="rect" id="node1" title="Basic implementation of the IArray interface which allocates a static number of T values." alt="" coords="7,80,100,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_array.xhtml" title="Array of type T." alt="" coords="5,5,101,32"/>
 </map>

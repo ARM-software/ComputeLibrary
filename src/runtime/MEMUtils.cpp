@@ -27,7 +27,7 @@
 
 #ifndef BARE_METAL
 #include <fstream>
-#include <regex>
+#include <iterator>
 #include <sstream>
 #endif // ifndef BARE_METAL
 
@@ -43,41 +43,33 @@ void parse_mem_info(size_t &total, size_t &free, size_t &buffer)
     size_t        memfree  = 0;
     std::ifstream meminfo_f;
     meminfo_f.open("/proc/meminfo", std::ios::in);
+
     if(meminfo_f.is_open())
     {
-        std::stringstream str_stream;
-        str_stream << meminfo_f.rdbuf();
-        const std::string str = str_stream.str();
-        try
+        std::string line;
+        while(bool(getline(meminfo_f, line)))
         {
-            std::smatch match;
-            if(std::regex_search(str, match, std::regex("MemTotal: (.*)kB")) && match.size() > 1)
+            std::istringstream       iss(line);
+            std::vector<std::string> tokens((std::istream_iterator<std::string>(iss)),
+                                            std::istream_iterator<std::string>());
+            if(tokens[0] == "MemTotal:")
             {
-                const std::string result = match.str(1);
-                total                    = std::stoul(result, nullptr, 0);
+                total = arm_compute::support::cpp11::stoul(tokens[1], nullptr);
             }
-            if(std::regex_search(str, match, std::regex("MemFree: (.*)kB")) && match.size() > 1)
+            else if(tokens[0] == "MemFree:")
             {
-                const std::string result = match.str(1);
-                memfree                  = std::stoul(result, nullptr, 0);
+                memfree = arm_compute::support::cpp11::stoul(tokens[1], nullptr);
             }
-            if(std::regex_search(str, match, std::regex("Buffers: (.*)kB")) && match.size() > 1)
+            else if(tokens[0] == "Buffers:")
             {
-                const std::string result = match.str(1);
-                buffer                   = std::stoul(result, nullptr, 0);
+                buffer = arm_compute::support::cpp11::stoul(tokens[1], nullptr);
             }
-            if(std::regex_search(str, match, std::regex("Cached: (.*)kB")) && match.size() > 1)
+            else if(tokens[0] == "Cached:")
             {
-                const std::string result = match.str(1);
-                memcache                 = std::stoul(result, nullptr, 0);
+                memcache = arm_compute::support::cpp11::stoul(tokens[1], nullptr);
             }
-            free = memfree + (buffer + memcache);
         }
-        catch(std::regex_error &e)
-        {
-            // failed parsing /proc/meminfo
-            // return 0s on all fields
-        }
+        free = memfree + (buffer + memcache);
     }
 #endif // ifndef BARE_METAL
 }

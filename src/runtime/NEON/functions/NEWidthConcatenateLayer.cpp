@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
     _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info;
-    for(unsigned int i = 0; i < _num_inputs; i++)
+    for(unsigned int i = 0; i < _num_inputs; ++i)
     {
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
@@ -80,7 +80,7 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
 
     _concat_kernels_vector = arm_compute::support::cpp14::make_unique<NEWidthConcatenateLayerKernel[]>(_num_inputs);
 
-    for(unsigned int i = 0; i < _num_inputs; i++)
+    for(unsigned int i = 0; i < _num_inputs; ++i)
     {
         _concat_kernels_vector[i].configure(inputs_vector.at(i), width_offset, output);
         width_offset += inputs_vector.at(i)->info()->dimension(0);
@@ -89,7 +89,7 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
 
 void NEWidthConcatenateLayer::run()
 {
-    for(unsigned i = 0; i < _num_inputs; i++)
+    for(unsigned i = 0; i < _num_inputs; ++i)
     {
         NEScheduler::get().schedule(_concat_kernels_vector.get() + i, Window::DimY);
     }

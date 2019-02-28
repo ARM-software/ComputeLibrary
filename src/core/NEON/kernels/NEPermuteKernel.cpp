@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,52 @@ using namespace arm_compute;
 
 namespace
 {
+inline bool is_permutation_supported(const PermutationVector &v)
+{
+    static const std::array<PermutationVector, 6> permutations3 =
+    {
+        {
+            PermutationVector(2U, 0U, 1U),
+            PermutationVector(1U, 2U, 0U),
+            PermutationVector(0U, 1U, 2U),
+            PermutationVector(0U, 2U, 1U),
+            PermutationVector(1U, 0U, 2U),
+            PermutationVector(2U, 1U, 0U),
+        }
+    };
+    static const std::array<PermutationVector, 24> permutations4 =
+    {
+        {
+            PermutationVector(0U, 1U, 2U, 3U),
+            PermutationVector(1U, 0U, 2U, 3U),
+            PermutationVector(2U, 0U, 1U, 3U),
+            PermutationVector(0U, 2U, 1U, 3U),
+            PermutationVector(1U, 2U, 0U, 3U),
+            PermutationVector(2U, 1U, 0U, 3U),
+            PermutationVector(2U, 1U, 3U, 0U),
+            PermutationVector(1U, 2U, 3U, 0U),
+            PermutationVector(3U, 2U, 1U, 0U),
+            PermutationVector(2U, 3U, 1U, 0U),
+            PermutationVector(1U, 3U, 2U, 0U),
+            PermutationVector(3U, 1U, 2U, 0U),
+            PermutationVector(3U, 0U, 2U, 1U),
+            PermutationVector(0U, 3U, 2U, 1U),
+            PermutationVector(2U, 3U, 0U, 1U),
+            PermutationVector(3U, 2U, 0U, 1U),
+            PermutationVector(0U, 2U, 3U, 1U),
+            PermutationVector(2U, 0U, 3U, 1U),
+            PermutationVector(1U, 0U, 3U, 2U),
+            PermutationVector(0U, 1U, 3U, 2U),
+            PermutationVector(3U, 1U, 0U, 2U),
+            PermutationVector(1U, 3U, 0U, 2U),
+            PermutationVector(0U, 3U, 1U, 2U),
+            PermutationVector(3U, 0U, 1U, 2U)
+        }
+    };
+
+    return (permutations3.end() != std::find(permutations3.begin(), permutations3.end(), v)) || (permutations4.end() != std::find(permutations4.begin(), permutations4.end(), v));
+}
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
@@ -50,9 +96,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm != PermutationVector{ 2U, 0U, 1U })
-                                    && (perm != PermutationVector{ 1U, 2U, 0U }),
-                                    "Only [2, 0, 1] and [1, 2, 0] permutation is supported");
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_permutation_supported(perm), "PermutationVector not supported.");
 
     const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
 
@@ -60,6 +105,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 
@@ -70,12 +116,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 template <typename T>
 void NEPermuteKernel::run_permute(const Window &window)
 {
+    const DataLayout input_layout = _input->info()->data_layout();
+
     // Input window
     Window window_in = window;
-    window_in.set(Window::DimX, Window::Dimension(window.x().start(), window.x().end(), window.x().end() - window.x().start()));
-    window_in.set(Window::DimY, Window::Dimension(window.y().start(), window.y().end(), window.y().end() - window.y().start()));
-    window_in.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), window.z().end() - window.z().start()));
-    window_in.set(3, Window::Dimension(window[3].start(), window[3].end(), window[3].end() - window[3].start()));
+
+    // we only support these two configs in arm_compute/core/NEON/kernels/convolution/common/shims.hpp, for all others
+    // we have to fall back to C++
+    if((input_layout == DataLayout::NCHW && _perm == PermutationVector{ 2U, 0U, 1U }) || (input_layout == DataLayout::NHWC && _perm == PermutationVector{ 1U, 2U, 0U }))
+    {
+        window_in.set(Window::DimX, Window::Dimension(window.x().start(), window.x().end(), window.x().end() - window.x().start()));
+        window_in.set(Window::DimY, Window::Dimension(window.y().start(), window.y().end(), window.y().end() - window.y().start()));
+        window_in.set(Window::DimZ, Window::Dimension(window.z().start(), window.z().end(), window.z().end() - window.z().start()));
+        window_in.set(3, Window::Dimension(window[3].start(), window[3].end(), window[3].end() - window[3].start()));
+    }
 
     // Output window
     Window                  window_out(window);
@@ -89,23 +143,53 @@ void NEPermuteKernel::run_permute(const Window &window)
     Iterator in(_input, window_in);
     Iterator out(_output, window_out);
 
-    // CHW -> HWC
-    if(_perm == PermutationVector{ 2U, 0U, 1U })
-    {
-        const int in_row_stride     = _input->info()->strides_in_bytes().y() / sizeof(T);
-        const int in_channel_stride = _input->info()->strides_in_bytes().z() / sizeof(T);
-        const int in_batch_stride   = _input->info()->strides_in_bytes()[3] / sizeof(T);
+    int in_row_stride     = 0;
+    int in_col_stride     = 0;
+    int in_channel_stride = 0;
+    int in_batch_stride   = 0;
+    int n_cols            = 0;
+    int n_rows            = 0;
+    int n_channels        = 0;
+    int n_batches         = 0;
 
+    switch(input_layout)
+    {
+        case DataLayout::NCHW:
+        {
+            in_row_stride     = _input->info()->strides_in_bytes().y() / sizeof(T);
+            in_channel_stride = _input->info()->strides_in_bytes().z() / sizeof(T);
+            in_batch_stride   = _input->info()->strides_in_bytes()[3] / sizeof(T);
+            n_cols            = _input->info()->tensor_shape().x();
+            n_rows            = window_in.y().step();
+            n_channels        = _input->info()->tensor_shape().z();
+            n_batches         = _input->info()->tensor_shape()[3];
+            break;
+        }
+        case DataLayout::NHWC:
+        {
+            in_col_stride   = _input->info()->strides_in_bytes().y() / sizeof(T);
+            in_row_stride   = _input->info()->strides_in_bytes().z() / sizeof(T);
+            in_batch_stride = _input->info()->strides_in_bytes()[3] / sizeof(T);
+            n_channels      = _input->info()->tensor_shape().x();
+            n_cols          = window_in.y().step();
+            n_rows          = _input->info()->tensor_shape().z();
+            n_batches       = _input->info()->tensor_shape()[3];
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Invalid input data layout.");
+            break;
+        }
+    }
+
+    // CHW -> HWC
+    if(input_layout == DataLayout::NCHW && _perm == PermutationVector{ 2U, 0U, 1U })
+    {
         const int out_channel_stride = _output->info()->strides_in_bytes().x() / sizeof(T);
         const int out_col_stride     = _output->info()->strides_in_bytes().y() / sizeof(T);
         const int out_row_stride     = _output->info()->strides_in_bytes().z() / sizeof(T);
         const int out_batch_stride   = _output->info()->strides_in_bytes()[3] / sizeof(T);
-
-        const int n_cols     = _input->info()->tensor_shape().x();
-        const int n_rows     = window_in.y().step();
-        const int n_channels = _input->info()->tensor_shape().z();
-        const int n_batches  = _input->info()->tensor_shape()[3];
-
         execute_window_loop(window_in, [&](const Coordinates & id)
         {
             const int idx = id[0] * out_col_stride + id[1] * out_row_stride + id[2] * out_channel_stride;
@@ -117,22 +201,12 @@ void NEPermuteKernel::run_permute(const Window &window)
         in, out);
     }
     // HWC -> CHW
-    else if(_perm == PermutationVector{ 1U, 2U, 0U })
+    else if(input_layout == DataLayout::NHWC && _perm == PermutationVector{ 1U, 2U, 0U })
     {
-        const int in_col_stride   = _input->info()->strides_in_bytes().y() / sizeof(T);
-        const int in_row_stride   = _input->info()->strides_in_bytes().z() / sizeof(T);
-        const int in_batch_stride = _input->info()->strides_in_bytes()[3] / sizeof(T);
-
         const int out_col_stride     = _output->info()->strides_in_bytes().x() / sizeof(T);
         const int out_row_stride     = _output->info()->strides_in_bytes().y() / sizeof(T);
         const int out_channel_stride = _output->info()->strides_in_bytes().z() / sizeof(T);
         const int out_batch_stride   = _output->info()->strides_in_bytes()[3] / sizeof(T);
-
-        const int n_channels = _input->info()->tensor_shape().x();
-        const int n_cols     = window_in.y().step();
-        const int n_rows     = _input->info()->tensor_shape().z();
-        const int n_batches  = _input->info()->tensor_shape()[3];
-
         execute_window_loop(window_in, [&](const Coordinates & id)
         {
             const int idx = id[0] * out_channel_stride + id[1] * out_col_stride + id[2] * out_row_stride;
@@ -145,7 +219,18 @@ void NEPermuteKernel::run_permute(const Window &window)
     }
     else
     {
-        ARM_COMPUTE_ERROR("Unsupported permutation vector");
+        // All other cases fall back to C++
+        // Permute strides
+        Strides strides      = _output->info()->strides_in_bytes();
+        Strides perm_strides = strides;
+        permute_strides(perm_strides, _perm);
+        const int perm_stride_3 = _input->info()->num_dimensions() >= 4 ? perm_strides[3] : 0;
+        execute_window_loop(window, [&](const Coordinates & id)
+        {
+            const int idx                             = id[0] * perm_strides[0] + id[1] * perm_strides[1] + id[2] * perm_strides[2] + id[3] * perm_stride_3;
+            *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
+        },
+        in, out);
     }
 }
 

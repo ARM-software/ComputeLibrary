@@ -1,3 +1,4 @@
 <map id="UpsampleLayerNode" name="UpsampleLayerNode">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface. " alt="" coords="49,5,106,32"/>
+<area shape="rect" id="node1" title="Upsample Layer node." alt="" coords="5,80,161,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="54,5,113,32"/>
 </map>

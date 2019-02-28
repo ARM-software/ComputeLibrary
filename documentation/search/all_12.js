@@ -25,5 +25,6 @@ var searchData=
   ['quantize_5fdown_5fint32_5fto_5fuint8_5fscale_5frelu_5fcases',['quantize_down_int32_to_uint8_scale_relu_cases',['../namespacearm__compute_1_1test_1_1validation.xhtml#ab39cf9de6ce4ea1cac5ddc8d2ca3175f',1,'arm_compute::test::validation']]],
   ['quantizedactivationdataset',['QuantizedActivationDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a0b8743d7c78a9fa2c303aa1b255a1b8e',1,'arm_compute::test::validation']]],
   ['quantizedactivationfunctionsdataset',['QuantizedActivationFunctionsDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a6716299a6877933f664cdc9796f6c924',1,'arm_compute::test::validation']]],
+  ['quantizedactivationfunctionssmalldataset',['QuantizedActivationFunctionsSmallDataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a0c4de6fef335f27d37630b6f16ed0f24',1,'arm_compute::test::validation']]],
   ['queue',['queue',['../classarm__compute_1_1_c_l_scheduler.xhtml#ad381d1aed28b4b1e1f5a710633934580',1,'arm_compute::CLScheduler']]]
 ];

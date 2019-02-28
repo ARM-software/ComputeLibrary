@@ -39,7 +39,7 @@ class CLScale : public ICLSimpleFunction
 public:
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
-     * @param[in,out] input                 Source tensor. Data types supported: U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[in,out] input                 Source tensor. Data types supported: U8/QASYMM8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]    output                Destination tensor. Data types supported: Same as @p input
      *                                      All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]     policy                The interpolation type.
@@ -52,7 +52,7 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLScale
      *
-     * @param[in] input                 Source tensor info. Data types supported: U8/S16/F16/F32.
+     * @param[in] input                 Source tensor info. Data types supported: U8/QASYMM8/S16/F16/F32.
      * @param[in] output                Output tensor info. Data type supported: Same as @p input
      *                                  All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in] policy                The interpolation type.

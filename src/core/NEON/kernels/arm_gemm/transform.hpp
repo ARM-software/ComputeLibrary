@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,11 +81,14 @@ struct TransformImpl {
                     }
                 }
                 // "row" tail - row is out of range so fill with zeros always.
-                for (int row = 0; row < blank_rows; row++) {
-                    for (int col=0; col < (fill_cols + blank_cols); col++) {
-                        *out++ = static_cast<TOut>(0);
-                    }
+                TOut zeroval = static_cast<TOut>(0);
+                int pads = blank_rows * (fill_cols + blank_cols);
+
+                for (int i=0; i<pads; i++) {
+                    out[i] = zeroval;
                 }
+
+                out += pads;
             }
         }
     }

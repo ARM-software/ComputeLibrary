@@ -70,7 +70,7 @@ inline TYPE lrelu_op(TYPE x)
 // Soft RELU Activation
 inline TYPE srelu_op(TYPE x)
 {
-    return LOG_OP(ADD_OP((TYPE)CONST_ONE, EXP_OP(x)));
+    return CONVERT(LOG_OP(ADD_OP((VEC_DATA_TYPE(float, VEC_SIZE))CONST_ONE, EXP_OP(CONVERT(x, VEC_DATA_TYPE(float, VEC_SIZE))))), TYPE);
 }
 // Absolute Activation
 inline TYPE abs_op(TYPE x)

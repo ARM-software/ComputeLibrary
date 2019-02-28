@@ -80,8 +80,10 @@ std::array<typename std::iterator_traits<Iterator>::value_type, N> make_array(It
  *
  *  @return Clamped value.
  */
-template <typename T>
-inline T clamp(const T &n, const T &lower, const T &upper)
+template <typename DataType, typename RangeType = DataType>
+inline DataType clamp(const DataType &n,
+                      const DataType &lower = std::numeric_limits<RangeType>::lowest(),
+                      const DataType &upper = std::numeric_limits<RangeType>::max())
 {
     return std::max(lower, std::min(n, upper));
 }
@@ -126,22 +128,6 @@ template <typename F, typename T, typename U, typename... Us>
 inline auto foldl(F &&func, T &&initial, U &&value, Us &&... values) -> decltype(func(std::forward<T>(initial), std::forward<U>(value)))
 {
     return foldl(std::forward<F>(func), func(std::forward<T>(initial), std::forward<U>(value)), std::forward<Us>(values)...);
-}
-
-/** Type cast with saturation.
- *
- * @param[in] val Value of type U to cast.
- *
- * @return Original value clamped to numeric limits of T and converted to type T.
- *
- * @warning Numeric limits of T must be representable without loss in type U.
- */
-template <typename T, typename U>
-T saturate_cast(U val)
-{
-    const auto low  = static_cast<U>(std::numeric_limits<T>::lowest());
-    const auto high = static_cast<U>(std::numeric_limits<T>::max());
-    return static_cast<T>(clamp(val, low, high));
 }
 
 /** Perform an index sort of a given vector.

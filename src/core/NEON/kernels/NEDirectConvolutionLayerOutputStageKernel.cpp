@@ -431,21 +431,13 @@ void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITe
     uint8x16_t      min                           = vdupq_n_u8(0);
     uint8x16_t      max                           = vdupq_n_u8(255);
 
-    Window window_bias = window;
-    window_bias.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_bias.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    window_bias.set(3, Window::Dimension(0, 0, 0));
-
     Iterator in(input, window);
-    Iterator bi(bias, window_bias);
-
     Iterator out(output, window);
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        // Get bias and pointer to input
+        // Get pointer to input
         const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr());
 
-        // Accumulate bias
         int32x4x4_t v_in =
         {
             {
@@ -459,7 +451,7 @@ void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITe
         const auto out_ptr = out.ptr();
         vst1q_u8(out_ptr, finalize_quantization<false>(v_in, result_fixedpoint_multiplier, result_shift, result_offset_after_shift_s32, min, max));
     },
-    in, bi, out);
+    in, out);
 }
 } // namespace
 
@@ -498,6 +490,8 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 
+    const bool has_bias = bias != nullptr;
+
     // Set appropriate function
     if(input->info()->data_layout() == DataLayout::NCHW)
     {
@@ -511,13 +505,27 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
             {
-                _func = (output == nullptr) ? &output_stage_nchw<float16_t, float16_t, true, true> : &output_stage_nchw<float16_t, float16_t, false, true>;
+                if(has_bias)
+                {
+                    _func = (output == nullptr) ? &output_stage_nchw<float16_t, float16_t, true, true> : &output_stage_nchw<float16_t, float16_t, false, true>;
+                }
+                else
+                {
+                    _func = (output == nullptr) ? &output_stage_nchw<float16_t, float16_t, true, false> : &output_stage_nchw<float16_t, float16_t, false, false>;
+                }
                 break;
             }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
             {
-                _func = (output == nullptr) ? &output_stage_nchw<float, float, true, true> : &output_stage_nchw<float, float, false, true>;
+                if(has_bias)
+                {
+                    _func = (output == nullptr) ? &output_stage_nchw<float, float, true, true> : &output_stage_nchw<float, float, false, true>;
+                }
+                else
+                {
+                    _func = (output == nullptr) ? &output_stage_nchw<float, float, true, false> : &output_stage_nchw<float, float, false, false>;
+                }
                 break;
             }
             default:
@@ -532,19 +540,33 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
         {
             case DataType::S32:
             {
-                _func = (output == nullptr) ? &output_stage_nhwc<int32_t, uint8_t, false, false> : &output_stage_nhwc<int32_t, uint8_t, false, true>;
+                _func = (bias == nullptr) ? &output_stage_nhwc<int32_t, uint8_t, false, false> : &output_stage_nhwc<int32_t, uint8_t, false, true>;
                 break;
             }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
             {
-                _func = (output == nullptr) ? &output_stage_nhwc<float16_t, float16_t, true, true> : &output_stage_nhwc<float16_t, float16_t, false, true>;
+                if(has_bias)
+                {
+                    _func = (output == nullptr) ? &output_stage_nhwc<float16_t, float16_t, true, true> : &output_stage_nhwc<float16_t, float16_t, false, true>;
+                }
+                else
+                {
+                    _func = (output == nullptr) ? &output_stage_nhwc<float16_t, float16_t, true, false> : &output_stage_nhwc<float16_t, float16_t, false, false>;
+                }
                 break;
             }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
             case DataType::F32:
             {
-                _func = (output == nullptr) ? &output_stage_nhwc<float, float, true, true> : &output_stage_nhwc<float, float, false, true>;
+                if(has_bias)
+                {
+                    _func = (output == nullptr) ? &output_stage_nhwc<float, float, true, true> : &output_stage_nhwc<float, float, false, true>;
+                }
+                else
+                {
+                    _func = (output == nullptr) ? &output_stage_nhwc<float, float, true, false> : &output_stage_nhwc<float, float, false, false>;
+                }
                 break;
             }
             default:

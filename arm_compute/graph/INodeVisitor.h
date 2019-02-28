@@ -71,6 +71,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(DepthwiseConvolutionLayerNode &n) = 0;
+    /** Visit DetectionOutputLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(DetectionOutputLayerNode &n) = 0;
     /** Visit EltwiseLayerNode.
      *
      * @param[in] n Node to visit.
@@ -167,6 +172,10 @@ public:
         default_visit();
     }
     virtual void visit(ConvolutionLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(DetectionOutputLayerNode &n) override
     {
         default_visit();
     }

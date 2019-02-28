@@ -1,3 +1,4 @@
 <map id="Allocator" name="Allocator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface. " alt="" coords="5,5,83,32"/>
+<area shape="rect" id="node1" title="Default malloc allocator implementation." alt="" coords="7,80,85,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_allocator.xhtml" title="Allocator interface." alt="" coords="5,5,87,32"/>
 </map>

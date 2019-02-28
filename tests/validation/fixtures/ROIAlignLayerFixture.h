@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,9 @@ class ROIAlignLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type)
+    void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout)
     {
-        _target    = compute_target(input_shape, data_type, pool_info, rois_shape);
+        _target    = compute_target(input_shape, data_type, data_layout, pool_info, rois_shape);
         _reference = compute_reference(input_shape, data_type, pool_info, rois_shape);
     }
 
@@ -60,7 +60,7 @@ protected:
     }
 
     template <typename U>
-    void generate_rois(U &&rois, const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, TensorShape rois_shape)
+    void generate_rois(U &&rois, const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, TensorShape rois_shape, DataLayout data_layout = DataLayout::NCHW)
     {
         const size_t values_per_roi = rois_shape.x();
         const size_t num_rois       = rois_shape.y();
@@ -73,8 +73,8 @@ protected:
         const float roi_scale   = pool_info.spatial_scale();
 
         // Calculate distribution bounds
-        const auto scaled_width  = static_cast<T>((shape.x() / roi_scale) / pool_width);
-        const auto scaled_height = static_cast<T>((shape.y() / roi_scale) / pool_height);
+        const auto scaled_width  = static_cast<T>((shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)] / roi_scale) / pool_width);
+        const auto scaled_height = static_cast<T>((shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)] / roi_scale) / pool_height);
         const auto min_width     = static_cast<T>(pool_width / roi_scale);
         const auto min_height    = static_cast<T>(pool_height / roi_scale);
 
@@ -101,13 +101,19 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape         &input_shape,
+    TensorType compute_target(TensorShape                input_shape,
                               DataType                   data_type,
+                              DataLayout                 data_layout,
                               const ROIPoolingLayerInfo &pool_info,
                               const TensorShape          rois_shape)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src         = create_tensor<TensorType>(input_shape, data_type);
+        TensorType src         = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
         TensorType rois_tensor = create_tensor<TensorType>(rois_shape, data_type);
         TensorType dst;
 
@@ -130,7 +136,7 @@ protected:
 
         // Fill tensors
         fill(AccessorType(src));
-        generate_rois(AccessorType(rois_tensor), input_shape, pool_info, rois_shape);
+        generate_rois(AccessorType(rois_tensor), input_shape, pool_info, rois_shape, data_layout);
 
         // Compute function
         roi_align_layer.run();

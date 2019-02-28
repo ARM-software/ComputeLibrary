@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLComputeAllAnchors.h"
 #include "arm_compute/runtime/CL/functions/CLGenerateProposalsLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/CL/functions/CLSlice.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLArrayAccessor.h"
@@ -46,6 +47,31 @@ template <typename U, typename T>
 inline void fill_tensor(U &&tensor, const std::vector<T> &v)
 {
     std::memcpy(tensor.data(), v.data(), sizeof(T) * v.size());
+}
+
+template <typename T>
+inline void fill_tensor(CLAccessor &&tensor, const std::vector<T> &v)
+{
+    if(tensor.data_layout() == DataLayout::NCHW)
+    {
+        std::memcpy(tensor.data(), v.data(), sizeof(T) * v.size());
+    }
+    else
+    {
+        const int channels = tensor.shape()[0];
+        const int width    = tensor.shape()[1];
+        const int height   = tensor.shape()[2];
+        for(int x = 0; x < width; ++x)
+        {
+            for(int y = 0; y < height; ++y)
+            {
+                for(int c = 0; c < channels; ++c)
+                {
+                    *(reinterpret_cast<T *>(tensor(Coordinates(c, x, y)))) = *(reinterpret_cast<const T *>(v.data() + x + y * width + c * height * width));
+                }
+            }
+        }
+    }
 }
 
 const auto ComputeAllInfoDataset = framework::dataset::make("ComputeAllInfo",
@@ -134,17 +160,42 @@ DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, frame
     const int feature_width  = 3;
 
     SimpleTensor<float> anchors_expected(TensorShape(values_per_roi, feature_width * feature_height * num_anchors), DataType::F32);
-    fill_tensor(anchors_expected, std::vector<float> { -38, -16, 53, 31, -84, -40, 99, 55, -176, -88, 191, 103,
-                                                       -22, -16, 69, 31, -68, -40, 115, 55, -160, -88, 207, 103,
-                                                       -6, -16, 85, 31, -52, -40, 131, 55, -144, -88, 223, 103, -38,
-                                                       0, 53, 47, -84, -24, 99, 71,
-                                                       -176, -72, 191, 119, -22, 0, 69, 47, -68, -24, 115, 71, -160, -72, 207,
-                                                       119, -6, 0, 85, 47, -52, -24, 131, 71, -144, -72, 223, 119, -38, 16, 53,
-                                                       63, -84, -8, 99, 87, -176, -56, 191, 135, -22, 16, 69, 63, -68, -8, 115,
-                                                       87, -160, -56, 207, 135, -6, 16, 85, 63, -52, -8, 131, 87, -144, -56, 223,
-                                                       135, -38, 32, 53, 79, -84, 8, 99, 103, -176, -40, 191, 151, -22, 32, 69,
-                                                       79, -68, 8, 115, 103, -160, -40, 207, 151, -6, 32, 85, 79, -52, 8, 131,
-                                                       103, -144, -40, 223, 151
+    fill_tensor(anchors_expected, std::vector<float> { -26, -19, 87, 86,
+                                                       -81, -27, 58, 63,
+                                                       -44, -15, 55, 36,
+                                                       -10, -19, 103, 86,
+                                                       -65, -27, 74, 63,
+                                                       -28, -15, 71, 36,
+                                                       6, -19, 119, 86,
+                                                       -49, -27, 90, 63,
+                                                       -12, -15, 87, 36,
+                                                       -26, -3, 87, 102,
+                                                       -81, -11, 58, 79,
+                                                       -44, 1, 55, 52,
+                                                       -10, -3, 103, 102,
+                                                       -65, -11, 74, 79,
+                                                       -28, 1, 71, 52,
+                                                       6, -3, 119, 102,
+                                                       -49, -11, 90, 79,
+                                                       -12, 1, 87, 52,
+                                                       -26, 13, 87, 118,
+                                                       -81, 5, 58, 95,
+                                                       -44, 17, 55, 68,
+                                                       -10, 13, 103, 118,
+                                                       -65, 5, 74, 95,
+                                                       -28, 17, 71, 68,
+                                                       6, 13, 119, 118,
+                                                       -49, 5, 90, 95,
+                                                       -12, 17, 87, 68,
+                                                       -26, 29, 87, 134,
+                                                       -81, 21, 58, 111,
+                                                       -44, 33, 55, 84,
+                                                       -10, 29, 103, 134,
+                                                       -65, 21, 74, 111,
+                                                       -28, 33, 71, 84,
+                                                       6, 29, 119, 134,
+                                                       -49, 21, 90, 111,
+                                                       -12, 33, 87, 84
                                                      });
 
     CLTensor all_anchors;
@@ -156,17 +207,18 @@ DATA_TEST_CASE(IntegrationTestCaseAllAnchors, framework::DatasetMode::ALL, frame
     anchors.allocator()->allocate();
     all_anchors.allocator()->allocate();
 
-    fill_tensor(CLAccessor(anchors), std::vector<float> { -38, -16, 53, 31,
-                                                          -84, -40, 99, 55,
-                                                          -176, -88, 191, 103
+    fill_tensor(CLAccessor(anchors), std::vector<float> { -26, -19, 87, 86,
+                                                          -81, -27, 58, 63,
+                                                          -44, -15, 55, 36
                                                         });
     // Compute function
     compute_anchors.run();
     validate(CLAccessor(all_anchors), anchors_expected);
 }
 
-DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, framework::dataset::make("DataType", { DataType::F32 }),
-               data_type)
+DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL, combine(framework::dataset::make("DataType", { DataType::F32 }),
+                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+               data_type, data_layout)
 {
     const int values_per_roi = 4;
     const int num_anchors    = 2;
@@ -175,94 +227,105 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 
     std::vector<float> scores_vector
     {
-        5.44218998e-03f, 1.19207997e-03f, 1.12379994e-03f, 1.17181998e-03f,
-        1.20544003e-03f, 6.17993006e-04f, 1.05261997e-05f, 8.91025957e-06f,
-        9.29536981e-09f, 6.09605013e-05f, 4.72735002e-04f, 1.13482002e-10f,
-        1.50015003e-05f, 4.45032993e-06f, 3.21612994e-08f, 8.02662980e-04f,
-        1.40488002e-04f, 3.12508007e-07f, 3.02616991e-06f, 1.97759000e-08f,
-        2.66913995e-02f, 5.26766013e-03f, 5.05053019e-03f, 5.62100019e-03f,
-        5.37420018e-03f, 5.26280981e-03f, 2.48894998e-04f, 1.06842002e-04f,
-        3.92931997e-06f, 1.79388002e-03f, 4.79440019e-03f, 3.41609990e-07f,
-        5.20430971e-04f, 3.34090000e-05f, 2.19159006e-07f, 2.28786003e-03f,
-        5.16703985e-05f, 4.04523007e-06f, 1.79227004e-06f, 5.32449000e-08f
+        5.055894435664012e-04f, 1.270304909820112e-03f, 2.492271113912067e-03f, 5.951663827809190e-03f,
+        7.846917156877404e-03f, 6.776275276294789e-03f, 6.761571012891965e-03f, 4.898292096237725e-03f,
+        6.044472332578605e-04f, 3.203334118759474e-03f, 2.947527908919908e-03f, 6.313238560015770e-03f,
+        7.931767757095738e-03f, 8.764345805102866e-03f, 7.325012199914913e-03f, 4.317069470446271e-03f,
+        2.372537409795522e-03f, 1.589227460352735e-03f, 7.419477503600818e-03f, 3.157690354133824e-05f,
+        1.125915135986472e-03f, 9.865363483872330e-03f, 2.429454743386769e-03f, 2.724460564167563e-03f,
+        7.670409838207963e-03f, 5.558891552328172e-03f, 7.876904873099614e-03f, 6.824746047239291e-03f,
+        7.023817548067892e-03f, 3.651314909238673e-04f, 6.720443709032501e-03f, 5.935615511606155e-03f,
+        2.837349642759774e-03f, 1.787235113610299e-03f, 4.538568889918262e-03f, 3.391510678188818e-03f,
+        7.328474239481874e-03f, 6.306967923936016e-03f, 8.102218904895860e-04f, 3.366646521610209e-03f
     };
 
     std::vector<float> bbx_vector
     {
-        -1.65040009e-02f, -1.84051003e-02f, -1.85930002e-02f, -2.08263006e-02f,
-        -1.83814000e-02f, -2.89172009e-02f, -3.89706008e-02f, -7.52277970e-02f,
-        -1.54091999e-01f, -2.55433004e-02f, -1.77490003e-02f, -1.10340998e-01f,
-        -4.20190990e-02f, -2.71421000e-02f, 6.89801015e-03f, 5.71171008e-02f,
-        -1.75665006e-01f, 2.30021998e-02f, 3.08554992e-02f, -1.39333997e-02f,
-        3.40579003e-01f, 3.91070992e-01f, 3.91624004e-01f, 3.92527014e-01f,
-        3.91445011e-01f, 3.79328012e-01f, 4.26631987e-01f, 3.64892989e-01f,
-        2.76894987e-01f, 5.13985991e-01f, 3.79999995e-01f, 1.80457994e-01f,
-        4.37402993e-01f, 4.18545991e-01f, 2.51549989e-01f, 4.48318988e-01f,
-        1.68564007e-01f, 4.65440989e-01f, 4.21891987e-01f, 4.45928007e-01f,
-        3.27155995e-03f, 3.71480011e-03f, 3.60032008e-03f, 4.27092984e-03f,
-        3.74579988e-03f, 5.95752988e-03f, -3.14473989e-03f, 3.52022005e-03f,
-        -1.88564006e-02f, 1.65188999e-03f, 1.73791999e-03f, -3.56074013e-02f,
-        -1.66615995e-04f, 3.14146001e-03f, -1.11830998e-02f, -5.35363983e-03f,
-        6.49790000e-03f, -9.27671045e-03f, -2.83346009e-02f, -1.61233004e-02f,
-        -2.15505004e-01f, -2.19910994e-01f, -2.20872998e-01f, -2.12831005e-01f,
-        -2.19145000e-01f, -2.27687001e-01f, -3.43973994e-01f, -2.75869995e-01f,
-        -3.19516987e-01f, -2.50418007e-01f, -2.48537004e-01f, -5.08224010e-01f,
-        -2.28724003e-01f, -2.82402009e-01f, -3.75815988e-01f, -2.86352992e-01f,
-        -5.28333001e-02f, -4.43836004e-01f, -4.55134988e-01f, -4.34897989e-01f,
-        -5.65053988e-03f, -9.25739005e-04f, -1.06790999e-03f, -2.37016007e-03f,
-        -9.71166010e-04f, -8.90910998e-03f, -1.17592998e-02f, -2.08992008e-02f,
-        -4.94231991e-02f, 6.63906988e-03f, 3.20469006e-03f, -6.44695014e-02f,
-        -3.11607006e-03f, 2.02738005e-03f, 1.48096997e-02f, 4.39785011e-02f,
-        -8.28424022e-02f, 3.62076014e-02f, 2.71668993e-02f, 1.38250999e-02f,
-        6.76669031e-02f, 1.03252999e-01f, 1.03255004e-01f, 9.89722982e-02f,
-        1.03646003e-01f, 4.79663983e-02f, 1.11014001e-01f, 9.31736007e-02f,
-        1.15768999e-01f, 1.04014002e-01f, -8.90677981e-03f, 1.13103002e-01f,
-        1.33085996e-01f, 1.25405997e-01f, 1.50051996e-01f, -1.13038003e-01f,
-        7.01059997e-02f, 1.79651007e-01f, 1.41055003e-01f, 1.62841007e-01f,
-        -1.00247003e-02f, -8.17587040e-03f, -8.32176022e-03f, -8.90108012e-03f,
-        -8.13035015e-03f, -1.77263003e-02f, -3.69572006e-02f, -3.51580009e-02f,
-        -5.92143014e-02f, -1.80795006e-02f, -5.46086021e-03f, -4.10550982e-02f,
-        -1.83081999e-02f, -2.15411000e-02f, -1.17953997e-02f, 3.33894007e-02f,
-        -5.29635996e-02f, -6.97528012e-03f, -3.15250992e-03f, -3.27355005e-02f,
-        1.29676998e-01f, 1.16080999e-01f, 1.15947001e-01f, 1.21797003e-01f,
-        1.16089001e-01f, 1.44875005e-01f, 1.15617000e-01f, 1.31586999e-01f,
-        1.74735002e-02f, 1.21973999e-01f, 1.31596997e-01f, 2.48907991e-02f,
-        6.18605018e-02f, 1.12855002e-01f, -6.99798986e-02f, 9.58312973e-02f,
-        1.53593004e-01f, -8.75087008e-02f, -4.92327996e-02f, -3.32239009e-02f
+        5.066650471856862e-03, -7.638671742936328e-03, 2.549596503988635e-03, -8.316416756423296e-03,
+        -2.397471917924575e-04, 7.370595187754891e-03, -2.771880178185262e-03, 3.958364873973579e-03,
+        4.493661094712284e-03, 2.016487051533088e-03, -5.893883038142033e-03, 7.570636080807809e-03,
+        -1.395511229386785e-03, 3.686686052704696e-03, -7.738166245767079e-03, -1.947306329828059e-03,
+        -9.299719716045681e-03, -3.476410493413708e-03, -2.390761190919604e-03, 4.359281254364210e-03,
+        -2.135251160164030e-04, 9.203299843371962e-03, 4.042322775006053e-03, -9.464271243910754e-03,
+        2.566239543229305e-03, -9.691093900220627e-03, -4.019283034310979e-03, 8.145470429508792e-03,
+        7.345087308315662e-04, 7.049642787384043e-03, -2.768492313674294e-03, 6.997160053405803e-03,
+        6.675346697112969e-03, 2.353293365652274e-03, -3.612002585241749e-04, 1.592076522068768e-03,
+        -8.354188900818149e-04, -5.232515333564140e-04, 6.946683728847089e-03, -8.469757407935994e-03,
+        -8.985324496496555e-03, 4.885832859017961e-03, -7.662967577576512e-03, 7.284124004335807e-03,
+        -5.812167510299458e-03, -5.760336800482398e-03, 6.040416930336549e-03, 5.861508595443691e-03,
+        -5.509243096133549e-04, -2.006142470055888e-03, -7.205925340416066e-03, -1.117459082969758e-03,
+        4.233247017623154e-03, 8.079257498201178e-03, 2.962639022639513e-03, 7.069474943472751e-03,
+        -8.562946284971293e-03, -8.228634642768271e-03, -6.116245322799971e-04, -7.213122000180859e-03,
+        1.693094399433209e-03, -4.287504459132290e-03, 8.740365683925144e-03, 3.751788160720638e-03,
+        7.006764222862830e-03, 9.676754678358187e-03, -6.458757235812945e-03, -4.486506575589758e-03,
+        -4.371087196816259e-03, 3.542166755953152e-03, -2.504808998699504e-03, 5.666601724512010e-03,
+        -3.691862724546129e-03, 3.689809719085287e-03, 9.079930264704458e-03, 6.365127787359476e-03,
+        2.881681788246101e-06, 9.991866069315165e-03, -1.104757466496565e-03, -2.668455405633477e-03,
+        -1.225748887087659e-03, 6.530536159094015e-03, 3.629468917975644e-03, 1.374426066950348e-03,
+        -2.404098881570632e-03, -4.791365049441602e-03, -2.970654027009094e-03, 7.807553690294366e-03,
+        -1.198321129505323e-03, -3.574885336949881e-03, -5.380848303732298e-03, 9.705151282165116e-03,
+        -1.005217683242201e-03, 9.178094036278405e-03, -5.615977269541644e-03, 5.333533158509859e-03,
+        -2.817116206168516e-03, 6.672609782000503e-03, 6.575769501651313e-03, 8.987596634989362e-03,
+        -1.283530791296188e-03, 1.687717120057778e-03, 3.242391851439037e-03, -7.312060454341677e-03,
+        4.735335326324270e-03, -6.832367028817463e-03, -5.414854835884652e-03, -9.352380213755996e-03,
+        -3.682662043703889e-03, -6.127508590419776e-04, -7.682256596819467e-03, 9.569532628790246e-03,
+        -1.572157284518933e-03, -6.023034366859191e-03, -5.110873282582924e-03, -8.697072236660256e-03,
+        -3.235150419663566e-03, -8.286320236471386e-03, -5.229472409112913e-03, 9.920785896115053e-03,
+        -2.478413362126123e-03, -9.261324796935007e-03, 1.718512310840434e-04, 3.015875488208480e-03,
+        -6.172932549255669e-03, -4.031715551985103e-03, -9.263878005853677e-03, -2.815310738453385e-03,
+        7.075307462133643e-03, 1.404611747938669e-03, -1.518548732533266e-03, -9.293430941655778e-03,
+        6.382186966633246e-03, 8.256835789169248e-03, 3.196907843506736e-03, 8.821615689753433e-03,
+        -7.661543424832439e-03, 1.636273081822326e-03, -8.792373335756125e-03, 2.958775812049877e-03,
+        -6.269300278071262e-03, 6.248285790856450e-03, -3.675414624536002e-03, -1.692616700318762e-03,
+        4.126007647815893e-03, -9.155291689759584e-03, -8.432616039924004e-03, 4.899980636213323e-03,
+        3.511535019681671e-03, -1.582745757177339e-03, -2.703657774917963e-03, 6.738168990840388e-03,
+        4.300455303937919e-03, 9.618312854781494e-03, 2.762142918402472e-03, -6.590025003382154e-03,
+        -2.071168373801788e-03, 8.613893943683627e-03, 9.411190295341036e-03, -6.129018930548372e-03
     };
 
-    std::vector<float> anchors_vector{ -38, -16, 53, 31,
-                                       -120, -120, 135, 135 };
+    std::vector<float> anchors_vector{ -26, -19, 87, 86, -81, -27, 58, 63 };
+    ;
 
     SimpleTensor<float> proposals_expected(TensorShape(5, 9), DataType::F32);
-    fill_tensor(proposals_expected, std::vector<float> { 0, 0, 0, 79, 59,
-                                                         0, 0, 5.0005703f, 52.63237f, 43.69501495f,
-                                                         0, 24.13628387f, 7.51243401f, 79, 46.06628418f,
-                                                         0, 0, 7.50924301f, 68.47792816f, 46.03357315f,
-                                                         0, 0, 23.09477997f, 51.61448669f, 59,
-                                                         0, 0, 39.52141571f, 52.44710541f, 59,
-                                                         0, 23.57396317f, 29.98791885f, 79, 59,
-                                                         0, 0, 41.90219116f, 79, 59,
-                                                         0, 0, 23.30098343f, 79, 59
-                                                       });
+    fill_tensor(proposals_expected, std::vector<float>
+    {
+        0, 0, 0, 75.269, 64.4388,
+        0, 21.9579, 13.0535, 119, 99,
+        0, 38.303, 0, 119, 87.6447,
+        0, 0, 0, 119, 64.619,
+        0, 0, 20.7997, 74.0714, 99,
+        0, 0, 0, 91.8963, 79.3724,
+        0, 0, 4.42377, 58.1405, 95.1781,
+        0, 0, 13.4405, 104.799, 99,
+        0, 38.9066, 28.2434, 119, 99,
+
+    });
 
     SimpleTensor<float> scores_expected(TensorShape(9), DataType::F32);
     fill_tensor(scores_expected, std::vector<float>
     {
-        2.66913995e-02f,
-        5.44218998e-03f,
-        1.20544003e-03f,
-        1.19207997e-03f,
-        6.17993006e-04f,
-        4.72735002e-04f,
-        6.09605013e-05f,
-        1.50015003e-05f,
-        8.91025957e-06f
+        0.00986536,
+        0.00876435,
+        0.00784692,
+        0.00767041,
+        0.00732847,
+        0.00682475,
+        0.00672044,
+        0.00631324,
+        3.15769e-05
     });
 
+    TensorShape scores_shape = TensorShape(feature_width, feature_height, num_anchors);
+    TensorShape deltas_shape = TensorShape(feature_width, feature_height, values_per_roi * num_anchors);
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(scores_shape, PermutationVector(2U, 0U, 1U));
+        permute(deltas_shape, PermutationVector(2U, 0U, 1U));
+    }
+
     // Inputs
-    CLTensor scores      = create_tensor<CLTensor>(TensorShape(feature_width, feature_height, num_anchors), data_type);
-    CLTensor bbox_deltas = create_tensor<CLTensor>(TensorShape(feature_width, feature_height, values_per_roi * num_anchors), data_type);
+    CLTensor scores      = create_tensor<CLTensor>(scores_shape, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor bbox_deltas = create_tensor<CLTensor>(deltas_shape, data_type, 1, QuantizationInfo(), data_layout);
     CLTensor anchors     = create_tensor<CLTensor>(TensorShape(values_per_roi, num_anchors), data_type);
 
     // Outputs
@@ -273,7 +336,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 
     CLGenerateProposalsLayer generate_proposals;
     generate_proposals.configure(&scores, &bbox_deltas, &anchors, &proposals, &scores_out, &num_valid_proposals,
-                                 GenerateProposalsInfo(80, 60, 0.166667f, 1 / 16.0, 6000, 300, 0.7f, 16.0f));
+                                 GenerateProposalsInfo(120, 100, 0.166667f, 1 / 16.0, 6000, 300, 0.7f, 16.0f));
 
     // Allocate memory for input/output tensors
     scores.allocator()->allocate();
@@ -282,7 +345,6 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
     proposals.allocator()->allocate();
     num_valid_proposals.allocator()->allocate();
     scores_out.allocator()->allocate();
-
     // Fill inputs
     fill_tensor(CLAccessor(scores), scores_vector);
     fill_tensor(CLAccessor(bbox_deltas), bbx_vector);
@@ -290,7 +352,6 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
 
     // Run operator
     generate_proposals.run();
-
     // Gather num_valid_proposals
     num_valid_proposals.map();
     const uint32_t N = *reinterpret_cast<uint32_t *>(num_valid_proposals.ptr_to_element(Coordinates(0, 0)));
@@ -310,7 +371,7 @@ DATA_TEST_CASE(IntegrationTestCaseGenerateProposals, framework::DatasetMode::ALL
     scores_final.allocator()->allocate();
     select_scores.run();
 
-    const RelativeTolerance<float> tolerance_f32(1e-6f);
+    const RelativeTolerance<float> tolerance_f32(1e-5f);
     // Validate the output
     validate(CLAccessor(proposals_final), proposals_expected, tolerance_f32);
     validate(CLAccessor(scores_final), scores_expected, tolerance_f32);

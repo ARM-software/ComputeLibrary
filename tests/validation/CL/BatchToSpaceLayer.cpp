@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,24 +47,6 @@ TEST_SUITE(BatchToSpaceLayer)
 
 template <typename T>
 using CLBatchToSpaceLayerFixture = BatchToSpaceLayerValidationFixture<CLTensor, CLAccessor, CLBatchToSpaceLayer, T>;
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallBatchToSpaceLayerDataset(),
-                                                                   framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
-               input_shape, block_shape_shape, output_shape, dt)
-{
-    // Create tensors
-    CLTensor src         = create_tensor<CLTensor>(input_shape, dt, 1);
-    CLTensor dst         = create_tensor<CLTensor>(output_shape, dt, 1);
-    CLTensor block_shape = create_tensor<CLTensor>(block_shape_shape, DataType::S32, 1);
-
-    // Create and Configure function
-    CLBatchToSpaceLayer batch_to_space;
-    batch_to_space.configure(&src, &block_shape, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(output_shape);
-    validate(dst.info()->valid_region(), valid_region);
-}
 
 // *INDENT-OFF*
 // clang-format off

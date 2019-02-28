@@ -1,8 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml" title="Tensor handle interface object. " alt="" coords="5,107,112,133"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml" title="OpenCL Sub&#45;Tensor handle interface object. " alt="" coords="161,5,304,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml" title="OpenCL Tensor handle interface object. " alt="" coords="173,56,293,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml" title="GLES compute tensor handle interface object. " alt="" coords="171,107,294,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml" title="NEON Sub&#45;Tensor handle interface object. " alt="" coords="160,157,305,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml" title="NEON Tensor handle interface object. " alt="" coords="171,208,294,235"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,31,131,57"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point.xhtml" title=" " alt="" coords="179,5,341,32"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point.xhtml" title=" " alt="" coords="179,56,341,83"/>
 </map>

@@ -1,3 +1,4 @@
 <map id="AccessWindowStatic" name="AccessWindowStatic">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters. " alt="" coords="20,5,137,32"/>
+<area shape="rect" id="node1" title="Implementation of a static rectangular access pattern." alt="" coords="5,80,156,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters." alt="" coords="22,5,139,32"/>
 </map>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NETABLELOOKUP_H__
 #define __ARM_COMPUTE_NETABLELOOKUP_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -32,7 +32,7 @@ class ITensor;
 class ILut;
 
 /** Basic function to run @ref NETableLookupKernel */
-class NETableLookup : public INESimpleFunction
+class NETableLookup : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and output
@@ -43,5 +43,5 @@ public:
      */
     void configure(const ITensor *input, const ILut *lut, ITensor *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NETABLELOOKUP_H__ */

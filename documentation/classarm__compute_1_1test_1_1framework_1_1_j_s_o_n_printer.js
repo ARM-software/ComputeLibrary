@@ -12,5 +12,9 @@ var classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer =
     [ "print_run_footer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a906cf0547c72a5e2c38697c7d6c669ba", null ],
     [ "print_run_header", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#aa520a585d43bb30a6c483e69d40f01a1", null ],
     [ "print_test_footer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a1012b95505daaa0be227d812b7329dc0", null ],
-    [ "print_test_header", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a0bd164e8c3de0910183bdb50315ab282", null ]
+    [ "print_test_header", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a0bd164e8c3de0910183bdb50315ab282", null ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#ae6481d49255440cc5261f751efc4e5bd", null ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#ab1c9bd7e4bc60107ac6035125cf76024", null ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#ac2f08469bc84751d553b626f319730bf", null ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml#a9738d1a0a99daa96da890b7f2cdc7b9d", null ]
 ];

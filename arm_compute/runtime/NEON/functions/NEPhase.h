@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,14 @@
 #ifndef __ARM_COMPUTE_NEPHASE_H__
 #define __ARM_COMPUTE_NEPHASE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Basic function to run NEMagnitudePhaseKernel */
-class NEPhase : public INESimpleFunction
+/** Basic function to run @ref NEMagnitudePhaseKernel */
+class NEPhase : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output.
@@ -43,5 +43,5 @@ public:
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, PhaseType phase_type = PhaseType::SIGNED);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPHASE_H__ */

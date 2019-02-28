@@ -1,7 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_distribution.xhtml" title="Interface for distribution objects. " alt="" coords="5,31,97,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_distribution1_d.xhtml" title="1D Distribution interface " alt="" coords="145,31,255,57"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_distribution1_d.xhtml" title="Basic implementation of the 1D distribution interface. " alt="" coords="313,5,419,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_distribution1_d.xhtml" title="ICLDistribution1D interface class. " alt="" coords="303,56,429,83"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_distribution1_d.xhtml" title="CLDistribution1D object class. " alt="" coords="477,56,600,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_c_l_g_e_m_m_reshaped_configuration.xhtml" title="Basic interface for the GEMM selection." alt="" coords="5,13,233,39"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_configuration_bifrost.xhtml" title="Bifrost based OpenCL GEMM reshaped configuration." alt="" coords="281,5,507,47"/>
 </map>

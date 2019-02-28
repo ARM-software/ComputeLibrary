@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ const auto ActivationDataset = combine(combine(framework::dataset::make("InPlace
 TEST_SUITE(CL)
 TEST_SUITE(ActivationLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
     // Create tensors
@@ -185,7 +185,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixture<half>, framework::Data
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
@@ -200,8 +200,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerFixture<float>, framework::Dat
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
@@ -227,11 +227,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLActivationLayerQuantizedFixture<uint8_t>, fra
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ActivationLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

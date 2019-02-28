@@ -1,12 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml" title="Tensor accessor interface. " alt="" coords="5,208,127,235"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml" title="Dummy accessor class. " alt="" coords="201,5,323,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml" title="Image accessor class. " alt="" coords="205,56,319,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml" title="NumPy accessor class. " alt="" coords="201,107,323,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml" title="Numpy Binary loader class. " alt="" coords="200,157,324,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph__utils_1_1_p_p_m_writer.xhtml" title="PPM writer class. " alt="" coords="219,208,305,235"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml" title="Random accessor class. " alt="" coords="199,259,325,285"/>
-<area shape="rect" id="node8" href="$classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml" title="Result accessor class. " alt="" coords="175,309,349,336"/>
-<area shape="rect" id="node9" href="$classarm__compute_1_1graph__utils_1_1_validation_input_accessor.xhtml" title="Input Accessor used for network validation. " alt="" coords="181,360,343,387"/>
-<area shape="rect" id="node10" href="$classarm__compute_1_1graph__utils_1_1_validation_output_accessor.xhtml" title="Output Accessor used for network validation. " alt="" coords="175,411,349,437"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,111,88,138"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml" title="Vector is considered a container." alt="" coords="141,5,283,47"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,71,280,112"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_t_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="136,136,288,177"/>
+<area shape="rect" id="node5" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,201,280,243"/>
 </map>

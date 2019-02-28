@@ -1,3 +1,4 @@
 <map id="ICLMemoryRegion" name="ICLMemoryRegion">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface. " alt="" coords="13,5,128,32"/>
+<area shape="rect" id="node1" title="OpenCL memory region interface." alt="" coords="5,80,140,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface." alt="" coords="13,5,132,32"/>
 </map>

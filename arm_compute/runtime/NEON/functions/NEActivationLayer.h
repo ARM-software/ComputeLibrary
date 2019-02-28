@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEACTIVATIONLAYER_H__
 #define __ARM_COMPUTE_NEACTIVATIONLAYER_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
 
@@ -36,7 +36,7 @@ class ITensor;
  *
  * @note The function simulates an activation layer with the specified activation function.
  */
-class NEActivationLayer : public INESimpleFunction
+class NEActivationLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensor.
@@ -60,5 +60,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEACTIVATIONLAYER_H__ */

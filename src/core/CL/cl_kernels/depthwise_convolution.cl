@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -464,6 +464,104 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
 
 #endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
 
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
+/** Reshape the weights for quantized depthwise convolution
+ *
+ * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type, e.g. -DDATA_TYPE=uint8
+ * @note Output width should be given as a preprocessor argument using -DDST_WIDTH=width, e.g. -DDST_WIDTH=128
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=vec_size, e.g., -DVEC_SIZE=4
+ * @attention Input's height and width should be 3
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void depthwise_convolution_reshape_weights(
+    TENSOR3D_DECLARATION(src),
+    IMAGE_DECLARATION(dst))
+{
+    Vector    src = CONVERT_TO_VECTOR_STRUCT(src);
+    const int x   = get_global_id(0);
+
+    // Load 3x3xVEC_SIZE weights
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w0 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 0 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w1 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 0 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w2 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 0 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w3 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 1 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w4 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 1 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w5 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 1 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w6 = VLOAD(VEC_SIZE)(0, src.ptr + 0 * src_stride_y + 2 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w7 = VLOAD(VEC_SIZE)(0, src.ptr + 1 * src_stride_y + 2 * src_stride_z);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    w8 = VLOAD(VEC_SIZE)(0, src.ptr + 2 * src_stride_y + 2 * src_stride_z);
+
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * DST_WIDTH * sizeof(DATA_TYPE);
+
+#if defined(TRANSPOSE)
+#if VEC_SIZE != 4
+#error "VEC_SIZE not supported"
+#else  // VEC_SIZE != 4
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w0.s0, w1.s0, w2.s0, w3.s0), 0, dst_addr + 0);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w4.s0, w5.s0, w6.s0, w7.s0), 0, dst_addr + 1 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w8.s0, w0.s1, w1.s1, w2.s1), 0, dst_addr + 2 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w3.s1, w4.s1, w5.s1, w6.s1), 0, dst_addr + 3 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w7.s1, w8.s1, w0.s2, w1.s2), 0, dst_addr + 4 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w2.s2, w3.s2, w4.s2, w5.s2), 0, dst_addr + 5 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w6.s2, w7.s2, w8.s2, w0.s3), 0, dst_addr + 6 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w1.s3, w2.s3, w3.s3, w4.s3), 0, dst_addr + 7 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    ((VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))(w5.s3, w6.s3, w7.s3, w8.s3), 0, dst_addr + 8 * sizeof(DATA_TYPE) * VEC_SIZE);
+#endif // VEC_SIZE != 4
+#else  // !defined(TRANSPOSE)
+    VSTORE(VEC_SIZE)
+    (w0, 0, dst_addr + 0);
+    VSTORE(VEC_SIZE)
+    (w1, 0, dst_addr + 1 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w2, 0, dst_addr + 2 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w3, 0, dst_addr + 3 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w4, 0, dst_addr + 4 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w5, 0, dst_addr + 5 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w6, 0, dst_addr + 6 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w7, 0, dst_addr + 7 * sizeof(DATA_TYPE) * VEC_SIZE);
+    VSTORE(VEC_SIZE)
+    (w8, 0, dst_addr + 8 * sizeof(DATA_TYPE) * VEC_SIZE);
+#endif // defined(TRANSPOSE)
+}
+#endif // defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
+
 #if defined(NCHW)
 #define in_stride_x src_stride_x
 #define in_stride_y src_stride_y
@@ -504,7 +602,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
  * @param[in]  biases_step_x                        (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  biases_offset_first_element_in_bytes (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_weights_reshape(
+__kernel void depthwise_convolution_reshape_weights_generic(
     TENSOR3D_DECLARATION(src),
     IMAGE_DECLARATION(dst)
 #ifdef HAS_BIAS
@@ -1091,9 +1189,9 @@ __kernel void depthwise_convolution_3x3_nhwc(
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
-#else /* defined(DST_DEPTH) */
+#else // defined(DST_DEPTH)
     int z = get_global_id(2); // spatial coordinate y
-#endif /* defined(DST_DEPTH) */
+#endif // defined(DST_DEPTH)
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 
@@ -1240,9 +1338,9 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 #if defined(DST_DEPTH)
     int z = get_global_id(2) % (int)DST_DEPTH; // spatial coordinate y
     int b = get_global_id(2) / (int)DST_DEPTH; // batch
-#else /* defined(DST_DEPTH) */
+#else // defined(DST_DEPTH)
     int z = get_global_id(2); // spatial coordinate y
-#endif /* defined(DST_DEPTH) */
+#endif // defined(DST_DEPTH)
 
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 

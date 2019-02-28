@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,21 +23,13 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include "arm_compute/runtime/CL/CLHelpers.h"
+
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
 #include "arm_compute/runtime/CL/tuners/Tuners.h"
 
 using namespace arm_compute;
-
-namespace
-{
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-void printf_callback(const char *buffer, unsigned int len, size_t complete, void *user_data)
-{
-    printf("%.*s", len, buffer);
-}
-#endif /* defined(ARM_COMPUTE_DEBUG_ENABLED) */
-} // namespace
 
 std::once_flag CLScheduler::_initialize_symbols;
 
@@ -53,59 +45,51 @@ CLScheduler &CLScheduler::get()
     return scheduler;
 }
 
+void CLScheduler::default_init_with_context(cl::Device &device, cl::Context &ctx, ICLTuner *cl_tuner)
+{
+    if(!_is_initialised)
+    {
+        cl::CommandQueue queue = cl::CommandQueue(ctx, device);
+        CLKernelLibrary::get().init("./cl_kernels/", ctx, device);
+        init(ctx, queue, device, cl_tuner);
+        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
+        _cl_tuner                = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+    }
+}
+
 void CLScheduler::default_init(ICLTuner *cl_tuner)
 {
     if(!_is_initialised)
     {
-        std::vector<cl::Platform> platforms;
-        cl::Platform::get(&platforms);
-        ARM_COMPUTE_ERROR_ON_MSG(platforms.size() == 0, "Couldn't find any OpenCL platform");
-        cl::Platform            p = platforms[0];
-        cl::Context             ctx;
-        cl::Device              device;
-        std::vector<cl::Device> platform_devices;
-        p.getDevices(CL_DEVICE_TYPE_DEFAULT, &platform_devices);
-        ARM_COMPUTE_ERROR_ON_MSG(platform_devices.size() == 0, "Couldn't find any OpenCL device");
-        device = platform_devices[0];
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-
-        // Query devices in the context for cl_arm_printf support
-        if(device_supports_extension(device, "cl_arm_printf"))
-        {
-            // Create a cl_context with a printf_callback and user specified buffer size.
-            cl_context_properties properties[] =
-            {
-                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(p()),
-                // Enable a printf callback function for this context.
-                CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
-                // Request a minimum printf buffer size of 4MB for devices in the
-                // context that support this extension.
-                CL_PRINTF_BUFFERSIZE_ARM, 0x1000,
-                0
-            };
-            ctx = cl::Context(device, properties);
-        }
-        else
-#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
-        {
-            cl_context_properties properties[] =
-            {
-                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(p()),
-                0
-            };
-            ctx = cl::Context(device, properties);
-        };
-
-        cl::CommandQueue queue = cl::CommandQueue(ctx, device);
-        CLKernelLibrary::get().init("./cl_kernels/", ctx, device);
-        init(ctx, queue, device, cl_tuner);
-
+        cl::Context ctx;
+        cl::Device  dev;
+        cl_int      err;
+        std::tie(ctx, dev, err) = create_opencl_context_and_device();
+        ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Failed to create OpenCL context");
+        cl::CommandQueue queue = cl::CommandQueue(ctx, dev);
+        CLKernelLibrary::get().init("./cl_kernels/", ctx, dev);
+        init(ctx, queue, dev, cl_tuner);
         // Create a default static tuner and set if none was provided
         _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
     }
 
     // Set CL tuner
     _cl_tuner = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
+}
+
+void CLScheduler::set_context(cl::Context context)
+{
+    _context = std::move(context);
+    CLKernelLibrary::get().set_context(_context);
+}
+
+void CLScheduler::init(cl::Context context, cl::CommandQueue queue, const cl::Device &device, ICLTuner *cl_tuner)
+{
+    set_context(std::move(context));
+    _queue          = std::move(queue);
+    _target         = get_target_from_device(device);
+    _is_initialised = true;
+    _cl_tuner       = cl_tuner;
 }
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)

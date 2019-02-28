@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,9 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(CustomConvolution)
 TEST_SUITE(Square3x3)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                           datasets::BorderModes()),
-                                                                   framework::dataset::make("filter_size", { 3 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+                                                                               datasets::BorderModes()),
+                                                                       framework::dataset::make("filter_size", { 3 })),
                shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
@@ -87,49 +87,34 @@ template <typename T>
 using CLConvolutionFixture = ConvolutionSquareValidationFixture<CLTensor, CLAccessor, CLConvolution3x3, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 3 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 3 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 3 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Square 3x3 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Square 3x3
 
 TEST_SUITE(Square5x5)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                           datasets::BorderModes()),
-                                                                   framework::dataset::make("filter_size", { 5 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+                                                                               datasets::BorderModes()),
+                                                                       framework::dataset::make("filter_size", { 5 })),
                shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
@@ -170,50 +155,34 @@ template <typename T>
 using CLConvolutionFixture = ConvolutionSquareValidationFixture<CLTensor, CLAccessor, CLConvolution5x5, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 5 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 5 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Square5x5 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Square5x5
 
 TEST_SUITE(Square7x7)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                           datasets::BorderModes()),
-                                                                   framework::dataset::make("filter_size", { 7 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+                                                                               datasets::BorderModes()),
+                                                                       framework::dataset::make("filter_size", { 7 })),
                shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
@@ -254,50 +223,34 @@ template <typename T>
 using CLConvolutionFixture = ConvolutionSquareValidationFixture<CLTensor, CLAccessor, CLConvolution7x7, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 7 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 7 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Square7x7 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Square7x7
 
 TEST_SUITE(Square9x9)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
-                                                                           datasets::BorderModes()),
-                                                                   framework::dataset::make("filter_size", { 9 })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
+                                                                               datasets::BorderModes()),
+                                                                       framework::dataset::make("filter_size", { 9 })),
                shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
@@ -338,48 +291,32 @@ template <typename T>
 using CLConvolutionFixture = ConvolutionSquareValidationFixture<CLTensor, CLAccessor, CLConvolution9x9, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 9 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 9 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Square9x9 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Square9x9
 
 TEST_SUITE(Rectangle)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
 { DataType::U8, DataType::S16 })),
 datasets::BorderModes()),
 framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
@@ -428,18 +365,9 @@ template <typename T>
 using CLConvolutionFixture = ConvolutionRectangleValidationFixture<CLTensor, CLAccessor, CLConvolutionRectangle, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                                   framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
-                                                                                                           framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                                  framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
                                                                                                          framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
@@ -447,21 +375,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::Datas
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                                   framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
-                                                                                                           framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                                  framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
                                                                                                          framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
@@ -469,135 +388,87 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::Datas
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Rectangle */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Rectangle
 
 TEST_SUITE(Separable5x5)
 template <typename T>
 using CLConvolutionFixture = ConvolutionSeparableValidationFixture<CLTensor, CLAccessor, CLConvolution5x5, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 5 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 5 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 5 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Separable5x5 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Separable5x5
 
 TEST_SUITE(Separable7x7)
 template <typename T>
 using CLConvolutionFixture = ConvolutionSeparableValidationFixture<CLTensor, CLAccessor, CLConvolution7x7, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 7 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 7 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 7 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
-TEST_SUITE_END() /* Separable7x7 */
+TEST_SUITE_END() // S16
+TEST_SUITE_END() // Separable7x7
 
 TEST_SUITE(Separable9x9)
 template <typename T>
 using CLConvolutionFixture = ConvolutionSeparableValidationFixture<CLTensor, CLAccessor, CLConvolution9x9, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::U8)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::U8)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 9 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::S16)),
-                                                                                                                   datasets::BorderModes()),
-                                                                                                           framework::dataset::make("filter_size", { 9 })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::S16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 9 })))
 {
@@ -605,10 +476,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::Datas
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
 TEST_SUITE_END()
-TEST_SUITE_END() /* Separable9x9 */
+TEST_SUITE_END() // Separable9x9
 
-TEST_SUITE_END() /* Custom Convolution */
-TEST_SUITE_END()
+TEST_SUITE_END() // Custom Convolution
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

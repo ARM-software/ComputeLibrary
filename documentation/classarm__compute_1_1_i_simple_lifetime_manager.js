@@ -4,7 +4,7 @@ var classarm__compute_1_1_i_simple_lifetime_manager =
     [ "ISimpleLifetimeManager", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#ac259070602e52d4448ce0468ecb87c05", null ],
     [ "ISimpleLifetimeManager", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#aed5acf29c2c4f3815c0d7ea94d3e9795", null ],
     [ "are_all_finalized", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#aa849cbaa03d63911dbbedc830f22943d", null ],
-    [ "end_lifetime", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#af1e7074ef17ce8e639b4dbd81f127d3d", null ],
+    [ "end_lifetime", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a5eb1cd0eb1bd44c695f7e3a8b65ba000", null ],
     [ "operator=", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a0f0200cb55880b234ad6b5957bcf4f1a", null ],
     [ "operator=", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a55b290d729e4102cd5598bf68970d465", null ],
     [ "register_group", "classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a93fc2c6a7ebb5d8f44c67d492347d054", null ],

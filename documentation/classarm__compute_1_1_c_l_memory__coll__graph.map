@@ -1,3 +1,4 @@
 <map id="CLMemory" name="CLMemory">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_memory.xhtml" title="Memory interface. " alt="" coords="12,5,85,32"/>
+<area shape="rect" id="node1" title="OpenCL implementation of memory object." alt="" coords="5,80,96,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_memory.xhtml" title="Memory interface." alt="" coords="12,5,89,32"/>
 </map>

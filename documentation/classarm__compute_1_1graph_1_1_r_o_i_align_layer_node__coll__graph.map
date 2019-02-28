@@ -1,3 +1,4 @@
 <map id="ROIAlignLayerNode" name="ROIAlignLayerNode">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface. " alt="" coords="46,5,103,32"/>
+<area shape="rect" id="node1" title="ROI Align node." alt="" coords="5,80,148,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="47,5,106,32"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="NEHistogramKernel" name="NEHistogramKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="33,80,116,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="43,5,106,32"/>
+<area shape="rect" id="node1" title="Interface for the histogram kernel." alt="" coords="5,155,152,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="37,80,120,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="47,5,111,32"/>
 </map>

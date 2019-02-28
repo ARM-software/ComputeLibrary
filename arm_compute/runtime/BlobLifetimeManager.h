@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,15 +26,16 @@
 
 #include "arm_compute/runtime/ISimpleLifetimeManager.h"
 
-#include "arm_compute/runtime/IMemoryPool.h"
 #include "arm_compute/runtime/Types.h"
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 
 namespace arm_compute
 {
+// Forward declarations
+class IMemoryPool;
+
 /** Concrete class that tracks the lifetime of registered tensors and
  *  calculates the systems memory requirements in terms of blobs */
 class BlobLifetimeManager : public ISimpleLifetimeManager
@@ -60,7 +61,7 @@ private:
     void update_blobs_and_mappings() override;
 
 private:
-    std::vector<size_t> _blobs; /**< Memory blobs' sizes */
+    std::vector<BlobInfo> _blobs; /**< Memory blobs */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBLIFETIMEMANAGER_H__ */

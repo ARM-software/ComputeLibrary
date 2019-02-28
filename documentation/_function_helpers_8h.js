@@ -8,6 +8,7 @@ var _function_helpers_8h =
     [ "create_convolution_layer", "_function_helpers_8h.xhtml#a9e38014fa1e7e08dcbf3b5f8c3bdb81e", null ],
     [ "create_deconvolution_layer", "_function_helpers_8h.xhtml#ac77fa3bf0d7d7c3fde6243192f93f380", null ],
     [ "create_depthwise_convolution_layer", "_function_helpers_8h.xhtml#ab8ff2a40f95b76ec10ac2a98d1a8d594", null ],
+    [ "create_detection_output_layer", "_function_helpers_8h.xhtml#afce1d2d783bb97a3a8c3c406c8cf6b9c", null ],
     [ "create_eltwise_layer", "_function_helpers_8h.xhtml#aa37faf92f78c0f5cefe2d43c8bf07f18", null ],
     [ "create_flatten_layer", "_function_helpers_8h.xhtml#a7880c3b249a6dad40da0ebcf6600b0e1", null ],
     [ "create_fully_connected_layer", "_function_helpers_8h.xhtml#ac64bbd0df74207f9ab59953e21311178", null ],

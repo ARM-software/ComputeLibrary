@@ -1,4 +1,5 @@
 <map id="NEConvertFullyConnectedWeightsKernel" name="NEConvertFullyConnectedWeightsKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="77,80,160,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="87,5,150,32"/>
+<area shape="rect" id="node1" title="Interface to convert the 2D Fully Connected weights from NCHW to NHWC or vice versa." alt="" coords="5,155,240,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="81,80,164,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="91,5,155,32"/>
 </map>

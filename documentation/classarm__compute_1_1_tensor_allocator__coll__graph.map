@@ -1,3 +1,4 @@
 <map id="TensorAllocator" name="TensorAllocator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors. " alt="" coords="5,5,123,32"/>
+<area shape="rect" id="node1" title="Basic implementation of a CPU memory tensor allocator." alt="" coords="7,80,126,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors." alt="" coords="5,5,128,32"/>
 </map>

@@ -1,9 +1,9 @@
 var tensor__transform_8cpp =
 [
-    [ "compute_slice_output_shape", "tensor__transform_8cpp.xhtml#a8102d4bb8d7cb6a4ccf5e5e422b2a751", null ],
-    [ "compute_strided_slice_output_shape", "tensor__transform_8cpp.xhtml#af13ccc2d4ed13a513cf7d031233cbfdd", null ],
-    [ "slice_absolute_end_coords", "tensor__transform_8cpp.xhtml#add47293d0be725957b930435482bfd53", null ],
-    [ "strided_slice_absolute_end_coords", "tensor__transform_8cpp.xhtml#a88bcbb798479cb74a34e0c4b1de181c8", null ],
-    [ "strided_slice_absolute_start_coords", "tensor__transform_8cpp.xhtml#aa5cd68178f4a5d7e9f3be67c19178fbe", null ],
-    [ "strided_slice_strides", "tensor__transform_8cpp.xhtml#a125684caafdab8cdee40e424166cf61f", null ]
+    [ "calculate_end_on_index", "tensor__transform_8cpp.xhtml#aadc7bc8c8e64fd06504c35173c88f7d1", null ],
+    [ "calculate_start_on_index", "tensor__transform_8cpp.xhtml#a3ff938cc9ead3acbbb2eb10d09d9c457", null ],
+    [ "calculate_stride_on_index", "tensor__transform_8cpp.xhtml#a9e3d9626e902ce6f9555d3580e13011e", null ],
+    [ "calculate_strided_slice_coords", "tensor__transform_8cpp.xhtml#a6a03e096e644bb85ed26acafd1516339", null ],
+    [ "compute_strided_slice_output_shape", "tensor__transform_8cpp.xhtml#adb1ed814b11a751017250143fb1a9174", null ],
+    [ "construct_slice_end_mask", "tensor__transform_8cpp.xhtml#a396d80389277ad8cd13a5e0567776191", null ]
 ];

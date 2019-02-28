@@ -10,7 +10,7 @@ var structarm__compute_1_1_i_o_format_info =
       [ "NoPadding", "structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0a23bb2bd76e5604aace0bdaa7b279a8fd", null ],
       [ "Full", "structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0abbd47109890259c0127154db1af26c75", null ]
     ] ],
-    [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml#aa0a9be7908d667b4d3735c4eef01a667", null ],
+    [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml#afc22bda96f8024656055390cc5f780f0", null ],
     [ "align_columns", "structarm__compute_1_1_i_o_format_info.xhtml#a1d81fe110d5dcac79dd73a532015bb94", null ],
     [ "element_delim", "structarm__compute_1_1_i_o_format_info.xhtml#a38c5b617ead74af00cc7957553bd0d66", null ],
     [ "precision", "structarm__compute_1_1_i_o_format_info.xhtml#a1fba9343eade93326cb985cfcb6de487", null ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,64 +27,75 @@
 #include "gemm_common.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
+#include "gemm_hybrid.hpp"
+#include "gemm_native.hpp"
 
 #include "kernels/a64_gemm_u16_12x8.hpp"
 #include "kernels/a64_gemm_u8_12x8.hpp"
 #include "kernels/a64_gemm_u8_4x4.hpp"
+#include "kernels/a64_hybrid_u8u32_dot_16x4.hpp"
 #include "kernels/sve_interleaved_u8u32_dot_3VLx8.hpp"
+#include "kernels/sve_native_u8u32_dot_4VLx4.hpp"
 
 namespace arm_gemm {
 
+static const GemmImplementation<uint8_t, uint32_t> gemm_u8_methods[] = {
 #ifdef __ARM_FEATURE_SVE
-class GemmImpl_gemm_u8_interleaved_dot : public GemmImplementation<uint8_t, uint32_t> {
-public:
-    UniqueGemmCommon<uint8_t, uint32_t> instantiate(const GemmArgs<uint32_t> &args) override {
-        return UniqueGemmCommon<uint8_t, uint32_t>(new GemmInterleaved<interleaved_u8u32_dot_3VLx8, uint8_t, uint32_t>(args));
-    }
-
-    GemmImpl_gemm_u8_interleaved_dot() : GemmImplementation<uint8_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED_DOT) { }
-};
-#else
-class GemmImpl_gemm_u8_interleaved_dot : public GemmImplementation<uint8_t, uint32_t> {
-public:
-    bool is_supported(const GemmArgs<uint32_t> &args) override {
-        return args._ci->has_dotprod();
-    }
-
-    UniqueGemmCommon<uint8_t, uint32_t> instantiate(const GemmArgs<uint32_t> &args) override {
-        return UniqueGemmCommon<uint8_t, uint32_t>(new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args));
-    }
-
-    GemmImpl_gemm_u8_interleaved_dot() : GemmImplementation<uint8_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED_DOT) { }
-};
+{
+    GemmMethod::GEMM_NATIVE,
+    "native_u8u32_dot_4VLx4",
+    [](const GemmArgs<uint32_t> &args) { return (args._Ksize>=16 && args._alpha==1 && !args._trA && !args._trB); },
+    [](const GemmArgs<uint32_t> &args) { return ((args._Ksize <= 128) && (args._Nsize <= 128)); },
+    [](const GemmArgs<uint32_t> &args) { return new GemmNative<native_u8u32_dot_4VLx4, uint8_t, uint32_t>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "interleaved_u8u32_dot_3VLx8",
+    [](const GemmArgs<uint32_t> &args) { return (args._Ksize>4); },
+    nullptr,
+    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<interleaved_u8u32_dot_3VLx8, uint8_t, uint32_t>(args); }
+},
 #endif
-
-class GemmImpl_gemm_u8_interleaved : public GemmImplementation<uint8_t, uint32_t> {
-public:
-    UniqueGemmCommon<uint8_t, uint32_t> instantiate(const GemmArgs<uint32_t> &args) override {
-        return UniqueGemmCommon<uint8_t, uint32_t>(new GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t>(args));
-    }
-
-    GemmImpl_gemm_u8_interleaved() : GemmImplementation<uint8_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED) { }
-};
-
-static GemmImpl_gemm_u8_interleaved_dot gemm_u8_interleaved_dot_impl{};
-static GemmImpl_gemm_u8_interleaved gemm_u8_interleaved_impl{};
-
-static std::vector<GemmImplementation<uint8_t, uint32_t> *> gemm_u8_methods = {
-    &gemm_u8_interleaved_dot_impl,
-    &gemm_u8_interleaved_impl
+{
+    GemmMethod::GEMM_HYBRID,
+    "hybrid_u8u32_dot_16x4",
+    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod() && args._Ksize>=16 && (args._Ksize % 16 == 0) && (args._Nsize % 16 == 0) && !args._trA && !args._trB && args._pretransposed_hint; },
+    [](const GemmArgs<uint32_t> &args) { return args._Nsize<=256 && args._Ksize>128; },
+    [](const GemmArgs<uint32_t> &args) { return new GemmHybrid<hybrid_u8u32_dot_16x4, uint8_t, uint32_t>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "gemm_u8_12x8",
+    [](const GemmArgs<uint32_t> &args) { return args._ci->has_dotprod(); },
+    nullptr,
+    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u8_12x8, uint8_t, uint32_t>(args); }
+},
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "gemm_u8_4x4",
+    nullptr,
+    nullptr,
+    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t>(args); }
+},
+{
+    GemmMethod::DEFAULT,
+    "",
+    nullptr,
+    nullptr,
+    nullptr
+}
 };
 
 template<>
-std::vector<GemmImplementation<uint8_t, uint32_t> *> &gemm_implementation_list<uint8_t, uint32_t>() {
+const GemmImplementation<uint8_t, uint32_t> *gemm_implementation_list<uint8_t, uint32_t>() {
     return gemm_u8_methods;
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<uint8_t, uint32_t> gemm<uint8_t, uint32_t>(GemmArgs<uint32_t> &args, GemmConfig *cfg);
-template GemmMethod get_gemm_method<uint8_t, uint32_t>(GemmArgs<uint32_t> &args);
-template bool method_is_compatible<uint8_t, uint32_t>(GemmMethod method, GemmArgs<uint32_t> &args);
+template UniqueGemmCommon<uint8_t, uint32_t> gemm<uint8_t, uint32_t>(const GemmArgs<uint32_t> &args);
+template KernelDescription get_gemm_method<uint8_t, uint32_t>(const GemmArgs<uint32_t> &args);
+template bool method_is_compatible<uint8_t, uint32_t>(GemmMethod method, const GemmArgs<uint32_t> &args);
+template std::vector<std::string> get_compatible_kernels<uint8_t, uint32_t> (const GemmArgs<uint32_t> &args);
 
 } // namespace arm_gemm
 

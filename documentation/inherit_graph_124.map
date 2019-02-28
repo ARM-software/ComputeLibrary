@@ -1,9 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="5,148,89,175"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml" title="Instrument implementation for mali hw counters. " alt="" coords="200,5,292,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1_open_c_l_clock.xhtml" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="170,57,322,98"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml" title="Instrument collecting memory usage information for OpenCL. " alt="" coords="169,123,323,149"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml" title="Implementation of an instrument to count CPU cycles. " alt="" coords="197,173,295,200"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1framework_1_1_scheduler_clock.xhtml" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="165,225,327,266"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1framework_1_1_wall_clock.xhtml" title="Implementation of an instrument to measure elapsed wall&#45;clock time in milliseconds. " alt="" coords="137,291,355,317"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_pool.xhtml" title="Memory Pool Inteface." alt="" coords="5,31,109,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_blob_memory_pool.xhtml" title="Blob memory pool." alt="" coords="162,5,291,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_offset_memory_pool.xhtml" title="Offset based memory pool." alt="" coords="157,56,296,83"/>
 </map>

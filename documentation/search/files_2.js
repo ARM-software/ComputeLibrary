@@ -13,6 +13,7 @@ var searchData=
   ['batchtospacelayer_2eh',['BatchToSpaceLayer.h',['../_batch_to_space_layer_8h.xhtml',1,'']]],
   ['bifrosttuner_2ecpp',['BifrostTuner.cpp',['../_bifrost_tuner_8cpp.xhtml',1,'']]],
   ['bifrosttuner_2eh',['BifrostTuner.h',['../_bifrost_tuner_8h.xhtml',1,'']]],
+  ['bit_5fops_2eh',['bit_ops.h',['../bit__ops_8h.xhtml',1,'']]],
   ['bitwise_5fop_2ecl',['bitwise_op.cl',['../bitwise__op_8cl.xhtml',1,'']]],
   ['bitwiseand_2ecpp',['BitwiseAnd.cpp',['../_c_l_2_bitwise_and_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_bitwise_and_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_bitwise_and_8cpp.xhtml',1,'(Global Namespace)']]],
   ['bitwiseand_2eh',['BitwiseAnd.h',['../_bitwise_and_8h.xhtml',1,'']]],
@@ -33,5 +34,6 @@ var searchData=
   ['boundingboxtransformlayernode_2eh',['BoundingBoxTransformLayerNode.h',['../_bounding_box_transform_layer_node_8h.xhtml',1,'']]],
   ['box3x3_2ecpp',['Box3x3.cpp',['../_c_l_2_box3x3_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_box3x3_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_box3x3_8cpp.xhtml',1,'(Global Namespace)']]],
   ['box3x3_2eh',['Box3x3.h',['../_box3x3_8h.xhtml',1,'']]],
+  ['bsl_2eh',['bsl.h',['../bsl_8h.xhtml',1,'']]],
   ['buffer_5fmanager_2ehpp',['buffer_manager.hpp',['../buffer__manager_8hpp.xhtml',1,'']]]
 ];

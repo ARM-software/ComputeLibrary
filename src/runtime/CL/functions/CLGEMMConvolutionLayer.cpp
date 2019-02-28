@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,7 +93,7 @@ void CLConvolutionLayerReshapeWeights::run()
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(), _activationlayer_function(), _add_bias_kernel(),
       _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _skip_im2col(false), _skip_col2im(false), _is_quantized(false),
-      _is_activationlayer_enabled(false), _is_prepared(false)
+      _is_activationlayer_enabled(false), _is_prepared(false), _run_addition(true)
 {
 }
 
@@ -101,7 +101,8 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
                                           int gemm_3d_depth)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), gemmlowp_output_stage, gemm_3d_depth, _skip_im2col));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), gemmlowp_output_stage, gemm_3d_depth, _skip_im2col,
+                                           _run_addition));
 
     const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                          gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */,
@@ -125,13 +126,15 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
     }
     else
     {
+        // Bias does not need to be added in GEMM if im2col is being used or the Matrix Addition kernel needs to be run
+        const bool skip_bias_in_gemm = _run_addition || !_skip_im2col;
         // Configure matrix multiply function
-        _mm_gemm.configure(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
+        _mm_gemm.configure(input, weights, (skip_bias_in_gemm) ? nullptr : biases, output, 1.0f, 1.0f, gemm_info);
     }
 }
 
 Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
-                                           const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col)
+                                           const GEMMLowpOutputStageInfo &gemmlowp_output_stage, int gemm_3d_depth, bool skip_im2col, bool run_addition)
 {
     const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
 
@@ -156,8 +159,10 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     }
     else
     {
+        // Bias does not need to be added in GEMM if im2col is being used or the Matrix Addition kernel needs to be run
+        const bool skip_bias_in_gemm = run_addition || !skip_im2col;
         // Perform validation step on Matrix multiply function
-        return CLGEMM::validate(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
+        return CLGEMM::validate(input, weights, (skip_bias_in_gemm) ? nullptr : biases, output, 1.0f, 1.0f, gemm_info);
     }
 }
 
@@ -193,6 +198,8 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     _skip_col2im                = data_layout == DataLayout::NHWC;
     _append_bias                = (biases != nullptr) && (!_is_quantized);
     _is_activationlayer_enabled = act_info.enabled();
+    // In case of F16, fused bias will be used in GEMM
+    _run_addition = (_skip_im2col) && (_append_bias) && (data_type != DataType::F16);
 
     // Set the GPU target for im2col and col2im
     _im2col_kernel.set_target(CLScheduler::get().target());
@@ -242,7 +249,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     else if(_append_bias)
     {
         // Configure add bias kernel
-        _add_bias_kernel.configure(output, biases, output, ConvertPolicy::SATURATE);
+        _add_bias_kernel.configure(ArithmeticOperation::ADD, output, biases, output, ConvertPolicy::SATURATE);
     }
 
     // Create GEMM output tensor
@@ -276,9 +283,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     {
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
 
-        const float multiplier  = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
+        const float multiplier        = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
+        int         output_multiplier = 0;
+        int         output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         int min_activation = 0;
@@ -375,6 +382,8 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const bool skip_im2col                = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
     const bool skip_col2im                = data_layout == DataLayout::NHWC;
     bool       is_activationlayer_enabled = act_info.enabled();
+    // In case of F16, fused bias will be used in GEMM
+    const bool run_addition = (skip_im2col) && (append_bias) && (data_type != DataType::F16);
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * num_groups) != input->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
@@ -429,10 +438,10 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, kernel_dims, conv_info, append_bias, dilation, num_groups));
         gemm_input_to_use = &im2col_reshaped_info;
     }
-    else if(append_bias)
+    else if(run_addition)
     {
         // Validate add bias kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAdditionKernel::validate(output, biases, output, ConvertPolicy::SATURATE));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLSaturatedArithmeticOperationKernel::validate(ArithmeticOperation::ADD, output, biases, output, ConvertPolicy::SATURATE));
     }
 
     // Create GEMM output tensor
@@ -459,9 +468,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     {
         const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input->quantization_info() : output->quantization_info();
 
-        const float multiplier  = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
+        const float multiplier        = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
+        int         output_multiplier = 0;
+        int         output_shift      = 0;
 
         ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 
@@ -496,7 +505,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // In case of NHWC, we need to run GEMM3D (gemm_3d_depth != 0) in order to avoid reshaping the output matrix
     const unsigned int gemm_3d_depth = (data_layout == DataLayout::NHWC) ? conv_h : 0;
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, skip_im2col));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases, gemm_output_to_use, gemmlowp_output_stage, gemm_3d_depth, skip_im2col, run_addition));
 
     // Validate Col2Im
     if(!skip_col2im)
@@ -537,7 +546,7 @@ void CLGEMMConvolutionLayer::run()
         _mm_gemm.run();
     }
 
-    if(_skip_im2col && _append_bias)
+    if(_run_addition)
     {
         CLScheduler::get().enqueue(_add_bias_kernel);
     }

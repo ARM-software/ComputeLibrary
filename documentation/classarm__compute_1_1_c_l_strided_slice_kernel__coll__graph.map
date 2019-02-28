@@ -1,4 +1,5 @@
 <map id="CLStridedSliceKernel" name="CLStridedSliceKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="39,80,119,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="47,5,110,32"/>
+<area shape="rect" id="node1" title="Interface for the kernel to perform tensor strided slicing." alt="" coords="5,155,159,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="42,80,122,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="50,5,114,32"/>
 </map>

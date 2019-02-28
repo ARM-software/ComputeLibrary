@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,6 +142,40 @@ inline T delta_bilinear_c1(const T *pixel_ptr, size_t stride, float dx, float dy
     const float w4 = dx * dy;
 
     return static_cast<T>(a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4);
+}
+
+/** Computes bilinear interpolation for quantized input and output, using the pointer to the top-left pixel and the pixel's distance between
+ * the real coordinates and the smallest following integer coordinates. Input must be quantized and in single channel format.
+ *
+ * @param[in] pixel_ptr Pointer to the top-left pixel value of a single channel input.
+ * @param[in] stride    Stride to access the bottom-left and bottom-right pixel values
+ * @param[in] dx        Pixel's distance between the X real coordinate and the smallest X following integer
+ * @param[in] dy        Pixel's distance between the Y real coordinate and the smallest Y following integer
+ * @param[in] iq_info   Input QuantizationInfo
+ * @param[in] oq_info   Output QuantizationInfo
+ *
+ * @note dx and dy must be in the range [0, 1.0]
+ *
+ * @return The bilinear interpolated pixel value
+ */
+inline uint8_t delta_bilinear_c1_quantized(const uint8_t *pixel_ptr, size_t stride, float dx, float dy, QuantizationInfo iq_info, QuantizationInfo oq_info)
+{
+    ARM_COMPUTE_ERROR_ON(pixel_ptr == nullptr);
+
+    const float dx1 = 1.0f - dx;
+    const float dy1 = 1.0f - dy;
+
+    const float a00 = iq_info.dequantize(*pixel_ptr);
+    const float a01 = iq_info.dequantize(*(pixel_ptr + 1));
+    const float a10 = iq_info.dequantize(*(pixel_ptr + stride));
+    const float a11 = iq_info.dequantize(*(pixel_ptr + stride + 1));
+
+    const float w1  = dx1 * dy1;
+    const float w2  = dx * dy1;
+    const float w3  = dx1 * dy;
+    const float w4  = dx * dy;
+    float       res = a00 * w1 + a01 * w2 + a10 * w3 + a11 * w4;
+    return static_cast<uint8_t>(oq_info.quantize(res, RoundingPolicy::TO_NEAREST_UP));
 }
 
 /** Computes linear interpolation using the pointer to the top pixel and the pixel's distance between
@@ -710,6 +744,18 @@ inline Size2D compute_winograd_convolution_tiles(const Size2D &in_dims, const Si
     return Size2D(num_tiles_x, num_tiles_y);
 }
 
+/** Wrap-around a number within the range 0 <= x < m
+ *
+ * @param[in] x Input value
+ * @param[in] m Range
+ *
+ * @return the wrapped-around number
+ */
+template <typename T>
+inline T wrap_around(T x, T m)
+{
+    return x >= 0 ? x % m : (x % m + m) % m;
+}
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

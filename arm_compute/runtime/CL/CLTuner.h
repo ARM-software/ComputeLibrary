@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,10 +118,8 @@ private:
     cl::NDRange find_optimal_lws(ICLKernel &kernel);
 
     std::unordered_map<std::string, cl::NDRange> _lws_table;
-    cl::CommandQueue _queue;
-    cl::CommandQueue _queue_profiler;
-    cl::Event        _kernel_event;
-    bool             _tune_new_kernels;
+    cl::Event _kernel_event;
+    bool      _tune_new_kernels;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLTUNER_H__ */

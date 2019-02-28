@@ -1,4 +1,5 @@
 <map id="GCNormalizationLayerKernel" name="GCNormalizationLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="59,80,142,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="69,5,132,32"/>
+<area shape="rect" id="node1" title="Interface for the normalization layer kernel." alt="" coords="5,155,209,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="66,80,149,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="75,5,139,32"/>
 </map>

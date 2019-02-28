@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,7 @@
 
 #pragma once
 
-#ifdef __ARM_FEATURE_SVE
-#include <arm_sve.h>
-#endif
+#include <cstddef>
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
 #define UNREACHABLE(why)  __builtin_unreachable()
@@ -34,7 +32,8 @@
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
 
-inline int iceildiv(const int a, const int b) {
+template<typename T>
+inline T iceildiv(const T a, const T b) {
     return (a + b - 1) / b;
 }
 
@@ -49,13 +48,43 @@ inline T roundup(const T a, const T b) {
     }
 }
 
+namespace arm_gemm {
+namespace utils {
+namespace {
+
+#ifdef __ARM_FEATURE_SVE
+template<size_t sz>
+inline unsigned long get_vector_length_sz() {
+    unsigned long v;
+
+    __asm (
+        "cntb	%0"
+        : "=r" (v)
+    );
+
+    return v / sz;
+}
+
+#define VEC_LEN_SPEC(sz, opcode) template <> inline unsigned long get_vector_length_sz<sz>() { unsigned long v; __asm ( opcode " %0" : "=r" (v)); return v; }
+
+VEC_LEN_SPEC(8, "cntd")
+VEC_LEN_SPEC(4, "cntw")
+VEC_LEN_SPEC(2, "cnth")
+VEC_LEN_SPEC(1, "cntb")
+#endif
+
+} // anonymous namespace
+
 template <typename T>
 inline unsigned long get_vector_length() {
 #ifdef __ARM_FEATURE_SVE
-    const unsigned long length = svcntb();
+    return get_vector_length_sz<sizeof(T)>();
 #else
-    const unsigned long length = 16;
+    return 16 / sizeof(T);
 #endif
-
-    return length / sizeof(T);
 }
+
+} // utils namespace
+} // arm_gemm namespace
+
+using namespace arm_gemm::utils;

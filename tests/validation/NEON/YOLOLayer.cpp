@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,46 @@ const auto YOLODataset = combine(combine(combine(combine(framework::dataset::mak
 
 TEST_SUITE(NEON)
 TEST_SUITE(YOLOLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::U8),  // Wrong input data type
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Invalid activation info
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Wrong output data type
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // wrong number of classes
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Mismatching shapes
+                                                       TensorInfo(TensorShape(17U, 16U, 6U), 1, DataType::F32),  // shrink window
+                                                       TensorInfo(TensorShape(17U, 16U, 7U), 1, DataType::F32),  // channels not multiple of (num_classes + 5)
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::U16),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 11U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 7U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 6U), 1, DataType::F32),
+                                                     })),
+               framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                                     })),
+               framework::dataset::make("Numclasses", { 1, 1, 1, 0, 1, 1, 1, 1
+                                                     })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, true})),
+               input_info, output_info, act_info, num_classes, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEYOLOLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), act_info, num_classes)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using NEYOLOLayerFixture = YOLOValidationFixture<Tensor, Accessor, NEYOLOLayer, T>;

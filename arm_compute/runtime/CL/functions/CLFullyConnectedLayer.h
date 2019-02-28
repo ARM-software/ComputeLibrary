@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,7 +136,7 @@ private:
     CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
-    CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
+    CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel; // TODO(COMPMID-1889): Use CLGEMM to add bias in CLFullyConnectedLayer
     CLTensor                                            _flatten_output;
     CLTensor                                            _gemmlowp_output;
     CLTensor                                            _converted_weights_output;

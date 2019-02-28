@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 
 #include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
+#include "arm_compute/runtime/CPP/CPPFunctions.h"
 
 using namespace arm_compute::utils::cast;
 
@@ -59,6 +60,8 @@ Status CLNodeValidator::validate(INode *node)
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<CLDepthwiseConvolutionLayer,
                    CLDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DetectionOutputLayer:
+            return detail::validate_detection_output_layer<CPPDetectionOutputLayer>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return detail::validate_generate_proposals_layer<CLGenerateProposalsLayer>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node));
         case NodeType::NormalizePlanarYUVLayer:

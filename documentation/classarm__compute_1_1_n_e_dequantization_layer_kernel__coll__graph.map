@@ -1,4 +1,5 @@
 <map id="NEDequantizationLayerKernel" name="NEDequantizationLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="63,80,145,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="73,5,135,32"/>
+<area shape="rect" id="node1" title="Interface for the dequantization layer kernel." alt="" coords="5,155,216,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="69,80,152,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="79,5,143,32"/>
 </map>

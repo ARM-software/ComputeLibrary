@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,16 +26,19 @@
 
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseVectorToTensorKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseWeightsReshapeKernel.h"
 #include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -46,6 +49,7 @@ class ICLTensor;
  *
  * -# @ref CLDepthwiseConvolutionLayer3x3NCHWKernel (if data_layout == NCHW)
  * -# @ref CLDepthwiseConvolutionLayer3x3NHWCKernel (if data_layout == NHWC)
+ * -# @ref CLDepthwiseConvolutionLayerReshapeWeightsKernel (if data_layout == NHWC)
  * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
  *
  */
@@ -53,7 +57,15 @@ class CLDepthwiseConvolutionLayer3x3 : public IFunction
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolutionLayer3x3();
+    CLDepthwiseConvolutionLayer3x3(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3(const CLDepthwiseConvolutionLayer3x3 &) = delete;
+    /** Default move constructor */
+    CLDepthwiseConvolutionLayer3x3(CLDepthwiseConvolutionLayer3x3 &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer3x3 &operator=(const CLDepthwiseConvolutionLayer3x3 &) = delete;
+    /** Default move assignment operator */
+    CLDepthwiseConvolutionLayer3x3 &operator=(CLDepthwiseConvolutionLayer3x3 &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
@@ -86,17 +98,30 @@ public:
                            ActivationLayerInfo act_info = ActivationLayerInfo(), GPUTarget gpu_target = GPUTarget::MIDGARD);
     // Inherited methods overriden:
     void run() override;
+    void prepare() override;
 
 private:
+    CLMemoryGroup                                          _memory_group;
     std::unique_ptr<ICLDepthwiseConvolutionLayer3x3Kernel> _kernel;
     CLFillBorderKernel                                     _border_handler;
+    CLPermute                                              _permute_input_to_nchw;
+    CLPermute                                              _permute_weights_to_nchw;
+    CLPermute                                              _permute_output_to_nhwc;
+    CLDepthwiseConvolutionLayerReshapeWeightsKernel        _reshape_weights;
+    CLTensor                                               _permuted_input;
+    CLTensor                                               _permuted_weights;
+    CLTensor                                               _permuted_output;
+    const ITensor                                         *_original_weights;
+    bool                                                   _needs_permute;
+    bool                                                   _needs_weights_reshape;
+    bool                                                   _is_prepared;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following OpenCL kernels:
  *
  * -# @ref CLDepthwiseIm2ColKernel
  * -# @ref CLGEMMMatrixVectorMultiplyKernel
- * -# @ref CLDepthwiseWeightsReshapeKernel
+ * -# @ref CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel
  * -# @ref CLFillBorderKernel (if pad_x or pad_y > 0)
  *
  */
@@ -148,22 +173,23 @@ public:
     void prepare() override;
 
 private:
-    CLDepthwiseIm2ColKernel                   _im2col_kernel;
-    CLDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
-    CLGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
-    CLDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
-    CLDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
-    CLActivationLayer                         _activationlayer_function;
-    CLFillBorderKernel                        _v2mm_input_fill_border;
-    CLFillBorderKernel                        _v2mm_weights_fill_border;
-    CLTensor                                  _input_reshaped;
-    CLTensor                                  _weights_reshaped;
-    CLTensor                                  _v2mm_output;
-    CLTensor                                  _output_reshaped;
-    bool                                      _is_prepared;
-    bool                                      _is_quantized;
-    bool                                      _is_activationlayer_enabled;
-    const ICLTensor                          *_original_weights;
+    CLDepthwiseIm2ColKernel                                _im2col_kernel;
+    CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel _weights_reshape_kernel;
+    CLGEMMMatrixVectorMultiplyKernel                       _v2mm_kernel;
+    CLDepthwiseVectorToTensorKernel                        _vector_to_tensor_kernel;
+    CLDirectConvolutionLayerOutputStageKernel              _output_stage_kernel;
+    CLActivationLayer                                      _activationlayer_function;
+    CLFillBorderKernel                                     _v2mm_input_fill_border;
+    CLFillBorderKernel                                     _v2mm_weights_fill_border;
+    CLTensor                                               _input_reshaped;
+    CLTensor                                               _weights_reshaped;
+    CLTensor                                               _v2mm_output;
+    CLTensor                                               _output_reshaped;
+    bool                                                   _is_prepared;
+    bool                                                   _is_quantized;
+    bool                                                   _is_activationlayer_enabled;
+    const ICLTensor                                       *_original_weights;
+    std::unique_ptr<IFunction>                             _optimised_function;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

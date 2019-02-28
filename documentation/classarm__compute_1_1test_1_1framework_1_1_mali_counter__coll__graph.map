@@ -1,3 +1,4 @@
 <map id="MaliCounter" name="MaliCounter">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="9,5,93,32"/>
+<area shape="rect" id="node1" title="Instrument implementation for mali hw counters." alt="" coords="5,80,104,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="9,5,101,32"/>
 </map>

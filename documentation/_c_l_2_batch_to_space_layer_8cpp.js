@@ -1,7 +1,6 @@
 var _c_l_2_batch_to_space_layer_8cpp =
 [
     [ "CLBatchToSpaceLayerFixture", "_c_l_2_batch_to_space_layer_8cpp.xhtml#ab2200847743f71611eb8687d2e26b440", null ],
-    [ "DATA_TEST_CASE", "_c_l_2_batch_to_space_layer_8cpp.xhtml#aefe9d26603a71b3c45ebf1d4ac0e3bee", null ],
     [ "DATA_TEST_CASE", "_c_l_2_batch_to_space_layer_8cpp.xhtml#ab486c194d8d408aefb3eae9cca4c2563", null ],
     [ "DATA_TEST_CASE", "_c_l_2_batch_to_space_layer_8cpp.xhtml#adb242fc7a08cc518edaee5c36262f8cb", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_batch_to_space_layer_8cpp.xhtml#a157af9e1f21df8785893e442409a4435", null ],

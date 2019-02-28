@@ -1,5 +1,6 @@
 <map id="CLGEMMLowpMatrixAReductionKernel" name="CLGEMMLowpMatrixAReductionKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_g_e_m_m_lowp_reduction_kernel.xhtml" title="Common interface for all OpenCL reduction kernels. " alt="" coords="7,155,218,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="73,80,153,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="81,5,144,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel used to compute the row&#45;vectors of sums of all the entries in each row of Matrix A." alt="" coords="5,229,225,271"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_g_e_m_m_lowp_reduction_kernel.xhtml" title="Common interface for all OpenCL reduction kernels." alt="" coords="8,155,223,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="75,80,155,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="83,5,147,32"/>
 </map>

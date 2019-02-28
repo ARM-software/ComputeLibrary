@@ -1,3 +1,4 @@
 <map id="GCFullyConnectedLayer" name="GCFullyConnectedLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="50,5,126,32"/>
+<area shape="rect" id="node1" title="Basic function to compute a Fully Connected layer on OpenGL ES." alt="" coords="5,80,177,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="52,5,131,32"/>
 </map>

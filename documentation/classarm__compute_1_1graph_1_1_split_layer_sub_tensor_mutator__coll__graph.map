@@ -1,3 +1,4 @@
 <map id="SplitLayerSubTensorMutator" name="SplitLayerSubTensorMutator">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface. " alt="" coords="46,5,151,32"/>
+<area shape="rect" id="node1" title="Mutation pass to optimize split operations by using sub&#45;tensors." alt="" coords="5,80,207,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface." alt="" coords="49,5,163,32"/>
 </map>

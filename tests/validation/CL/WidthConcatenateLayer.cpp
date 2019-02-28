@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,6 +129,24 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<float>, framewor
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QASYMM8)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::QASYMM8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

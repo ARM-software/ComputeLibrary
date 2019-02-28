@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,10 +42,29 @@ namespace validation
 {
 namespace
 {
-const auto PermuteParametersSmall = combine(datasets::Small4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
-const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
-                                            framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
+const auto PermuteVectors3 = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(2U, 0U, 1U),
+    PermutationVector(1U, 2U, 0U),
+    PermutationVector(0U, 1U, 2U),
+    PermutationVector(0U, 2U, 1U),
+    PermutationVector(1U, 0U, 2U),
+    PermutationVector(2U, 1U, 0U),
+});
+const auto PermuteVectors4 = framework::dataset::make("PermutationVector",
+{
+    PermutationVector(3U, 2U, 0U, 1U),
+    PermutationVector(3U, 2U, 1U, 0U),
+    PermutationVector(2U, 3U, 1U, 0U),
+    PermutationVector(1U, 3U, 2U, 0U),
+    PermutationVector(3U, 1U, 2U, 0U),
+    PermutationVector(3U, 0U, 2U, 1U),
+    PermutationVector(0U, 3U, 2U, 1U)
+});
+const auto PermuteVectors         = concat(PermuteVectors3, PermuteVectors4);
+const auto PermuteInputLayout     = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto PermuteParametersSmall = concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()) * PermuteInputLayout * PermuteVectors;
+const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteInputLayout * PermuteVectors;
 } // namespace
 TEST_SUITE(CL)
 TEST_SUITE(Permute)
@@ -53,47 +72,49 @@ TEST_SUITE(Permute)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-                                                framework::dataset::make("InputInfo",{
-                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
-                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
-                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
-                                                                                        TensorInfo(TensorShape(1U, 7U), 1, DataType::U8),              // invalid input size
-                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
-                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
-                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::QASYMM8), // permutation not supported
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::F32), // permutation not supported
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::F32), // permutation not supported
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::U16), // permutation not supported
-                                                                                    }),
-                                                framework::dataset::make("OutputInfo", {
-                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
-                                                                                        TensorInfo(TensorShape(5U, 5U, 7U, 3U), 1, DataType::U16),
-                                                                                        TensorInfo(TensorShape(7U, 7U, 7U, 3U), 1, DataType::U16),
-                                                                                        TensorInfo(TensorShape(5U, 7U), 1, DataType::U8),
-                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
-                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(2U, 37U, 27U, 13U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::QASYMM8),
-                                                                                        TensorInfo(TensorShape(128U, 64U, 21U, 2U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(21U, 64U, 2U, 128U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(2U, 21U, 64U, 128U), 1, DataType::U16),
-                                                                                    })),
-                                                framework::dataset::make("PermutationVector", {
-                                                                                                PermutationVector(2U, 1U, 0U),
-                                                                                                PermutationVector(2U, 2U, 1U),
-                                                                                                PermutationVector(1U, 1U, 1U),
-                                                                                                PermutationVector(2U, 0U, 1U),
-                                                                                                PermutationVector(2U, 0U, 1U),
-                                                                                                PermutationVector(1U, 2U, 0U),
-                                                                                                PermutationVector(3U, 2U, 0U, 1U),
-                                                                                                PermutationVector(2U, 3U, 1U, 0U),
-                                                                                                PermutationVector(1U, 1U, 1U, 1U),
-                                                                                                PermutationVector(2U, 1U, 3U, 0U),
-                                                                                                PermutationVector(3U, 2U, 1U, 0U),
-                                                                                    })),
-                                                framework::dataset::make("Expected", { false, false, false, false, true, true, true, false, false, false, false })),
-                                            input_info, output_info, perm_vect, expected)
+        framework::dataset::make("InputInfo",{
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                TensorInfo(TensorShape(1U, 7U), 1, DataType::U8),              // invalid input size
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
+                TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::S16),     // valid
+                TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
+                TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
+                TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32)   // permutation not supported
+
+        }),
+        framework::dataset::make("OutputInfo", {
+                TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
+                TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
+                TensorInfo(TensorShape(5U, 7U), 1, DataType::U8),
+                TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
+                TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),
+                TensorInfo(TensorShape(3U, 5U, 7U, 7U), 1, DataType::S16),
+                TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
+                TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
+                TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32)
+
+        })),
+        framework::dataset::make("PermutationVector", {
+                PermutationVector(2U, 1U, 0U),
+                PermutationVector(2U, 2U, 1U),
+                PermutationVector(1U, 1U, 1U),
+                PermutationVector(2U, 0U, 1U),
+                PermutationVector(2U, 0U, 1U),
+                PermutationVector(1U, 2U, 0U),
+                PermutationVector(3U, 2U, 0U, 1U),
+                PermutationVector(3U, 2U, 0U, 1U),
+                PermutationVector(2U, 3U, 1U, 0U),
+                PermutationVector(2U, 3U, 1U, 0U),
+                PermutationVector(0U, 0U, 0U, 1000U)
+        })),
+        framework::dataset::make("Expected", { true, false, false, false, true, true, false, true, false, true, false })),
+        input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);
 }
@@ -123,50 +144,61 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     validate(dst.info()->valid_region(), valid_region);
 }
 
+#ifndef DOXYGEN_SKIP_THIS
+
 template <typename T>
 using CLPermuteFixture = PermuteValidationFixture<CLTensor, CLAccessor, CLPermute, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U8)))
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U8))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U16))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U16
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(PermuteParametersSmall, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(PermuteParametersLarge, framework::dataset::make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge * framework::dataset::make("DataType", DataType::U32))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U32
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+#endif /* DOXYGEN_SKIP_THIS */
+
+TEST_SUITE_END() // Permute
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

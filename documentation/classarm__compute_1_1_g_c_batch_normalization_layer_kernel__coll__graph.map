@@ -1,4 +1,5 @@
 <map id="GCBatchNormalizationLayerKernel" name="GCBatchNormalizationLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="58,80,141,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="68,5,131,32"/>
+<area shape="rect" id="node1" title="Interface for the BatchNormalization layer kernel." alt="" coords="5,155,208,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="65,80,148,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="75,5,139,32"/>
 </map>

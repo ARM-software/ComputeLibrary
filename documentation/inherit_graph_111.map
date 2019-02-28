@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;. " alt="" coords="5,31,100,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_lut_allocator.xhtml" title="Basic implementation of a CL memory LUT allocator. " alt="" coords="148,5,256,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_lut_allocator.xhtml" title="Basic implementation of a CPU memory LUT allocator. " alt="" coords="157,56,247,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1utils_1_1_i_image_data_feeder.xhtml" title="Image feeder interface." alt="" coords="5,31,144,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_file_image_feeder.xhtml" title="File Image feeder concrete implementation." alt="" coords="208,5,333,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_memory_image_feeder.xhtml" title="Memory Image feeder concrete implementation." alt="" coords="192,56,349,83"/>
 </map>

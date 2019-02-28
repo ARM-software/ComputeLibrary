@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@ struct KeyPoint;
 struct Coordinates2D;
 struct DetectionWindow;
 class Size2D;
-struct ROI;
 
 /** Array of type T */
 template <class T>
@@ -142,8 +141,6 @@ using IKeyPointArray = IArray<KeyPoint>;
 using ICoordinates2DArray = IArray<Coordinates2D>;
 /** Interface for Array of Detection Windows. */
 using IDetectionWindowArray = IArray<DetectionWindow>;
-/** Interface for Array of ROIs. */
-using IROIArray = IArray<ROI>;
 /** Interface for Array of 2D Sizes. */
 using ISize2DArray = IArray<Size2D>;
 /** Interface for Array of uint8s. */

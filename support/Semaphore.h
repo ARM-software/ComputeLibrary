@@ -46,8 +46,10 @@ public:
     /** Signals a semaphore */
     inline void signal()
     {
-        std::unique_lock<std::mutex> lock(_m);
-        ++_value;
+        {
+            std::lock_guard<std::mutex> lock(_m);
+            ++_value;
+        }
         _cv.notify_one();
     }
     /** Waits on a semaphore */

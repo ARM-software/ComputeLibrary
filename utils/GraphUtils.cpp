@@ -420,6 +420,77 @@ void ValidationOutputAccessor::report_top_n(size_t top_n, size_t total_samples, 
     _output_stream << "Accuracy : " << accuracy << std::endl;
 }
 
+DetectionOutputAccessor::DetectionOutputAccessor(const std::string &labels_path, std::vector<TensorShape> &imgs_tensor_shapes, std::ostream &output_stream)
+    : _labels(), _tensor_shapes(std::move(imgs_tensor_shapes)), _output_stream(output_stream)
+{
+    _labels.clear();
+
+    std::ifstream ifs;
+
+    try
+    {
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(labels_path, std::ios::in | std::ios::binary);
+
+        for(std::string line; !std::getline(ifs, line).fail();)
+        {
+            _labels.emplace_back(line);
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", labels_path.c_str(), e.what());
+    }
+}
+
+template <typename T>
+void DetectionOutputAccessor::access_predictions_tensor(ITensor &tensor)
+{
+    const size_t num_detection = tensor.info()->valid_region().shape.y();
+    const auto   output_prt    = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+
+    if(num_detection > 0)
+    {
+        _output_stream << "---------------------- Detections ----------------------" << std::endl
+                       << std::endl;
+
+        _output_stream << std::left << std::setprecision(4) << std::setw(8) << "Image | " << std::setw(8) << "Label | " << std::setw(12) << "Confidence | "
+                       << "[ xmin, ymin, xmax, ymax ]" << std::endl;
+
+        for(size_t i = 0; i < num_detection; ++i)
+        {
+            auto im = static_cast<const int>(output_prt[i * 7]);
+            _output_stream << std::setw(8) << im << std::setw(8)
+                           << _labels[output_prt[i * 7 + 1]] << std::setw(12) << output_prt[i * 7 + 2]
+                           << " [" << (output_prt[i * 7 + 3] * _tensor_shapes[im].x())
+                           << ", " << (output_prt[i * 7 + 4] * _tensor_shapes[im].y())
+                           << ", " << (output_prt[i * 7 + 5] * _tensor_shapes[im].x())
+                           << ", " << (output_prt[i * 7 + 6] * _tensor_shapes[im].y())
+                           << "]" << std::endl;
+        }
+    }
+    else
+    {
+        _output_stream << "No detection found." << std::endl;
+    }
+}
+
+bool DetectionOutputAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+
+    switch(tensor.info()->data_type())
+    {
+        case DataType::F32:
+            access_predictions_tensor<float>(tensor);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+
+    return false;
+}
+
 TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
     : _labels(), _output_stream(output_stream), _top_n(top_n)
 {

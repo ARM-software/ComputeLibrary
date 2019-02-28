@@ -1,6 +1,7 @@
 var namespacearm__compute_1_1graph__utils =
 [
     [ "CaffePreproccessor", "classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml", "classarm__compute_1_1graph__utils_1_1_caffe_preproccessor" ],
+    [ "DetectionOutputAccessor", "classarm__compute_1_1graph__utils_1_1_detection_output_accessor.xhtml", "classarm__compute_1_1graph__utils_1_1_detection_output_accessor" ],
     [ "DummyAccessor", "classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml", "classarm__compute_1_1graph__utils_1_1_dummy_accessor" ],
     [ "ImageAccessor", "classarm__compute_1_1graph__utils_1_1_image_accessor.xhtml", "classarm__compute_1_1graph__utils_1_1_image_accessor" ],
     [ "IPreprocessor", "classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml", "classarm__compute_1_1graph__utils_1_1_i_preprocessor" ],

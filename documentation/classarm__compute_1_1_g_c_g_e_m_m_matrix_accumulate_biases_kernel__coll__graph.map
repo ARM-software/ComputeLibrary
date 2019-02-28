@@ -1,4 +1,5 @@
 <map id="GCGEMMMatrixAccumulateBiasesKernel" name="GCGEMMMatrixAccumulateBiasesKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="78,80,161,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="88,5,151,32"/>
+<area shape="rect" id="node1" title="Interface to add a bias to each row of the input tensor." alt="" coords="5,155,244,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="83,80,166,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="93,5,157,32"/>
 </map>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,11 +71,25 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     }
     else
     {
-        const int m                         = reshape_info.m();
-        const int n                         = reshape_info.n();
-        const int k                         = reshape_info.k();
-        const int mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
-        const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
+        GEMMRHSMatrixInfo rhs_info;
+        GEMMLHSMatrixInfo lhs_info;
+        const int         m                         = reshape_info.m();
+        const int         n                         = reshape_info.n();
+        const int         k                         = reshape_info.k();
+        const int         mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
+        const int         mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
+        const bool        unroll_block              = dot8_supported(CLKernelLibrary::get().get_device());
+
+        rhs_info.n0         = 16 / input1->element_size();
+        rhs_info.k0         = 1;
+        rhs_info.h0         = mult_transpose1xW_width;
+        rhs_info.interleave = false;
+        rhs_info.transpose  = false;
+        lhs_info.m0         = 4;
+        lhs_info.k0         = 4;
+        lhs_info.v0         = mult_interleave4x4_height;
+        lhs_info.interleave = true;
+        lhs_info.transpose  = !unroll_block;
 
         TensorShape tensor_shape0{ input0->tensor_shape() };
         tensor_shape0.set(0, k);
@@ -88,8 +102,8 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
         const TensorInfo tensor_info0 = input0->clone()->set_tensor_shape(tensor_shape0);
         const TensorInfo tensor_info1 = input1->clone()->set_tensor_shape(tensor_shape1);
 
-        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
-        const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(tensor_info1, mult_transpose1xW_width));
+        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(compute_lhs_reshaped_shape(tensor_info0, lhs_info));
+        const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_rhs_reshaped_shape(tensor_info1, rhs_info));
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);

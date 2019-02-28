@@ -24,16 +24,18 @@
 #ifndef __ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__
 #define __ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
+class ITensor;
+
 /** Basic function to execute NEGEMMTranspose1xWKernel. This function calls the following NEON kernels:
  *
  *  -# @ref NEGEMMTranspose1xWKernel
  *
  */
-class NEGEMMTranspose1xW : public INESimpleFunction
+class NEGEMMTranspose1xW : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output
@@ -51,5 +53,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__ */

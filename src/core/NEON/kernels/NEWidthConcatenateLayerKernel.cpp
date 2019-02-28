@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -56,6 +57,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
 Status validate_arguments(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    // Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1,
                                                          DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16, DataType::F16,
@@ -110,15 +112,28 @@ void NEWidthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &
     uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _width_offset * _output->info()->strides_in_bytes()[0];
 
     // Create iterators
-    Iterator input(_input, window);
-    Iterator output(_output, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
+    Iterator                input(_input, window);
+    Iterator                output(_output, window);
+    const DataType          dt           = _input->info()->data_type();
+    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
+    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
-        const auto in_ptr  = input.ptr();
-        const auto out_ptr = output_ptr + output.offset();
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            vst1q_u8(output_ptr + output.offset(), vquantize(vdequantize(vld1q_u8(input.ptr()), input_qinfo), output_qinfo));
+        },
+        input, output);
+    }
+    else
+    {
+        execute_window_loop(window, [&](const Coordinates &)
+        {
+            const auto in_ptr  = input.ptr();
+            const auto out_ptr = output_ptr + output.offset();
 
-        wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
-    },
-    input, output);
+            wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
+        },
+        input, output);
+    }
 }

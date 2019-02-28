@@ -1,11 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_region.xhtml" title="Memory region interface. " alt="" coords="5,107,120,133"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_memory_region.xhtml" title="OpenCL memory region interface. " alt="" coords="170,56,301,83"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1_i_g_c_memory_region.xhtml" title="GLES memory region interface. " alt="" coords="168,107,303,133"/>
-<area shape="rect" id="node9" href="$classarm__compute_1_1_memory_region.xhtml" title="Memory region CPU implementation. " alt="" coords="180,157,291,184"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_buffer_memory_region.xhtml" title="OpenCL buffer memory region implementation. " alt="" coords="352,5,515,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml" title="OpenCL SVM memory region interface. " alt="" coords="353,56,513,83"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_coarse_s_v_m_memory_region.xhtml" title="OpenCL coarse&#45;grain SVM memory region implementation. " alt="" coords="564,31,763,57"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml" title="OpenCL fine&#45;grain SVM memory region implementation. " alt="" coords="573,81,754,108"/>
-<area shape="rect" id="node8" href="$classarm__compute_1_1_g_c_buffer_memory_region.xhtml" title="GLES buffer memory region implementation. " alt="" coords="351,107,516,133"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;." alt="" coords="5,31,107,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_lut_allocator.xhtml" title="Basic implementation of a CL memory LUT allocator." alt="" coords="155,5,269,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_lut_allocator.xhtml" title="Basic implementation of a CPU memory LUT allocator." alt="" coords="163,56,261,83"/>
 </map>

@@ -238,6 +238,89 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.02 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - New Neon kernels / functions:
+    - @ref NETileKernel / @ref NETile
+    - @ref NEFuseBatchNormalizationKernel / @ref NEFuseBatchNormalization
+    - @ref NEElementwiseOperationKernel
+    - @ref NEElementwiseMax
+    - @ref NEElementwiseMin
+    - @ref NEElementwiseSquaredDiff
+    - @ref NESelectKernel / @ref NESelect
+    - @ref NESplit
+    - @ref NESlice
+    - @ref NEUnstack
+    - @ref NEStridedSliceKernel / @ref NEStridedSlice
+    - @ref NEElementwiseUnaryKernel
+    - @ref NERsqrtLayer
+    - @ref NEExpLayer
+    - @ref NEReverseKernel / @ref NEReverse
+    - @ref NEArgMinMaxLayer
+    - @ref NEStackLayerKernel / @ref NEStackLayer
+    - @ref NERangeKernel / @ref NERange
+    - @ref NEPadLayer
+    - @ref NEMemsetKernel
+    - @ref NEGatherKernel / @ref NEGather
+    - @ref NEElementwiseComparison
+    - @ref NEElementwiseComparisonStatic
+    - @ref NEComparisonOperationKernel
+    - @ref NEElementwiseDivision
+ - New OpenCL kernels / functions:
+    - @ref CLSelectKernel / @ref CLSelect
+    - @ref CLTileKernel / @ref CLTile
+    - @ref CLComparisonKernel / @ref CLComparison
+    - @ref CLArgMinMaxLayer
+    - @ref CLElementwiseMax
+    - @ref CLElementwiseMin
+    - @ref CLElementwiseSquaredDiff
+    - @ref CLStackLayerKernel / @ref CLStackLayer
+    - @ref CLReverse / @ref CLReverseKernel
+    - @ref CLRsqrtLayer
+    - @ref CLExpLayer
+    - @ref CLElementWiseUnaryLayerKernel
+    - @ref CLGEMMReshapeLHSMatrixKernel
+    - @ref CLGEMMReshapeRHSMatrixKernel
+    - @ref CLGEMMMatrixMultiplyReshapedKernel
+    - @ref CLRangeKernel / @ref CLRange
+    - @ref CLUnstack
+    - @ref CLGatherKernel / @ref CLGather
+    - @ref CLGEMMLowpMatrixMultiplyReshapedKernel
+ - New CPP kernels / functions:
+    - @ref CPPDetectionOutputLayer
+    - @ref CPPTopKV / @ref CPPTopKVKernel
+ - Added new examples:
+    - graph_ssd_mobilenet.cpp
+    - graph_mobilenet_v2.cpp
+    - graph_resnet12.cpp
+    - graph_srcnn955.cpp
+    - graph_vgg_vdsr.cpp
+    - graph_inception_resnet_v1.cpp
+ - Add 4D tensors support to
+    - @ref NESoftmaxLayer
+ - Fused activation in @ref CLWinogradConvolutionLayer
+ - Extented @ref NEPermute to support more cases
+ - Added NEON/SVE GEMM Hybrid kernels
+ - Added u8 and s8 hybrid assembly kernels
+ - Introduced GEMM strategy name in NEGEMMAssemblyWrapper
+ - Improved @ref CLTuner
+ - Fused the bias addition within @ref CLGEMM
+ - Added support for QASYMM8 LOGISTIC activation in @ref NEActivationLayer
+ - Added NHWC data layout support to:
+    - @ref NEScale for F16
+    - @ref CLNormalizationLayer IN_MAP_2D for FP32/FP16
+    - @ref NEL2NormalizeLayer for FP32/FP16
+    - @ref NENormalizationLayer IN_MAP_2D for FP32/FP16
+    - @ref CLROIAlignLayer
+    - @ref CLGenerateProposalsLayer
+ - Added QASYMM8 support to the following kernels:
+    - @ref NEArithmeticAdditionKernel
+    - @ref NEScale
+ - Added new tests and improved validation and benchmarking suites.
+ - Deprecated functions/interfaces
+    - Usage of inner_border_right and inner_border_top has been deprecated in @ref CLDeconvolutionLayer and @ref NEDeconvolutionLayer
+
 v18.11 Public major release
  - Various bug fixes.
  - Various optimisations.
@@ -538,7 +621,7 @@ v17.09 Public major release
     - @ref NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel @ref CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
     - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - @ref CLFlattenLayer
@@ -960,10 +1043,8 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 - Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
-<!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
 
-<!-- End of the 2 blank lines --!>
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17b --stl libc++ --api 21
 

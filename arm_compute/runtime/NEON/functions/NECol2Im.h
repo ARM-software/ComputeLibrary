@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NECOL2IM_H__
 #define __ARM_COMPUTE_NECOL2IM_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NECol2Im */
-class NECol2Im : public INESimpleFunction
+class NECol2Im : public INESimpleFunctionNoBorder
 {
 public:
     /** Configure the col2im NEON kernel
@@ -56,5 +56,5 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &convolved_dims);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECOL2IM_H__ */

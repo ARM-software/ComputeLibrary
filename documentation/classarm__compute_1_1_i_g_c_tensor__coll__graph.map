@@ -1,3 +1,4 @@
 <map id="IGCTensor" name="IGCTensor">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor. " alt="" coords="15,5,82,32"/>
+<area shape="rect" id="node1" title="Interface for GLES Compute tensor." alt="" coords="5,80,91,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor.xhtml" title="Interface for NEON tensor." alt="" coords="15,5,81,32"/>
 </map>

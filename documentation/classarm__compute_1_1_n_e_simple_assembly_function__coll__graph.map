@@ -1,3 +1,4 @@
 <map id="NESimpleAssemblyFunction" name="NESimpleAssemblyFunction">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="62,5,138,32"/>
+<area shape="rect" id="node1" title="Basic interface for functions which have a single NEON GEMM wrapper kernel to run." alt="" coords="5,80,204,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="65,5,144,32"/>
 </map>

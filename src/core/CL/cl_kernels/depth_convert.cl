@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,80 +38,92 @@
 
 /** This function performs a down-scaling depth conversion.
  *
- * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
+ * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/U16/S16/U32/S32/F16/F32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source image in Y dimension (in bytes)
  * @param[in]  in_step_y                         in_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  in_step_z                         in_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in_offset_first_element_in_bytes  The offset of the first element in the source image
  * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8/U16/S16/U32/S32/F16/F32
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  out_step_z                        out_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  * @param[in]  shift                             The integer shift amount value. Supported data types: S32
  */
 __kernel void convert_depth_down(
-    IMAGE_DECLARATION(in),
-    IMAGE_DECLARATION(out),
+    TENSOR3D_DECLARATION(in),
+    TENSOR3D_DECLARATION(out),
     const int shift)
 {
     // Get pixels pointer
-    Image in  = CONVERT_TO_IMAGE_STRUCT(in);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
-    VEC_DATA_TYPE(DATA_TYPE_IN, 16)
-    in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
+    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in.ptr);
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    const DATA_TYPE_IN scale = (DATA_TYPE_IN)(1 << shift);
-    vstore16(CONVERT_DOWN(in_data / scale, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
-    vstore16(CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }
 
 /** This function performs a up-scaling depth conversion.
  *
- * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
+ * @note The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/U16/S16/U32/S32/F16/F32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source image in Y dimension (in bytes)
  * @param[in]  in_step_y                         in_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  in_step_z                         in_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in_offset_first_element_in_bytes  The offset of the first element in the source image
  * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8/U16/S16/U32/S32/F16/F32
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  out_step_z                        out_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
  * @param[in]  shift                             The integer shift amount value. Supported data types: S32
  */
 __kernel void convert_depth_up(
-    IMAGE_DECLARATION(in),
-    IMAGE_DECLARATION(out),
+    TENSOR3D_DECLARATION(in),
+    TENSOR3D_DECLARATION(out),
     const int shift)
 {
     // Get pixels pointer
-    Image in  = CONVERT_TO_IMAGE_STRUCT(in);
-    Image out = CONVERT_TO_IMAGE_STRUCT(out);
+    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
     // Load data
-    VEC_DATA_TYPE(DATA_TYPE_IN, 16)
-    in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
+    VEC_DATA_TYPE(DATA_TYPE_IN, VEC_SIZE)
+    in_data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE_IN *)in.ptr);
 
 #if defined(IS_DATA_TYPE_FLOAT)
-    const DATA_TYPE_OUT scale = (DATA_TYPE_OUT)(1 << shift);
-    vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)) * scale, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)), 0, (__global DATA_TYPE_OUT *)out.ptr);
 #else  /* defined(IS_DATA_TYPE_FLOAT) */
-    vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)) << shift, 0, (__global DATA_TYPE_OUT *)out.ptr);
+    VSTORE(VEC_SIZE)
+    (CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, VEC_SIZE)) << shift, 0, (__global DATA_TYPE_OUT *)out.ptr);
 #endif /* defined(IS_DATA_TYPE_FLOAT) */
 }

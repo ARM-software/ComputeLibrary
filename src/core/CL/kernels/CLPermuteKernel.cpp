@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,17 +56,22 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm != PermutationVector{ 2U, 0U, 1U })
-                                    && (perm != PermutationVector{ 1U, 2U, 0U })
-                                    && (perm != PermutationVector{ 3U, 2U, 0U, 1U }),
-                                    "Only [2, 0, 1], [1, 2, 0] and [3, 2, 0, 1] permutation is supported");
 
-    const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 1 || input->num_dimensions() > 4,
+                                    "Permutation upto 4-D input tensor is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() < 1 || perm.num_dimensions() > 4,
+                                    "Permutation vector size should be less than or equal to 4");
+    for(const auto &p : perm)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(p >= perm.num_dimensions(), "Permutation vector has invalid values");
+    }
 
     // Validate configured output
     if(output->total_size() != 0)
     {
+        const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
     return Status{};
@@ -87,30 +92,16 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     // Create kernel
-    std::set<std::string> build_opts;
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
+    // New positions of  width(W), height(H), channel(C) and batch(D) based on permutation vector
+    build_opts.add_option("-DP1=" + support::cpp11::to_string((_perm.num_dimensions() >= 1) ? perm[0] : 0));
+    build_opts.add_option("-DP2=" + support::cpp11::to_string((_perm.num_dimensions() >= 2) ? perm[1] : 1));
+    build_opts.add_option("-DP3=" + support::cpp11::to_string((_perm.num_dimensions() >= 3) ? perm[2] : 2));
+    build_opts.add_option("-DP4=" + support::cpp11::to_string((_perm.num_dimensions() >= 4) ? perm[3] : 3));
 
-    build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DDEPTH_IN=" + support::cpp11::to_string(input->info()->dimension(2)));
-
-    // Run [2, 0, 1] permute
-    if(_perm == PermutationVector{ 2U, 0U, 1U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_201", build_opts));
-    }
-    // Run [1, 2, 0] permute
-    else if(_perm == PermutationVector{ 1U, 2U, 0U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_120", build_opts));
-    }
-    // Run [3, 2, 0, 1] permute
-    else if(_perm == PermutationVector{ 3U, 2U, 0U, 1U })
-    {
-        _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute_3201", build_opts));
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Not supported.");
-    }
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("permute", build_opts.options()));
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());

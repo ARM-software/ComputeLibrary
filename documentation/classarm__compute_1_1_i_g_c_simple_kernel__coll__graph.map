@@ -1,4 +1,5 @@
 <map id="IGCSimpleKernel" name="IGCSimpleKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="25,80,108,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="35,5,98,32"/>
+<area shape="rect" id="node1" title="Interface for simple OpenGL ES kernels having 1 tensor input and 1 tensor output." alt="" coords="5,155,132,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="27,80,110,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="37,5,101,32"/>
 </map>

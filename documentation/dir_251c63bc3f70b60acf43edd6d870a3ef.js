@@ -11,14 +11,8 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLActivationLayer.h", "_c_l_activation_layer_8h.xhtml", [
       [ "CLActivationLayer", "classarm__compute_1_1_c_l_activation_layer.xhtml", "classarm__compute_1_1_c_l_activation_layer" ]
     ] ],
-    [ "CLArithmeticAddition.h", "_c_l_arithmetic_addition_8h.xhtml", [
-      [ "CLArithmeticAddition", "classarm__compute_1_1_c_l_arithmetic_addition.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition" ]
-    ] ],
-    [ "CLArithmeticDivision.h", "_c_l_arithmetic_division_8h.xhtml", [
-      [ "CLArithmeticDivision", "classarm__compute_1_1_c_l_arithmetic_division.xhtml", "classarm__compute_1_1_c_l_arithmetic_division" ]
-    ] ],
-    [ "CLArithmeticSubtraction.h", "_c_l_arithmetic_subtraction_8h.xhtml", [
-      [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction" ]
+    [ "CLArgMinMaxLayer.h", "_c_l_arg_min_max_layer_8h.xhtml", [
+      [ "CLArgMinMaxLayer", "classarm__compute_1_1_c_l_arg_min_max_layer.xhtml", "classarm__compute_1_1_c_l_arg_min_max_layer" ]
     ] ],
     [ "CLBatchNormalizationLayer.h", "_c_l_batch_normalization_layer_8h.xhtml", [
       [ "CLBatchNormalizationLayer", "classarm__compute_1_1_c_l_batch_normalization_layer.xhtml", "classarm__compute_1_1_c_l_batch_normalization_layer" ]
@@ -47,6 +41,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLCannyEdge.h", "_c_l_canny_edge_8h.xhtml", [
       [ "CLCannyEdge", "classarm__compute_1_1_c_l_canny_edge.xhtml", "classarm__compute_1_1_c_l_canny_edge" ]
     ] ],
+    [ "CLCast.h", "_c_l_cast_8h.xhtml", [
+      [ "CLCast", "classarm__compute_1_1_c_l_cast.xhtml", "classarm__compute_1_1_c_l_cast" ]
+    ] ],
     [ "CLChannelCombine.h", "_c_l_channel_combine_8h.xhtml", [
       [ "CLChannelCombine", "classarm__compute_1_1_c_l_channel_combine.xhtml", "classarm__compute_1_1_c_l_channel_combine" ]
     ] ],
@@ -59,6 +56,7 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLColorConvert.h", "_c_l_color_convert_8h.xhtml", [
       [ "CLColorConvert", "classarm__compute_1_1_c_l_color_convert.xhtml", "classarm__compute_1_1_c_l_color_convert" ]
     ] ],
+    [ "CLComparison.h", "_c_l_comparison_8h.xhtml", "_c_l_comparison_8h" ],
     [ "CLComputeAllAnchors.h", "_c_l_compute_all_anchors_8h.xhtml", [
       [ "CLComputeAllAnchors", "classarm__compute_1_1_c_l_compute_all_anchors.xhtml", "classarm__compute_1_1_c_l_compute_all_anchors" ]
     ] ],
@@ -106,6 +104,18 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLDirectConvolutionLayer.h", "_c_l_direct_convolution_layer_8h.xhtml", [
       [ "CLDirectConvolutionLayer", "classarm__compute_1_1_c_l_direct_convolution_layer.xhtml", "classarm__compute_1_1_c_l_direct_convolution_layer" ]
     ] ],
+    [ "CLElementwiseOperations.h", "_c_l_elementwise_operations_8h.xhtml", [
+      [ "CLArithmeticAddition", "classarm__compute_1_1_c_l_arithmetic_addition.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition" ],
+      [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction" ],
+      [ "CLArithmeticDivision", "classarm__compute_1_1_c_l_arithmetic_division.xhtml", "classarm__compute_1_1_c_l_arithmetic_division" ],
+      [ "CLElementwiseMax", "classarm__compute_1_1_c_l_elementwise_max.xhtml", "classarm__compute_1_1_c_l_elementwise_max" ],
+      [ "CLElementwiseMin", "classarm__compute_1_1_c_l_elementwise_min.xhtml", "classarm__compute_1_1_c_l_elementwise_min" ],
+      [ "CLElementwiseSquaredDiff", "classarm__compute_1_1_c_l_elementwise_squared_diff.xhtml", "classarm__compute_1_1_c_l_elementwise_squared_diff" ]
+    ] ],
+    [ "CLElementWiseUnaryLayer.h", "_c_l_element_wise_unary_layer_8h.xhtml", [
+      [ "CLRsqrtLayer", "classarm__compute_1_1_c_l_rsqrt_layer.xhtml", "classarm__compute_1_1_c_l_rsqrt_layer" ],
+      [ "CLExpLayer", "classarm__compute_1_1_c_l_exp_layer.xhtml", "classarm__compute_1_1_c_l_exp_layer" ]
+    ] ],
     [ "CLEqualizeHistogram.h", "_c_l_equalize_histogram_8h.xhtml", [
       [ "CLEqualizeHistogram", "classarm__compute_1_1_c_l_equalize_histogram.xhtml", "classarm__compute_1_1_c_l_equalize_histogram" ]
     ] ],
@@ -130,6 +140,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLFuseBatchNormalization.h", "_c_l_fuse_batch_normalization_8h.xhtml", [
       [ "CLFuseBatchNormalization", "classarm__compute_1_1_c_l_fuse_batch_normalization.xhtml", "classarm__compute_1_1_c_l_fuse_batch_normalization" ]
+    ] ],
+    [ "CLGather.h", "_c_l_gather_8h.xhtml", [
+      [ "CLGather", "classarm__compute_1_1_c_l_gather.xhtml", "classarm__compute_1_1_c_l_gather" ]
     ] ],
     [ "CLGaussian3x3.h", "_c_l_gaussian3x3_8h.xhtml", [
       [ "CLGaussian3x3", "classarm__compute_1_1_c_l_gaussian3x3.xhtml", "classarm__compute_1_1_c_l_gaussian3x3" ]
@@ -248,6 +261,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLQuantizationLayer.h", "_c_l_quantization_layer_8h.xhtml", [
       [ "CLQuantizationLayer", "classarm__compute_1_1_c_l_quantization_layer.xhtml", "classarm__compute_1_1_c_l_quantization_layer" ]
     ] ],
+    [ "CLRange.h", "_c_l_range_8h.xhtml", [
+      [ "CLRange", "classarm__compute_1_1_c_l_range.xhtml", "classarm__compute_1_1_c_l_range" ]
+    ] ],
     [ "CLReduceMean.h", "_c_l_reduce_mean_8h.xhtml", [
       [ "CLReduceMean", "classarm__compute_1_1_c_l_reduce_mean.xhtml", "classarm__compute_1_1_c_l_reduce_mean" ]
     ] ],
@@ -263,6 +279,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLReshapeLayer.h", "_c_l_reshape_layer_8h.xhtml", [
       [ "CLReshapeLayer", "classarm__compute_1_1_c_l_reshape_layer.xhtml", "classarm__compute_1_1_c_l_reshape_layer" ]
     ] ],
+    [ "CLReverse.h", "_c_l_reverse_8h.xhtml", [
+      [ "CLReverse", "classarm__compute_1_1_c_l_reverse.xhtml", "classarm__compute_1_1_c_l_reverse" ]
+    ] ],
     [ "CLRNNLayer.h", "_c_l_r_n_n_layer_8h.xhtml", [
       [ "CLRNNLayer", "classarm__compute_1_1_c_l_r_n_n_layer.xhtml", "classarm__compute_1_1_c_l_r_n_n_layer" ]
     ] ],
@@ -277,6 +296,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLScharr3x3.h", "_c_l_scharr3x3_8h.xhtml", [
       [ "CLScharr3x3", "classarm__compute_1_1_c_l_scharr3x3.xhtml", "classarm__compute_1_1_c_l_scharr3x3" ]
+    ] ],
+    [ "CLSelect.h", "_c_l_select_8h.xhtml", [
+      [ "CLSelect", "classarm__compute_1_1_c_l_select.xhtml", "classarm__compute_1_1_c_l_select" ]
     ] ],
     [ "CLSlice.h", "_c_l_slice_8h.xhtml", [
       [ "CLSlice", "classarm__compute_1_1_c_l_slice.xhtml", "classarm__compute_1_1_c_l_slice" ]
@@ -299,6 +321,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLSplit.h", "_c_l_split_8h.xhtml", [
       [ "CLSplit", "classarm__compute_1_1_c_l_split.xhtml", "classarm__compute_1_1_c_l_split" ]
     ] ],
+    [ "CLStackLayer.h", "_c_l_stack_layer_8h.xhtml", [
+      [ "CLStackLayer", "classarm__compute_1_1_c_l_stack_layer.xhtml", "classarm__compute_1_1_c_l_stack_layer" ]
+    ] ],
     [ "CLStridedSlice.h", "_c_l_strided_slice_8h.xhtml", [
       [ "CLStridedSlice", "classarm__compute_1_1_c_l_strided_slice.xhtml", "classarm__compute_1_1_c_l_strided_slice" ]
     ] ],
@@ -308,8 +333,14 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLThreshold.h", "_c_l_threshold_8h.xhtml", [
       [ "CLThreshold", "classarm__compute_1_1_c_l_threshold.xhtml", "classarm__compute_1_1_c_l_threshold" ]
     ] ],
+    [ "CLTile.h", "_c_l_tile_8h.xhtml", [
+      [ "CLTile", "classarm__compute_1_1_c_l_tile.xhtml", "classarm__compute_1_1_c_l_tile" ]
+    ] ],
     [ "CLTranspose.h", "_c_l_transpose_8h.xhtml", [
       [ "CLTranspose", "classarm__compute_1_1_c_l_transpose.xhtml", "classarm__compute_1_1_c_l_transpose" ]
+    ] ],
+    [ "CLUnstack.h", "_c_l_unstack_8h.xhtml", [
+      [ "CLUnstack", "classarm__compute_1_1_c_l_unstack.xhtml", "classarm__compute_1_1_c_l_unstack" ]
     ] ],
     [ "CLUpsampleLayer.h", "_c_l_upsample_layer_8h.xhtml", [
       [ "CLUpsampleLayer", "classarm__compute_1_1_c_l_upsample_layer.xhtml", "classarm__compute_1_1_c_l_upsample_layer" ]

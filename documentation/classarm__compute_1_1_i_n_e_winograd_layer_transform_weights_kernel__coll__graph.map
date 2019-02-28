@@ -1,4 +1,5 @@
 <map id="INEWinogradLayerTransformWeightsKernel&lt; T &gt;" name="INEWinogradLayerTransformWeightsKernel&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="59,80,142,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="69,5,132,32"/>
+<area shape="rect" id="node1" title="Interface for the NEON kernel to perform Winograd weights transform." alt="" coords="5,155,205,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="64,80,147,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="73,5,137,32"/>
 </map>

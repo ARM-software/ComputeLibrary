@@ -140,6 +140,9 @@ public:
         add_config(TensorShape(224U, 224U, 3U), TensorShape(3U, 3U, 3U, 32U), TensorShape(32U), TensorShape(112U, 112U, 32U),
                    PadStrideInfo(2, 2, /*left*/ 0, /*right*/ 1, /*top*/ 0, /*bottom*/ 1, DimensionRoundingType::FLOOR));
 
+        // 1D Kernel
+        add_config(TensorShape(1U, 5U, 2U), TensorShape(1U, 3U, 2U, 3U), TensorShape(3U), TensorShape(1U, 7U, 3U), PadStrideInfo(1, 1, 0, 0, 2, 2, DimensionRoundingType::FLOOR));
+
         // Batch size 1
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0));

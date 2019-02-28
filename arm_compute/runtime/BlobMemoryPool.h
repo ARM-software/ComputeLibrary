@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 
 namespace arm_compute
 {
+// Forward declaration
 class IAllocator;
 
 /** Blob memory pool */
@@ -45,10 +46,10 @@ public:
      *
      * @note allocator should outlive the memory pool
      *
-     * @param[in] allocator  Backing memory allocator
-     * @param[in] blob_sizes Sizes of the blobs to be allocated
+     * @param[in] allocator Backing memory allocator
+     * @param[in] blob_info Configuration information of the blobs to be allocated
      */
-    BlobMemoryPool(IAllocator *allocator, std::vector<size_t> blob_sizes);
+    BlobMemoryPool(IAllocator *allocator, std::vector<BlobInfo> blob_info);
     /** Default Destructor */
     ~BlobMemoryPool();
     /** Prevent instances of this class to be copy constructed */
@@ -69,16 +70,16 @@ public:
 private:
     /** Allocates internal blobs
      *
-     * @param sizes Size of each blob
+     * @param blob_info Size of each blob
      */
-    void allocate_blobs(const std::vector<size_t> &sizes);
+    void allocate_blobs(const std::vector<BlobInfo> &blob_info);
     /** Frees blobs **/
     void free_blobs();
 
 private:
-    IAllocator                                 *_allocator;  /**< Allocator to use for internal allocation */
-    std::vector<std::unique_ptr<IMemoryRegion>> _blobs;      /**< Vector holding all the memory blobs */
-    std::vector<size_t>                         _blob_sizes; /**< Sizes of each blob */
+    IAllocator                                 *_allocator; /**< Allocator to use for internal allocation */
+    std::vector<std::unique_ptr<IMemoryRegion>> _blobs;     /**< Vector holding all the memory blobs */
+    std::vector<BlobInfo>                       _blob_info; /**< Information of each blob */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_BLOBMEMORYPOOL_H__ */

@@ -1,5 +1,6 @@
 <map id="NETableLookupKernel" name="NETableLookupKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output. " alt="" coords="20,155,143,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="36,80,127,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="50,5,113,32"/>
+<area shape="rect" id="node1" title="Interface for the kernel to perform table lookup calculations." alt="" coords="5,229,163,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output." alt="" coords="21,155,147,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="39,80,129,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="52,5,116,32"/>
 </map>

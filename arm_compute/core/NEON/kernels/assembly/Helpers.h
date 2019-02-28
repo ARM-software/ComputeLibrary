@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,9 @@
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Utils.h"
 
+#include "arm_compute/core/NEON/kernels/assembly/INEGEMMWrapperKernel.h"
+#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
+
 namespace arm_compute
 {
 /** Block sizes to use to break the M, N, K dimension */
@@ -38,31 +41,29 @@ struct BlockSizes
     unsigned int strategy_out_height{ 0 }; /**< Number of rows (M) processed by the selected strategy */
 };
 
-/** Calculate the recommended block sizes to use based on the CPU cache sizes and data type
+/** Extracts the kernel description of the selected kernel by the GEMM backend heuristics
  *
- * @param[in] ci         CPU information
- * @param[in] M          M dimension.
- * @param[in] N          N dimension.
- * @param[in] K          K dimension.
- * @param[in] input_type Input data type
- * @param[in] use_dot    (Optional) If data_type is QASYMM8/U8/S8, then use the dot product instruction ?
+ * @param[in] input_type        Data type of the input tensor.
+ * @param[in] ci                CPU information.
+ * @param[in] num_threads       Maximum number of threads that might be used for the calculations.
+ * @param[in] p                 M, N, K sizes.
+ * @param[in] alpha             Alpha value.
+ * @param[in] beta              Beta value.
+ * @param[in] pretranspose_hint Is B also pretransposed ?
  *
- * @return Recommeded block sizes to use for the given M, N, K dimensions.
+ * @return Kernel description that the assembly heuristics picked for the given configuration
  */
-BlockSizes calculate_block_sizes_from_data_type(const CPUInfo &ci, unsigned int M, unsigned int N, unsigned int K, DataType input_type, bool use_dot = false);
-
-/** Get the name of the GEMM strategy which will be used for a given input type
- *
- * @param[in] input_type Input data type
- * @param[in] use_dot    (Optional) If data_type is QASYMM8/U8/S8, then use the dot product instruction ?
- *
- * @return The name of the strategy that will be used
- */
-const char *get_strategy_name(DataType input_type, bool use_dot = false);
+arm_gemm::KernelDescription get_gemm_info(DataType                            input_type,
+                                          const CPUInfo                      &ci,
+                                          const unsigned int                  num_threads,
+                                          const INEGEMMWrapperKernel::Params &p,
+                                          float                               alpha,
+                                          float                               beta,
+                                          bool                                pretranspose_hint);
 
 /** Calculate the recommended block sizes to use based on the CPU cache sizes and the strategy which will be used
  *
- * @param[in] ci CPU information
+ * @param[in] ci CPU information.
  * @param[in] M  M dimension.
  * @param[in] N  N dimension.
  * @param[in] K  K dimension.

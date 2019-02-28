@@ -1,6 +1,8 @@
 <map id="CLDepthConvertLayerKernel" name="CLDepthConvertLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="31,229,169,256"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="40,155,160,181"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="60,80,140,107"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="69,5,131,32"/>
+<area shape="rect" id="node1" title="Interface for the depth conversion kernel." alt="" coords="5,379,207,405"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple3_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="35,304,177,331"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_simple2_d_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="35,229,177,256"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="44,155,168,181"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="66,80,146,107"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="74,5,138,32"/>
 </map>

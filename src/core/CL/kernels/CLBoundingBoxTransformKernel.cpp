@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ namespace
 Status validate_arguments(const ITensorInfo *boxes, const ITensorInfo *pred_boxes, const ITensorInfo *deltas, const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(boxes);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(boxes, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->tensor_shape()[1] != boxes->tensor_shape()[1]);

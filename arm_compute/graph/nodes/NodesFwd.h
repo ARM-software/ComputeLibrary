@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@ class ConstNode;
 class ConvolutionLayerNode;
 class DeconvolutionLayerNode;
 class DepthwiseConvolutionLayerNode;
+class DetectionOutputLayerNode;
 class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;

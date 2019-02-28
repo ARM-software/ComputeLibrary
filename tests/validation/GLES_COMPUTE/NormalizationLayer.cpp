@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,12 +63,16 @@ using GCNormalizationLayerFixture = NormalizationValidationFixture<GCTensor, GCA
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset,
+                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(NormalizationDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCNormalizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset,
+                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
+                                                                                                              framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);

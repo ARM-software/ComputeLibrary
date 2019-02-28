@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,33 @@ namespace validation
 {
 TEST_SUITE(NEON)
 TEST_SUITE(ChannelShuffle)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Invalid num groups
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
+                                                       TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Num groups == channels
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // (channels % num_groups) != 0
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),
+                                                     })),
+               framework::dataset::make("NumGroups",{ 1, 2, 2, 4, 3, 2,
+                                                     })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               input_info, output_info, num_groups, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEChannelShuffleLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), num_groups)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 DATA_TEST_CASE(Configuration,
                framework::DatasetMode::ALL,

@@ -7,9 +7,7 @@ var dir_59425e443f801f1f2fd8bbe4959a3ccf =
     [ "NEON", "dir_445738e6fed662d0b65e690e3f1e1de0.xhtml", "dir_445738e6fed662d0b65e690e3f1e1de0" ],
     [ "validation", "dir_e7c7b16542faa38cb4655ff1750d3604.xhtml", "dir_e7c7b16542faa38cb4655ff1750d3604" ],
     [ "AssetsLibrary.cpp", "_assets_library_8cpp.xhtml", null ],
-    [ "AssetsLibrary.h", "_assets_library_8h.xhtml", [
-      [ "AssetsLibrary", "classarm__compute_1_1test_1_1_assets_library.xhtml", "classarm__compute_1_1test_1_1_assets_library" ]
-    ] ],
+    [ "AssetsLibrary.h", "_assets_library_8h.xhtml", "_assets_library_8h" ],
     [ "Globals.h", "_globals_8h.xhtml", "_globals_8h" ],
     [ "IAccessor.h", "_i_accessor_8h.xhtml", [
       [ "IAccessor", "classarm__compute_1_1test_1_1_i_accessor.xhtml", "classarm__compute_1_1test_1_1_i_accessor" ]

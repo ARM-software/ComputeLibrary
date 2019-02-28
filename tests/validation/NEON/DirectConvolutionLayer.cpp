@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,19 +78,21 @@ const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),
                                       combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
                                               data_pad_f16)));
 
-const auto data_f32_nightly   = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
-const auto data_f16_nightly   = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4, 8, 16 }));
-const auto data_f32_precommit = combine(data_f32, framework::dataset::make("NumKernels", { 4 }));
-const auto data_f16_precommit = combine(data_f16, framework::dataset::make("NumKernels", { 4 }));
+const auto data = combine(datasets::SmallDirectConvolutionShapes(),
+                          combine(framework::dataset::make("StrideX", { 1 }),
+                                  combine(framework::dataset::make("StrideY", { 1 }),
+                                          combine(framework::dataset::make("PadX", { 1 }),
+                                                  combine(framework::dataset::make("PadY", { 1 }),
+                                                          framework::dataset::make("KernelSize", 3))))));
+
+const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4 }));
+
+const auto data_precommit = combine(data, framework::dataset::make("NumKernels", { 1 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -171,7 +173,7 @@ using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tenso
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_f16_precommit, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
                                                                                                                    DataType::F16)),
                                                                                                                    ActivationFunctionsDataset),
                                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
@@ -190,7 +192,7 @@ TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_f32_precommit, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit, framework::dataset::make("DataType",
                                                                                                                     DataType::F32)),
                                                                                                                     ActivationFunctionsDataset),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))

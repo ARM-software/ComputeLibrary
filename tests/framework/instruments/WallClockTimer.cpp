@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,13 +48,13 @@ std::string    WallClock<output_timestamps>::id() const
 template <bool output_timestamps>
 void           WallClock<output_timestamps>::start()
 {
-    _start = std::chrono::high_resolution_clock::now();
+    _start = std::chrono::system_clock::now();
 }
 
 template <bool output_timestamps>
 void           WallClock<output_timestamps>::stop()
 {
-    _stop = std::chrono::high_resolution_clock::now();
+    _stop = std::chrono::system_clock::now();
 }
 
 template <bool              output_timestamps>

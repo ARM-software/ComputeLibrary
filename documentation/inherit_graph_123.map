@@ -1,5 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_node_visitor.xhtml" title="Node visitor interface. " alt="" coords="5,5,100,32"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_default_node_visitor.xhtml" title="Default visitor implementation. " alt="" coords="148,5,280,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml" title="Graph printer visitor. " alt="" coords="328,5,443,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_memory_manager.xhtml" title="Memory manager interface to handle allocations of backing memory." alt="" coords="5,5,139,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_memory_manager_on_demand.xhtml" title="On&#45;demand memory manager." alt="" coords="187,5,389,32"/>
 </map>

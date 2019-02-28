@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ namespace
 Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(anchors, all_anchors);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(anchors);
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->dimension(0) != info.values_per_roi());
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(anchors, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->num_dimensions() > 2);

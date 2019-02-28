@@ -1,5 +1,6 @@
 <map id="NEIntegralImageKernel" name="NEIntegralImageKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output. " alt="" coords="23,155,145,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="39,80,129,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="53,5,115,32"/>
+<area shape="rect" id="node1" title="Kernel to perform an image integral on an image." alt="" coords="5,229,172,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output." alt="" coords="25,155,152,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="44,80,133,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="57,5,121,32"/>
 </map>

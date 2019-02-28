@@ -1,3 +1,4 @@
 <map id="ThreadInfo" name="ThreadInfo">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_u_info.xhtml" title="CPUInfo" alt="" coords="11,5,84,32"/>
+<area shape="rect" id="node1" title="Information about executing thread and CPU." alt="" coords="5,95,95,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_p_u_info.xhtml" title=" " alt="" coords="14,5,86,32"/>
 </map>

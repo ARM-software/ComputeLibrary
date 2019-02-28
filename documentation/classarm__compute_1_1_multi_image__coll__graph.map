@@ -1,3 +1,4 @@
 <map id="MultiImage" name="MultiImage">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_multi_image.xhtml" title="Interface for multi&#45;planar images. " alt="" coords="5,5,96,32"/>
+<area shape="rect" id="node1" title="Basic implementation of the multi&#45;planar image interface." alt="" coords="7,80,99,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_multi_image.xhtml" title="Interface for multi&#45;planar images." alt="" coords="5,5,100,32"/>
 </map>

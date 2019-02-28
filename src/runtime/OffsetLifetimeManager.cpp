@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,16 @@
 #include <map>
 #include <vector>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
+namespace
+{
+size_t align_offset(size_t offset, size_t alignment)
+{
+    const size_t remainder = (alignment != 0U) ? offset % alignment : 0U;
+    return (remainder != 0U) ? offset + (alignment - remainder) : offset;
+}
+} // namespace
 OffsetLifetimeManager::OffsetLifetimeManager()
     : _blob(0)
 {
@@ -58,11 +66,15 @@ void OffsetLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
     // Update blob size
-    size_t max_group_size = std::accumulate(std::begin(_free_blobs), std::end(_free_blobs), static_cast<size_t>(0), [](size_t s, const Blob & b)
+    size_t max_aggregated_size = 0;
+    std::for_each(std::begin(_free_blobs), std::end(_free_blobs), [&](const Blob & b)
     {
-        return s + b.max_size;
+        max_aggregated_size += b.max_size;
+        _blob.alignment = std::max(_blob.alignment, b.max_alignment);
     });
-    _blob = std::max(_blob, max_group_size);
+    max_aggregated_size += _free_blobs.size() * _blob.alignment;
+    _blob.owners = std::max(_blob.owners, _free_blobs.size());
+    _blob.size   = std::max(_blob.size, max_aggregated_size);
 
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
@@ -76,6 +88,8 @@ void OffsetLifetimeManager::update_blobs_and_mappings()
             group_mappings[bound_element.handle] = offset;
         }
         offset += free_blob.max_size;
-        ARM_COMPUTE_ERROR_ON(offset > _blob);
+        offset = align_offset(offset, _blob.alignment);
+        ARM_COMPUTE_ERROR_ON(offset > _blob.size);
     }
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,6 @@ inline VEC_DATA_TYPE(DATA_TYPE, 8) convolution1x3(__global const uchar *left_pix
  * @param[in] mat4  Coefficient from the convolution matrix
  * @param[in] mat5  Coefficient from the convolution matrix
  * @param[in] mat6  Coefficient from the convolution matrix
- * @param[in] mat0  Coefficient from the convolution matrix
  * @param[in] mat7  Coefficient from the convolution matrix
  * @param[in] mat8  Coefficient from the convolution matrix
  * @param[in] scale Convolution matrix scale (Sum of the coefficients, or 1 if the sum is 0)

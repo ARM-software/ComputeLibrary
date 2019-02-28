@@ -1,7 +1,7 @@
 var structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value =
 [
     [ "Value", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab037372802cee601adeb0ee97dc0c0f3", null ],
-    [ "operator*", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ae9a75e9f2233655aa30f2199ed33bddd", null ],
+    [ "operator *", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a82dc1e06c88a4412fd40f1750487c2ae", null ],
     [ "operator+", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a722639a64527d7e2fd655372694166ce", null ],
     [ "operator-", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a6fb5fa1257ad2837d4b83dded72e2fe8", null ],
     [ "operator-=", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a6cb5526035904ad08a9d5ba9fff9a942", null ],

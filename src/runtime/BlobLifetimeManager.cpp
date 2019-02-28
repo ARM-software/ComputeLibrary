@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,6 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
-#include <vector>
 
 using namespace arm_compute;
 
@@ -62,19 +61,21 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     {
         return ba.max_size > bb.max_size;
     });
-    std::vector<size_t> group_sizes;
+
+    // Create group sizes vector
+    std::vector<BlobInfo> group_sizes;
     std::transform(std::begin(_free_blobs), std::end(_free_blobs), std::back_inserter(group_sizes), [](const Blob & b)
     {
-        return b.max_size;
+        return BlobInfo(b.max_size, b.max_alignment);
     });
 
     // Update blob sizes
     size_t max_size = std::max(_blobs.size(), group_sizes.size());
-    _blobs.resize(max_size, 0);
-    group_sizes.resize(max_size, 0);
-    std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs), [](size_t lhs, size_t rhs)
+    _blobs.resize(max_size);
+    group_sizes.resize(max_size);
+    std::transform(std::begin(_blobs), std::end(_blobs), std::begin(group_sizes), std::begin(_blobs), [](BlobInfo lhs, BlobInfo rhs)
     {
-        return std::max(lhs, rhs);
+        return BlobInfo(std::max(lhs.size, rhs.size), std::max(lhs.alignment, rhs.alignment));
     });
 
     // Calculate group mappings

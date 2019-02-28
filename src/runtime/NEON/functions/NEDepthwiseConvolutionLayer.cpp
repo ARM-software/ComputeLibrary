@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
             accum_layout = DataLayout::NCHW;
         }
 
-        _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, input->info()->quantization_info()));
+        _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, output->info()->quantization_info()));
         _accumulator.info()->set_data_layout(accum_layout);
         zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
     }
@@ -271,7 +271,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(channel_idx);
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON((input->info()->dimension(channel_idx) * depth_multiplier) != weights->info()->dimension(channel_idx));
 

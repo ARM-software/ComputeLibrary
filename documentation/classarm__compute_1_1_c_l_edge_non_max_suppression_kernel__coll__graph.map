@@ -1,4 +1,5 @@
 <map id="CLEdgeNonMaxSuppressionKernel" name="CLEdgeNonMaxSuppressionKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="79,80,159,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="87,5,150,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform Non&#45;Maxima suppression for Canny Edge." alt="" coords="5,155,245,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="85,80,165,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="93,5,157,32"/>
 </map>

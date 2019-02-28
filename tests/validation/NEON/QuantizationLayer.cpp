@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,14 +45,37 @@ namespace
 /** Tolerance for quantization */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 
-const auto QuantizationShapes = concat(concat(concat(datasets::Small3DShapes(),
-                                                     datasets::Large3DShapes()),
-                                              datasets::Small4DShapes()),
-                                       datasets::Large4DShapes());
+const auto QuantizationShapes = concat(datasets::Small3DShapes(),
+                                       datasets::Small4DShapes());
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(QuantizationLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),  // Wrong input data type
+                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),  // Invalid shape
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Wrong output data type
+                                                       TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::U8),  // Missmatching shapes
+                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::U8),  // Shrink window
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U16),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),
+                                                     })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               input_info, output_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEQuantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationShapes, framework::dataset::make("DataType", DataType::F32)), shape, data_type)
 {
@@ -95,11 +118,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<float>, framework::D
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QuantizationLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_c_l_tuner.xhtml" title="Basic interface for tuning the OpenCL kernels. " alt="" coords="5,56,81,83"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface. " alt="" coords="144,5,216,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1tuners_1_1_bifrost_tuner.xhtml" title="Bifrost based OpenCL tuner implementation. " alt="" coords="133,56,227,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1tuners_1_1_midgard_tuner.xhtml" title="Midgard based OpenCL tuner implementation. " alt="" coords="129,107,231,133"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_array.xhtml" title="Array of type T." alt="" coords="5,31,101,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values." alt="" coords="159,5,252,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_array.xhtml" title="Interface for OpenCL Array." alt="" coords="149,56,261,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_c_l_array.xhtml" title="CLArray implementation." alt="" coords="309,56,419,83"/>
 </map>

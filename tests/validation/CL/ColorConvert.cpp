@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,49 +134,49 @@ template <typename T>
 using CLColorConvertFixture = ColorConvertValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLColorConvert, T>;
 
 TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGBA_to_RGB),
+DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGB_to_RGBA),
+DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGB_to_U8),
+DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUYV_to_RGBDataset),
+DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYV_to_RGBDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUVPlanar_to_RGBDataset),
+DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGBDataset_to_NVDataset),
+DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUYVtoNV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUYVDataset_to_NVDataset),
+DATA_TEST_CASE(YUYVtoNV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_NVDataset_to_YUVDataset),
+DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);

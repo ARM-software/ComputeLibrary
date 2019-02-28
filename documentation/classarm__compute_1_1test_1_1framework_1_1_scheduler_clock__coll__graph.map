@@ -1,3 +1,4 @@
 <map id="SchedulerClock&lt; output_timestamps &gt;" name="SchedulerClock&lt; output_timestamps &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="45,5,129,32"/>
+<area shape="rect" id="node1" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="5,80,183,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="48,5,140,32"/>
 </map>

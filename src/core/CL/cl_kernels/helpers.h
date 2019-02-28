@@ -50,6 +50,9 @@
 #define VSTORE_STR(size) vstore##size
 #define VSTORE(size) VSTORE_STR(size)
 
+#define float1 float
+#define half1 half
+
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
 

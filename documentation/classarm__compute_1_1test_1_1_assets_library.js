@@ -1,5 +1,6 @@
 var classarm__compute_1_1test_1_1_assets_library =
 [
+    [ "RangePair", "classarm__compute_1_1test_1_1_assets_library.xhtml#a51733f705cc27b63c4be127eb50639c4", null ],
     [ "AssetsLibrary", "classarm__compute_1_1test_1_1_assets_library.xhtml#adb53338108890e6b7354e16a1e9ae716", null ],
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#ac186c860429337d470bccc138ed84423", null ],
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a72642223d82ac5d32582d66ba180fdfc", null ],
@@ -11,9 +12,11 @@ var classarm__compute_1_1test_1_1_assets_library =
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a81b1ba22b8f48b5a80f38e7dca0efc66", null ],
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a05e6db8fe58b0d75a552c226477a344e", null ],
     [ "fill_borders_with_garbage", "classarm__compute_1_1test_1_1_assets_library.xhtml#ae139c07ceb794ec059efb92aa4c6fd9d", null ],
+    [ "fill_boxes", "classarm__compute_1_1test_1_1_assets_library.xhtml#a6327330393eee13d12234267ab5d19d4", null ],
     [ "fill_layer_data", "classarm__compute_1_1test_1_1_assets_library.xhtml#a5580270336a3055bb7477b227563ccf0", null ],
     [ "fill_tensor_uniform", "classarm__compute_1_1test_1_1_assets_library.xhtml#a6bdf347bae60f8b5b4303776cfc48d68", null ],
     [ "fill_tensor_uniform", "classarm__compute_1_1test_1_1_assets_library.xhtml#ab419bdd4d1b71e56517cbd99428e3740", null ],
+    [ "fill_tensor_uniform_ranged", "classarm__compute_1_1test_1_1_assets_library.xhtml#a7fd005cb98921bb25824629d659ea79d", null ],
     [ "fill_tensor_value", "classarm__compute_1_1test_1_1_assets_library.xhtml#aa13fcfba9d7f0433db83255bd1f0638a", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#aa6db5c08c0540fb3c0b8292861342a73", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#aa0cf1a79542c521b9f16d117b085c4d5", null ],

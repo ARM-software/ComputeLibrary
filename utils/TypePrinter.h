@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -882,6 +882,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding
     return os;
 }
 
+/** Formatted output of the Multiples type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  multiples Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Multiples &multiples)
+{
+    os << "(";
+    for(size_t i = 0; i < multiples.size() - 1; i++)
+    {
+        os << multiples[i] << ", ";
+    }
+    os << multiples.back() << ")";
+    return os;
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[out] os     Output stream.
@@ -1234,6 +1252,19 @@ inline std::string to_string(const PaddingList &padding)
     return str.str();
 }
 
+/** Formatted output of the Multiples type.
+ *
+ * @param[in] multiples Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Multiples &multiples)
+{
+    std::stringstream str;
+    str << multiples;
+    return str.str();
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[in] policy Type to output.
@@ -1291,6 +1322,55 @@ inline std::string to_string(const ConvertPolicy &policy)
     return str.str();
 }
 
+/** Formatted output of the ArithmeticOperation type.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Operation to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation &op)
+{
+    switch(op)
+    {
+        case ArithmeticOperation::ADD:
+            os << "ADD";
+            break;
+        case ArithmeticOperation::SUB:
+            os << "SUB";
+            break;
+        case ArithmeticOperation::DIV:
+            os << "DIV";
+            break;
+        case ArithmeticOperation::MAX:
+            os << "MAX";
+            break;
+        case ArithmeticOperation::MIN:
+            os << "MIN";
+            break;
+        case ArithmeticOperation::SQUARED_DIFF:
+            os << "SQUARED_DIFF";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Arithmetic Operation
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ArithmeticOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
 /** Formatted output of the Reduction Operations.
  *
  * @param[out] os Output stream.
@@ -1311,6 +1391,15 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
         case ReductionOperation::MEAN_SUM:
             os << "MEAN_SUM";
             break;
+        case ReductionOperation::ARG_IDX_MAX:
+            os << "ARG_IDX_MAX";
+            break;
+        case ReductionOperation::ARG_IDX_MIN:
+            os << "ARG_IDX_MIN";
+            break;
+        case ReductionOperation::PROD:
+            os << "PROD";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -1325,6 +1414,92 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
  * @return Formatted string.
  */
 inline std::string to_string(const ReductionOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
+/** Formatted output of the Comparison Operations.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ComparisonOperation &op)
+{
+    switch(op)
+    {
+        case ComparisonOperation::Equal:
+            os << "Equal";
+            break;
+        case ComparisonOperation::NotEqual:
+            os << "NotEqual";
+            break;
+        case ComparisonOperation::Greater:
+            os << "Greater";
+            break;
+        case ComparisonOperation::GreaterEqual:
+            os << "GreaterEqual";
+            break;
+        case ComparisonOperation::Less:
+            os << "Less";
+            break;
+        case ComparisonOperation::LessEqual:
+            os << "LessEqual";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Elementwise unary Operations.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op)
+{
+    switch(op)
+    {
+        case ElementWiseUnary::RSQRT:
+            os << "RSQRT";
+            break;
+        case ElementWiseUnary::EXP:
+            os << "EXP";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Comparison Operations.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ComparisonOperation &op)
+{
+    std::stringstream str;
+    str << op;
+    return str.str();
+}
+
+/** Formatted output of the Elementwise unary Operations.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const ElementWiseUnary &op)
 {
     std::stringstream str;
     str << op;
@@ -1729,6 +1904,85 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &det
     return os;
 }
 
+/** Formatted output of the DetectionOutputLayerCodeType type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_code Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayerCodeType &detection_code)
+{
+    switch(detection_code)
+    {
+        case DetectionOutputLayerCodeType::CENTER_SIZE:
+            os << "CENTER_SIZE";
+            break;
+        case DetectionOutputLayerCodeType::CORNER:
+            os << "CORNER";
+            break;
+        case DetectionOutputLayerCodeType::CORNER_SIZE:
+            os << "CORNER_SIZE";
+            break;
+        case DetectionOutputLayerCodeType::TF_CENTER:
+            os << "TF_CENTER";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+/** Formatted output of the DetectionOutputLayerCodeType type.
+ *
+ * @param[in] detection_code Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionOutputLayerCodeType &detection_code)
+{
+    std::stringstream str;
+    str << detection_code;
+    return str.str();
+}
+
+/** Formatted output of the DetectionOutputLayerInfo type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  detection_info Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionOutputLayerInfo &detection_info)
+{
+    os << "{Classes=" << detection_info.num_classes() << ","
+       << "ShareLocation=" << detection_info.share_location() << ","
+       << "CodeType=" << detection_info.code_type() << ","
+       << "VarianceEncodedInTarget=" << detection_info.variance_encoded_in_target() << ","
+       << "KeepTopK=" << detection_info.keep_top_k() << ","
+       << "NMSThreshold=" << detection_info.nms_threshold() << ","
+       << "Eta=" << detection_info.eta() << ","
+       << "BackgroundLabelId=" << detection_info.background_label_id() << ","
+       << "ConfidenceThreshold=" << detection_info.confidence_threshold() << ","
+       << "TopK=" << detection_info.top_k() << ","
+       << "NumLocClasses=" << detection_info.num_loc_classes()
+       << "}";
+
+    return os;
+}
+
+/** Formatted output of the DetectionOutputLayerInfo type.
+ *
+ * @param[in] detection_info Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionOutputLayerInfo &detection_info)
+{
+    std::stringstream str;
+    str << detection_info;
+    return str.str();
+}
 /** Formatted output of the DetectionWindow type.
  *
  * @param[in] detection_window Type to output

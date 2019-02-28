@@ -1,4 +1,5 @@
 <map id="NEDirectConvolutionLayerOutputStageKernel" name="NEDirectConvolutionLayerOutputStageKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="53,80,135,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,125,32"/>
+<area shape="rect" id="node1" title="NEON kernel to accumulate the biases, if provided, or downscale in case of quantized input." alt="" coords="5,155,193,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="58,80,141,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="67,5,131,32"/>
 </map>

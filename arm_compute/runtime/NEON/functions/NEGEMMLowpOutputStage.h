@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H__
 #define __ARM_COMPUTE_NEGEMMLOWPOUTPUTSTAGE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 /** This file contains all available output stages for GEMMLowp on NEON.
  *
@@ -56,7 +56,7 @@ class ITensor;
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
 */
-class NEGEMMLowpQuantizeDownInt32ToUint8Scale : public INESimpleFunction
+class NEGEMMLowpQuantizeDownInt32ToUint8Scale : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output
@@ -116,7 +116,7 @@ public:
  * @note The function accepts also 2 optional input arguments (min and max) which can be used to implement "rectified linear unit" activation functions
  *       after the result is shifted right by result_shift
 */
-class NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint : public INESimpleFunction
+class NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs, output

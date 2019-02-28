@@ -1,5 +1,6 @@
 <map id="NEAccumulateWeightedKernel" name="NEAccumulateWeightedKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output. " alt="" coords="45,155,168,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="61,80,152,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="75,5,138,32"/>
+<area shape="rect" id="node1" title="Interface for the accumulate weighted kernel." alt="" coords="5,229,219,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output." alt="" coords="49,155,175,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="67,80,157,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="80,5,144,32"/>
 </map>

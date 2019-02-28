@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_NETRANSPOSE_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
@@ -36,7 +36,7 @@ class ITensor;
  *  -# @ref NETransposeKernel
  *
  */
-class NETranspose : public INESimpleFunction
+class NETranspose : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the kernel's inputs and output
@@ -54,6 +54,6 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
-}
+} // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_NETRANSPOSE_H__ */

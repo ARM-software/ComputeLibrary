@@ -13,6 +13,7 @@ var searchData=
   ['simpleoption_3c_20logformat_20_3e',['SimpleOption&lt; LogFormat &gt;',['../classarm__compute_1_1utils_1_1_simple_option.xhtml',1,'arm_compute::utils']]],
   ['simpleoption_3c_20loglevel_20_3e',['SimpleOption&lt; LogLevel &gt;',['../classarm__compute_1_1utils_1_1_simple_option.xhtml',1,'arm_compute::utils']]],
   ['simpleoption_3c_20std_3a_3astring_20_3e',['SimpleOption&lt; std::string &gt;',['../classarm__compute_1_1utils_1_1_simple_option.xhtml',1,'arm_compute::utils']]],
+  ['simpleoption_3c_20unsigned_20int_20_3e',['SimpleOption&lt; unsigned int &gt;',['../classarm__compute_1_1utils_1_1_simple_option.xhtml',1,'arm_compute::utils']]],
   ['simpletensor',['SimpleTensor',['../classarm__compute_1_1test_1_1_simple_tensor.xhtml',1,'arm_compute::test']]],
   ['simpletensor_3c_20uint8_5ft_20_3e',['SimpleTensor&lt; uint8_t &gt;',['../classarm__compute_1_1test_1_1_simple_tensor.xhtml',1,'arm_compute::test']]],
   ['simpletestcasefactory',['SimpleTestCaseFactory',['../classarm__compute_1_1test_1_1framework_1_1_simple_test_case_factory.xhtml',1,'arm_compute::test::framework']]],

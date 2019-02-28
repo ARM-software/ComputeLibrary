@@ -69,9 +69,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    template <typename T>
     void fill_replicate_single_channel(const Window &window);
-    template <typename T>
     void fill_constant_value_single_channel(const Window &window);
 
     ITensor   *_tensor;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,8 +121,6 @@ using ICLKeyPointArray = ICLArray<KeyPoint>;
 using ICLCoordinates2DArray = ICLArray<Coordinates2D>;
 /** Interface for OpenCL Array of Detection Windows. */
 using ICLDetectionWindowArray = ICLArray<DetectionWindow>;
-/** Interface for OpenCL Array of ROIs. */
-using ICLROIArray = ICLArray<ROI>;
 /** Interface for OpenCL Array of 2D Sizes. */
 using ICLSize2DArray = ICLArray<Size2D>;
 /** Interface for OpenCL Array of uint8s. */

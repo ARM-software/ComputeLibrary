@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,14 +27,14 @@
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 NEROIPoolingLayer::NEROIPoolingLayer()
     : _roi_kernel()
 {
 }
 
-void NEROIPoolingLayer::configure(const ITensor *input, const IROIArray *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info)
+void NEROIPoolingLayer::configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     _roi_kernel.configure(input, rois, output, pool_info);
 }
@@ -43,3 +43,4 @@ void NEROIPoolingLayer::run()
 {
     NEScheduler::get().schedule(&_roi_kernel, Window::DimX);
 }
+} // namespace arm_compute

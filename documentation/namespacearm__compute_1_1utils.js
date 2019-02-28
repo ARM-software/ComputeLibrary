@@ -1,6 +1,9 @@
 var namespacearm__compute_1_1utils =
 [
     [ "iterable", "namespacearm__compute_1_1utils_1_1iterable.xhtml", "namespacearm__compute_1_1utils_1_1iterable" ],
+    [ "random", "namespacearm__compute_1_1utils_1_1random.xhtml", "namespacearm__compute_1_1utils_1_1random" ],
+    [ "requires", "namespacearm__compute_1_1utils_1_1requires.xhtml", null ],
+    [ "traits", "namespacearm__compute_1_1utils_1_1traits.xhtml", "namespacearm__compute_1_1utils_1_1traits" ],
     [ "CommandLineParser", "classarm__compute_1_1utils_1_1_command_line_parser.xhtml", "classarm__compute_1_1utils_1_1_command_line_parser" ],
     [ "CommonGraphOptions", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml", "classarm__compute_1_1utils_1_1_common_graph_options" ],
     [ "CommonGraphParams", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml", "structarm__compute_1_1utils_1_1_common_graph_params" ],

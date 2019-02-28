@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,6 +124,66 @@ uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
 
     return out_u8;
 }
+
+/** Dequantize a neon vector holding 16 quantized values.
+ *
+ * @param qv                            Input values to be dequantized.
+ * @param qi                            Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const QuantizationInfo &qi)
+{
+    const float         scale   = qi.scale;
+    const int           offset  = qi.offset;
+    const int32x4_t     voffset = vdupq_n_s32(offset);
+    const float32x4_t   vscale  = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_low_u8(qv))))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(vget_high_u8(qv))))), voffset)), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
+/** Quantize a neon vector holding 16 floating point values.
+ *
+ * @param qv                            Input values to be quantized.
+ * @param qi                            Quantization information to be used in the computation.
+ *
+ * @return A neon vector holding the quantized values
+ */
+inline uint8x16_t vquantize(const float32x4x4_t &qv, const QuantizationInfo &qi)
+{
+    const float       scale     = qi.scale;
+    const int         offset    = qi.offset;
+    const float32x4_t voffset   = vdupq_n_f32(offset);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#else  //__aarch64__
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[2], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[3], vinvscale)),
+#endif //__aarch64__
+        }
+    };
+    const uint8x8_t pa = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+    const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
+    return vcombine_u8(pa, pb);
+}
+
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEAsymm.inl"
 #endif // __ARM_COMPUTE_NEASYMM_H__

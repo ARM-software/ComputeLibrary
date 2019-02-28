@@ -5,6 +5,7 @@ var _validate_helpers_8h =
     [ "validate_channel_shuffle_layer", "_validate_helpers_8h.xhtml#ab4632d71bdb4542008ad33b7b74b7b2c", null ],
     [ "validate_convolution_layer", "_validate_helpers_8h.xhtml#a84a36a0cae1ceb4313891ca841b11cb3", null ],
     [ "validate_depthwise_convolution_layer", "_validate_helpers_8h.xhtml#a1634943db602da2c457279f427ab9538", null ],
+    [ "validate_detection_output_layer", "_validate_helpers_8h.xhtml#a432fd13bfda1435e0d3a8aa5b3dddf4f", null ],
     [ "validate_generate_proposals_layer", "_validate_helpers_8h.xhtml#a40f232193e819dfc9dc9edbabefd5b7a", null ],
     [ "validate_normalize_planar_yuv_layer", "_validate_helpers_8h.xhtml#ad6c95a270f3275bd5711ce6ec193c4ff", null ],
     [ "validate_pad_layer", "_validate_helpers_8h.xhtml#ada206e294c8d07093a8a50e08172c272", null ],

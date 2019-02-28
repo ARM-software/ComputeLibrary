@@ -18,5 +18,7 @@ var searchData=
   ['generic_5ffp16',['GENERIC_FP16',['../namespacearm__compute.xhtml#aa41d7415a5386798147cccae2333d5d4aca6fc09ca003ddc8f631109ce01bc6e8',1,'arm_compute']]],
   ['generic_5ffp16_5fdot',['GENERIC_FP16_DOT',['../namespacearm__compute.xhtml#aa41d7415a5386798147cccae2333d5d4aad1a9b424f69f167da12150036196cd7',1,'arm_compute']]],
   ['gpu_5farch_5fmask',['GPU_ARCH_MASK',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3a57a3b40730a5af7ea3e13eb4bba56d82',1,'arm_compute']]],
-  ['grad_5fxy',['GRAD_XY',['../namespacearm__compute.xhtml#ae46abc5ecac309cbece5c06cb80daaf7a5515a637eda61b978e97adaa5d7629cc',1,'arm_compute']]]
+  ['grad_5fxy',['GRAD_XY',['../namespacearm__compute.xhtml#ae46abc5ecac309cbece5c06cb80daaf7a5515a637eda61b978e97adaa5d7629cc',1,'arm_compute']]],
+  ['greater',['Greater',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca8768a6821cd735aea4f5b0df88c1fc6a',1,'arm_compute']]],
+  ['greaterequal',['GreaterEqual',['../namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca758b05d899def79c9eb864ad4f96be1f',1,'arm_compute']]]
 ];

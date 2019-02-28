@@ -136,6 +136,25 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<float>, framewor
 TEST_SUITE_END()
 TEST_SUITE_END()
 
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
+                                                                                                                     DataType::QASYMM8)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::QASYMM8)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

@@ -15,6 +15,10 @@ var searchData=
   ['declare_5fneon_5ffunctions_5ffor_5ftype',['DECLARE_NEON_FUNCTIONS_FOR_TYPE',['../_n_e_softmax_layer_kernel_8cpp.xhtml#a32a426c4abdceda8e1c40005df27f8d4',1,'NESoftmaxLayerKernel.cpp']]],
   ['declare_5fneon_5fvec_5ftype',['DECLARE_NEON_VEC_TYPE',['../_n_e_softmax_layer_kernel_8cpp.xhtml#af743beb1ad23bceb05b4eeb3e491839c',1,'NESoftmaxLayerKernel.cpp']]],
   ['default_5fvalidate',['DEFAULT_VALIDATE',['../_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aafb2ac305c1cfb580f29d538687f1fb5',1,'PixelWiseMultiplication.cpp']]],
+  ['define_5fkernel',['DEFINE_KERNEL',['../comparisons_8cl.xhtml#ae9c11d005e6e6db7e1a736f07ed32bd7',1,'comparisons.cl']]],
+  ['define_5fkernel_5fquantized',['DEFINE_KERNEL_QUANTIZED',['../comparisons_8cl.xhtml#a8ed8f939def9689f1ecfe79740f5fd2f',1,'comparisons.cl']]],
+  ['define_5fkernel_5fquantized_5fstr',['DEFINE_KERNEL_QUANTIZED_STR',['../comparisons_8cl.xhtml#ac3bebd1fe5a5382f50c4b15d2d551b70',1,'comparisons.cl']]],
+  ['define_5fkernel_5fstr',['DEFINE_KERNEL_STR',['../comparisons_8cl.xhtml#a09a9348f4f03ddf2d08ae98bb8d0418b',1,'comparisons.cl']]],
   ['determinant_5fthr',['DETERMINANT_THR',['../optical__flow__pyramid__lk_8cl.xhtml#a0f3927d942874a04e6464bdb946de046',1,'optical_flow_pyramid_lk.cl']]],
   ['disabled_5fdata_5ftest_5fcase',['DISABLED_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a2d0deff95a1325348da7d2a945982b59',1,'Macros.h']]],
   ['disabled_5ffixture_5fdata_5ftest_5fcase',['DISABLED_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a7fb6c2e21b15474448e1f50d8acc854b',1,'Macros.h']]],
@@ -22,7 +26,7 @@ var searchData=
   ['disabled_5fregister_5ffixture_5fdata_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a934ee9a7581b65523fd180c96b159fb8',1,'Macros.h']]],
   ['disabled_5fregister_5ffixture_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a55d2ae62838572e7be1c87128d02b493',1,'Macros.h']]],
   ['disabled_5ftest_5fcase',['DISABLED_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a89747ae30c60b9f052fbf9707c8301a9',1,'Macros.h']]],
-  ['div',['DIV',['../arithmetic__op_8cl.xhtml#a49f6fecffd852cda3b0ece53dcbb2b87',1,'arithmetic_op.cl']]],
+  ['div',['DIV',['../elementwise__operation_8cl.xhtml#a49f6fecffd852cda3b0ece53dcbb2b87',1,'DIV():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#a49f6fecffd852cda3b0ece53dcbb2b87',1,'DIV():&#160;elementwise_operation_quantized.cl']]],
   ['div_5fop',['DIV_OP',['../normalization__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;normalization_layer.cl'],['../pooling__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer_quantized.cl'],['../softmax__layer_8cl.xhtml#a8cde99b1ce0f3c1dacd49261b0cf03d8',1,'DIV_OP():&#160;softmax_layer.cl']]],
   ['div_5fop_5fnhwc',['DIV_OP_NHWC',['../pooling__layer_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a6c01fa98d360a9d52926dc6a5a599711',1,'DIV_OP_NHWC():&#160;pooling_layer_quantized.cl']]]
 ];

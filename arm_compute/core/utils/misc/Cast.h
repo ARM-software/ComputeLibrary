@@ -48,7 +48,7 @@ inline Target polymorphic_cast(Source *v)
 {
     if(dynamic_cast<Target>(v) == nullptr)
     {
-        throw std::bad_cast();
+        ARM_COMPUTE_THROW(std::bad_cast());
     }
     return static_cast<Target>(v);
 }
@@ -88,7 +88,7 @@ std::unique_ptr<Target, Deleter> polymorphic_cast_unique_ptr(std::unique_ptr<Sou
 {
     if(dynamic_cast<Target *>(v.get()) == nullptr)
     {
-        throw std::bad_cast();
+        ARM_COMPUTE_THROW(std::bad_cast());
     }
     auto r = static_cast<Target *>(v.release());
     return std::unique_ptr<Target, Deleter>(r, std::move(v.get_deleter()));

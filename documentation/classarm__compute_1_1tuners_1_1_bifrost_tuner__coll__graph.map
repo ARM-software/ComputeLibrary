@@ -1,3 +1,4 @@
 <map id="BifrostTuner" name="BifrostTuner">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_tuner.xhtml" title="Basic interface for tuning the OpenCL kernels. " alt="" coords="14,5,90,32"/>
+<area shape="rect" id="node1" title="Bifrost based OpenCL tuner implementation." alt="" coords="5,80,103,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_tuner.xhtml" title="Basic interface for tuning the OpenCL kernels." alt="" coords="17,5,91,32"/>
 </map>

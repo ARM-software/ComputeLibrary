@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -44,9 +45,9 @@ public:
      * @note allocator should outlive the memory pool
      *
      * @param[in] allocator Backing memory allocator
-     * @param[in] blob_size Size of the memory be allocated
+     * @param[in] blob_info Configuration information of the blob to be allocated
      */
-    OffsetMemoryPool(IAllocator *allocator, size_t blob_size);
+    OffsetMemoryPool(IAllocator *allocator, BlobInfo blob_info);
     /** Default Destructor */
     ~OffsetMemoryPool() = default;
     /** Prevent instances of this class to be copy constructed */
@@ -67,7 +68,7 @@ public:
 private:
     IAllocator                    *_allocator; /**< Allocator to use for internal allocation */
     std::unique_ptr<IMemoryRegion> _blob;      /**< Memory blob */
-    size_t                         _blob_size; /**< Sizes of the allocated memory blob */
+    BlobInfo                       _blob_info; /**< Information for the blob to allocate */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_OFFSETMEMORYPOOL_H__ */

@@ -108,13 +108,11 @@ private:
     CLWinogradInputTransform        _input_transform;
     CLWinogradFilterTransformKernel _filter_transform;
     CLWinogradOutputTransformKernel _output_transform;
-    CLActivationLayer               _activationlayer_function;
     CLTensor                        _input0;
     CLTensor                        _input1;
     CLTensor                        _batched_mm_output;
     const ICLTensor                *_original_weights;
     bool                            _is_prepared;
-    bool                            _is_activationlayer_enabled;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H__ */

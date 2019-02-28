@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,23 +56,24 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. Data types supported: F32.
-     * @param[in]  rois      Array containing @ref ROI.
+     * @param[in]  rois      ROIs tensor, it is a 2D tensor of size [5, N] (where N is the number of ROIs) containing top left and bottom right corner
+     *                       as coordinate of an image and batch_id of ROI [ batch_id, x1, y1, x2, y2 ]. Data types supported: U16
      * @param[out] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]  pool_info Contains pooling operation information described in @ref ROIPoolingLayerInfo.
      *
      * @note The x and y dimensions of @p output tensor must be the same as that specified by @p pool_info 's pooled
      * width and pooled height.
      * @note The z dimensions of @p output tensor and @p input tensor must be the same.
-     * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois array.
+     * @note The fourth dimension of @p output tensor must be the same as the number of elements in @p rois tensor.
      */
-    void configure(const ITensor *input, const IROIArray *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
+    void configure(const ITensor *input, const ITensor *rois, ITensor *output, const ROIPoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
     const ITensor      *_input;
-    const IROIArray    *_rois;
+    const ITensor      *_rois;
     ITensor            *_output;
     ROIPoolingLayerInfo _pool_info;
 };

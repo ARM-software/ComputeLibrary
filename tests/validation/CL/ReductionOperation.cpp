@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/ReductionOperationDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -44,10 +43,17 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-AbsoluteTolerance<float> tolerance_f32(0.01f);
+AbsoluteTolerance<float> tolerance_f32(0.001f);
 RelativeTolerance<float> rel_tolerance_f32(0.00001f);
 AbsoluteTolerance<float> tolerance_f16(0.5f);
 RelativeTolerance<float> rel_tolerance_f16(0.2f);
+
+const auto ReductionOperations = framework::dataset::make("ReductionOperation",
+{
+    ReductionOperation::SUM,
+    ReductionOperation::PROD
+});
+
 } // namespace
 
 TEST_SUITE(CL)
@@ -89,13 +95,13 @@ using CLReductionOperationFixture = ReductionOperationFixture<CLTensor, CLAccess
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0, tolerance_f16);
@@ -103,13 +109,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::D
 TEST_SUITE_END() // F16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), ReductionOperations))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, tolerance_f32);

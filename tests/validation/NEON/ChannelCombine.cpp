@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONCLCTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
@@ -74,23 +74,23 @@ TEST_SUITE(NEON)
 TEST_SUITE(ChannelCombine)
 
 TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })),
+DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 })),
                shape, format)
 {
     validate_configuration(shape, format);
 }
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })),
+DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })),
                shape, format)
 {
     validate_configuration(shape, format);
 }
 
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 })),
+DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444, Format::NV12, Format::NV21 })),
                shape, format)
 {
     validate_configuration(shape, format);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // Configuration
 
 template <typename T>
 using NEChannelCombineFixture = ChannelCombineValidationFixture<MultiImage, Tensor, Accessor, NEChannelCombine, T>;
@@ -112,7 +112,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelCombineFixture<uint8_t>, framework::Da
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBA
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::YUYV422, Format::UYVY422 })))
@@ -131,7 +131,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelCombineFixture<uint8_t>, framework::Da
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEChannelCombineFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("FormatType", { Format::NV12, Format::NV21, Format::IYUV, Format::YUV444 })))
@@ -150,10 +150,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEChannelCombineFixture<uint8_t>, framework::Da
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUVPlanar
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ChannelCombine
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

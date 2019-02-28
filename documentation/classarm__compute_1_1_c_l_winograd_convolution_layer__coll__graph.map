@@ -1,3 +1,4 @@
 <map id="CLWinogradConvolutionLayer" name="CLWinogradConvolutionLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="65,5,141,32"/>
+<area shape="rect" id="node1" title="Basic function to execute Winograd&#45;based convolution on OpenCL." alt="" coords="5,80,212,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="69,5,148,32"/>
 </map>

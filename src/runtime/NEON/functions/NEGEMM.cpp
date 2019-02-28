@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,8 +91,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             shape_tmp_b.set(0, b->info()->dimension(1) * transpose_w);
             shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / static_cast<float>(transpose_w)));
 
-            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
-            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
+            TensorInfo info_a = a->info()->clone()->set_tensor_shape(shape_tmp_a).set_is_resizable(true);
+            TensorInfo info_b = b->info()->clone()->set_tensor_shape(shape_tmp_b).set_is_resizable(true);
 
             _tmp_a.allocator()->init(info_a);
             _tmp_b.allocator()->init(info_b);

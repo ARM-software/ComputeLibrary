@@ -1,4 +1,5 @@
 <map id="GCWeightsReshapeKernel" name="GCWeightsReshapeKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="53,80,136,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,126,32"/>
+<area shape="rect" id="node1" title="GLES Compute kernel to perform reshaping on the weights used by convolution and locally connected lay..." alt="" coords="5,155,188,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="55,80,138,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="65,5,129,32"/>
 </map>

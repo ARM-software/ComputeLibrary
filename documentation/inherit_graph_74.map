@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml" title="GEMMLowp output stage info. " alt="" coords="5,5,195,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,173,131,199"/>
+<area shape="rect" id="node2" href="$classarm__gemm_1_1_gemm_hybrid.xhtml" title=" " alt="" coords="194,5,373,47"/>
+<area shape="rect" id="node3" href="$classarm__gemm_1_1_gemm_interleaved.xhtml" title=" " alt="" coords="179,71,388,112"/>
+<area shape="rect" id="node4" href="$classarm__gemm_1_1_gemm_native.xhtml" title=" " alt="" coords="194,136,373,177"/>
+<area shape="rect" id="node5" href="$classarm__gemm_1_1_gemv_batched.xhtml" title=" " alt="" coords="196,202,371,229"/>
+<area shape="rect" id="node6" href="$classarm__gemm_1_1_gemv_native_transposed.xhtml" title=" " alt="" coords="197,253,370,295"/>
+<area shape="rect" id="node7" href="$classarm__gemm_1_1_gemv_pretransposed.xhtml" title=" " alt="" coords="201,319,365,360"/>
 </map>

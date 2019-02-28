@@ -1,5 +1,6 @@
 <map id="NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;" name="NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml" title="Interface for the NEON kernel to perform Winograd output transform. " alt="" coords="22,155,213,196"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="76,80,159,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="86,5,149,32"/>
+<area shape="rect" id="node1" title="NEON kernel to perform Winograd output transform." alt="" coords="5,244,240,315"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml" title="Interface for the NEON kernel to perform Winograd output transform." alt="" coords="23,155,223,196"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="81,80,164,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="91,5,155,32"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="CLSynthetizeFunctionWithZeroConstantBorder&lt; K, bordersize &gt;" name="CLSynthetizeFunctionWithZeroConstantBorder&lt; K, bordersize &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel. " alt="" coords="28,80,161,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="57,5,133,32"/>
+<area shape="rect" id="node1" title="As above but this also setups a Zero border on the input tensor of the specified bordersize." alt="" coords="5,155,192,211"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel." alt="" coords="29,80,168,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="59,5,138,32"/>
 </map>

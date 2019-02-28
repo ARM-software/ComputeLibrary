@@ -347,4 +347,10 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
 #define ARM_COMPUTE_ERROR_ON_LOC(cond, func, file, line) \
     ARM_COMPUTE_ERROR_ON_LOC_MSG(cond, func, file, line, #cond)
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
+#define ARM_COMPUTE_THROW(ex) throw(ex)
+#else /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+#define ARM_COMPUTE_THROW(ex) (ex), std::abort()
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
+
 #endif /* __ARM_COMPUTE_ERROR_H__ */

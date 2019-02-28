@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,12 +76,12 @@ public:
 
 private:
     CLMemoryGroup                                 _memory_group;
-    std::unique_ptr<CLTensor[]>                   _sums_vector{ nullptr };
+    std::unique_ptr<CLTensor[]>                   _results_vector{ nullptr };
     std::unique_ptr<CLReductionOperationKernel[]> _reduction_kernels_vector{ nullptr };
     std::unique_ptr<CLFillBorderKernel[]>         _border_handlers_vector{ nullptr };
     unsigned int                                  _num_of_stages;
     unsigned int                                  _reduction_axis;
-    bool                                          _is_quantized;
+    bool                                          _is_serial;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLREDUCTIONOPERATION_H__ */

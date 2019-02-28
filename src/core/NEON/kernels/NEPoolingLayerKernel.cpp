@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,8 +52,7 @@ using namespace misc::shape_calculator;
 
 namespace
 {
-template <bool exclude_padding, DataLayout data_layout>
-inline float calculate_avg_scale(const Coordinates &id, const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
+inline float calculate_avg_scale(bool exclude_padding, DataLayout data_layout, const Coordinates &id, const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
                                  const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
     const unsigned int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -72,8 +71,7 @@ inline float calculate_avg_scale(const Coordinates &id, const int pool_size_x, c
     return 1.f / ((end_y - start_y) * (end_x - start_x));
 }
 
-template <bool exclude_padding>
-inline void scale_vector_s16x8(uint16x8_t &v, const Coordinates &id, int id_offset, int step,
+inline void scale_vector_s16x8(bool exclude_padding, uint16x8_t &v, const Coordinates &id, int id_offset, int step,
                                const int pool_size, const int upper_bound_w, const int upper_bound_h,
                                const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
@@ -140,6 +138,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH)) != pooled_w)
                                     || (output->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT)) != pooled_h));
     }
@@ -336,13 +335,9 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    const PoolingType   pool_type         = pool_info.pool_type();
     const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
-    const bool          exclude_padding   = pool_info.exclude_padding();
     const bool          is_global_pooling = pool_info.is_global_pooling();
     const int           pool_stride_x     = pad_stride_info.stride().first;
-    unsigned int        pool_size_x       = 0;
-    unsigned int        pool_size_y       = 0;
 
     // Get data layout
     const DataLayout data_layout = input->info()->data_layout();
@@ -350,18 +345,19 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Update pool size in case of global pooling
-    pool_size_x = is_global_pooling ? input->info()->dimension(idx_width) : pool_info.pool_size().width;
-    pool_size_y = is_global_pooling ? input->info()->dimension(idx_height) : pool_info.pool_size().height;
+    const Size2D pool_size(
+        is_global_pooling ? input->info()->dimension(idx_width) : pool_info.pool_size().width,
+        is_global_pooling ? input->info()->dimension(idx_height) : pool_info.pool_size().height);
 
     // Validate pool info before calling scaled_dimensions
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(pool_size_x, pool_size_y));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(pool_size.x(), pool_size.y()));
 
     // Check output dimensions
     unsigned int pooled_w, pooled_h;
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(idx_width),
                                                      input->info()->dimension(idx_height),
-                                                     pool_size_x,
-                                                     pool_size_y,
+                                                     pool_size.x(),
+                                                     pool_size.y(),
                                                      pad_stride_info);
 
     // Perform validation step
@@ -371,7 +367,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     _input     = input;
     _output    = output;
     _pool_info = pool_info;
-    _is_square = (pool_size_x == pool_size_y);
+    _is_square = (pool_size.x() == pool_size.y());
 
     // Get data type
     const DataType data_type = input->info()->data_type();
@@ -379,88 +375,37 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
 
     if(data_type == DataType::QASYMM8)
     {
-        if(pool_size_x == 2 && pool_stride_x < 3 && _is_square)
+        if(pool_size.x() == 2 && pool_stride_x < 3 && _is_square)
         {
-            switch(pool_type)
+            if(is_nchw)
             {
-                case PoolingType::AVG:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_qasymm8_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling2_qasymm8_nchw<PoolingType::AVG, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, false>;
-                    }
-                    break;
-                case PoolingType::MAX:
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling2_qasymm8_nchw<PoolingType::MAX>;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::MAX>;
-                    }
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                _func = &NEPoolingLayerKernel::pooling2_qasymm8_nchw;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
             }
         }
-        else if(pool_size_x == 3 && pool_stride_x < 3 && _is_square)
+        else if(pool_size.x() == 3 && pool_stride_x < 3 && _is_square)
         {
-            switch(pool_type)
+            if(is_nchw)
             {
-                case PoolingType::AVG:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_qasymm8_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling3_qasymm8_nchw<PoolingType::AVG, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, false>;
-                    }
-                    break;
-                case PoolingType::MAX:
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::pooling3_qasymm8_nchw<PoolingType::MAX>;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::MAX>;
-                    }
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                _func = &NEPoolingLayerKernel::pooling3_qasymm8_nchw;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
             }
         }
         else
         {
-            switch(pool_type)
+            if(is_nchw)
             {
-                case PoolingType::AVG:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_qasymm8_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_qasymm8_nchw<PoolingType::AVG, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::AVG, false>;
-                    }
-                    break;
-                case PoolingType::MAX:
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nchw<PoolingType::MAX>;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc<PoolingType::MAX>;
-                    }
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nchw;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc;
             }
         }
     }
@@ -468,157 +413,56 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     {
         if(_is_square)
         {
-            switch(pool_size_x)
+            switch(pool_size.x())
             {
                 case 2:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f16_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling2_f16_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f16_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling2_f16_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::pooling2_f16_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::pooling2_f16_nchw;
                     }
-                    break;
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
+                    }
+                }
+                break;
                 case 3:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f16_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling3_f16_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f16_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling3_f16_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::pooling3_f16_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::pooling3_f16_nchw;
                     }
-                    break;
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
+                    }
+                }
+                break;
                 default:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
+                    }
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
                     }
                     break;
+                }
+                break;
             }
         }
         else
         {
-            switch(pool_type)
+            if(is_nchw)
             {
-                case PoolingType::AVG:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::AVG, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::AVG, false>;
-                    }
-                    break;
-                case PoolingType::L2:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::L2, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::L2, false>;
-                    }
-                    break;
-                case PoolingType::MAX:
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw<PoolingType::MAX, false>;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc<PoolingType::MAX, false>;
-                    }
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                _func = &NEPoolingLayerKernel::poolingMxN_f16_nchw;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_f16_nhwc;
             }
         }
     }
@@ -626,206 +470,78 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     {
         if(_is_square)
         {
-            switch(pool_size_x)
+            switch(pool_size.x())
             {
                 case 2:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f32_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling2_f32_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling2_f32_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling2_f32_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::pooling2_f32_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::pooling2_f32_nchw;
+                    }
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
                     }
                     break;
+                }
                 case 3:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f32_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling3_f32_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling3_f32_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling3_f32_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::pooling3_f32_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::pooling3_f32_nchw;
+                    }
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
                     }
                     break;
+                }
                 case 7:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling7_f32_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::pooling7_f32_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::pooling7_f32_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::pooling7_f32_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::pooling7_f32_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::pooling7_f32_nchw;
+                    }
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
                     }
                     break;
+                }
                 default:
-                    switch(pool_type)
+                {
+                    if(is_nchw)
                     {
-                        case PoolingType::AVG:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::AVG, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, false>;
-                            }
-                            break;
-                        case PoolingType::L2:
-                            if(is_nchw)
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::L2, false>;
-                            }
-                            else
-                            {
-                                _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, false>;
-                            }
-                            break;
-                        case PoolingType::MAX:
-                            if(is_nchw)
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::MAX, false>;
-                            }
-                            else
-                            {
-                                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::MAX, false>;
-                            }
-                            break;
-                        default:
-                            ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
+                    }
+                    else
+                    {
+                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
                     }
                     break;
+                }
             }
         }
         else
         {
-            switch(pool_type)
+            if(is_nchw)
             {
-                case PoolingType::AVG:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::AVG, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::AVG, false>;
-                    }
-                    break;
-                case PoolingType::L2:
-                    if(is_nchw)
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::L2, false>;
-                    }
-                    else
-                    {
-                        _func = (exclude_padding) ? &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, true> : &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::L2, false>;
-                    }
-                    break;
-                case PoolingType::MAX:
-                    if(is_nchw)
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw<PoolingType::MAX, false>;
-                    }
-                    else
-                    {
-                        _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc<PoolingType::MAX, false>;
-                    }
-                    break;
-                default:
-                    ARM_COMPUTE_ERROR("Unsupported pooling type!");
+                _func = &NEPoolingLayerKernel::poolingMxN_f32_nchw;
+            }
+            else
+            {
+                _func = &NEPoolingLayerKernel::poolingMxN_f32_nhwc;
             }
         }
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size_x, pool_size_y);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info, _num_elems_processed_per_iteration, _border_size, pooled_w, pooled_h, pool_size.x(), pool_size.y());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -879,9 +595,9 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
             uint16x8_t res_lower = vcombine_u16(vpsum.val[0], vpsum.val[1]);
 
             // Scale lower result
-            scale_vector_s16x8<exclude_padding>(res_lower, id, 0, scale_step_x,
-                                                pool_size, upper_bound_w, upper_bound_h,
-                                                pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            scale_vector_s16x8(exclude_padding, res_lower, id, 0, scale_step_x,
+                               pool_size, upper_bound_w, upper_bound_h,
+                               pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             lower_res = vmovn_u16(res_lower);
 
             // Compute upper result for stride_x == 1
@@ -907,9 +623,9 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
                 uint16x8_t res_upper = vcombine_u16(vpsum_shifted.val[0], vpsum_shifted.val[1]);
 
                 // Scale lower result
-                scale_vector_s16x8<exclude_padding>(res_upper, id, 1, 2,
-                                                    pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                scale_vector_s16x8(exclude_padding, res_upper, id, 1, 2,
+                                   pool_size, upper_bound_w, upper_bound_h,
+                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 upper_res = vmovn_u16(res_upper);
             }
         }
@@ -938,9 +654,10 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
     input, output);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling3_f16_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::pooling3_f16_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
+    ARM_COMPUTE_UNUSED(pooling_type);
+    ARM_COMPUTE_UNUSED(exclude_padding);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -978,7 +695,7 @@ void NEPoolingLayerKernel::pooling3_f16_nchw(const Window &window_input, const W
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float       scale   = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float16x4_t scale_v = vdup_n_f16(scale);
             // Perform pooling
             const float16x4_t sum_data = vadd_f16(vadd_f16(top_data, bottom_data), middle_data);
@@ -1008,9 +725,10 @@ void NEPoolingLayerKernel::pooling3_f16_nchw(const Window &window_input, const W
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
+    ARM_COMPUTE_UNUSED(pooling_type);
+    ARM_COMPUTE_UNUSED(exclude_padding);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator      input(_input, window_input);
     Iterator      output(_output, window);
@@ -1042,7 +760,7 @@ void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const W
 
         if(pooling_type != PoolingType::MAX)
         {
-            const float       scale   = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float       scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
             const float16x4_t scale_v = vdup_n_f16(scale);
 
             const float16x4_t sum_data = vadd_f16(top_data, bottom_data);
@@ -1071,71 +789,7 @@ void NEPoolingLayerKernel::pooling2_f16_nchw(const Window &window_input, const W
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling2_f32_nchw(const Window &window_input, const Window &window)
-{
-    Iterator input(_input, window_input);
-    Iterator output(_output, window);
-
-    constexpr int pool_size       = 2;
-    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
-    int           pool_stride_x   = 0;
-    int           pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
-
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        float32x2_t top_data    = vld1_f32(reinterpret_cast<const float *>(input_top_ptr + input.offset()));
-        float32x2_t bottom_data = vld1_f32(reinterpret_cast<const float *>(input_bottom_ptr + input.offset()));
-        float32x2_t res         = {};
-        float       final_res   = 0;
-
-        // Get power of 2 in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            top_data    = vmul_f32(top_data, top_data);
-            bottom_data = vmul_f32(bottom_data, bottom_data);
-        }
-
-        if(pooling_type != PoolingType::MAX)
-        {
-            // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-            const float32x2_t scale_v = vdup_n_f32(scale);
-
-            // Perform pooling
-            const float32x2_t sum_data = vadd_f32(top_data, bottom_data);
-            res                        = vmul_f32(vpadd_f32(sum_data, sum_data), scale_v);
-        }
-        else
-        {
-            const float32x2_t max_data = vmax_f32(top_data, bottom_data);
-            res                        = vpmax_f32(max_data, max_data);
-        }
-        final_res = vget_lane_f32(res, 0);
-
-        // Calculate square-root in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            final_res = sqrt(final_res);
-        }
-
-        // Store result
-        *(reinterpret_cast<float *>(output.ptr())) = final_res;
-    },
-    input, output);
-}
-
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1212,21 +866,21 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
                     vgetq_lane_u16(final_sum.val[1], 6),
                 };
 
-                scale_vector_s16x8<exclude_padding>(res, id, 0, 1,
-                                                    pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                scale_vector_s16x8(exclude_padding, res, id, 0, 1,
+                                   pool_size, upper_bound_w, upper_bound_h,
+                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(res));
             }
             else
             {
                 // Scale lower result
-                scale_vector_s16x8<exclude_padding>(final_sum.val[0], id, 0, 1,
-                                                    pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                scale_vector_s16x8(exclude_padding, final_sum.val[0], id, 0, 1,
+                                   pool_size, upper_bound_w, upper_bound_h,
+                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 // Scale lower result
-                scale_vector_s16x8<exclude_padding>(final_sum.val[1], id, 8, 1,
-                                                    pool_size, upper_bound_w, upper_bound_h,
-                                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+                scale_vector_s16x8(exclude_padding, final_sum.val[1], id, 8, 1,
+                                   pool_size, upper_bound_w, upper_bound_h,
+                                   pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
                 const uint8x16_t res = vcombine_u8(vmovn_u16(final_sum.val[0]), vmovn_u16(final_sum.val[1]));
                 vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), res);
             }
@@ -1254,160 +908,10 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
     input, output);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling3_f32_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
-    Iterator input(_input, window_input);
-    Iterator output(_output, window);
-
-    constexpr const int pool_size       = 3;
-    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
-
-    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
-    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
-    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        float32x4_t top_data    = vld1q_f32(reinterpret_cast<const float *>(input_top_ptr + input.offset()));
-        float32x4_t middle_data = vld1q_f32(reinterpret_cast<const float *>(input_middle_ptr + input.offset()));
-        float32x4_t bottom_data = vld1q_f32(reinterpret_cast<const float *>(input_bottom_ptr + input.offset()));
-        float32x2_t res         = {};
-        float       final_res   = 0;
-
-        // Get power of 2 in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            top_data    = vmulq_f32(top_data, top_data);
-            middle_data = vmulq_f32(middle_data, middle_data);
-            bottom_data = vmulq_f32(bottom_data, bottom_data);
-        }
-
-        if(pooling_type != PoolingType::MAX)
-        {
-            // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-            const float32x2_t scale_v = vdup_n_f32(scale);
-
-            // Perform pooling
-            const float32x4_t sum_data = vaddq_f32(vaddq_f32(top_data, bottom_data), middle_data);
-            res                        = vpadd_f32(vget_high_f32(vsetq_lane_f32(0.f, sum_data, 3)), vget_low_f32(sum_data));
-            res                        = vmul_f32(vpadd_f32(res, res), scale_v);
-        }
-        else
-        {
-            const float32x4_t max_data = vmaxq_f32(vmaxq_f32(top_data, bottom_data), middle_data);
-            res                        = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::max(), max_data, 3)), vget_low_f32(max_data));
-            res                        = vpmax_f32(res, res);
-        }
-        final_res = vget_lane_f32(res, 0);
-
-        // Calculate square-root in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            final_res = sqrt(final_res);
-        }
-
-        // Store result
-        *(reinterpret_cast<float *>(output.ptr())) = final_res;
-    },
-    input, output);
-}
-
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::pooling7_f32_nchw(const Window &window_input, const Window &window)
-{
-    Iterator input(_input, window_input);
-    Iterator output(_output, window);
-
-    constexpr const int pool_size       = 7;
-    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
-    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
-    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
-    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
-    int                 pool_stride_x   = 0;
-    int                 pool_stride_y   = 0;
-    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
-    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
-    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
-
-    std::array<const uint8_t *, pool_size> input_ptrs{ {} };
-    for(int i = 0; i < pool_size; ++i)
-    {
-        input_ptrs[i] = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + i));
-    }
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        float32x2_t res       = {};
-        float       final_res = 0.f;
-        if(pooling_type != PoolingType::MAX)
-        {
-            // Calculate scale
-            float             scale   = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-            const float32x2_t scale_v = vdup_n_f32(scale);
-
-            // Perform pooling
-            float32x4x2_t data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[0] + input.offset()));
-            // Get power of 2 in case of l2 pooling
-            if(pooling_type == PoolingType::L2)
-            {
-                data.val[0] = vmulq_f32(data.val[0], data.val[0]);
-                data.val[1] = vmulq_f32(data.val[1], data.val[1]);
-            }
-            float32x4_t sum_data = vaddq_f32(data.val[0], vsetq_lane_f32(0.f, data.val[1], 3));
-            for(int i = 1; i < pool_size; ++i)
-            {
-                data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[i] + input.offset()));
-                // Get power of 2 in case of l2 pooling
-                if(pooling_type == PoolingType::L2)
-                {
-                    data.val[0] = vmulq_f32(data.val[0], data.val[0]);
-                    data.val[1] = vmulq_f32(data.val[1], data.val[1]);
-                }
-                sum_data = vaddq_f32(sum_data, data.val[0]);
-                sum_data = vaddq_f32(sum_data, vsetq_lane_f32(0.f, data.val[1], 3));
-            }
-            res = vpadd_f32(vget_high_f32(sum_data), vget_low_f32(sum_data));
-            res = vmul_f32(vpadd_f32(res, res), scale_v);
-        }
-        else
-        {
-            float32x4x2_t max_data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[0] + input.offset()));
-            for(int i = 1; i < pool_size; ++i)
-            {
-                const float32x4x2_t data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[i] + input.offset()));
-                max_data                 = vmax2q_f32(max_data, data);
-            }
-            res = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::max(), max_data.val[1], 3)), vget_low_f32(max_data.val[1]));
-            res = vpmax_f32(res, vpmax_f32(vget_high_f32(max_data.val[0]), vget_low_f32(max_data.val[0])));
-            res = vpmax_f32(res, res);
-        }
-        final_res = vget_lane_f32(res, 0);
-
-        // Calculate square-root in case of l2 pooling
-        if(pooling_type == PoolingType::L2)
-        {
-            final_res = sqrt(final_res);
-        }
-
-        // Store result
-        *(reinterpret_cast<float *>(output.ptr())) = final_res;
-    },
-    input, output);
-}
-
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const Window &window)
-{
+    ARM_COMPUTE_UNUSED(pooling_type);
+    ARM_COMPUTE_UNUSED(exclude_padding);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1432,7 +936,7 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
 
@@ -1528,9 +1032,10 @@ void NEPoolingLayerKernel::poolingMxN_f16_nchw(const Window &window_input, const
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
+    ARM_COMPUTE_UNUSED(pooling_type);
+    ARM_COMPUTE_UNUSED(exclude_padding);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1564,8 +1069,8 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NHWC>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                                                       pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                    pool_stride_y);
             const float16x8_t scale_v = vdupq_n_f16(scale);
 
             // Perform pooling
@@ -1625,8 +1130,7 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1650,7 +1154,7 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             float32x4_t vres = vdupq_n_f32(0.0f);
@@ -1748,8 +1252,218 @@ void NEPoolingLayerKernel::poolingMxN_f32_nchw(const Window &window_input, const
     input, output);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::pooling2_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    constexpr int pool_size       = 2;
+    const int     pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int     pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int     pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int     pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int           pool_stride_x   = 0;
+    int           pool_stride_y   = 0;
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
+
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        float32x2_t top_data    = vld1_f32(reinterpret_cast<const float *>(input_top_ptr + input.offset()));
+        float32x2_t bottom_data = vld1_f32(reinterpret_cast<const float *>(input_bottom_ptr + input.offset()));
+        float32x2_t res         = {};
+        float       final_res   = 0;
+
+        // Get power of 2 in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            top_data    = vmul_f32(top_data, top_data);
+            bottom_data = vmul_f32(bottom_data, bottom_data);
+        }
+
+        if(pooling_type != PoolingType::MAX)
+        {
+            // Calculate scale
+            float             scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float32x2_t scale_v = vdup_n_f32(scale);
+
+            // Perform pooling
+            const float32x2_t sum_data = vadd_f32(top_data, bottom_data);
+            res                        = vmul_f32(vpadd_f32(sum_data, sum_data), scale_v);
+        }
+        else
+        {
+            const float32x2_t max_data = vmax_f32(top_data, bottom_data);
+            res                        = vpmax_f32(max_data, max_data);
+        }
+        final_res = vget_lane_f32(res, 0);
+
+        // Calculate square-root in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            final_res = sqrt(final_res);
+        }
+
+        // Store result
+        *(reinterpret_cast<float *>(output.ptr())) = final_res;
+    },
+    input, output);
+}
+
+void NEPoolingLayerKernel::pooling3_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    constexpr const int pool_size       = 3;
+    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
+
+    const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
+    const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
+    const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        float32x4_t top_data    = vld1q_f32(reinterpret_cast<const float *>(input_top_ptr + input.offset()));
+        float32x4_t middle_data = vld1q_f32(reinterpret_cast<const float *>(input_middle_ptr + input.offset()));
+        float32x4_t bottom_data = vld1q_f32(reinterpret_cast<const float *>(input_bottom_ptr + input.offset()));
+        float32x2_t res         = {};
+        float       final_res   = 0;
+
+        // Get power of 2 in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            top_data    = vmulq_f32(top_data, top_data);
+            middle_data = vmulq_f32(middle_data, middle_data);
+            bottom_data = vmulq_f32(bottom_data, bottom_data);
+        }
+
+        if(pooling_type != PoolingType::MAX)
+        {
+            // Calculate scale
+            float             scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float32x2_t scale_v = vdup_n_f32(scale);
+
+            // Perform pooling
+            const float32x4_t sum_data = vaddq_f32(vaddq_f32(top_data, bottom_data), middle_data);
+            res                        = vpadd_f32(vget_high_f32(vsetq_lane_f32(0.f, sum_data, 3)), vget_low_f32(sum_data));
+            res                        = vmul_f32(vpadd_f32(res, res), scale_v);
+        }
+        else
+        {
+            const float32x4_t max_data = vmaxq_f32(vmaxq_f32(top_data, bottom_data), middle_data);
+            res                        = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::max(), max_data, 3)), vget_low_f32(max_data));
+            res                        = vpmax_f32(res, res);
+        }
+        final_res = vget_lane_f32(res, 0);
+
+        // Calculate square-root in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            final_res = sqrt(final_res);
+        }
+
+        // Store result
+        *(reinterpret_cast<float *>(output.ptr())) = final_res;
+    },
+    input, output);
+}
+
+void NEPoolingLayerKernel::pooling7_f32_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
+{
+    Iterator input(_input, window_input);
+    Iterator output(_output, window);
+
+    constexpr const int pool_size       = 7;
+    const int           pool_pad_right  = _pool_info.pad_stride_info().pad_right();
+    const int           pool_pad_top    = _pool_info.pad_stride_info().pad_top();
+    const int           pool_pad_left   = _pool_info.pad_stride_info().pad_left();
+    const int           pool_pad_bottom = _pool_info.pad_stride_info().pad_bottom();
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
+    const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
+    const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
+
+    std::array<const uint8_t *, pool_size> input_ptrs{ {} };
+    for(int i = 0; i < pool_size; ++i)
+    {
+        input_ptrs[i] = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + i));
+    }
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        float32x2_t res       = {};
+        float       final_res = 0.f;
+        if(pooling_type != PoolingType::MAX)
+        {
+            // Calculate scale
+            float             scale   = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size, pool_size, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float32x2_t scale_v = vdup_n_f32(scale);
+
+            // Perform pooling
+            float32x4x2_t data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[0] + input.offset()));
+            // Get power of 2 in case of l2 pooling
+            if(pooling_type == PoolingType::L2)
+            {
+                data.val[0] = vmulq_f32(data.val[0], data.val[0]);
+                data.val[1] = vmulq_f32(data.val[1], data.val[1]);
+            }
+            float32x4_t sum_data = vaddq_f32(data.val[0], vsetq_lane_f32(0.f, data.val[1], 3));
+            for(int i = 1; i < pool_size; ++i)
+            {
+                data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[i] + input.offset()));
+                // Get power of 2 in case of l2 pooling
+                if(pooling_type == PoolingType::L2)
+                {
+                    data.val[0] = vmulq_f32(data.val[0], data.val[0]);
+                    data.val[1] = vmulq_f32(data.val[1], data.val[1]);
+                }
+                sum_data = vaddq_f32(sum_data, data.val[0]);
+                sum_data = vaddq_f32(sum_data, vsetq_lane_f32(0.f, data.val[1], 3));
+            }
+            res = vpadd_f32(vget_high_f32(sum_data), vget_low_f32(sum_data));
+            res = vmul_f32(vpadd_f32(res, res), scale_v);
+        }
+        else
+        {
+            float32x4x2_t max_data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[0] + input.offset()));
+            for(int i = 1; i < pool_size; ++i)
+            {
+                const float32x4x2_t data = vld2q_f32(reinterpret_cast<const float *>(input_ptrs[i] + input.offset()));
+                max_data                 = vmax2q_f32(max_data, data);
+            }
+            res = vpmax_f32(vget_high_f32(vsetq_lane_f32(-std::numeric_limits<float>::max(), max_data.val[1], 3)), vget_low_f32(max_data.val[1]));
+            res = vpmax_f32(res, vpmax_f32(vget_high_f32(max_data.val[0]), vget_low_f32(max_data.val[0])));
+            res = vpmax_f32(res, res);
+        }
+        final_res = vget_lane_f32(res, 0);
+
+        // Calculate square-root in case of l2 pooling
+        if(pooling_type == PoolingType::L2)
+        {
+            final_res = sqrt(final_res);
+        }
+
+        // Store result
+        *(reinterpret_cast<float *>(output.ptr())) = final_res;
+    },
+    input, output);
+}
+
+void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1783,8 +1497,8 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
         if(pooling_type != PoolingType::MAX)
         {
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NHWC>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                                                       pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                    pool_stride_y);
             const float32x4_t scale_v = vdupq_n_f32(scale);
 
             // Perform pooling
@@ -1837,8 +1551,7 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
     input, output);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1865,7 +1578,7 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
             uint32_t   sres = 0;
 
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NCHW>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NCHW, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
 
             // Perform pooling
             for(int y = 0; y < pool_size_y; ++y)
@@ -1933,8 +1646,7 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
     input, output);
 }
 
-template <PoolingType pooling_type, bool exclude_padding>
-void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, const Window &window)
+void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, const Window &window, PoolingType pooling_type, bool exclude_padding)
 {
     Iterator input(_input, window_input);
     Iterator output(_output, window);
@@ -1973,8 +1685,8 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
             uint32x4_t vres4 = vdupq_n_u32(0);
 
             // Calculate scale
-            const float scale = calculate_avg_scale<exclude_padding, DataLayout::NHWC>(id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
-                                                                                       pool_stride_y);
+            const float scale = calculate_avg_scale(exclude_padding, DataLayout::NHWC, id, pool_size_x, pool_size_y, upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                    pool_stride_y);
             const float32x4_t scale_v = vdupq_n_f32(scale);
 
             // Perform pooling
@@ -2073,9 +1785,10 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_ERROR_ON(_func == nullptr);
 
-    const unsigned int pool_stride_x = _pool_info.pad_stride_info().stride().first;
-    const unsigned int pool_stride_y = _pool_info.pad_stride_info().stride().second;
-    const unsigned int pool_size     = _pool_info.pool_size().width;
+    const unsigned int pool_stride_x   = _pool_info.pad_stride_info().stride().first;
+    const unsigned int pool_stride_y   = _pool_info.pad_stride_info().stride().second;
+    const unsigned int pool_size       = _pool_info.pool_size().width;
+    const bool         exclude_padding = _pool_info.exclude_padding();
 
     Window window_input(window);
     if(_input->info()->data_layout() == DataLayout::NCHW)
@@ -2093,6 +1806,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
                 }
                 break;
             }
+
             case DataType::F16:
             case DataType::F32:
             {
@@ -2115,5 +1829,5 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     }
 
     // Run function
-    (this->*_func)(window_input, window);
+    (this->*_func)(window_input, window, _pool_info.pool_type(), exclude_padding);
 }

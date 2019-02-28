@@ -1,3 +1,4 @@
 <map id="ICLLut" name="ICLLut">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut.xhtml" title="Lookup Table object interface. " alt="" coords="14,5,58,32"/>
+<area shape="rect" id="node1" title="Interface for OpenCL LUT." alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut.xhtml" title="Lookup Table object interface." alt="" coords="13,5,59,32"/>
 </map>

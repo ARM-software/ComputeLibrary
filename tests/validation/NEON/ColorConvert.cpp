@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -134,54 +134,54 @@ template <typename T>
 using NEColorConvertFixture = ColorConvertValidationFixture<MultiImage, Tensor, Accessor, NEColorConvert, T>;
 
 TEST_SUITE(Configuration)
-DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGBA_to_RGB),
+DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGB_to_RGBA),
+DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGB_to_U8),
+DATA_TEST_CASE(RGBtoU8, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUYVDataset_to_RGBDataset),
+DATA_TEST_CASE(YUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_RGBDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUVPlanar_to_RGBDataset),
+DATA_TEST_CASE(YUVPlanar, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_RGBDataset_to_NVDataset),
+DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(YUYVtoNV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_YUYVDataset_to_NVDataset),
+DATA_TEST_CASE(YUYVtoNV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
 
-DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvert_NVDataset_to_YUVDataset),
+DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset),
                shape, src_format, dst_format)
 {
     validate_configuration(shape, src_format, dst_format);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // Configuration
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGBA_to_RGB))
@@ -201,7 +201,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBA
 
 TEST_SUITE(RGB)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_RGBA))
@@ -220,7 +220,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGB
 
 TEST_SUITE(RGBtoU8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGB_to_U8))
@@ -239,7 +239,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // RGBtoU8
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_RGBDataset))
@@ -258,7 +258,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUV
 
 TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUVPlanar_to_RGBDataset))
@@ -277,7 +277,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUVPlanar
 
 TEST_SUITE(NV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_RGBDataset_to_NVDataset))
@@ -297,7 +297,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx], tolerance_nv);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // NV
 
 TEST_SUITE(YUYVtoNV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_YUYVDataset_to_NVDataset))
@@ -317,7 +317,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // YUYVtoNV
 
 TEST_SUITE(NVtoYUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvert_NVDataset_to_YUVDataset))
@@ -336,10 +336,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEColorConvertFixture<uint8_t>, framework::Data
         validate(Accessor(*_target.plane(plane_idx)), _reference[plane_idx]);
     }
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // NVtoYUV
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ColorConvert
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

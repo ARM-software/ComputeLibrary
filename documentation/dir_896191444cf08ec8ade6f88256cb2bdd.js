@@ -14,6 +14,7 @@ var dir_896191444cf08ec8ade6f88256cb2bdd =
     ] ],
     [ "Helper.h", "_c_l_2_helper_8h.xhtml", [
       [ "CLSynthetizeFunction", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function" ],
-      [ "CLSynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border" ]
+      [ "CLSynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border" ],
+      [ "CLSynthetizeFunctionInitOutputWithZeroAndWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_init_output_with_zero_and_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_init_output_with_zero_and_with_zero_constant_border" ]
     ] ]
 ];

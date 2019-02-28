@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,7 +139,7 @@ struct logistic
      */
     void operator()(ExactType &vval)
     {
-        vval = wrapper::vinv(wrapper::vadd(vone, wrapper::vexpq(wrapper::vnegq(vval))));
+        vval = wrapper::vinv(wrapper::vadd(vone, wrapper::vexpq(wrapper::vneg(vval))));
     }
 
     /** Vector of ones. */

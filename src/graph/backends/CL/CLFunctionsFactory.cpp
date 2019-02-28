@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/backends/FunctionHelpers.h"
 #include "arm_compute/runtime/CL/CLFunctions.h"
+#include "arm_compute/runtime/CPP/CPPFunctions.h"
 
 using namespace arm_compute::utils::cast;
 
@@ -68,6 +69,94 @@ struct CLEltwiseFunctions
     using Subtraction    = CLArithmeticSubtraction;
     using Multiplication = CLPixelWiseMultiplication;
 };
+// TODO (isagot01): Remove once we support heterogeneous scheduling at function level
+/** Wrapper for the CPP Function in the OpenCL backend **/
+class CPPWrapperFunction : public IFunction
+{
+public:
+    /* Default constructor */
+    CPPWrapperFunction()
+        : _tensors(), _func(nullptr)
+    {
+    }
+
+    void run() override
+    {
+        for(auto &tensor : _tensors)
+        {
+            tensor->map(CLScheduler::get().queue());
+        }
+        _func->run();
+
+        for(auto &tensor : _tensors)
+        {
+            tensor->unmap(CLScheduler::get().queue());
+        }
+    }
+
+    void register_tensor(ICLTensor *tensor)
+    {
+        _tensors.push_back(tensor);
+    }
+
+    void register_function(std::unique_ptr<IFunction> function)
+    {
+        _func = std::move(function);
+    }
+
+private:
+    std::vector<arm_compute::ICLTensor *> _tensors;
+    std::unique_ptr<IFunction>            _func;
+};
+
+namespace detail
+{
+// Specialized functions
+template <>
+std::unique_ptr<IFunction> create_detection_output_layer<CPPDetectionOutputLayer, CLTargetInfo>(DetectionOutputLayerNode &node)
+{
+    validate_node<CLTargetInfo>(node, 3 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    CLTargetInfo::TensorType      *input0      = get_backing_tensor<CLTargetInfo>(node.input(0));
+    CLTargetInfo::TensorType      *input1      = get_backing_tensor<CLTargetInfo>(node.input(1));
+    CLTargetInfo::TensorType      *input2      = get_backing_tensor<CLTargetInfo>(node.input(2));
+    CLTargetInfo::TensorType      *output      = get_backing_tensor<CLTargetInfo>(node.output(0));
+    const DetectionOutputLayerInfo detect_info = node.detection_output_info();
+
+    ARM_COMPUTE_ERROR_ON(input0 == nullptr);
+    ARM_COMPUTE_ERROR_ON(input1 == nullptr);
+    ARM_COMPUTE_ERROR_ON(input2 == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<CPPDetectionOutputLayer>();
+    func->configure(input0, input1, input2, output, detect_info);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << CLTargetInfo::TargetType
+                               << " Data Type: " << input0->info()->data_type()
+                               << " Input0 shape: " << input0->info()->tensor_shape()
+                               << " Input1 shape: " << input1->info()->tensor_shape()
+                               << " Input2 shape: " << input2->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " DetectionOutputLayer info: " << detect_info
+                               << std::endl);
+
+    auto wrap_function = support::cpp14::make_unique<CPPWrapperFunction>();
+    ;
+    wrap_function->register_function(std::move(func));
+    wrap_function->register_tensor(input0);
+    wrap_function->register_tensor(input1);
+    wrap_function->register_tensor(input2);
+    wrap_function->register_tensor(output);
+
+    return std::move(wrap_function);
+}
+} // namespace detail
 
 std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &ctx)
 {
@@ -95,6 +184,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_concatenate_layer<CLConcatenateLayer, CLTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<CLDepthwiseConvolutionLayerFunctions, CLTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
+        case NodeType::DetectionOutputLayer:
+            return detail::create_detection_output_layer<CPPDetectionOutputLayer, CLTargetInfo>(*polymorphic_downcast<DetectionOutputLayerNode *>(node));
         case NodeType::EltwiseLayer:
             return detail::create_eltwise_layer<CLEltwiseFunctions, CLTargetInfo>(*polymorphic_downcast<EltwiseLayerNode *>(node));
         case NodeType::FlattenLayer:

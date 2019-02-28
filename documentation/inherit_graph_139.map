@@ -1,5 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml" title="Stream interface. " alt="" coords="5,31,73,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1frontend_1_1_stream.xhtml" title="Stream frontend class to construct simple graphs in a stream fashion. " alt="" coords="133,5,197,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml" title="Sub stream class. " alt="" coords="121,56,208,83"/>
+<area shape="rect" id="node1" href="$structarm__compute_1_1traits_1_1is__contained.xhtml" title=" " alt="" coords="5,5,157,47"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_u_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="205,5,357,47"/>
 </map>

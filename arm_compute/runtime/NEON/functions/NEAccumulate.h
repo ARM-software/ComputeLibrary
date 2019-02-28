@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEACCUMULATE_H__
 #define __ARM_COMPUTE_NEACCUMULATE_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include <cstdint>
 
@@ -33,7 +33,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEAccumulateKernel */
-class NEAccumulate : public INESimpleFunction
+class NEAccumulate : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and accumulation tensors
@@ -45,7 +45,7 @@ public:
 };
 
 /** Basic function to run @ref NEAccumulateWeightedKernel */
-class NEAccumulateWeighted : public INESimpleFunction
+class NEAccumulateWeighted : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and accumulation tensors, and the scale value
@@ -59,7 +59,7 @@ public:
 };
 
 /** Basic function to run @ref NEAccumulateSquaredKernel */
-class NEAccumulateSquared : public INESimpleFunction
+class NEAccumulateSquared : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and accumulation tensors and the shift value.
@@ -70,5 +70,5 @@ public:
      */
     void configure(const ITensor *input, uint32_t shift, ITensor *output);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEACCUMULATE_H__ */

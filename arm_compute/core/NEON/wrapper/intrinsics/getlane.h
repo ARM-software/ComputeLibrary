@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,62 +30,62 @@ namespace arm_compute
 {
 namespace wrapper
 {
-#define VGETLANE_IMPL_8(stype, vtype, postfix)                \
-    inline stype vgetlane(const vtype vector, const int lane) \
-    {                                                         \
-        switch(lane)                                          \
-        {                                                     \
-            case 0:                                           \
-                return vget_lane_##postfix(vector, 0);        \
-            case 1:                                           \
-                return vget_lane_##postfix(vector, 1);        \
-            case 2:                                           \
-                return vget_lane_##postfix(vector, 2);        \
-            case 3:                                           \
-                return vget_lane_##postfix(vector, 3);        \
-            case 4:                                           \
-                return vget_lane_##postfix(vector, 4);        \
-            case 5:                                           \
-                return vget_lane_##postfix(vector, 5);        \
-            case 6:                                           \
-                return vget_lane_##postfix(vector, 6);        \
-            case 7:                                           \
-                return vget_lane_##postfix(vector, 7);        \
-            default:                                          \
-                ARM_COMPUTE_ERROR("Invalid lane");            \
-        }                                                     \
+#define VGETLANE_IMPL_8(stype, vtype, postfix)                         \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vget_lane_##postfix(vector, 0);                 \
+            case 1:                                                    \
+                return vget_lane_##postfix(vector, 1);                 \
+            case 2:                                                    \
+                return vget_lane_##postfix(vector, 2);                 \
+            case 3:                                                    \
+                return vget_lane_##postfix(vector, 3);                 \
+            case 4:                                                    \
+                return vget_lane_##postfix(vector, 4);                 \
+            case 5:                                                    \
+                return vget_lane_##postfix(vector, 5);                 \
+            case 6:                                                    \
+                return vget_lane_##postfix(vector, 6);                 \
+            case 7:                                                    \
+                return vget_lane_##postfix(vector, 7);                 \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
-#define VGETLANE_IMPL_4(stype, vtype, postfix)                \
-    inline stype vgetlane(const vtype vector, const int lane) \
-    {                                                         \
-        switch(lane)                                          \
-        {                                                     \
-            case 0:                                           \
-                return vget_lane_##postfix(vector, 0);        \
-            case 1:                                           \
-                return vget_lane_##postfix(vector, 1);        \
-            case 2:                                           \
-                return vget_lane_##postfix(vector, 2);        \
-            case 3:                                           \
-                return vget_lane_##postfix(vector, 3);        \
-            default:                                          \
-                ARM_COMPUTE_ERROR("Invalid lane");            \
-        }                                                     \
+#define VGETLANE_IMPL_4(stype, vtype, postfix)                         \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vget_lane_##postfix(vector, 0);                 \
+            case 1:                                                    \
+                return vget_lane_##postfix(vector, 1);                 \
+            case 2:                                                    \
+                return vget_lane_##postfix(vector, 2);                 \
+            case 3:                                                    \
+                return vget_lane_##postfix(vector, 3);                 \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
-#define VGETLANE_IMPL_2(stype, vtype, postfix)                \
-    inline stype vgetlane(const vtype vector, const int lane) \
-    {                                                         \
-        switch(lane)                                          \
-        {                                                     \
-            case 0:                                           \
-                return vget_lane_##postfix(vector, 0);        \
-            case 1:                                           \
-                return vget_lane_##postfix(vector, 1);        \
-            default:                                          \
-                ARM_COMPUTE_ERROR("Invalid lane");            \
-        }                                                     \
+#define VGETLANE_IMPL_2(stype, vtype, postfix)                         \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vget_lane_##postfix(vector, 0);                 \
+            case 1:                                                    \
+                return vget_lane_##postfix(vector, 1);                 \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
 VGETLANE_IMPL_8(uint8_t, uint8x8_t, u8)
@@ -99,90 +99,90 @@ VGETLANE_IMPL_2(float, float32x2_t, f32)
 VGETLANE_IMPL_4(float16_t, float16x4_t, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-#define VGETQLANE_IMPL_16(stype, vtype, postfix)               \
-    inline stype vgetqlane(const vtype vector, const int lane) \
-    {                                                          \
-        switch(lane)                                           \
-        {                                                      \
-            case 0:                                            \
-                return vgetq_lane_##postfix(vector, 0);        \
-            case 1:                                            \
-                return vgetq_lane_##postfix(vector, 1);        \
-            case 2:                                            \
-                return vgetq_lane_##postfix(vector, 2);        \
-            case 3:                                            \
-                return vgetq_lane_##postfix(vector, 3);        \
-            case 4:                                            \
-                return vgetq_lane_##postfix(vector, 4);        \
-            case 5:                                            \
-                return vgetq_lane_##postfix(vector, 5);        \
-            case 6:                                            \
-                return vgetq_lane_##postfix(vector, 6);        \
-            case 7:                                            \
-                return vgetq_lane_##postfix(vector, 7);        \
-            case 8:                                            \
-                return vgetq_lane_##postfix(vector, 8);        \
-            case 9:                                            \
-                return vgetq_lane_##postfix(vector, 9);        \
-            case 10:                                           \
-                return vgetq_lane_##postfix(vector, 10);       \
-            case 11:                                           \
-                return vgetq_lane_##postfix(vector, 11);       \
-            case 12:                                           \
-                return vgetq_lane_##postfix(vector, 12);       \
-            case 13:                                           \
-                return vgetq_lane_##postfix(vector, 13);       \
-            case 14:                                           \
-                return vgetq_lane_##postfix(vector, 14);       \
-            case 15:                                           \
-                return vgetq_lane_##postfix(vector, 15);       \
-            default:                                           \
-                ARM_COMPUTE_ERROR("Invalid lane");             \
-        }                                                      \
+#define VGETQLANE_IMPL_16(stype, vtype, postfix)                       \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vgetq_lane_##postfix(vector, 0);                \
+            case 1:                                                    \
+                return vgetq_lane_##postfix(vector, 1);                \
+            case 2:                                                    \
+                return vgetq_lane_##postfix(vector, 2);                \
+            case 3:                                                    \
+                return vgetq_lane_##postfix(vector, 3);                \
+            case 4:                                                    \
+                return vgetq_lane_##postfix(vector, 4);                \
+            case 5:                                                    \
+                return vgetq_lane_##postfix(vector, 5);                \
+            case 6:                                                    \
+                return vgetq_lane_##postfix(vector, 6);                \
+            case 7:                                                    \
+                return vgetq_lane_##postfix(vector, 7);                \
+            case 8:                                                    \
+                return vgetq_lane_##postfix(vector, 8);                \
+            case 9:                                                    \
+                return vgetq_lane_##postfix(vector, 9);                \
+            case 10:                                                   \
+                return vgetq_lane_##postfix(vector, 10);               \
+            case 11:                                                   \
+                return vgetq_lane_##postfix(vector, 11);               \
+            case 12:                                                   \
+                return vgetq_lane_##postfix(vector, 12);               \
+            case 13:                                                   \
+                return vgetq_lane_##postfix(vector, 13);               \
+            case 14:                                                   \
+                return vgetq_lane_##postfix(vector, 14);               \
+            case 15:                                                   \
+                return vgetq_lane_##postfix(vector, 15);               \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
-#define VGETQLANE_IMPL_8(stype, vtype, postfix)                \
-    inline stype vgetqlane(const vtype vector, const int lane) \
-    {                                                          \
-        switch(lane)                                           \
-        {                                                      \
-            case 0:                                            \
-                return vgetq_lane_##postfix(vector, 0);        \
-            case 1:                                            \
-                return vgetq_lane_##postfix(vector, 1);        \
-            case 2:                                            \
-                return vgetq_lane_##postfix(vector, 2);        \
-            case 3:                                            \
-                return vgetq_lane_##postfix(vector, 3);        \
-            case 4:                                            \
-                return vgetq_lane_##postfix(vector, 4);        \
-            case 5:                                            \
-                return vgetq_lane_##postfix(vector, 5);        \
-            case 6:                                            \
-                return vgetq_lane_##postfix(vector, 6);        \
-            case 7:                                            \
-                return vgetq_lane_##postfix(vector, 7);        \
-            default:                                           \
-                ARM_COMPUTE_ERROR("Invalid lane");             \
-        }                                                      \
+#define VGETQLANE_IMPL_8(stype, vtype, postfix)                        \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vgetq_lane_##postfix(vector, 0);                \
+            case 1:                                                    \
+                return vgetq_lane_##postfix(vector, 1);                \
+            case 2:                                                    \
+                return vgetq_lane_##postfix(vector, 2);                \
+            case 3:                                                    \
+                return vgetq_lane_##postfix(vector, 3);                \
+            case 4:                                                    \
+                return vgetq_lane_##postfix(vector, 4);                \
+            case 5:                                                    \
+                return vgetq_lane_##postfix(vector, 5);                \
+            case 6:                                                    \
+                return vgetq_lane_##postfix(vector, 6);                \
+            case 7:                                                    \
+                return vgetq_lane_##postfix(vector, 7);                \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
-#define VGETQLANE_IMPL_4(stype, vtype, postfix)                \
-    inline stype vgetqlane(const vtype vector, const int lane) \
-    {                                                          \
-        switch(lane)                                           \
-        {                                                      \
-            case 0:                                            \
-                return vgetq_lane_##postfix(vector, 0);        \
-            case 1:                                            \
-                return vgetq_lane_##postfix(vector, 1);        \
-            case 2:                                            \
-                return vgetq_lane_##postfix(vector, 2);        \
-            case 3:                                            \
-                return vgetq_lane_##postfix(vector, 3);        \
-            default:                                           \
-                ARM_COMPUTE_ERROR("Invalid lane");             \
-        }                                                      \
+#define VGETQLANE_IMPL_4(stype, vtype, postfix)                        \
+    inline stype vgetlane(const vtype vector, const unsigned int lane) \
+    {                                                                  \
+        switch(lane)                                                   \
+        {                                                              \
+            case 0:                                                    \
+                return vgetq_lane_##postfix(vector, 0);                \
+            case 1:                                                    \
+                return vgetq_lane_##postfix(vector, 1);                \
+            case 2:                                                    \
+                return vgetq_lane_##postfix(vector, 2);                \
+            case 3:                                                    \
+                return vgetq_lane_##postfix(vector, 3);                \
+            default:                                                   \
+                ARM_COMPUTE_ERROR("Invalid lane");                     \
+        }                                                              \
     }
 
 VGETQLANE_IMPL_16(uint8_t, uint8x16_t, u8)
@@ -199,6 +199,10 @@ VGETQLANE_IMPL_8(float16_t, float16x8_t, f16)
 #undef VGETLANE_IMPL_8
 #undef VGETLANE_IMPL_4
 #undef VGETLANE_IMPL_2
+
+#undef VGETQLANE_IMPL_16
+#undef VGETQLANE_IMPL_8
+#undef VGETQLANE_IMPL_4
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_GET_LANE_H__ */

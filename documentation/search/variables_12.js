@@ -3,10 +3,13 @@ var searchData=
   ['r_5fvalue',['r_value',['../_mali_counter_8cpp.xhtml#a736088bbd41fd7407ac9fc811864db68',1,'MaliCounter.cpp']]],
   ['raw_5f',['raw_',['../structarm__compute_1_1logging_1_1_log_msg.xhtml#ab564cdace3a0a660c5a04b5f2c637213',1,'arm_compute::logging::LogMsg']]],
   ['real_5fclenqueuendrangekernel',['real_clEnqueueNDRangeKernel',['../classarm__compute_1_1_c_l_tuner.xhtml#a5baba955626e8da33ed5dd829a538974',1,'arm_compute::CLTuner']]],
-  ['rect',['rect',['../structarm__compute_1_1_r_o_i.xhtml#aa23d9b69995e7138751a71caf1d46429',1,'arm_compute::ROI']]],
   ['red_5fcoef_5fbt709',['red_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#ac3138daaa2a074986406b22ec6f3d909',1,'arm_compute::test::colorconvert_helper::detail']]],
-  ['ref_5fsrc1',['ref_src1',['../namespacearm__compute_1_1test_1_1validation.xhtml#aaa37812e34d60d0c75b47623a552b8ce',1,'arm_compute::test::validation']]],
+  ['ref_5fc',['ref_c',['../namespacearm__compute_1_1test_1_1validation.xhtml#a56dcd0ed6ea18f4694b4b81030ff384f',1,'arm_compute::test::validation']]],
+  ['ref_5fsrc',['ref_src',['../namespacearm__compute_1_1test_1_1validation.xhtml#a80d454b3b4cf1a2b3a1e3bccc2e12ff8',1,'arm_compute::test::validation']]],
+  ['ref_5fsrc1',['ref_src1',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1314e5082ccbc5c77c154d3417533493',1,'arm_compute::test::validation']]],
   ['ref_5fsrc2',['ref_src2',['../namespacearm__compute_1_1test_1_1validation.xhtml#a32648f11269b827fefc288e4d60a3507',1,'arm_compute::test::validation']]],
+  ['ref_5fx',['ref_x',['../namespacearm__compute_1_1test_1_1validation.xhtml#afd61a7e2a0a6de7b9572fcf0a81d0999',1,'arm_compute::test::validation']]],
+  ['ref_5fy',['ref_y',['../namespacearm__compute_1_1test_1_1validation.xhtml#aefbfb6e2d75275f293020ddfa0a6a2c2',1,'arm_compute::test::validation']]],
   ['retain_5finternal_5fweights',['retain_internal_weights',['../structarm__compute_1_1_fully_connected_layer_info.xhtml#a4f87c5060cca01305f94a9d2f10e9d83',1,'arm_compute::FullyConnectedLayerInfo']]],
   ['rgb',['rgb',['../classarm__compute_1_1_pixel_value.xhtml#afe42472c55e7e5df52b8aaca94d0fa7e',1,'arm_compute::PixelValue']]],
   ['rgb2u8_5fblue_5fcoef',['rgb2u8_blue_coef',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#a212c4b6cc3384fc8a6daefc25b40efb1',1,'arm_compute::test::colorconvert_helper::detail']]],
@@ -20,5 +23,6 @@ var searchData=
   ['rgbx',['rgbx',['../classarm__compute_1_1_pixel_value.xhtml#ac24a28b797176d8a1e73d27f64c058d2',1,'arm_compute::PixelValue']]],
   ['right',['right',['../structarm__compute_1_1_border_size.xhtml#a78b0fed184c642b78f32fd34b228a5f9',1,'arm_compute::BorderSize']]],
   ['rounding_5fpolicy',['rounding_policy',['../namespacearm__compute_1_1test_1_1validation.xhtml#a60ad1078faeaf3f59266d69ad937339f',1,'arm_compute::test::validation']]],
-  ['row_5fdelim',['row_delim',['../structarm__compute_1_1_i_o_format_info.xhtml#ab1a3e6cb2768124a6853f52bd0e10596',1,'arm_compute::IOFormatInfo']]]
+  ['row_5fdelim',['row_delim',['../structarm__compute_1_1_i_o_format_info.xhtml#ab1a3e6cb2768124a6853f52bd0e10596',1,'arm_compute::IOFormatInfo']]],
+  ['run_5fsmall_5fdataset',['run_small_dataset',['../namespacearm__compute_1_1test_1_1validation.xhtml#a2e54f8a51394fac8230e2618e0d4c0a2',1,'arm_compute::test::validation']]]
 ];

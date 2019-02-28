@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,12 @@ const auto conv_args         = combine(combine(combine(combine(conv_filter_sizes
                                                        framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                        framework::dataset::make("NumGroups", { 1 }));
+
+const auto conv_filter_sizes_small = framework::dataset::make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U) });
+const auto conv_args_small         = combine(combine(combine(combine(conv_filter_sizes_small, framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U) })),
+                                                             framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
+                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                             framework::dataset::make("NumGroups", { 1 }));
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Im2Col)
@@ -78,58 +84,61 @@ using NEIm2ColFixture = Im2ColValidationFixture<Tensor, Accessor, NEIm2Col, T, f
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
-                                                                                              conv_args))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
+                                                                                                    conv_args_small))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+                                                                                                          DataType::F32)),
                                                                                                   conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
-                                                                                             conv_args))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
+                                                                                                   conv_args_small))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
+                                                                                                         DataType::F16)),
                                                                                                  conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
-TEST_SUITE_END()
+TEST_SUITE_END() // Float
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                conv_args))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                      conv_args_small))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()),
+                                                                                                            framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                     conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // Im2Col
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

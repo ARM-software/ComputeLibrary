@@ -25,6 +25,8 @@ var src_2core_2_c_l_2cl__kernels_2_helpers_8h =
     [ "CONVERT_TO_VECTOR_STRUCT", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a527bfdf5eeb306f1cf01c4a8e29f38e0", null ],
     [ "CONVERT_TO_VECTOR_STRUCT_NO_STEP", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a64d779f80eeb923e0ab2313433f7b40b", null ],
     [ "EXPAND", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#ae4b532a93c757194ec73b6790a3e6b1f", null ],
+    [ "float1", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a08069d303d2082bb5db214244a634c0c", null ],
+    [ "half1", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6083fd110e3a4572725f6a020c1681ae", null ],
     [ "IMAGE_DECLARATION", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a22f42fcf2077d951271df83b55c1a71a", null ],
     [ "TENSOR3D_DECLARATION", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a6b83038822d1ae7ab619b684ed3b7fc0", null ],
     [ "TENSOR4D_DECLARATION", "src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a481bdc6d61b3df9dcdbdb244f0f97790", null ],

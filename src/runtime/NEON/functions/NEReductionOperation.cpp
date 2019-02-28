@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,16 +50,6 @@ size_t reduction_window_split_dimension(unsigned int axis)
             ARM_COMPUTE_ERROR("Unsupported reduction axis");
     }
 }
-BorderMode reduction_operation_border_mode(ReductionOperation op)
-{
-    switch(op)
-    {
-        case ReductionOperation::SUM_SQUARE:
-            return BorderMode::CONSTANT;
-        default:
-            return BorderMode::CONSTANT;
-    }
-}
 } // namespace
 
 NEReductionOperation::NEReductionOperation()
@@ -86,9 +76,9 @@ void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned i
     if(axis == 0)
     {
         // Configure fill border kernel
-        BorderSize fill_border_size = (axis == 0) ? _reduction_kernel.border_size() : BorderSize();
-        BorderMode fill_border_mode = reduction_operation_border_mode(op);
-        _fill_border_kernel.configure(input, fill_border_size, fill_border_mode, PixelValue(static_cast<float>(0.f)));
+        const BorderSize fill_border_size = _reduction_kernel.border_size();
+        const PixelValue pixelValue       = (op == ReductionOperation::PROD) ? PixelValue(1, input->info()->data_type(), input->info()->quantization_info()) : PixelValue(0, input->info()->data_type());
+        _fill_border_kernel.configure(input, fill_border_size, BorderMode::CONSTANT, pixelValue);
     }
 }
 

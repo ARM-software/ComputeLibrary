@@ -1,3 +1,4 @@
 <map id="OpenCLClock&lt; output_timestamps &gt;" name="OpenCLClock&lt; output_timestamps &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="39,5,123,32"/>
+<area shape="rect" id="node1" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="5,80,168,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="41,5,133,32"/>
 </map>

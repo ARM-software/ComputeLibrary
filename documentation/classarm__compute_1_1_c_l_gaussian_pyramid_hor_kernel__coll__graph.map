@@ -1,5 +1,6 @@
 <map id="CLGaussianPyramidHorKernel" name="CLGaussianPyramidHorKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output. " alt="" coords="45,155,165,181"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="65,80,145,107"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="74,5,137,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform a Gaussian filter and half scaling across width (horizontal pass)" alt="" coords="5,229,216,256"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_simple_kernel.xhtml" title="Interface for simple OpenCL kernels having 1 tensor input and 1 tensor output." alt="" coords="49,155,173,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="71,80,151,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="79,5,143,32"/>
 </map>

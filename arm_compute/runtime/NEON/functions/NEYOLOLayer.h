@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_NEYOLOLAYER_H__
 #define __ARM_COMPUTE_NEYOLOLAYER_H__
 
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/NEON/kernels/NEYOLOLayerKernel.h"
 #include "arm_compute/core/Types.h"
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEYOLOLayerKernel */
-class NEYOLOLayer : public INESimpleFunction
+class NEYOLOLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensor.

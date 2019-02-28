@@ -58,17 +58,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-template <typename T>
-inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &perm)
-{
-    const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
-    for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
-    {
-        T dimension_val = old_dim[i];
-        dimensions.set(perm[i], dimension_val);
-    }
-}
-
 } // namespace
 
 template <typename T>

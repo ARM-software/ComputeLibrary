@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,12 +28,12 @@
 
 #include "arm_compute/runtime/Types.h"
 
-#include <cstddef>
 #include <map>
 #include <vector>
 
 namespace arm_compute
 {
+// Forward declarations
 class IMemoryPool;
 
 /** Concrete class that tracks the lifetime of registered tensors and
@@ -61,7 +61,7 @@ private:
     void update_blobs_and_mappings() override;
 
 private:
-    size_t _blob; /**< Memory blob size */
+    BlobInfo _blob; /**< Memory blob size */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_OFFSETLIFETIMEMANAGER_H__ */

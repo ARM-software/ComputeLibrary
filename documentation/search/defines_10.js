@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['scale_5fout',['SCALE_OUT',['../activation__layer__qa8_8cl.xhtml#a814d8a020b304f2ad69204ca56d76e4f',1,'activation_layer_qa8.cl']]],
   ['select_5fdata_5ftype',['SELECT_DATA_TYPE',['../softmax__layer_8cl.xhtml#af5b2e33e3c5fcaab3a213f26c2300170',1,'softmax_layer.cl']]],
   ['select_5ftype',['SELECT_TYPE',['../activation__layer_8cl.xhtml#a5c9e2fb8fe562b69a0be48600a910d77',1,'activation_layer.cl']]],
   ['sobel1x1_5fhor',['SOBEL1x1_HOR',['../sobel__filter_8cl.xhtml#ad40297671e8a51899c6114386492006b',1,'sobel_filter.cl']]],
@@ -9,9 +10,10 @@ var searchData=
   ['sort',['SORT',['../non__linear__filter__helpers_8h.xhtml#ac226bc1ed04fd7d4865263484ed22a47',1,'non_linear_filter_helpers.h']]],
   ['sqcvt_5fsat',['SQCVT_SAT',['../batchnormalization__layer_8cl.xhtml#a107d847044e677b01e9bd3d5251b39d9',1,'SQCVT_SAT():&#160;batchnormalization_layer.cl'],['../normalization__layer_8cl.xhtml#a107d847044e677b01e9bd3d5251b39d9',1,'SQCVT_SAT():&#160;normalization_layer.cl']]],
   ['sqrt_5fop',['SQRT_OP',['../pooling__layer_8cl.xhtml#ac9af19bec38fe50b4b9585c0e5c0ccca',1,'pooling_layer.cl']]],
+  ['squared_5fdiff',['SQUARED_DIFF',['../elementwise__operation_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd',1,'SQUARED_DIFF():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#ab05bd244cb8823c69d6dce6a23a758fd',1,'SQUARED_DIFF():&#160;elementwise_operation_quantized.cl']]],
   ['stb_5fimage_5fimplementation',['STB_IMAGE_IMPLEMENTATION',['../utils_2_utils_8cpp.xhtml#a18372412ad2fc3ce1e3240b3cf0efe78',1,'Utils.cpp']]],
   ['store_5fop',['STORE_OP',['../normalization__layer_8cl.xhtml#ac59caf44b60378c02032aab994ad5ac1',1,'normalization_layer.cl']]],
-  ['sub',['SUB',['../arithmetic__op_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14',1,'SUB():&#160;arithmetic_op.cl'],['../arithmetic__op__quantized_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14',1,'SUB():&#160;arithmetic_op_quantized.cl']]],
+  ['sub',['SUB',['../elementwise__operation_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14',1,'SUB():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#aafc2c4f262a0686c07f86c7d2e1d8d14',1,'SUB():&#160;elementwise_operation_quantized.cl']]],
   ['sub_5fop',['SUB_OP',['../batchnormalization__layer_8cl.xhtml#ad778425e4131c4731f17d7e6e3499a07',1,'SUB_OP():&#160;batchnormalization_layer.cl'],['../softmax__layer_8cl.xhtml#ac3af2d18008cbbf7247ae48fcd6e0c4e',1,'SUB_OP():&#160;softmax_layer.cl']]],
   ['swap_5f4x4',['SWAP_4x4',['../transpose_8cl.xhtml#af5dc9980a3e0aae2cba22e97b9458bc9',1,'transpose.cl']]],
   ['swap_5f8x8',['SWAP_8x8',['../transpose_8cl.xhtml#a91074bda470bd8bec36799fdaffd107a',1,'transpose.cl']]],

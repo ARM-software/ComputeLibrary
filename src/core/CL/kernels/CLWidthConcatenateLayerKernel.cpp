@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,9 +107,16 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(_width_offset));
     build_opts.add_option("-DDEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
 
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
+    {
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+    }
+
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width", build_opts.options()));
-
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), width_offset, output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));

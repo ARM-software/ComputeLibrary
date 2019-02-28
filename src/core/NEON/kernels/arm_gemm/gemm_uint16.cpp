@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,30 +32,33 @@
 
 namespace arm_gemm {
 
-class GemmImpl_gemm_u16_interleaved : public GemmImplementation<uint16_t, uint32_t> {
-public:
-    UniqueGemmCommon<uint16_t, uint32_t> instantiate(const GemmArgs<uint32_t> &args) override {
-        return UniqueGemmCommon<uint16_t, uint32_t>(new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(args));
-    }
-
-    GemmImpl_gemm_u16_interleaved() : GemmImplementation<uint16_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED) { }
-};
-
-static GemmImpl_gemm_u16_interleaved gemm_u16_interleaved_impl{};
-
-static std::vector<GemmImplementation<uint16_t, uint32_t> *> gemm_u16_methods = {
-    &gemm_u16_interleaved_impl
+static const GemmImplementation<uint16_t, uint32_t> gemm_u16_methods[] = {
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "gemm_u16_12x8",
+    nullptr,
+    nullptr,
+    [](const GemmArgs<uint32_t> &args) { return new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(args); }
+},
+{
+    GemmMethod::DEFAULT,
+    "",
+    nullptr,
+    nullptr,
+    nullptr
+}
 };
 
 template<>
-std::vector<GemmImplementation<uint16_t, uint32_t> *> &gemm_implementation_list<uint16_t, uint32_t>() {
+const GemmImplementation<uint16_t, uint32_t> *gemm_implementation_list<uint16_t, uint32_t>() {
     return gemm_u16_methods;
 }
 
 /* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(GemmArgs<uint32_t> &args, GemmConfig *cfg);
-template GemmMethod get_gemm_method<uint16_t, uint32_t>(GemmArgs<uint32_t> &args);
-template bool method_is_compatible<uint16_t, uint32_t>(GemmMethod method, GemmArgs<uint32_t> &args);
+template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
+template KernelDescription get_gemm_method<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
+template bool method_is_compatible<uint16_t, uint32_t>(GemmMethod method, const GemmArgs<uint32_t> &args);
+template std::vector<std::string> get_compatible_kernels<uint16_t, uint32_t> (const GemmArgs<uint32_t> &args);
 
 } // namespace arm_gemm
 

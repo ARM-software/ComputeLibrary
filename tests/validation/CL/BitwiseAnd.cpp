@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(BitwiseAnd)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
     // Create tensors
     CLTensor src1 = create_tensor<CLTensor>(shape, data_type);
@@ -74,19 +74,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
 template <typename T>
 using CLBitwiseAndFixture = BitwiseAndValidationFixture<CLTensor, CLAccessor, CLBitwiseAnd, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                          DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                    DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::U8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation

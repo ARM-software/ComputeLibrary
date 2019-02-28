@@ -47,7 +47,7 @@ public:
     NEScale();
     /** Initialize the function's source, destination, interpolation type and border_mode.
      *
-     * @param[in, out] input                 Source tensor. Data type supported: U8/S16/F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[in, out] input                 Source tensor. Data type supported: U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]     output                Destination tensor. Data type supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in]      policy                The interpolation type.
      * @param[in]      border_mode           Strategy to use for borders.
@@ -58,7 +58,7 @@ public:
                    SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
     /** Static function to check if given info will lead to a valid configuration of @ref NEScale
      *
-     * @param[in] input                 Source tensor. Data type supported: U8/S16/F32. (Written to only for @p border_mode != UNDEFINED)
+     * @param[in] input                 Source tensor. Data type supported: U8/S16/F16/F32. (Written to only for @p border_mode != UNDEFINED)
      * @param[in] output                Destination tensor. Data type supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
      * @param[in] policy                The interpolation type.
      * @param[in] border_mode           Strategy to use for borders.

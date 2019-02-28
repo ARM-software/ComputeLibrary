@@ -1,3 +1,4 @@
 <map id="NEDeviceBackend" name="NEDeviceBackend">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml" title="Device backend interface. " alt="" coords="13,5,131,32"/>
+<area shape="rect" id="node1" title="NEON device backend." alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_i_device_backend.xhtml" title="Device backend interface." alt="" coords="13,5,136,32"/>
 </map>

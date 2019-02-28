@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,22 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE) && defined(VEC_SIZE)
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
+inline VEC_UCHAR requantize(VEC_UCHAR input, float in_offset, float out_offset, float in_scale, float out_scale)
+{
+    const VEC_FLOAT in_f32  = (CONVERT(input, VEC_FLOAT) - (VEC_FLOAT)((float)in_offset)) * (VEC_FLOAT)((float)in_scale);
+    const VEC_FLOAT out_f32 = in_f32 / ((VEC_FLOAT)(float)out_scale) + ((VEC_FLOAT)((float)out_offset));
+    const VEC_UCHAR res_u8  = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT), VEC_UCHAR);
+    return res_u8;
+}
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
+#if defined(DATA_TYPE) && defined(VEC_SIZE)
 #if defined(DEPTH) && defined(ELEMENT_SIZE)
 
 #if defined(INPUT1_WIDTH)
@@ -50,6 +64,7 @@
 #else // VEC_SIZE
 #error "Vector size not supported"
 #endif // VEC_SIZE
+
 /** This kernel concatenates two input tensors into the output tensor along the first dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
@@ -88,11 +103,15 @@
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src1_pad_right                     Right paddings of the first input tensor in unit of elements
+ * @param[in]  src1_pad_left                      Left paddings of the second input tensor in unit of elements
  */
 __kernel void concatenate_width_x2(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    uint src1_pad_right,
+    uint src2_pad_left)
 {
     Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
 
@@ -101,16 +120,22 @@ __kernel void concatenate_width_x2(
     const int y  = get_global_id(1);
     const int z  = get_global_id(2) % (int)DEPTH;
     const int w  = get_global_id(2) / (int)DEPTH;
-    const int x1 = min(x, (int)INPUT1_WIDTH);
-    const int x2 = max(x - (int)INPUT1_WIDTH, -(int)VEC_SIZE);
+    const int x1 = min(x, (int)INPUT1_WIDTH + (int)src1_pad_right - (int)VEC_SIZE);
+    const int x2 = max(x - (int)INPUT1_WIDTH, -(int)src2_pad_left);
 
     // Calculate inputs and output addresses
     const __global uchar *in1_ptr = src1_ptr + (int)src1_offset_first_element_in_bytes + x1 * (int)src1_stride_x + y * (int)src1_stride_y + z * (int)src1_stride_z + w * (int)src1_stride_w;
     const __global uchar *in2_ptr = src2_ptr + (int)src2_offset_first_element_in_bytes + x2 * (int)src2_stride_x + y * (int)src2_stride_y + z * (int)src2_stride_z + w * (int)src2_stride_w;
 
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in1_ptr);
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in2_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in1_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in2_ptr);
 
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2)
+    src1_values = requantize(src1_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    src2_values = requantize(src2_values, OFFSET_IN2, OFFSET_OUT, SCALE_IN2, SCALE_OUT);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) */
     const VEC_DATA_TYPE(int, VEC_SIZE) x_coords        = SEQ + (VEC_DATA_TYPE(int, VEC_SIZE))(x);
     const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) values    = select(src2_values, src1_values, cond);
@@ -180,13 +205,25 @@ __kernel void concatenate_width_x2(
  * @param[in]  dst_stride_w                       Stride of the destination tensor in Z dimension (in bytes)
  * @param[in]  dst_step_w                         output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src1_pad_right                     Right paddings of the first input tensor in unit of elements
+ * @param[in]  src2_pad_left                      Left paddings of the second input tensor in unit of elements
+ * @param[in]  src2_pad_right                     Right paddings of the second input tensor in unit of elements
+ * @param[in]  src3_pad_left                      Left paddings of the third input tensor in unit of elements
+ * @param[in]  src3_pad_right                     Right paddings of the third input tensor in unit of elements
+ * @param[in]  src4_pad_left                      Left paddings of the fourth input tensor in unit of elements
  */
 __kernel void concatenate_width_x4(
     TENSOR4D_DECLARATION(src1),
     TENSOR4D_DECLARATION(src2),
     TENSOR4D_DECLARATION(src3),
     TENSOR4D_DECLARATION(src4),
-    TENSOR4D_DECLARATION(dst))
+    TENSOR4D_DECLARATION(dst),
+    uint src1_pad_right,
+    uint src2_pad_left,
+    uint src2_pad_right,
+    uint src3_pad_left,
+    uint src3_pad_right,
+    uint src4_pad_left)
 {
     Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
 
@@ -196,10 +233,10 @@ __kernel void concatenate_width_x4(
     const int z = get_global_id(2) % (int)DEPTH;
     const int w = get_global_id(2) / (int)DEPTH;
 
-    const int x1 = min(x, (int)INPUT1_WIDTH);
-    const int x2 = min(max(x - (int)INPUT1_WIDTH, -(int)VEC_SIZE), (int)INPUT2_WIDTH);
-    const int x3 = min(max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH, -(int)VEC_SIZE), (int)INPUT3_WIDTH);
-    const int x4 = max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH - (int)INPUT3_WIDTH, -(int)VEC_SIZE);
+    const int x1 = min(x, (int)INPUT1_WIDTH + (int)src1_pad_right - (int)VEC_SIZE);
+    const int x2 = min(max(x - (int)INPUT1_WIDTH, -(int)src2_pad_left), (int)INPUT2_WIDTH + (int)src2_pad_right - (int)VEC_SIZE);
+    const int x3 = min(max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH, -(int)src3_pad_left), (int)INPUT3_WIDTH + (int)src3_pad_right - (int)VEC_SIZE);
+    const int x4 = max(x - (int)INPUT1_WIDTH - (int)INPUT2_WIDTH - (int)INPUT3_WIDTH, -(int)src4_pad_left);
 
     // Calculate inputs and output addresses
     const __global uchar *in1_ptr = src1_ptr + (int)src1_offset_first_element_in_bytes + x1 * (int)src1_stride_x + y * (int)src1_stride_y + z * (int)src1_stride_z + w * (int)src1_stride_w;
@@ -207,10 +244,21 @@ __kernel void concatenate_width_x4(
     const __global uchar *in3_ptr = src3_ptr + (int)src3_offset_first_element_in_bytes + x3 * (int)src3_stride_x + y * (int)src3_stride_y + z * (int)src3_stride_z + w * (int)src3_stride_w;
     const __global uchar *in4_ptr = src4_ptr + (int)src4_offset_first_element_in_bytes + x4 * (int)src4_stride_x + y * (int)src4_stride_y + z * (int)src4_stride_z + w * (int)src4_stride_w;
 
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in1_ptr);
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in2_ptr);
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src3_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in3_ptr);
-    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) src4_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in4_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src1_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in1_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in2_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src3_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in3_ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    src4_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in4_ptr);
+
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) && defined(OFFSET_IN3) && defined(SCALE_IN3) && defined(OFFSET_IN4) && defined(SCALE_IN4)
+    src1_values = requantize(src1_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    src2_values = requantize(src2_values, OFFSET_IN2, OFFSET_OUT, SCALE_IN2, SCALE_OUT);
+    src3_values = requantize(src3_values, OFFSET_IN3, OFFSET_OUT, SCALE_IN3, SCALE_OUT);
+    src4_values = requantize(src4_values, OFFSET_IN4, OFFSET_OUT, SCALE_IN4, SCALE_OUT);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) && defined(OFFSET_IN3) && defined(SCALE_IN3) && defined(OFFSET_IN4) && defined(SCALE_IN4) */
 
     const VEC_DATA_TYPE(int, VEC_SIZE) x_coords = SEQ + (VEC_DATA_TYPE(int, VEC_SIZE))(x);
 
@@ -259,6 +307,7 @@ __kernel void concatenate_width_x4(
  * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
+
 __kernel void concatenate_width(
     TENSOR4D_DECLARATION(src),
     TENSOR4D_DECLARATION(dst))
@@ -269,9 +318,16 @@ __kernel void concatenate_width(
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+    const VEC_UCHAR out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    VSTORE(VEC_SIZE)
+    (out, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
+#else  /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr) + WIDTH_OFFSET);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 }
+
 #endif /* defined(WIDTH_OFFSET) && defined(DEPTH) */
 
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
@@ -308,7 +364,12 @@ __kernel void concatenate_depth(
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, -offsets.x, -offsets.y, 0));
 
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+    source_values = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offsets.z));
+
 }
 #endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */

@@ -1,3 +1,4 @@
 <map id="Lut" name="Lut">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut.xhtml" title="Lookup Table object interface. " alt="" coords="5,5,49,32"/>
+<area shape="rect" id="node1" title="Basic implementation of the LUT interface." alt="" coords="7,80,49,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_lut.xhtml" title="Lookup Table object interface." alt="" coords="5,5,51,32"/>
 </map>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,7 @@ CLGenerateProposalsLayer::CLGenerateProposalsLayer(std::shared_ptr<IMemoryManage
       _memset_kernel(),
       _padded_copy_kernel(),
       _cpp_nms_kernel(),
+      _is_nhwc(false),
       _deltas_permuted(),
       _deltas_flattened(),
       _scores_permuted(),
@@ -60,10 +61,11 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
     ARM_COMPUTE_ERROR_THROW_ON(CLGenerateProposalsLayer::validate(scores->info(), deltas->info(), anchors->info(), proposals->info(), scores_out->info(), num_valid_proposals->info(), info));
 
+    _is_nhwc                         = scores->info()->data_layout() == DataLayout::NHWC;
     const DataType data_type         = deltas->info()->data_type();
-    const int      num_anchors       = scores->info()->dimension(2);
-    const int      feat_width        = scores->info()->dimension(0);
-    const int      feat_height       = scores->info()->dimension(1);
+    const int      num_anchors       = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::CHANNEL));
+    const int      feat_width        = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::WIDTH));
+    const int      feat_height       = scores->info()->dimension(get_data_layout_dimension_index(scores->info()->data_layout(), DataLayoutDimension::HEIGHT));
     const int      total_num_anchors = num_anchors * feat_width * feat_height;
     const int      pre_nms_topN      = info.pre_nms_topN();
     const int      post_nms_topN     = info.post_nms_topN();
@@ -77,21 +79,37 @@ void CLGenerateProposalsLayer::configure(const ICLTensor *scores, const ICLTenso
     _deltas_flattened.allocator()->init(TensorInfo(flatten_shape_deltas, 1, data_type));
 
     // Permute and reshape deltas
-    _memory_group.manage(&_deltas_permuted);
-    _memory_group.manage(&_deltas_flattened);
-    _permute_deltas_kernel.configure(deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
-    _flatten_deltas_kernel.configure(&_deltas_permuted, &_deltas_flattened);
-    _deltas_permuted.allocator()->allocate();
+    if(!_is_nhwc)
+    {
+        _memory_group.manage(&_deltas_permuted);
+        _memory_group.manage(&_deltas_flattened);
+        _permute_deltas_kernel.configure(deltas, &_deltas_permuted, PermutationVector{ 2, 0, 1 });
+        _flatten_deltas_kernel.configure(&_deltas_permuted, &_deltas_flattened);
+        _deltas_permuted.allocator()->allocate();
+    }
+    else
+    {
+        _memory_group.manage(&_deltas_flattened);
+        _flatten_deltas_kernel.configure(deltas, &_deltas_flattened);
+    }
 
     const TensorShape flatten_shape_scores(1, total_num_anchors);
     _scores_flattened.allocator()->init(TensorInfo(flatten_shape_scores, 1, data_type));
 
     // Permute and reshape scores
-    _memory_group.manage(&_scores_permuted);
-    _memory_group.manage(&_scores_flattened);
-    _permute_scores_kernel.configure(scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
-    _flatten_scores_kernel.configure(&_scores_permuted, &_scores_flattened);
-    _scores_permuted.allocator()->allocate();
+    if(!_is_nhwc)
+    {
+        _memory_group.manage(&_scores_permuted);
+        _memory_group.manage(&_scores_flattened);
+        _permute_scores_kernel.configure(scores, &_scores_permuted, PermutationVector{ 2, 0, 1 });
+        _flatten_scores_kernel.configure(&_scores_permuted, &_scores_flattened);
+        _scores_permuted.allocator()->allocate();
+    }
+    else
+    {
+        _memory_group.manage(&_scores_flattened);
+        _flatten_scores_kernel.configure(scores, &_scores_flattened);
+    }
 
     // Bounding box transform
     _memory_group.manage(&_all_proposals);
@@ -141,11 +159,12 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
                                           const ITensorInfo *num_valid_proposals, const GenerateProposalsInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(scores, deltas, anchors, proposals, scores_out, num_valid_proposals);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(scores, DataLayout::NCHW, DataLayout::NHWC);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(scores, deltas);
 
-    const int num_anchors       = scores->dimension(2);
-    const int feat_width        = scores->dimension(0);
-    const int feat_height       = scores->dimension(1);
+    const int num_anchors       = scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::CHANNEL));
+    const int feat_width        = scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::WIDTH));
+    const int feat_height       = scores->dimension(get_data_layout_dimension_index(scores->data_layout(), DataLayoutDimension::HEIGHT));
     const int num_images        = scores->dimension(3);
     const int total_num_anchors = num_anchors * feat_width * feat_height;
     const int values_per_roi    = info.values_per_roi();
@@ -156,13 +175,20 @@ Status CLGenerateProposalsLayer::validate(const ITensorInfo *scores, const ITens
     ARM_COMPUTE_RETURN_ON_ERROR(CLComputeAllAnchorsKernel::validate(anchors, &all_anchors_info, ComputeAnchorsInfo(feat_width, feat_height, info.spatial_scale())));
 
     TensorInfo deltas_permuted_info = deltas->clone()->set_tensor_shape(TensorShape(values_per_roi * num_anchors, feat_width, feat_height)).set_is_resizable(true);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(deltas, &deltas_permuted_info, PermutationVector{ 2, 0, 1 }));
+    TensorInfo scores_permuted_info = scores->clone()->set_tensor_shape(TensorShape(num_anchors, feat_width, feat_height)).set_is_resizable(true);
+    if(scores->data_layout() == DataLayout::NHWC)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(deltas, &deltas_permuted_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(scores, &scores_permuted_info);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(deltas, &deltas_permuted_info, PermutationVector{ 2, 0, 1 }));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(scores, &scores_permuted_info, PermutationVector{ 2, 0, 1 }));
+    }
 
     TensorInfo deltas_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
     ARM_COMPUTE_RETURN_ON_ERROR(CLReshapeLayerKernel::validate(&deltas_permuted_info, &deltas_flattened_info));
-
-    TensorInfo scores_permuted_info = scores->clone()->set_tensor_shape(TensorShape(num_anchors, feat_width, feat_height)).set_is_resizable(true);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(scores, &scores_permuted_info, PermutationVector{ 2, 0, 1 }));
 
     TensorInfo scores_flattened_info(deltas->clone()->set_tensor_shape(TensorShape(1, total_num_anchors)).set_is_resizable(true));
     TensorInfo proposals_4_roi_values(deltas->clone()->set_tensor_shape(TensorShape(values_per_roi, total_num_anchors)).set_is_resizable(true));
@@ -236,9 +262,12 @@ void CLGenerateProposalsLayer::run()
     CLScheduler::get().enqueue(_compute_anchors_kernel, false);
 
     // Transpose and reshape the inputs
-    CLScheduler::get().enqueue(_permute_deltas_kernel, false);
+    if(!_is_nhwc)
+    {
+        CLScheduler::get().enqueue(_permute_deltas_kernel, false);
+        CLScheduler::get().enqueue(_permute_scores_kernel, false);
+    }
     CLScheduler::get().enqueue(_flatten_deltas_kernel, false);
-    CLScheduler::get().enqueue(_permute_scores_kernel, false);
     CLScheduler::get().enqueue(_flatten_scores_kernel, false);
 
     // Build the boxes

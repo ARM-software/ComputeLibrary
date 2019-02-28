@@ -1,3 +1,4 @@
 <map id="PMUCounter" name="PMUCounter">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="13,5,97,32"/>
+<area shape="rect" id="node1" title="Implementation of an instrument to count CPU cycles." alt="" coords="5,80,108,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="11,5,103,32"/>
 </map>

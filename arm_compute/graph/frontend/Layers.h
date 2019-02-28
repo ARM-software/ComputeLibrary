@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -414,24 +414,27 @@ class DepthwiseConvolutionLayer final : public ILayer
 public:
     /** Construct a depthwise convolution layer.
      *
-     * @param[in] conv_width  Convolution width.
-     * @param[in] conv_height Convolution height.
-     * @param[in] weights     Accessor to get kernel weights from.
-     * @param[in] bias        Accessor to get kernel bias from.
-     * @param[in] conv_info   Padding and stride information.
-     * @param[in] quant_info  (Optional) Quantization info used for weights
+     * @param[in] conv_width       Convolution width.
+     * @param[in] conv_height      Convolution height.
+     * @param[in] weights          Accessor to get kernel weights from.
+     * @param[in] bias             Accessor to get kernel bias from.
+     * @param[in] conv_info        Padding and stride information.
+     * @param[in] depth_multiplier (Optional) Depth multiplier parameter.
+     * @param[in] quant_info       (Optional) Quantization info used for weights
      */
     DepthwiseConvolutionLayer(unsigned int           conv_width,
                               unsigned int           conv_height,
                               ITensorAccessorUPtr    weights,
                               ITensorAccessorUPtr    bias,
                               PadStrideInfo          conv_info,
-                              const QuantizationInfo quant_info = QuantizationInfo())
+                              int                    depth_multiplier = 1,
+                              const QuantizationInfo quant_info       = QuantizationInfo())
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _conv_info(std::move(conv_info)),
           _weights(std::move(weights)),
           _bias(std::move(bias)),
+          _depth_multiplier(depth_multiplier),
           _quant_info(std::move(quant_info))
     {
     }
@@ -441,7 +444,7 @@ public:
         NodeIdxPair input         = { s.tail_node(), 0 };
         NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_depthwise_convolution_node(s.graph(), common_params,
-                                                            input, Size2D(_conv_width, _conv_height), _conv_info,
+                                                            input, Size2D(_conv_width, _conv_height), _conv_info, _depth_multiplier,
                                                             s.hints().depthwise_convolution_method_hint,
                                                             std::move(_weights), std::move(_bias), std::move(_quant_info));
     }
@@ -452,9 +455,38 @@ private:
     const PadStrideInfo    _conv_info;
     ITensorAccessorUPtr    _weights;
     ITensorAccessorUPtr    _bias;
+    int                    _depth_multiplier;
     const QuantizationInfo _quant_info;
 };
+/** DetectionOutput Layer */
+class DetectionOutputLayer final : public ILayer
+{
+public:
+    /** Construct a detection output layer.
+     *
+     * @param[in] sub_stream_conf  Confidence graph sub-stream.
+     * @param[in] sub_stream_prior PriorBox graph sub-stream.
+     * @param[in] detect_info      DetectionOutput parameters.
+     */
+    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, DetectionOutputLayerInfo detect_info)
+        : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)
+    {
+    }
 
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params  = { name(), s.hints().target_hint };
+        NodeIdxPair input_loc      = { s.tail_node(), 0 };
+        NodeIdxPair input_conf     = { _ss_conf.tail_node(), 0 };
+        NodeIdxPair input_priorbox = { _ss_prior.tail_node(), 0 };
+        return GraphBuilder::add_detection_output_node(s.graph(), common_params, input_loc, input_conf, input_priorbox, _detect_info);
+    }
+
+private:
+    SubStream                _ss_conf;
+    SubStream                _ss_prior;
+    DetectionOutputLayerInfo _detect_info;
+};
 /** Dummy Layer */
 class DummyLayer final : public ILayer
 {

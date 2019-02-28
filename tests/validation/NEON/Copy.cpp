@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,14 +64,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<float>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                  DataType::F32)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NECopyFixture<float>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<float>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                            DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -79,14 +73,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NECopyFixture<float>, framework::DatasetMode::N
 TEST_SUITE_END() // F32
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                    DataType::U8)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NECopyFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                  DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<uint8_t>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                              DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -94,14 +82,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NECopyFixture<uint8_t>, framework::DatasetMode:
 TEST_SUITE_END() // U8
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
-                                                                                                     DataType::U16)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NECopyFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(zip(datasets::LargeShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                                   DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NECopyFixture<uint16_t>, framework::DatasetMode::ALL, combine(zip(datasets::SmallShapes(), datasets::SmallShapes()), framework::dataset::make("DataType",
+                                                                                               DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

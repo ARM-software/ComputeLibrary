@@ -44,6 +44,9 @@ namespace
 {
 /** Tolerance for float operations */
 RelativeTolerance<float> tolerance_f32(0.00001f);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+RelativeTolerance<float> tolerance_f16(0.2f);
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace
 
 TEST_SUITE(NEON)
@@ -57,7 +60,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
-                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 0
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 2
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
     framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
@@ -68,7 +71,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            })),
-    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 1U, 0U })),
+    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 3U, 0U })),
     framework::dataset::make("Expected",   { false, false, false, false, false, false, true })),
     input_info, output_info, axis, expected)
 {
@@ -85,8 +88,8 @@ using NEL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<Tensor, Acce
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("Axis", { 0 })),
+                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("Axis", { 0, 1, 2 })),
                                framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
@@ -94,17 +97,39 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::Da
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("Axis", { 0 })),
+                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("Axis", { 0, 1, 2 })),
                                framework::dataset::make("Epsilon", { 1e-12 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("Axis", { 0, 1, 2 })),
+                               framework::dataset::make("Epsilon", { 1e-12 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("Axis", { 0, 1, 2 })),
+                               framework::dataset::make("Epsilon", { 1e-12 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // FP16
+#endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+TEST_SUITE_END() // L2NormalizeLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

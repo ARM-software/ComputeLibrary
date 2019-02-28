@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,13 +46,14 @@ namespace validation
 {
 namespace
 {
-const auto data = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }), combine(framework::dataset::make("BlockSize", { 3, 5, 7 }), datasets::BorderModes()));
+const auto data_nightly   = combine(framework::dataset::make("GradientSize", { 3, 5, 7 }), combine(framework::dataset::make("BlockSize", { 3, 5, 7 }), datasets::BorderModes()));
+const auto data_precommit = combine(framework::dataset::make("GradientSize", { 3 }), combine(framework::dataset::make("BlockSize", { 3 }), datasets::BorderModes()));
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(HarrisCorners)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), data), framework::dataset::make("Format", Format::U8)), shape,
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), data_nightly), framework::dataset::make("Format", Format::U8)), shape,
                gradient_size, block_size, border_mode, format)
 {
     std::mt19937                          gen(library->seed());
@@ -96,7 +97,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 template <typename T>
 using CLHarrisCornersFixture = HarrisCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLHarrisCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data_precommit), framework::dataset::make("Format",
                                                                                                              Format::U8)))
 {
     // Validate output
@@ -104,7 +105,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::Dat
     validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), RelativeTolerance<float>(0.0001f));
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageFiles(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageFiles(), data_nightly), framework::dataset::make("Format",
+                                                                                                           Format::U8)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);

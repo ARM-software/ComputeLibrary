@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,5 +36,5 @@ void NEIntegralImage::configure(const ITensor *input, ITensor *output)
     auto k = arm_compute::support::cpp14::make_unique<NEIntegralImageKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
-    _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, static_cast<float>(0.f));
+    _border_handler.configure(output, _kernel->border_size(), BorderMode::CONSTANT, PixelValue());
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,14 +42,44 @@ namespace validation
 {
 namespace
 {
-const auto DequantizationShapes = concat(concat(concat(datasets::Small3DShapes(),
-                                                       datasets::Large3DShapes()),
-                                                datasets::Small4DShapes()),
-                                         datasets::Large4DShapes());
+const auto DequantizationShapes = concat(datasets::Small3DShapes(),
+                                         datasets::Small4DShapes());
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(DequantizationLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32), // Wrong input data type
+                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),       // Invalid shape
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),  // Wrong output data type
+                                                       TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::U8),   // Missmatching shapes
+                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::U8),  // Shrink window
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),  // Valid
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
+                                                     })),
+               framework::dataset::make("MinMax",{ TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(2U), 1, DataType::U8),
+                                                     })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               input_info, output_info, min_max, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLDequantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), &min_max.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(DequantizationShapes, framework::dataset::make("DataType", DataType::U8)), shape, data_type)
 {
@@ -109,11 +139,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<uint8_t>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // Integer
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // DequantizationLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

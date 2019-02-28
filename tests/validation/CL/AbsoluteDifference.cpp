@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,7 +57,7 @@ template <typename T>
 using CLAbsoluteDifferenceFixture = AbsoluteDifferenceValidationFixture<CLTensor, CLAccessor, CLAbsoluteDifference, T>;
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), AbsoluteDifferenceU8Dataset),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceU8Dataset),
                shape, data_type0, data_type1, output_data_type)
 {
     // Create tensors
@@ -90,10 +90,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLAbsoluteDifferenceFixture<uint8_t>, framework
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), AbsoluteDifferenceS16Dataset),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AbsoluteDifferenceS16Dataset),
                shape, data_type0, data_type1, output_data_type)
 {
     // Create tensors
@@ -127,10 +127,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLAbsoluteDifferenceFixture<int16_t>, framework
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // S16
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // AbsoluteDifference
+TEST_SUITE_END() // CL
 
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,7 +48,22 @@ AbsoluteTolerance<float> tolerance_rel_low_error_f16(0.01f);
 TEST_SUITE(CL)
 TEST_SUITE(MeanStdDev)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), framework::dataset::make("DataType", { DataType::U8 })), shape,
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U), 1, DataType::F32),    // Wrong input data type
+                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8), // Invalid shape
+                                                       TensorInfo(TensorShape(16U, 16U), 1, DataType::U8),     // Valid
+                                                     }),
+               framework::dataset::make("Expected", { false, false, true })),
+               input_info, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(CLMeanStdDev::validate(&input_info.clone()->set_is_resizable(false), nullptr, nullptr)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small2DShapes(), framework::dataset::make("DataType", { DataType::U8 })), shape,
                data_type)
 {
     // Create tensors

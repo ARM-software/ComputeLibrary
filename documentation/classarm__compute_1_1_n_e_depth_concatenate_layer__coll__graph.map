@@ -1,3 +1,4 @@
 <map id="NEDepthConcatenateLayer" name="NEDepthConcatenateLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="59,5,135,32"/>
+<area shape="rect" id="node1" title="Basic function to execute concatenate tensors along z axis." alt="" coords="5,80,201,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="64,5,143,32"/>
 </map>

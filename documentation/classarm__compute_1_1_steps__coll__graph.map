@@ -1,4 +1,5 @@
 <map id="Steps" name="Steps">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; unsigned\l int \&gt;" alt="" coords="5,95,160,136"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. " alt="" coords="21,5,144,32"/>
+<area shape="rect" id="node1" title="Class to describe a number of elements in each dimension." alt="" coords="61,185,120,212"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="5,95,176,136"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality." alt="" coords="23,5,158,32"/>
 </map>

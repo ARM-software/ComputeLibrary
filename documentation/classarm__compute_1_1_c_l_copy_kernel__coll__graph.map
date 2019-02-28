@@ -1,4 +1,5 @@
 <map id="CLCopyKernel" name="CLCopyKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="19,80,99,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="27,5,90,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform a copy between two tensors." alt="" coords="5,155,115,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="20,80,100,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="28,5,92,32"/>
 </map>

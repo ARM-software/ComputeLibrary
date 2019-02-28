@@ -1,5 +1,6 @@
 <map id="SubTensorInfo" name="SubTensorInfo">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. " alt="" coords="49,171,137,197"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="ICloneable\&lt; ITensorInfo \&gt;" alt="" coords="5,95,180,121"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface. " alt="" coords="35,5,151,32"/>
+<area shape="rect" id="node1" title="Store the sub tensor&#39;s metadata." alt="" coords="43,247,153,273"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata." alt="" coords="53,171,143,197"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title=" " alt="" coords="5,95,191,121"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface." alt="" coords="35,5,161,32"/>
 </map>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ TEST_SUITE(Derivative)
 
 using NEDerivativeFixture = DerivativeValidationFixture<Tensor, Accessor, NEDerivative, uint8_t, int16_t>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), datasets::BorderModes()), framework::dataset::make("Format",
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::Small2DShapes(), datasets::BorderModes()), framework::dataset::make("Format",
                                                                    Format::U8)),
                shape, border_mode, format)
 {
@@ -104,8 +104,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDerivativeFixture, framework::DatasetMode::NI
     validate(Accessor(_target.second), _reference.second, valid_region_y);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // Derivative
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,25 +56,26 @@ public:
      *
      * Valid configurations (Input1,Input2) -> Output :
      *
-     *   - (U8,U8)     -> U8
-     *   - (U8,U8)     -> S16
-     *   - (S16,U8)    -> S16
-     *   - (U8,S16)    -> S16
-     *   - (S16,S16)   -> S16
-     *   - (F16,F16)   -> F16
-     *   - (F32,F32)   -> F32
+     *   - (U8,U8)           -> U8
+     *   - (U8,U8)           -> S16
+     *   - (S16,U8)          -> S16
+     *   - (U8,S16)          -> S16
+     *   - (S16,S16)         -> S16
+     *   - (F16,F16)         -> F16
+     *   - (F32,F32)         -> F32
+     *   - (QASYMM8,QASYMM8) -> QASYMM8
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/F16/F32.
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
-     * @param[in] input1 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[in] input2 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[in] output The output tensor. Data types supported: U8/S16/F16/F32.
+     * @param[in] input1 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[in] input2 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[in] output The output tensor. Data types supported: U8/QASYMM8/S16/F16/F32.
      * @param[in] policy Overflow policy.
      *
      * @return a status
@@ -83,22 +84,23 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
     /** Common signature for all the specialised add functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/QASYMM8/S16/F16/F32.
+     * @param[in]  policy Overflow policy.
      * @param[in]  window Region on which to execute the kernel.
      */
-    using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);
+    using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy, const Window &window);
     /** Add function to use for the particular tensor types passed to configure() */
     AddFunction   *_func;
     const ITensor *_input1;
     const ITensor *_input2;
     ITensor       *_output;
+    ConvertPolicy  _policy;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEARITHMETICADDITIONKERNEL_H__ */

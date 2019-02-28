@@ -1,4 +1,5 @@
 <map id="CLLogits1DNormKernel" name="CLLogits1DNormKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="45,80,125,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="54,5,117,32"/>
+<area shape="rect" id="node1" title="Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by..." alt="" coords="5,155,175,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="50,80,130,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="58,5,122,32"/>
 </map>

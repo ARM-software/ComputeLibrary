@@ -9,6 +9,7 @@ var dir_b522e8895b1a2b097ec0514a9a6c1549 =
     [ "ConvolutionLayerNode.cpp", "_convolution_layer_node_8cpp.xhtml", null ],
     [ "DeconvolutionLayerNode.cpp", "_deconvolution_layer_node_8cpp.xhtml", null ],
     [ "DepthwiseConvolutionLayerNode.cpp", "_depthwise_convolution_layer_node_8cpp.xhtml", null ],
+    [ "DetectionOutputLayerNode.cpp", "_detection_output_layer_node_8cpp.xhtml", null ],
     [ "DummyNode.cpp", "_dummy_node_8cpp.xhtml", null ],
     [ "EltwiseLayerNode.cpp", "_eltwise_layer_node_8cpp.xhtml", null ],
     [ "FlattenLayerNode.cpp", "_flatten_layer_node_8cpp.xhtml", null ],

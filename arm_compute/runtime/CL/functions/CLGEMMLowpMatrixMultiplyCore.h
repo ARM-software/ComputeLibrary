@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,13 @@
 #ifndef __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 #define __ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYCORE_H__
 
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpReductionKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -41,9 +42,10 @@ class ICLTensor;
 
 /** Basic function to execute GEMMLowpMatrixMultiplyCore on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel  (if the output tensor is a matrix)
- *  -# @ref CLGEMMTranspose1xWKernel  (if the output tensor is a matrix)
- *  -# @ref CLGEMMLowpMatrixMultiplyKernel
+ *  -# @ref CLGEMMReshapeLHSMatrixKernel  (if the output tensor is a matrix)
+ *  -# @ref CLGEMMReshapeRHSMatrixKernel  (if the output tensor is a matrix)
+ *  -# @ref CLGEMMLowpMatrixMultiplyKernel (if the input matrix is a vector or for Midgard architectures)
+ *  -# @ref CLGEMMLowpMatrixMultiplyReshapedKernel (if the input matrix is not a vector and if the GPU architecture is not Midgard)
  *  -# @ref CLGEMMLowpMatrixAReductionKernel (if the offset of matrix B is not 0)
  *  -# @ref CLGEMMLowpMatrixBReductionKernel (if the offset of matrix A is not 0)
  *  -# @ref CLGEMMLowpOffsetContributionKernel (if gemm_info.gemmlowp_output_stage == NONE)
@@ -101,8 +103,9 @@ public:
 private:
     CLMemoryGroup                                 _memory_group;
     CLGEMMLowpMatrixMultiplyKernel                _mm_kernel;
-    CLGEMMInterleave4x4Kernel                     _mtx_a_reshape_kernel;
-    CLGEMMTranspose1xWKernel                      _mtx_b_reshape_kernel;
+    CLGEMMLowpMatrixMultiplyReshapedKernel        _mm_reshaped_kernel;
+    CLGEMMReshapeLHSMatrixKernel                  _mtx_a_reshape_kernel;
+    CLGEMMReshapeRHSMatrixKernel                  _mtx_b_reshape_kernel;
     CLGEMMLowpMatrixAReductionKernel              _mtx_a_reduction_kernel;
     CLGEMMLowpMatrixBReductionKernel              _mtx_b_reduction_kernel;
     CLGEMMLowpOffsetContributionKernel            _offset_contribution_kernel;
@@ -115,7 +118,7 @@ private:
     const ICLTensor                              *_original_b;
     int32_t                                       _a_offset;
     int32_t                                       _b_offset;
-    bool                                          _is_interleaved_transposed;
+    bool                                          _is_gemm_reshaped;
     bool                                          _reshape_b_only_on_first_run;
     bool                                          _is_prepared;
     bool                                          _fuse_output_stage;

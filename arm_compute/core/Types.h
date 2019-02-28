@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,6 +123,25 @@ enum class DataLayoutDimension
     HEIGHT,  /**< height */
     WIDTH,   /**< width */
     BATCHES  /**< batches */
+};
+
+/** Available ConvolutionMethod*/
+enum class ConvolutionMethod
+{
+    GEMM,    /**< Convolution using GEMM */
+    DIRECT,  /**< Direct convolution */
+    WINOGRAD /**< Convolution using Winograd */
+};
+
+/** Supported comparison operations */
+enum class ComparisonOperation
+{
+    Equal,        /**< Equal comparison ( \f$ x == y \f$ ) */
+    NotEqual,     /**< NotEqual comparison ( \f$ x != y \f$ ) */
+    Greater,      /**< Greater comparison ( \f$ x > y \f$ ) */
+    GreaterEqual, /**< Greater equal comparison ( \f$ x >= y \f$ ) */
+    Less,         /**< Less comparison ( \f$ x < y \f$ ) */
+    LessEqual     /**< Less equal comparison ( \f$ x <= y \f$ ) */
 };
 
 /** Quantization settings (used for QASYMM8 data type) */
@@ -479,12 +498,8 @@ using PaddingInfo = std::pair<uint32_t, uint32_t>;
 /** List of padding information */
 using PaddingList = std::vector<PaddingInfo>;
 
-/** Region of interest */
-struct ROI
-{
-    Rectangle rect;      /**< Rectangle specifying the region of interest */
-    uint16_t  batch_idx; /**< The batch index of the region of interest */
-};
+/** Information to produce a tiled version of a Tensor */
+using Multiples = std::vector<uint32_t>;
 
 /** Available channels */
 enum class Channel
@@ -523,9 +538,30 @@ enum class NonLinearFilterFunction : unsigned
 /** Available reduction operations */
 enum class ReductionOperation
 {
-    SUM_SQUARE, /**< Sum of squares */
-    SUM,        /**< Sum */
-    MEAN_SUM,   /**< Mean of sum */
+    ARG_IDX_MAX, /**< Index of the max value */
+    ARG_IDX_MIN, /**< Index of the min value */
+    MEAN_SUM,    /**< Mean of sum */
+    PROD,        /**< Product */
+    SUM_SQUARE,  /**< Sum of squares */
+    SUM          /**< Sum */
+};
+
+/** Available element-wise operations */
+enum class ArithmeticOperation
+{
+    ADD,          /**< (x + y) */
+    SUB,          /**< (x  - y) */
+    DIV,          /**< (x / y) */
+    MIN,          /**< Min(x, y) */
+    MAX,          /**< Max(x, y) */
+    SQUARED_DIFF, /**< (x - y)^2 */
+};
+
+/** Available element wise unary operations */
+enum class ElementWiseUnary
+{
+    RSQRT, /**< Reverse square root */
+    EXP,   /**< Exponential */
 };
 
 /** The normalization type used for the normalization layer */
@@ -953,6 +989,134 @@ private:
     std::array<float, 2> _steps;
 };
 
+/** Available Detection Output code types */
+enum class DetectionOutputLayerCodeType
+{
+    CORNER,      /**< Use box corners */
+    CENTER_SIZE, /**< Use box centers and size */
+    CORNER_SIZE, /**< Use box centers and size */
+    TF_CENTER    /**< Use box centers and size but flip x and y co-ordinates */
+};
+
+/** Detection Output layer info */
+class DetectionOutputLayerInfo final
+{
+public:
+    /** Default Constructor */
+    DetectionOutputLayerInfo()
+        : _num_classes(),
+          _share_location(),
+          _code_type(DetectionOutputLayerCodeType::CORNER),
+          _keep_top_k(),
+          _nms_threshold(),
+          _top_k(),
+          _background_label_id(),
+          _confidence_threshold(),
+          _variance_encoded_in_target(false),
+          _eta(),
+          _num_loc_classes()
+    {
+        _num_loc_classes = _share_location ? 1 : _num_classes;
+    }
+    /** Constructor
+     *
+     * @param[in] num_classes                Number of classes to be predicted.
+     * @param[in] share_location             If true, bounding box are shared among different classes.
+     * @param[in] code_type                  Type of coding method for bbox.
+     * @param[in] keep_top_k                 Number of total bounding boxes to be kept per image after NMS step.
+     * @param[in] nms_threshold              Threshold to be used in NMS.
+     * @param[in] top_k                      (Optional) Number of boxes per image with top confidence scores that are fed into the NMS algorithm. Default set to -1.
+     * @param[in] background_label_id        (Optional) Background label ID. If there is no background class, set it as -1.
+     * @param[in] confidence_threshold       (Optional) Only consider detections whose confidences are larger than a threshold. Default set to -FLT_MAX.
+     * @param[in] variance_encoded_in_target (Optional) If true, variance is encoded in target. Otherwise we need to adjust the predicted offset accordingly.Default set to false.
+     * @param[in] eta                        (Optional) Eta.
+     */
+    DetectionOutputLayerInfo(int num_classes, bool share_location, DetectionOutputLayerCodeType code_type, int keep_top_k, float nms_threshold, int top_k = -1, int background_label_id = -1,
+                             float confidence_threshold = std::numeric_limits<float>::lowest(), bool variance_encoded_in_target = false, float eta = 1)
+        : _num_classes(num_classes),
+          _share_location(share_location),
+          _code_type(code_type),
+          _keep_top_k(keep_top_k),
+          _nms_threshold(nms_threshold),
+          _top_k(top_k),
+          _background_label_id(background_label_id),
+          _confidence_threshold(confidence_threshold),
+          _variance_encoded_in_target(variance_encoded_in_target),
+          _eta(eta),
+          _num_loc_classes()
+    {
+        _num_loc_classes = _share_location ? 1 : _num_classes;
+    }
+    /** Get num classes. */
+    int num_classes() const
+    {
+        return _num_classes;
+    }
+    /** Get share location. */
+    bool share_location() const
+    {
+        return _share_location;
+    }
+    /** Get detection output code type. */
+    DetectionOutputLayerCodeType code_type() const
+    {
+        return _code_type;
+    }
+    /** Get if variance encoded in target. */
+    bool variance_encoded_in_target() const
+    {
+        return _variance_encoded_in_target;
+    }
+    /** Get the number of total bounding boxes to be kept per image. */
+    int keep_top_k() const
+    {
+        return _keep_top_k;
+    }
+    /** Get nms threshold. */
+    float nms_threshold() const
+    {
+        return _nms_threshold;
+    }
+    /** Get eta. */
+    float eta() const
+    {
+        return _eta;
+    }
+    /** Get background label ID. */
+    int background_label_id() const
+    {
+        return _background_label_id;
+    }
+    /** Get confidence threshold. */
+    float confidence_threshold() const
+    {
+        return _confidence_threshold;
+    }
+    /** Get top K. */
+    int top_k() const
+    {
+        return _top_k;
+    }
+    /** Get number of location classes. */
+    int num_loc_classes() const
+    {
+        return _num_loc_classes;
+    }
+
+private:
+    int                          _num_classes;
+    bool                         _share_location;
+    DetectionOutputLayerCodeType _code_type;
+    int                          _keep_top_k;
+    float                        _nms_threshold;
+    int                          _top_k;
+    int                          _background_label_id;
+    float                        _confidence_threshold;
+    bool                         _variance_encoded_in_target;
+    float                        _eta;
+    int                          _num_loc_classes;
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {
@@ -1291,7 +1455,7 @@ public:
         RELU,            /**< Rectifier ( \f$ f(x) = max(0,x) \f$ ) */
         BOUNDED_RELU,    /**< Upper Bounded Rectifier ( \f$ f(x) = min(a, max(0,x)) \f$ ) */
         LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
-        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
@@ -1345,7 +1509,7 @@ class NormalizationLayerInfo
 public:
     /** Default Constructor
      *
-     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NORM_TYPE::CROSS_MAP
+     * @param[in] type      The normalization type. Can be @ref NormType::IN_MAP_1D, @ref NormType::IN_MAP_2D or @ref NormType::CROSS_MAP
      * @param[in] norm_size The normalization size is the number of elements to normalize across. Defaults to 5.
      * @param[in] alpha     (Optional) Alpha parameter used by normalization equation. Defaults to 0.0001.
      * @param[in] beta      (Optional) Beta parameter used by normalization equation. Defaults to 0.5.
@@ -1381,6 +1545,11 @@ public:
     float kappa() const
     {
         return _kappa;
+    }
+    /** Get the is_scaled value */
+    bool is_scaled() const
+    {
+        return _is_scaled;
     }
     /** Check if normalization is cross map */
     bool is_cross_map() const
@@ -1477,8 +1646,8 @@ private:
  * The matrix A can only be reshaped through @ref CLGEMMInterleave4x4Kernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
  * Note: Optionally just for @ref CLGEMMInterleave4x4Kernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
  *
- * The matrix B can only be reshaped through @ref CLGEMMTranspose1xWKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
- * Note: Optionally just for @ref CLGEMMTranspose1xWKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
+ * The matrix B can only be reshaped through @ref CLGEMMReshapeRHSMatrixKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
+ * Note: Optionally just for @ref CLGEMMReshapeRHSMatrixKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
  *
  */
 class GEMMReshapeInfo final
@@ -1576,6 +1745,12 @@ private:
     const bool _reinterpret_input_as_3d;
 };
 
+struct DepthwiseConvolutionReshapeInfo
+{
+    unsigned int c0{ 1 };            /**< Number of channels processed by the depth-wise convolution */
+    bool         transpose{ false }; /**< True if the block MxC0 (where M is the area of the filter i.e. KwxKh) has to be transposed */
+};
+
 /** GEMMLowp output stage type */
 enum class GEMMLowpOutputStageType
 {
@@ -1596,6 +1771,26 @@ struct GEMMLowpOutputStageInfo
     int                     gemmlowp_max_bound{ 0 };               /**< GEMMLowp max value used to saturate down the output result before converting back to QASYMM8 */
 };
 
+/** GEMM LHS (Left Hand Side) matrix information */
+struct GEMMLHSMatrixInfo
+{
+    unsigned int m0{ 1 };            /**< Number of rows processed by the matrix multiplication */
+    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int v0{ 1 };            /**< Number of vertical blocks of size (m0xk0) stored on the same output row */
+    bool         transpose{ true };  /**< True if the (m0xk0) block has to be transposed before been stored */
+    bool         interleave{ true }; /**< True if the v0 (m0xk0) blocks have to be interleaved in the output row */
+};
+
+/** GEMM RHS (Right Hand Side) matrix information */
+struct GEMMRHSMatrixInfo
+{
+    unsigned int n0{ 1 };            /**< Number of columns processed by the matrix multiplication */
+    unsigned int k0{ 1 };            /**< Number of partial accumulations performed by the matrix multiplication */
+    unsigned int h0{ 1 };            /**< Number of horizontal blocks of size (k0xn0) stored on the same output row */
+    bool         transpose{ true };  /**< True if the (k0xn0) block has to be transposed before been stored */
+    bool         interleave{ true }; /**< True if the h0 (k0xn0) blocks have to be interleaved in the output row */
+};
+
 /** GEMM information class. This class stores the necessary information to compute GEMM functions
  *
  * This object also contains the information about how matrix A and matrix B have been reshaped
@@ -1606,8 +1801,8 @@ class GEMMInfo
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false),
-          _gemmlowp_output_stage(), _fp_mixed_precision(false)
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(true), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false), _gemmlowp_output_stage(),
+          _fp_mixed_precision(false)
     {
     }
     /** Constructor
@@ -1786,14 +1981,6 @@ struct IOFormatInfo
     std::string row_delim;
     /** Align columns */
     bool align_columns;
-};
-
-/** Available ConvolutionMethod*/
-enum class ConvolutionMethod
-{
-    GEMM,    /**< Convolution using GEMM */
-    DIRECT,  /**< Direct convolution */
-    WINOGRAD /**< Convolution using Winograd */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TYPES_H__ */

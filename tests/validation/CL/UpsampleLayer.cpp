@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,31 +47,6 @@ constexpr AbsoluteTolerance<float> tolerance(0.001f);
 
 TEST_SUITE(CL)
 TEST_SUITE(UpsampleLayer)
-
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32))),
-               input_shape, data_type)
-{
-    InterpolationPolicy upsampling_policy = InterpolationPolicy::NEAREST_NEIGHBOR;
-    Size2D              info              = Size2D(2, 2);
-
-    // Create tensors
-    CLTensor src = create_tensor<CLTensor>(input_shape, data_type, 1);
-    CLTensor dst;
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    CLUpsampleLayer upsample;
-    upsample.configure(&src, &dst, info, upsampling_policy);
-
-    // Validate valid region
-    const ValidRegion src_valid_region = shape_to_valid_region(src.info()->tensor_shape());
-    const ValidRegion dst_valid_region = shape_to_valid_region(dst.info()->tensor_shape());
-
-    validate(src.info()->valid_region(), src_valid_region);
-    validate(dst.info()->valid_region(), dst_valid_region);
-}
 
 // *INDENT-OFF*
 // clang-format off

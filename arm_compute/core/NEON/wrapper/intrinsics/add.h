@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,8 +61,41 @@ VADD_IMPL(float32x4_t, float32x4_t, vaddq, f32)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 VADD_IMPL(float16x8_t, float16x8_t, vaddq, f16)
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
 #undef VADD_IMPL
+
+#define VQADD_IMPL(stype, vtype, prefix, postfix)      \
+    inline vtype vqadd(const vtype &a, const vtype &b) \
+    {                                                  \
+        return prefix##_##postfix(a, b);               \
+    }
+
+// VQADD: Vector saturating add (No notion of saturation for floating point)
+VQADD_IMPL(uint8x8_t, uint8x8_t, vqadd, u8)
+VQADD_IMPL(int8x8_t, int8x8_t, vqadd, s8)
+VQADD_IMPL(uint16x4_t, uint16x4_t, vqadd, u16)
+VQADD_IMPL(int16x4_t, int16x4_t, vqadd, s16)
+VQADD_IMPL(uint32x2_t, uint32x2_t, vqadd, u32)
+VQADD_IMPL(int32x2_t, int32x2_t, vqadd, s32)
+VQADD_IMPL(uint64x1_t, uint64x1_t, vqadd, u64)
+VQADD_IMPL(int64x1_t, int64x1_t, vqadd, s64)
+VQADD_IMPL(float32x2_t, float32x2_t, vadd, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VQADD_IMPL(float16x4_t, float16x4_t, vadd, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+VQADD_IMPL(uint8x16_t, uint8x16_t, vqaddq, u8)
+VQADD_IMPL(int8x16_t, int8x16_t, vqaddq, s8)
+VQADD_IMPL(uint16x8_t, uint16x8_t, vqaddq, u16)
+VQADD_IMPL(int16x8_t, int16x8_t, vqaddq, s16)
+VQADD_IMPL(uint32x4_t, uint32x4_t, vqaddq, u32)
+VQADD_IMPL(int32x4_t, int32x4_t, vqaddq, s32)
+VQADD_IMPL(uint64x2_t, uint64x2_t, vqaddq, u64)
+VQADD_IMPL(int64x2_t, int64x2_t, vqaddq, s64)
+VQADD_IMPL(float32x4_t, float32x4_t, vaddq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VQADD_IMPL(float16x8_t, float16x8_t, vaddq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#undef VQADD_IMPL
 } // namespace wrapper
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_ADD_H__ */

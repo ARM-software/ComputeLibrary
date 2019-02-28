@@ -23,7 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(BATCH_SIZE) && defined(DATA_TYPE)
+#if defined(BATCH_SIZE) && defined(DATA_TYPE) && defined(WIDTH_IN) && defined(HEIGHT_IN)
 /** Calculate the space to batch conversion.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
@@ -83,12 +83,15 @@ __kernel void space_to_batch_nchw(
     const int out_y = get_global_id(1);
     const int z     = get_global_id(2);
 
-    if((out_x >= pad_left_x && out_x < WIDTH_OUT - pad_right_x) && (out_y >= pad_left_y && out_y < HEIGHT_OUT - pad_right_y))
+    const int pos_x = out_x * block_x + ((batch_id / BATCH_IN) % block_x);
+    const int pos_y = out_y * block_y + ((batch_id / BATCH_IN) / block_x);
+
+    if(((pos_y >= pad_left_y) && (pos_y < pad_left_y + HEIGHT_IN) && (pos_x >= pad_left_x) && (pos_x < pad_left_x + WIDTH_IN)))
     {
-        const int r                      = (BATCH_SIZE / (block_x * block_y));
-        const int w                      = batch_id % r;
-        const int in_x                   = (out_x - pad_left_x) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - pad_left_y) * block_y + (batch_id / r) / block_x;
+        const int w    = batch_id % BATCH_IN;
+        const int in_x = pos_x - pad_left_x;
+        const int in_y = pos_y - pad_left_y;
+
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, in_x, in_y, z, w));
     }
 }
@@ -151,18 +154,21 @@ __kernel void space_to_batch_nhwc(
     const int out_y = get_global_id(2);
     const int z     = get_global_id(0);
 
-    if((out_x >= pad_left_x && out_x < WIDTH_OUT - pad_right_x) && (out_y >= pad_left_y && out_y < HEIGHT_OUT - pad_right_y))
+    const int pos_x = out_x * block_x + ((batch_id / BATCH_IN) % block_x);
+    const int pos_y = out_y * block_y + ((batch_id / BATCH_IN) / block_x);
+
+    if(((pos_y >= pad_left_y) && (pos_y < pad_left_y + HEIGHT_IN) && (pos_x >= pad_left_x) && (pos_x < pad_left_x + WIDTH_IN)))
     {
-        const int r                      = (BATCH_SIZE / (block_x * block_y));
-        const int w                      = batch_id % r;
-        const int in_x                   = (out_x - pad_left_x) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - pad_left_y) * block_y + (batch_id / r) / block_x;
+        const int w    = batch_id % BATCH_IN;
+        const int in_x = pos_x - pad_left_x;
+        const int in_y = pos_y - pad_left_y;
+
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, z, in_x, in_y, w));
     }
 }
-#endif // defined(BATCH_SIZE) && defined(DATA_TYPE)
+#endif // defined(BATCH_SIZE) && defined(DATA_TYPE)  && defined(WIDTH_IN) && defined(HEIGHT_IN)
 
-#if defined(BATCH_SIZE) && defined(DATA_TYPE) && defined(BLOCK_SHAPE_X) && defined(BLOCK_SHAPE_Y) && defined(PAD_LEFT_X) && defined(PAD_RIGHT_X) && defined(PAD_LEFT_Y) && defined(PAD_RIGHT_Y)
+#if defined(BATCH_SIZE) && defined(DATA_TYPE) && defined(BLOCK_SHAPE_X) && defined(BLOCK_SHAPE_Y) && defined(PAD_LEFT_X) && defined(PAD_RIGHT_X) && defined(PAD_LEFT_Y) && defined(PAD_RIGHT_Y) && defined(WIDTH_IN) && defined(HEIGHT_IN)
 /** Calculate the space to batch conversion.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
@@ -207,12 +213,15 @@ __kernel void space_to_batch_static_nchw(
     const int out_y = get_global_id(1);
     const int z     = get_global_id(2);
 
-    if((out_x >= PAD_LEFT_X && out_x < WIDTH_OUT - PAD_RIGHT_X) && (out_y >= PAD_LEFT_Y && out_y < HEIGHT_OUT - PAD_RIGHT_Y))
+    const int pos_x = out_x * block_x + ((batch_id / BATCH_IN) % block_x);
+    const int pos_y = out_y * block_y + ((batch_id / BATCH_IN) / block_x);
+
+    if(pos_y >= PAD_LEFT_Y && pos_y < PAD_LEFT_Y + HEIGHT_IN && pos_x >= PAD_LEFT_X && pos_x < PAD_LEFT_X + WIDTH_IN)
     {
-        const int r                      = (BATCH_SIZE / (block_x * block_y));
-        const int w                      = batch_id % r;
-        const int in_x                   = (out_x - PAD_LEFT_X) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - PAD_LEFT_Y) * block_y + (batch_id / r) / block_x;
+        const int w    = batch_id % BATCH_IN;
+        const int in_x = pos_x - PAD_LEFT_X;
+        const int in_y = pos_y - PAD_LEFT_Y;
+
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, in_x, in_y, z, w));
     }
 }
@@ -260,13 +269,16 @@ __kernel void space_to_batch_static_nhwc(
     const int out_y = get_global_id(2);
     const int z     = get_global_id(0);
 
-    if((out_x >= PAD_LEFT_X && out_x < WIDTH_OUT - PAD_RIGHT_X) && (out_y >= PAD_LEFT_Y && out_y < HEIGHT_OUT - PAD_RIGHT_Y))
+    const int pos_x = out_x * block_x + ((batch_id / BATCH_IN) % block_x);
+    const int pos_y = out_y * block_y + ((batch_id / BATCH_IN) / block_x);
+
+    if(pos_y >= PAD_LEFT_Y && pos_y < PAD_LEFT_Y + HEIGHT_IN && pos_x >= PAD_LEFT_X && pos_x < PAD_LEFT_X + WIDTH_IN)
     {
-        const int r                      = (BATCH_SIZE / (block_x * block_y));
-        const int w                      = batch_id % r;
-        const int in_x                   = (out_x - PAD_LEFT_X) * block_x + (batch_id / r) % block_x;
-        const int in_y                   = (out_y - PAD_LEFT_Y) * block_y + (batch_id / r) / block_x;
+        const int w    = batch_id % BATCH_IN;
+        const int in_x = pos_x - PAD_LEFT_X;
+        const int in_y = pos_y - PAD_LEFT_Y;
+
         *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, z, in_x, in_y, w));
     }
 }
-#endif // defined(BATCH_SIZE) && defined(DATA_TYPE) && defined(BLOCK_SHAPE_X) && defined(BLOCK_SHAPE_Y) && defined(PAD_LEFT_X) && defined(PAD_RIGHT_X) && defined(PAD_LEFT_Y) && defined(PAD_RIGHT_Y)
+#endif // defined(BATCH_SIZE) && defined(DATA_TYPE) && defined(BLOCK_SHAPE_X) && defined(BLOCK_SHAPE_Y) && defined(PAD_LEFT_X) && defined(PAD_RIGHT_X) && defined(PAD_LEFT_Y) && defined(PAD_RIGHT_Y)  && defined(WIDTH_IN) && defined(HEIGHT_IN)

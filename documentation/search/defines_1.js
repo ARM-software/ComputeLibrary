@@ -1,9 +1,10 @@
 var searchData=
 [
   ['accum_5fprocess_5f4x',['ACCUM_PROCESS_4X',['../_g_c_g_e_m_m_matrix_accumulate_biases_kernel_8cpp.xhtml#a1662de6128d240b3112d483269a38c12',1,'GCGEMMMatrixAccumulateBiasesKernel.cpp']]],
+  ['activation_5ffunc',['ACTIVATION_FUNC',['../winograd__output__transform_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9',1,'winograd_output_transform.cl']]],
   ['activation_5fop',['ACTIVATION_OP',['../activation__layer__qa8_8cl.xhtml#a5a310089a4e6b6de57a075a9bd4ced82',1,'activation_layer_qa8.cl']]],
   ['activation_5fop2',['ACTIVATION_OP2',['../activation__layer__qa8_8cl.xhtml#ab13ec269b92f52bb2f1f6dcf12956704',1,'activation_layer_qa8.cl']]],
-  ['add',['ADD',['../arithmetic__op_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8',1,'ADD():&#160;arithmetic_op.cl'],['../arithmetic__op__quantized_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8',1,'ADD():&#160;arithmetic_op_quantized.cl']]],
+  ['add',['ADD',['../elementwise__operation_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8',1,'ADD():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8',1,'ADD():&#160;elementwise_operation_quantized.cl']]],
   ['add_5fop',['ADD_OP',['../batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39',1,'ADD_OP():&#160;batchnormalization_layer.cl'],['../direct__convolution1x1_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39',1,'ADD_OP():&#160;direct_convolution1x1.cl'],['../direct__convolution3x3_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39',1,'ADD_OP():&#160;direct_convolution3x3.cl'],['../normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504',1,'ADD_OP():&#160;normalization_layer.cl'],['../softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88',1,'ADD_OP():&#160;softmax_layer.cl'],['../softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88',1,'ADD_OP():&#160;softmax_layer_quantized.cl']]],
   ['alloc_5fround',['ALLOC_ROUND',['../gemm__interleaved_8hpp.xhtml#abd1ded15e3688096ead983e87f83fbd1',1,'gemm_interleaved.hpp']]],
   ['arm_5fcompute_5fassert',['ARM_COMPUTE_ASSERT',['../_asserts_8h.xhtml#a83bf33add9b97f6897b7b3db2766dd27',1,'Asserts.h']]],
@@ -103,6 +104,7 @@ var searchData=
   ['arm_5fcompute_5freturn_5fon_5ferror',['ARM_COMPUTE_RETURN_ON_ERROR',['../_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4',1,'Error.h']]],
   ['arm_5fcompute_5ftest_5fcomp_5ffactory',['ARM_COMPUTE_TEST_COMP_FACTORY',['../_asserts_8h.xhtml#a9b1013d9828dd87c5ea4a43c31db18cc',1,'Asserts.h']]],
   ['arm_5fcompute_5ftest_5finfo',['ARM_COMPUTE_TEST_INFO',['../_asserts_8h.xhtml#ac498e3dc31f8819519a9497b2d5789c1',1,'Asserts.h']]],
+  ['arm_5fcompute_5fthrow',['ARM_COMPUTE_THROW',['../_error_8h.xhtml#ad5518fdae84a33ce6fbed540c6e89479',1,'Error.h']]],
   ['arm_5fcompute_5fthrow_5fon_5ferror',['ARM_COMPUTE_THROW_ON_ERROR',['../_error_8h.xhtml#a51e206ee52bcfb358919ee478d9fdc47',1,'Error.h']]],
   ['arm_5fcompute_5funused',['ARM_COMPUTE_UNUSED',['../_error_8h.xhtml#a6dc630a6ae9cc063b3924bcea8dee9d6',1,'Error.h']]],
   ['asm_5fprefetch',['ASM_PREFETCH',['../asmlib_8hpp.xhtml#aaca0205a239e6ef80e4e2788837579e8',1,'asmlib.hpp']]],
@@ -120,7 +122,7 @@ var searchData=
   ['asymm_5fmult_5fimpl',['ASYMM_MULT_IMPL',['../helpers__asymm_8h.xhtml#ad4b199221927cbabbf859e4d2efb688d',1,'helpers_asymm.h']]],
   ['asymm_5fone_5fover_5fone_5fplus_5fx_5ffor_5fx_5fin_5f0_5f1',['ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1',['../helpers__asymm_8h.xhtml#ae77f34e1316d52c1ee84c35be9efb0d8',1,'helpers_asymm.h']]],
   ['asymm_5fone_5fover_5fone_5fplus_5fx_5ffor_5fx_5fin_5f0_5f1_5fimpl',['ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL',['../helpers__asymm_8h.xhtml#a0e53aa5d4cbcec7a0c0085838f32453d',1,'helpers_asymm.h']]],
-  ['asymm_5frescale',['asymm_rescale',['../softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae',1,'asymm_rescale():&#160;softmax_layer_quantized.cl'],['../helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151',1,'ASYMM_RESCALE():&#160;helpers_asymm.h']]],
+  ['asymm_5frescale',['ASYMM_RESCALE',['../helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151',1,'ASYMM_RESCALE():&#160;helpers_asymm.h'],['../softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae',1,'asymm_rescale():&#160;softmax_layer_quantized.cl']]],
   ['asymm_5frescale_5fimpl',['ASYMM_RESCALE_IMPL',['../helpers__asymm_8h.xhtml#aace85e2a32bacdaa4e2d2055deabfc57',1,'helpers_asymm.h']]],
   ['asymm_5frounding_5fdivide_5fby_5fpow2',['ASYMM_ROUNDING_DIVIDE_BY_POW2',['../helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845',1,'helpers_asymm.h']]],
   ['asymm_5frounding_5fdivide_5fby_5fpow2_5fimpl',['ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL',['../helpers__asymm_8h.xhtml#abf75e242631b23007e4046682aa57ec5',1,'helpers_asymm.h']]],

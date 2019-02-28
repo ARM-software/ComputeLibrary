@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,7 @@
 
 #include "arm_gemm.hpp"
 
-#include "mergeresults.hpp"
-#include "transform.hpp"
+#include "ndrange.hpp"
 
 #ifdef CYCLE_PROFILING
 #include "profiler.hpp"
@@ -55,35 +54,46 @@ class GemmNative : public GemmCommon<To, Tr> {
     const unsigned int _nbatches;
     const unsigned int _nmultis;
 
-    Tr _beta;
+    const Tr _beta;
 
     const CPUInfo * const _ci;
 
-    unsigned int k_block=0;
-    unsigned int n_block=0;
+    const unsigned int _k_block;
+    const unsigned int _n_block;
 
-    unsigned int window_per_batch() const {
-        return iceildiv(_Msize, strategy::out_height());
+    const NDRange<4> _window_range;
+
+    static unsigned int compute_k_block(const GemmArgs<Tr> &args) {
+        return args._Ksize;
     }
 
-    unsigned int window_per_multi() const {
-        return window_per_batch() * _nbatches;
+    static unsigned int compute_n_block(const GemmArgs<Tr> &args) {
+        if ((args._cfg != nullptr) && args._cfg->outer_block_size > 0) {
+            return args._cfg->outer_block_size;
+        } else {
+            return args._Nsize;
+        }
     }
 
 public:
     GemmNative(GemmNative &) = delete;
     GemmNative & operator= (GemmNative &) = delete;
 
-    GemmNative(const CPUInfo *ci, const unsigned int M, const unsigned int N, const unsigned int K, const unsigned int nbatches, const unsigned int nmultis, const Tr beta) :
-        _Msize(M), _Nsize(N), _Ksize(K), _nbatches(nbatches), _nmultis(nmultis), _beta(beta), _ci(ci) {
-        /* For now don't do any blocking. TODO: figure out if we should. */
-        k_block = K;
-        n_block = N;
-    }
+    GemmNative(const GemmArgs<Tr> &args)
+            : _Msize(args._Msize), _Nsize(args._Nsize), _Ksize(args._Ksize),
+              _nbatches(args._nbatches), _nmultis(args._nmulti),
+              _beta(args._beta), _ci(args._ci),
+              _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
+              _window_range(iceildiv(_Msize, strategy::out_height()), _nbatches, iceildiv(_Nsize, _n_block), _nmultis) { }
 
     // Window is amount per multi multiplied by total number of multis.
     unsigned int get_window_size() const override {
-        return window_per_multi() * _nmultis;
+        return _window_range.total_size();
+    }
+
+    // Native GEMMs can always be dynamically scheduled (whether requested or not)
+    bool supports_dynamic_scheduling() const override {
+        return true;
     }
 
     // Actually execute the GEMM.
@@ -96,39 +106,29 @@ public:
         static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
         static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
 
-        /* Compute starting point based on 'start' */
-        unsigned int multi     = start / window_per_multi();
-        unsigned int multi_pos = start % window_per_multi();
+        auto p = _window_range.iterator(start, end);
 
-        unsigned int batch     = multi_pos / window_per_batch();
-        unsigned int batch_pos = multi_pos % window_per_batch();
+        if (p.done()) {
+            return;
+        }
 
-        unsigned int y0        = batch_pos * strategy::out_height();
+        do {
+            unsigned int y0    = p.dim(0) * strategy::out_height();
+            unsigned int ymax  = std::min(p.dim0_max() * strategy::out_height(), _Msize);
+            unsigned int batch = p.dim(1);
+            unsigned int n0    = p.dim(2) * _n_block;
+            unsigned int nmax  = std::min(n0 + _n_block, _Nsize);
+            unsigned int multi = p.dim(3);
 
-        for (unsigned int pos=start; pos<end; pos++) {
-            const unsigned int ymax = std::min(y0 + strategy::out_height(), _Msize);
 #ifdef CYCLE_PROFILING
-            auto p = prof.ScopedProfiler(PROFILE_KERNEL, (ymax-y0) * _Nsize * _Ksize);
+            auto p = prof.ScopedProfiler(PROFILE_KERNEL, (ymax-y0) * (nmax - n0) * _Ksize);
 #endif
 
             strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (y0 * this->_lda), this->_lda,
-                         this->_Bptr + (multi * this->_B_multi_stride), this->_ldb,
-                         this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (y0 * this->_ldc), this->_ldc,
-                         _beta, (ymax-y0), _Nsize, _Ksize);
-
-            /* Advance to next item */
-            y0 += strategy::out_height();
-
-            /* Check for batch/multi overflow */
-            if (y0 >= _Msize) {
-                y0=0;
-                batch++;
-                if (batch == _nbatches) {
-                    batch=0;
-                    multi++;
-                }
-            }
-        }
+                         this->_Bptr + (multi * this->_B_multi_stride) + n0, this->_ldb,
+                         this->_Cptr + (multi * this->_C_multi_stride) + (batch * this->_C_batch_stride) + (y0 * this->_ldc) + n0, this->_ldc,
+                         _beta, (ymax-y0), (nmax - n0), _Ksize);
+        } while (p.next_dim1());
     }
 };
 

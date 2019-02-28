@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,8 +65,8 @@ SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &padding
         const size_t m = coord[4];
         const size_t n = coord[5];
 
-        std::array<size_t, TensorShape::num_max_dimensions> dims   = { 0, 1, 2, 3, 4, 5 };
-        std::array<size_t, TensorShape::num_max_dimensions> coords = { i, j, k, l, m, n };
+        std::array<size_t, TensorShape::num_max_dimensions> dims   = { { 0, 1, 2, 3, 4, 5 } };
+        std::array<size_t, TensorShape::num_max_dimensions> coords = { { i, j, k, l, m, n } };
         auto is_padding_area = [&](size_t i)
         {
             return (coords[i] < paddings_extended[i].first || coords[i] > orig_shape[i] + paddings_extended[i].first - 1);

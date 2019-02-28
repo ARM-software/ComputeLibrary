@@ -1,4 +1,5 @@
 <map id="CLFloorKernel" name="CLFloorKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="18,80,98,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="27,5,89,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform a floor operation." alt="" coords="5,155,113,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="19,80,99,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="27,5,91,32"/>
 </map>

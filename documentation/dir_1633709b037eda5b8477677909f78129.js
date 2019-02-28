@@ -1,7 +1,7 @@
 var dir_1633709b037eda5b8477677909f78129 =
 [
     [ "kernels", "dir_f906bbebc596bc606d589ccb705e6595.xhtml", "dir_f906bbebc596bc606d589ccb705e6595" ],
-    [ "CLHelpers.h", "_c_l_helpers_8h.xhtml", "_c_l_helpers_8h" ],
+    [ "CLHelpers.h", "core_2_c_l_2_c_l_helpers_8h.xhtml", "core_2_c_l_2_c_l_helpers_8h" ],
     [ "CLKernelLibrary.h", "_c_l_kernel_library_8h.xhtml", [
       [ "CLBuildOptions", "classarm__compute_1_1_c_l_build_options.xhtml", "classarm__compute_1_1_c_l_build_options" ],
       [ "Program", "classarm__compute_1_1_program.xhtml", "classarm__compute_1_1_program" ],

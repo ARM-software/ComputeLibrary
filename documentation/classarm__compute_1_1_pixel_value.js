@@ -1,6 +1,7 @@
 var classarm__compute_1_1_pixel_value =
 [
     [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml#a6c754430610a785d5cb27e3b0ac396b8", null ],
+    [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml#a77a6e9d50b8bc697760b68bd34c63c4e", null ],
     [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml#aeee8c50430251df2909cb16bd435a0b9", null ],
     [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml#a013dcabbedc5e470addaefe209c1d970", null ],
     [ "PixelValue", "classarm__compute_1_1_pixel_value.xhtml#a759f09965687c6aea87dc4df7dd6f6b8", null ],

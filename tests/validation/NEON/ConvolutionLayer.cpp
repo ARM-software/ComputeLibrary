@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,34 +77,36 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 } // namespace
 
 TEST_SUITE(NEON)
-
 TEST_SUITE(ConvolutionLayer)
+
+// *INDENT-OFF*
+// clang-format off
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
-                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)
-                                                                                                                                 }),
-                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(5U, 5U, 32U, 21U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
-                                                                                                                                   })),
-                                                                                       framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F32),
-                                                                                                                TensorInfo(TensorShape(19U, 23U, 21U, 4U), 1, DataType::F32),
-                                                                                                                TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
-                                                                                                                TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
-                                                                                                                              })),
-                                                                                   framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
-                                                                                                            PadStrideInfo(1, 1, 0, 0),
-                                                                                                            PadStrideInfo(2, 1, 0, 0),
-                                                                                                            PadStrideInfo(3, 2, 1, 0)
-                                                                                                                        })),
-                                                                               framework::dataset::make("FastMath", { true,
-                                                                                                                      true,
-                                                                                                                      false,
-                                                                                                                      false
-                                                                                                                    })),
+                                          framework::dataset::make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F32),
+                                                                                  TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32),
+                                                                                  TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
+                                                                                  TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)
+                                          }),
+                                          framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 32U, 21U), 1, DataType::F32),
+                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
+                                          })),
+                                          framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(19U, 23U, 21U, 4U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                                                                                   TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
+                                          })),
+                                          framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                                                 PadStrideInfo(1, 1, 0, 0),
+                                                                                 PadStrideInfo(2, 1, 0, 0),
+                                                                                 PadStrideInfo(3, 2, 1, 0)
+                                          })),
+                                          framework::dataset::make("FastMath", { true,
+                                                                                 true,
+                                                                                 false,
+                                                                                 false
+                                          })),
                                                                            framework::dataset::make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
                input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
@@ -113,7 +115,9 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                             &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
-TEST_SUITE_END()
+// clang-format on
+// *INDENT-ON*
+TEST_SUITE_END() // ConvolutionLayer
 
 TEST_SUITE(WinogradLayer)
 template <typename T>
@@ -316,12 +320,12 @@ FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<f
     validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // WinogradLayer
 
 TEST_SUITE(GEMMConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                            CNNDataTypes),
                                                                    framework::dataset::make("ActivationInfo",
 { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) })),
@@ -390,8 +394,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<half>, framework:
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
-TEST_SUITE_END()
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END() // FP16
+#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
@@ -412,8 +416,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework
     // Validate output
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
@@ -446,11 +450,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // GEMMConvolutionLayer
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,3 +1,4 @@
 <map id="WallClock&lt; output_timestamps &gt;" name="WallClock&lt; output_timestamps &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="72,5,156,32"/>
+<area shape="rect" id="node1" title="Implementation of an instrument to measure elapsed wall&#45;clock time in milliseconds." alt="" coords="5,80,241,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance." alt="" coords="77,5,169,32"/>
 </map>

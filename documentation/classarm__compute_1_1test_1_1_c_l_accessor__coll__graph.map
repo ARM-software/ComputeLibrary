@@ -1,3 +1,4 @@
 <map id="CLAccessor" name="CLAccessor">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_i_accessor.xhtml" title="Common interface to provide information and access to tensor like structures. " alt="" coords="12,5,93,32"/>
+<area shape="rect" id="node1" title="Accessor implementation for CLTensor objects." alt="" coords="5,80,101,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_i_accessor.xhtml" title="Common interface to provide information and access to tensor like structures." alt="" coords="12,5,95,32"/>
 </map>

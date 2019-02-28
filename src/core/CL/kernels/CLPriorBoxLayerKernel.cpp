@@ -73,8 +73,7 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
 
     if(output != nullptr && output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(input1->data_layout(), DataLayoutDimension::HEIGHT)) != 2);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input1, output);
+        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != 2);
     }
 
     return Status{};
@@ -87,29 +86,11 @@ std::pair<Status, Window> validate_and_configure_window(const ITensorInfo *input
     TensorShape output_shape = compute_prior_box_shape(*input1, info);
     auto_init_if_empty(*output, output_shape, 1, input1->data_type());
 
-    Window win{};
-    bool   window_changed = false;
-
-    switch(input1->data_layout())
-    {
-        case DataLayout::NCHW:
-        {
-            const unsigned int num_elems_processed_per_iteration = 4 * num_priors;
-
-            win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-            window_changed = update_window_and_padding(win, output_access);
-            break;
-        }
-        case DataLayout::NHWC:
-        {
-            win = calculate_max_window(*output, Steps());
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Not implemented");
-    };
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    const unsigned int     num_elems_processed_per_iteration = 4 * num_priors;
+    Window                 win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    bool                   window_changed = update_window_and_padding(win, output_access);
+    Status                 err            = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 } // namespace
@@ -188,25 +169,8 @@ void CLPriorBoxLayerKernel::configure(const ICLTensor *input1, const ICLTensor *
         }
     }
 
-    unsigned int idx = 0;
-    // Create kernel
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-        {
-            idx     = num_arguments_per_2D_tensor();
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("prior_box_layer_nchw", build_opts.options()));
-            break;
-        }
-        case DataLayout::NHWC:
-        {
-            idx     = num_arguments_per_3D_tensor();
-            _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("prior_box_layer_nhwc", build_opts.options()));
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Not implemented");
-    }
+    unsigned int idx = num_arguments_per_2D_tensor();
+    _kernel          = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("prior_box_layer_nchw", build_opts.options()));
 
     _kernel.setArg(idx++, *_min);
     _kernel.setArg(idx++, *_max);
@@ -245,31 +209,11 @@ void CLPriorBoxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         queue.enqueueWriteBuffer(*_max, CL_TRUE, 0, _info.max_sizes().size() * sizeof(float), _info.max_sizes().data());
     }
 
-    switch(_input1->info()->data_layout())
-    {
-        case DataLayout::NCHW:
-        {
-            Window slice = window.first_slice_window_2D();
-            slice.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 2));
+    Window slice = window.first_slice_window_2D();
+    slice.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 2));
 
-            unsigned int idx = 0;
-            add_2D_tensor_argument(idx, _output, slice);
-            enqueue(queue, *this, slice);
-            break;
-        }
-        case DataLayout::NHWC:
-        {
-            Window slice = window.first_slice_window_3D();
-            slice.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 4 * _num_priors));
-            slice.set(Window::DimZ, Window::Dimension(0, _output->info()->dimension(2), 2));
-
-            unsigned int idx = 0;
-            add_3D_tensor_argument(idx, _output, slice);
-            enqueue(queue, *this, slice);
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Not implemented");
-    }
+    unsigned int idx = 0;
+    add_2D_tensor_argument(idx, _output, slice);
+    enqueue(queue, *this, slice);
 }
 } // namespace arm_compute

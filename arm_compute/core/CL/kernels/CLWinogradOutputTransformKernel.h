@@ -63,8 +63,10 @@ public:
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
+     * @param[in]  act_info      (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info);
+    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradOutputTransformKernel
      *
      * @note Winograd output transform supports the following configurations for NCWH data layout
@@ -82,10 +84,11 @@ public:
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
+     * @param[in]  act_info      (Optional) Activation layer information in case of a fused activation @ref ActivationLayerInfo. Only RELU, BOUNDED_RELU, LU_BOUNDED_RELU, LEAKY_RELU and SOFT_RELU supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

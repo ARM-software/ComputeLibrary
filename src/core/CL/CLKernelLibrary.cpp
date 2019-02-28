@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,11 +149,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "accumulate_weighted", "accumulate.cl" },
     { "activation_layer", "activation_layer.cl" },
     { "activation_layer_qa8", "activation_layer_qa8.cl" },
-    { "arithmetic_add_quantized", "arithmetic_op_quantized.cl" },
-    { "arithmetic_add", "arithmetic_op.cl" },
-    { "arithmetic_sub", "arithmetic_op.cl" },
-    { "arithmetic_sub_quantized", "arithmetic_op_quantized.cl" },
-    { "arithmetic_div", "arithmetic_op.cl" },
+    { "activation_layer_logistic_qa8", "activation_layer_qa8.cl" },
     { "batch_to_space_nchw", "batch_to_space.cl" },
     { "batch_to_space_static_nchw", "batch_to_space.cl" },
     { "batch_to_space_nhwc", "batch_to_space.cl" },
@@ -180,6 +176,18 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "channel_extract_YUYV422", "channel_extract.cl" },
     { "combine_gradients_L1", "canny.cl" },
     { "combine_gradients_L2", "canny.cl" },
+    { "compare_equal", "comparisons.cl" },
+    { "compare_equal_quantized", "comparisons.cl" },
+    { "compare_notequal", "comparisons.cl" },
+    { "compare_notequal_quantized", "comparisons.cl" },
+    { "compare_greater", "comparisons.cl" },
+    { "compare_greater_quantized", "comparisons.cl" },
+    { "compare_greaterequal", "comparisons.cl" },
+    { "compare_greaterequal_quantized", "comparisons.cl" },
+    { "compare_less", "comparisons.cl" },
+    { "compare_less_quantized", "comparisons.cl" },
+    { "compare_lessequal", "comparisons.cl" },
+    { "compare_lessequal_quantized", "comparisons.cl" },
     { "concatenate_depth", "concatenate.cl" },
     { "concatenate_width", "concatenate.cl" },
     { "concatenate_width_x2", "concatenate.cl" },
@@ -218,9 +226,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32", "depthwise_convolution.cl" },
+    { "depthwise_convolution_reshape_weights", "depthwise_convolution.cl" },
+    { "depthwise_convolution_reshape_weights_generic", "depthwise_convolution.cl" },
     { "depthwise_im2col", "depthwise_convolution.cl" },
     { "depthwise_vector_to_tensor", "depthwise_convolution.cl" },
-    { "depthwise_weights_reshape", "depthwise_convolution.cl" },
     { "dequantization_layer", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
@@ -234,6 +243,19 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution5x5_nhwc", "direct_convolution5x5.cl" },
     { "direct_convolution5x5_f32_bifrost", "direct_convolution5x5.cl" },
     { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "elementwise_operation_ADD", "elementwise_operation.cl" },
+    { "elementwise_operation_SUB", "elementwise_operation.cl" },
+    { "elementwise_operation_MAX", "elementwise_operation.cl" },
+    { "elementwise_operation_MIN", "elementwise_operation.cl" },
+    { "elementwise_operation_DIV", "elementwise_operation.cl" },
+    { "elementwise_operation_SQUARED_DIFF", "elementwise_operation.cl" },
+    { "elementwise_operation_ADD_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SUB_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MAX_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_MIN_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_DIV_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_operation_SQUARED_DIFF_quantized", "elementwise_operation_quantized.cl" },
+    { "elementwise_unary", "elementwise_unary.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
     { "flatten", "flatten.cl" },
@@ -242,6 +264,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "finalize", "optical_flow_pyramid_lk.cl" },
     { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "floor_layer", "floor.cl" },
+    { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
     { "gemm_accumulate_biases", "gemm.cl" },
@@ -260,8 +283,13 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_mm_floating_point_f16_bifrost_acc32", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
+    { "gemm_mm_reshaped_lhs_nt_rhs_t", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1xW", "gemm.cl" },
+    { "gemm_reshape_lhs_matrix_nt", "gemm.cl" },
+    { "gemm_reshape_lhs_matrix_t", "gemm.cl" },
+    { "gemm_reshape_rhs_matrix_nt", "gemm.cl" },
+    { "gemm_reshape_rhs_matrix_t", "gemm.cl" },
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
     { "gemmlowp_matrix_a_reduction_dot8", "gemmlowp.cl" },
     { "gemmlowp_matrix_b_reduction", "gemmlowp.cl" },
@@ -271,6 +299,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_interleaved_transposed_bifrost", "gemmlowp.cl" },
     { "gemmlowp_mm_interleaved_transposed_bifrost_dot8", "gemmlowp.cl" },
     { "gemmlowp_mm_interleaved_transposed_midgard", "gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_lhs_nt_rhs_t_dot8", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },
@@ -296,6 +326,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "im2col_generic_nchw", "im2col.cl" },
     { "im2col_generic_padx0_pady0_nchw", "im2col.cl" },
     { "im2col3x3_nhwc", "im2col.cl" },
+    { "im2col9x9_nhwc", "im2col.cl" },
     { "im2col_generic_nhwc", "im2col.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
@@ -326,7 +357,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "non_linear_filter_disk5x5", "non_linear_filter5x5.cl" },
     { "non_max_suppression", "nonmax.cl" },
     { "normalization_layer_cross_map", "normalization_layer.cl" },
-    { "normalization_layer_in_map", "normalization_layer.cl" },
+    { "normalization_layer_in_map_nchw", "normalization_layer.cl" },
+    { "normalization_layer_in_map_nhwc", "normalization_layer.cl" },
     { "normalize_planar_yuv_layer_nchw", "normalize_planar_yuv_layer.cl" },
     { "normalize_planar_yuv_layer_nhwc", "normalize_planar_yuv_layer.cl" },
     { "normalize_planar_yuv_layer_q8_nchw", "normalize_planar_yuv_layer_quantized.cl" },
@@ -340,9 +372,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "NV21_to_RGBA8888_bt709", "color_convert.cl" },
     { "NV21_to_YUV444_bt709", "color_convert.cl" },
     { "output_stage_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
-    { "permute_201", "permute.cl" },
-    { "permute_120", "permute.cl" },
-    { "permute_3201", "permute.cl" },
+    { "permute", "permute.cl" },
     { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
     { "pixelwise_mul_int", "pixelwise_mul_int.cl" },
     { "pixelwise_mul_quantized", "pixelwise_mul_int.cl" },
@@ -355,10 +385,11 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "pooling_layer_MxN_quantized_nhwc", "pooling_layer_quantized.cl" },
     { "pooling_layer_MxN_quantized_nchw", "pooling_layer_quantized.cl" },
     { "prior_box_layer_nchw", "prior_box_layer.cl" },
-    { "prior_box_layer_nhwc", "prior_box_layer.cl" },
     { "quantization_layer", "quantization_layer.cl" },
+    { "range", "range.cl" },
+    { "range_quantized", "range.cl" },
     { "reduction_operation_x", "reduction_operation.cl" },
-    { "reduction_operation_quantized_x", "reduction_operation.cl" },
+    { "reduction_operation_non_parallel_x", "reduction_operation.cl" },
     { "reduction_operation_y", "reduction_operation.cl" },
     { "reduction_operation_z", "reduction_operation.cl" },
     { "reduction_operation_w", "reduction_operation.cl" },
@@ -368,6 +399,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "reorg_layer_nhwc", "reorg_layer.cl" },
     { "reshape_layer", "reshape_layer.cl" },
     { "reshape_to_columns", "convolution_layer.cl" },
+    { "reverse", "reverse.cl" },
     { "RGB888_to_IYUV_bt709", "color_convert.cl" },
     { "RGB888_to_NV12_bt709", "color_convert.cl" },
     { "RGB888_to_RGBA8888_bt709", "color_convert.cl" },
@@ -386,6 +418,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "scale_bilinear_quantized_nchw", "scale_quantized.cl" },
     { "scale_bilinear_quantized_nhwc", "scale_quantized.cl" },
     { "scharr3x3", "scharr_filter.cl" },
+    { "select_same_rank", "select.cl" },
+    { "select_different_rank_2", "select.cl" },
+    { "select_different_rank_n", "select.cl" },
     { "sobel3x3", "sobel_filter.cl" },
     { "sobel_separable5x1", "sobel_filter.cl" },
     { "sobel_separable1x5", "sobel_filter.cl" },
@@ -401,12 +436,14 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "space_to_batch_nhwc", "space_to_batch.cl" },
     { "space_to_batch_static_nhwc", "space_to_batch.cl" },
     { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
+    { "stack_layer", "stack_layer.cl" },
     { "strided_slice", "slice_ops.cl" },
     { "suppress_non_maximum", "canny.cl" },
     { "tablelookup_U8", "tablelookup.cl" },
     { "tablelookup_S16", "tablelookup.cl" },
     { "threshold_binary", "threshold.cl" },
     { "threshold_range", "threshold.cl" },
+    { "tile", "tile.cl" },
     { "transpose", "transpose.cl" },
     { "UYVY422_to_IYUV_bt709", "color_convert.cl" },
     { "UYVY422_to_NV12_bt709", "color_convert.cl" },
@@ -494,14 +531,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/activation_layer_qa8.clembed"
     },
     {
-        "arithmetic_op.cl",
-#include "./cl_kernels/arithmetic_op.clembed"
-    },
-    {
-        "arithmetic_op_quantized.cl",
-#include "./cl_kernels/arithmetic_op_quantized.clembed"
-    },
-    {
         "batch_to_space.cl",
 #include "./cl_kernels/batch_to_space.clembed"
     },
@@ -532,6 +561,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "col2im.cl",
 #include "./cl_kernels/col2im.clembed"
+    },
+    {
+        "comparisons.cl",
+#include "./cl_kernels/comparisons.clembed"
     },
     {
         "concatenate.cl",
@@ -622,6 +655,18 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/direct_convolution_1x1_3x3_5x5_quantized.clembed"
     },
     {
+        "elementwise_operation.cl",
+#include "./cl_kernels/elementwise_operation.clembed"
+    },
+    {
+        "elementwise_operation_quantized.cl",
+#include "./cl_kernels/elementwise_operation_quantized.clembed"
+    },
+    {
+        "elementwise_unary.cl",
+#include "./cl_kernels/elementwise_unary.clembed"
+    },
+    {
         "erode.cl",
 #include "./cl_kernels/erode.clembed"
     },
@@ -640,6 +685,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "floor.cl",
 #include "./cl_kernels/floor.clembed"
+    },
+    {
+        "gather.cl",
+#include "./cl_kernels/gather.clembed"
     },
     {
         "gaussian_pyramid.cl",
@@ -778,6 +827,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/quantization_layer.clembed"
     },
     {
+        "range.cl",
+#include "./cl_kernels/range.clembed"
+    },
+    {
         "reduction_operation.cl",
 #include "./cl_kernels/reduction_operation.clembed"
     },
@@ -792,6 +845,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "reshape_layer.cl",
 #include "./cl_kernels/reshape_layer.clembed"
+    },
+    {
+        "reverse.cl",
+#include "./cl_kernels/reverse.clembed"
     },
     {
         "roi_align_layer.cl",
@@ -814,6 +871,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/scharr_filter.clembed"
     },
     {
+        "select.cl",
+#include "./cl_kernels/select.clembed"
+    },
+    {
         "sobel_filter.cl",
 #include "./cl_kernels/sobel_filter.clembed"
     },
@@ -834,12 +895,20 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/space_to_batch.clembed"
     },
     {
+        "stack_layer.cl",
+#include "./cl_kernels/stack_layer.clembed"
+    },
+    {
         "tablelookup.cl",
 #include "./cl_kernels/tablelookup.clembed"
     },
     {
         "threshold.cl",
 #include "./cl_kernels/threshold.clembed"
+    },
+    {
+        "tile.cl",
+#include "./cl_kernels/tile.clembed"
     },
     {
         "transpose.cl",

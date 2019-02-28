@@ -34,7 +34,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/Utility.h"
+#include "arm_compute/core/utils/misc/SaturateCast.h"
 
 #include <algorithm>
 #include <arm_neon.h>
@@ -667,7 +667,7 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
             /* Run remaining elements */
             for(; i < input_width; ++i)
             {
-                out_ptr[i] = utility::saturate_cast<qasymm8_t>(tmp_ptr[i] * sum_inversed);
+                out_ptr[i] = utils::cast::saturate_cast<qasymm8_t>(tmp_ptr[i] * sum_inversed);
             }
         }
     },

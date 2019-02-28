@@ -1,7 +1,8 @@
 <map id="ValidRegion" name="ValidRegion">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor. " alt="" coords="63,171,162,197"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; size_t \&gt;" alt="" coords="5,95,156,121"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. " alt="" coords="101,5,223,32"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions\&lt; int \&gt;" alt="" coords="180,95,309,121"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1_coordinates.xhtml" title="Coordinates of an item. " alt="" coords="192,171,284,197"/>
+<area shape="rect" id="node1" title="Container for valid region of a window." alt="" coords="105,260,200,287"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor." alt="" coords="51,171,155,197"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="5,95,169,121"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality." alt="" coords="117,5,252,32"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="193,95,336,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_coordinates.xhtml" title="Coordinates of an item." alt="" coords="205,171,303,197"/>
 </map>

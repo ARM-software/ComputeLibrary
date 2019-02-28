@@ -32,11 +32,16 @@ namespace arm_compute
 {
 namespace graph
 {
-DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, DepthwiseConvolutionMethod method)
-    : _info(std::move(info)), _method(method), _fused_activation()
+DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, int depth_multiplier, DepthwiseConvolutionMethod method)
+    : _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
+}
+
+int DepthwiseConvolutionLayerNode::depth_multiplier() const
+{
+    return _depth_multiplier;
 }
 
 void DepthwiseConvolutionLayerNode::set_depthwise_convolution_method(DepthwiseConvolutionMethod method)
@@ -66,21 +71,24 @@ void DepthwiseConvolutionLayerNode::set_fused_activation(ActivationLayerInfo fus
 
 TensorDescriptor DepthwiseConvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                                           const TensorDescriptor &weights_descriptor,
-                                                                          const PadStrideInfo    &info)
+                                                                          const PadStrideInfo    &info,
+                                                                          int                     depth_multiplier)
 {
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
 
-    const unsigned int input_width   = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
-    const unsigned int input_height  = get_dimension_size(input_descriptor, DataLayoutDimension::HEIGHT);
-    const unsigned int kernel_width  = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
-    const unsigned int kernel_height = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
+    const unsigned int input_width    = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
+    const unsigned int input_height   = get_dimension_size(input_descriptor, DataLayoutDimension::HEIGHT);
+    const unsigned int input_channels = get_dimension_size(input_descriptor, DataLayoutDimension::CHANNEL);
+    const unsigned int kernel_width   = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
+    const unsigned int kernel_height  = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
     std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::WIDTH), output_width);
     output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::HEIGHT), output_height);
+    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::CHANNEL), input_channels * depth_multiplier);
 
     return output_descriptor;
 }
@@ -105,7 +113,7 @@ TensorDescriptor DepthwiseConvolutionLayerNode::configure_output(size_t idx) con
 
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
-    return compute_output_descriptor(src->desc(), weights->desc(), _info);
+    return compute_output_descriptor(src->desc(), weights->desc(), _info, _depth_multiplier);
 }
 
 NodeType DepthwiseConvolutionLayerNode::type() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,11 @@
 #ifndef __ARM_COMPUTE_CLGEMM_H__
 #define __ARM_COMPUTE_CLGEMM_H__
 
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -39,9 +40,10 @@ class ICLTensor;
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model)
- *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model)
- *  -# @ref CLGEMMMatrixMultiplyKernel
+ *  -# @ref CLGEMMReshapeLHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model)
+ *  -# @ref CLGEMMReshapeRHSMatrixKernel (only if the reshaped GEMM is selected by the heuristic model)
+ *  -# @ref CLGEMMMatrixMultiplyKernel (if GPU target is NOT G76 or if the reshaped GEMM is NOT selected)
+ *  -# @ref CLGEMMMatrixMultiplyReshapedKernel (only if the reshaped GEMM is selected by the heuristic model and the GPU target IS Mali-G76)
  *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
  *
  */
@@ -82,13 +84,13 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
-     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor info. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     * @param[in] a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
+     * @param[in] b         Second input tensor info (Matrix B). Data type supported: same as @p a.
+     * @param[in] c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[in] output    Output tensor info. Data type supported: same as @p a
+     * @param[in] alpha     Weight of the matrix product
+     * @param[in] beta      Weight of matrix C
+     * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
      *                       if the reshape of matrix B should happen only for the first run
      *
      * @return a status
@@ -100,19 +102,21 @@ public:
     void prepare() override;
 
 private:
-    CLMemoryGroup              _memory_group;
-    CLGEMMInterleave4x4Kernel  _interleave_kernel;
-    CLGEMMTranspose1xWKernel   _transpose_kernel;
-    CLGEMMMatrixMultiplyKernel _mm_kernel;
-    CLGEMMMatrixAdditionKernel _ma_kernel;
-    CLTensor                   _tmp_a;
-    CLTensor                   _tmp_b;
-    const ICLTensor           *_original_b;
-    bool                       _is_interleaved_transposed;
-    bool                       _run_addition;
-    bool                       _reshape_b_only_on_first_run;
-    bool                       _is_prepared;
+    CLMemoryGroup                      _memory_group;
+    CLGEMMMatrixMultiplyKernel         _mm_kernel;
+    CLGEMMMatrixAdditionKernel         _ma_kernel;
+    CLGEMMReshapeLHSMatrixKernel       _reshape_lhs_kernel;
+    CLGEMMReshapeRHSMatrixKernel       _reshape_rhs_kernel;
+    CLGEMMMatrixMultiplyReshapedKernel _mm_reshaped_kernel;
+    CLTensor                           _tmp_a;
+    CLTensor                           _tmp_b;
+    const ICLTensor                   *_original_b;
+    bool                               _is_interleaved_transposed;
+    bool                               _run_addition;
+    bool                               _reshape_b_only_on_first_run;
+    bool                               _is_prepared;
+    bool                               _is_new_gemm_reshaped; // Remove when COMPMID-1892 is completed
 };
-}
+} // namespace arm_compute
 
 #endif /* __ARM_COMPUTE_CLGEMM_H__ */

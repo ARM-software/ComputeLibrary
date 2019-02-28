@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,6 +123,8 @@ private:
 
     // CPP kernels
     CPPBoxWithNonMaximaSuppressionLimitKernel _cpp_nms_kernel;
+
+    bool _is_nhwc;
 
     // Temporary tensors
     CLTensor _deltas_permuted;

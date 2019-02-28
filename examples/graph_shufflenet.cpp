@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,12 +57,11 @@ public:
         // Set default layout if needed (Single kernel grouped convolution not yet supported int NHWC)
         if(!common_opts.data_layout->is_set())
         {
-            common_params.data_layout = DataLayout::NCHW;
+            common_params.data_layout = DataLayout::NHWC;
         }
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type == DataType::F16 && common_params.target == Target::NEON, "F16 NEON not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -244,6 +243,8 @@ private:
  *      https://arxiv.org/abs/1707.01083
  *      "ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices"
  *      Xiangyu Zhang, Xinyu Zhou, Mengxiao Lin, Jian Sun
+ *
+ * Provenance: https://s3.amazonaws.com/download.onnx/models/opset_9/shufflenet.tar.gz
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

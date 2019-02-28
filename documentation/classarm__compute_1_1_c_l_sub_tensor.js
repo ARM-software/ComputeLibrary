@@ -9,8 +9,10 @@ var classarm__compute_1_1_c_l_sub_tensor =
     [ "info", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a47d74e4e51f9b1a636c4831bd747a97c", null ],
     [ "info", "classarm__compute_1_1_c_l_sub_tensor.xhtml#af3913a3ffefed788b1fa3fb91407472a", null ],
     [ "map", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002", null ],
+    [ "map", "classarm__compute_1_1_c_l_sub_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0", null ],
     [ "operator=", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a9e7404a38329c9f1fcce42b8098dc6f9", null ],
     [ "operator=", "classarm__compute_1_1_c_l_sub_tensor.xhtml#aee53085b838758adfce05657de25f5c5", null ],
     [ "parent", "classarm__compute_1_1_c_l_sub_tensor.xhtml#ae06581a05b08fb202d499444ae791e15", null ],
-    [ "unmap", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ]
+    [ "unmap", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ],
+    [ "unmap", "classarm__compute_1_1_c_l_sub_tensor.xhtml#af974a2360069c2ef8df4496d00e4f6cc", null ]
 ];

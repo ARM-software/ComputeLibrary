@@ -323,7 +323,7 @@ private:
                3U, 3U,
                get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
-               dwc_pad_stride_info, depth_weights_quant_info)
+               dwc_pad_stride_info, 1, depth_weights_quant_info)
            .set_name(total_path + "depthwise/depthwise")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
            << ConvolutionLayer(
@@ -344,6 +344,9 @@ private:
  *      https://arxiv.org/abs/1704.04861
  *      "MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications"
  *      Andrew G. Howard, Menglong Zhu, Bo Chen, Dmitry Kalenichenko, Weijun Wang, Tobias Weyand, Marco Andreetto, Hartwig Adam
+ *
+ * Provenance: download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
+ *             download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_0.75_160.tgz
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(Accumulate)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), AccumulateS16Dataset),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateS16Dataset),
                shape, data_type, output_data_type)
 {
     // Create tensors
@@ -88,13 +88,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateFixture<uint8_t>, framework::Datase
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // Accumulate
 
 TEST_SUITE(AccumulateWeighted)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), AccumulateU8Dataset),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateU8Dataset),
                shape, data_type, output_data_type)
 {
     // Generate a random alpha value
@@ -134,13 +134,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateWeightedFixture<uint8_t>, framework
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // AccumulateWeighted
 
 TEST_SUITE(AccumulateSquared)
 
 TEST_SUITE(U8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), AccumulateS16Dataset),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), AccumulateS16Dataset),
                shape, data_type, output_data_type)
 {
     // Generate a random shift value
@@ -180,10 +180,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEAccumulateSquaredFixture<uint8_t>, framework:
     validate(Accessor(_target), _reference, tolerance);
 }
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // U8
+TEST_SUITE_END() // AccumulateSquared
 
-TEST_SUITE_END()
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -55,9 +55,9 @@ public:
     void configure(const ICLTensor *input, ICLTensor *output, unsigned int num_groups);
     /** Static function to check if given info will lead to a valid configuration of @ref CLChannelShuffleLayerKernel
      *
-     * @param[in]  input      Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
-     * @param[out] output     Output tensor. Data type supported: Same as @p input
-     * @param[in]  num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
+     * @param[in] input      Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] output     Output tensor info. Data type supported: Same as @p input
+     * @param[in] num_groups Number of groups. Must be greater than 1 and the number of channels of the tensors must be a multiple of the number of groups.
      *
      * @return a status
      */

@@ -1,3 +1,4 @@
 <map id="RawLutAccessor&lt; T &gt;" name="RawLutAccessor&lt; T &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_i_lut_accessor.xhtml" title="Common interface to provide information and access to Lut like structures. " alt="" coords="17,5,148,32"/>
+<area shape="rect" id="node1" title="Accessor implementation for std::map&#45;lut objects." alt="" coords="5,80,168,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_i_lut_accessor.xhtml" title="Common interface to provide information and access to Lut like structures." alt="" coords="17,5,157,32"/>
 </map>

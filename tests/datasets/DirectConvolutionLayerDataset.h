@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,10 +45,7 @@ public:
     {
         add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(13U, 13U, 3U), PadStrideInfo(1, 1, 1, 1));
         add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 4U), TensorShape(4U), TensorShape(13U, 13U, 4U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 5U), TensorShape(5U), TensorShape(13U, 13U, 5U), PadStrideInfo(1, 1, 1, 1));
         add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(7U, 7U, 3U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 4U), TensorShape(4U), TensorShape(7U, 7U, 4U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 5U), TensorShape(5U), TensorShape(7U, 7U, 5U), PadStrideInfo(2, 2, 1, 1));
         add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(12U, 12U, 3U), PadStrideInfo(1, 1, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 5U), TensorShape(5U), TensorShape(12U, 12U, 5U), PadStrideInfo(1, 1, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
     }

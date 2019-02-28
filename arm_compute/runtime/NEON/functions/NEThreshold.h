@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #define __ARM_COMPUTE_NETHRESHOLD_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include <cstdint>
 
@@ -34,7 +34,7 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEThresholdKernel */
-class NEThreshold : public INESimpleFunction
+class NEThreshold : public INESimpleFunctionNoBorder
 {
 public:
     /** Initialise the function's source, destination, thresholds and threshold type
@@ -50,5 +50,5 @@ public:
     void configure(const ITensor *input, ITensor *output, uint8_t threshold, uint8_t false_value = 0, uint8_t true_value = 0,
                    ThresholdType type = ThresholdType::BINARY, uint8_t upper = 0);
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NETHRESHOLD_H__ */

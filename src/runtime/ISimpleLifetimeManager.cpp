@@ -59,7 +59,7 @@ void ISimpleLifetimeManager::start_lifetime(void *obj)
     // Check if there is a free blob
     if(_free_blobs.empty())
     {
-        _occupied_blobs.emplace_front(Blob{ obj, 0, { obj } });
+        _occupied_blobs.emplace_front(Blob{ obj, 0, 0, { obj } });
     }
     else
     {
@@ -71,7 +71,7 @@ void ISimpleLifetimeManager::start_lifetime(void *obj)
     _active_elements.insert(std::make_pair(obj, obj));
 }
 
-void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t size)
+void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t size, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON(obj == nullptr);
 
@@ -80,10 +80,11 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
     ARM_COMPUTE_ERROR_ON(active_object_it == std::end(_active_elements));
 
     // Update object fields and mark object as complete
-    Element &el = active_object_it->second;
-    el.handle   = &obj_memory;
-    el.size     = size;
-    el.status   = true;
+    Element &el  = active_object_it->second;
+    el.handle    = &obj_memory;
+    el.size      = size;
+    el.alignment = alignment;
+    el.status    = true;
 
     // Find object in the occupied lists
     auto occupied_blob_it = std::find_if(std::begin(_occupied_blobs), std::end(_occupied_blobs), [&obj](const Blob & b)
@@ -94,8 +95,9 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, IMemory &obj_memory, size_t
 
     // Update occupied blob and return as free
     occupied_blob_it->bound_elements.insert(obj);
-    occupied_blob_it->max_size = std::max(occupied_blob_it->max_size, size);
-    occupied_blob_it->id       = nullptr;
+    occupied_blob_it->max_size      = std::max(occupied_blob_it->max_size, size);
+    occupied_blob_it->max_alignment = std::max(occupied_blob_it->max_alignment, alignment);
+    occupied_blob_it->id            = nullptr;
     _free_blobs.splice(std::begin(_free_blobs), _occupied_blobs, occupied_blob_it);
 
     // Check if all object are finalized and reset active group

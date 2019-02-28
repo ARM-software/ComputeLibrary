@@ -44,7 +44,7 @@ namespace arm_compute
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
-class NEFullyConnectedLayerReshapeWeights : public INESimpleFunction
+class NEFullyConnectedLayerReshapeWeights : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.

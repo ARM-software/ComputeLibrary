@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,7 @@
 
 using namespace arm_compute;
 
-void CLROIPoolingLayer::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
+void CLROIPoolingLayer::configure(const ICLTensor *input, const ICLTensor *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     // Configure ROI pooling kernel
     auto k = arm_compute::support::cpp14::make_unique<CLROIPoolingLayerKernel>();

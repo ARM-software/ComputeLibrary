@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,11 +34,7 @@
 #include "../arm_gemm/mergeresults.hpp"
 #include "../arm_gemm/transform.hpp"
 
-#include "../arm_gemm/kernels/a32_sgemm_8x6.hpp"
-#include "../arm_gemm/kernels/a64_sgemm_12x8.hpp"
 #include "../arm_gemm/kernels/a64_sgemm_native_16x4.hpp"
-#include "../arm_gemm/kernels/a64_sgemv_pretransposed.hpp"
-#include "../arm_gemm/kernels/a64_sgemv_trans.hpp"
 
 namespace arm_compute
 {

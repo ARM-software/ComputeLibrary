@@ -1,7 +1,7 @@
 var classarm__gemm_1_1_gemv_pretransposed =
 [
     [ "GemvPretransposed", "classarm__gemm_1_1_gemv_pretransposed.xhtml#a1721e8ac2ad69c15d7c13a063d4c00c4", null ],
-    [ "GemvPretransposed", "classarm__gemm_1_1_gemv_pretransposed.xhtml#a6fe4c9494706418764f975aa2bdfb5bf", null ],
+    [ "GemvPretransposed", "classarm__gemm_1_1_gemv_pretransposed.xhtml#a8dca5a76de1711aa0d39bf892b7ca2c9", null ],
     [ "B_is_pretransposed", "classarm__gemm_1_1_gemv_pretransposed.xhtml#ac5dec5063a75604fdc60555f15577b94", null ],
     [ "B_pretranspose_required", "classarm__gemm_1_1_gemv_pretransposed.xhtml#aa7cfff39cbb2be65cd40042a75e5ae1c", null ],
     [ "execute", "classarm__gemm_1_1_gemv_pretransposed.xhtml#a514bdec015ee0ca587b6444e9defc190", null ],

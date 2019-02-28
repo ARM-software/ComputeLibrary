@@ -1,4 +1,5 @@
 <map id="CLGEMMMatrixAdditionKernel" name="CLGEMMMatrixAdditionKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="65,80,145,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="74,5,137,32"/>
+<area shape="rect" id="node1" title="OpenCL kernel to perform the in&#45;place matrix addition between 2 matrices, taking into account that th..." alt="" coords="5,155,213,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="69,80,149,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="77,5,141,32"/>
 </map>

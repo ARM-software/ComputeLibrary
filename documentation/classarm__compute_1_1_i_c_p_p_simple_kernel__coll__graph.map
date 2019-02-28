@@ -1,4 +1,5 @@
 <map id="ICPPSimpleKernel" name="ICPPSimpleKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="25,80,116,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="39,5,102,32"/>
+<area shape="rect" id="node1" title="Interface for simple C++ kernels having 1 tensor input and 1 tensor output." alt="" coords="5,155,139,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="27,80,117,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="40,5,104,32"/>
 </map>

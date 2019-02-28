@@ -1,3 +1,4 @@
 <map id="CLLSTMLayer" name="CLLSTMLayer">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="21,5,97,32"/>
+<area shape="rect" id="node1" title="This function performs a single time step in a Long Short&#45;Term Memory (LSTM) layer." alt="" coords="5,80,112,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="19,5,98,32"/>
 </map>

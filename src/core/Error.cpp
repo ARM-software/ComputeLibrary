@@ -54,9 +54,9 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     va_start(args, msg);
     auto err = create_error_va_list(ErrorCode::RUNTIME_ERROR, function, file, line, msg, args);
     va_end(args);
-    throw std::runtime_error(err.error_description());
+    ARM_COMPUTE_THROW(std::runtime_error(err.error_description()));
 }
 void Status::internal_throw_on_error() const
 {
-    throw std::runtime_error(_error_description);
+    ARM_COMPUTE_THROW(std::runtime_error(_error_description));
 }

@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -34,7 +35,11 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to run @ref CLSpaceToBatchLayerKernel. */
+/** Basic function to spatial divide a tensor. This function calls the following OpenCL kernels/functions:
+ *
+ *  -# @ref CLMemsetKernel
+ *  -# @ref CLSpaceToBatchLayerKernel
+ */
 class CLSpaceToBatchLayer : public IFunction
 {
 public:
@@ -96,7 +101,7 @@ public:
 
 private:
     CLSpaceToBatchLayerKernel _space_to_batch_kernel; /**< SpaceToBatch kernel to run */
-    ICLTensor                *_output;                /**< Output tensor */
+    CLMemsetKernel            _memset_kernel;         /**< Memset kernel to run */
     bool                      _has_padding;           /**< Flag to check if the output has padding */
 };
 } // namespace arm_compute

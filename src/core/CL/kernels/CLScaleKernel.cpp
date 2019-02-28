@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, I
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
 
     float wr = 0.f;
@@ -94,14 +95,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
             num_elems_processed_per_iteration = 4;
             // Configure kernel window
-            win                                   = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            const ValidRegion &input_valid_region = input->valid_region();
-
-            // Reads can occur within the valid region of the input
+            win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
             AccessWindowStatic input_access(input,
-                                            input_valid_region.anchor[0] - border.left, input_valid_region.anchor[1] - border.top,
-                                            input_valid_region.anchor[0] + input_valid_region.shape[0] + border.right,
-                                            input_valid_region.anchor[1] + input_valid_region.shape[1] + border.bottom);
+                                            -border.left, -border.top,
+                                            input->dimension(0) + border.right,
+                                            input->dimension(1) + border.bottom);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
             output_access.set_valid_region(win, calculate_valid_region_scale(*(input),
@@ -118,7 +116,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             num_elems_processed_per_iteration = 1;
             // Configure kernel window
             win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-            AccessWindowRectangle  input_access(input, -border.left, -border.top, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+            AccessWindowStatic input_access(input, -border.left, -border.top,
+                                            input->dimension(0) + border.right,
+                                            input->dimension(1) + border.bottom);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access);
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
@@ -175,6 +175,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     DataLayout data_layout = input->info()->data_layout();
     const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const bool is_nhwc     = data_layout == DataLayout::NHWC;
 
     // Compute the ratio between source width/height and destination width/height
     const unsigned int input_width   = input->info()->dimension(idx_width);
@@ -201,6 +202,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
     build_opts.add_option_if(border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
+    build_opts.add_option_if(is_nhwc, "-DDEPTH_OUT=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
     if(call_quantized_kernel)
     {
@@ -215,7 +217,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     kernel_name += lower_string(string_from_data_layout(data_layout));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    unsigned int idx = data_layout == DataLayout::NHWC ? 2 * num_arguments_per_3D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
+    unsigned int idx = is_nhwc ? 2 * num_arguments_per_4D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 
     // Set static kernel arguments
     const float scale_x = static_cast<float>(input_width) / output_width;
@@ -225,6 +227,20 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     _kernel.setArg<float>(idx++, input_height);
     _kernel.setArg<float>(idx++, scale_x);
     _kernel.setArg<float>(idx++, scale_y);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "scale_";
+    _config_id += (border_mode == BorderMode::REPLICATE ? "Bord_rep" : "");
+    _config_id += (sampling_policy == SamplingPolicy::CENTER ? "center" : "topleft");
+    _config_id += (is_nhwc ? "nhwc" : "nchw");
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(3));
 }
 
 void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -250,16 +266,13 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
         }
         case DataLayout::NHWC:
         {
-            Window slice = window.first_slice_window_3D();
+            Window collapsed = window.collapse(ICLKernel::window(), Window::DimZ);
+            Window slice     = collapsed.first_slice_window_4D();
 
-            do
-            {
-                unsigned int idx = 0;
-                add_3D_tensor_argument(idx, _input, slice);
-                add_3D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, lws_hint());
-            }
-            while(window.slide_window_slice_3D(slice));
+            unsigned int idx = 0;
+            add_4D_tensor_argument(idx, _input, slice);
+            add_4D_tensor_argument(idx, _output, slice);
+            enqueue(queue, *this, slice, lws_hint());
             break;
         }
         default:

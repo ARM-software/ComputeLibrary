@@ -1,4 +1,5 @@
 <map id="GCScale" name="GCScale">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel. " alt="" coords="5,80,141,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="35,5,111,32"/>
+<area shape="rect" id="node1" title="Basic function to run GCScaleKernel." alt="" coords="38,155,114,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_simple_function.xhtml" title="Basic interface for functions which have a single OpenGL ES kernel." alt="" coords="5,80,147,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="37,5,115,32"/>
 </map>

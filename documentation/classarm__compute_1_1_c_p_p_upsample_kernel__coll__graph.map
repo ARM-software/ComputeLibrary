@@ -1,4 +1,5 @@
 <map id="CPPUpsampleKernel" name="CPPUpsampleKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="33,80,124,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="47,5,110,32"/>
+<area shape="rect" id="node1" title="CPP kernel to perform tensor upsample." alt="" coords="5,155,156,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="36,80,125,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="49,5,113,32"/>
 </map>

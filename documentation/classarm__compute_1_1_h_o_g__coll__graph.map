@@ -1,3 +1,4 @@
 <map id="HOG" name="HOG">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_h_o_g.xhtml" title="Interface for HOG data&#45;object. " alt="" coords="5,5,61,32"/>
+<area shape="rect" id="node1" title="CPU implementation of HOG data&#45;object." alt="" coords="7,80,59,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_h_o_g.xhtml" title="Interface for HOG data&#45;object." alt="" coords="5,5,60,32"/>
 </map>

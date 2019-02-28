@@ -1,3 +1,4 @@
 <map id="PoolingLayerNode" name="PoolingLayerNode">
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface. " alt="" coords="41,5,98,32"/>
+<area shape="rect" id="node1" title="Pooling Layer node." alt="" coords="5,80,143,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="45,5,103,32"/>
 </map>

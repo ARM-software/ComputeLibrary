@@ -1,6 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lifetime_manager.xhtml" title="Interface for managing the lifetime of objects. " alt="" coords="5,31,128,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_simple_lifetime_manager.xhtml" title="Abstract class of the simple lifetime manager interface. " alt="" coords="176,31,339,57"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_blob_lifetime_manager.xhtml" title="Concrete class that tracks the lifetime of registered tensors and calculates the systems memory requi..." alt="" coords="392,5,536,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_offset_lifetime_manager.xhtml" title="Concrete class that tracks the lifetime of registered tensors and calculates the systems memory requi..." alt="" coords="387,56,541,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_graph_printer.xhtml" title="Graph printer interface." alt="" coords="5,5,112,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_dot_graph_printer.xhtml" title="Graph printer interface." alt="" coords="160,5,287,32"/>
 </map>

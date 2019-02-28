@@ -103,3 +103,20 @@ if env['gles_compute']:
         Depends(prog, arm_compute_dependency)
         alias = examples_env.Alias(example, prog)
         Default(alias)
+
+#FIXME Delete 3rdparty builds before release
+for file in Glob("#3rdparty/examples/graph_*.cpp"):
+    example = os.path.basename(os.path.splitext(str(file))[0])
+    prog = None
+
+    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
+        prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
+        prog = install_bin(prog)
+        Depends(prog, graph_dependency)
+    else:
+        #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
+        prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+        prog = install_bin(prog)
+        Depends(prog, graph_dependency)
+    alias = examples_env.Alias(example, prog)
+    Default(alias)

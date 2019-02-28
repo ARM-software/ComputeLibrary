@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,7 +113,7 @@ protected:
         {
             TensorShape output_shape = i == 0 ? src_shape : out.shape();
             output_shape.set(axis[i], 1);
-            out = reference::reduction_operation<T>(i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM);
+            out = reference::reduction_operation<T, T>(i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM);
         }
 
         if(!keep_dims)

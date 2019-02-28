@@ -1,3 +1,4 @@
 <map id="ICPPKernel" name="ICPPKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="19,5,82,32"/>
+<area shape="rect" id="node1" title="Common interface for all kernels implemented in C++." alt="" coords="5,80,95,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="18,5,82,32"/>
 </map>

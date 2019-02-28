@@ -1,6 +1,7 @@
 var dir_b986aa98f9b6490bb4fc7918500346fb =
 [
     [ "functions", "dir_251c63bc3f70b60acf43edd6d870a3ef.xhtml", "dir_251c63bc3f70b60acf43edd6d870a3ef" ],
+    [ "gemm_reshaped", "dir_4cd7e5c51880595e3dace45b5597f5d6.xhtml", "dir_4cd7e5c51880595e3dace45b5597f5d6" ],
     [ "tuners", "dir_50b23570393db6a4ca8647d7d5ff6dbe.xhtml", "dir_50b23570393db6a4ca8647d7d5ff6dbe" ],
     [ "CLArray.h", "_c_l_array_8h.xhtml", "_c_l_array_8h" ],
     [ "CLBufferAllocator.h", "_c_l_buffer_allocator_8h.xhtml", [
@@ -10,6 +11,7 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
       [ "CLDistribution1D", "classarm__compute_1_1_c_l_distribution1_d.xhtml", "classarm__compute_1_1_c_l_distribution1_d" ]
     ] ],
     [ "CLFunctions.h", "_c_l_functions_8h.xhtml", null ],
+    [ "CLHelpers.h", "runtime_2_c_l_2_c_l_helpers_8h.xhtml", "runtime_2_c_l_2_c_l_helpers_8h" ],
     [ "CLHOG.h", "_c_l_h_o_g_8h.xhtml", [
       [ "CLHOG", "classarm__compute_1_1_c_l_h_o_g.xhtml", "classarm__compute_1_1_c_l_h_o_g" ]
     ] ],
@@ -52,6 +54,9 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     ] ],
     [ "CLTuner.h", "_c_l_tuner_8h.xhtml", [
       [ "CLTuner", "classarm__compute_1_1_c_l_tuner.xhtml", "classarm__compute_1_1_c_l_tuner" ]
+    ] ],
+    [ "ICLGEMMReshapedConfiguration.h", "_i_c_l_g_e_m_m_reshaped_configuration_8h.xhtml", [
+      [ "ICLGEMMReshapedConfiguration", "classarm__compute_1_1_i_c_l_g_e_m_m_reshaped_configuration.xhtml", "classarm__compute_1_1_i_c_l_g_e_m_m_reshaped_configuration" ]
     ] ],
     [ "ICLSimpleFunction.h", "_i_c_l_simple_function_8h.xhtml", [
       [ "ICLSimpleFunction", "classarm__compute_1_1_i_c_l_simple_function.xhtml", "classarm__compute_1_1_i_c_l_simple_function" ]

@@ -3,7 +3,7 @@ var validation_2_n_e_o_n_2_sobel_8cpp =
     [ "NESobel3x3Fixture", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a622679b1f1a3fe86dcec18bfa0cb5500", null ],
     [ "NESobel5x5Fixture", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a72e5000ade80e08031b5f69fa514e3bd", null ],
     [ "NESobel7x7Fixture", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a0003f45ddaf84d43adbffd1d84f3cb73", null ],
-    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a712c785a9475eb2bb0a5a24e43d282cc", null ],
+    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a7aadc4b7727668e738a6e31fe7a12f3d", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a1bf7e6f323df630eb6c25ce6f42a9e53", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#aed4429269fca49bdfc415fd41270da89", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_sobel_8cpp.xhtml#a065f6d5fc454c7f38cefe407efd418b9", null ],

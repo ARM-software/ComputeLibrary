@@ -1,9 +1,13 @@
 var validation_2_n_e_o_n_2_convolution_layer_8cpp =
 [
     [ "NEGEMMConvolutionLayerFixture", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a7d7f0321e91f8b48ec2b198ccf4149a8", null ],
-    [ "NEGEMMConvolutionLayerQuantizedFixture", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a2d2a81298b3e14177809c912f7a4adb9", null ],
-    [ "NEWinogradConvolutionLayerFixture", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#afd007c058c59ab7abc7c4baec7d426d6", null ],
     [ "NEWinogradConvolutionLayerNoBiasFixture", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a1a95256b08846db22e0c4d2b13656272", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#af3c1de77fd86df539395c75c17ec230e", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#aedc846191741fb759460952ef3dbf6d2", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a4723dcafb6cb17bc56a7ef564beba6bf", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a8a3a4ff1ec017f023aa950ddc43434e8", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a230a5295f65fab5a7ad5028c1f2561b2", null ],
+    [ "ARM_COMPUTE_EXPECT", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a5c77cc4c8d5ea17105cebb7abdda28c2", null ],
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#aeaf63c04a1cc347e32d54af646df589a", null ],
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#af5dc36fe0848cf8263570cf02a5a6569", null ],
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a5a6b39c4e919ccb67029c24966da3318", null ],
@@ -12,8 +16,8 @@ var validation_2_n_e_o_n_2_convolution_layer_8cpp =
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a1ed250192de73300c8e4c05e77e66f87", null ],
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a85dd0f7e03c6e9d992ef9b8f0751cf40", null ],
     [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#af7c994b02533988ca1192f1527373621", null ],
+    [ "combine", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a8fdb116fa072ae44264324d851e07d68", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a53950503f84613370c1874e9ec36f738", null ],
-    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#abb65b429d8bb356a6aea3a366ef56e3a", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a2d46a2835e58f6bdec18d668358b6dae", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#aee7d650bc059f8cf752b8188a80f5db1", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#ae3a215e9f428d6042cf896a6378d28c9", null ],
@@ -26,7 +30,12 @@ var validation_2_n_e_o_n_2_convolution_layer_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#ad901b433d9837ccbc813f45da6643a44", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#af92744dbe82969aec7e036fd13ae6428", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a28c3d4bdd5b08adbcfbd2a65c3921133", null ],
+    [ "src", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#ad0532a6909101cd29a4554ff19508c61", null ],
     [ "TEST_SUITE_END", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "validate", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a6813132c943295888972727864ea5c2f", null ],
+    [ "validate", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a7b3a3ff6a6f15d54e05a82f13dc727c2", null ],
+    [ "validate", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a379c037a43bfd25a8664a9650b93d56a", null ],
+    [ "validate", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a25d6ff2730cac30b00fc8fe6c9028108", null ],
     [ "NEWinogradConvolutionLayerFixture< float >", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a123fca581853db28cc4d78255ab19c31", null ],
     [ "NEWinogradConvolutionLayerNoBiasFixture< float >", "validation_2_n_e_o_n_2_convolution_layer_8cpp.xhtml#a3e6b894fd8b8b2ea7349ceee796d4c03", null ]
 ];

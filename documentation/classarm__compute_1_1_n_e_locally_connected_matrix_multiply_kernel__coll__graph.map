@@ -1,4 +1,5 @@
 <map id="NELocallyConnectedMatrixMultiplyKernel" name="NELocallyConnectedMatrixMultiplyKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="55,80,137,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="65,5,127,32"/>
+<area shape="rect" id="node1" title="NEON kernel to multiply each row of first tensor with low 2 dimensions of second tensor." alt="" coords="5,155,196,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="59,80,142,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="69,5,133,32"/>
 </map>

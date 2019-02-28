@@ -1,4 +1,5 @@
 <map id="CLWidthConcatenate4TensorsKernel" name="CLWidthConcatenate4TensorsKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="66,80,146,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="75,5,137,32"/>
+<area shape="rect" id="node1" title="Interface for the width concatenate kernel of 4 tensors." alt="" coords="5,155,216,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="71,80,151,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="79,5,143,32"/>
 </map>

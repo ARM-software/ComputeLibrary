@@ -1,3 +1,4 @@
 <map id="NEConvolutionSquare&lt; matrix_size &gt;" name="NEConvolutionSquare&lt; matrix_size &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions. " alt="" coords="43,5,119,32"/>
+<area shape="rect" id="node1" title="Basic function to execute convolution of size 5x5, 7x7, 9x9." alt="" coords="5,80,167,121"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_function.xhtml" title="Base class for all functions." alt="" coords="47,5,125,32"/>
 </map>

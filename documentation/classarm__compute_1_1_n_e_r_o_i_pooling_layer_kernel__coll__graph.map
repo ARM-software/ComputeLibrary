@@ -1,4 +1,5 @@
 <map id="NEROIPoolingLayerKernel" name="NEROIPoolingLayerKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="53,80,135,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,125,32"/>
+<area shape="rect" id="node1" title="Interface for the ROI pooling layer kernel." alt="" coords="5,155,187,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++." alt="" coords="55,80,137,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="64,5,128,32"/>
 </map>

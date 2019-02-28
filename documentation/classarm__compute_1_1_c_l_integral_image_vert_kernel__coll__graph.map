@@ -1,4 +1,5 @@
 <map id="CLIntegralImageVertKernel" name="CLIntegralImageVertKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels. " alt="" coords="55,80,135,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,126,32"/>
+<area shape="rect" id="node1" title="Interface to run the vertical pass of the integral image kernel." alt="" coords="5,155,196,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="61,80,141,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="69,5,133,32"/>
 </map>

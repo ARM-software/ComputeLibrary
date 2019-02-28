@@ -26,14 +26,14 @@
 
 #include "arm_compute/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 namespace arm_compute
 {
 class ITensor;
 
 /** Basic function to run @ref NEPriorBoxLayerKernel. */
-class NEPriorBoxLayer : public INESimpleFunction
+class NEPriorBoxLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Set the input and output tensors.

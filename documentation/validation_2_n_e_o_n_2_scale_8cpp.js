@@ -1,12 +1,18 @@
 var validation_2_n_e_o_n_2_scale_8cpp =
 [
     [ "NEScaleFixture", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a152f1e4ecfef54bb351850512120791d", null ],
-    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#aa3830d4e647f546ac6d38972d094d8b5", null ],
-    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#ae6f344fd1ac7dd22a492166e451be5c8", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#ac20f08f84350cec359fd993a89fb2429", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a35eebecdec6239bcc2f3a645ac037472", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a16bef8ca6666ea890dc8cb4d221abab6", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a3a9aeb6c71de03a24bd71c7df97da77a", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a0620fccea209f1cdbe397a7df703c3e7", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a118c18b166a5195bb1d67c302e022606", null ]
+    [ "NEScaleQuantizedFixture", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#aeb53666db95b7f44cd1d9da3bfe9fba9", null ],
+    [ "combine", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#af9629d98e36c1b8af8e76c14af3d6da3", null ],
+    [ "combine", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#acf063764cfff310dba70808a155b52d6", null ],
+    [ "combine", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a783c92d2df2f01e47aa1afcd9b14ab9e", null ],
+    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a614bc7d280f8e91c5d60e5794bdaaaec", null ],
+    [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a9e82562ed5b5aff773e44abff48b5965", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a86d4e83e51ce3c0f66f7113f38a98f59", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a69ac273b17946f393a00d55ec6e3caf4", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a31218e07765dc89e569f0c34d363f6a2", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#ac043b0f8a5e546c0ef63fb8e98961b3c", null ],
+    [ "TEST_SUITE_END", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
+    [ "NEScaleFixture< int16_t >", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a782e7f9a04e1f2cdf11bce6889b59a9c", null ],
+    [ "NEScaleFixture< uint8_t >", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a99749e031ebbf3a071aeb598169b2f51", null ],
+    [ "NEScaleQuantizedFixture< uint8_t >", "validation_2_n_e_o_n_2_scale_8cpp.xhtml#a4333a47b069be7e3f1e23740fdec2e99", null ]
 ];

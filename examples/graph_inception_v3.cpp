@@ -56,7 +56,6 @@ public:
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "QASYMM8 not supported for this graph");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_type == DataType::F16 && common_params.target == Target::NEON, "F16 NEON not supported for this graph");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -851,6 +850,8 @@ private:
  *      https://arxiv.org/abs/1512.00567
  *      "Rethinking the Inception Architecture for Computer Vision"
  *      Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jonathon Shlens, Zbigniew Wojna
+ *
+ * Provenance: download.tensorflow.org/models/inception_v3_2016_08_28.tar.gz
  *
  * @note To list all the possible arguments execute the binary appended with the --help option
  *

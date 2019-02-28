@@ -26,8 +26,8 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLPyramid.h"
-#include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLScale.h"
 #include "arm_compute/runtime/IFunction.h"
 

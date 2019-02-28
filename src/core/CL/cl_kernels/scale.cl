@@ -134,9 +134,11 @@ __kernel void scale_bilinear_nchw(
     vstore4(bilinear_interpolate_with_border(&in, tc, input_width, input_height, BORDER_SIZE), 0, (__global DATA_TYPE *)out.ptr);
 }
 
+#if defined(DEPTH_OUT)
 /** Performs scale on an image interpolating with the NEAREAST NEIGHBOUR method. Input and output are single channel F32. (NHWC)
  *
  * @note Sampling policy to used is passed as -DSAMPLING_POLICY_(TYPE) e.g. -DSAMPLING_POLICY_TOP_LEFT
+ * @note Output tensor's depth should be given as a preprocessor argument using -DDEPTH_OUT=size. e.g. -DDEPTH=16
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/S16/F16/F32.
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -160,28 +162,29 @@ __kernel void scale_bilinear_nchw(
  * @param[in]  scale_y                           The scale factor along y dimension
  */
 __kernel void scale_nearest_neighbour_nhwc(
-    TENSOR3D_DECLARATION(in),
-    TENSOR3D_DECLARATION(out),
+    TENSOR4D_DECLARATION(in),
+    TENSOR4D_DECLARATION(out),
     const float input_width,
     const float input_height,
     const float scale_x,
     const float scale_y)
 {
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(in);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(in, 0);
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT(out, DEPTH_OUT);
 
     const float new_x     = (get_global_id(1) + 0.5f) * scale_x;
-    const float new_y     = (get_global_id(2) + 0.5f) * scale_y;
+    const float new_y     = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y;
     const float clamped_x = clamp(new_x, 0.0f, input_width - 1);
     const float clamped_y = clamp(new_y, 0.0f, input_height - 1);
 
-    *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor3D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y)));
+    *((__global DATA_TYPE *)out.ptr) = *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT)));
 }
 
 /** Performs scale on an image interpolating with the BILINEAR method. (NHWC)
  *
  * @note Sampling policy to be used is passed as -DSAMPLING_POLICY_(TYPE) e.g. -DSAMPLING_POLICY_TOP_LEFT
  * @note If border mode replicate is used, is should be passed as -DBORDER_MODE_REPLICATE
+ * @note Output tensor's depth should be given as a preprocessor argument using -DDEPTH_OUT=size. e.g. -DDEPTH=16
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8/S16/F16/F32.
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -205,22 +208,22 @@ __kernel void scale_nearest_neighbour_nhwc(
  * @param[in]  scale_y                           The scale factor along y dimension
  */
 __kernel void scale_bilinear_nhwc(
-    TENSOR3D_DECLARATION(in),
-    TENSOR3D_DECLARATION(out),
+    TENSOR4D_DECLARATION(in),
+    TENSOR4D_DECLARATION(out),
     const float input_width,
     const float input_height,
     const float scale_x,
     const float scale_y)
 {
-    Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(in);
-    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+    Tensor4D in  = CONVERT_TO_TENSOR4D_STRUCT_NO_STEP(in, 0);
+    Tensor4D out = CONVERT_TO_TENSOR4D_STRUCT(out, DEPTH_OUT);
 
 #ifdef SAMPLING_POLICY_TOP_LEFT
     const float new_x = get_global_id(1) * scale_x;
-    const float new_y = get_global_id(2) * scale_y;
+    const float new_y = (get_global_id(2) % DEPTH_OUT) * scale_y;
 #elif SAMPLING_POLICY_CENTER
     const float new_x = (get_global_id(1) + 0.5f) * scale_x - 0.5f;
-    const float new_y = (get_global_id(2) + 0.5f) * scale_y - 0.5f;
+    const float new_y = ((get_global_id(2) % DEPTH_OUT) + 0.5f) * scale_y - 0.5f;
 #else /* SAMPLING_POLICY */
 #error("Unsupported sampling policy");
 #endif /* SAMPLING_POLICY */
@@ -241,10 +244,10 @@ __kernel void scale_bilinear_nhwc(
     clamped_x1_ = select(clamped_x1_, 0.0f - BORDER_SIZE, new_xf + 1 < 0.f || new_xf + 1 > input_width - 1 || new_yf < 0.f || new_yf > input_height - 1);
 #endif /* BORDER_MODE_REPLICATE */
 
-    float4 ins = (float4)(*((__global DATA_TYPE *)tensor3D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y))),
-                          *((__global DATA_TYPE *)tensor3D_offset(&in, get_global_id(0), convert_int(clamped_x1_), convert_int(clamped_y))),
-                          *((__global DATA_TYPE *)tensor3D_offset(&in, get_global_id(0), convert_int(clamped_x_), convert_int(clamped_y1))),
-                          *((__global DATA_TYPE *)tensor3D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y1))));
+    float4 ins = (float4)(*((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
+                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1_), convert_int(clamped_y), (get_global_id(2) / DEPTH_OUT))),
+                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x_), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))),
+                          *((__global DATA_TYPE *)tensor4D_offset(&in, get_global_id(0), convert_int(clamped_x1), convert_int(clamped_y1), (get_global_id(2) / DEPTH_OUT))));
 
     const float a  = new_x - new_xf;
     const float b  = 1.f - a;
@@ -254,3 +257,4 @@ __kernel void scale_bilinear_nhwc(
 
     *((__global DATA_TYPE *)out.ptr) = CONVERT(fr, DATA_TYPE);
 }
+#endif /* defined(DEPTH_OUT) */

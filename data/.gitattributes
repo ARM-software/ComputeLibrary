@@ -1,2 +1,0 @@
-*.npy filter=lfs diff=lfs merge=lfs -text
-*.ppm filter=lfs diff=lfs merge=lfs -text

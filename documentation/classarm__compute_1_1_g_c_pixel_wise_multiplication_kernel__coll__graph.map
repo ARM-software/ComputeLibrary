@@ -1,4 +1,5 @@
 <map id="GCPixelWiseMultiplicationKernel" name="GCPixelWiseMultiplicationKernel">
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels. " alt="" coords="53,80,135,107"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="63,5,125,32"/>
+<area shape="rect" id="node1" title="Interface for the pixelwise multiplication kernel." alt="" coords="5,155,188,196"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_g_c_kernel.xhtml" title="Common interface for all the GLES kernels." alt="" coords="55,80,138,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="65,5,129,32"/>
 </map>

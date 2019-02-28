@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Helpers.h"
 
+#include "arm_compute/core/Utils.h"
 #include "support/ToolchainSupport.h"
 
 #include <algorithm>
@@ -48,8 +49,10 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
     std::string   out;
     std::ifstream fs;
 
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
     {
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
         fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
         std::ios_base::openmode mode = std::ios::in;
 
@@ -68,11 +71,13 @@ std::string arm_compute::read_file(const std::string &filename, bool binary)
         fs.seekg(0, std::ios::beg);
         // Copy the content of the file
         out.assign(std::istreambuf_iterator<char>(fs), std::istreambuf_iterator<char>());
+#ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
     catch(const std::ifstream::failure &e)
     {
         ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
     }
+#endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
 
     return out;
 }
@@ -321,17 +326,19 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
-PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
+PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout)
 {
-    const auto &strides         = conv_info.stride();
-    const int   out_width       = std::ceil(float(input_shape.x()) / float(strides.first));
-    const int   out_height      = std::ceil(float(input_shape.y()) / float(strides.second));
-    const int   pad_width       = ((out_width - 1) * strides.first + weights_shape.x() - input_shape.x());
-    const int   pad_height      = ((out_height - 1) * strides.second + weights_shape.y() - input_shape.y());
-    const int   same_pad_left   = pad_width / 2;
-    const int   same_pad_top    = pad_height / 2;
-    const int   same_pad_right  = pad_width - same_pad_left;
-    const int   same_pad_bottom = pad_height - same_pad_top;
+    const unsigned int width_idx       = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx      = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const auto        &strides         = conv_info.stride();
+    const int          out_width       = std::ceil(float(input_shape[width_idx]) / float(strides.first));
+    const int          out_height      = std::ceil(float(input_shape[height_idx]) / float(strides.second));
+    const int          pad_width       = ((out_width - 1) * strides.first + weights_shape[width_idx] - input_shape[width_idx]);
+    const int          pad_height      = ((out_height - 1) * strides.second + weights_shape[height_idx] - input_shape[height_idx]);
+    const int          same_pad_left   = pad_width / 2;
+    const int          same_pad_top    = pad_height / 2;
+    const int          same_pad_right  = pad_width - same_pad_left;
+    const int          same_pad_bottom = pad_height - same_pad_top;
 
     return PadStrideInfo(strides.first, strides.second, same_pad_left, same_pad_right, same_pad_top, same_pad_bottom, DimensionRoundingType::CEIL);
 }
@@ -391,6 +398,7 @@ const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsig
     return std::make_pair(w, h);
 }
 
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const uint8_t *ptr, unsigned int n, int stream_width, const std::string &element_delim)
 {
     switch(dt)
@@ -451,3 +459,4 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
     }
     return 0;
 }
+#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
