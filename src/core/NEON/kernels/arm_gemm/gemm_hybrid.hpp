@@ -208,7 +208,6 @@ public:
         return roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Toi);
     }
 
-    using GemmCommon<To, Tr>::pretranspose_B_array;
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         Toi *buffer = reinterpret_cast<Toi *>(in_buffer);
         _B_transposed = buffer;

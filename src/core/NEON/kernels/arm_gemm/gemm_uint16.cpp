@@ -58,7 +58,7 @@ const GemmImplementation<uint16_t, uint32_t> *gemm_implementation_list<uint16_t,
 template UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
 template KernelDescription get_gemm_method<uint16_t, uint32_t>(const GemmArgs<uint32_t> &args);
 template bool method_is_compatible<uint16_t, uint32_t>(GemmMethod method, const GemmArgs<uint32_t> &args);
-template std::vector<std::string> get_compatible_kernels<uint16_t, uint32_t> (const GemmArgs<uint32_t> &args);
+template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint32_t> (const GemmArgs<uint32_t> &args);
 
 } // namespace arm_gemm
 

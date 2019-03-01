@@ -112,8 +112,12 @@ bool find_implementation(const GemmArgs<Tret> &args, const GemmImplementation<To
 }
 
 template<typename Top, typename Tret>
-std::vector<std::string> get_compatible_kernels(const GemmArgs<Tret> &args) {
-    std::vector<std::string> res;
+std::vector<KernelDescription> get_compatible_kernels(const GemmArgs<Tret> &args) {
+    std::vector<KernelDescription> res;
+
+    /* Find out what the default implementation in so we can set the flag accordingly later. */
+    const GemmImplementation<Top, Tret> *default_impl;
+    find_implementation(args, default_impl);
 
     auto gemms = gemm_implementation_list<Top, Tret>();
 
@@ -123,7 +127,7 @@ std::vector<std::string> get_compatible_kernels(const GemmArgs<Tret> &args) {
             continue;
         }
 
-        res.push_back(i->name);
+        res.push_back(KernelDescription(i->method, i->name, i==default_impl));
     }
 
     return res;
