@@ -23,7 +23,7 @@ Related projects:
 
 Documentation available here:
 
-- [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/)
+- [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/index.xhtml)
 - [v18.11](https://arm-software.github.io/ComputeLibrary/v18.11/index.xhtml)
 - [v18.08](https://arm-software.github.io/ComputeLibrary/v18.08/)
 - [v18.05](https://arm-software.github.io/ComputeLibrary/v18.05/)
