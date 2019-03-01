@@ -73,6 +73,7 @@ You should have the following file organisation:
 
 	.
 	├── arm_compute --> All the arm_compute headers
+	│   ├── graph.h --> Includes all the Graph headers at once.
 	│   ├── core
 	│   │   ├── CL
 	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
@@ -163,7 +164,6 @@ You should have the following file organisation:
 	│   ├── graph_*.cpp --> Graph examples
 	│   ├── neoncl_*.cpp --> NEON / OpenCL interoperability examples
 	│   └── neon_*.cpp --> NEON examples
-	├── graph.h --> Includes all the Graph headers at once.
 	├── include
 	│   ├── CL
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
@@ -208,8 +208,6 @@ You should have the following file organisation:
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 	│   ├── framework
 	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
-	│   ├── networks
-	│   │   └── Examples of how to instantiate networks.
 	│   └── validation --> Sources for validation
 	│       ├── Validation specific files
 	│       ├── fixtures
@@ -1041,7 +1039,7 @@ For Android, the library was successfully built and tested using Google's standa
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
 - Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
-- Make sure you have Python 2 installed on your machine.
+- Make sure you have Python 2.7 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
 
