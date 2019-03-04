@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,32 +54,30 @@ public:
     NEQuantizationLayerKernel &operator=(NEQuantizationLayerKernel &&) = default;
     /** Default destructor */
     ~NEQuantizationLayerKernel() = default;
-    /** Set the input, output, min and max.
+    /** Set the input, output.
      *
-     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[out] output  Destination tensor with the same dimensions of input. Data types supported: U8.
-     * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32
+     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32/F16.
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8.
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *min_max);
+    void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayerKernel
      *
-     * @param[in] input   Input tensor info. Data types supported: F32.
-     * @param[in] output  Output tensor info. Data types supported: U8.
-     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
-     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     * @param[in] input  Input tensor info. Data types supported: F32/F16.
+     * @param[in] output Output tensor info. Data types supported: QASYMM8.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
+    template <typename T>
+    void quantize(const Window &window, const QuantizationInfo &qinfo);
+
     const ITensor *_input;
     ITensor       *_output;
-    const ITensor *_min_max;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEQUANTIZATIONLAYERKERNEL_H__ */

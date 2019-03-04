@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,13 @@ int arm_compute::round(float x, RoundingPolicy rounding_policy)
         }
         case RoundingPolicy::TO_NEAREST_EVEN:
         {
+#ifdef __aarch64__
+            asm("fcvtns %x[res], %s[value]"
+                : [res] "=r"(rounded)
+                : [value] "w"(x));
+#else  // __aarch64__
             ARM_COMPUTE_ERROR("TO_NEAREST_EVEN rounding policy is not supported.");
+#endif // __aarch64__
             break;
         }
         default:
