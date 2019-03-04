@@ -732,11 +732,11 @@ public:
     }
 };
 
-/** Data set containing tensor shapes for WidthConcatenateLayer. */
-class WidthConcatenateLayerShapes final : public ShapeDataset
+/** Data set containing tensor shapes for ConcatenateLayer. */
+class ConcatenateLayerShapes final : public ShapeDataset
 {
 public:
-    WidthConcatenateLayerShapes()
+    ConcatenateLayerShapes()
         : ShapeDataset("Shape",
     {
         TensorShape{ 232U, 65U, 3U },

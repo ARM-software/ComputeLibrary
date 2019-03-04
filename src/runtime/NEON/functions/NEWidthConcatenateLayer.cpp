@@ -48,7 +48,7 @@ inline Status NEWidthConcatenateLayer::validate_internal(const std::vector<Tenso
 
     // Output auto inizialitation if not yet initialized
     TensorInfo  tmp_output_info = *output->clone();
-    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
     auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
 
     unsigned int width_offset = 0;
@@ -71,7 +71,7 @@ inline void NEWidthConcatenateLayer::configure_internal(std::vector<TensorType *
     {
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
-    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());

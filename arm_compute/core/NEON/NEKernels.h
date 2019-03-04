@@ -89,6 +89,7 @@
 #include "arm_compute/core/NEON/kernels/NEHOGDescriptorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHOGDetectorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHarrisCornersKernel.h"
+#include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHistogramKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIntegralImageKernel.h"

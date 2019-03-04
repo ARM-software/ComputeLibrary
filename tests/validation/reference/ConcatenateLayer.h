@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_H__
-#define __ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_H__
+#ifndef __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__
+#define __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__
 
 #include "tests/SimpleTensor.h"
 
@@ -37,9 +37,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs, SimpleTensor<T> &dst);
+SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTensor<T> &dst, unsigned int axis);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_WIDTHCONCATENATE_LAYER_H__ */
+#endif /* __ARM_COMPUTE_TEST_CONCATENATE_LAYER_H__ */

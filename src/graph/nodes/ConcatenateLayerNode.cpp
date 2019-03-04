@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,10 +71,9 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
         shapes.emplace_back(&input_descriptor.shape);
     }
 
-    // Calculate output shape
-    if(axis_idx == 0)
+    if(axis_idx < 2)
     {
-        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(shapes);
+        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(shapes, axis_idx);
     }
     else if(axis_idx == 2)
     {

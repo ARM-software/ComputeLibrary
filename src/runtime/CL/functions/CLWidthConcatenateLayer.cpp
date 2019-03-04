@@ -51,7 +51,7 @@ Status CLWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &input
 
     // Output auto inizialitation if not yet initialized
     TensorInfo        tmp_output_info = *output->clone();
-    const TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    const TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
     auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
 
     switch(num_inputs)
@@ -90,7 +90,7 @@ void CLWidthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
     {
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
-    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,17 +98,18 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
     return out_shape;
 }
 
-TensorShape calculate_width_concatenate_shape(const std::vector<TensorShape> &input_shapes)
+TensorShape calculate_concatenate_shape(const std::vector<TensorShape> &input_shapes, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(input_shapes.empty());
-
     TensorShape out_shape = input_shapes[0];
+    ARM_COMPUTE_ERROR_ON(axis >= out_shape.num_dimensions());
 
-    int width = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [](int sum, const TensorShape & shape)
+    const int new_size = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [&](int sum, const TensorShape & shape)
     {
-        return sum + shape.x();
+        ARM_COMPUTE_ERROR_ON(axis >= shape.num_dimensions());
+        return sum + shape[axis];
     });
-    out_shape.set(0, width);
+    out_shape.set(axis, new_size);
 
     return out_shape;
 }
