@@ -119,7 +119,7 @@ void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, 
             break;
         }
         default:
-            ARM_COMPUTE_ERROR("Concatenation is supported across width and depth only!");
+            ARM_COMPUTE_ERROR("Concatenation is supported across width, height and depth only!");
     }
 }
 

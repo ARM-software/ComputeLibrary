@@ -190,6 +190,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "compare_lessequal_quantized", "comparisons.cl" },
     { "concatenate_depth", "concatenate.cl" },
     { "concatenate_width", "concatenate.cl" },
+    { "concatenate_height", "concatenate.cl" },
     { "concatenate_width_x2", "concatenate.cl" },
     { "concatenate_width_x4", "concatenate.cl" },
     { "convolution_rectangle", "convolution_rectangle.cl" },

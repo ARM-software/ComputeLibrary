@@ -1239,6 +1239,7 @@ inline TensorShape calculate_concatenate_shape(const std::vector<T *> &input, si
     {
         ARM_COMPUTE_ERROR_ON(tensor == nullptr);
         const TensorShape shape = extract_shape(tensor);
+        ARM_COMPUTE_ERROR_ON(axis >= shape.num_dimensions());
         new_size += shape[axis];
     }
 

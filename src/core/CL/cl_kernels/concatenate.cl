@@ -330,6 +330,59 @@ __kernel void concatenate_width(
 
 #endif /* defined(WIDTH_OFFSET) && defined(DEPTH) */
 
+#if defined(HEIGHT_OFFSET) && defined(DEPTH) && defined(VEC_SIZE)
+/** This kernel concatenates the input tensor into the output tensor along the second dimension
+ *
+ * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
+ * @note Vector size has to be passed at compile time using -DVEC_SIZE. i.e. -DVEC_SIZE=16
+ * @note Vector sizes supported are 2,4,8 and 16.
+ * @note The offset for the second spatial dimension has to be passed at compile time using -DHEIGHT_OFFSET. i.e. -DHEIGHT_OFFSET=128
+ * @note Tensor depth should be given as a preprocessor argument using -DDEPTH=size. e.g. -DDEPTH=16
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the first source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_w                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_w                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+
+__kernel void concatenate_height(
+    TENSOR4D_DECLARATION(src),
+    TENSOR4D_DECLARATION(dst))
+{
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, DEPTH);
+    Tensor4D dst = CONVERT_TO_TENSOR4D_STRUCT(dst, DEPTH);
+
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
+
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+    const VEC_UCHAR out = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
+    VSTORE(VEC_SIZE)
+    (out, 0, (__global DATA_TYPE *)(dst.ptr + HEIGHT_OFFSET * dst_stride_y));
+#else  /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+    VSTORE(VEC_SIZE)
+    (source_values, 0, (__global DATA_TYPE *)(dst.ptr + HEIGHT_OFFSET * dst_stride_y));
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+}
+
+#endif /* defined(HEIGHT_OFFSET) && defined(DEPTH) */
+
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
  * @note The data type has to be passed at compile time using -DDATA_TYPE. i.e. -DDATA_TYPE=float
@@ -370,6 +423,5 @@ __kernel void concatenate_depth(
 
     VSTORE(VEC_SIZE)
     (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offsets.z));
-
 }
 #endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */

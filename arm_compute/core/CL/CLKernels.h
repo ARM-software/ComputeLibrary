@@ -95,6 +95,7 @@
 #include "arm_compute/core/CL/kernels/CLHOGDescriptorKernel.h"
 #include "arm_compute/core/CL/kernels/CLHOGDetectorKernel.h"
 #include "arm_compute/core/CL/kernels/CLHarrisCornersKernel.h"
+#include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHistogramKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLIntegralImageKernel.h"
