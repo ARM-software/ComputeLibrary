@@ -323,8 +323,8 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 } // namespace
 
 NEScaleKernel::NEScaleKernel()
-    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _constant_border_value(0), _sampling_offset(0),
-      _use_padding(true)
+    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _constant_border_value(PixelValue()),
+      _sampling_offset(0), _use_padding(true)
 {
 }
 
