@@ -236,6 +236,23 @@ public:
     static NodeID add_flatten_node(Graph &g, NodeParams params, NodeIdxPair input);
     /** Adds a fully connected layer node to the graph
      *
+     * @param[in] g              Graph to add the layer to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the fully connected layer node as a NodeID-Index pair
+     * @param[in] num_outputs    Number of output neurons
+     * @param[in] weights_nid    Node ID of the weights node data
+     * @param[in] bias_nid       (Optional) Node ID of the bias node data. Defaults to EmptyNodeID
+     * @param[in] fc_info        (Optional) Fully connected layer metadata
+     * @param[in] out_quant_info (Optional) Output quantization info
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
+                                            NodeID weights_nid, NodeID bias_nid = EmptyNodeID,
+                                            const FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo(),
+                                            const QuantizationInfo        out_quant_info = QuantizationInfo());
+    /** Adds a fully connected layer node to the graph
+     *
      * @param[in] g                  Graph to add the layer to
      * @param[in] params             Common node parameters
      * @param[in] input              Input to the fully connected layer node as a NodeID-Index pair
