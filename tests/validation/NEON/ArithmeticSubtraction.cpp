@@ -43,6 +43,13 @@ namespace validation
 {
 namespace
 {
+
+#ifdef __aarch64__
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#else  //__aarch64__
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#endif //__aarch64__
+
 /** Input data sets **/
 const auto ArithmeticSubtractionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8),
                                                                  framework::dataset::make("DataType", DataType::QASYMM8)),
@@ -182,7 +189,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQuantFixture, framework:
                                                                                                                  ArithmeticSubtractionQuantizationInfoDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
