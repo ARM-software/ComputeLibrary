@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "impl_fp32_fp32.hpp"
 
-namespace depthwise
+#pragma once
+
+namespace neon_convolution_kernels
 {
-template class DepthwiseConvolution<4, 4, 3, 3, 2, 2, float, float, float>;
-}  // namespace depthwise
+
+enum class ActivationFunction
+{
+  None,
+  ReLU,
+  ReLU6,
+};
+
+}

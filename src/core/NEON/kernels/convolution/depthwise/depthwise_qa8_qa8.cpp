@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "impl_fp32_fp32.hpp"
+#include "impl_qa8_qa8.hpp"
 
 namespace depthwise
 {
-template class DepthwiseConvolution<4, 4, 3, 3, 2, 2, float, float, float>;
+template class QAsymm8DepthwiseConvolution<2, 2, 3, 3, 1, 1>;
+template class QAsymm8DepthwiseConvolution<2, 2, 3, 3, 2, 2>;
 }  // namespace depthwise

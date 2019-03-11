@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "impl_fp32_fp32.hpp"
 
-namespace depthwise
+#pragma once
+#include <cstdint>
+
+namespace qasymm8
 {
-template class DepthwiseConvolution<4, 4, 3, 3, 2, 2, float, float, float>;
-}  // namespace depthwise
+
+struct QAsymm8Params
+{
+  uint8_t quantize(float value) const;
+  float dequantize(uint8_t value) const;
+
+  uint8_t offset;
+  float scale;
+};
+
+struct QAsymm8RescaleParams
+{
+  static QAsymm8RescaleParams make_rescale_params(
+    const QAsymm8Params& weight_quant,
+    const QAsymm8Params& input_quant,
+    const QAsymm8Params& output_quant
+  );
+
+  QAsymm8RescaleParams(int32_t shift, int32_t multiplier, float rescale);
+
+  const int32_t shift, multiplier;
+  const float rescale;
+};
+
+}
