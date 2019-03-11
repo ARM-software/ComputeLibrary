@@ -318,6 +318,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_mm_interleaved_transposed_midgard", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t", "gemmlowp.cl" },
     { "gemmlowp_mm_reshaped_lhs_nt_rhs_t_dot8", "gemmlowp.cl" },
+    { "gemmlowp_mm_reshaped_only_rhs_t", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down", "gemmlowp.cl" },
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },

@@ -1267,7 +1267,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
- *  - H0 > 1
+ *  - H0 >= 1
  *
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
@@ -2401,6 +2401,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
+ *  - V0 >= 1
+ *  - H0 >= 1
  *
  * @note In case the output has to be reinterpreted as a 3D tensor (i.e. output of convolution layer), the following information must be passed at compile time:
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
