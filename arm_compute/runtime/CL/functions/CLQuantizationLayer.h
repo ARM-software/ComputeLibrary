@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,11 +24,7 @@
 #ifndef __ARM_COMPUTE_CLQUANTIZATIONLAYER_H__
 #define __ARM_COMPUTE_CLQUANTIZATIONLAYER_H__
 
-#include "arm_compute/runtime/IFunction.h"
-
-#include "arm_compute/core/CL/kernels/CLMinMaxLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 namespace arm_compute
 {
@@ -38,37 +34,26 @@ class ICLTensor;
  *
  * @note The implementation supports only 3D input tensors.
  *
- * -# @ref CLMinMaxLayerKernel
  * -# @ref CLQuantizationLayerKernel
  *
  */
-class CLQuantizationLayer : public IFunction
+class CLQuantizationLayer : public ICLSimpleFunction
 {
 public:
-    /** Default constructor */
-    CLQuantizationLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[out] output Destination tensor with the same dimensions of input. Output data type must be U8.
+     * @param[in]  input  Source tensor. Data types supported: F16/32.
+     * @param[out] output Destination tensor with the same dimensions of input. Output data type must be QASYMM8.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayer
      *
-     * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[in] output Output tensor info. Output data type must be U8.
+     * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F16/32.
+     * @param[in] output Output tensor info. Output data type must be QASYMM8.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    CLQuantizationLayerKernel _quantize_kernel;
-    CLMinMaxLayerKernel       _min_max_kernel;
-    CLTensor                  _min_max;
 };
-}
+} //namespace arm_compute
 #endif /* __ARM_COMPUTE_CLQUANTIZATIONLAYER_H__ */

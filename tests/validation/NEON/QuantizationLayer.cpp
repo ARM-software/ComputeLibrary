@@ -97,7 +97,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationS
 }
 
 template <typename T>
-using NEQuantizationLayerFixture = QAsymm8QuantizationValidationFixture<Tensor, Accessor, NEQuantizationLayer, T>;
+using NEQuantizationLayerFixture = QuantizationValidationFixture<Tensor, Accessor, NEQuantizationLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)

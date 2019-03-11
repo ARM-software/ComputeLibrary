@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,53 +23,63 @@
  */
 #include "helpers.h"
 
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_RTE_VEC_STR(x, type, size) (convert_##type##size##_rte((x)))
+#define CONVERT_RTE_VEC(x, type, size) CONVERT_RTE_VEC_STR(x, type, size)
+
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
+
 /** This performs the quantization of floating point inputs to 8-bit unsigned integers.
  *
- * @param[in]  input_ptr                             Pointer to the source image. Supported data types: F32
- * @param[in]  input_stride_x                        Stride of the source image in X dimension (in bytes)
- * @param[in]  input_step_x                          input_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  input_stride_y                        Stride of the source image in Y dimension (in bytes)
- * @param[in]  input_step_y                          input_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  input_stride_z                        Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  input_step_z                          input_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  input_offset_first_element_in_bytes   The offset of the first element in the source image
- * @param[out] output_ptr                            Pointer to the destination image. Supported data types: U8
- * @param[in]  output_stride_x                       Stride of the destination image in X dimension (in bytes)
- * @param[in]  output_step_x                         output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  output_stride_y                       Stride of the destination image in Y dimension (in bytes)
- * @param[in]  output_step_y                         output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  output_stride_z                       Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  output_step_z                         output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  output_offset_first_element_in_bytes  The offset of the first element in the destination image
- * @param[in]  min_max_ptr                           Pointer to the min/max vector. Minimum value in position 0, maximum value in position 1. Supported data types: F32.
- * @param[in]  min_max_stride_x                      Stride of the min/max vector in X dimension (in bytes)
- * @param[in]  min_max_step_x                        min_max_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  min_max_offset_first_element_in_bytes The offset of the first element in the min/max vector
+ * @param[in]  input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in]  input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out] output_ptr                           Pointer to the destination tensor. Supported data types: U8
+ * @param[in]  output_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
 __kernel void quantization_layer(
     TENSOR3D_DECLARATION(input),
-    TENSOR3D_DECLARATION(output),
-    VECTOR_DECLARATION(min_max))
+    TENSOR3D_DECLARATION(output))
 {
     // Get pixels pointer
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-    // min_max_value.s0 = min, min_max_value.s1 = max
-    const float2 min_max_value = vload2(0, (__global float *)(min_max_ptr + min_max_offset_first_element_in_bytes));
-
-    const float4 vmin   = (float4)min_max_value.s0;
-    const float4 vrange = (float4)(min_max_value.s1 - min_max_value.s0);
+#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+    // Check if access on width gets out of bounds
+    // If it does shift access vector to access elements within bounds
+    const int xi = (int)(get_global_id(0) * VEC_SIZE);
+    input.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * input_stride_x;
+    output.ptr -= max(xi - (int)LAST_ACCESSED_X, 0) * output_stride_x;
 
     // Load data
-    float4 data = vload4(0, (__global float *)input.ptr);
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    val = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
 
-    // Map float values to range [0.0, 1.0]
-    data = (data - vmin) / vrange;
+    // Create scale and offset vectors
+    const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) vscale = SCALE;
+    const VEC_DATA_TYPE(int, VEC_SIZE) voffset      = OFFSET;
 
-    // Quantize and saturate
-    uchar4 res = convert_uchar4_sat(data * 256.0f);
+    // Quantize
+    VEC_DATA_TYPE(int, VEC_SIZE)
+    res = CLAMP(CONVERT_RTE_VEC(val / vscale, int, VEC_SIZE) + voffset, 0, 255);
 
-    // Store result
-    vstore4(res, 0, (__global uchar *)output.ptr);
+    //Store result
+    VSTORE(VEC_SIZE)
+    (CONVERT(res, VEC_DATA_TYPE(uchar, VEC_SIZE)), 0, (__global uchar *)output.ptr);
+#else  //!defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
+    *((__global uchar *)(output.ptr)) = (uchar)CLAMP(CONVERT_RTE(((float) * (__global DATA_TYPE *)input.ptr) / ((float)SCALE), int) + (int)OFFSET, 0, 255);
+#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
 }
+#endif //defined(VEC_SIZE) && defined(DATA_TYPE) && defined(SCALE) && defined(OFFSET)
