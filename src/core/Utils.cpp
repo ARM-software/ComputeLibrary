@@ -383,18 +383,6 @@ const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsig
             ARM_COMPUTE_ERROR("Unsupported rounding type");
     }
 
-    // Make sure that border operations will start from inside the input and not the padded area
-    if(((w - 1) * stride_x) >= (width + pad_left))
-    {
-        --w;
-    }
-    if(((h - 1) * stride_y) >= (height + pad_top))
-    {
-        --h;
-    }
-    ARM_COMPUTE_ERROR_ON(((w - 1) * stride_x) >= (width + pad_left));
-    ARM_COMPUTE_ERROR_ON(((h - 1) * stride_y) >= (height + pad_top));
-
     return std::make_pair(w, h);
 }
 
