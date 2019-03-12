@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -204,10 +204,13 @@ void call_all_const_node_accessors(Graph &g)
 
 bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
-    return !std::any_of(std::begin(workload.inputs), std::end(workload.inputs), [](Tensor * input_tensor)
+    bool is_valid = true;
+    std::for_each(std::begin(workload.inputs), std::end(workload.inputs), [&](Tensor * input_tensor)
     {
-        return (input_tensor == nullptr) || !input_tensor->call_accessor();
+        bool valid_input = (input_tensor != nullptr) && input_tensor->call_accessor();
+        is_valid         = is_valid && valid_input;
     });
+    return is_valid;
 }
 
 void prepare_all_tasks(ExecutionWorkload &workload)
