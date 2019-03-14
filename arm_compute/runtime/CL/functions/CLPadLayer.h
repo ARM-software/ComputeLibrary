@@ -53,9 +53,12 @@ public:
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
-     * @param[in]  constant_value (Optional) Constant value to be used for the padding
+     * @param[in]  constant_value (Optional) Constant value to be used for the padding.
+     * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
+     *                              is currently supported.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
+    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *
@@ -64,8 +67,11 @@ public:
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
      * @param[in] constant_value (Optional) Constant value to be used for the padding
+     * @param[in] mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
+     *                              is currently supported.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
     void run() override;

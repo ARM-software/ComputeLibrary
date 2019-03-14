@@ -1183,6 +1183,46 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
     return os;
 }
 
+/** Formatted output of the PaddingMode type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  mode Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PaddingMode &mode)
+{
+    switch(mode)
+    {
+        case PaddingMode::CONSTANT:
+            os << "CONSTANT";
+            break;
+        case PaddingMode::REFLECT:
+            os << "REFLECT";
+            break;
+        case PaddingMode::SYMMETRIC:
+            os << "SYMMETRIC";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the PaddingMode type.
+ *
+ * @param[in] mode Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PaddingMode &mode)
+{
+    std::stringstream str;
+    str << mode;
+    return str.str();
+}
+
 /** Formatted output of the PadStrideInfo type.
  *
  * @param[out] os              Output stream.

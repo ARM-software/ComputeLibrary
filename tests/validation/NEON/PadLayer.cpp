@@ -42,12 +42,14 @@ namespace validation
 {
 namespace
 {
-const auto PaddingSizesDataset = framework::dataset::make("PaddingSize", { PaddingList{ { 0, 0 } },
+const auto PaddingSizesDataset = framework::dataset::make("PaddingSize",
+{
+    PaddingList{ { 0, 0 } },
     PaddingList{ { 1, 1 } },
     PaddingList{ { 1, 1 }, { 2, 2 } },
-    PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 } },
-    PaddingList{ { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 2 } },
-    PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 1, 1 } }
+    PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 } },
+    PaddingList{ { 0, 0 }, { 1, 0 }, { 0, 1 } },
+    PaddingList{ { 0, 1 }, { 1, 0 }, { 0, 1 } },
 });
 } // namespace
 
@@ -57,33 +59,62 @@ TEST_SUITE(PadLayer)
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type input/output
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32)
-        }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
-                                                TensorInfo(TensorShape(28U, 11U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(29U, 17U, 2U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(29U, 15U, 4U, 3U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(27U, 14U, 3U, 4U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(32U, 13U, 2U, 3U), 1, DataType::F32)
-        })),
-        framework::dataset::make("PaddingSize", { PaddingList{{0, 0}},
-                                                  PaddingList{{1, 1}},
-                                                  PaddingList{{1, 1}, {2, 2}},
-                                                  PaddingList{{1,1}, {1,1}, {1,1}, {1,1}},
-                                                  PaddingList{{0,0}, {1,0}, {0,1}, {1,2}},
-                                                  PaddingList{{0,0}, {0,0}, {0,0}, {1,1}}
-        })),
-        framework::dataset::make("Expected", { false, false, true, true, true, true })),
-        input_info, output_info, padding, expected)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type input/output
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type input/output
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32)
+                                                     }),
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(28U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(29U, 17U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(29U, 15U, 4U, 3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 14U, 3U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(28U, 11U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(29U, 17U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(29U, 15U, 4U, 3U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 14U, 3U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U, 3U), 1, DataType::F32)
+                                                     })),
+               framework::dataset::make("PaddingSize", { PaddingList{{0, 0}},
+                                                         PaddingList{{1, 1}},
+                                                         PaddingList{{1, 1}, {2, 2}},
+                                                         PaddingList{{1,1}, {1,1}, {1,1}, {1,1}},
+                                                         PaddingList{{0,0}, {1,0}, {0,1}, {1,2}},
+                                                         PaddingList{{0,0}, {0,0}, {0,0}, {1,1}},
+                                                         PaddingList{{0, 0}},
+                                                         PaddingList{{1, 1}},
+                                                         PaddingList{{1, 1}, {2, 2}},
+                                                         PaddingList{{1,1}, {1,1}, {1,1}, {1,1}},
+                                                         PaddingList{{0,0}, {1,0}, {0,1}, {1,2}},
+                                                         PaddingList{{0,0}, {0,0}, {0,0}, {1,1}}
+                                                         })),
+               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT,
+                                                         PaddingMode::CONSTANT,
+                                                         PaddingMode::CONSTANT,
+                                                         PaddingMode::CONSTANT,
+                                                         PaddingMode::CONSTANT,
+                                                         PaddingMode::CONSTANT,
+                                                         PaddingMode::REFLECT,
+                                                         PaddingMode::REFLECT,
+                                                         PaddingMode::REFLECT,
+                                                         PaddingMode::REFLECT,
+                                                         PaddingMode::REFLECT,
+                                                         PaddingMode::SYMMETRIC })),
+               framework::dataset::make("Expected", { false, false, true, true, true, true, false, false, true, false, false, true })),
+               input_info, output_info, padding, mode, expected)
 {
-    Status s = NEPadLayer::validate(&input_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), padding);
-    ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(NEPadLayer::validate(&input_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), padding, PixelValue(), mode)) == expected, framework::LogLevel::ERRORS);
 }
 
 // clang-format on
@@ -96,17 +127,17 @@ TEST_SUITE(Float)
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F32 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F32 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(
-                           combine(datasets::LargeShapes(), framework::dataset::make("DataType", { DataType::F32 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F32 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -116,17 +147,17 @@ TEST_SUITE_END() // FP32
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<half>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F16 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F16 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(
-                           combine(datasets::LargeShapes(), framework::dataset::make("DataType", { DataType::F16 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F16 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -135,41 +166,20 @@ TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END() // Float
 
-TEST_SUITE(Integer)
-TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 })),
-                           PaddingSizesDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(
-                           combine(datasets::LargeShapes(), framework::dataset::make("DataType", { DataType::S8 })),
-                           PaddingSizesDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-TEST_SUITE_END() // S8
-TEST_SUITE_END() // Integer
-
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(
-                           combine(datasets::LargeShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                           PaddingSizesDataset))
+                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                       PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output
     validate(Accessor(_target), _reference);

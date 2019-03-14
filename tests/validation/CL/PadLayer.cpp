@@ -94,8 +94,9 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunPadding, CLPaddingFixture<float>, framework::DatasetMode::ALL,
                        combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F32 })),
-                           PaddingSizesDataset))
+                           combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F32 })),
+                                   PaddingSizesDataset),
+                           framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -105,8 +106,9 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunPadding, CLPaddingFixture<half>, framework::DatasetMode::ALL,
                        combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F16 })),
-                           PaddingSizesDataset))
+                           combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::F16 })),
+                                   PaddingSizesDataset),
+                           framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -118,8 +120,9 @@ TEST_SUITE(Integer)
 TEST_SUITE(S8)
 FIXTURE_DATA_TEST_CASE(RunPadding, CLPaddingFixture<int8_t>, framework::DatasetMode::ALL,
                        combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 })),
-                           PaddingSizesDataset))
+                           combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 })),
+                                   PaddingSizesDataset),
+                           framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -131,8 +134,9 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunPadding, CLPaddingFixture<uint8_t>, framework::DatasetMode::ALL,
                        combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                           PaddingSizesDataset))
+                           combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                   PaddingSizesDataset),
+                           framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

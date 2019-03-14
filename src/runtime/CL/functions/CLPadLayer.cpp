@@ -34,8 +34,9 @@ CLPadLayer::CLPadLayer()
 {
 }
 
-void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value)
+void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
+    ARM_COMPUTE_UNUSED(mode);
     // Copy the input to the output
     _copy_kernel.configure(input, output, padding);
 
@@ -46,10 +47,11 @@ void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingLis
     _fillborder_kernel.configure(input, input->info()->padding(), BorderMode::CONSTANT, constant_value);
 }
 
-Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value)
+Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(input, constant_value));
     ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output, padding));
+    ARM_COMPUTE_RETURN_ERROR_ON(mode != PaddingMode::CONSTANT);
 
     return Status{};
 }

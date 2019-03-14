@@ -707,6 +707,15 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord);
  */
 inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 
+/** Get the DataLayoutDimension of a given index and layout.
+ *
+ * @param[in] data_layout The data layout.
+ * @param[in] index       The data layout index.
+ *
+ * @return The dimension which this index is requested for.
+ */
+inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout data_layout, const size_t index);
+
 /** Calculate the normalization dimension index for a given normalization type
  *
  * @param[in] layout Data layout of the input and output tensor
