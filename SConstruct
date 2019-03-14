@@ -206,6 +206,7 @@ elif env['arch'] == 'x86_32':
     env.Append(CCFLAGS = ['-m32'])
     env.Append(LINKFLAGS = ['-m32'])
 elif env['arch'] == 'x86_64':
+    env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CCFLAGS = ['-m64'])
     env.Append(LINKFLAGS = ['-m64'])
 
