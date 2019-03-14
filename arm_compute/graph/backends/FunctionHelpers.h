@@ -109,7 +109,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
                                << node.name()
                                << " Type: " << node.type()
-                               << " Target " << TargetInfo::TargetType
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Shape: " << input->info()->tensor_shape()
                                << " Activation function: " << act_info.activation()
@@ -245,8 +245,10 @@ std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransf
     func->configure(input, output, deltas, bbox_info);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << TargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Shape: " << input->info()->tensor_shape()
                                << " BoundingBox Info img W: " << bbox_info.img_width() << " "
@@ -326,6 +328,12 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
     func->configure(inputs, output, concat_axis);
 
     // Log info
+    const bool         is_quantized = is_data_type_quantized_asymmetric(output->info()->data_type());
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
                                << node.name()
                                << " Type: " << node.type()
@@ -334,6 +342,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
                                << " Shape: " << output->info()->tensor_shape()
                                << " Num Inputs: " << inputs.size()
                                << " Axis: " << concat_axis
+                               << qss.str()
                                << std::endl);
 
     return std::move(func);
@@ -421,10 +430,10 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Groups: " << num_groups
-                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
@@ -536,11 +545,11 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
                                << " Type: " << func_name
                                << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
-                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
                                << " Depth multiplier: " << depth_multiplier
+                               << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
@@ -1177,8 +1186,10 @@ std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
     func->configure(input, rois, output, pool_info);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << TargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()

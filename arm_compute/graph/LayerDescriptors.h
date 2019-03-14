@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,45 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_ACTIVATION_LAYER_NODE_H__
-#define __ARM_COMPUTE_GRAPH_ACTIVATION_LAYER_NODE_H__
+#ifndef __ARM_COMPUTE_CONCAT_DESCRIPTOR_H__
+#define __ARM_COMPUTE_CONCAT_DESCRIPTOR_H__
 
-#include "arm_compute/graph/INode.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-/** Activation Layer node */
-class ActivationLayerNode final : public INode
+namespace descriptors
 {
-public:
-    /** Constructor
+/** Common node parameters */
+struct ConcatLayerDescriptor
+{
+    /** Default constructor */
+    ConcatLayerDescriptor()
+        : axis(DataLayoutDimension::CHANNEL), output_qinfo()
+    {
+    }
+
+    /** Constructor concatenate layer descriptor
      *
-     * @param[in] info           Activation Layer information
-     * @param[in] out_quant_info (Optional) Output quantization info
+     * @param[in] axis Axis.
      */
-    ActivationLayerNode(ActivationLayerInfo info,
-                        QuantizationInfo    out_quant_info = QuantizationInfo());
-    /** Activation metadata accessor
+    ConcatLayerDescriptor(DataLayoutDimension axis)
+        : axis(axis), output_qinfo()
+    {
+    }
+
+    /** Constructor concatenate layer descriptor
      *
-     * @return The activation info of the layer
+     * @param[in] axis         Axis.
+     * @param[in] output_qinfo Output quantization info.
      */
-    ActivationLayerInfo activation_info() const;
+    ConcatLayerDescriptor(DataLayoutDimension axis, QuantizationInfo output_qinfo)
+        : axis(axis), output_qinfo(output_qinfo)
+    {
+    }
 
-    // Inherited overridden methods:
-    NodeType         type() const override;
-    bool             forward_descriptors() override;
-    TensorDescriptor configure_output(size_t idx) const override;
-    void accept(INodeVisitor &v) override;
-
-public:
-    static constexpr NodeType node_type = NodeType::ActivationLayer;
-
-private:
-    ActivationLayerInfo _info;
-    QuantizationInfo    _out_quant_info;
+    const DataLayoutDimension axis;         /**< Concatenation Axis */
+    const QuantizationInfo    output_qinfo; /**< Output quantizazion info */
 };
+} // namespace descriptor
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_ACTIVATION_LAYER_NODE_H__ */
+#endif /* __ARM_COMPUTE_CONCAT_DESCRIPTOR_H__ */

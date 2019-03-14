@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,10 +36,10 @@ class ConcatenateLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] total_nodes Number of nodes that will get concatenated
-     * @param[in] axis        Concatenation axis
+     * @param[in] total_nodes       Number of nodes that will get concatenated
+     * @param[in] concat_descriptor Concatenate Layer Descriptor
      */
-    ConcatenateLayerNode(unsigned int total_nodes, DataLayoutDimension axis);
+    ConcatenateLayerNode(unsigned int total_nodes, descriptors::ConcatLayerDescriptor concat_descriptor);
     /** Computes concatenations output descriptor
      *
      * @param[in] input_descriptors Input descriptors
@@ -68,6 +68,12 @@ public:
      */
     DataLayoutDimension concatenation_axis() const;
 
+    /** Concatenation output quantization info accessor
+     *
+     * @return Output quantization info
+     */
+    QuantizationInfo output_quantization_info() const;
+
     // Inherited overridden methods:
     NodeType         type() const override;
     bool             forward_descriptors() override;
@@ -75,9 +81,9 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    unsigned int        _total_nodes;
-    DataLayoutDimension _axis;
-    bool                _is_enabled;
+    unsigned int                       _total_nodes;
+    descriptors::ConcatLayerDescriptor _concat_descriptor;
+    bool                               _is_enabled;
 };
 } // namespace graph
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -160,7 +160,7 @@ public:
 
 private:
     template <typename T>
-    void access_numpy_tensor(ITensor &tensor);
+    void access_numpy_tensor(ITensor &tensor, T tolerance);
 
     Tensor            _npy_tensor;
     const std::string _filename;

@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_GRAPH_BUILDER_H__
 
 #include "arm_compute/graph/ITensorAccessor.h"
+#include "arm_compute/graph/LayerDescriptors.h"
 #include "arm_compute/graph/Types.h"
 
 namespace arm_compute
@@ -73,14 +74,16 @@ public:
     static NodeID add_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an activation layer node to the graph
      *
-     * @param[in] g        Graph to add the node to
-     * @param[in] params   Common node parameters
-     * @param[in] input    Input to the activation layer node as a NodeID-Index pair
-     * @param[in] act_info Activation layer information
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the activation layer node as a NodeID-Index pair
+     * @param[in] act_info       Activation layer information
+     * @param[in] out_quant_info (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info);
+    static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
+                                      const QuantizationInfo out_quant_info = QuantizationInfo());
     /** Adds a batch normalization layer node to the graph
      *
      * @param[in] g              Graph to add the node to
@@ -163,14 +166,14 @@ public:
                                          ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
     /** Adds a depth concatenate node to the graph
      *
-     * @param[in] g      Graph to add the node to
-     * @param[in] params Common node parameters
-     * @param[in] inputs Inputs to the depth concatenate layer node as a NodeID-Index pair
-     * @param[in] axis   Concatenation axis
+     * @param[in] g                 Graph to add the node to
+     * @param[in] params            Common node parameters
+     * @param[in] inputs            Inputs to the depth concatenate layer node as a NodeID-Index pair
+     * @param[in] concat_descriptor Concatenation layer descriptor
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, DataLayoutDimension axis);
+    static NodeID add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, descriptors::ConcatLayerDescriptor concat_descriptor);
     /** Adds a depth-wise convolution layer node to the graph
      *
      * @param[in] g                     Graph to add the node to
@@ -183,13 +186,15 @@ public:
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
      * @param[in] quant_info            (Optional) Weights quantization info
+     * @param[in] out_quant_info        (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                                  Size2D kernel_spatial_extend, PadStrideInfo conv_info, int depth_multiplier = 1,
                                                  DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::Default,
-                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo());
+                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo(),
+                                                 const QuantizationInfo out_quant_info = QuantizationInfo());
     /** Adds an element-wise layer node to the graph
      *
      * @param[in] g         Graph to add the node to

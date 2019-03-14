@@ -203,6 +203,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 
     return status;
 }
+
 /** Validates a detection output layer node
  *
  * @tparam DetectionOutputLayer DetectionOutput layer type
@@ -370,6 +371,29 @@ Status validate_reorg_layer(ReorgLayerNode &node)
 
     // Validate function
     return ReorgLayer::validate(input, output, node.stride());
+}
+
+/** Validates a Reshape layer node
+ *
+ * @tparam ReshapeLayer Reshape layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ReshapeLayer>
+Status validate_reshape_layer(ReshapeLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ReshapeLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = detail::get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return ReshapeLayer::validate(input, output);
 }
 
 /** Validates a ROI Align layer node

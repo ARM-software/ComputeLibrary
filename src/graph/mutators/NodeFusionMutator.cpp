@@ -211,10 +211,17 @@ void NodeFusionMutator::mutate(Graph &g)
     {
         return true;
     };
-    auto qs8_prec = [](INode & n)
+    auto qs8_prec = [&g](INode & n)
     {
         ARM_COMPUTE_ERROR_ON(n.output(0) == nullptr);
-        return n.output(0)->desc().data_type == DataType::QASYMM8;
+
+        const auto output_edge_id = *n.output_edges().begin();
+        const auto output_edge    = g.edge(output_edge_id);
+        // To perform fusion the two nodes must have same output quantization information
+        const bool same_qinfo     = n.output(0)->desc().quant_info == output_edge->producer()->output(0)->desc().quant_info;
+        const bool output_qasymm8 = n.output(0)->desc().data_type == DataType::QASYMM8;
+
+        return output_qasymm8 && same_qinfo;
     };
 
     // Fusion mutations

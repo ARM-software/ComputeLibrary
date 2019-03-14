@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_INODE_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/graph/LayerDescriptors.h"
 #include "arm_compute/graph/TensorDescriptor.h"
 #include "arm_compute/graph/Types.h"
 

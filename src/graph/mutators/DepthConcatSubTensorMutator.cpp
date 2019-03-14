@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,11 +69,12 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
                 continue;
             }
 
-            // Check that all tensor have the same target and valid inputs
+            // Check that all tensor have the same target, valid inputs and same quantization info
             bool is_valid = std::all_of(node->input_edges().cbegin(), node->input_edges().cend(),
                                         [&](const EdgeID & eid)
             {
-                return (g.edge(eid) != nullptr) && (g.edge(eid)->tensor() != nullptr) && (g.edge(eid)->tensor()->desc().target == output_tensor->desc().target);
+                return (g.edge(eid) != nullptr) && (g.edge(eid)->tensor() != nullptr) && (g.edge(eid)->tensor()->desc().target == output_tensor->desc().target)
+                       && (g.edge(eid)->tensor()->desc().quant_info == output_tensor->desc().quant_info);
             });
 
             // Create subtensors

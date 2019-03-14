@@ -74,6 +74,8 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_priorbox_layer<NEPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::validate_reorg_layer<NEReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
+        case NodeType::ReshapeLayer:
+            return detail::validate_reshape_layer<NEReshapeLayer>(*polymorphic_downcast<ReshapeLayerNode *>(node));
         case NodeType::ROIAlignLayer:
             return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ROIAlignLayer");
         case NodeType::SliceLayer:

@@ -111,9 +111,10 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
     return nid;
 }
 
-NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info)
+NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
+                                         const QuantizationInfo out_quant_info)
 {
-    return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info);
+    return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
 
 NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
@@ -293,11 +294,11 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     return deconv_nid;
 }
 
-NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, DataLayoutDimension axis)
+NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, descriptors::ConcatLayerDescriptor concat_descriptor)
 {
     ARM_COMPUTE_ERROR_ON(inputs.size() == 0);
 
-    NodeID nid = g.add_node<ConcatenateLayerNode>(inputs.size(), axis);
+    NodeID nid = g.add_node<ConcatenateLayerNode>(inputs.size(), concat_descriptor);
 
     unsigned int i = 0;
     for(const auto &input : inputs)
@@ -312,7 +313,7 @@ NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, std::vect
 
 NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D kernel_spatial_extend,
                                                     PadStrideInfo conv_info, int depth_multiplier, DepthwiseConvolutionMethod method,
-                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo quant_info)
+                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo quant_info, const QuantizationInfo out_quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
     ARM_COMPUTE_ERROR_ON((kernel_spatial_extend.width == 0) || (kernel_spatial_extend.height == 0));
@@ -351,7 +352,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     }
 
     // Create convolution node and connect
-    NodeID conv_nid = g.add_node<DepthwiseConvolutionLayerNode>(conv_info, depth_multiplier, method);
+    NodeID conv_nid = g.add_node<DepthwiseConvolutionLayerNode>(conv_info, depth_multiplier, method, out_quant_info);
     g.add_connection(input.node_id, input.index, conv_nid, 0);
     g.add_connection(w_nid, 0, conv_nid, 1);
     if(has_bias)

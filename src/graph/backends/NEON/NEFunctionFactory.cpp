@@ -143,8 +143,10 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
             << " Weights QuantInfo: " << weights->info()->quantization_info()
             << " Output QuantInfo: " << output->info()->quantization_info();
     }
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
-                               << " Target " << NETargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << func_name
+                               << " Target: " << NETargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
