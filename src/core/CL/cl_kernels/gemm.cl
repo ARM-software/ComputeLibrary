@@ -1128,7 +1128,7 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
 #endif // defined(TRANSPOSE)
 #endif // defined(K0) && defined(N0) && defined(H0) && defined(DATA_TYPE) && defined(SRC_HEIGHT)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(K)
+#if defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N) && defined(K)
 
 #define CONCAT(a, b) a##b
 
@@ -1256,6 +1256,8 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is transposed
  *
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions (M,N and K) must be passed at compile time using -DM, -DN and and -DK (i.e. -DM=52, -DN=30 and -DK=90)
  * @note The number of columns of LHS matrix must be passed at compile time using -DK (i.e. -DK=64)
  * @note The block's dimensions used for reshaping the RHS matrix (N0 and K0) must be passed at compile time using -DN0 and -DK0 (i.e. -DN0=8, -DK0=4).
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
@@ -1331,6 +1333,13 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((x * N0 >= N) || (y * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
     uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
@@ -1534,15 +1543,6 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
     // Left-over accumulations
     for(; i < K; ++i)
     {
-        // Supported cases (M0, K0):
-        // 1,2 - 1,3 - 1,4 - 1,8 - 1,16
-        // 2,2 - 2,3 - 2,4 - 2,8 - 2,16
-        // 3,2 - 3,3 - 3,4 - 3,8 - 3,16
-        // 4,2 - 4,3 - 4,4 - 4,8 - 4,16
-        // 5,2 - 5,3 - 5,4 - 5,8 - 5,16
-        // 6,2 - 6,3 - 6,4 - 6,8 - 6,16
-        // 7,2 - 7,3 - 7,4 - 7,8 - 7,16
-        // 8,2 - 8,3 - 8,4 - 8,8 - 8,16
         // Load values from LHS matrix
         DATA_TYPE a0 = *((__global DATA_TYPE *)(lhs_ptr + lhs_offset + 0 * lhs_stride_y + zin0));
 #if M0 > 1
@@ -1852,6 +1852,8 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  *  The LHS matrix is NOT reshaped
  *  The RHS is reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the block K0xN0 is NOT transposed
  *
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions (M,N and K) must be passed at compile time using -DM, -DN and and -DK (i.e. -DM=52, -DN=30 and -DK=90).
  * @note The block's dimensions used for reshaping the RHS matrix (N0 and K0) must be passed at compile time using -DN0 and -DK0 (i.e. -DN0=8, -DK0=4).
  * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (i.e. -DH0=2)
@@ -1860,7 +1862,7 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
- *  - H0 > 1
+ *  - H0 >= 1
  *
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
@@ -1926,6 +1928,13 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
     uint x = get_global_id(0);
     uint y = get_global_id(1);
     uint z = get_global_id(2);
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((x * N0 >= N) || (y * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
     uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
@@ -2259,9 +2268,9 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #undef RHS_OFFSET_X
 #undef RHS_STEP_X
 }
-#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(K)
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N) && defined(K)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE)
+#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(DATA_TYPE) && defined(M) && defined(N)
 
 #if K0 == 2
 #define ARM_DOT_K0(a, b, c)     \
@@ -2381,6 +2390,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
  *
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (i.e. -DM=52 and -DN=90).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (i.e. -DM0=4, -DN0=8, -DK0=4).
  * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (i.e. -DV0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (i.e. -DH0=2)
@@ -2460,6 +2471,13 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #define RHS_STEP_X (K0)
 #define RHS_STEP_LOOP (H0)
 #endif // defined(RHS_INTERLEAVE)
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((get_global_id(0) * N0 >= N) || (get_global_id(1) * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
     __global uchar *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (get_global_id(1) % V0) * (uint)LHS_OFFSET_X * sizeof(DATA_TYPE) + (get_global_id(1) / V0) * (uint)lhs_stride_y +

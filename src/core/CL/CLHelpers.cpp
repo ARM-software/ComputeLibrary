@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -254,5 +254,12 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         default:
             return 1;
     }
+}
+
+bool preferred_dummy_work_items_support(const cl::Device &device)
+{
+    ARM_COMPUTE_UNUSED(device);
+    // TODO (COMPMID-2044)
+    return true;
 }
 } // namespace arm_compute

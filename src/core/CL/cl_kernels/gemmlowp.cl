@@ -1944,7 +1944,7 @@ __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #endif // defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_Y) && defined(COLS_A)
 
-#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0)
+#if defined(M0) && defined(N0) && defined(K0) && defined(V0) && defined(H0) && defined(M) && defined(N)
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
@@ -2103,6 +2103,8 @@ __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
  *  The LHS matrix must be reshaped with @ref CLGEMMReshapeLHSMatrixKernel and the M0xK0 must be NOT transposed
  *  The RHS matrix must be reshaped with @ref CLGEMMReshapeRHSMatrixKernel and the K0xN0 must be transposed
  *
+ * @note If the first two dimensions of NDRange have been dispatched with "dummy_work_items" support, the option -DDUMMY_WORK_ITEMS must be passed at compile time.
+ * @note The GEMM's dimensions M and N must be passed at compile time using -DM and -DN (i.e. -DM=52 and -DN=90).
  * @note The block's dimensions used for reshaping the LHS matrix and the RHS matrix (M0, N0 and K0) must be passed at compile time using -DM0, -DN0 and -DK0 (i.e. -DM0=4, -DN0=8, -DK0=4).
  * @note The number of M0xK0 vertical blocks stored on the same output row of the reshaped LHS matrix must be passed at compile time using -DV0 (i.e. -DV0=2)
  * @note The number of K0xN0 horizontal blocks stored on the same output row of the reshaped RHS matrix must be passed at compile time using -DH0 (i.e. -DH0=2)
@@ -2182,6 +2184,13 @@ __kernel void gemmlowp_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #define RHS_STEP_X (K0)
 #define RHS_STEP_LOOP (H0)
 #endif // defined(RHS_INTERLEAVE)
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((get_global_id(0) * N0 >= N) || (get_global_id(1) * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
 
     // Compute LHS matrix address
     __global uchar *lhs_addr = lhs_ptr + lhs_offset_first_element_in_bytes + (get_global_id(1) % V0) * (uint)LHS_OFFSET_X + (get_global_id(1) / V0) * (uint)lhs_stride_y + (get_global_id(

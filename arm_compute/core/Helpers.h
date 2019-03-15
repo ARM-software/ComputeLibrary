@@ -756,6 +756,34 @@ inline T wrap_around(T x, T m)
 {
     return x >= 0 ? x % m : (x % m + m) % m;
 }
+
+/** Given an integer value, this function returns the next power of two
+ *
+ * @param[in] x Input value
+ *
+ * @return the next power of two
+ */
+inline unsigned int get_next_power_two(unsigned int x)
+{
+    // Decrement by 1
+    x--;
+
+    // Shift right by 1
+    x |= x >> 1u;
+    // Shift right by 2
+    x |= x >> 2u;
+    // Shift right by 4
+    x |= x >> 4u;
+    // Shift right by 8
+    x |= x >> 8u;
+    // Shift right by 16
+    x |= x >> 16u;
+
+    // Increment by 1
+    x++;
+
+    return x;
+}
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

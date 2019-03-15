@@ -81,6 +81,7 @@ private:
     bool             _slide_matrix_b;
     bool             _reinterpret_output_as_3d;
     unsigned int     _k;
+    bool             _use_dummy_work_items;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMLOWPMATRIXMULTIPLYRESHAPEDKERNEL_H__*/

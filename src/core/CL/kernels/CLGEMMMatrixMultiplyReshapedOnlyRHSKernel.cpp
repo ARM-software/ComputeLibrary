@@ -161,7 +161,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 } // namespace
 
 CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::CLGEMMMatrixMultiplyReshapedOnlyRHSKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_input_as_3d(false), _reinterpret_output_as_3d(false)
+    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_input_as_3d(false), _reinterpret_output_as_3d(false), _use_dummy_work_items(false)
 {
 }
 
@@ -177,6 +177,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     _output                   = output;
     _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
+    _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -202,12 +203,14 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
+    build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
+    build_opts.add_option("-DM=" + support::cpp11::to_string(gemm_info.m()));
+    build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n()));
     build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k()));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
     build_opts.add_option("-DH0=" + support::cpp11::to_string(rhs_info.h0));
-
 
     std::string kernel_name("gemm_mm_reshaped_only_rhs_");
     kernel_name += rhs_info.transpose ? "t" : "nt";
@@ -308,7 +311,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::run(const Window &window, cl::Co
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
-        enqueue(queue, *this, slice, lws_hint());
+        enqueue(queue, *this, slice, lws_hint(), _use_dummy_work_items);
     }
     while(window.slide_window_slice_3D(slice));
 }
