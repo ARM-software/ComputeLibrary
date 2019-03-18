@@ -332,12 +332,15 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
             // Validate matrix multiply
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, false, reshape_info));
         }
-        // Validate offset contribution kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOffsetContributionKernel::validate(output,
-                                                                                 a_offset == 0 ? nullptr : &info_vector_sum_col,
-                                                                                 b_offset == 0 ? nullptr : &info_vector_sum_row,
-                                                                                 c,
-                                                                                 a_offset, b_offset));
+        if(output->total_size() != 0)
+        {
+            // Validate offset contribution kernel
+            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpOffsetContributionKernel::validate(output,
+                                                                                     a_offset == 0 ? nullptr : &info_vector_sum_col,
+                                                                                     b_offset == 0 ? nullptr : &info_vector_sum_row,
+                                                                                     c,
+                                                                                     a_offset, b_offset));
+        }
     }
 
     return Status{};
