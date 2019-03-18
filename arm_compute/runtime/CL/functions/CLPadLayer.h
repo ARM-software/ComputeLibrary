@@ -25,10 +25,13 @@
 #define __ARM_COMPUTE_CLPADLAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -77,9 +80,18 @@ public:
     void run() override;
 
 private:
-    CLCopyKernel       _copy_kernel;
-    CLFillBorderKernel _fillborder_kernel;
-    CLMemsetKernel     _memset_kernel;
+    void configure_constant_mode(ICLTensor *input, ICLTensor *output, const PaddingList &padding, const PixelValue constant_value);
+    void configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *output);
+
+    CLCopyKernel                          _copy_kernel;
+    PaddingMode                           _mode;
+    PaddingList                           _padding;
+    CLMemsetKernel                        _memset_kernel;
+    size_t                                _num_dimensions;
+    std::unique_ptr<CLStridedSlice[]>     _slice_functions;
+    std::unique_ptr<CLConcatenateLayer[]> _concat_functions;
+    std::unique_ptr<CLTensor[]>           _slice_results;
+    std::unique_ptr<CLTensor[]>           _concat_results;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_PADLAYER_H__ */
