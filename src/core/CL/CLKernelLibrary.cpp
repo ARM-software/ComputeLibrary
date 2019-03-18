@@ -219,6 +219,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
+    { "digit_reverse", "fft.cl" },
     { "dwc_3x3_native_qasymm8_nchw", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_native_qasymm8_dot8_nchw", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_reshaped_qasymm8_nhwc", "depthwise_convolution_quantized.cl" },
@@ -260,12 +261,24 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "elementwise_unary", "elementwise_unary.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
-    { "flatten", "flatten.cl" },
+    { "fft_radix_2_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_2_axis_0", "fft.cl" },
+    { "fft_radix_3_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_3_axis_0", "fft.cl" },
+    { "fft_radix_4_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_4_axis_0", "fft.cl" },
+    { "fft_radix_5_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_5_axis_0", "fft.cl" },
+    { "fft_radix_7_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_7_axis_0", "fft.cl" },
+    { "fft_radix_8_first_stage_axis_0", "fft.cl" },
+    { "fft_radix_8_axis_0", "fft.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
-    { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
+    { "flatten", "flatten.cl" },
     { "floor_layer", "floor.cl" },
+    { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
     { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },
@@ -686,12 +699,16 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/fast_corners.clembed"
     },
     {
-        "flatten.cl",
-#include "./cl_kernels/flatten.clembed"
+        "fft.cl",
+#include "./cl_kernels/fft.clembed"
     },
     {
         "fill_border.cl",
 #include "./cl_kernels/fill_border.clembed"
+    },
+    {
+        "flatten.cl",
+#include "./cl_kernels/flatten.clembed"
     },
     {
         "floor.cl",

@@ -65,6 +65,7 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLEqualizeHistogram.h"
 #include "arm_compute/runtime/CL/functions/CLErode.h"
+#include "arm_compute/runtime/CL/functions/CLFFT1D.h"
 #include "arm_compute/runtime/CL/functions/CLFastCorners.h"
 #include "arm_compute/runtime/CL/functions/CLFillBorder.h"
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"

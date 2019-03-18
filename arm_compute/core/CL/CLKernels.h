@@ -64,6 +64,8 @@
 #include "arm_compute/core/CL/kernels/CLElementWiseUnaryLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLErodeKernel.h"
+#include "arm_compute/core/CL/kernels/CLFFTDigitReverseKernel.h"
+#include "arm_compute/core/CL/kernels/CLFFTRadixStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLFastCornersKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
