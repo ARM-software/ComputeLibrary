@@ -166,7 +166,7 @@ inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mul
     in_value += result_offset_after_shift_s32;
 
     // Bound the result
-    uint8_t out_u8 = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
+    uint8_t out_u8 = static_cast<uint8_t>(std::max<int32_t>(0, std::min<int32_t>(255, in_value)));
     if(is_bounded_relu)
     {
         out_u8 = static_cast<uint8_t>(std::max(min_u8, std::min(max_u8, out_u8)));

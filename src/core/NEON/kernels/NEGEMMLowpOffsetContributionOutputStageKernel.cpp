@@ -291,9 +291,9 @@ inline void run_offset_contribution_output_stage_window(const int32_t *vector_su
             // Bound and store the result
             if(is_bounded_relu)
             {
-                in_value = static_cast<uint8_t>(std::max(output_stage.gemmlowp_min_bound, std::min(output_stage.gemmlowp_max_bound, in_value)));
+                in_value = static_cast<uint8_t>(std::max<int32_t>(output_stage.gemmlowp_min_bound, std::min<int32_t>(output_stage.gemmlowp_max_bound, in_value)));
             }
-            *(out_it.ptr() + x) = static_cast<uint8_t>(std::max(0, std::min(255, in_value)));
+            *(out_it.ptr() + x) = static_cast<uint8_t>(std::max<int32_t>(0, std::min<int32_t>(255, in_value)));
         }
     }
 }
