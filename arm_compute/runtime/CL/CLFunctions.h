@@ -61,6 +61,7 @@
 #include "arm_compute/runtime/CL/functions/CLDerivative.h"
 #include "arm_compute/runtime/CL/functions/CLDilate.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementWiseUnaryLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLEqualizeHistogram.h"

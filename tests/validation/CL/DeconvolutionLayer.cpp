@@ -119,7 +119,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                 1U,
                                                 0U,
                                             })),
-    framework::dataset::make("Expected", { false, false, false, false, false, true })),
+    framework::dataset::make("Expected", { false, false, false, false, true, true })),
     input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)
 {
     bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info, ax, ay));
