@@ -104,9 +104,9 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         matrix_b = &_tmp_b;
 
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
-        TensorInfo a_info(compute_interleaved_shape(*a->info()), 1, a->info()->data_type());
+        TensorInfo a_info(compute_interleaved_shape(*a->info()), 1, a->info()->data_type(), a->info()->quantization_info());
         // The transpose1xW output matrix will have the following shape: [ b_height * 16, ceil(b_width / 16.0f) ]
-        TensorInfo b_info(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type());
+        TensorInfo b_info(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type(), b->info()->quantization_info());
         _tmp_a.allocator()->init(a_info);
         _tmp_b.allocator()->init(b_info);
         _memory_group.manage(&_tmp_a);
