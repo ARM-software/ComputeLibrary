@@ -133,6 +133,14 @@ enum class ConvolutionMethod
     WINOGRAD /**< Convolution using Winograd */
 };
 
+/** Padding mode to use for PadLayer */
+enum class PaddingMode
+{
+    CONSTANT,
+    REFLECT,
+    SYMMETRIC
+};
+
 /** Supported comparison operations */
 enum class ComparisonOperation
 {

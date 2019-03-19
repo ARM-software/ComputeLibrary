@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,13 +39,15 @@ namespace reference
 /** Reference function to pad an ND tensor. This function is not supposed to be optimized, but to
  * clearly and naively execute the padding of a tensor
  *
- * @param[in] src      Tensor to pad
- * @param[in] paddings Padding size in each dimension
+ * @param[in] src         Tensor to pad
+ * @param[in] paddings    Padding size in each dimension
+ * @param[in] const_value Constant value to fill padding with
+ * @param[in] mode        [optional] Padding mode to use
  *
  * @return The padded Tensor
  */
 template <typename T>
-SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &paddings);
+SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
 } // namespace reference
 } // namespace validation
 } // namespace test
