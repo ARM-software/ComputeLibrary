@@ -21,19 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATIONBIFROST_H__
-#define __ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATIONBIFROST_H__
+#ifndef __ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H__
+#define __ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H__
 
-#include "arm_compute/runtime/CL/ICLGEMMReshapedConfiguration.h"
+#include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
 
 namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Bifrost based OpenCL GEMM reshaped configuration */
-class CLGEMMReshapedConfigurationBifrost final : public ICLGEMMReshapedConfiguration
+/** Bifrost based OpenCL GEMMReshapedOnlyRHS configuration */
+class CLGEMMReshapedOnlyRHSKernelConfigurationBifrost final : public ICLGEMMKernelConfiguration
 {
 public:
+    /** Constructor
+     *
+     * @param[in] arch GPU target
+     */
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(GPUTarget arch);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(const CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &operator=(const CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &) = delete;
+    /** Default Move Constructor. */
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost(CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &&) = default;
+    /** Default move assignment operator */
+    CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &operator=(CLGEMMReshapedOnlyRHSKernelConfigurationBifrost &&) = default;
+
     // Inherited overridden method
     std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) override;
 
@@ -45,4 +59,4 @@ private:
 };
 } // namespace cl_gemm
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATIONBIFROST_H__ */
+#endif /*__ARM_COMPUTE_CLGEMMRESHAPEDONLYRHSKERNELCONFIGURATIONBIFROST_H__ */

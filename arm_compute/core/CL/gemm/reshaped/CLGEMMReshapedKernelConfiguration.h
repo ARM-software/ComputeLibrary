@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATION_H__
-#define __ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATION_H__
+#ifndef __ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H__
+#define __ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H__
 
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/ICLGEMMReshapedConfiguration.h"
-#include "arm_compute/runtime/CL/gemm_reshaped/CLGEMMReshapedConfigurationBifrost.h"
+#include "arm_compute/core/CL/ICLGEMMKernelConfiguration.h"
+#include "arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfigurationBifrost.h"
 
 #include <memory>
 
@@ -34,23 +33,27 @@ namespace arm_compute
 {
 namespace cl_gemm
 {
-/** Tuner factory class */
-class CLGEMMReshapedConfigurationFactory final
+/** CLGEMMReshaped factory class */
+class CLGEMMReshapedKernelConfigurationFactory final
 {
 public:
-    static std::unique_ptr<ICLGEMMReshapedConfiguration> create()
+    /** Static method to call the CLGEMMReshaped kernel configuration class accordingly with the GPU architecture
+     *
+     * @param[in] arch GPU target
+     *
+     * @return CLGEMMReshaped kernel configuration class
+     */
+    static std::unique_ptr<ICLGEMMKernelConfiguration> create(GPUTarget arch)
     {
-        GPUTarget arch = get_arch_from_target(CLScheduler::get().target());
-
-        switch(arch)
+        switch(get_arch_from_target(arch))
         {
             case GPUTarget::BIFROST:
-                return support::cpp14::make_unique<CLGEMMReshapedConfigurationBifrost>();
+                return support::cpp14::make_unique<CLGEMMReshapedKernelConfigurationBifrost>(arch);
             default:
                 return nullptr;
         }
     }
 };
-} // namespace tuners
+} // namespace cl_gemm
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLGEMMRESHAPEDCONFIGURATION_H__ */
+#endif /*__ARM_COMPUTE_CLGEMMRESHAPEDKERNELCONFIGURATION_H__ */

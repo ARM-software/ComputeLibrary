@@ -887,23 +887,20 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 {
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
+    const bool reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
     const bool reinterpret_output_as_3d = gemm_info.depth_output_gemm3d() != 0;
     const int  depth_output_gemm3d      = reinterpret_output_as_3d ? gemm_info.depth_output_gemm3d() : 1;
 
     // If the output of GEMM has to be reinterpreted as 3D, the number of input0 rows (M) is obtained collapsing the second and third
     // dimension of the output tensor
-    const int dim0 = gemm_info.n();
-    const int dim1 = gemm_info.m() / depth_output_gemm3d;
-    const int dim2 = input0.tensor_shape()[2];
-    const int dim3 = input0.tensor_shape()[3];
+    const int batch_size = reinterpret_input_as_3d ? input0.tensor_shape()[3] : input0.tensor_shape()[2];
 
     TensorShape output_shape{ input0.tensor_shape() };
 
-    output_shape.set(0, dim0);
-    output_shape.set(1, dim1);
-    output_shape.set(2, reinterpret_output_as_3d ? depth_output_gemm3d : dim2);
-    output_shape.set(3, reinterpret_output_as_3d ? dim2 : dim3);
-    output_shape.set(4, reinterpret_output_as_3d ? dim3 : 1);
+    output_shape.set(0, gemm_info.n());
+    output_shape.set(1, gemm_info.m() / depth_output_gemm3d);
+    output_shape.set(2, reinterpret_output_as_3d ? depth_output_gemm3d : batch_size);
+    output_shape.set(3, reinterpret_output_as_3d ? batch_size : 1);
 
     return output_shape;
 }

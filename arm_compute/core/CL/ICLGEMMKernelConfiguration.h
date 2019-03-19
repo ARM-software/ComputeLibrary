@@ -21,20 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ICLGEMMRESHAPEDCONFIGURATION_H__
-#define __ARM_COMPUTE_ICLGEMMRESHAPEDCONFIGURATION_H__
+#ifndef __ARM_COMPUTE_ICLGEMMKERNELCONFIGURATION_H__
+#define __ARM_COMPUTE_ICLGEMMKERNELCONFIGURATION_H__
 
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
-/** Basic interface for the GEMM selection */
-class ICLGEMMReshapedConfiguration
+/** Basic interface for the GEMM kernel configuration */
+class ICLGEMMKernelConfiguration
 {
 public:
+    /** Constructor
+     *
+     * @param[in] arch GPU target
+     */
+    ICLGEMMKernelConfiguration(GPUTarget arch)
+        : _target(arch)
+    {
+    }
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    ICLGEMMKernelConfiguration(const ICLGEMMKernelConfiguration &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    ICLGEMMKernelConfiguration &operator=(const ICLGEMMKernelConfiguration &) = delete;
+    /** Default Move Constructor. */
+    ICLGEMMKernelConfiguration(ICLGEMMKernelConfiguration &&) = default;
+    /** Default move assignment operator */
+    ICLGEMMKernelConfiguration &operator=(ICLGEMMKernelConfiguration &&) = default;
     /** Virtual destructor */
-    virtual ~ICLGEMMReshapedConfiguration() = default;
-    /** Given M, N, K and B, this method returns the @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo to be used with @ref CLGEMMMatrixMultiplyReshapedKernel
+    virtual ~ICLGEMMKernelConfiguration() = default;
+    /** Given M, N, K and B, this method returns the @ref GEMMLHSMatrixInfo and @ref GEMMRHSMatrixInfo to be used
      *
      * @param[in] m         Number of rows LHS matrix
      * @param[in] n         Number of columns RHS matrix
@@ -43,6 +60,9 @@ public:
      * @param[in] data_type Data type
      */
     virtual std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> configure(unsigned int m, unsigned int n, unsigned int k, unsigned int b, DataType data_type) = 0;
+
+protected:
+    GPUTarget _target;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_ICLGEMMRESHAPEDCONFIGURATION_H__ */
+#endif /*__ARM_COMPUTE_ICLGEMMKERNELCONFIGURATION_H__ */
