@@ -70,13 +70,13 @@ const auto shapes_4d_small = combine(datasets::Small4DShapes(), framework::datas
 const auto shapes_1d_large = combine(datasets::Large1DShapes(), framework::dataset::make("Axis", -1, 2));
 
 /** Shapes 2D to test */
-const auto shapes_2d_large = combine(datasets::Large2DShapes(), framework::dataset::make("Axis", -2, 3));
+const auto shapes_2d_large = combine(datasets::Medium2DShapes(), framework::dataset::make("Axis", -2, 3));
 
 /** Shapes 3D to test */
-const auto shapes_3d_large = combine(datasets::Large3DShapes(), framework::dataset::make("Axis", -3, 4));
+const auto shapes_3d_large = combine(datasets::Medium3DShapes(), framework::dataset::make("Axis", -3, 4));
 
 /** Shapes 4D to test */
-const auto shapes_4d_large = combine(datasets::Large4DShapes(), framework::dataset::make("Axis", -4, 5));
+const auto shapes_4d_large = combine(datasets::Medium4DShapes(), framework::dataset::make("Axis", -4, 5));
 
 /** Configuration test */
 void validate_configuration(TensorShape shape_in, int axis, DataType data_type, int num_tensors)
