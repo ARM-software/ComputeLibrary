@@ -48,19 +48,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 15U, 5U), 1, DataType::F32), // Mismatching data type input/output
                                                   TensorInfo(TensorShape(22U, 27U, 5U), 1, DataType::F32), // Mismatching y dimension
                                                   TensorInfo(TensorShape(11U, 25U, 5U), 1, DataType::F32), // Mismatching total height
-                                                  TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32)
+                                                  TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(35U, 21U, 5U), 1, DataType::F32)
+
         }),
         framework::dataset::make("InputInfo2", {  TensorInfo(TensorShape(23U, 15U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(22U, 127U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(11U, 26U, 5U), 1, DataType::F32),
-                                                  TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32)
+                                                  TensorInfo(TensorShape(16U, 25U, 5U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(35U, 10U, 5U), 1, DataType::F32)
         })),
         framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 30U, 5U), 1, DataType::F16),
                                                   TensorInfo(TensorShape(22U, 12U, 5U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(11U, 7U, 5U), 1, DataType::F32),
-                                                  TensorInfo(TensorShape(16U, 50U, 5U), 1, DataType::F32)
+                                                  TensorInfo(TensorShape(16U, 50U, 5U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(35U, 31U, 5U), 1, DataType::F32)
         })),
-        framework::dataset::make("Expected", { false, false, false, true })),
+        framework::dataset::make("Expected", { false, false, false, true, true })),
         input_info1, input_info2, output_info,expected)
 {
     std::vector<TensorInfo> inputs_vector_info;
@@ -73,7 +77,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         inputs_vector_info_raw.emplace_back(&input);
     }
 
-    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(false), DataLayoutDimension::HEIGHT));
+    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(true), DataLayoutDimension::HEIGHT));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
