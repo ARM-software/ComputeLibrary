@@ -61,6 +61,7 @@ class ROIAlignLayerNode;
 class SoftmaxLayerNode;
 class SliceLayerNode;
 class SplitLayerNode;
+class StackLayerNode;
 class UpsampleLayerNode;
 class YOLOLayerNode;
 } // namespace graph

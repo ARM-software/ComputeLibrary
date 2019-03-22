@@ -143,6 +143,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::SplitLayer:
             os << "SplitLayer";
             break;
+        case NodeType::StackLayer:
+            os << "StackLayer";
+            break;
         case NodeType::UpsampleLayer:
             os << "UpsampleLayer";
             break;

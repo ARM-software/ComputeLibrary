@@ -168,12 +168,12 @@ public:
      *
      * @param[in] g                 Graph to add the node to
      * @param[in] params            Common node parameters
-     * @param[in] inputs            Inputs to the depth concatenate layer node as a NodeID-Index pair
+     * @param[in] inputs            Inputs to the concatenate layer node as a NodeID-Index pair
      * @param[in] concat_descriptor Concatenation layer descriptor
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, descriptors::ConcatLayerDescriptor concat_descriptor);
+    static NodeID add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, descriptors::ConcatLayerDescriptor concat_descriptor);
     /** Adds a depth-wise convolution layer node to the graph
      *
      * @param[in] g                     Graph to add the node to
@@ -443,6 +443,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
+    /** Adds a stack layer node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] inputs Inputs to the reorg layer node as a NodeID-Index pair
+     * @param[in] axis   Axis along which the input tensors have to be packed
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_stack_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, int axis);
     /** Adds an upsample layer to the graph
      *
      * @param[in] g                 Graph to add the node to

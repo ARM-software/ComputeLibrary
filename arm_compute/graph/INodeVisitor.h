@@ -141,6 +141,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(SplitLayerNode &n) = 0;
+    /** Visit StackLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(StackLayerNode &n) = 0;
 };
 
 /** Default visitor implementation
@@ -237,6 +242,10 @@ public:
         default_visit();
     }
     virtual void visit(SplitLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(StackLayerNode &n) override
     {
         default_visit();
     }

@@ -1276,6 +1276,49 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
 
     return std::move(func);
 }
+
+/** Create a backend layer stack function
+ *
+ * @tparam StackLayerFunction Backend stack function
+ * @tparam TargetInfo         Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend stack layer function
+ */
+template <typename StackLayerFunction, typename TargetInfo>
+std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Creating Stack node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    std::vector<typename TargetInfo::TensorType *> inputs;
+    for(unsigned int i = 0; i < node.num_inputs(); ++i)
+    {
+        inputs.push_back(get_backing_tensor<TargetInfo>(node.input(i)));
+    }
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    const int                        axis   = node.axis();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<StackLayerFunction>();
+    func->configure(inputs, axis, output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << output->info()->data_type()
+                               << " Inputs shape: " << inputs[0]->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Num Inputs: " << inputs.size()
+                               << " Axis: " << axis
+                               << std::endl);
+
+    return std::move(func);
+}
 /** Create a backend Upsample layer function
  *
  * @tparam UpsampleLayerFunction Backend Upsample function

@@ -238,6 +238,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_resize_layer<NEScale, NETargetInfo>(*polymorphic_downcast<ResizeLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<NESoftmaxLayer, NETargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+        case NodeType::StackLayer:
+            return detail::create_stack_layer<NEStackLayer, NETargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::create_upsample_layer<NEUpsampleLayer, NETargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
         case NodeType::YOLOLayer:
