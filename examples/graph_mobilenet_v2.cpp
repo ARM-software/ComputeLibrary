@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -263,7 +263,7 @@ private:
     void create_graph_qasymm8(TensorDescriptor &input_descriptor)
     {
         // Create model path
-        const std::string model_path = "/cnn_data/mobilenet_v2_1.0_224_quantized_model";
+        const std::string model_path = "/cnn_data/mobilenet_v2_1.0_224_quantized_model/";
 
         // Get trainable parameters data path
         std::string data_path = common_params.data_path;
