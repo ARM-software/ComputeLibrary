@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,13 @@ inline Window::Window(const Window &src)
     {
         set(i, src[i]);
     }
+}
+
+inline Window &Window::operator=(const arm_compute::Window &rhs)
+{
+    Window tmp(rhs);
+    swap(*this, tmp);
+    return *this;
 }
 
 inline constexpr const Window::Dimension &Window::operator[](size_t dimension) const
@@ -267,4 +274,9 @@ inline size_t Window::num_iterations_total() const
     }
     return total;
 }
+
+inline void swap(Window &lhs, Window &rhs)
+{
+    lhs._dims.swap(rhs._dims);
 }
+} // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,13 @@ public:
      * @param[in] src Copy the values from src to a new object
      */
     Window(const Window &src);
+    /** Copy assignment operator
+     *
+     * @param[in] rhs Copy the values from rhs to the current object
+     *
+     * @return Reference to the updated object
+     */
+    Window &operator=(const Window &rhs);
 
     /** Describe one of the image's dimensions with a start, end and step.
      *
@@ -384,6 +391,12 @@ public:
     {
         return broadcast_if_dimension_le_one(info.tensor_shape());
     }
+    /** Friend function that swaps the contents of two windows
+     *
+     * @param[in] lhs First window to swap.
+     * @param[in] rhs Second window to swap.
+     */
+    friend void swap(Window &lhs, Window &rhs);
 
 private:
     /** First slice of the window
@@ -407,6 +420,6 @@ private:
 private:
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
 };
-}
+} // namespace arm_compute
 #include "Window.inl"
 #endif /*__ARM_COMPUTE_WINDOW_H__ */

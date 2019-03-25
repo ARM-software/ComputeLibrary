@@ -478,7 +478,7 @@ public:
      * @param[in] sub_stream_prior PriorBox graph sub-stream.
      * @param[in] detect_info      DetectionOutput parameters.
      */
-    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, DetectionOutputLayerInfo detect_info)
+    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, const DetectionOutputLayerInfo &detect_info)
         : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)
     {
     }
@@ -838,7 +838,7 @@ public:
      * @param[in] sub_stream First graph sub-stream
      * @param[in] prior_info PriorBox parameters.
      */
-    PriorBoxLayer(SubStream &&sub_stream, PriorBoxLayerInfo prior_info)
+    PriorBoxLayer(SubStream &&sub_stream, const PriorBoxLayerInfo &prior_info)
         : _ss(std::move(sub_stream)), _prior_info(prior_info)
     {
     }

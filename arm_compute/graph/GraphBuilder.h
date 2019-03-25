@@ -217,7 +217,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info);
+    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info);
     /** Adds a Dummy node to the graph
      *
      * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.
@@ -353,7 +353,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info);
+    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to

@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_UTILS_H__
-#define __ARM_COMPUTE_GRAPH_UTILS_H__
+#ifndef __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__
+#define __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
@@ -601,4 +601,4 @@ inline graph::Target set_target_hint(int target)
 } // namespace graph_utils
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */
+#endif /* __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__ */

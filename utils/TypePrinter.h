@@ -978,7 +978,6 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
-//FIXME: Check why this doesn't work and the TensorShape and Coordinates overload are needed
 /** Formatted output of the Dimensions type.
  *
  * @param[in] dimensions Type to output.

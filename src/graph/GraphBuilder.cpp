@@ -369,7 +369,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
     return conv_nid;
 }
-NodeID GraphBuilder::add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info)
+NodeID GraphBuilder::add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info)
 {
     CHECK_NODEIDX_PAIR(input_loc, g);
     CHECK_NODEIDX_PAIR(input_conf, g);
@@ -544,7 +544,7 @@ NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);
 }
 
-NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info)
+NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info)
 {
     CHECK_NODEIDX_PAIR(input0, g);
     CHECK_NODEIDX_PAIR(input1, g);

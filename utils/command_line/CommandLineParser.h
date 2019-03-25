@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,7 +225,7 @@ inline void CommandLineParser::print_help(const std::string &program_name) const
 
     for(const auto &option : _positional_options)
     {
-        //FIXME: Print help string as well
+        // TODO(COMPMID-2079): Print help string as well
         std::cout << option->name() << "\n";
     }
 }
