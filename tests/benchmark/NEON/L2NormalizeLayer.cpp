@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,10 +49,10 @@ using NEL2NormalizeLayerFixture = L2NormalizeLayerFixture<Tensor, NEL2NormalizeL
 TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(L2NormalizeLayer, NEL2NormalizeLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SmallShapes(), data_types), framework::dataset::make("Axis", { 0 })));
+                                framework::dataset::combine(framework::dataset::combine(datasets::SmallShapes(), data_types), framework::dataset::make("Axis", { 0, 1, 2 })));
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(L2NormalizeLayer, NEL2NormalizeLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LargeShapes(), data_types), framework::dataset::make("Axis", { 0 })));
+                                framework::dataset::combine(framework::dataset::combine(datasets::LargeShapes(), data_types), framework::dataset::make("Axis", { 0, 1, 2 })));
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace benchmark
