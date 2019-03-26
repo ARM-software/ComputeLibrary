@@ -66,7 +66,8 @@ Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInf
 
 void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(NEReductionOperation::validate(input->info(), output->info(), axis, op));
 
     // Configure reduction kernel
     _reduction_kernel.configure(input, output, axis, op);

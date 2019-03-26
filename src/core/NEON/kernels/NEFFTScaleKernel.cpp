@@ -129,7 +129,7 @@ void NEFFTScaleKernel::run(const Window &window, const ThreadInfo &info)
 
     execute_window_loop(window, [&](const Coordinates &)
     {
-        scale_complex(reinterpret_cast<float *>(out.ptr()), reinterpret_cast<float *>(in.ptr()), _is_conj, _scale);
+        scale_complex(reinterpret_cast<float *>(in.ptr()), reinterpret_cast<float *>(out.ptr()), _is_conj, _scale);
     },
     in, out);
 }

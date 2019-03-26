@@ -59,15 +59,15 @@ public:
      *
      * @note If the output tensor is nullptr, the FFT will be performed in-place
      *
-     * @param[in,out] input  Source tensor. Data types supported: F32.
-     * @param[out]    output Destination tensor. Data type supported: same as @p input
+     * @param[in,out] input  Source tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[out]    output Destination tensor. Data type supported: same as @p input. Number of channels supported: same as @p input.
      * @param[in]     config FFT descriptor metadata.
      */
     void configure(ITensor *input, ITensor *output, const FFTRadixStageKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref NEFFTRadixStageKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: F32.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * @param[in] input  Source tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] output Destination tensor info. Data type supported: same as @p input. Number of channels supported: same as @p input.
      * @param[in] config FFT descriptor metadata.
      *
      * @return a status

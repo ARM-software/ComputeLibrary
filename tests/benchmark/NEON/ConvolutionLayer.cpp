@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,17 +24,21 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/FFTConvolutionLayerFixture.h"
 #include "tests/benchmark/fixtures/WinogradConvolutionLayerFixture.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/lenet5/LeNet5ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/mobilenet/MobileNetConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/resnet12/ResNet12ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/squeezenet/SqueezeNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/vgg/vgg16/VGG16ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/yolo/v2/YOLOV2ConvolutionLayerDataset.h"
@@ -59,6 +63,7 @@ const auto data_types = framework::dataset::make("DataType", { DataType::F32, Da
 } // namespace
 
 using NEGEMMConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEGEMMConvolutionLayer, Accessor>;
+using NEFFTConvolutionLayerFixture  = FFTConvolutionLayerFixture<Tensor, NEFFTConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
 #if defined(__aarch64__)
@@ -88,6 +93,12 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetWinogradLayer, NEWinogradConvolutionLa
                                                                                         framework::dataset::make("DataType", DataType::F32)),
                                                             framework::dataset::make("Batches", 1)));
 #endif /* __aarch64__ */
+
+REGISTER_FIXTURE_DATA_TEST_CASE(ResNet12FFTLayer, NEFFTConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::ResNet12FFTConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, NEGEMMConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),

@@ -68,5 +68,27 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 };
+
+/** Basic function to run @ref NEComplexPixelWiseMultiplicationKernel. */
+class NEComplexPixelWiseMultiplication : public INESimpleFunction
+{
+public:
+    /** Initialise the kernel's inputs, output.
+     *
+     * @param[in, out] input1 An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[in, out] input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[out]     output The output tensor. Data types supported: same as @p input1. Number of channels: same as @p input1.
+     */
+    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplication
+     *
+     * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] input2 An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] output The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+};
 }
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H__ */

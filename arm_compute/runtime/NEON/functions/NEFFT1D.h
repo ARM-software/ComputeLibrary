@@ -51,8 +51,9 @@ public:
     NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source and destinations.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
-     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
+     * @param[in]  input  Source tensor. Data types supported: F32. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
+     * @param[out] output Destination tensor.  Data types and data layouts supported: Same as @p input.
+     *                    Number of channels supported: 1 (real tensor) or 2 (complex tensor).If @p input is real, @p output must be complex.
      * @param[in]  config FFT related configuration
      */
     void configure(const ITensor *input, ITensor *output, const FFT1DInfo &config);

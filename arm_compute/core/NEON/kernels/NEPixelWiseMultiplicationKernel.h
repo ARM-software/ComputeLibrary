@@ -128,5 +128,51 @@ private:
     float          _scale;
     int            _scale_exponent;
 };
+
+/** Interface for the complex pixelwise multiplication kernel. */
+class NEComplexPixelWiseMultiplicationKernel : public INEKernel
+{
+public:
+    const char *name() const override
+    {
+        return "NEComplexPixelWiseMultiplicationKernel";
+    }
+    /** Default constructor.*/
+    NEComplexPixelWiseMultiplicationKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEComplexPixelWiseMultiplicationKernel(const NEComplexPixelWiseMultiplicationKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEComplexPixelWiseMultiplicationKernel &operator=(const NEComplexPixelWiseMultiplicationKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    NEComplexPixelWiseMultiplicationKernel(NEComplexPixelWiseMultiplicationKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    NEComplexPixelWiseMultiplicationKernel &operator=(NEComplexPixelWiseMultiplicationKernel &&) = default;
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  input1 An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in]  input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[out] output The output tensor, Data types supported: same as @p input1.  Number of channels supported: same as @p input1.
+     */
+    void configure(const ITensor *input1, const ITensor *input2, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplicationKernel
+     *
+     * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] input2 An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] output The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
+    BorderSize border_size() const override;
+
+private:
+    const ITensor *_input1;
+    const ITensor *_input2;
+    ITensor       *_output;
+};
+
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATIONKERNEL_H__ */

@@ -55,15 +55,15 @@ public:
     ~NEFFTScaleKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in,out] input  Source tensor. Data types supported: F32.
-     * @param[out]    output Destination tensor. Data type supported: same as @p input
+     * @param[in,out] input  Source tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[out]    output Destination tensor. Data type supported: same as @p input. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
      * @param[in]     config Kernel configuration
      */
     void configure(ITensor *input, ITensor *output, const FFTScaleKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref NEFFTScaleKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: F32.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * @param[in] input  Source tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] output Destination tensor info. Data type supported: same as @p input. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
      * @param[in] config Kernel configuration
      *
      * @return a status

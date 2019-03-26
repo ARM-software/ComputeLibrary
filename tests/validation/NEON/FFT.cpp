@@ -24,8 +24,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
 #include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
+#include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/NEON/Accessor.h"
+#include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -200,6 +202,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFFT2DFixture<float>, framework::DatasetMode::
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // FFT2D
+
+TEST_SUITE(FFTConvolutionLayer)
+
+template <typename T>
+using NEFFTConvolutionLayerFixture = FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T>;
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFFTConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                                                                                 ActivationFunctionsSmallDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
+TEST_SUITE_END() // FFTConvolutionLayer
 
 TEST_SUITE_END() // NEON
 } // namespace validation

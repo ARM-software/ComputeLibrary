@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include <memory>
@@ -41,6 +42,7 @@ class ITensor;
  * -# @ref NEGEMMConvolutionLayer     (executed only in case GEMM is required for the operation)
  * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
  * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)
+ * -# @ref NEFFTConvolutionLayer      (executed only in case FFT is required for the operation)
  */
 class NEConvolutionLayer : public IFunction
 {

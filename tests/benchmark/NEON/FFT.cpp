@@ -21,31 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
-#define __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
-#include <utility>
+#include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
+#include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
+#include "arm_compute/runtime/Tensor.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/benchmark/fixtures/FFTFixture.h"
+#include "tests/framework/Macros.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
-/** FFT direction to use */
-enum class FFTDirection
+namespace test
 {
-    Forward,
-    Inverse
-};
+namespace benchmark
+{
+namespace
+{
+const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto shapes     = framework::dataset::make("Shapes", { TensorShape(192U, 128U, 64U), TensorShape(224U, 224U) });
+} // namespace
 
-/** Descriptor used by the FFT1D function */
-struct FFT1DInfo
-{
-    unsigned int axis{ 0 };                          /**< Axis to run the FFT on. */
-    FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
-};
+using NEFFT1DFixture = FFTFixture<Tensor, NEFFT1D, FFT1DInfo, Accessor>;
+using NEFFT2DFixture = FFTFixture<Tensor, NEFFT2D, FFT2DInfo, Accessor>;
 
-/** Descriptor used by the FFT2D function */
-struct FFT2DInfo
-{
-    std::pair<unsigned int, unsigned int> axes{ 0, 1 }; /**< Axes to run on. If same, multiple transforms are performed on single axis*/
-    FFTDirection direction{ FFTDirection::Forward };    /**< Direction of the FFT. */
-};
+TEST_SUITE(CL)
+
+REGISTER_FIXTURE_DATA_TEST_CASE(FFT1D, NEFFT1DFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(shapes, data_types));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(FFT2D, NEFFT2DFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(shapes, data_types));
+
+TEST_SUITE_END() // CL
+} // namespace benchmark
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__ */

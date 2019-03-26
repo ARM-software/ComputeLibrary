@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__
 #define __ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
@@ -53,31 +54,40 @@ public:
     ~NEFFTDigitReverseKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
-     * @param[out] output Destination tensor. Data type supported: same as @p input
+     * @param[in]  input  Source tensor. Data types supported: F32. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
+     * @param[out] output Destination tensor. Data type supported: same as @p input. Number of channels supported: 2 (complex tensor).
      * @param[in]  idx    Digit reverse index tensor. Data type supported: U32
-     * @param[in]  axis   Axis to perform digit reverse on.
+     * @param[in]  config Kernel configuration.
      */
-    void configure(const ITensor *input, ITensor *output, const ITensor *idx, unsigned int axis);
+    void configure(const ITensor *input, ITensor *output, const ITensor *idx, const FFTDigitReverseKernelInfo &config);
+
     /** Static function to check if given info will lead to a valid configuration of @ref NEFFTDigitReverseKernel
      *
-     * @param[in] input  Source tensor info. Data types supported: F32.
-     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * @param[in] input  Source tensor info. Data types supported: F32. Number of channels supported: 1 (real tensor) or 2 (complex tensor).
+     * @param[in] output Destination tensor info. Data type supported: same as @p input. Number of channels supported: 2 (complex tensor).
      * @param[in] idx    Digit reverse index tensor info. Data type supported: U32
-     * @param[in] axis   Axis to perform digit reverse on.
+     * @param[in] config Kernel configuration
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, unsigned int axis);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
-    const ITensor *_idx;
-    unsigned int   _axis;
+    using NEFFTDigitReverseKernelFunctionPtr = void (NEFFTDigitReverseKernel::*)(const Window &window);
+
+    template <bool is_input_complex, bool is_conj>
+    void digit_reverse_kernel_axis_0(const Window &window);
+
+    template <bool is_input_complex, bool is_conj>
+    void digit_reverse_kernel_axis_1(const Window &window);
+
+    NEFFTDigitReverseKernelFunctionPtr _func;
+    const ITensor                     *_input;
+    ITensor                           *_output;
+    const ITensor                     *_idx;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H__ */
