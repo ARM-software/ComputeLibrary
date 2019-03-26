@@ -24,12 +24,29 @@
 #ifndef __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
 #define __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__
 
+#include <utility>
+
 namespace arm_compute
 {
-/** Descriptor used by the FFT1d function */
+/** FFT direction to use */
+enum class FFTDirection
+{
+    Forward,
+    Inverse
+};
+
+/** Descriptor used by the FFT1D function */
 struct FFT1DInfo
 {
-    unsigned int axis{ 0 }; /**< Axis to run the FFT on. */
+    unsigned int axis{ 0 };                          /**< Axis to run the FFT on. */
+    FFTDirection direction{ FFTDirection::Forward }; /**< Direction of the FFT. */
+};
+
+/** Descriptor used by the FFT2D function */
+struct FFT2DInfo
+{
+    std::pair<unsigned int, unsigned int> axes{ 0, 1 }; /**< Axes to run on. If same, multiple transforms are performed on single axis*/
+    FFTDirection direction{ FFTDirection::Forward };    /**< Direction of the FFT. */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_RUNTIME_FUNCTION_DESCRIPTORS_H__ */

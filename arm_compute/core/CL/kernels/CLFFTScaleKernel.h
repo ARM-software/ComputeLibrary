@@ -21,59 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFFTRADIXSTAGEKERNEL_H__
-#define __ARM_COMPUTE_CLFFTRADIXSTAGEKERNEL_H__
+#ifndef __ARM_COMPUTE_CLFFTSCALEKERNEL_H__
+#define __ARM_COMPUTE_CLFFTSCALEKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
 #include "arm_compute/core/KernelDescriptors.h"
-
-#include <set>
 
 namespace arm_compute
 {
 // Forward declarations
 class ICLTensor;
 
-/** Interface for the FFT radix stage kernel. */
-class CLFFTRadixStageKernel : public ICLKernel
+/** Interface for the inverse fft scale kernel. */
+class CLFFTScaleKernel : public ICLKernel
 {
 public:
     /** Constructor */
-    CLFFTRadixStageKernel();
+    CLFFTScaleKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFFTRadixStageKernel(const CLFFTRadixStageKernel &) = delete;
+    CLFFTScaleKernel(const CLFFTScaleKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLFFTRadixStageKernel &operator=(const CLFFTRadixStageKernel &) = delete;
+    CLFFTScaleKernel &operator=(const CLFFTScaleKernel &) = delete;
     /** Default Move Constructor. */
-    CLFFTRadixStageKernel(CLFFTRadixStageKernel &&) = default;
+    CLFFTScaleKernel(CLFFTScaleKernel &&) = default;
     /** Default move assignment operator */
-    CLFFTRadixStageKernel &operator=(CLFFTRadixStageKernel &&) = default;
+    CLFFTScaleKernel &operator=(CLFFTScaleKernel &&) = default;
     /** Default destructor */
-    ~CLFFTRadixStageKernel() = default;
+    ~CLFFTScaleKernel() = default;
     /** Set the input and output tensors.
      *
-     * @note If the output tensor is nullptr, the FFT will be performed in-place
-     *
      * @param[in,out] input  Source tensor. Data types supported: F32.
-     * @param[out]    output Destination tensor. Can be nullptr. Data type supported: same as @p input
-     * @param[in]     config FFT descriptor metadata.
+     * @param[out]    output Destination tensor. Data type supported: same as @p input
+     * @param[in]     config Kernel configuration
      */
-    void configure(ICLTensor *input, ICLTensor *output, const FFTRadixStageKernelInfo &config);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFFTRadixStageKernel
+    void configure(ICLTensor *input, ICLTensor *output, const FFTScaleKernelInfo &config);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFFTScaleKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.
-     * @param[in] output Destination tensor info. Can be nullptr. Data type supported: same as @p input
-     * @param[in] config FFT descriptor metadata.
+     * @param[in] output Destination tensor info. Data type supported: same as @p input
+     * @param[in] config Kernel configuration
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config);
-    /** Returns the radix that are support by the FFT kernel
-     *
-     * @return A set of supported radix
-     */
-    static std::set<unsigned int> supported_radix();
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFTScaleKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -84,4 +75,4 @@ private:
     bool       _run_in_place;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLFFTRADIXSTAGEKERNEL_H__ */
+#endif /*__ARM_COMPUTE_CLFFTSCALEKERNEL_H__ */

@@ -23,48 +23,6 @@
  */
 #include "helpers.h"
 
-/** Computes the digit reverse stage
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- * @param[in]  idx_ptr                           Pointer to the index tensor. Supported data types: U32
- * @param[in]  idx_stride_x                      Stride of the index tensor in X dimension (in bytes)
- * @param[in]  idx_step_x                        idx_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  idx_offset_first_element_in_bytes The offset of the first element in the index tensor
- */
-__kernel void digit_reverse(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst),
-    VECTOR_DECLARATION(idx))
-{
-    // Get tensor pointers
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-    Vector   idx = CONVERT_TO_VECTOR_STRUCT(idx);
-
-    const unsigned int iidx = *((__global uint *)(idx.ptr));
-
-    // Load data
-    float2 data = vload2(0, (__global float *)tensor3D_offset(&src, iidx, get_global_id(1), get_global_id(2)));
-
-    // Store result
-    vstore2(data, 0, (__global float *)dst.ptr);
-}
-
 /** Calculates and applies the twiddle factor to a given input.
  *
  * @param[in]     phi   The angle.
@@ -252,7 +210,7 @@ __kernel void digit_reverse(
         c7   = s4 + t1;                        \
     }
 
-/** Computes the first stage of a radix-2 DFT.
+/** Computes the first stage of a radix-2 DFT on axis 0.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -264,14 +222,14 @@ __kernel void digit_reverse(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_2_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -289,17 +247,17 @@ kernel void fft_radix_2_first_stage_axis_0(
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
 
-    // Load eight complex input values
+    // Load two complex input values
     float4 data = vload4(0, (__global float *)input.ptr);
 
     // Compute DFT N = 2
     DFT_2(data.s01, data.s23);
 
-    // Store eight complex output values
+    // Store two complex output values
     vstore4(data, 0, (__global float *)output.ptr);
 }
 
-/** Computes the first stage of a radix-3 DFT.
+/** Computes the first stage of a radix-2 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -311,14 +269,63 @@ kernel void fft_radix_2_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_2_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load two complex input values
+    float2 data1 = vload2(0, (__global float *)input.ptr);
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+
+    // Compute DFT N = 2
+    DFT_2(data1, data2);
+
+    // Store two complex output values
+    vstore2(data1, 0, (__global float *)output.ptr);
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+}
+
+/** Computes the first stage of a radix-3 DFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_3_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -336,19 +343,19 @@ kernel void fft_radix_3_first_stage_axis_0(
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
 
-    // Load eight complex input values
+    // Load three complex input values
     float4 data0 = vload4(0, (__global float *)input.ptr);
     float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 2, 0, 0));
 
     // Compute DFT N = 3
     DFT_3(data0.s01, data0.s23, data1.s01);
 
-    // Store eight complex output values
+    // Store three complex output values
     vstore4(data0, 0, (__global float *)output.ptr);
     vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 2, 0, 0));
 }
 
-/** Computes the first stage of a radix-4 DFT.
+/** Computes the first stage of a radix-3 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -360,14 +367,65 @@ kernel void fft_radix_3_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_3_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load three complex input values
+    float2 data0 = vload2(0, (__global float *)input.ptr);
+    float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2, 0));
+
+    // Compute DFT N = 3
+    DFT_3(data0, data1, data2);
+
+    // Store three complex output values
+    vstore2(data0, 0, (__global float *)output.ptr);
+    vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 2, 0));
+}
+
+/** Computes the first stage of a radix-4 DFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_4_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -385,17 +443,17 @@ kernel void fft_radix_4_first_stage_axis_0(
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
 
-    // Load eight complex input values
+    // Load four complex input values
     float8 data = vload8(0, (__global float *)input.ptr);
 
     // Compute DFT N = 4
     DFT_4(data.s01, data.s23, data.s45, data.s67);
 
-    // Store eight complex output values
+    // Store four complex output values
     vstore8(data, 0, (__global float *)output.ptr);
 }
 
-/** Computes the first stage of a radix-5 DFT.
+/** Computes the first stage of a radix-4 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -407,14 +465,67 @@ kernel void fft_radix_4_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_4_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load four complex input values
+    float2 data0 = vload2(0, (__global float *)input.ptr);
+    float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2, 0));
+    float2 data3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3, 0));
+
+    // Compute DFT N = 4
+    DFT_4(data0, data1, data2, data3);
+
+    // Store four complex output values
+    vstore2(data0, 0, (__global float *)output.ptr);
+    vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 2, 0));
+    vstore2(data3, 0, (__global float *)tensor3D_offset(&output, 0, 3, 0));
+}
+
+/** Computes the first stage of a radix-5 DFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_5_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -432,19 +543,19 @@ kernel void fft_radix_5_first_stage_axis_0(
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
 
-    // Load eight complex input values
+    // Load five complex input values
     float8 data0 = vload8(0, (__global float *)input.ptr);
     float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 4, 0, 0));
 
     // Compute DFT N = 5
     DFT_5(data0.s01, data0.s23, data0.s45, data0.s67, data1.s01);
 
-    // Store eight complex output values
+    // Store five complex output values
     vstore8(data0, 0, (__global float *)output.ptr);
     vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 4, 0, 0));
 }
 
-/** Computes the first stage of a radix-7 DFT.
+/** Computes the first stage of a radix-5 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -456,14 +567,69 @@ kernel void fft_radix_5_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_5_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load five complex input values
+    float2 data0 = vload2(0, (__global float *)input.ptr);
+    float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2, 0));
+    float2 data3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3, 0));
+    float2 data4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4, 0));
+
+    // Compute DFT N = 5
+    DFT_5(data0, data1, data2, data3, data4);
+
+    // Store five complex output values
+    vstore2(data0, 0, (__global float *)output.ptr);
+    vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 2, 0));
+    vstore2(data3, 0, (__global float *)tensor3D_offset(&output, 0, 3, 0));
+    vstore2(data4, 0, (__global float *)tensor3D_offset(&output, 0, 4, 0));
+}
+
+/** Computes the first stage of a radix-7 DFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_7_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -481,7 +647,7 @@ kernel void fft_radix_7_first_stage_axis_0(
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
 
-    // Load eight complex input values
+    // Load seven complex input values
     float8 data0 = vload8(0, (__global float *)input.ptr);
     float4 data1 = vload4(0, (__global float *)tensor3D_offset(&input, 4, 0, 0));
     float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 6, 0, 0));
@@ -489,13 +655,13 @@ kernel void fft_radix_7_first_stage_axis_0(
     // Compute DFT N = 7
     DFT_7(data0.s01, data0.s23, data0.s45, data0.s67, data1.s01, data1.s23, data2.s01);
 
-    // Store eight complex output values
+    // Store seven complex output values
     vstore8(data0, 0, (__global float *)output.ptr);
     vstore4(data1, 0, (__global float *)tensor3D_offset(&output, 4, 0, 0));
     vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 6, 0, 0));
 }
 
-/** Computes the first stage of a radix-8 DFT.
+/** Computes the first stage of a radix-7 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -507,14 +673,73 @@ kernel void fft_radix_7_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_7_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load seven complex input values
+    float2 data0 = vload2(0, (__global float *)input.ptr);
+    float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2, 0));
+    float2 data3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3, 0));
+    float2 data4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4, 0));
+    float2 data5 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 5, 0));
+    float2 data6 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 6, 0));
+
+    // Compute DFT N = 7
+    DFT_7(data0, data1, data2, data3, data4, data5, data6);
+
+    // Store seven complex output values
+    vstore2(data0, 0, (__global float *)output.ptr);
+    vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 2, 0));
+    vstore2(data3, 0, (__global float *)tensor3D_offset(&output, 0, 3, 0));
+    vstore2(data4, 0, (__global float *)tensor3D_offset(&output, 0, 4, 0));
+    vstore2(data5, 0, (__global float *)tensor3D_offset(&output, 0, 5, 0));
+    vstore2(data6, 0, (__global float *)tensor3D_offset(&output, 0, 6, 0));
+}
+
+/** Computes the first stage of a radix-8 DFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
 kernel void fft_radix_8_first_stage_axis_0(
     TENSOR3D_DECLARATION(input)
@@ -542,7 +767,7 @@ kernel void fft_radix_8_first_stage_axis_0(
     vstore16(data, 0, (__global float *)output.ptr);
 }
 
-/** Computes a stage of a radix-2 FFT.
+/** Computes the first stage of a radix-8 DFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -554,14 +779,75 @@ kernel void fft_radix_8_first_stage_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ */
+kernel void fft_radix_8_first_stage_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+)
+{
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT(input);
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+#endif /* IN_PLACE */
+
+    // Load eight complex input values
+    float2 data0 = vload2(0, (__global float *)input.ptr);
+    float2 data1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 1, 0));
+    float2 data2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2, 0));
+    float2 data3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3, 0));
+    float2 data4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4, 0));
+    float2 data5 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 5, 0));
+    float2 data6 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 6, 0));
+    float2 data7 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 7, 0));
+
+    // Compute DFT N = 8
+    DFT_8(data0, data1, data2, data3, data4, data5, data6, data7);
+
+    // Store eight complex output values
+    vstore2(data0, 0, (__global float *)output.ptr);
+    vstore2(data1, 0, (__global float *)tensor3D_offset(&output, 0, 1, 0));
+    vstore2(data2, 0, (__global float *)tensor3D_offset(&output, 0, 2, 0));
+    vstore2(data3, 0, (__global float *)tensor3D_offset(&output, 0, 3, 0));
+    vstore2(data4, 0, (__global float *)tensor3D_offset(&output, 0, 4, 0));
+    vstore2(data5, 0, (__global float *)tensor3D_offset(&output, 0, 5, 0));
+    vstore2(data6, 0, (__global float *)tensor3D_offset(&output, 0, 6, 0));
+    vstore2(data7, 0, (__global float *)tensor3D_offset(&output, 0, 7, 0));
+}
+
+/** Computes a stage of a radix-2 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -612,7 +898,7 @@ kernel void fft_radix_2_axis_0(
     vstore2(c1, 0, (__global float *)tensor3D_offset(&output, Nx, 0, 0));
 }
 
-/** Computes a stage of a radix-3 FFT.
+/** Computes a stage of a radix-2 FFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -624,14 +910,84 @@ kernel void fft_radix_2_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_2_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-2
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load two complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+
+    // Compute DFT N = 2
+    DFT_2(c0, c1);
+
+    // Store two complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+}
+
+/** Computes a stage of a radix-3 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -685,7 +1041,7 @@ kernel void fft_radix_3_axis_0(
     vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 2 * Nx, 0, 0));
 }
 
-/** Computes a stage of a radix-4 FFT.
+/** Computes a stage of a radix-3 FFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -697,14 +1053,87 @@ kernel void fft_radix_3_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_3_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-3
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load three complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+    float2 c2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2 * Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+    TWIDDLE_FACTOR_MULTIPLICATION(2 * phi, c2);
+
+    // Compute DFT N = 3
+    DFT_3(c0, c1, c2);
+
+    // Store three complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+    vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 0, 2 * Nx, 0));
+}
+
+/** Computes a stage of a radix-4 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -761,7 +1190,7 @@ kernel void fft_radix_4_axis_0(
     vstore2(c3, 0, (__global float *)tensor3D_offset(&output, 3 * Nx, 0, 0));
 }
 
-/** Computes a stage of a radix-5 FFT.
+/** Computes a stage of a radix-4 FFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -773,14 +1202,90 @@ kernel void fft_radix_4_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_4_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-4
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load four complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+    float2 c2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2 * Nx, 0));
+    float2 c3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3 * Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+    TWIDDLE_FACTOR_MULTIPLICATION(2 * phi, c2);
+    TWIDDLE_FACTOR_MULTIPLICATION(3 * phi, c3);
+
+    // Compute DFT N = 4
+    DFT_4(c0, c1, c2, c3);
+
+    // Store four complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+    vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 0, 2 * Nx, 0));
+    vstore2(c3, 0, (__global float *)tensor3D_offset(&output, 0, 3 * Nx, 0));
+}
+
+/** Computes a stage of a radix-5 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -840,7 +1345,7 @@ kernel void fft_radix_5_axis_0(
     vstore2(c4, 0, (__global float *)tensor3D_offset(&output, 4 * Nx, 0, 0));
 }
 
-/** Computes a stage of a radix-7 FFT.
+/** Computes a stage of a radix-5 FFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -852,14 +1357,93 @@ kernel void fft_radix_5_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_5_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-5
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load five complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+    float2 c2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2 * Nx, 0));
+    float2 c3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3 * Nx, 0));
+    float2 c4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4 * Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+    TWIDDLE_FACTOR_MULTIPLICATION(2 * phi, c2);
+    TWIDDLE_FACTOR_MULTIPLICATION(3 * phi, c3);
+    TWIDDLE_FACTOR_MULTIPLICATION(4 * phi, c4);
+
+    // Compute DFT N = 5
+    DFT_5(c0, c1, c2, c3, c4);
+
+    // Store five complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+    vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 0, 2 * Nx, 0));
+    vstore2(c3, 0, (__global float *)tensor3D_offset(&output, 0, 3 * Nx, 0));
+    vstore2(c4, 0, (__global float *)tensor3D_offset(&output, 0, 4 * Nx, 0));
+}
+
+/** Computes a stage of a radix-7 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -925,7 +1509,7 @@ kernel void fft_radix_7_axis_0(
     vstore2(c6, 0, (__global float *)tensor3D_offset(&output, 6 * Nx, 0, 0));
 }
 
-/** Computes a stage of a radix-8 FFT.
+/** Computes a stage of a radix-7 FFT on axis 1.
  *
  * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -937,14 +1521,99 @@ kernel void fft_radix_7_axis_0(
  * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
  * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
- * @param[out]    output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
- * @param[in]     output_stride_x                      Stride of the destination image in X dimension (in bytes)
- * @param[in]     output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]     output_stride_y                      Stride of the destination image in Y dimension (in bytes)
- * @param[in]     output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]     output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]     output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]     output_offset_first_element_in_bytes The offset of the first element in the destination image
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_7_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-7
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load seven complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+    float2 c2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2 * Nx, 0));
+    float2 c3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3 * Nx, 0));
+    float2 c4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4 * Nx, 0));
+    float2 c5 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 5 * Nx, 0));
+    float2 c6 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 6 * Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+    TWIDDLE_FACTOR_MULTIPLICATION(2 * phi, c2);
+    TWIDDLE_FACTOR_MULTIPLICATION(3 * phi, c3);
+    TWIDDLE_FACTOR_MULTIPLICATION(4 * phi, c4);
+    TWIDDLE_FACTOR_MULTIPLICATION(5 * phi, c5);
+    TWIDDLE_FACTOR_MULTIPLICATION(6 * phi, c6);
+
+    // Compute DFT N = 7
+    DFT_7(c0, c1, c2, c3, c4, c5, c6);
+
+    // Store seven complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+    vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 0, 2 * Nx, 0));
+    vstore2(c3, 0, (__global float *)tensor3D_offset(&output, 0, 3 * Nx, 0));
+    vstore2(c4, 0, (__global float *)tensor3D_offset(&output, 0, 4 * Nx, 0));
+    vstore2(c5, 0, (__global float *)tensor3D_offset(&output, 0, 5 * Nx, 0));
+    vstore2(c6, 0, (__global float *)tensor3D_offset(&output, 0, 6 * Nx, 0));
+}
+
+/** Computes a stage of a radix-8 FFT on axis 0.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
  * @param[in]     Ni                                   Nx * Ny.
  * @param[in]     exp_const                            Exponent constant
@@ -1011,4 +1680,92 @@ kernel void fft_radix_8_axis_0(
     vstore2(c5, 0, (__global float *)tensor3D_offset(&output, 5 * Nx, 0, 0));
     vstore2(c6, 0, (__global float *)tensor3D_offset(&output, 6 * Nx, 0, 0));
     vstore2(c7, 0, (__global float *)tensor3D_offset(&output, 7 * Nx, 0, 0));
+}
+
+/** Computes a stage of a radix-8 FFT on axis 1.
+ *
+ * @note In order to perform the FFT function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
+ *
+ * @param[in,out] input_ptr                            Pointer to the source tensor. Supported data types: F32
+ * @param[in,out] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
+ * @param[in,out] input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in,out] input_stride_y                       Stride of the source tensor in Y dimension (in bytes)
+ * @param[in,out] input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in,out] input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in,out] input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in,out] input_offset_first_element_in_bytes  The offset of the first element in the source tensor
+ * @param[out]    output_ptr                           (Optional) Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]     output_stride_x                      (Optional) Stride of the destination image in X dimension (in bytes)
+ * @param[in]     output_step_x                        (Optional) output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]     output_stride_y                      (Optional) Stride of the destination image in Y dimension (in bytes)
+ * @param[in]     output_step_y                        (Optional) output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]     output_stride_z                      (Optional) Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]     output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]     output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
+ * @param[in]     Nx                                   The butterfly span. Products of radix order of previous radix's stage
+ * @param[in]     Ni                                   Nx * Ny.
+ * @param[in]     exp_const                            Exponent constant
+ */
+kernel void fft_radix_8_axis_1(
+    TENSOR3D_DECLARATION(input)
+#ifndef IN_PLACE
+    ,
+    TENSOR3D_DECLARATION(output)
+#endif /* not IN_PLACE */
+    ,
+    uint Nx, uint Ni, float exp_const)
+{
+    // Each work-item computes a single radix-8
+    uint kx = get_global_id(1);
+
+    // Compute nx
+    uint nx = kx % Nx;
+
+    // Compute n index
+    uint n = nx + (kx / Nx) * Ni;
+
+    // Get tensor pointers
+    Tensor3D input = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(input);
+    input.ptr += get_global_id(0) * input.stride_x + n * input.stride_y + get_global_id(2) * input.stride_z;
+#ifdef IN_PLACE
+    Tensor3D output = input;
+#else  /* IN_PLACE */
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(output);
+    output.ptr += get_global_id(0) * output.stride_x + n * output.stride_y + get_global_id(2) * output.stride_z;
+#endif /* IN_PLACE */
+
+    // Load eight complex input values
+    float2 c0 = vload2(0, (__global float *)input.ptr);
+    float2 c1 = vload2(0, (__global float *)tensor3D_offset(&input, 0, Nx, 0));
+    float2 c2 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 2 * Nx, 0));
+    float2 c3 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 3 * Nx, 0));
+    float2 c4 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 4 * Nx, 0));
+    float2 c5 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 5 * Nx, 0));
+    float2 c6 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 6 * Nx, 0));
+    float2 c7 = vload2(0, (__global float *)tensor3D_offset(&input, 0, 7 * Nx, 0));
+
+    // Compute phi
+    float phi = (float)nx * exp_const;
+
+    // Multiply by twiddle factor
+    TWIDDLE_FACTOR_MULTIPLICATION(phi, c1);
+    TWIDDLE_FACTOR_MULTIPLICATION(2 * phi, c2);
+    TWIDDLE_FACTOR_MULTIPLICATION(3 * phi, c3);
+    TWIDDLE_FACTOR_MULTIPLICATION(4 * phi, c4);
+    TWIDDLE_FACTOR_MULTIPLICATION(5 * phi, c5);
+    TWIDDLE_FACTOR_MULTIPLICATION(6 * phi, c6);
+    TWIDDLE_FACTOR_MULTIPLICATION(7 * phi, c7);
+
+    // Compute DFT N = 8
+    DFT_8(c0, c1, c2, c3, c4, c5, c6, c7);
+
+    // Store eight complex output values
+    vstore2(c0, 0, (__global float *)output.ptr);
+    vstore2(c1, 0, (__global float *)tensor3D_offset(&output, 0, Nx, 0));
+    vstore2(c2, 0, (__global float *)tensor3D_offset(&output, 0, 2 * Nx, 0));
+    vstore2(c3, 0, (__global float *)tensor3D_offset(&output, 0, 3 * Nx, 0));
+    vstore2(c4, 0, (__global float *)tensor3D_offset(&output, 0, 4 * Nx, 0));
+    vstore2(c5, 0, (__global float *)tensor3D_offset(&output, 0, 5 * Nx, 0));
+    vstore2(c6, 0, (__global float *)tensor3D_offset(&output, 0, 6 * Nx, 0));
+    vstore2(c7, 0, (__global float *)tensor3D_offset(&output, 0, 7 * Nx, 0));
 }

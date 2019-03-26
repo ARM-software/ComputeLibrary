@@ -24,6 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLFFT1D.h"
+#include "arm_compute/runtime/CL/functions/CLFFT2D.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/FFTFixture.h"
 #include "tests/framework/Macros.h"
@@ -42,11 +43,15 @@ const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
 const auto shapes     = framework::dataset::make("Shapes", { TensorShape(192U, 128U, 64U), TensorShape(224U, 224U) });
 } // namespace
 
-using CLFFT1DFixture = FFT1DFixture<CLTensor, CLFFT1D, CLAccessor>;
+using CLFFT1DFixture = FFTFixture<CLTensor, CLFFT1D, FFT1DInfo, CLAccessor>;
+using CLFFT2DFixture = FFTFixture<CLTensor, CLFFT2D, FFT2DInfo, CLAccessor>;
 
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(FFT1D, CLFFT1DFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(shapes, data_types));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(FFT2D, CLFFT2DFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(shapes, data_types));
 
 TEST_SUITE_END() // CL

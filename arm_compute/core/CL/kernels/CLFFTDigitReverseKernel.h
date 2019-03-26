@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/KernelDescriptors.h"
+
 namespace arm_compute
 {
 // Forward declarations
@@ -52,19 +54,19 @@ public:
      * @param[in]  input  Source tensor. Data types supported: F32.
      * @param[out] output Destination tensor. Data type supported: same as @p input
      * @param[in]  idx    Digit reverse index tensor. Data type supported: U32
-     * @param[in]  axis   Axis to perform digit reverse on.
+     * @param[in]  config Kernel configuration.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, unsigned int axis);
+    void configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *idx, const FFTDigitReverseKernelInfo &config);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFFTDigitReverseKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.
      * @param[in] output Destination tensor info. Data type supported: same as @p input
      * @param[in] idx    Digit reverse index tensor info. Data type supported: U32
-     * @param[in] axis   Axis to perform digit reverse on.
+     * @param[in] config Kernel configuration.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, unsigned int axis);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *idx, const FFTDigitReverseKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -26,10 +26,24 @@
 
 namespace arm_compute
 {
-/** Descriptor used by the FFT core kernels */
-struct FFTRadixStageKernelDescriptor
+/** Descriptor for FFT scale kernels */
+struct FFTScaleKernelInfo
 {
-    unsigned int axis{ 0 };               /**< Axis to run the FFT on. */
+    float scale{ 0.f };      /**< Axis to perform the kernel on. */
+    bool  conjugate{ true }; /**< Flag to conjugate the output/ */
+};
+
+/** Descriptor for FFT digit reverse kernels */
+struct FFTDigitReverseKernelInfo
+{
+    unsigned int axis{ 0 };          /**< Axis to perform the kernel on. */
+    bool         conjugate{ false }; /**< Flag to conjugate the output/ */
+};
+
+/** Descriptor used by the FFT core kernels */
+struct FFTRadixStageKernelInfo
+{
+    unsigned int axis{ 0 };               /**< Axis to run the kernel on. */
     unsigned int radix{ 0 };              /**< Radix to use. */
     unsigned int Nx{ 0 };                 /**< Nx coefficient. */
     bool         is_first_stage{ false }; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */

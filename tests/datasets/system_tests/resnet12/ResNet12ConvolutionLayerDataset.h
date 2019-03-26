@@ -21,63 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FFT_FIXTURE
-#define ARM_COMPUTE_TEST_FFT_FIXTURE
+#ifndef ARM_COMPUTE_TEST_RESNET12_CONVOLUTION_LAYER_DATASET
+#define ARM_COMPUTE_TEST_RESNET12_CONVOLUTION_LAYER_DATASET
 
+#include "tests/datasets/ConvolutionLayerDataset.h"
+
+#include "utils/TypePrinter.h"
+
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/FunctionDescriptors.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
-#include "tests/framework/Fixture.h"
 
 namespace arm_compute
 {
 namespace test
 {
-namespace benchmark
+namespace datasets
 {
-template <typename TensorType, typename Function, typename FFTInfo, typename Accessor>
-class FFTFixture : public framework::Fixture
+class ResNet12FFTConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:
-    template <typename...>
-    void setup(TensorShape shape, DataType data_type)
+    ResNet12FFTConvolutionLayerDataset()
     {
-        // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 2);
-        dst = create_tensor<TensorType>(shape, data_type, 2);
-
-        // Create and configure function
-        fft_func.configure(&src, &dst, FFTInfo());
-
-        // Allocate tensors
-        src.allocator()->allocate();
-        dst.allocator()->allocate();
+        add_config(TensorShape(192U, 128U, 64U), TensorShape(9U, 9U, 64U, 3U), TensorShape(3U), TensorShape(192U, 128U, 3U), PadStrideInfo(1, 1, 4, 4));
     }
-
-    void run()
-    {
-        fft_func.run();
-    }
-
-    void sync()
-    {
-        sync_if_necessary<TensorType>();
-        sync_tensor_if_necessary<TensorType>(dst);
-    }
-
-    void teardown()
-    {
-        src.allocator()->free();
-        dst.allocator()->free();
-    }
-
-private:
-    TensorType src{};
-    TensorType dst{};
-    Function   fft_func{};
 };
-} // namespace benchmark
+} // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FFT_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_RESNET12_CONVOLUTION_LAYER_DATASET */

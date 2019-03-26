@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FFT_FIXTURE
-#define ARM_COMPUTE_TEST_FFT_FIXTURE
+#ifndef ARM_COMPUTE_TEST_FFT_CONVOLUTION_LAYER_FIXTURE
+#define ARM_COMPUTE_TEST_FFT_CONVOLUTION_LAYER_FIXTURE
 
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/FunctionDescriptors.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
 #include "tests/framework/Fixture.h"
@@ -36,28 +36,41 @@ namespace test
 {
 namespace benchmark
 {
-template <typename TensorType, typename Function, typename FFTInfo, typename Accessor>
-class FFTFixture : public framework::Fixture
+/** Fixture that can be used for NEON and CL */
+template <typename TensorType, typename Function, typename Accessor>
+class FFTConvolutionLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type)
+    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation, ActivationLayerInfo act_info, DataType data_type,
+               int batches)
     {
+        ARM_COMPUTE_UNUSED(dilation);
+
+        // Set batched in source and destination shapes
+
+        src_shape.set(3 /* batch */, batches);
+        dst_shape.set(3 /* batch */, batches);
+
         // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 2);
-        dst = create_tensor<TensorType>(shape, data_type, 2);
+        src     = create_tensor<TensorType>(src_shape, data_type, 1);
+        weights = create_tensor<TensorType>(weights_shape, data_type, 1);
+        biases  = create_tensor<TensorType>(biases_shape, data_type, 1);
+        dst     = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         // Create and configure function
-        fft_func.configure(&src, &dst, FFTInfo());
+        conv_layer.configure(&src, &weights, &biases, &dst, info, act_info);
 
         // Allocate tensors
         src.allocator()->allocate();
+        weights.allocator()->allocate();
+        biases.allocator()->allocate();
         dst.allocator()->allocate();
     }
 
     void run()
     {
-        fft_func.run();
+        conv_layer.run();
     }
 
     void sync()
@@ -69,15 +82,19 @@ public:
     void teardown()
     {
         src.allocator()->free();
+        weights.allocator()->free();
+        biases.allocator()->free();
         dst.allocator()->free();
     }
 
 private:
     TensorType src{};
+    TensorType weights{};
+    TensorType biases{};
     TensorType dst{};
-    Function   fft_func{};
+    Function   conv_layer{};
 };
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FFT_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_FFT_CONVOLUTION_LAYER_FIXTURE */

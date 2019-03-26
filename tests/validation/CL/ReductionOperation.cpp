@@ -63,7 +63,7 @@ TEST_SUITE(ReductionOperation)
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     framework::dataset::make("InputInfo",          { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
-                                                     TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
+                                                     TensorInfo(TensorShape(128U, 64U), 3, DataType::F32), // Number of Input channels != 1
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != QASYMM8/F16/F32
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::QASYMM8), // Axis == 0 and SUM_SQUARE and QASYMM8

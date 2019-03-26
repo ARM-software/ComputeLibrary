@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,11 +29,10 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ICLTensor;
 
-/** Interface for the pixelwise multiplication kernel.
- *
- */
+/** Interface for the pixelwise multiplication kernel. */
 class CLPixelWiseMultiplicationKernel : public ICLKernel
 {
 public:
@@ -73,6 +72,47 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
                            ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
+    BorderSize border_size() const override;
+
+private:
+    const ICLTensor *_input1;
+    const ICLTensor *_input2;
+    ICLTensor       *_output;
+};
+
+/** Interface for the complex pixelwise multiplication kernel. */
+class CLComplexPixelWiseMultiplicationKernel : public ICLKernel
+{
+public:
+    /** Default constructor.*/
+    CLComplexPixelWiseMultiplicationKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLComplexPixelWiseMultiplicationKernel(const CLComplexPixelWiseMultiplicationKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLComplexPixelWiseMultiplicationKernel &operator=(const CLComplexPixelWiseMultiplicationKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLComplexPixelWiseMultiplicationKernel(CLComplexPixelWiseMultiplicationKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLComplexPixelWiseMultiplicationKernel &operator=(CLComplexPixelWiseMultiplicationKernel &&) = default;
+    /** Initialise the kernel's input, output and border mode.
+     *
+     * @param[in]  input1 An input tensor. Data types supported: F32. Number of channels supported: 2.
+     * @param[in]  input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[out] output The output tensor, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     */
+    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplicationKernel
+     *
+     * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2.
+     * @param[in] input2 An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] output The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
