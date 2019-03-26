@@ -63,6 +63,7 @@
 #include "arm_compute/runtime/NEON/functions/NEElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEEqualizeHistogram.h"
 #include "arm_compute/runtime/NEON/functions/NEErode.h"
+#include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
 #include "arm_compute/runtime/NEON/functions/NEFastCorners.h"
 #include "arm_compute/runtime/NEON/functions/NEFillBorder.h"
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
