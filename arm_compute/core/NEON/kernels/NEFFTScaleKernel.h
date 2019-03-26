@@ -21,83 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFFTRADIXSTAGEKERNEL_H__
-#define __ARM_COMPUTE_NEFFTRADIXSTAGEKERNEL_H__
+#ifndef __ARM_COMPUTE_NEFFTSCALEKERNEL_H__
+#define __ARM_COMPUTE_NEFFTSCALEKERNEL_H__
 
-#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/NEON/INEKernel.h"
 
-#include <arm_neon.h>
-#include <set>
+#include "arm_compute/core/KernelDescriptors.h"
 
 namespace arm_compute
 {
 // Forward declarations
 class ITensor;
 
-/** Interface for the FFT kernel. */
-class NEFFTRadixStageKernel : public INEKernel
+/** Interface for the inverse fft scale kernel. */
+class NEFFTScaleKernel : public INEKernel
 {
 public:
     const char *name() const override
     {
-        return "NEFFTRadixStageKernel";
+        return "NEFFTScaleKernel";
     }
     /** Constructor */
-    NEFFTRadixStageKernel();
+    NEFFTScaleKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEFFTRadixStageKernel(const NEFFTRadixStageKernel &) = delete;
+    NEFFTScaleKernel(const NEFFTScaleKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEFFTRadixStageKernel &operator=(const NEFFTRadixStageKernel &) = delete;
+    NEFFTScaleKernel &operator=(const NEFFTScaleKernel &) = delete;
     /** Default Move Constructor. */
-    NEFFTRadixStageKernel(NEFFTRadixStageKernel &&) = default;
+    NEFFTScaleKernel(NEFFTScaleKernel &&) = default;
     /** Default move assignment operator */
-    NEFFTRadixStageKernel &operator=(NEFFTRadixStageKernel &&) = default;
+    NEFFTScaleKernel &operator=(NEFFTScaleKernel &&) = default;
     /** Default destructor */
-    ~NEFFTRadixStageKernel() = default;
+    ~NEFFTScaleKernel() = default;
     /** Set the input and output tensors.
-     *
-     * @note If the output tensor is nullptr, the FFT will be performed in-place
      *
      * @param[in,out] input  Source tensor. Data types supported: F32.
      * @param[out]    output Destination tensor. Data type supported: same as @p input
-     * @param[in]     config FFT descriptor metadata.
+     * @param[in]     config Kernel configuration
      */
-    void configure(ITensor *input, ITensor *output, const FFTRadixStageKernelInfo &config);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEFFTRadixStageKernel
+    void configure(ITensor *input, ITensor *output, const FFTScaleKernelInfo &config);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEFFTScaleKernel
      *
      * @param[in] input  Source tensor info. Data types supported: F32.
      * @param[in] output Destination tensor info. Data type supported: same as @p input
-     * @param[in] config FFT descriptor metadata.
+     * @param[in] config Kernel configuration
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFTRadixStageKernelInfo &config);
-    /** Returns the radix that are support by the FFT kernel
-     *
-     * @return A set of supported radix
-     */
-    static std::set<unsigned int> supported_radix();
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFTScaleKernelInfo &config);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    ITensor     *_input;
-    ITensor     *_output;
-    bool         _run_in_place;
-    unsigned int _Nx;
-    unsigned int _axis;
-    unsigned int _radix;
-
-    void set_radix_stage_axis0(const FFTRadixStageKernelInfo &config);
-    void set_radix_stage_axis1(const FFTRadixStageKernelInfo &config);
-
-    using FFTFunctionPointerAxis0 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int)>;
-    using FFTFunctionPointerAxis1 = std::function<void(float *, float *, unsigned int, unsigned int, const float32x2_t &, unsigned int, unsigned int)>;
-
-    FFTFunctionPointerAxis0 _func_0;
-    FFTFunctionPointerAxis1 _func_1;
+    ITensor *_input;
+    ITensor *_output;
+    float    _scale;
+    bool     _run_in_place;
+    bool     _is_conj;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFFTRADIXSTAGEKERNEL_H__ */
+#endif /*__ARM_COMPUTE_NEFFTSCALEKERNEL_H__ */

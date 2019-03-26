@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEFFT1D_H__
-#define __ARM_COMPUTE_NEFFT1D_H__
+#ifndef __ARM_COMPUTE_NEFFT2D_H__
+#define __ARM_COMPUTE_NEFFT2D_H__
 
-#include "arm_compute/core/NEON/kernels/NEFFTDigitReverseKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFFTRadixStageKernel.h"
-#include "arm_compute/core/NEON/kernels/NEFFTScaleKernel.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/runtime/FunctionDescriptors.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEFFT1D.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -38,25 +36,24 @@ namespace arm_compute
 // Forward declaration
 class ITensor;
 
-/** Basic function to execute one dimensional FFT. This function calls the following NEON kernels:
+/** Basic function to execute two dimensional FFT. This function calls the following NEON kernels:
  *
- * -# @ref NEFFTDigitReverseKernel Performs digit reverse
- * -# @ref NEFFTRadixStageKernel   A list of FFT kernels depending on the radix decomposition
- * -# @ref NEFFTScaleKernel        Performs output scaling in case of in inverse FFT
+ * -# @ref NEFFT1D 1D FFT is performed on the first given axis
+ * -# @ref NEFFT1D 1D FFT is performed on the second given axis
  */
-class NEFFT1D : public IFunction
+class NEFFT2D : public IFunction
 {
 public:
     /** Default Constructor */
-    NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-    /** Initialise the function's source and destinations.
+    NEFFT2D(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Initialise the function's source and destinations
      *
      * @param[in]  input  Source tensor. Data types supported: F32.
      * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  config FFT related configuration
      */
-    void configure(const ITensor *input, ITensor *output, const FFT1DInfo &config);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEFFT1D.
+    void configure(const ITensor *input, ITensor *output, const FFT2DInfo &config);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEFFT2D.
      *
      * @param[in] input  Source tensor info. Data types supported: F32.
      * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
@@ -64,21 +61,16 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFT1DInfo &config);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const FFT2DInfo &config);
 
     // Inherited methods overridden:
     void run() override;
 
 protected:
-    MemoryGroup                        _memory_group;
-    NEFFTDigitReverseKernel            _digit_reverse_kernel;
-    std::vector<NEFFTRadixStageKernel> _fft_kernels;
-    NEFFTScaleKernel                   _scale_kernel;
-    Tensor                             _digit_reversed_input;
-    Tensor                             _digit_reverse_indices;
-    unsigned int                       _num_ffts;
-    unsigned int                       _axis;
-    bool                               _run_scale;
+    MemoryGroup _memory_group;
+    NEFFT1D     _first_pass_func;
+    NEFFT1D     _second_pass_func;
+    Tensor      _first_pass_tensor;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEFFT1D_H__ */
+#endif /*__ARM_COMPUTE_NEFFT2D_H__ */

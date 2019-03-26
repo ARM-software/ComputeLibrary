@@ -31,7 +31,7 @@
 namespace arm_compute
 {
 NEFFT1D::NEFFT1D(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _digit_reversed_input(), _digit_reverse_indices(), _digit_reverse_kernel(), _fft_kernels(), _n_ffts(0)
+    : _memory_group(std::move(memory_manager)), _digit_reverse_kernel(), _fft_kernels(), _scale_kernel(), _digit_reversed_input(), _digit_reverse_indices(), _num_ffts(0), _axis(0), _run_scale(false)
 {
 }
 
@@ -43,6 +43,11 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
     const auto         decomposed_vector = arm_compute::helpers::fft::decompose_stages(N, supported_radix);
     ARM_COMPUTE_ERROR_ON(decomposed_vector.empty());
 
+    // Flags
+    _run_scale        = config.direction == FFTDirection::Inverse;
+    _axis             = config.axis;
+    const bool is_c2r = input->info()->num_channels() == 2 && output->info()->num_channels() == 1;
+
     // Configure digit reverse
     TensorInfo digit_reverse_indices_info(TensorShape(input->info()->tensor_shape()[config.axis]), 1, DataType::U32);
     _digit_reverse_indices.allocator()->init(digit_reverse_indices_info);
@@ -51,19 +56,19 @@ void NEFFT1D::configure(const ITensor *input, ITensor *output, const FFT1DInfo &
 
     // Create and configure FFT kernels
     unsigned int Nx = 1;
-    _n_ffts         = decomposed_vector.size();
-    _fft_kernels.resize(_n_ffts);
-    for(unsigned int i = 0; i < _n_ffts; ++i)
+
+    _num_ffts = decomposed_vector.size();
+    _fft_kernels.resize(_num_ffts);
+    for(unsigned int i = 0; i < _num_ffts; ++i)
     {
         const unsigned int radix_for_stage = decomposed_vector.at(i);
 
-        FFTRadixStageKernelInfo fft_kernel_desc;
-        fft_kernel_desc.axis           = config.axis;
-        fft_kernel_desc.radix          = radix_for_stage;
-        fft_kernel_desc.Nx             = Nx;
-        fft_kernel_desc.is_first_stage = (i == 0);
-        _fft_kernels[i].configure(&_digit_reversed_input, i == (_n_ffts - 1) ? output : nullptr, fft_kernel_desc);
-
+        FFTRadixStageKernelInfo fft_kernel_info;
+        fft_kernel_info.axis           = config.axis;
+        fft_kernel_info.radix          = radix_for_stage;
+        fft_kernel_info.Nx             = Nx;
+        fft_kernel_info.is_first_stage = (i == 0);
+        _fft_kernels[i].configure(&_digit_reversed_input, i == (_num_ffts - 1) && !is_c2r ? output : nullptr, fft_kernel_info);
         Nx *= radix_for_stage;
     }
 
@@ -80,7 +85,7 @@ Status NEFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(config.axis != 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(config.axis > 1);
 
     // Check if FFT is decomposable
     const auto         supported_radix   = NEFFTRadixStageKernel::supported_radix();
@@ -102,11 +107,17 @@ void NEFFT1D::run()
 {
     MemoryGroupResourceScope scope_mg(_memory_group);
 
-    NEScheduler::get().schedule(&_digit_reverse_kernel, Window::DimY);
+    NEScheduler::get().schedule(&_digit_reverse_kernel, (_axis == 0 ? Window::DimY : Window::DimX));
 
-    for(unsigned int i = 0; i < _n_ffts; ++i)
+    for(unsigned int i = 0; i < _num_ffts; ++i)
     {
-        NEScheduler::get().schedule(&_fft_kernels[i], Window::DimY);
+        NEScheduler::get().schedule(&_fft_kernels[i], (_axis == 0 ? Window::DimY : Window::DimX));
+    }
+
+    // Run output scaling
+    if(_run_scale)
+    {
+        NEScheduler::get().schedule(&_scale_kernel, Window::DimY);
     }
 }
 } // namespace arm_compute
