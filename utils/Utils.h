@@ -774,7 +774,7 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
 template <typename T>
 void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::DataType dt)
 {
-    dst.allocator()->init(TensorInfo(TensorShape(src1.info()->dimension(0), src0.info()->dimension(1)), 1, dt));
+    dst.allocator()->init(TensorInfo(TensorShape(src1.info()->dimension(0), src0.info()->dimension(1), src0.info()->dimension(2)), 1, dt));
 }
 /** This function returns the amount of memory free reading from /proc/meminfo
  *
