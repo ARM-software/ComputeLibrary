@@ -33,7 +33,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd.hpp"
 
 namespace arm_compute
 {
@@ -236,10 +236,10 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _gemm_function(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
-      _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
-      _is_prepared(false), _is_activationlayer_enabled(false)
+      _permute_input(), _permute_weights(), _permute_output(), _input_transformed(), _output_transformed(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(),
+      _weights_hwio(), _input(), _weights(), _output(), _is_prepared(false), _is_activationlayer_enabled(false)
 {
-} /* arm_compute */
+}
 
 void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info,
                                            bool enable_fast_math)
@@ -436,9 +436,9 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     b_info.init(b_shape, 1, data_type, b_strides, 0, kernel_storage_size);
     d_info.init(d_shape, 1, data_type, d_strides, 0, output_storage_size);
 
-    _input_workspace.allocator()->init(a_info, storage_alignment);
+    _input_transformed.allocator()->init(a_info, storage_alignment);
     _kernel_storage.allocator()->init(b_info, storage_alignment);
-    _output_workspace.allocator()->init(d_info, storage_alignment);
+    _output_transformed.allocator()->init(d_info, storage_alignment);
 
     // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
     TensorInfo info(TensorShape(_output->info()->dimension(2), _output->info()->dimension(0),
@@ -447,6 +447,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _output_nhwc.allocator()->init(info);
 
     // Configure the InputTransform
+    _memory_group.manage(&_input_transformed);
+    _memory_group.manage(&_output_transformed);
     _memory_group.manage(&_input_workspace);
     _memory_group.manage(&_output_workspace);
 
@@ -456,7 +458,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
         _input_nhwc.allocator()->allocate();
         transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          &_input_workspace, input_matrix_stride);
+                                          &_input_transformed, input_matrix_stride, &_input_workspace);
 
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
@@ -465,26 +467,39 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
         //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
         _memory_group.manage(&_output_nhwc);
-        transform_output_kernel->configure(biases, &_output_workspace,
+        transform_output_kernel->configure(biases, &_output_transformed,
                                            output_matrix_stride, &_output_nhwc,
-                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels, &_output_workspace);
     }
     else
     {
         transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          &_input_workspace, input_matrix_stride);
+                                          &_input_transformed, input_matrix_stride, &_input_workspace);
 
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
 
         transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
 
-        transform_output_kernel->configure(biases, &_output_workspace,
+        transform_output_kernel->configure(biases, &_output_transformed,
                                            output_matrix_stride, _output,
-                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels, &_output_workspace);
     }
 
-    _gemm_function.configure(&_input_workspace, &_kernel_storage, nullptr, &_output_workspace, 1.0f, 0.f);
+    //Configure input/output workspaces, get_working_space_size() must be called after configure()
+    const unsigned int max_num_threads       = NEScheduler::get().num_threads_hint();
+    const size_t       input_workspace_size  = transform_input_kernel->get_working_space_size(max_num_threads);
+    const size_t       output_workspace_size = transform_output_kernel->get_working_space_size(max_num_threads);
+
+    TensorInfo input_workspace_info(TensorShape(input_workspace_size), 1, _input->info()->data_type());
+    _input_workspace.allocator()->init(input_workspace_info);
+
+    TensorInfo output_workspace_info(TensorShape(output_workspace_size), 1, _output->info()->data_type());
+    _output_workspace.allocator()->init(output_workspace_info);
+
+    _gemm_function.configure(&_input_transformed, &_kernel_storage, nullptr, &_output_transformed, 1.0f, 0.f);
+    _input_transformed.allocator()->allocate();
+    _output_transformed.allocator()->allocate();
     _input_workspace.allocator()->allocate();
     _output_workspace.allocator()->allocate();
 

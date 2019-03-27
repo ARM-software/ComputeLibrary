@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,43 +22,29 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/output.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_output_transform.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
+#include "output.hpp"
+#include "arm.hpp"
 
-namespace
+namespace winograd
 {
 
-template <bool Specialized, int PadRight=0>
-void winograd_output_transform_2_7_fp32_process_tile(
+template <>
+void OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>::transform_tile(
   const int n_channels,
-  const float* const matrix_base,
+  const float* inptr,
   const int matrix_stride,
-  const float* const biases,
+  const float* bptr,
   float* const output,
-  const int output_row_stride,
-  const int output_col_stride,
-  const int _pad_bottom,
-  const int _pad_right
+  const int,  // No need to stride across rows
+  const int output_col_stride
 )
 {
-  (void) output_row_stride;
-  (void) _pad_bottom;
-  constexpr int output_tile_cols = 2;
-  constexpr int inner_tile_cols = 8;
-
-  const int pad_right = Specialized ? PadRight : _pad_right;
-  const int cells_j = output_tile_cols - pad_right;
-
-
   // Construct a map to the output cells
-  float *outptrs[cells_j];
-  for (int j = 0; j < cells_j; j++)
+  float *outptrs[output_tile_cols];
+  for (int j = 0; j < output_tile_cols; j++)
   {
     outptrs[j] = output + j*output_col_stride;
   }
-  const float *inptr = matrix_base;
-  const float *bptr = biases;
 
   // For each channel of the output
   int channels_remaining = n_channels;
@@ -76,7 +62,11 @@ void winograd_output_transform_2_7_fp32_process_tile(
     inptr += 4;
 
     f[0] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[6], 1), F[5], 1), F[4], 1), F[3], 1), F[2], 1), F[1], 1), F[0], 1);
-    f[1] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[7], 1), F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
+    f[1] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
+    f[2] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[1], 1), F[6], 9), F[5], 9), F[4], 4), F[3], 4);
+    f[3] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
+    f[4] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[2], 1), F[1], 1), F[6], 81), F[5], 81), F[4], 16), F[3], 16);
+    f[5] = vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmlaq_n_f32(vmulq_n_f32(F[7], 1), F[2], 1), F[6], 243), F[4], 32), F[3], -32), F[5], -243), F[1], -1);
 
     // Write out the output tile
     if (bptr != 0)
@@ -84,7 +74,7 @@ void winograd_output_transform_2_7_fp32_process_tile(
       b = vld1q_f32(bptr);
       bptr += 4;
     }
-    for (int j = 0; j < cells_j; j++)
+    for (int j = 0; j < output_tile_cols; j++)
     {
       vst1q_f32(outptrs[j], f[j] + b);
       outptrs[j] += 4;
@@ -103,7 +93,11 @@ void winograd_output_transform_2_7_fp32_process_tile(
     inptr += 2;
 
     f[0] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[6], 1), F[5], 1), F[4], 1), F[3], 1), F[2], 1), F[1], 1), F[0], 1);
-    f[1] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[7], 1), F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
+    f[1] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[6], 3), F[4], 2), F[3], -2), F[5], -3), F[1], -1);
+    f[2] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[1], 1), F[6], 9), F[5], 9), F[4], 4), F[3], 4);
+    f[3] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[6], 27), F[4], 8), F[3], -8), F[5], -27), F[1], -1);
+    f[4] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[2], 1), F[1], 1), F[6], 81), F[5], 81), F[4], 16), F[3], 16);
+    f[5] = vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmla_n_f32(vmul_n_f32(F[7], 1), F[2], 1), F[6], 243), F[4], 32), F[3], -32), F[5], -243), F[1], -1);
 
     // Write out the output tile
     if (bptr != 0)
@@ -111,7 +105,7 @@ void winograd_output_transform_2_7_fp32_process_tile(
       b = vld1_f32(bptr);
       bptr += 2;
     }
-    for (int j = 0; j < cells_j; j++)
+    for (int j = 0; j < output_tile_cols; j++)
     {
       vst1_f32(outptrs[j], f[j] + b);
       outptrs[j] += 2;
@@ -131,33 +125,25 @@ void winograd_output_transform_2_7_fp32_process_tile(
     inptr++;
 
     f[0] = F[0]*1 + F[1]*1 + F[2]*1 + F[3]*1 + F[4]*1 + F[5]*1 + F[6]*1;
-    f[1] = F[1]*-1 + F[5]*-3 + F[3]*-2 + F[4]*2 + F[6]*3 + F[2]*1 + F[7]*1;
+    f[1] = F[1]*-1 + F[5]*-3 + F[3]*-2 + F[4]*2 + F[6]*3 + F[2]*1;
+    f[2] = F[3]*4 + F[4]*4 + F[5]*9 + F[6]*9 + F[1]*1 + F[2]*1;
+    f[3] = F[1]*-1 + F[5]*-27 + F[3]*-8 + F[4]*8 + F[6]*27 + F[2]*1;
+    f[4] = F[3]*16 + F[4]*16 + F[5]*81 + F[6]*81 + F[1]*1 + F[2]*1;
+    f[5] = F[1]*-1 + F[5]*-243 + F[3]*-32 + F[4]*32 + F[6]*243 + F[2]*1 + F[7]*1;
 
     // Write out the output tile
     if (bptr != 0)
     {
       b = *(bptr++);
     }
-    for (int j = 0; j < cells_j; j++)
+    for (int j = 0; j < output_tile_cols; j++)
     {
       *(outptrs[j]++) = f[j] + b;
     }
   }
 }
-}  // namespace (anonymous)
 
-namespace winograd
-{
-using Tiles = OutputTransformImplTiles<1, 7, 1, 8, float>;
+template class OutputTransform<1, 3, 1, 8, float, float, WinogradRoots::Integers>;
+template class OutputTransform<3, 1, 8, 1, float, float, WinogradRoots::Integers>;
 
-template <>
-const Tiles::TileFn Tiles::tilefn_unpadded = winograd_output_transform_2_7_fp32_process_tile<true>;
-
-template <>
-const Tiles::TileFn Tiles::tilefn_right_padded[n_pad_right] = {
-  winograd_output_transform_2_7_fp32_process_tile<true, 1>
-};
-
-template class OutputTransform<1, 7, 1, 8, float>;
-template class OutputTransform<7, 1, 8, 1, float>;
-}  // namespace winograd
+}  // namespace

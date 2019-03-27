@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,29 +22,45 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#pragma once
+#include "winograd.hpp"
 using namespace winograd;
 
+#define MEMBERFN(RTYPE) template <\
+  int KernelRows, int KernelCols, int InnerTileRows, int InnerTileCols, typename TIn, typename TOut, WinogradRoots Roots\
+> RTYPE WeightTransform<KernelRows, KernelCols, InnerTileRows, InnerTileCols, TIn, TOut, Roots>
 
-template <int otr, int otc, int kr, int kc>
-template <typename T>
-WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::WeightsTransform(
-  const T* const input,
-  T* const output,
-  const int matrix_stride,      /** Stride across matrices in the output. */
-  const int matrix_row_stride,  /** Stride across rows of the matrix. */
+MEMBERFN()::WeightTransform(
   const int n_output_channels,
   const int n_input_channels
-) : inptr(input), outptr(output),
-    matrix_stride(matrix_stride), matrix_row_stride(matrix_row_stride),
-    n_output_channels(n_output_channels), n_input_channels(n_input_channels)
+) : _n_output_channels(n_output_channels), _n_input_channels(n_input_channels),
+    _matrices(nullptr), _matrix_stride(0), _matrix_row_stride(0), _weights(nullptr)
+{
+
+}
+
+MEMBERFN(void)::set_weight_tensor(const void * const weights)
+{
+  _weights = static_cast<const TIn *>(weights);
+}
+
+MEMBERFN(void)::set_output_matrices(void * const mptr, const int ldmatrix, const int ldrow)
+{
+  _matrices = static_cast<TOut *>(mptr);
+  _matrix_stride = ldmatrix;
+  _matrix_row_stride = ldrow;
+}
+
+MEMBERFN(size_t)::get_working_space_size(unsigned int) const
+{
+  return 0;
+}
+
+MEMBERFN(void)::set_working_space(void *)
 {
 }
 
-
-template <int otr, int otc, int kr, int kc>
-template <typename T>
-unsigned int WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::get_window() const
+MEMBERFN(unsigned int)::get_window(void) const
 {
   // TODO When the weights transform supports multithreading, return the number
   // of output channels. For now we return 1 to indicate that the weights must
@@ -53,25 +69,10 @@ unsigned int WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::get_window() c
   return 1;
 }
 
-
-template <int otr, int otc, int kr, int kc>
-template <typename T>
-void WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::run(
-  const unsigned int start, const unsigned int stop
-)
+MEMBERFN(void)::run(const unsigned int, const unsigned int, unsigned int)
 {
-  // TODO When the weights transform supports multithreading call execute for a
-  // portion of the output channels.
-  (void) start;
-  (void) stop;
-
-  // For now, just do all of the work.
   execute(
-    n_output_channels,
-    n_input_channels,
-    inptr,
-    outptr,
-    matrix_stride,
-    matrix_row_stride
+    _n_output_channels, _n_input_channels, _weights,
+    _matrices, _matrix_stride, _matrix_row_stride
   );
 }

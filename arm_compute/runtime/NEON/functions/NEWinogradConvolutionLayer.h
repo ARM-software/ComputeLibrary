@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,6 +113,8 @@ private:
     CPPPermute     _permute_input;
     CPPPermute     _permute_weights;
     CPPPermute     _permute_output;
+    Tensor         _input_transformed;
+    Tensor         _output_transformed;
     Tensor         _input_workspace;
     Tensor         _output_workspace;
     Tensor         _kernel_storage;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -238,8 +238,7 @@ unsigned int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTile
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformWeightsKernel()
-    : _weights_hwio(nullptr), _output(nullptr), _matrix_stride(0), _num_output_channels(0), _num_input_channels(0)
-
+    : _transform(nullptr), _weights_hwio(nullptr), _output(nullptr), _matrix_stride(0), _num_output_channels(0), _num_input_channels(0)
 {
 }
 
@@ -263,11 +262,10 @@ void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ke
     _matrix_stride       = matrix_stride;
     _num_output_channels = num_output_channels;
     _num_input_channels  = num_input_channels;
+    _transform           = arm_compute::support::cpp14::make_unique<WeightsTransform>(num_output_channels, num_input_channels);
 
-    const int        matrix_row_stride = roundup(num_output_channels, WinogradConv::N_BLOCK);
-    WeightsTransform transform(nullptr, nullptr, matrix_stride, matrix_row_stride, num_output_channels, num_input_channels);
-    Window           win;
-    auto             win_last = transform.get_window();
+    Window win;
+    auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     INEKernel::configure(win);
 }
@@ -278,12 +276,14 @@ void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, Ke
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    const size_t fst = window.x().start();
+    const size_t lst = window.x().end();
+    _transform->set_weight_tensor(_weights_hwio->buffer());
+    const int matrix_row_stride = roundup(_num_output_channels, WinogradConv::N_BLOCK);
+    _transform->set_output_matrices(_output->buffer(), _matrix_stride, matrix_row_stride);
+    _transform->set_working_space(_output->buffer());
 
-    const int        matrix_row_stride = roundup(_num_output_channels, WinogradConv::N_BLOCK);
-    WeightsTransform transform(reinterpret_cast<T *>(_weights_hwio->buffer()), reinterpret_cast<T *>(_output->buffer()), _matrix_stride, matrix_row_stride, _num_output_channels, _num_input_channels);
-    const size_t     fst = window.x().start();
-    const size_t     lst = window.x().end();
-    transform.run(fst, lst);
+    _transform->run(fst, lst);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -331,6 +331,12 @@ unsigned int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCo
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_working_space_size(unsigned int num_threads) const
+{
+    return _transform->get_working_space_size(num_threads) / sizeof(T);
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(
     const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const
 {
@@ -339,7 +345,8 @@ int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kerne
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformInputKernel()
-    : _input_nhwc(), _num_batches(0), _num_rows(0), _num_cols(0), _num_channels(0), _padding(), _output(nullptr), _matrix_stride(0)
+    : _transform(nullptr), _input_nhwc(nullptr), _num_batches(0), _num_rows(0), _num_cols(0), _num_channels(0), _padding(), _output(nullptr), _matrix_stride(0), _padding_top(), _padding_left(),
+      _padding_right(), _padding_bottom(), _workspace(nullptr)
 {
 }
 
@@ -352,7 +359,8 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
     const int         num_channels,  /* Number of channels in input tensor. */
     const PaddingType padding,       /* Padding type. */
     ITensor          *output,        /* Base of output matrices. */
-    const int         matrix_stride) /* Stride between output matrices. */
+    const int         matrix_stride, /* Stride between output matrices. */
+    ITensor          *workspace)
 {
     _input_nhwc    = input_nhwc;
     _num_batches   = num_batches;
@@ -362,9 +370,28 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
     _padding       = padding;
     _output        = output;
     _matrix_stride = matrix_stride;
-    InputTransform transform(nullptr, num_batches, num_rows, num_cols, num_channels, padding, nullptr, matrix_stride, num_channels);
-    Window         win;
-    auto           win_last = transform.get_window();
+    _workspace     = workspace;
+
+    _padding_top    = (padding == PADDING_SAME) ? (KernelRows - 1) / 2 : 0;
+    _padding_left   = (padding == PADDING_SAME) ? (KernelCols - 1) / 2 : 0;
+    _padding_bottom = (padding == PADDING_SAME) ? iceildiv(KernelRows - 1, 2) : 0;
+    _padding_right  = (padding == PADDING_SAME) ? iceildiv(KernelCols - 1, 2) : 0;
+
+    _transform = arm_compute::support::cpp14::make_unique<InputTransform>(
+                     KernelRows,
+                     KernelCols,
+                     num_batches,
+                     num_rows,
+                     num_cols,
+                     num_channels,
+                     _padding_top,    /**< Padding to apply to the top of the image. */
+                     _padding_left,   /**< Padding to apply to the left of the image. */
+                     _padding_bottom, /**< Padding to apply to the bottom of the image. */
+                     _padding_right   /**< Padding to apply to the right of the image. */
+                 );
+
+    Window win;
+    auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     INEKernel::configure(win);
 }
@@ -374,22 +401,25 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_workspace);
 
-    const int      element_size_in_bytes = _input_nhwc->info()->element_size();
-    const int      input_col_stride      = _input_nhwc->info()->strides_in_bytes().y() / element_size_in_bytes;
-    const int      input_row_stride      = _input_nhwc->info()->strides_in_bytes().z() / element_size_in_bytes;
-    const int      input_batch_stride    = _input_nhwc->info()->strides_in_bytes()[3] / element_size_in_bytes;
-    const auto     input_nhwc_ptr        = reinterpret_cast<const T *>(_input_nhwc->buffer() + _input_nhwc->info()->offset_first_element_in_bytes());
-    auto           output_ptr            = reinterpret_cast<T *>(_output->buffer() + _output->info()->offset_first_element_in_bytes());
-    InputTransform input_transform(input_nhwc_ptr,
-                                   _num_batches, _num_rows, _num_cols, _num_channels, _padding,
-                                   output_ptr,
-                                   _matrix_stride, _num_channels, input_batch_stride, input_row_stride, input_col_stride);
+    const int  element_size_in_bytes = _input_nhwc->info()->element_size();
+    const int  input_col_stride      = _input_nhwc->info()->strides_in_bytes().y() / element_size_in_bytes;
+    const int  input_row_stride      = _input_nhwc->info()->strides_in_bytes().z() / element_size_in_bytes;
+    const int  input_batch_stride    = _input_nhwc->info()->strides_in_bytes()[3] / element_size_in_bytes;
+    const auto input_nhwc_ptr        = reinterpret_cast<const T *>(_input_nhwc->buffer() + _input_nhwc->info()->offset_first_element_in_bytes());
+    auto       output_ptr            = reinterpret_cast<T *>(_output->buffer() + _output->info()->offset_first_element_in_bytes());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output_ptr);
+
+    _transform->set_input_tensor(input_nhwc_ptr, input_batch_stride, input_row_stride, input_col_stride);
+    _transform->set_output_matrices(output_ptr, _matrix_stride, _num_channels);
+
+    _transform->set_working_space(_workspace->buffer());
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
     const size_t fst = window.x().start();
     const size_t lst = window.x().end();
-    input_transform.run(fst, lst);
+    _transform->run(fst, lst, info.thread_id);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -435,8 +465,15 @@ unsigned int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileC
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformOutputKernel()
-    : _biases(nullptr), _output_workspace(nullptr), _matrix_stride(0), _matrix_row_stride(0), _output_nhwc(nullptr), _num_batches(0), _num_rows(0), _num_cols(0), _num_channels(0)
+    : _transform(nullptr), _biases(nullptr), _transformed_output(nullptr), _workspace(nullptr), _matrix_stride(0), _matrix_row_stride(0), _output_nhwc(nullptr), _num_batches(0), _num_rows(0),
+      _num_cols(0), _num_channels(0)
 {
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_working_space_size(unsigned int num_threads) const
+{
+    return _transform->get_working_space_size(num_threads) / sizeof(T);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
@@ -455,28 +492,29 @@ Tensor4DShape NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTile
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
     const ITensor *biases,
-    const ITensor *output_workingspace,
+    const ITensor *transformed_output,
     const int      matrix_stride,
     ITensor       *output_nhwc,
     const int      num_batches,
     const int      num_rows,
     const int      num_cols,
-    const int      num_channels)
+    const int      num_channels,
+    ITensor       *workspace)
 {
-    _biases            = biases;
-    _output_workspace  = output_workingspace;
-    _matrix_stride     = matrix_stride;
-    _matrix_row_stride = roundup(num_channels, WinogradConv::N_BLOCK);
-    _output_nhwc       = output_nhwc;
-    _num_batches       = num_batches;
-    _num_rows          = num_rows;
-    _num_cols          = num_cols;
-    _num_channels      = num_channels;
+    _biases             = biases;
+    _workspace          = workspace;
+    _transformed_output = transformed_output;
+    _matrix_stride      = matrix_stride;
+    _matrix_row_stride  = roundup(num_channels, WinogradConv::N_BLOCK);
+    _output_nhwc        = output_nhwc;
+    _num_batches        = num_batches;
+    _num_rows           = num_rows;
+    _num_cols           = num_cols;
+    _num_channels       = num_channels;
     // We don't have the biases buffer at this stage as it hasn't been allocated, we pass in nullptr OutputTransform is only used here to compute the window
-    OutputTransform output_transform(nullptr, _matrix_stride, _matrix_row_stride, nullptr, nullptr, _num_batches, _num_rows, _num_cols, _num_channels);
-
+    _transform = arm_compute::support::cpp14::make_unique<OutputTransform>(num_batches, num_rows, num_cols, num_channels);
     Window win;
-    auto   win_last = output_transform.get_window();
+    auto   win_last = _transform->get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
     _output_nhwc->info()->set_valid_region(ValidRegion(Coordinates(), _output_nhwc->info()->tensor_shape()));
 
@@ -488,22 +526,22 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_output_workspace);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_workspace);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(_transformed_output);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output_nhwc);
 
-    const int out_batch_stride = 0;
+    const int out_batch_stride = _output_nhwc->info()->strides_in_bytes()[3] / sizeof(T);
     const int out_row_stride   = _output_nhwc->info()->strides_in_bytes()[2] / sizeof(T);
     const int out_col_stride   = _output_nhwc->info()->strides_in_bytes()[1] / sizeof(T);
 
-    OutputTransform output_transform(reinterpret_cast<T *>(_output_workspace->buffer()), _matrix_stride, _matrix_row_stride,
-                                     (_biases ? reinterpret_cast<T *>(_biases->buffer() + _biases->info()->offset_first_element_in_bytes()) : nullptr),
-                                     reinterpret_cast<T *>(_output_nhwc->buffer() + _output_nhwc->info()->offset_first_element_in_bytes()),
-                                     _num_batches, _num_rows, _num_cols, _num_channels, out_batch_stride, out_row_stride, out_col_stride);
-
+    _transform->set_input_matrices(_transformed_output->buffer(), _matrix_stride, _matrix_row_stride);
+    _transform->set_bias((_biases ? reinterpret_cast<T *>(_biases->buffer() + _biases->info()->offset_first_element_in_bytes()) : nullptr));
+    _transform->set_output_tensor(_output_nhwc->buffer() + _output_nhwc->info()->offset_first_element_in_bytes(), out_batch_stride, out_row_stride, out_col_stride);
+    _transform->set_working_space(_workspace->buffer());
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
     const size_t fst = window.x().start();
     const size_t lst = window.x().end();
-    output_transform.run(fst, lst);
+    _transform->run(fst, lst, info.thread_id);
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>

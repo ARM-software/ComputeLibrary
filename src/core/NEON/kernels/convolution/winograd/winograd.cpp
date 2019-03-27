@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,13 @@
  * SOFTWARE.
  */
 #include <cstring>
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/winograd/batched_blocked_gemm.hpp"
+#include "winograd.hpp"
 using namespace winograd;
 
 /** Get the output shape of a convolution. */
-template <int kr, int kc, int itr, int itc>
-template <typename TOut, typename TIn>
-Tensor4DShape WinogradGEMM<kr, kc, itr, itc>::Convolution<TOut, TIn>::get_output_shape(
+template <int kr, int kc, int itr, int itc, WinogradRoots R>
+template <typename TOut, typename TIn, typename TInGEMM, typename TOutGEMM>
+Tensor4DShape WinogradGEMM<kr, kc, itr, itc, R>::Convolution<TOut, TIn, TInGEMM, TOutGEMM>::get_output_shape(
   const KernelShape &kernel_shape,
   const Tensor4DShape &in_shape,
   const PaddingType padding
@@ -47,9 +46,9 @@ Tensor4DShape WinogradGEMM<kr, kc, itr, itc>::Convolution<TOut, TIn>::get_output
 /* Get the memory required to transform the kernel.
  */
 template <int kernel_rows, int kernel_cols,
-          int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_kernel_transform_working_size(const KernelShape &shape)
+          int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_kernel_transform_working_size(const KernelShape &shape)
 {
   if (shape.ordering == HWIO)
   {
@@ -68,17 +67,17 @@ size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols
 /** Get the memory required to store the kernel transformed into the
  * Winograd domain.
  */
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_kernel_storage_size(const KernelShape &shape)
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_kernel_storage_size(const KernelShape &shape)
 {
   return N_GEMMS * get_kernel_matrix_size(shape);
 }
 
 
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_input_storage_size(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_input_storage_size(
   const KernelShape &kernel_shape,
   const Tensor4DShape &input_shape,
   const PaddingType padding
@@ -88,9 +87,9 @@ size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols
 }
 
 
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_output_storage_size(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_output_storage_size(
   const KernelShape &kernel_shape,
   const Tensor4DShape &input_shape,
   const PaddingType padding
@@ -102,9 +101,9 @@ size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols
 
 /** Get the memory required to apply a Winograd operator to some input.
  */
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_working_space_size(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_working_space_size(
   const KernelShape &kernel_shape,
   const Tensor4DShape &input_shape,
   const PaddingType padding_type
@@ -139,20 +138,20 @@ size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols
 
 /* Get the memory required by a single "input" matrix.
  */
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_input_matrix_size(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_input_matrix_size(
   const KernelShape &kernel_shape,
   const Tensor4DShape &input_shape,
   const PaddingType padding_type
 )
 {
-  return get_input_matrix_stride(kernel_shape, input_shape, padding_type) * sizeof(TIn);
+  return get_input_matrix_stride(kernel_shape, input_shape, padding_type) * sizeof(TGIn);
 }
 
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_input_matrix_stride(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_input_matrix_stride(
   const KernelShape &kernel_shape,
   const Tensor4DShape &input_shape,
   const PaddingType padding_type
@@ -171,21 +170,21 @@ int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::
 
 /* Get the memory required by a single "output" matrix.
  */
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_output_matrix_size(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_output_matrix_size(
     const KernelShape &kernel_shape,
     const Tensor4DShape &input_shape,
     const PaddingType padding_type
 )
 {
-  return get_output_matrix_stride(kernel_shape, input_shape, padding_type) * sizeof(TOut);
+  return get_output_matrix_stride(kernel_shape, input_shape, padding_type) * sizeof(TGOut);
 }
 
 
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_output_matrix_stride(
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_output_matrix_stride(
     const KernelShape &kernel_shape,
     const Tensor4DShape &input_shape,
     const PaddingType padding_type
@@ -204,16 +203,16 @@ int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::
 
 /* Get the memory required by a single "kernel" matrix.
  */
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_kernel_matrix_size(const KernelShape &shape)
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+size_t WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_kernel_matrix_size(const KernelShape &shape)
 {
-  return sizeof(TIn) * get_kernel_matrix_stride(shape);
+  return sizeof(TGIn) * get_kernel_matrix_stride(shape);
 }
 
-template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols>
-template <typename TOut, typename TIn>
-int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::Convolution<TOut, TIn>::get_kernel_matrix_stride(const KernelShape &shape)
+template <int kernel_rows, int kernel_cols, int output_tile_rows, int output_tile_cols, WinogradRoots roots>
+template <typename TOut, typename TIn, typename TGIn, typename TGOut>
+int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols, roots>::Convolution<TOut, TIn, TGIn, TGOut>::get_kernel_matrix_stride(const KernelShape &shape)
 {
   const int K = shape.n_input_channels;
   const int N = roundup(shape.n_output_channels, N_BLOCK);
@@ -222,19 +221,16 @@ int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::
 
 
 // Instantiate required implementations
-template class WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>;
-template class WinogradGEMM<4, 4, 3, 3>::Convolution<float, float>;
+template class WinogradGEMM<2, 2, 3, 3, WinogradRoots::Integers>::Convolution<float, float, float, float>;
+template class WinogradGEMM<4, 4, 3, 3, WinogradRoots::Integers>::Convolution<float, float, float, float>;
 
-template class WinogradGEMM<1, 6, 1, 3>::Convolution<float, float>;
-template class WinogradGEMM<6, 1, 3, 1>::Convolution<float, float>;
+template class WinogradGEMM<1, 6, 1, 3, WinogradRoots::Integers>::Convolution<float, float, float, float>;
+template class WinogradGEMM<6, 1, 3, 1, WinogradRoots::Integers>::Convolution<float, float, float, float>;
 
-template class WinogradGEMM<2, 2, 5, 5>::Convolution<float, float>;
+template class WinogradGEMM<2, 2, 5, 5, WinogradRoots::Integers>::Convolution<float, float, float, float>;
 
-template class WinogradGEMM<1, 4, 1, 5>::Convolution<float, float>;
-template class WinogradGEMM<4, 1, 5, 1>::Convolution<float, float>;
+template class WinogradGEMM<1, 4, 1, 5, WinogradRoots::Integers>::Convolution<float, float, float, float>;
+template class WinogradGEMM<4, 1, 5, 1, WinogradRoots::Integers>::Convolution<float, float, float, float>;
 
-template class WinogradGEMM<1, 2, 1, 7>::Convolution<float, float>;
-template class WinogradGEMM<2, 1, 7, 1>::Convolution<float, float>;
-
-
-
+template class WinogradGEMM<1, 2, 1, 7, WinogradRoots::Integers>::Convolution<float, float, float, float>;
+template class WinogradGEMM<2, 1, 7, 1, WinogradRoots::Integers>::Convolution<float, float, float, float>;

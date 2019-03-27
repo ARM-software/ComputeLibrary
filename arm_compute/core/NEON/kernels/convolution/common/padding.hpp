@@ -71,4 +71,21 @@ class CopyCropped
     );
 };
 
+template <typename T>
+void crop_and_copy_tile(
+  unsigned int tile_rows,
+  unsigned int tile_cols,
+  unsigned int n_channels,
+  const T *inptr,
+  unsigned int in_row_stride,
+  unsigned int in_col_stride,
+  T *outptr,
+  unsigned int out_row_stride,
+  unsigned int out_col_stride,
+  unsigned int crop_top,
+  unsigned int crop_left,
+  unsigned int crop_bottom,
+  unsigned int crop_right
+);
+
 }
