@@ -51,12 +51,12 @@ public:
      * @param[in]  input    Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output   Output tensor. Data type supported: same as @p input
      * @param[in]  rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
-     *                                      information to reshape the input tensor. Only the following values are supported:
-     *                                      rhs_info.n0: 2,3,4,8,16
-     *                                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
-     *                                      rhs_info.h0: greater than 0
-     *                                      rhs_info.transpose: true, false
-     *                                      rhs_info.interleave: true, false
+     *                      information to reshape the input tensor. Only the following values are supported:
+     *                      rhs_info.n0: 2,3,4,8,16
+     *                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
+     *                      rhs_info.h0: greater than 0
+     *                      rhs_info.transpose: true, false
+     *                      rhs_info.interleave: true, false
      */
     void configure(const ICLTensor *input, ICLTensor *output, const GEMMRHSMatrixInfo &rhs_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMReshapeRHSMatrixKernel
@@ -64,12 +64,12 @@ public:
      * @param[in] input    Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output   Output tensor info which stores the interleaved matrix. Data type supported: same as @p input.
      * @param[in] rhs_info RHS matrix information to be used for reshaping. This object contains all the necessary
-     *                                      information to reshape the input tensor. Only the following values are supported:
-     *                                      rhs_info.n0: 2,3,4,8,16
-     *                                      rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
-     *                                      rhs_info.h0: greater than 0
-     *                                      rhs_info.transpose: true, false
-     *                                      rhs_info.interleave: true, false
+     *                     information to reshape the input tensor. Only the following values are supported:
+     *                     rhs_info.n0: 2,3,4,8,16
+     *                     rhs_info.k0: 1,2,3,4,8,16 (k0 = 1 only if rhs_info.transpose = false)
+     *                     rhs_info.h0: greater than 0
+     *                     rhs_info.transpose: true, false
+     *                     rhs_info.interleave: true, false
      *
      * @return a status
      */
