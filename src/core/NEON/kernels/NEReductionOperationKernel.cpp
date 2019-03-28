@@ -934,7 +934,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U32);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
 
         const TensorShape output_shape         = arm_compute::misc::shape_calculator::compute_reduced_shape(input->tensor_shape(), axis);
         const TensorInfo  tensor_info_reshaped = input->clone()->set_tensor_shape(output_shape);
