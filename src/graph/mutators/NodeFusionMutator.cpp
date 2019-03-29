@@ -221,7 +221,7 @@ void NodeFusionMutator::mutate(Graph &g)
         const bool same_qinfo     = n.output(0)->desc().quant_info == output_edge->producer()->output(0)->desc().quant_info;
         const bool output_qasymm8 = n.output(0)->desc().data_type == DataType::QASYMM8;
 
-        return output_qasymm8 && same_qinfo;
+        return (output_qasymm8 && same_qinfo) || !output_qasymm8;
     };
 
     // Fusion mutations

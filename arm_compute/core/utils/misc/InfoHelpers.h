@@ -52,9 +52,11 @@ inline bool is_relu(ActivationLayerInfo activation_info)
  */
 inline bool is_relu6(ActivationLayerInfo activation_info)
 {
-    return activation_info.enabled()
-           && activation_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
-           && activation_info.a() == 6.f && activation_info.b() == 0.f;
+    const bool is_lu_bounded_relu = activation_info.activation() == ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                    && activation_info.a() == 6.f && activation_info.b() == 0.f;
+    const bool is_bounded_relu = activation_info.activation() == ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+                                 && activation_info.a() == 6.f;
+    return activation_info.enabled() && (is_lu_bounded_relu || is_bounded_relu);
 }
 } // namespace info_helpers
 } // namespace utils
