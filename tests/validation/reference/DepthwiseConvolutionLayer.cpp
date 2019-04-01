@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ namespace reference
  */
 template <typename T, typename TB>
 SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier)
+                                      unsigned int depth_multiplier, const Size2D &dilation)
 {
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
 
@@ -63,18 +63,18 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int filter_half_width  = filter_width / 2;
-    const int filter_half_height = filter_height / 2;
-
     const int pad_left   = conv_info.pad_left();
     const int pad_top    = conv_info.pad_top();
     const int pad_right  = conv_info.pad_right();
     const int pad_bottom = conv_info.pad_bottom();
 
-    const int minimum_x = -pad_left + filter_half_width;
-    const int minimum_y = -pad_top + filter_half_height;
-    const int maximum_x = input_width + pad_left - filter_half_width + pad_right - filter_half_width;
-    const int maximum_y = input_height + pad_top - filter_half_height + pad_bottom - filter_half_height;
+    const int patch_half_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1)) / 2;
+    const int patch_half_height = (filter_height + (dilation.y() - 1) * (filter_height - 1)) / 2;
+
+    const int minimum_x = -pad_left + patch_half_width;
+    const int minimum_y = -pad_top + patch_half_height;
+    const int maximum_x = input_width + pad_left + pad_right - patch_half_width * 2;
+    const int maximum_y = input_height + pad_top + pad_bottom - patch_half_height * 2;
 
     const T border_value(0);
 
@@ -95,9 +95,9 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
                         size_t      filter_offset = filter_plane * out_z;
 
                         T val(0);
-                        for(int j = y - filter_half_height; j <= static_cast<int>(y + filter_half_height); ++j)
+                        for(int j = y - patch_half_height; j <= y + patch_half_height; j += dilation.y())
                         {
-                            for(int i = x - filter_half_width; i <= static_cast<int>(x + filter_half_width); ++i)
+                            for(int i = x - patch_half_width; i <= x + patch_half_width; i += dilation.x())
                             {
                                 coords.set(0, i);
                                 coords.set(1, j);
@@ -119,7 +119,7 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
 
 template <>
 SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
-                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier)
+                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
 {
     SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.quantization_info() };
 
@@ -145,18 +145,18 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const int input_depth   = src.shape().z();
     const int num_batches   = src.shape().total_size() / (input_width * input_height * input_depth);
 
-    const int filter_half_width  = filter_width / 2;
-    const int filter_half_height = filter_height / 2;
-
     const int pad_left   = conv_info.pad_left();
     const int pad_top    = conv_info.pad_top();
     const int pad_right  = conv_info.pad_right();
     const int pad_bottom = conv_info.pad_bottom();
 
-    const int minimum_x = -pad_left + filter_half_width;
-    const int minimum_y = -pad_top + filter_half_height;
-    const int maximum_x = input_width + pad_left - filter_half_width + pad_right - filter_half_width;
-    const int maximum_y = input_height + pad_top - filter_half_height + pad_bottom - filter_half_height;
+    const int patch_half_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1)) / 2;
+    const int patch_half_height = (filter_height + (dilation.y() - 1) * (filter_height - 1)) / 2;
+
+    const int minimum_x = -pad_left + patch_half_width;
+    const int minimum_y = -pad_top + patch_half_height;
+    const int maximum_x = input_width + pad_left + pad_right - patch_half_width * 2;
+    const int maximum_y = input_height + pad_top + pad_bottom - patch_half_height * 2;
 
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
@@ -176,9 +176,9 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                         int         filter_offset = filter_plane * out_z;
 
                         int32_t val = 0;
-                        for(int j = y - filter_half_height; j <= (y + filter_half_height); ++j)
+                        for(int j = y - patch_half_height; j <= y + patch_half_height; j += dilation.y())
                         {
-                            for(int i = x - filter_half_width; i <= (x + filter_half_width); ++i)
+                            for(int i = x - patch_half_width; i <= x + patch_half_width; i += dilation.x())
                             {
                                 coords.set(0, i);
                                 coords.set(1, j);
@@ -206,10 +206,10 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
 }
 
 template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
-                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier);
+                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation);
 
 template SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
-                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier);
+                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation);
 } // namespace reference
 } // namespace validation
 } // namespace test
