@@ -78,7 +78,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
         TensorInfo out_info(TensorInfo(compute_pool_shape(*input, pool_info), 1, output->data_type()));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
     }
@@ -201,6 +200,17 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     const int pool_pad_top  = pad_stride_info.pad_top();
     const int pool_pad_left = pad_stride_info.pad_left();
 
+    // Set build options
+    CLBuildOptions build_opts;
+
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
+    {
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+    }
+
     // Check output dimensions
     auto_init(input->info(), output->info(), pool_info);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info));
@@ -212,8 +222,6 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
 
     const DataType data_type = input->info()->data_type();
 
-    // Set build options
-    CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DPOOL_" + string_from_pooling_type(pool_type));
     build_opts.add_option("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x));
@@ -222,6 +230,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     build_opts.add_option("-DPAD_Y=" + support::cpp11::to_string(pool_pad_top));
     build_opts.add_option("-DPOOL_SIZE_X=" + support::cpp11::to_string(pool_size_x));
     build_opts.add_option("-DPOOL_SIZE_Y=" + support::cpp11::to_string(pool_size_y));
+
     build_opts.add_option_if(data_type == DataType::F16, "-DFP16");
 
     // Create kernel
