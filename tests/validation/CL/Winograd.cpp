@@ -157,11 +157,15 @@ const auto LargeWinogradFilterTransformDatasetNHWC_F32 =
 // Output transform
 const auto SmallWinogradOutputTransformDatasetNCHW = datasets::SmallWinogradOutputTransformDatasetNCHW();
 
-const auto SmallWinogradOutputTransformDatasetNHWC = datasets::SmallWinogradOutputTransformDatasetNHWC();
+const auto SmallWinogradOutputTransformDatasetNHWC_F16 = datasets::SmallWinogradOutputTransformDatasetNHWC_F16();
+
+const auto SmallWinogradOutputTransformDatasetNHWC_F32 = datasets::SmallWinogradOutputTransformDatasetNHWC_F32();
 
 const auto LargeWinogradOutputTransformDatasetNCHW = datasets::LargeWinogradOutputTransformDatasetNCHW();
 
-const auto LargeWinogradOutputTransformDatasetNHWC = datasets::LargeWinogradOutputTransformDatasetNHWC();
+const auto LargeWinogradOutputTransformDatasetNHWC_F16 = datasets::LargeWinogradOutputTransformDatasetNHWC_F16();
+
+const auto LargeWinogradOutputTransformDatasetNHWC_F32 = datasets::LargeWinogradOutputTransformDatasetNHWC_F32();
 
 //Activation Functions
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -514,7 +518,7 @@ TEST_SUITE_END() // NCHW
 TEST_SUITE(NHWC)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP16, framework::DatasetMode::ALL,
-                       combine(combine(SmallWinogradOutputTransformDatasetNHWC,
+                       combine(combine(SmallWinogradOutputTransformDatasetNHWC_F16,
                                framework::dataset::make("DataType", { DataType::F16 })),
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
@@ -523,7 +527,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP16, framework
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixtureFP16, framework::DatasetMode::NIGHTLY,
-                       combine(combine(LargeWinogradOutputTransformDatasetNHWC,
+                       combine(combine(LargeWinogradOutputTransformDatasetNHWC_F16,
                                framework::dataset::make("DataType", { DataType::F16 })),
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
@@ -533,7 +537,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixtureFP16, framework
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP32, framework::DatasetMode::ALL,
-                       combine(combine(SmallWinogradOutputTransformDatasetNHWC,
+                       combine(combine(SmallWinogradOutputTransformDatasetNHWC_F32,
                                framework::dataset::make("DataType", { DataType::F32 })),
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
@@ -542,7 +546,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradOutputTransformFixtureFP32, framework
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradOutputTransformFixtureFP32, framework::DatasetMode::NIGHTLY,
-                       combine(combine(LargeWinogradOutputTransformDatasetNHWC,
+                       combine(combine(LargeWinogradOutputTransformDatasetNHWC_F32,
                                framework::dataset::make("DataType", { DataType::F32 })),
                                framework::dataset::make("ActivationInfo",{ ActivationLayerInfo() }) ))
 {
