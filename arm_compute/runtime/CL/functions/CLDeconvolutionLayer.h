@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__
 
 #include "arm_compute/runtime/CL/functions/CLDirectDeconvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
@@ -34,6 +35,7 @@ namespace arm_compute
 {
 /** Basic function to compute the deconvolution layer. This function calls the following OpenCL kernels/functions:
  *
+ * -# @ref CLGEMMDeconvolutionLayer
  * -# @ref CLDirectDeconvolutionLayer
  */
 class CLDeconvolutionLayer : public IFunction
@@ -44,7 +46,7 @@ public:
 
     /** Set the input, weights, biases and output tensors.
      *
-     * @deprecated This method is deprecated and will be removed in release 19.05
+     * @note This method will be deprecated in the next release.
      *
      * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in]     weights            The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
@@ -60,7 +62,7 @@ public:
                    unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
-     * @deprecated This method is deprecated and will be removed in release 19.05
+     * @note This method will be deprecated in the next release.
      *
      * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in] weights            The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
@@ -101,6 +103,8 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
                            const WeightsInfo &weights_info = WeightsInfo());
 
+    static DeconvolutionMethod get_deconvolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
+                                                        const WeightsInfo &weights_info);
     // Inherited methods overridden:
     void run() override;
     void prepare() override;
@@ -109,5 +113,5 @@ private:
     std::shared_ptr<IMemoryManager> _memory_manager;
     std::unique_ptr<IFunction>      _function;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__ */

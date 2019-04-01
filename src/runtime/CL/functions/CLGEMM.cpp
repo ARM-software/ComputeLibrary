@@ -206,7 +206,7 @@ void CLGEMM::configure_reshaped_v2(const ICLTensor *a, const ICLTensor *b, const
     _reshape_lhs_kernel.set_target(gpu_target);
     _mm_kernel.set_target(gpu_target);
 
-    GEMMReshapeInfo reshape_info(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d);
+    GEMMReshapeInfo reshape_info(m, n, k, 1, 1, depth_output_gemm3d, false);
 
     // Manage intermediate buffers
     _memory_group.manage(&_tmp_a);

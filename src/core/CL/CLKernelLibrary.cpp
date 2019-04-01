@@ -214,6 +214,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
     { "crop_tensor", "crop_tensor.cl" },
+    { "deconvolution_reshape", "deconvolution_layer.cl" },
     { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
@@ -1093,7 +1094,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     return Kernel(kernel_name, cl_program);
 }
 
-void CLKernelLibrary::add_built_program(const std::string &built_program_name, cl::Program program)
+void CLKernelLibrary::add_built_program(const std::string &built_program_name, const cl::Program &program)
 {
     _built_programs_map.emplace(built_program_name, program);
 }

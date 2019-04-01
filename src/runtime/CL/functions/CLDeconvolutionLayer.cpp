@@ -44,11 +44,29 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
                                      unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
 {
-    ARM_COMPUTE_UNUSED(inner_border_right, inner_border_top);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    auto f = arm_compute::support::cpp14::make_unique<CLDirectDeconvolutionLayer>();
-    f->configure(input, weights, bias, output, deconv_info, weights_info);
-    _function = std::move(f);
+    ARM_COMPUTE_UNUSED(inner_border_right, inner_border_top);
+
+    switch(CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(), deconv_info, weights_info))
+    {
+        case DeconvolutionMethod::DIRECT:
+        {
+            auto f = arm_compute::support::cpp14::make_unique<CLDirectDeconvolutionLayer>();
+            f->configure(input, weights, bias, output, deconv_info, weights_info);
+            _function = std::move(f);
+            break;
+        }
+        case DeconvolutionMethod::GEMM:
+        {
+            auto f = arm_compute::support::cpp14::make_unique<CLGEMMDeconvolutionLayer>(_memory_manager);
+            f->configure(input, weights, bias, output, deconv_info);
+            _function = std::move(f);
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Not supported.");
+            break;
+    }
 }
 
 Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
@@ -56,8 +74,45 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(inner_border_right, inner_border_top);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDirectDeconvolutionLayer::validate(input, weights, bias, output, deconv_info, weights_info));
+
+    switch(CLDeconvolutionLayer::get_deconvolution_method(input, weights, bias, output, deconv_info, weights_info))
+    {
+        case DeconvolutionMethod::DIRECT:
+        {
+            // Validate direct convolution layer
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDirectDeconvolutionLayer::validate(input, weights, bias, output, deconv_info, weights_info));
+            break;
+        }
+        case DeconvolutionMethod::GEMM:
+        {
+            // Validate gemm-based convolution layer
+            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMDeconvolutionLayer::validate(input, weights, bias, output, deconv_info));
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Not supported.");
+            break;
+    }
+
     return Status{};
+}
+
+DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
+                                                                   const WeightsInfo &weights_info)
+{
+    ARM_COMPUTE_UNUSED(output, bias, weights_info);
+
+    const DataLayout data_layout = input->data_layout();
+
+    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    if(weights->dimension(idx_w) != deconv_info.stride().first || weights->dimension(idx_h) != deconv_info.stride().second)
+    {
+        return DeconvolutionMethod::DIRECT;
+    }
+
+    return DeconvolutionMethod::GEMM;
 }
 
 void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,

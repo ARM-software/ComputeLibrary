@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -333,7 +333,7 @@ public:
      * @param[in] built_program_name Name of the program
      * @param[in] program            Built program to add to the cache
      */
-    void add_built_program(const std::string &built_program_name, cl::Program program);
+    void add_built_program(const std::string &built_program_name, const cl::Program &program);
 
     /** Returns true if FP16 is supported by the CL device
      *

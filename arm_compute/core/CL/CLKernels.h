@@ -48,6 +48,7 @@
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLCropKernel.h"
 #include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
+#include "arm_compute/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"

@@ -134,6 +134,13 @@ enum class ConvolutionMethod
     FFT       /**< Convolution using FFT */
 };
 
+/** Available DeconvolutionMethod*/
+enum class DeconvolutionMethod
+{
+    GEMM,   /**< Deconvolution using GEMM */
+    DIRECT, /**< Direct deconvolution */
+};
+
 /** Padding mode to use for PadLayer */
 enum class PaddingMode
 {

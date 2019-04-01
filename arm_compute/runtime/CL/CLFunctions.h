@@ -77,6 +77,7 @@
 #include "arm_compute/runtime/CL/functions/CLFuseBatchNormalization.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMInterleave4x4.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
