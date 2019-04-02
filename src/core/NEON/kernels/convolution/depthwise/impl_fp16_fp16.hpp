@@ -63,7 +63,6 @@ DepthwiseConvolution<
 {
 }
 
-
 template <
   unsigned int OutputTileRows, unsigned int OutputTileCols,
   unsigned int KernelRows, unsigned int KernelCols,
@@ -92,7 +91,6 @@ void DepthwiseConvolution<
 
   // Perform the depthwise convolution
   int channels_remaining = n_channels;
-#ifdef __aarch64__
   for (; channels_remaining >= 8; channels_remaining -= 8)
   {
     // Load input tile
@@ -140,6 +138,8 @@ void DepthwiseConvolution<
           for (unsigned int in_j = 0; in_j < KernelCols; in_j++)
           {
             const unsigned int j = base_j + in_j;
+
+            // v[out_i][out_j] += w[in_i][in_j] * u[i][j];
             v[out_i][out_j] = vaddq_f16(v[out_i][out_j], vmulq_f16(w[in_i][in_j], u[i][j]));
           }
         }
@@ -168,7 +168,6 @@ void DepthwiseConvolution<
     }
     outptr_base += 8;
   }
-#endif  // __aarch64__
   for (; channels_remaining; channels_remaining--)
   {
     // Load input tile
@@ -241,6 +240,173 @@ void DepthwiseConvolution<
       }
     }
     outptr_base++;
+  }
+}
+
+template <
+  unsigned int OutputTileRows, unsigned int OutputTileCols,
+  unsigned int KernelRows, unsigned int KernelCols,
+  unsigned int StrideRows, unsigned int StrideCols
+>
+template <ActivationFunction Activation>
+void DepthwiseConvolution<
+  OutputTileRows, OutputTileCols,
+  KernelRows, KernelCols, StrideRows, StrideCols,
+  float16_t, float16_t, float16_t
+>::execute_tile(
+  int n_channels,
+  const void *weights_biases_ptr,
+  const float16_t * inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+  float16_t *outptrs[Base::output_tile_rows][Base::output_tile_cols]
+)
+{
+  // Instantiate pointers
+  const float16_t* __restrict__ params = static_cast<const float16_t*>(weights_biases_ptr);
+  int n = 0;
+
+  // Perform the depthwise convolution
+  int channels_remaining = n_channels;
+  for (; channels_remaining >= 8; channels_remaining -= 8, n += 8)
+  {
+    // Load input tile
+    float16x8_t u[Base::inner_tile_rows][Base::inner_tile_cols];
+    for (int i = 0; i < Base::inner_tile_rows; i++)
+    {
+      for (int j = 0; j < Base::inner_tile_cols; j++)
+      {
+        u[i][j] = vld1q_f16(inptrs[i][j] + n);
+      }
+    }
+
+    // Load weights tile
+    float16x8_t vbias = vld1q_f16(params);
+    params += 8;
+
+    float16x8_t w[KernelRows][KernelCols];
+    for (unsigned int i = 0; i < KernelRows; i++)
+    {
+      for (unsigned int j = 0; j < KernelCols; j++)
+      {
+        w[i][j] = vld1q_f16(params);
+        params += 8;
+      }
+    }
+
+    // Perform the convolution
+    float16x8_t v[OutputTileRows][OutputTileCols];
+    for (unsigned int out_i = 0; out_i < OutputTileRows; out_i++)
+    {
+      for (unsigned int out_j = 0; out_j < OutputTileCols; out_j++)
+      {
+        v[out_i][out_j] = vbias;
+
+        // Base co-ordinate
+        const int base_i = out_i * StrideRows;
+        const int base_j = out_j * StrideCols;
+
+        // Fill the accumulator
+        for (unsigned int in_i = 0; in_i < KernelRows; in_i++)
+        {
+          const unsigned int i = base_i + in_i;
+          for (unsigned int in_j = 0; in_j < KernelCols; in_j++)
+          {
+            const unsigned int j = base_j + in_j;
+
+            // v[out_i][out_j] += w[in_i][in_j] * u[i][j];
+            v[out_i][out_j] = vaddq_f16(v[out_i][out_j], vmulq_f16(w[in_i][in_j], u[i][j]));
+          }
+        }
+
+        // Apply the activation function
+        if (Activation == ActivationFunction::ReLU ||
+            Activation == ActivationFunction::ReLU6)
+        {
+          v[out_i][out_j] = vmaxq_f16(v[out_i][out_j], vdupq_n_f16(0.0f));
+        }
+        if (Activation == ActivationFunction::ReLU6)
+        {
+          v[out_i][out_j] = vminq_f16(v[out_i][out_j], vdupq_n_f16(6.0f));
+        }
+      }
+    }
+
+    // Store the output tile
+    for (unsigned int i = 0; i < OutputTileRows; i++)
+    {
+      for (unsigned int j = 0; j < OutputTileCols; j++)
+      {
+        vst1q_f16(outptrs[i][j] + n, v[i][j]);
+      }
+    }
+  }
+  for (; channels_remaining; channels_remaining--, n++)
+  {
+    // Load input tile
+    float16_t u[Base::inner_tile_rows][Base::inner_tile_cols];
+    for (int i = 0; i < Base::inner_tile_rows; i++)
+    {
+      for (int j = 0; j < Base::inner_tile_cols; j++)
+      {
+        u[i][j] = *(inptrs[i][j] + n);
+      }
+    }
+
+    // Load weights tile
+    float16_t bias = *(params++);
+    float16_t w[KernelRows][KernelCols];
+    for (unsigned int i = 0; i < KernelRows; i++)
+    {
+      for (unsigned int j = 0; j < KernelCols; j++)
+      {
+        w[i][j] = *(params++);
+      }
+    }
+
+    // Perform the convolution
+    float16_t v[OutputTileRows][OutputTileCols];
+    for (unsigned int out_i = 0; out_i < OutputTileRows; out_i++)
+    {
+      for (unsigned int out_j = 0; out_j < OutputTileCols; out_j++)
+      {
+        // Clear the accumulator
+        v[out_i][out_j] = bias;
+
+        // Base co-ordinate
+        const int base_i = out_i * StrideRows;
+        const int base_j = out_j * StrideCols;
+
+        // Fill the accumulator
+        for (unsigned int in_i = 0; in_i < KernelRows; in_i++)
+        {
+          const unsigned int i = base_i + in_i;
+          for (unsigned int in_j = 0; in_j < KernelCols; in_j++)
+          {
+            const int j = base_j + in_j;
+            v[out_i][out_j] += w[in_i][in_j] * u[i][j];
+          }
+        }
+
+        // Apply the activation function
+        if (Activation == ActivationFunction::ReLU ||
+            Activation == ActivationFunction::ReLU6)
+        {
+          v[out_i][out_j] = std::max<float16_t>(0.0f, v[out_i][out_j]);
+        }
+        if (Activation == ActivationFunction::ReLU6)
+        {
+          v[out_i][out_j] = std::min<float16_t>(6.0f, v[out_i][out_j]);
+        }
+      }
+    }
+
+    // Store the output tile
+    for (unsigned int i = 0; i < OutputTileRows; i++)
+    {
+      for (unsigned int j = 0; j < OutputTileCols; j++)
+      {
+        *(outptrs[i][j] + n) = v[i][j];
+      }
+    }
   }
 }
 

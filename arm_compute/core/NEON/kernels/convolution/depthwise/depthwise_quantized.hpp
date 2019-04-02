@@ -109,6 +109,14 @@ class QAsymm8DepthwiseConvolution : public DepthwiseConvolutionBase<
       unsigned int out_col_stride
     );
 
+    template <nck::ActivationFunction Activation>
+    void execute_tile(
+      int n_channels,
+      const void* packed_params,
+      const uint8_t* inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+      uint8_t* outptrs[Base::output_tile_rows][Base::output_tile_cols]
+    );
+
   private:
     // Quantization parameters
     const qasymm8::QAsymm8Params _weights_quant, _inputs_quant, _output_quant;

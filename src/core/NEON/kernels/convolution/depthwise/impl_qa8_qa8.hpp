@@ -631,4 +631,329 @@ void QAsymm8DepthwiseConvolution<
   }
 }
 
+template <
+  unsigned int OutputTileRows, unsigned int OutputTileCols,
+  unsigned int KernelRows, unsigned int KernelCols,
+  unsigned int StrideRows, unsigned int StrideCols
+>
+template<ActivationFunction Activation>
+void QAsymm8DepthwiseConvolution<
+  OutputTileRows, OutputTileCols, KernelRows, KernelCols, StrideRows, StrideCols
+>::execute_tile(
+  int n_channels,
+  const void* packed_params,
+  const uint8_t* inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+  uint8_t* outptrs[Base::output_tile_rows][Base::output_tile_cols]
+)
+{
+  // Activation parameters (unused if Activation is None)
+  const uint8_t aqmin = _output_quant.offset;
+  const uint8_t aqmax = (Activation == ActivationFunction::ReLU6) ?
+    std::min<uint8_t>(255u, _output_quant.quantize(6.0f)) : 255u;
+
+  // Byte type pointer to weights and biases
+  const uint8_t *wbptr = static_cast<const uint8_t *>(packed_params);
+
+  // Offset into input/output tensors
+  int n = 0;
+
+#if defined(__aarch64__)  // Under Aarch64 only use quad registers
+  for (; n_channels >= 16; n_channels -= 16, n += 16)
+  {
+    // Load biases
+    const int32x4_t biases[4] = {
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr)),
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr) + 4),
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr) + 8),
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr) + 12)
+    };
+    wbptr += 16*sizeof(int32_t);
+
+    // Load weights
+    uint8x16_t weights[KernelRows][KernelCols];
+    for (unsigned int i = 0; i < KernelRows; i++)
+    {
+      for (unsigned int j = 0; j < KernelCols; j++)
+      {
+        weights[i][j] = vld1q_u8(wbptr);
+        wbptr += 16;
+      }
+    }
+
+    // Load the input activations
+    uint8x16_t inputs[Base::inner_tile_rows][Base::inner_tile_cols];
+    for (unsigned int i = 0; i < Base::inner_tile_rows; i++)
+    {
+      for (unsigned int j = 0; j < Base::inner_tile_cols; j++)
+      {
+        inputs[i][j] = vld1q_u8(inptrs[i][j] + n);
+      }
+    }
+
+    // Perform the convolution
+    for (unsigned int oi = 0; oi < OutputTileRows; oi++)
+    {
+      for (unsigned int oj = 0; oj < OutputTileCols; oj++)
+      {
+        // Two sets of operations are required, we perform the
+        // multiply-accumulates for the convolution proper but must also sum
+        // the tile elements to account for the _weight_ offset.
+        uint32x4_t accs[4];
+        for (unsigned int i = 0; i < 4; i++)
+        {
+          accs[i] = reinterpret_cast<uint32x4_t>(biases[i]);
+        }
+
+        for (unsigned int wi = 0; wi < KernelRows; wi++)
+        {
+          for (unsigned int wj = 0; wj < KernelCols; wj++)
+          {
+            // Get relevant weight and activation pixel
+            const uint8x16_t w = weights[wi][wj];
+            const uint8x16_t x = inputs[oi*StrideRows + wi][oj*StrideCols + wj];
+
+            // Perform multiplication and accumulation
+            const uint16x8_t muls[2] = {
+              vmull_u8(vget_low_u8(w), vget_low_u8(x)),
+              vmull_u8(vget_high_u8(w), vget_high_u8(x))
+            };
+
+            const uint8x8_t woffset = vdup_n_u8(_weights_quant.offset);
+            const uint16x8_t sum_elems[2] = {
+              vmull_u8(vget_low_u8(x), woffset),
+              vmull_u8(vget_high_u8(x), woffset)
+            };
+
+            const uint32x4_t tmps[4] = {
+              vsubl_u16(vget_low_u16(muls[0]), vget_low_u16(sum_elems[0])),
+              vsubl_u16(vget_high_u16(muls[0]), vget_high_u16(sum_elems[0])),
+              vsubl_u16(vget_low_u16(muls[1]), vget_low_u16(sum_elems[1])),
+              vsubl_u16(vget_high_u16(muls[1]), vget_high_u16(sum_elems[1])),
+            };
+            for (unsigned int i = 0; i < 4; i++)
+            {
+              accs[i] = vaddq_u32(accs[i], tmps[i]);
+            }
+          }
+        }
+
+        // Rescale the accumulator and add in the new offset.
+        uint32x4_t final_accs[4];
+        for (unsigned int i = 0; i < 4; i++)
+        {
+#ifdef FIXED_POINT_REQUANTISATION
+          const int32x4_t y = rounding_divide_by_exp2(
+            saturating_doubling_high_mul(
+              reinterpret_cast<int32x4_t>(accs[i]), rescale_parameters.multiplier
+            ),
+            rescale_parameters.shift
+          );
+          const int32x4_t offset = reinterpret_cast<int32x4_t>(vdupq_n_u32(_output_quant.offset));
+          final_accs[i] = reinterpret_cast<uint32x4_t>(vmaxq_s32(vaddq_s32(y, offset), vdupq_n_s32(0)));
+#else  // floating point requantisation
+          float32x4_t fp_acc = vcvtq_f32_s32(reinterpret_cast<int32x4_t>(accs[i]));
+          fp_acc = vmulq_f32(fp_acc, vdupq_n_f32(rescale_parameters.rescale));
+          fp_acc = vaddq_f32(fp_acc, vdupq_n_f32(static_cast<float>(_output_quant.offset)));
+          fp_acc = vmaxq_f32(fp_acc, vdupq_n_f32(0.0f));
+          final_accs[i] = vcvtq_u32_f32(fp_acc);
+#endif
+        }
+
+        uint8x16_t output = vcombine_u8(
+          vqmovn_u16(vcombine_u16(vqmovn_u32(final_accs[0]), vqmovn_u32(final_accs[1]))),
+          vqmovn_u16(vcombine_u16(vqmovn_u32(final_accs[2]), vqmovn_u32(final_accs[3])))
+        );
+
+        // Apply the activation function
+        if (Activation == ActivationFunction::ReLU ||
+            Activation == ActivationFunction::ReLU6)
+        {
+          output = vmaxq_u8(output, vdupq_n_u8(aqmin));
+        }
+        if (Activation == ActivationFunction::ReLU6)
+        {
+          output = vminq_u8(output, vdupq_n_u8(aqmax));
+        }
+
+        vst1q_u8(outptrs[oi][oj] + n, output);
+      }
+    }
+  }
+#endif  // defined(__aarch64__)
+  for (; n_channels >= 8; n_channels -= 8, n += 8)
+  {
+    const int32x4_t biases[2] = {
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr)),
+      vld1q_s32(reinterpret_cast<const int32_t *>(wbptr) + 4),
+    };
+    wbptr += 8*sizeof(int32_t);
+
+    uint8x8_t weights[KernelRows][KernelCols];
+    for (unsigned int i = 0; i < KernelRows; i++)
+    {
+      for (unsigned int j = 0; j < KernelCols; j++)
+      {
+        weights[i][j] = vld1_u8(wbptr);
+        wbptr += 8;
+      }
+    }
+
+    uint8x8_t inputs[Base::inner_tile_rows][Base::inner_tile_cols];
+    for (unsigned int i = 0; i < Base::inner_tile_rows; i++)
+    {
+      for (unsigned int j = 0; j < Base::inner_tile_cols; j++)
+      {
+        inputs[i][j] = vld1_u8(inptrs[i][j] + n);
+      }
+    }
+
+    for (unsigned int oi = 0; oi < OutputTileRows; oi++)
+    {
+      for (unsigned int oj = 0; oj < OutputTileCols; oj++)
+      {
+        uint32x4_t accs[2];
+        for (unsigned int i = 0; i < 2; i++)
+        {
+          accs[i] = reinterpret_cast<uint32x4_t>(biases[i]);
+        }
+
+        for (unsigned int wi = 0; wi < KernelRows; wi++)
+        {
+          for (unsigned int wj = 0; wj < KernelCols; wj++)
+          {
+            const uint8x8_t w = weights[wi][wj];
+            const uint8x8_t x = inputs[oi*StrideRows + wi][oj*StrideCols + wj];
+
+            const uint16x8_t muls = vmull_u8(w, x);
+            const uint8x8_t woffset = vdup_n_u8(_weights_quant.offset);
+            const uint16x8_t sum_elems = vmull_u8(x, woffset);
+
+            const uint32x4_t tmps[2] = {
+              vsubl_u16(vget_low_u16(muls), vget_low_u16(sum_elems)),
+              vsubl_u16(vget_high_u16(muls), vget_high_u16(sum_elems)),
+            };
+            for (unsigned int i = 0; i < 2; i++)
+            {
+              accs[i] = vaddq_u32(accs[i], tmps[i]);
+            }
+          }
+        }
+
+        uint32x4_t final_accs[2];
+        for (unsigned int i = 0; i < 2; i++)
+        {
+#ifdef FIXED_POINT_REQUANTISATION
+          const int32x4_t y = rounding_divide_by_exp2(
+            saturating_doubling_high_mul(
+              reinterpret_cast<int32x4_t>(accs[i]), rescale_parameters.multiplier
+            ),
+            rescale_parameters.shift
+          );
+          const int32x4_t offset = reinterpret_cast<int32x4_t>(vdupq_n_u32(_output_quant.offset));
+          final_accs[i] = reinterpret_cast<uint32x4_t>(vmaxq_s32(vaddq_s32(y, offset), vdupq_n_s32(0)));
+#else  // floating point requantisation
+          float32x4_t fp_acc = vcvtq_f32_s32(reinterpret_cast<int32x4_t>(accs[i]));
+          fp_acc = vmulq_f32(fp_acc, vdupq_n_f32(rescale_parameters.rescale));
+          fp_acc = vaddq_f32(fp_acc, vdupq_n_f32(static_cast<float>(_output_quant.offset)));
+          fp_acc = vmaxq_f32(fp_acc, vdupq_n_f32(0.0f));
+          final_accs[i] = vcvtq_u32_f32(fp_acc);
+#endif
+        }
+
+        uint8x8_t output = vqmovn_u16(vcombine_u16(vqmovn_u32(final_accs[0]), vqmovn_u32(final_accs[1])));
+
+        // Apply the activation function
+        if (Activation == ActivationFunction::ReLU ||
+            Activation == ActivationFunction::ReLU6)
+        {
+          output = vmax_u8(output, vdup_n_u8(aqmin));
+        }
+        if (Activation == ActivationFunction::ReLU6)
+        {
+          output = vmin_u8(output, vdup_n_u8(aqmax));
+        }
+
+        vst1_u8(outptrs[oi][oj] + n, output);
+      }
+    }
+  }
+  for (; n_channels; n_channels--, n++)
+  {
+    // Load bias
+    const int32_t bias = *reinterpret_cast<const int32_t *>(wbptr);
+    wbptr += sizeof(int32_t);
+
+    // Load weights
+    uint8_t weights[KernelRows][KernelCols];
+    for (unsigned int i = 0; i < KernelRows; i++)
+    {
+      for (unsigned int j = 0; j < KernelCols; j++)
+      {
+        weights[i][j] = *(wbptr++);
+      }
+    }
+
+    // Load the input activations
+    uint8_t inputs[Base::inner_tile_rows][Base::inner_tile_cols];
+    for (unsigned int i = 0; i < Base::inner_tile_rows; i++)
+    {
+      for (unsigned int j = 0; j < Base::inner_tile_cols; j++)
+      {
+        inputs[i][j] = *(inptrs[i][j] + n);
+      }
+    }
+
+    // Perform the convolution
+    for (unsigned int oi = 0; oi < OutputTileRows; oi++)
+    {
+      for (unsigned int oj = 0; oj < OutputTileCols; oj++)
+      {
+        int32_t acc = bias;
+        uint32_t element_sum = 0;
+
+        for (unsigned int wi = 0; wi < KernelRows; wi++)
+        {
+          for (unsigned int wj = 0; wj < KernelCols; wj++)
+          {
+            const auto w = weights[wi][wj], x = inputs[oi*StrideRows + wi][oj*StrideCols + wj];
+            acc += static_cast<int32_t>(static_cast<uint32_t>(w) * static_cast<uint32_t>(x));
+            element_sum += static_cast<uint32_t>(x);
+          }
+        }
+
+        acc -= static_cast<int32_t>(element_sum) * static_cast<int32_t>(_weights_quant.offset);
+
+        // Requantize
+#ifdef FIXED_POINT_REQUANTISATION
+        acc = rounding_divide_by_exp2(
+            saturating_doubling_high_mul(acc, rescale_parameters.multiplier),
+            rescale_parameters.shift
+        );
+        acc += _output_quant.offset;
+        uint8_t output = clamp_to_limits<uint8_t>::clamp_and_cast<int32_t>(acc);
+#else  // floating point requantization
+        float fp_acc = static_cast<float>(acc);
+        fp_acc *= rescale_parameters.rescale;
+        fp_acc += static_cast<float>(_output_quant.offset);
+        fp_acc = std::max<float>(fp_acc, 0.0f);
+        uint8_t output = static_cast<uint8_t>(std::min<int32_t>(static_cast<int32_t>(fp_acc), 255));
+#endif
+
+        // Apply the activation function
+        if (Activation == ActivationFunction::ReLU ||
+            Activation == ActivationFunction::ReLU6)
+        {
+          output = std::max(output, aqmin);
+        }
+        if (Activation == ActivationFunction::ReLU6)
+        {
+          output = std::min(output, aqmax);
+        }
+
+        *(outptrs[oi][oj] + n) = output;
+      }
+    }
+  }
+}
+
 }  // namespace depthwise

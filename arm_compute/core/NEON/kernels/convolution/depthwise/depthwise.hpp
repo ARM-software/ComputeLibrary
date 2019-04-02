@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
+#include <arm_neon.h>
 #include "arm_compute/core/NEON/kernels/convolution/common/activation.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/padding.hpp"
 
@@ -275,6 +275,14 @@ class DepthwiseConvolutionBase : public IDepthwiseConvolution
       unsigned int out_col_stride
     );
 
+    template <nck::ActivationFunction Activation>
+    void execute_tile(
+      int n_channels,
+      const void* packed_params,
+      const InputType* inptrs[inner_tile_rows][inner_tile_cols],
+      OutputType* outptrs[output_tile_rows][output_tile_cols]
+    );
+
     int n_channels(void) const;
 
   private:
@@ -290,9 +298,7 @@ class DepthwiseConvolutionBase : public IDepthwiseConvolution
 
     // Stride information for a convolution instance
     int _input_col_stride, _input_row_stride, _input_batch_stride;
-    const int _input_ws_col_stride, _input_ws_row_stride;
     int _output_col_stride, _output_row_stride, _output_batch_stride;
-    const int _output_ws_col_stride, _output_ws_row_stride;
 
     // Methods for getting access to working space
     size_t _get_input_working_space_size(void) const;
@@ -351,6 +357,14 @@ class DepthwiseConvolution : public DepthwiseConvolutionBase<
       TOut* outptr,
       unsigned int out_row_stride,
       unsigned int out_col_stride
+    );
+
+    template <nck::ActivationFunction Activation>
+    void execute_tile(
+      int n_channels,
+      const void* packed_params,
+      const InputType* inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+      OutputType* outptrs[Base::output_tile_rows][Base::output_tile_cols]
     );
 };
 
@@ -415,6 +429,14 @@ class DepthwiseConvolution<
       unsigned int out_row_stride,
       unsigned int out_col_stride
     );
+
+    template <nck::ActivationFunction Activation>
+    void execute_tile(
+      int n_channels,
+      const void* packed_params,
+      const float* inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+      float* outptrs[Base::output_tile_rows][Base::output_tile_cols]
+    );
 };
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -478,6 +500,15 @@ class DepthwiseConvolution<
       unsigned int out_row_stride,
       unsigned int out_col_stride
     );
+
+    template <nck::ActivationFunction Activation>
+    void execute_tile(
+      int n_channels,
+      const void* packed_params,
+      const float16_t* inptrs[Base::inner_tile_rows][Base::inner_tile_cols],
+      float16_t* outptrs[Base::output_tile_rows][Base::output_tile_cols]
+    );
 };
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
 }  // namespace depthwise
