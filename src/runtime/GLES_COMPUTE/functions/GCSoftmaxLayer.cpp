@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,13 +69,11 @@ void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float 
 
 void GCSoftmaxLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     GCScheduler::get().dispatch(_max_kernel, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_shift_exp_sum_kernel, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_norm_kernel);
-
-    _memory_group.release();
 }

@@ -105,7 +105,7 @@ Status CLFFT1D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 void CLFFT1D::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     CLScheduler::get().enqueue(_digit_reverse_kernel, false);
 
@@ -113,7 +113,5 @@ void CLFFT1D::run()
     {
         CLScheduler::get().enqueue(_fft_kernels[i], i == (_num_ffts - 1));
     }
-
-    _memory_group.release();
 }
 } // namespace arm_compute

@@ -526,7 +526,7 @@ void CLGEMMConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run im2col
     if(!_skip_im2col)
@@ -562,8 +562,6 @@ void CLGEMMConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-
-    _memory_group.release();
 }
 
 void CLGEMMConvolutionLayer::prepare()

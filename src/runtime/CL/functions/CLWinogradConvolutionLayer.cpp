@@ -204,7 +204,7 @@ void CLWinogradConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run input transform
     _input_transform.run();
@@ -214,8 +214,6 @@ void CLWinogradConvolutionLayer::run()
 
     // Run output transform
     CLScheduler::get().enqueue(_output_transform);
-
-    _memory_group.release();
 }
 
 void CLWinogradConvolutionLayer::prepare()

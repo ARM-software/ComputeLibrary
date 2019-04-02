@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -513,7 +513,7 @@ void NEWinogradConvolutionLayer::run()
 
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(data_layout == DataLayout::NCHW)
     {
@@ -539,8 +539,6 @@ void NEWinogradConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-
-    _memory_group.release();
 }
 
 Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,

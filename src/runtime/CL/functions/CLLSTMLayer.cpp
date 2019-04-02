@@ -505,7 +505,7 @@ void CLLSTMLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     CLScheduler::get().enqueue(_concat_inputs_forget_gate);
 
@@ -574,8 +574,6 @@ void CLLSTMLayer::run()
     CLScheduler::get().enqueue(_copy_output);
 
     _concat_scratch_buffer.run();
-
-    _memory_group.release();
 }
 
 void CLLSTMLayer::prepare()

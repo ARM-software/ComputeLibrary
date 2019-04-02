@@ -299,7 +299,7 @@ void NEDepthwiseConvolutionAssemblyDispatch::run()
     // Prepare assembly kernel
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Setup inputs/outputs
     ARM_COMPUTE_ERROR_ON(_workspace.buffer() == nullptr);
@@ -323,8 +323,6 @@ void NEDepthwiseConvolutionAssemblyDispatch::run()
 
     // Schedule assembly kernel
     NEScheduler::get().schedule(&_dwc_acl_kernel, Window::DimX);
-
-    _memory_group.release();
 }
 
 void NEDepthwiseConvolutionAssemblyDispatch::prepare()

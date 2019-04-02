@@ -92,7 +92,7 @@ void NELSTMLayer::configure(const ITensor *input,
                                                      scratch_buffer->info(), output_state_out->info(), cell_state_out->info(), output->info(),
                                                      lstm_params_info, activation_info, cell_threshold, projection_threshold));
 
-    const TensorShape cell_state_shape   = cell_state_in->info()->tensor_shape();
+    const TensorShape cell_state_shape = cell_state_in->info()->tensor_shape();
 
     // Configure block that calculates the forget gate
     // forget_gate = Activation(input * input_to_forget_weights + output_state_in * recurrent_to_forget_weights + PixelWiseMul(cell_state, cell_to_forget_weights) + forget_gate_bias)
@@ -493,7 +493,7 @@ void NELSTMLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _concat_inputs_forget_gate.run();
     _fully_connected_forget_gate.run();
@@ -567,8 +567,6 @@ void NELSTMLayer::run()
     NEScheduler::get().schedule(&_copy_output, Window::DimY);
 
     _concat_scratch_buffer.run();
-
-    _memory_group.release();
 }
 
 void NELSTMLayer::prepare()

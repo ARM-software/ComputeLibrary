@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,11 +74,9 @@ Status CLL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
 void CLL2NormalizeLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _reduce_func.run();
     CLScheduler::get().enqueue(_normalize_kernel, true);
-
-    _memory_group.release();
 }
 } // namespace arm_compute

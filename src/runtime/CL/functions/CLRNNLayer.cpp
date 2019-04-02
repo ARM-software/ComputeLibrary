@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ void CLRNNLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _fully_connected_kernel.run();
     _gemm_state_f.run();
@@ -114,8 +114,6 @@ void CLRNNLayer::run()
 
     // copy hidden out to output
     CLScheduler::get().enqueue(_copy_kernel);
-
-    _memory_group.release();
 }
 
 void CLRNNLayer::prepare()

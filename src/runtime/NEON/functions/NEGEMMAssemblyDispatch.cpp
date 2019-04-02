@@ -375,7 +375,7 @@ bool NEGEMMAssemblyDispatch::is_configured() const
 
 void NEGEMMAssemblyDispatch::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
     if(_function != nullptr)
     {
         _function->run();
@@ -385,6 +385,5 @@ void NEGEMMAssemblyDispatch::run()
         ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
         _arm_gemm->run();
     }
-    _memory_group.release();
 }
 } //namespace arm_compute

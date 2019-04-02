@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -184,7 +184,7 @@ void NEHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
@@ -207,6 +207,4 @@ void NEHarrisCorners::run()
 
     // Run sort & euclidean distance
     NEScheduler::get().schedule(&_sort_euclidean, Window::DimY);
-
-    _memory_group.release();
 }

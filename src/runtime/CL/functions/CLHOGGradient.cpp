@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,13 +71,11 @@ void CLHOGGradient::configure(ICLTensor *input, ICLTensor *output_magnitude, ICL
 
 void CLHOGGradient::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run derivative
     _derivative.run();
 
     // Run magnitude/phase kernel
     CLScheduler::get().enqueue(_mag_phase);
-
-    _memory_group.release();
 }

@@ -179,7 +179,7 @@ void CLDepthwiseConvolutionLayer3x3::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_needs_permute)
     {
@@ -192,8 +192,6 @@ void CLDepthwiseConvolutionLayer3x3::run()
     {
         _permute_output_to_nhwc.run();
     }
-
-    _memory_group.release();
 }
 
 void CLDepthwiseConvolutionLayer3x3::prepare()

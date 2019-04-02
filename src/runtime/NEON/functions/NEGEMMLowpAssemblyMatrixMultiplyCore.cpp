@@ -1,4 +1,5 @@
-/* Copyright (c) 2017-2018 ARM Limited.
+/*
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,7 +117,7 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
 
 void NEGEMMLowpAssemblyMatrixMultiplyCore::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
     if(_mtx_a_reshape_kernel)
     {
         NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
@@ -135,6 +136,4 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::run()
     {
         NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
     }
-
-    _memory_group.release();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -231,7 +231,7 @@ void CLHOGMultiDetection::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_detection_windows == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Reset detection window
     _detection_windows->clear();
@@ -265,6 +265,4 @@ void CLHOGMultiDetection::run()
         Scheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
         _detection_windows->unmap(CLScheduler::get().queue());
     }
-
-    _memory_group.release();
 }

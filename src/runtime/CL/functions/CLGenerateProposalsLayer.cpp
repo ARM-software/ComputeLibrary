@@ -256,7 +256,7 @@ void CLGenerateProposalsLayer::run_cpp_nms_kernel()
 void CLGenerateProposalsLayer::run()
 {
     // Acquire all the temporaries
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Compute all the anchors
     CLScheduler::get().enqueue(_compute_anchors_kernel, false);
@@ -277,8 +277,5 @@ void CLGenerateProposalsLayer::run()
     // Add dummy batch indexes
     CLScheduler::get().enqueue(_memset_kernel, true);
     CLScheduler::get().enqueue(_padded_copy_kernel, true);
-
-    // Release all the temporaries
-    _memory_group.release();
 }
 } // namespace arm_compute

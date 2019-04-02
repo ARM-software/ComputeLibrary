@@ -206,7 +206,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
 
 void CLReductionOperation::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_is_serial)
     {
@@ -220,6 +220,4 @@ void CLReductionOperation::run()
             CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
         }
     }
-
-    _memory_group.release();
 }

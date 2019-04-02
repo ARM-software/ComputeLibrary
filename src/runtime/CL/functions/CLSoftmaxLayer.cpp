@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -191,7 +191,7 @@ Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
 void CLSoftmaxLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_needs_flattening)
     {
@@ -205,9 +205,6 @@ void CLSoftmaxLayer::run()
     {
         CLScheduler::get().enqueue(_reshape_kernel, true);
     }
-
-    // Relase intermediate buffers
-    _memory_group.release();
 }
 
 } // namespace arm_compute

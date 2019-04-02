@@ -137,7 +137,7 @@ void NEReduceMean::configure(ITensor *input, const Coordinates &reduction_axis, 
 
 void NEReduceMean::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     for(unsigned int i = 0; i < _reduction_ops; ++i)
     {
@@ -148,5 +148,4 @@ void NEReduceMean::run()
     {
         _reshape.run();
     }
-    _memory_group.release();
 }

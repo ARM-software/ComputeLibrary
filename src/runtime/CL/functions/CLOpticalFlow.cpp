@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,7 +149,7 @@ void CLOpticalFlow::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_num_levels == 0, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     for(unsigned int level = _num_levels; level > 0; --level)
     {
@@ -167,6 +167,4 @@ void CLOpticalFlow::run()
     }
 
     CLScheduler::get().enqueue(_tracker_finalize_kernel, true);
-
-    _memory_group.release();
 }

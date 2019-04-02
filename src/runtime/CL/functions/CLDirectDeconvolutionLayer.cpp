@@ -170,12 +170,10 @@ void CLDirectDeconvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _scale_f.run();
     _conv_f.run();
-
-    _memory_group.release();
 }
 
 void CLDirectDeconvolutionLayer::prepare()

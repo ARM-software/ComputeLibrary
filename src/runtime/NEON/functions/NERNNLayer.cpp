@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,7 +104,7 @@ void NERNNLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _fully_connected_kernel.run();
 
@@ -115,8 +115,6 @@ void NERNNLayer::run()
 
     // copy hidden out to output
     NEScheduler::get().schedule(&_copy_kernel, Window::DimY);
-
-    _memory_group.release();
 }
 
 void NERNNLayer::prepare()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,12 +96,10 @@ void                   CLConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
-        _memory_group.acquire();
+        MemoryGroupResourceScope scope_mg(_memory_group);
 
         CLScheduler::get().enqueue(_kernel_hor, false);
         CLScheduler::get().enqueue(_kernel_vert);
-
-        _memory_group.release();
     }
     else
     {

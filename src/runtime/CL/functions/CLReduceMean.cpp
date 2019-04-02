@@ -140,7 +140,7 @@ Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
 
 void CLReduceMean::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     for(unsigned int i = 0; i < _reduction_ops; ++i)
     {
@@ -151,6 +151,5 @@ void CLReduceMean::run()
     {
         _reshape.run();
     }
-    _memory_group.release();
 }
 } // namespace arm_compute

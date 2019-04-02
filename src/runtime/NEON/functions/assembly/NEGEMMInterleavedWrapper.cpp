@@ -183,9 +183,8 @@ void NEGEMMInterleavedWrapper::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
     NEScheduler::get().run_tagged_workloads(_workloads, _tag.c_str());
-    _memory_group.release();
 }
 
 void NEGEMMInterleavedWrapper::prepare()

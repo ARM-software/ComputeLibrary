@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,7 +104,7 @@ void CLMeanStdDev::configure(ICLImage *input, float *mean, float *stddev)
 template <typename T>
 void CLMeanStdDev::run_float()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Perform reduction on x-axis
     _reduction_operation_mean.run();
@@ -140,8 +140,6 @@ void CLMeanStdDev::run_float()
         _reduction_output_stddev.unmap();
     }
     _reduction_output_mean.unmap();
-
-    _memory_group.release();
 }
 
 void CLMeanStdDev::run_int()

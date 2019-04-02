@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,11 +69,9 @@ Status NENormalizationLayer::validate(const ITensorInfo *input, const ITensorInf
 
 void NENormalizationLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(&_multiply_kernel, Window::DimY);
     NEScheduler::get().schedule(&_border_handler, Window::DimY);
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
-
-    _memory_group.release();
 }

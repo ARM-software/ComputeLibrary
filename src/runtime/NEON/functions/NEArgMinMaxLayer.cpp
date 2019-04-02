@@ -57,15 +57,13 @@ Status NEArgMinMaxLayer::validate(const ITensorInfo *input, int axis, const ITen
 
 void NEArgMinMaxLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_run_fill_border)
     {
         NEScheduler::get().schedule(&_fill_border_kernel, Window::DimY);
     }
     NEScheduler::get().schedule(&_reduction_kernel, Window::DimY);
-
-    _memory_group.release();
 }
 
 } // namespace arm_compute

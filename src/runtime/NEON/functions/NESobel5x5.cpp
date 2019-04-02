@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,10 +81,8 @@ void NESobel5x5::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(&_sobel_hor, Window::DimY);
     NEScheduler::get().schedule(&_sobel_vert, Window::DimY);
-
-    _memory_group.release();
 }

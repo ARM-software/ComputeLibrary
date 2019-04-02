@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ void CLFastCorners::run()
 {
     cl::CommandQueue q = CLScheduler::get().queue();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_non_max)
     {
@@ -129,6 +129,4 @@ void CLFastCorners::run()
     }
 
     q.flush();
-
-    _memory_group.release();
 }

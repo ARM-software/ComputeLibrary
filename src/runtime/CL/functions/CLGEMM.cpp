@@ -352,7 +352,7 @@ void CLGEMM::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_is_interleaved_transposed)
     {
@@ -381,8 +381,6 @@ void CLGEMM::run()
     {
         CLScheduler::get().enqueue(_ma_kernel);
     }
-
-    _memory_group.release();
 }
 
 void CLGEMM::prepare()

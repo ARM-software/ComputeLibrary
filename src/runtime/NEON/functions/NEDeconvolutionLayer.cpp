@@ -159,12 +159,10 @@ void NEDeconvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _upsample_f.run();
     _conv_f.run();
-
-    _memory_group.release();
 }
 
 void NEDeconvolutionLayer::prepare()

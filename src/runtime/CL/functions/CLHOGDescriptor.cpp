@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,7 @@ void CLHOGDescriptor::configure(ICLTensor *input, ICLTensor *output, const IHOG 
 
 void CLHOGDescriptor::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run gradient
     _gradient.run();
@@ -105,6 +105,4 @@ void CLHOGDescriptor::run()
 
     // Run block normalization
     CLScheduler::get().enqueue(_block_norm);
-
-    _memory_group.release();
 }

@@ -340,7 +340,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Reshape inputs
     if(_mtx_a_reshape_kernel)
@@ -384,8 +384,6 @@ void NEGEMMLowpMatrixMultiplyCore::run()
         // Run offset contribution kernel
         NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
     }
-
-    _memory_group.release();
 }
 
 void NEGEMMLowpMatrixMultiplyCore::prepare()

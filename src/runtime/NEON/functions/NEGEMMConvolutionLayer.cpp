@@ -546,7 +546,7 @@ void NEGEMMConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(!_skip_im2col)
     {
@@ -589,8 +589,6 @@ void NEGEMMConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-
-    _memory_group.release();
 }
 
 void NEGEMMConvolutionLayer::prepare()

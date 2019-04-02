@@ -350,7 +350,7 @@ void CLGEMMLowpMatrixMultiplyCore::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_is_gemm_reshaped)
     {
@@ -396,8 +396,6 @@ void CLGEMMLowpMatrixMultiplyCore::run()
         // Run offset contribution kernel
         CLScheduler::get().enqueue(_offset_contribution_kernel, true);
     }
-
-    _memory_group.release();
 }
 
 void CLGEMMLowpMatrixMultiplyCore::prepare()

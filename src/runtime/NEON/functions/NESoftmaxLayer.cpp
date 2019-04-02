@@ -180,7 +180,7 @@ Status NESoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
 void NESoftmaxLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_needs_flattening)
     {
@@ -195,7 +195,5 @@ void NESoftmaxLayer::run()
     {
         NEScheduler::get().schedule(&_reshape_kernel, Window::DimY);
     }
-
-    _memory_group.release();
 }
 } // namespace arm_compute

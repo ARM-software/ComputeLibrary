@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,7 +225,7 @@ void NEHOGMultiDetection::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_detection_windows == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Reset detection window
     _detection_windows->clear();
@@ -256,6 +256,4 @@ void NEHOGMultiDetection::run()
     {
         NEScheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
     }
-
-    _memory_group.release();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ void NEDirectConvolutionLayer::run()
 {
     NEScheduler::get().schedule(&_input_border_handler, Window::DimZ);
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(&_conv_kernel, _dim_split);
     if(_has_bias)
@@ -117,5 +117,4 @@ void NEDirectConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-    _memory_group.release();
 }
