@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
+#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
 #include "arm_compute/core/Types.h"
@@ -188,6 +189,7 @@ private:
     CLWidthConcatenate2TensorsKernel     _concat_weights_forget_gate;
     CLWidthConcatenate2TensorsKernel     _concat_weights_input_gate;
     CLWidthConcatenate2TensorsKernel     _concat_weights_output;
+    CLMemsetKernel                       _ones_memset_kernel;
     CLTensor                             _input_gate_out1;
     CLTensor                             _input_gate_out2;
     CLTensor                             _input_gate_out3;

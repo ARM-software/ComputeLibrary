@@ -28,7 +28,6 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
 #include "utils/TypePrinter.h"
 
 #include <memory>
@@ -46,6 +45,7 @@ CLDirectDeconvolutionLayer::CLDirectDeconvolutionLayer(std::shared_ptr<IMemoryMa
       _scaled_output(),
       _original_weights(nullptr),
       _weights_flipped(),
+      _flip_axis(),
       _is_prepared(false)
 {
 }
@@ -120,8 +120,9 @@ void CLDirectDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights,
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     _original_weights = weights;
+    _flip_axis.allocator()->init(TensorInfo(TensorShape(2U), 1, DataType::U32));
     _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
-    _flip_weights.configure(weights, &_weights_flipped);
+    _flip_weights.configure(weights, &_weights_flipped, &_flip_axis);
 
     auto out_dims = deconvolution_output_dimensions(input->info()->dimension(idx_w), input->info()->dimension(idx_h), weights->info()->dimension(idx_w), weights->info()->dimension(idx_h),
                                                     info.pad().first, info.pad().second, stride_x, stride_y);
@@ -151,10 +152,18 @@ void CLDirectDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights,
     const PadStrideInfo upsample_info(stride_x, stride_y, padx / 2, pady / 2);
     _scale_f.configure(input, &_scaled_output, BorderSize(), upsample_info);
 
-    // setup the function to convolve the upscaled output
+    // Setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info, weights_info);
     _scaled_output.allocator()->allocate();
+
+    // Setup flip axis data
+    _flip_axis.allocator()->allocate();
+    _flip_axis.map(true);
+    auto axis_data = reinterpret_cast<uint32_t *>(_flip_axis.buffer());
+    axis_data[0]   = 0;
+    axis_data[1]   = 1;
+    _flip_axis.unmap();
 }
 
 void CLDirectDeconvolutionLayer::run()
@@ -177,16 +186,13 @@ void CLDirectDeconvolutionLayer::prepare()
 
         // Run weights flipping and mark original weights tensor as unused
         _weights_flipped.allocator()->allocate();
-        _weights_flipped.map(true);
-        _original_weights->map(CLScheduler::get().queue(), true);
-        CPPScheduler::get().schedule(&_flip_weights, Window::DimZ);
-        _weights_flipped.unmap();
-        _original_weights->unmap(CLScheduler::get().queue());
+        _flip_weights.run();
         _original_weights->mark_as_unused();
 
         // Prepare convolution
         _conv_f.prepare();
 
+        // Free flipped weights
         if(!_weights_flipped.is_used())
         {
             _weights_flipped.allocator()->free();

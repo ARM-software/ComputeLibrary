@@ -44,9 +44,10 @@ CLLSTMLayer::CLLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
       _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(), _pixelwise_mul_cell_state2(), _fully_connected_output(), _gemm_output(), _pixelwise_mul_output_state1(), _transpose_output(),
       _accum_output1(), _accum_output2(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(), _fully_connected_output_state(), _gemm_output_state(), _accum_output_state(),
       _projection_clip(), _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _concat_inputs_forget_gate(), _concat_weights_forget_gate(), _concat_weights_input_gate(), _concat_weights_output(),
-      _input_gate_out1(), _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(),
-      _forget_gate_out6(), _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(), _cell_state_out5(), _output1(), _output2(), _output3(), _output4(), _cell_state_activation(),
-      _output_state1(), _ones(), _run_peephole_opt(false), _run_cifg_opt(false), _perform_cell_clipping(false), _has_projection_weights(false), _perform_projection_clipping(false), _is_prepared(false)
+      _ones_memset_kernel(), _input_gate_out1(), _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(),
+      _forget_gate_out5(), _forget_gate_out6(), _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(), _cell_state_out5(), _output1(), _output2(), _output3(), _output4(),
+      _cell_state_activation(), _output_state1(), _ones(), _run_peephole_opt(false), _run_cifg_opt(false), _perform_cell_clipping(false), _has_projection_weights(false), _perform_projection_clipping(false),
+      _is_prepared(false)
 {
 }
 
@@ -104,7 +105,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     std::vector<const ICLTensor *> inputs_vector;
     inputs_vector.emplace_back(input);
     inputs_vector.emplace_back(output_state_in);
-    const TensorShape concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    const TensorShape concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, 0);
     _forget_gate_out2.allocator()->init(TensorInfo(concat_shape, 1, input->info()->data_type()));
 
     _memory_group.manage(&_forget_gate_out2);
@@ -114,7 +115,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
 
     weights_vector.emplace_back(input_to_forget_weights);
     weights_vector.emplace_back(recurrent_to_forget_weights);
-    const TensorShape weights_concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(weights_vector);
+    const TensorShape weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(weights_vector, 0);
     _forget_gate_out6.allocator()->init(TensorInfo(weights_concat_shape, 1, input->info()->data_type()));
 
     _concat_weights_forget_gate.configure(input_to_forget_weights, recurrent_to_forget_weights, &_forget_gate_out6);
@@ -155,6 +156,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     {
         _memory_group.manage(&_input_gate_out1);
         _ones.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _ones_memset_kernel.configure(&_ones, PixelValue(1, _ones.info()->data_type()));
         _subtract_input_gate.configure(ArithmeticOperation::SUB, &_ones, forget_gate_out, &_input_gate_out1, ConvertPolicy::SATURATE);
         _ones.allocator()->allocate();
         _run_cifg_opt = true;
@@ -167,7 +169,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
         std::vector<const ICLTensor *> lstm_weights;
         lstm_weights.emplace_back(lstm_params.input_to_input_weights());
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
-        TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(lstm_weights);
+        TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         _input_gate_out2.allocator()->init(TensorInfo(lstm_weights_concat_shape, 1, input->info()->data_type()));
 
         _concat_weights_input_gate.configure(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
@@ -237,7 +239,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     std::vector<const ICLTensor *> in_out_weights;
     in_out_weights.emplace_back(input_to_output_weights);
     in_out_weights.emplace_back(recurrent_to_output_weights);
-    TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(in_out_weights);
+    TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     _output2.allocator()->init(TensorInfo(in_out_weights_concat_shape, 1, input->info()->data_type()));
 
     _concat_weights_output.configure(input_to_output_weights, recurrent_to_output_weights, &_output2);
@@ -392,7 +394,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     std::vector<const ITensorInfo *> inputs_vector;
     inputs_vector.emplace_back(input);
     inputs_vector.emplace_back(output_state_in);
-    const TensorShape concat_shape       = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    const TensorShape concat_shape       = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, 0);
     TensorInfo        forget_gate_concat = TensorInfo(concat_shape, 1, input->data_type());
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input, output_state_in, &forget_gate_concat));
@@ -417,7 +419,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
         std::vector<const ITensorInfo *> lstm_weights;
         lstm_weights.emplace_back(lstm_params.input_to_input_weights());
         lstm_weights.emplace_back(lstm_params.recurrent_to_input_weights());
-        TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(lstm_weights);
+        TensorShape lstm_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(lstm_weights, 0);
         TensorInfo  lstm_gate_concat          = TensorInfo(lstm_weights_concat_shape, 1, input->data_type());
         ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(lstm_params.input_to_input_weights(), lstm_params.recurrent_to_input_weights(), &lstm_gate_concat));
 
@@ -454,7 +456,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     std::vector<const ITensorInfo *> in_out_weights;
     in_out_weights.emplace_back(input_to_output_weights);
     in_out_weights.emplace_back(recurrent_to_output_weights);
-    TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(in_out_weights);
+    TensorShape in_out_weights_concat_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(in_out_weights, 0);
     TensorInfo  in_out_gate_concat          = TensorInfo(in_out_weights_concat_shape, 1, input->data_type());
     ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(input_to_output_weights, recurrent_to_output_weights, &in_out_gate_concat));
     // Validate output gate tmp
@@ -518,16 +520,7 @@ void CLLSTMLayer::run()
 
     if(_run_cifg_opt)
     {
-        _ones.map(true);
-        if(_ones.info()->data_type() == DataType::F16)
-        {
-            std::fill_n(reinterpret_cast<half *>(_ones.buffer()), _ones.info()->total_size() / _ones.info()->element_size(), 1);
-        }
-        else
-        {
-            std::fill_n(reinterpret_cast<float *>(_ones.buffer()), _ones.info()->total_size() / _ones.info()->element_size(), 1);
-        }
-        _ones.unmap();
+        CLScheduler::get().enqueue(_ones_memset_kernel);
         CLScheduler::get().enqueue(_subtract_input_gate);
     }
     else

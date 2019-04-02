@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,14 +27,11 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include <cmath>
-#include <memory>
-#include <tuple>
-
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CLDeconvolutionLayerUpsample::CLDeconvolutionLayerUpsample() // NOLINT
     : _upsample(),
+      _memset(),
       _output(nullptr)
 {
 }
@@ -51,22 +48,13 @@ void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
+    _memset.configure(_output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
     _upsample.configure(input, _output, inner_border, info);
 }
 
 void CLDeconvolutionLayerUpsample::run()
 {
-    _output->map(CLScheduler::get().queue(), true);
-    if(is_data_type_quantized_asymmetric(_output->info()->data_type()))
-    {
-        const uint8_t quantized_zero = _output->info()->quantization_info().offset;
-        std::fill_n(_output->buffer(), _output->info()->total_size(), quantized_zero);
-    }
-    else
-    {
-        memset(_output->buffer(), 0, _output->info()->total_size());
-    }
-    _output->unmap(CLScheduler::get().queue());
-
-    CLScheduler::get().enqueue(_upsample, false);
+    CLScheduler::get().enqueue(_memset, false);
+    CLScheduler::get().enqueue(_upsample, true);
 }
+} // namespace arm_compute

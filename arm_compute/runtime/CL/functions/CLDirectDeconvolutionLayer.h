@@ -26,9 +26,8 @@
 
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
+#include "arm_compute/runtime/CL/functions/CLReverse.h"
 #include "arm_compute/runtime/CL/functions/CLTranspose.h"
-
-#include "arm_compute/core/CPP/kernels/CPPFlipWeightsKernel.h"
 
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -70,7 +69,7 @@ class ICLTensor;
  * -# @ref CLConvolutionLayer
  *
  * And the following CPP kernels:
- * -# @ref CPPFlipWeightsKernel
+ * -# @ref CLReverse
  *
  */
 class CLDirectDeconvolutionLayer : public IFunction
@@ -119,11 +118,12 @@ private:
     CLMemoryGroup                _memory_group;
     CLDeconvolutionLayerUpsample _scale_f;
     CLConvolutionLayer           _conv_f;
-    CPPFlipWeightsKernel         _flip_weights;
+    CLReverse                    _flip_weights;
 
     CLTensor   _scaled_output;
     ICLTensor *_original_weights;
     CLTensor   _weights_flipped;
+    CLTensor   _flip_axis;
 
     bool _is_prepared;
 };
