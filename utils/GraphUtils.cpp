@@ -77,8 +77,8 @@ void TFPreproccessor::preprocess(ITensor &tensor)
     });
 }
 
-CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, float scale, bool bgr)
-    : _mean(mean), _scale(scale), _bgr(bgr)
+CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr, float scale)
+    : _mean(mean), _bgr(bgr), _scale(scale)
 {
     if(_bgr)
     {
