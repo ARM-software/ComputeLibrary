@@ -299,6 +299,9 @@ env.Append(LINKFLAGS = env['extra_link_flags'])
 
 Default( install_include("arm_compute"))
 Default( install_include("support"))
+Default( install_include("utils"))
+for dirname in os.listdir("./include"):
+    Default( install_include("include/%s" % dirname))
 
 Export('version_at_least')
 
