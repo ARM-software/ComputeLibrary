@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,11 +149,11 @@ void TensorAllocator::free()
     info().set_is_resizable(true);
 }
 
-arm_compute::Status TensorAllocator::import_memory(void *memory, size_t size)
+Status TensorAllocator::import_memory(void *memory)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(memory == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON(size == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON(alignment() != 0 && !arm_compute::utility::check_aligned(memory, alignment()));
 
     _memory.set_owned_region(support::cpp14::make_unique<MemoryRegion>(memory, info().total_size()));
     info().set_is_resizable(false);
