@@ -44,6 +44,8 @@ class ITensor;
 /** Basic function to execute concatenate tensors along x axis. This function calls the following kernel:
  *
  * -# @ref NEWidthConcatenateLayerKernel
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  */
 class NEWidthConcatenateLayer : public IFunction
 {

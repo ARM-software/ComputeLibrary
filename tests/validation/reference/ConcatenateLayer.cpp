@@ -114,6 +114,15 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
             dst = reference::permute<T>(dst, PermutationVector(1U, 0U));
             return reference::permute<T>(widthconcatenate_layer(srcs, dst), PermutationVector(1U, 0U));
         }
+        case Window::DimZ:
+        {
+            for(auto &t : srcs)
+            {
+                t = reference::permute<T>(t, PermutationVector(2U, 1U, 0U));
+            }
+            dst = reference::permute<T>(dst, PermutationVector(2U, 1U, 0U));
+            return reference::permute<T>(widthconcatenate_layer(srcs, dst), PermutationVector(2U, 1U, 0U));
+        }
         default:
         {
             ARM_COMPUTE_ERROR("Not supported");

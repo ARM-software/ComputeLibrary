@@ -77,13 +77,9 @@ public:
     void run() override;
 
 private:
-    void configure_h_concatenate(std::vector<ITensor *> inputs_vector, ITensor *output);
-    static Status validate_h_concatenate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output);
-
-    std::unique_ptr<IFunction>                        _concat_function;
-    std::unique_ptr<NEHeightConcatenateLayerKernel[]> _hconcat_kernels;
-    unsigned int                                      _num_inputs;
-    unsigned int                                      _axis;
+    std::vector<std::unique_ptr<INEKernel>> _concat_kernels;
+    unsigned int                            _num_inputs;
+    unsigned int                            _axis;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NECONCATENATELAYER_H__ */

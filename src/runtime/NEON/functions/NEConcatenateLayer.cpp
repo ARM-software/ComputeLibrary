@@ -38,36 +38,16 @@
 namespace arm_compute
 {
 NEConcatenateLayer::NEConcatenateLayer()
-    : _concat_function(nullptr),
-      _hconcat_kernels(),
+    : _concat_kernels(),
       _num_inputs(0),
       _axis(Window::DimX)
 {
 }
 
-Status NEConcatenateLayer::validate_h_concatenate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, DataLayoutDimension axis)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
-
-    // Output auto inizialitation if not yet initialized
-    TensorInfo  tmp_output_info = *output->clone();
-    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimY);
-    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
-
-    unsigned int offset = 0;
-    for(const auto &input : inputs_vector)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-        ARM_COMPUTE_RETURN_ON_ERROR(NEHeightConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
-        offset += input->dimension(Window::DimY);
-    }
-
-    return Status{};
-}
-
-void NEConcatenateLayer::configure_h_concatenate(std::vector<ITensor *> inputs_vector, ITensor *output)
-{
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    _axis       = get_data_layout_dimension_index(output->info()->data_layout(), axis);
     _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info;
@@ -76,98 +56,108 @@ void NEConcatenateLayer::configure_h_concatenate(std::vector<ITensor *> inputs_v
         ARM_COMPUTE_ERROR_ON_NULLPTR(inputs_vector.at(i));
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
-    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimY);
+    TensorShape output_shape{};
+    if(_axis == Window::DimZ)
+    {
+        output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
+    }
+    else
+    {
+        output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
+    }
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
-    ARM_COMPUTE_ERROR_THROW_ON(validate_h_concatenate(inputs_vector_info, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(NEConcatenateLayer::validate(inputs_vector_info, output->info(), axis));
 
     unsigned int offset = 0;
 
-    _hconcat_kernels = arm_compute::support::cpp14::make_unique<NEHeightConcatenateLayerKernel[]>(_num_inputs);
-
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
-        _hconcat_kernels[i].configure(inputs_vector.at(i), offset, output);
-        offset += inputs_vector.at(i)->info()->dimension(Window::DimY);
-    }
-}
-
-void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, DataLayoutDimension axis)
-{
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-    _axis = get_data_layout_dimension_index(output->info()->data_layout(), axis);
-    switch(_axis)
-    {
-        case 0:
+        switch(_axis)
         {
-            auto func = support::cpp14::make_unique<NEWidthConcatenateLayer>();
-            func->configure(inputs_vector, output);
-            _concat_function = std::move(func);
-            break;
+            case Window::DimX:
+            {
+                auto kernel = support::cpp14::make_unique<NEWidthConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                _concat_kernels.emplace_back(std::move(kernel));
+                break;
+            }
+            case Window::DimY:
+            {
+                auto kernel = support::cpp14::make_unique<NEHeightConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                _concat_kernels.emplace_back(std::move(kernel));
+                break;
+            }
+            case Window::DimZ:
+            {
+                auto kernel = support::cpp14::make_unique<NEDepthConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                _concat_kernels.emplace_back(std::move(kernel));
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Axis not supported");
         }
-        case 1:
-        {
-            configure_h_concatenate(inputs_vector, output);
-            break;
-        }
-        case 2:
-        {
-            auto func = support::cpp14::make_unique<NEDepthConcatenateLayer>();
-            func->configure(inputs_vector, output);
-            _concat_function = std::move(func);
-            break;
-        }
-        default:
-            ARM_COMPUTE_ERROR("Concatenation is supported across width, height and depth only!");
+        offset += inputs_vector.at(i)->info()->dimension(_axis);
     }
 }
 
 Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, DataLayoutDimension axis)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
+    const unsigned int _axis = get_data_layout_dimension_index(inputs_vector[0]->data_layout(), axis);
 
-    switch(get_data_layout_dimension_index(output->data_layout(), axis))
+    // Output auto inizialitation if not yet initialized
+    TensorInfo  tmp_output_info = *output->clone();
+    TensorShape output_shape{};
+    if(_axis == Window::DimZ)
     {
-        case 0:
-            ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(inputs_vector, output));
-            break;
-        case 1:
-            ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate_h_concatenate(inputs_vector, output));
-            break;
-        case 2:
-            ARM_COMPUTE_RETURN_ON_ERROR(NEDepthConcatenateLayer::validate(inputs_vector, output));
-            break;
-        default:
-            ARM_COMPUTE_RETURN_ERROR_MSG("Concatenation is supported across width and depth only!");
+        output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
     }
+    else
+    {
+        output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
+    }
+    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
+
+    unsigned int offset = 0;
+    for(const auto &input : inputs_vector)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+        switch(_axis)
+        {
+            case Window::DimX:
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                break;
+            }
+            case Window::DimY:
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(NEHeightConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                break;
+            }
+            case Window::DimZ:
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(NEDepthConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Axis not supported");
+        }
+        offset += input->dimension(_axis);
+    }
+
     return Status{};
 }
 
 void NEConcatenateLayer::run()
 {
-    switch(_axis)
+    for(auto &kernel : _concat_kernels)
     {
-        case 0:
-        case 2:
-        {
-            ARM_COMPUTE_ERROR_ON(_concat_function == nullptr);
-            _concat_function->run();
-            break;
-        }
-        case 1:
-        {
-            for(unsigned i = 0; i < _num_inputs; ++i)
-            {
-                NEScheduler::get().schedule(_hconcat_kernels.get() + i, Window::DimY);
-            }
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Axis not supported.");
-            break;
-        }
+        NEScheduler::get().schedule(kernel.get(), _axis);
     }
 }
 } // namespace arm_compute
