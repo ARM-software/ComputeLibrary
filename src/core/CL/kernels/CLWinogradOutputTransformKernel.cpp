@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,7 +139,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLWinogradOutputTransformKernel::CLWinogradOutputTransformKernel()
-    : _input(nullptr), _bias(nullptr), _output(nullptr)
+    : _input(nullptr), _bias(nullptr), _output(nullptr), _is_nhwc(false)
 {
 }
 
@@ -152,9 +152,10 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info, act_info));
 
-    _input  = input;
-    _bias   = bias;
-    _output = output;
+    _input   = input;
+    _bias    = bias;
+    _output  = output;
+    _is_nhwc = winograd_info.output_data_layout == DataLayout::NHWC;
 
     // Compute num_tiles_x
     const Size2D        input_dimensions = winograd_info.input_dimensions;
@@ -253,7 +254,7 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
         add_1D_tensor_argument(idx1, _bias, slice_biases);
     }
 
-    if(_output->info()->data_layout() == DataLayout::NHWC)
+    if(_is_nhwc)
     {
         unsigned int idx2 = 2 * num_arguments_per_4D_tensor() + ((_bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
         _kernel.setArg(idx2, static_cast<int>(_output->info()->total_size() - _output->info()->strides_in_bytes().y()));
