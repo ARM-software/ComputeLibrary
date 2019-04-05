@@ -24,9 +24,11 @@
 #include "helpers.h"
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
-#define VEC_FLOAT(VEC_SIZE)        \
-    VEC_DATA_TYPE(float, VEC_SIZE) \
-#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE) #define VEC_UCHAR(VEC_SIZE) VEC_DATA_TYPE(uchar, VEC_SIZE) #define CONVERT_RTE(x, type)(convert_##type##_rte((x)))
+#define VEC_FLOAT(VEC_SIZE) \
+    VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_UCHAR(VEC_SIZE) VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
 #define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
 #define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                  \
     {                                                                                                                                                                 \
