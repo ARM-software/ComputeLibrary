@@ -56,15 +56,7 @@ void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, 
         ARM_COMPUTE_ERROR_ON_NULLPTR(inputs_vector.at(i));
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
-    TensorShape output_shape{};
-    if(_axis == Window::DimZ)
-    {
-        output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
-    }
-    else
-    {
-        output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
-    }
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
@@ -109,19 +101,6 @@ Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vec
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
 
-    // Output auto inizialitation if not yet initialized
-    TensorInfo  tmp_output_info = *output->clone();
-    TensorShape output_shape{};
-    if(axis == Window::DimZ)
-    {
-        output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
-    }
-    else
-    {
-        output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, axis);
-    }
-    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
-
     unsigned int offset = 0;
     for(const auto &input : inputs_vector)
     {
@@ -130,23 +109,29 @@ Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vec
         {
             case Window::DimX:
             {
-                ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayerKernel::validate(input, offset, output));
                 break;
             }
             case Window::DimY:
             {
-                ARM_COMPUTE_RETURN_ON_ERROR(NEHeightConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                ARM_COMPUTE_RETURN_ON_ERROR(NEHeightConcatenateLayerKernel::validate(input, offset, output));
                 break;
             }
             case Window::DimZ:
             {
-                ARM_COMPUTE_RETURN_ON_ERROR(NEDepthConcatenateLayerKernel::validate(input, offset, &tmp_output_info));
+                ARM_COMPUTE_RETURN_ON_ERROR(NEDepthConcatenateLayerKernel::validate(input, offset, output));
                 break;
             }
             default:
                 ARM_COMPUTE_ERROR("Axis not supported");
         }
         offset += input->dimension(axis);
+    }
+
+    if(output->total_size() != 0)
+    {
+        TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, axis);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() != output->tensor_shape().total_size());
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ public:
             src_ptrs.emplace_back(&_srcs.back());
         }
 
-        TensorShape dst_shape = misc::shape_calculator::calculate_depth_concatenate_shape(src_ptrs);
+        TensorShape dst_shape = misc::shape_calculator::calculate_concatenate_shape(src_ptrs, Window::DimZ);
         _dst                  = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         _depth_concat.configure(src_ptrs, &_dst);

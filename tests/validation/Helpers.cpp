@@ -74,46 +74,6 @@ void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pat
     }
 }
 
-TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes)
-{
-    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
-
-    TensorShape out_shape = input_shapes[0];
-
-    size_t max_x = 0;
-    size_t max_y = 0;
-    size_t depth = 0;
-
-    for(const auto &shape : input_shapes)
-    {
-        max_x = std::max(shape.x(), max_x);
-        max_y = std::max(shape.y(), max_y);
-        depth += shape.z();
-    }
-
-    out_shape.set(0, max_x);
-    out_shape.set(1, max_y);
-    out_shape.set(2, depth);
-
-    return out_shape;
-}
-
-TensorShape calculate_concatenate_shape(const std::vector<TensorShape> &input_shapes, size_t axis)
-{
-    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
-    TensorShape out_shape = input_shapes[0];
-    ARM_COMPUTE_ERROR_ON(axis >= out_shape.num_dimensions());
-
-    const int new_size = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [&](int sum, const TensorShape & shape)
-    {
-        ARM_COMPUTE_ERROR_ON(axis >= shape.num_dimensions());
-        return sum + shape[axis];
-    });
-    out_shape.set(axis, new_size);
-
-    return out_shape;
-}
-
 HarrisCornersParameters harris_corners_parameters()
 {
     HarrisCornersParameters params;

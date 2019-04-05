@@ -236,6 +236,15 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v19.05 Public major release
+ - Deprecated functions/interfaces
+    -  @ref GCDepthConcatenateLayer
+    -  @ref NEWidthConcatenateLayer
+    -  @ref NEDepthConcatenateLayer
+    -  @ref CLWidthConcatenateLayer
+    -  @ref CLDepthConcatenateLayer
+
+
 v19.02 Public major release
  - Various bug fixes.
  - Various optimisations.

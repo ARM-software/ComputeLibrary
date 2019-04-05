@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,14 +24,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCConcatenateLayer.h"
 #include "tests/GLES_COMPUTE/GCAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/DepthConcatenateLayerFixture.h"
+#include "tests/validation/fixtures/ConcatenateLayerFixture.h"
 
 namespace arm_compute
 {
@@ -42,21 +42,23 @@ namespace validation
 TEST_SUITE(GC)
 TEST_SUITE(DepthConcatenateLayer)
 
-//TODO(COMPMID-415): Add configuration test?
-
 template <typename T>
-using GCDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCDepthConcatenateLayer, T>;
+using GCDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<GCTensor, IGCTensor, GCAccessor, GCConcatenateLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                  DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthConcatenateLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small3DShapes(),
+                                                                                                                  framework::dataset::make("DataType",
+                                                                                                                          DataType::F16)),
+                                                                                                                  framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), framework::dataset::make("DataType",
-                                                                                                                DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large3DShapes(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::F16)),
+                                                                                                                framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);
@@ -64,14 +66,17 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<half>, framework
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small3DShapes(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F32)),
+                                                                                                                   framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F32)),
+                                                                                                                 framework::dataset::make("Axis", 2)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference);

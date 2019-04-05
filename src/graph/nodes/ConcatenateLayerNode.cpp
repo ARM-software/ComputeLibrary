@@ -68,6 +68,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
 
     TensorDescriptor output_descriptor = input_descriptors[0];
     const int        axis_idx          = get_dimension_idx(output_descriptor.layout, axis);
+    ARM_COMPUTE_ERROR_ON_MSG(axis_idx > 2, "Unsupported concatenation axis!");
 
     // Extract shapes
     std::vector<const TensorShape *> shapes;
@@ -76,18 +77,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
         shapes.emplace_back(&input_descriptor.shape);
     }
 
-    if(axis_idx < 2)
-    {
-        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(shapes, axis_idx);
-    }
-    else if(axis_idx == 2)
-    {
-        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(shapes);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Unsupported concatenation axis!");
-    }
+    output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(shapes, axis_idx);
 
     return output_descriptor;
 }

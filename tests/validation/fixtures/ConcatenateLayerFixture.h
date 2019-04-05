@@ -73,7 +73,7 @@ public:
         // Generate more shapes based on the input
         for(auto &s : shapes)
         {
-            // Randomly change the first dimension
+            // Randomly change the dimension
             if(mutate_dis(gen))
             {
                 // Decrease the dimension by a small percentage. Don't increase
@@ -144,18 +144,20 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const std::vector<TensorShape> &shapes, const std::vector<QuantizationInfo> &qinfo, DataType data_type, unsigned int axis)
+    SimpleTensor<T> compute_reference(std::vector<TensorShape> &shapes, const std::vector<QuantizationInfo> &qinfo, DataType data_type, unsigned int axis)
     {
         std::vector<SimpleTensor<T>> srcs;
+        std::vector<TensorShape *>   src_ptrs;
 
         // Create and fill tensors
         for(size_t j = 0; j < shapes.size(); ++j)
         {
             srcs.emplace_back(shapes[j], data_type, 1, qinfo[j]);
             fill(srcs.back(), j);
+            src_ptrs.emplace_back(&shapes[j]);
         }
 
-        const TensorShape dst_shape = calculate_concatenate_shape(shapes, axis);
+        const TensorShape dst_shape = misc::shape_calculator::calculate_concatenate_shape(src_ptrs, axis);
         SimpleTensor<T>   dst{ dst_shape, data_type, 1, qinfo[shapes.size()] };
         return reference::concatenate_layer<T>(srcs, dst, axis);
     }

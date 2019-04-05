@@ -409,19 +409,19 @@ __kernel void concatenate_height(
 __kernel void concatenate_depth(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
-    int3 offsets)
+    int offset)
 {
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, -offsets.x, -offsets.y, 0));
+    source_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
 #if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
     source_values = requantize(source_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
 #endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
     VSTORE(VEC_SIZE)
-    (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offsets.z));
+    (source_values, 0, (__global DATA_TYPE *)(dst.ptr + offset));
 }
 #endif /* defined(DATA_TYPE) && defined(VEC_SIZE) */

@@ -56,7 +56,7 @@ void CLDepthConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_v
     _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<CLDepthConcatenateLayerKernel[]>(_num_inputs);
     _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_inputs);
 
-    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector_info);
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector_info, Window::DimZ);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
@@ -82,7 +82,7 @@ Status CLDepthConcatenateLayer::validate(const std::vector<ITensorInfo *> &input
 
     // Output auto inizialitation if not yet initialized
     TensorInfo  tmp_output_info = *output->clone();
-    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
+    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimZ);
     auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
 
     unsigned int depth_offset = 0;

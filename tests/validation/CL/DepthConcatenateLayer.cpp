@@ -83,8 +83,8 @@ TEST_CASE(Configuration, framework::DatasetMode::ALL)
 {
     // Create tensors
     CLTensor src1 = create_tensor<CLTensor>(TensorShape(128U, 32U, 32U), DataType::F32, 1);
-    CLTensor src2 = create_tensor<CLTensor>(TensorShape(32U, 32U, 32U), DataType::F32, 1);
-    CLTensor src3 = create_tensor<CLTensor>(TensorShape(16U, 32U, 32U), DataType::F32, 1);
+    CLTensor src2 = create_tensor<CLTensor>(TensorShape(128U, 32U, 32U), DataType::F32, 1);
+    CLTensor src3 = create_tensor<CLTensor>(TensorShape(128U, 32U, 32U), DataType::F32, 1);
     CLTensor dst;
 
     ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);

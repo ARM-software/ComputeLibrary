@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GCDEPTHCONCATENATE_H__
-#define __ARM_COMPUTE_GCDEPTHCONCATENATE_H__
+#ifndef __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__
+#define __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthConcatenateLayerKernel.h"
-#include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -37,32 +36,33 @@ namespace arm_compute
 {
 class IGCTensor;
 
-/** Basic function to execute concatenate tensors along z axis. This function calls the following kernels:
+/** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * @deprecated This function is deprecated and will be removed in release 19.08
- * -# @ref GCFillBorderKernel (executed if input's lowest two dimensions are smaller than respective output's dimensions)
+ * @note only axis z is supported
  * -# @ref GCDepthConcatenateLayerKernel
- *
  */
-class GCDepthConcatenateLayer : public IFunction
+class GCConcatenateLayer : public IFunction
 {
 public:
     /** Default constructor */
-    GCDepthConcatenateLayer();
+    GCConcatenateLayer();
     /** Initialise the kernel's inputs vector and output.
+     *
+     * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
+     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis is 2.
      */
-    void configure(std::vector<IGCTensor *> inputs_vector, IGCTensor *output);
+    void configure(std::vector<IGCTensor *> inputs_vector, IGCTensor *output, size_t axis);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    std::unique_ptr<GCDepthConcatenateLayerKernel[]> _concat_kernels_vector;
-    std::unique_ptr<GCFillBorderKernel[]>            _border_handlers_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<std::unique_ptr<IGCKernel>> _concat_kernels;
+    unsigned int                            _num_inputs;
+    unsigned int                            _axis;
 };
-}
-#endif /* __ARM_COMPUTE_GCDEPTHCONCATENATE_H__ */
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GCDEPTHCONCATENATELAYER_H__ */
