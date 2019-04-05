@@ -77,13 +77,9 @@ public:
     void run() override;
 
 private:
-    void configure_h_concatenate(std::vector<ICLTensor *> inputs_vector, ICLTensor *output);
-    static Status validate_h_concatenate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output);
-
-    std::unique_ptr<IFunction>                        _concat_function;
-    std::unique_ptr<CLHeightConcatenateLayerKernel[]> _hconcat_kernels;
-    unsigned int                                      _num_inputs;
-    unsigned int                                      _axis;
+    std::vector<std::unique_ptr<ICLKernel>> _concat_kernels;
+    unsigned int                            _num_inputs;
+    unsigned int                            _axis;
 };
 }
 #endif /* __ARM_COMPUTE_CLCONCATENATELAYER_H__ */

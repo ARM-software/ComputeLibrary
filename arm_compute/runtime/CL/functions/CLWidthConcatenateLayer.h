@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,8 @@ namespace arm_compute
 class ICLTensor;
 
 /** Basic function to execute concatenate tensors along x axis. This function calls the following kernel:
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  *
  * -# @ref CLWidthConcatenateLayerKernel
  * -# @ref CLWidthConcatenate2TensorsKernel (if there are exactly 2 input tensors)
