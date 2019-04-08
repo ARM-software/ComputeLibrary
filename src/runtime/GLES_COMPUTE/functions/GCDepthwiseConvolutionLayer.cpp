@@ -36,8 +36,10 @@ GCDepthwiseConvolutionLayer3x3::GCDepthwiseConvolutionLayer3x3()
 }
 
 void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
-                                               unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
+                                               unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
+    ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
+    ARM_COMPUTE_UNUSED(dilation);
     auto k = arm_compute::support::cpp14::make_unique<GCDepthwiseConvolutionLayer3x3Kernel>();
     k->configure(input, weights, biases, output, conv_info, depth_multiplier);
     _kernel = std::move(k);

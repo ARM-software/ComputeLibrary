@@ -182,8 +182,11 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor       *input,
                                                const ITensor *biases,
                                                ITensor *output, const PadStrideInfo &conv_info,
                                                unsigned int               depth_multiplier,
-                                               const ActivationLayerInfo &act_info)
+                                               const ActivationLayerInfo &act_info,
+                                               const Size2D              &dilation)
 {
+    ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
+    ARM_COMPUTE_UNUSED(dilation);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
@@ -222,10 +225,12 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo         *input
                                                 const ITensorInfo         *output,
                                                 const PadStrideInfo       &conv_info,
                                                 unsigned int               depth_multiplier,
-                                                const ActivationLayerInfo &act_info)
+                                                const ActivationLayerInfo &act_info,
+                                                const Size2D              &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
 
     if(biases != nullptr)
     {
@@ -347,10 +352,12 @@ NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
 }
 
 void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                                            unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
+                                            unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(channel_idx);
+    ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
+    ARM_COMPUTE_UNUSED(dilation);
 
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -480,10 +487,11 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
 }
 
 Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info)
+                                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
 
     const unsigned int width_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const unsigned int height_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);

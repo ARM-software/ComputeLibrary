@@ -43,7 +43,7 @@ using namespace arm_compute::misc::shape_calculator;
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                          const ActivationLayerInfo &act_info)
+                          const ActivationLayerInfo &act_info, const Size2D dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -55,6 +55,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1 || conv_info.stride().first > 3);
+
+    ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
     const bool is_qasymm = is_data_type_quantized_asymmetric(input->data_type());
 
@@ -74,7 +76,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
@@ -82,10 +84,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
-                                                        GPUTarget gpu_target, std::string &kernel_name)
+                                                        GPUTarget gpu_target, std::string &kernel_name, const Size2D dilation)
 {
     // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
 
     const unsigned int conv_stride_x = conv_info.stride().first;
@@ -176,10 +178,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         kernel_name += (is_qasymm ? "_nchw" : "");
 
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
-        num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y == 1) ? 2 : 1;
+        num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y == 1 && dilation.y() == 1) ? 2 : 1;
         num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
         num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
+    num_elems_read_per_iteration_x += (num_elems_read_per_iteration_x - 1) * (dilation.x() - 1);
+    num_elems_read_per_iteration_y += (num_elems_read_per_iteration_y - 1) * (dilation.y() - 1);
 
     // Create window and update padding
     Window win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
@@ -210,10 +214,10 @@ BorderSize CLDepthwiseConvolutionLayer3x3NCHWKernel::border_size() const
 }
 
 void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                                         unsigned int depth_multiplier, ActivationLayerInfo act_info)
+                                                         unsigned int depth_multiplier, ActivationLayerInfo act_info, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     bool is_qasymm = is_data_type_quantized_asymmetric(input->info()->data_type());
 
@@ -231,7 +235,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     std::string     kernel_name;
     const GPUTarget gpu_target = get_target();
 
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name, dilation);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -240,6 +244,8 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(_output->info()->tensor_shape().z()));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
+    build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
+    build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
 
     if(is_qasymm)
@@ -292,12 +298,11 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 }
 
 Status CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                          unsigned int        depth_multiplier,
-                                                          ActivationLayerInfo act_info, GPUTarget gpu_target)
+                                                          unsigned int depth_multiplier, ActivationLayerInfo act_info, GPUTarget gpu_target, const Size2D &dilation)
 {
     std::string kernel_name;
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, depth_multiplier, gpu_target, kernel_name).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, depth_multiplier, gpu_target, kernel_name, dilation).first);
 
     return Status{};
 }

@@ -67,31 +67,33 @@ public:
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer3x3
      *
      * @param[in] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in] weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in] biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     * @param[in] biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                             Data type supported: Same as @p input.
      * @param[in] output           Destination tensor. Data type supported: same as @p input.
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overriden:
     void run() override;
@@ -102,7 +104,7 @@ private:
      *
      * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in]      weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
@@ -115,7 +117,7 @@ private:
      *
      * @param[in]  input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in]  weights          Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]  biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     * @param[in]  biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                              Data type supported: Same as @p input.
      * @param[out] output           Destination tensor. Data type supported: same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
@@ -184,9 +186,10 @@ public:
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayer
      *
@@ -198,11 +201,12 @@ public:
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                           unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overriden:
     void run() override;

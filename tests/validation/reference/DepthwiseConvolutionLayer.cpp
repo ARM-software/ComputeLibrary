@@ -70,13 +70,19 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     const int pad_right  = conv_info.pad_right();
     const int pad_bottom = conv_info.pad_bottom();
 
-    const int patch_half_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1)) / 2;
-    const int patch_half_height = (filter_height + (dilation.y() - 1) * (filter_height - 1)) / 2;
+    const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
+    const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
 
-    const int minimum_x = -pad_left + patch_half_width;
-    const int minimum_y = -pad_top + patch_half_height;
-    const int maximum_x = input_width + pad_left + pad_right - patch_half_width * 2;
-    const int maximum_y = input_height + pad_top + pad_bottom - patch_half_height * 2;
+    const int patch_half_width_floor  = patch_width / 2;
+    const int patch_half_height_floor = patch_height / 2;
+
+    const auto patch_half_width_ceil  = static_cast<int>(std::ceil(patch_width / 2));
+    const auto patch_half_height_ceil = static_cast<int>(std::ceil(patch_height / 2));
+
+    const int minimum_x = -pad_left + patch_half_width_floor;
+    const int minimum_y = -pad_top + patch_half_height_floor;
+    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
+    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
 
     const T border_value(0);
 
@@ -89,21 +95,20 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
             {
                 const int out_z = z * depth_multiplier + m;
 
-                for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
+                for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {
-                    for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
+                    for(int x = minimum_x; x <= minimum_x + maximum_x; x += conv_info.stride().first)
                     {
                         Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
                         size_t      filter_offset = filter_plane * out_z;
 
                         T val(0);
-                        for(int j = y - patch_half_height; j <= y + patch_half_height; j += dilation.y())
+                        for(int j = y - patch_half_height_floor; j < y + patch_half_height_ceil; j += dilation.y())
                         {
-                            for(int i = x - patch_half_width; i <= x + patch_half_width; i += dilation.x())
+                            for(int i = x - patch_half_width_floor; i < x + patch_half_width_ceil; i += dilation.x())
                             {
                                 coords.set(0, i);
                                 coords.set(1, j);
-
                                 val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, border_value);
                                 ++filter_offset;
                             }
@@ -157,13 +162,19 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const int pad_right  = conv_info.pad_right();
     const int pad_bottom = conv_info.pad_bottom();
 
-    const int patch_half_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1)) / 2;
-    const int patch_half_height = (filter_height + (dilation.y() - 1) * (filter_height - 1)) / 2;
+    const float patch_width  = (filter_width + (dilation.x() - 1) * (filter_width - 1));
+    const float patch_height = (filter_height + (dilation.y() - 1) * (filter_height - 1));
 
-    const int minimum_x = -pad_left + patch_half_width;
-    const int minimum_y = -pad_top + patch_half_height;
-    const int maximum_x = input_width + pad_left + pad_right - patch_half_width * 2;
-    const int maximum_y = input_height + pad_top + pad_bottom - patch_half_height * 2;
+    const int patch_half_width_floor  = patch_width / 2;
+    const int patch_half_height_floor = patch_height / 2;
+
+    const auto patch_half_width_ceil  = static_cast<int>(std::ceil(patch_width / 2));
+    const auto patch_half_height_ceil = static_cast<int>(std::ceil(patch_height / 2));
+
+    const int minimum_x = -pad_left + patch_half_width_floor;
+    const int minimum_y = -pad_top + patch_half_height_floor;
+    const int maximum_x = input_width + pad_left + pad_right - static_cast<int>(patch_width);
+    const int maximum_y = input_height + pad_top + pad_bottom - static_cast<int>(patch_height);
 
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
@@ -175,17 +186,17 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
                 const int     out_z    = z * depth_multiplier + m;
                 const int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(out_z)));
 
-                for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
+                for(int y = minimum_y; y <= minimum_y + maximum_y; y += conv_info.stride().second)
                 {
-                    for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
+                    for(int x = minimum_x; x <= minimum_x + maximum_x; x += conv_info.stride().first)
                     {
                         Coordinates coords(x, y, z, r);
                         int         filter_offset = filter_plane * out_z;
 
                         int32_t val = 0;
-                        for(int j = y - patch_half_height; j <= y + patch_half_height; j += dilation.y())
+                        for(int j = y - patch_half_height_floor; j < y + patch_half_height_ceil; j += dilation.y())
                         {
-                            for(int i = x - patch_half_width; i <= x + patch_half_width; i += dilation.x())
+                            for(int i = x - patch_half_width_floor; i < x + patch_half_width_ceil; i += dilation.x())
                             {
                                 coords.set(0, i);
                                 coords.set(1, j);

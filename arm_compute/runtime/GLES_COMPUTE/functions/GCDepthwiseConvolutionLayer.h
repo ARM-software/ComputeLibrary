@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,15 +50,16 @@ public:
      *
      * @param[in, out] input            Source tensor. Data type supported: F16. (Written to only for border filling).
      * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     * @param[in]      biases           Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                                  Data type supported: Same as @p input.
      * @param[out]     output           Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
      */
     void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
-                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                   unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overridden:
     void run() override final;

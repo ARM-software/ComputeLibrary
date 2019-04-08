@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ class DepthwiseConvolutionLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, Size2D kernel_size, PadStrideInfo info, DataType data_type, int batches)
+    void setup(TensorShape src_shape, Size2D kernel_size, PadStrideInfo info, Size2D Dilation, DataType data_type, int batches)
     {
         // Get shapes
         TensorShape weights_shape(kernel_size.width, kernel_size.height);
