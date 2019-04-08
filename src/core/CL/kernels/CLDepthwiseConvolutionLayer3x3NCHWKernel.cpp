@@ -47,10 +47,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
                                     "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
@@ -241,6 +241,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 
     // Set build options
     CLBuildOptions build_opts;
+    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(_output->info()->tensor_shape().z()));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
@@ -269,7 +270,6 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
             const int b_val = output->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
             const int o1    = output->info()->quantization_info().offset;
 
-            build_opts.add_option("-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
             build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
@@ -279,6 +279,18 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
             build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
         }
     }
+    else
+    {
+        build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
+        build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
+        build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option_if(act_info.enabled(), "-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+        build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(win_config.second.x().step()));
+    }
+
+    build_opts.add_option_if(input->info()->data_type() == DataType::F16, "-DIS_F16");
+    build_opts.add_option_if(input->info()->data_type() == DataType::F32, "-DIS_F32");
+
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set config_id for enabling LWS tuning

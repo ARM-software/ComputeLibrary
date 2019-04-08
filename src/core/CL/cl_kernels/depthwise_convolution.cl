@@ -24,7 +24,141 @@
 
 #include "helpers.h"
 
-#if defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
+#if defined(FUSED_ACTIVATION)
+#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
+#include "activation_helpers.h"
+#define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
+#else /* defined(FUSED_ACTIVATION) */
+#define ACTIVATION_FUNC(x) (x)
+#endif /* defined(FUSED_ACTIVATION) */
+
+/** Get the pointer position at a certain offset in x and y direction.
+ *
+ * @param[in] ptr      Pointer to the starting position of the buffer
+ * @param[in] x        Relative X position
+ * @param[in] y        Relative Y position
+ * @param[in] stride_x Stride of the source tensor in X dimension (in bytes)
+ * @param[in] stride_y Stride of the source tensor in Y dimension (in bytes)
+ *
+ * @return a uchar
+ */
+inline __global uchar *ptr_offset(__global uchar *ptr, const int x, const int y, const int stride_x, const int stride_y)
+{
+    return ptr + x * stride_x + y * stride_y;
+}
+
+#if(DILATION_X == 1 && DILATION_Y == 1)
+
+#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0, weights_row0) \
+    ({                                                             \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
+        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
+        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
+        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
+    })
+
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0, weights_row0) \
+    ({                                                             \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
+        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
+        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
+        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
+        acc.s2 = fma(src0.s2, weights_row0.s0, acc.s2);            \
+        acc.s2 = fma(src0.s3, weights_row0.s1, acc.s2);            \
+        acc.s2 = fma(src0.s4, weights_row0.s2, acc.s2);            \
+        acc.s3 = fma(src0.s3, weights_row0.s0, acc.s3);            \
+        acc.s3 = fma(src0.s4, weights_row0.s1, acc.s3);            \
+        acc.s3 = fma(src0.s5, weights_row0.s2, acc.s3);            \
+    })
+
+#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0, src1, weights_row0) \
+    ({                                                                   \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
+        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
+        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
+        acc.s1 = fma(src1.s0, weights_row0.s2, acc.s1);                  \
+    })
+
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0, src1, weights_row0) \
+    ({                                                                   \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
+        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
+        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
+        acc.s1 = fma(src0.s4, weights_row0.s2, acc.s1);                  \
+        acc.s2 = fma(src0.s4, weights_row0.s0, acc.s2);                  \
+        acc.s2 = fma(src0.s5, weights_row0.s1, acc.s2);                  \
+        acc.s2 = fma(src0.s6, weights_row0.s2, acc.s2);                  \
+        acc.s3 = fma(src0.s6, weights_row0.s0, acc.s3);                  \
+        acc.s3 = fma(src0.s7, weights_row0.s1, acc.s3);                  \
+        acc.s3 = fma(src1.s0, weights_row0.s2, acc.s3);                  \
+    })
+
+#else /* DILATION_X==1 && DILATION_Y==1 */
+
+#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                        \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
+        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
+        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
+        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
+    })
+
+#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                        \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
+        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
+        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
+        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
+    })
+
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                        \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
+        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
+        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
+        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
+        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                                  \
+        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                                   \
+        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                                 \
+        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                                  \
+        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                                   \
+        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                                 \
+    })
+
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
+    ({                                                                                        \
+        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
+        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
+        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
+        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
+        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
+        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
+        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                                  \
+        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                                   \
+        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                                 \
+        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                                  \
+        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                                   \
+        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                                 \
+    })
+
+#endif /* DILATION_X==1 && DILATION_Y==1 */
+
+#if defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F32)
 #if defined(CONV_STRIDE_X)
 
 #if CONV_STRIDE_X == 1
@@ -234,132 +368,13 @@ __kernel void depthwise_convolution_3x3(
     pixels += (float2)(*((__global float *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
-    vstore2(pixels, 0, (__global float *)dst.ptr);
+    vstore2(ACTIVATION_FUNC(pixels), 0, (__global float *)dst.ptr);
 }
 #endif //defined(CONV_STRIDE_X)
 
-#if(DILATION_X == 1 && DILATION_Y == 1)
+#if(DILATION_X > 1 || DILATION_Y > 1)
 
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0, weights_row0) \
-    ({                                                             \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
-        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
-        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
-        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
-    })
-
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0, weights_row0) \
-    ({                                                             \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
-        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
-        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
-        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
-        acc.s2 = fma(src0.s2, weights_row0.s0, acc.s2);            \
-        acc.s2 = fma(src0.s3, weights_row0.s1, acc.s2);            \
-        acc.s2 = fma(src0.s4, weights_row0.s2, acc.s2);            \
-        acc.s3 = fma(src0.s3, weights_row0.s0, acc.s3);            \
-        acc.s3 = fma(src0.s4, weights_row0.s1, acc.s3);            \
-        acc.s3 = fma(src0.s5, weights_row0.s2, acc.s3);            \
-    })
-
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0, src1, weights_row0) \
-    ({                                                                   \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
-        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
-        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
-        acc.s1 = fma(src1.s0, weights_row0.s2, acc.s1);                  \
-    })
-
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0, src1, weights_row0) \
-    ({                                                                   \
-        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
-        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
-        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
-        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
-        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
-        acc.s1 = fma(src0.s4, weights_row0.s2, acc.s1);                  \
-        acc.s2 = fma(src0.s4, weights_row0.s0, acc.s2);                  \
-        acc.s2 = fma(src0.s5, weights_row0.s1, acc.s2);                  \
-        acc.s2 = fma(src0.s6, weights_row0.s2, acc.s2);                  \
-        acc.s3 = fma(src0.s6, weights_row0.s0, acc.s3);                  \
-        acc.s3 = fma(src0.s7, weights_row0.s1, acc.s3);                  \
-        acc.s3 = fma(src1.s0, weights_row0.s2, acc.s3);                  \
-    })
-
-#else /* DILATION_X==1 && DILATION_Y==1 */
-
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
-    })
-
-#define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
-    })
-
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \
-        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                                  \
-        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                                   \
-        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                                 \
-        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                                  \
-        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                                   \
-        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                                 \
-    })
-
-#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0_left, src0_mid, src0_right, weights_row0) \
-    ({                                                                                        \
-        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \
-        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \
-        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \
-        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \
-        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \
-        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \
-        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                                  \
-        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                                   \
-        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                                 \
-        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                                  \
-        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                                   \
-        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                                 \
-    })
-
-/** Get the pointer position at a certain offset in x and y direction.
- *
- * @param[in] ptr          Pointer to the starting position of the buffer
- * @param[in] x            Relative X position
- * @param[in] y            Relative Y position
- * @param[in] src_stride_x Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_stride_y Stride of the source tensor in Y dimension (in bytes)
- */
-inline __global uchar *ptr_offset(__global uchar *ptr, const int x, const int y, const int stride_x, const int stride_y)
-{
-    return ptr + x * stride_x + y * stride_y;
-}
-
-/** Perform 3x3 convolution for stride_x=1 and stride_y=1 when DILATION_X>1 and DILATION_Y>1 for F32
+/** Perform 3x3 convolution for stride_x=1 and stride_y=1 when DILATION_X>1 or DILATION_Y>1 for F32
  *
  * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
  * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
@@ -397,7 +412,7 @@ inline float2 convolution_3x3_dilation_stridex1_stridey1_bifrost_f32(__global uc
     return pixels0;
 }
 
-/** Perform 3x3 convolution for stride_x=2 and stride_y=2 when DILATION_X>1 and DILATION_Y>1 for F32
+/** Perform 3x3 convolution for stride_x=2 and stride_y=2 when DILATION_X>1 or DILATION_Y>1 for F32
  *
  * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
  * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
@@ -435,86 +450,16 @@ inline float2 convolution_3x3_dilation_stridex2_stridey2_bifrost_f32(__global uc
     return pixels0;
 }
 
-/** Perform 3x3 convolution for stride_x=1 and stride_y=1 when DILATION_X>1 and DILATION_Y>1 for f16
- *
- * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
- * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_stride_y     Stride of the source tensor in Y dimension (in bytes)
- * @param[in] y_offset         Offset from the source tensor from which to start convolution
- * @param[in] weights_addr     Pointer from where to get weights
- * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
- */
-inline half4 convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
-{
-    // Load the weights
-    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
-    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
-    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
-
-    half4 pixels0 = 0.0f;
-
-    half4 src00_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset, stride_x_bytes, stride_y_bytes)); // Row0
-    half4 src00_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
-    half4 src00_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
-
-    half4 src10_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes)); // Row1
-    half4 src10_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
-    half4 src10_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
-
-    half4 src20_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes)); // Row2
-    half4 src20_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
-    half4 src20_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
-
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
-
-    return pixels0;
-}
-
-/** Perform 3x3 convolution for stride_x=2 and stride_y=2 when DILATION_X>1 and DILATION_Y>1 for F16
- *
- * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
- * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
- * @param[in] src_stride_y     Stride of the source tensor in Y dimension (in bytes)
- * @param[in] y_offset         Offset from the source tensor from which to start convolution
- * @param[in] weights_addr     Pointer from where to get weights
- * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
- */
-inline half4 convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
-                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
-{
-    // Load the weights
-    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
-    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
-    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
-
-    half4 pixels0 = 0.0f;
-
-    half8 src00_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset, stride_x_bytes, stride_y_bytes)); // Row0
-    half8 src00_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
-    half8 src00_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
-
-    half8 src10_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes)); // Row1
-    half8 src10_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
-    half8 src10_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
-
-    half8 src20_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes)); // Row2
-    half8 src20_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
-    half8 src20_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
-
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
-    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
-
-    return pixels0;
-}
-
-#endif /* DILATION_X==1 && DILATION_Y==1 */
+#endif /* (DILATION_X > 1 || DILATION_Y > 1) */
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 1
+ *
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=float
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -622,14 +567,20 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     pixels3 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(pixels0, 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(pixels1, 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
-    vstore2(pixels2, 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
-    vstore2(pixels3, 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels0), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels1), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels2), 0, (__global float *)(dst.ptr + 2 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels3), 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
  * stride_x and stride_y are equal to 2
+ *
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types: float.
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=float
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -727,11 +678,11 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     pixels1 += (float2)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore2(pixels0, 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
-    vstore2(pixels1, 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels0), 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore2(ACTIVATION_FUNC(pixels1), 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
 }
 
-#endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
+#endif // defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F32)
 
 #if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DST_WIDTH)
 /** Reshape the weights for quantized depthwise convolution
@@ -998,7 +949,7 @@ __kernel void depthwise_vector_to_tensor(
 
 #endif //defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 
-#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 #if defined(CONV_STRIDE_X)
 #if CONV_STRIDE_X == 1
 #define convolution1x3_f16 convolution1x3_stride_1_f16
@@ -1009,6 +960,86 @@ __kernel void depthwise_vector_to_tensor(
 #else /* CONV_STRIDE_X */
 #error "Stride not supported"
 #endif /* CONV_STRIDE_X */
+
+#if(DILATION_X > 1 || DILATION_Y > 1)
+
+/** Perform 3x3 convolution for stride_x=1 and stride_y=1 when DILATION_X>1 or DILATION_Y>1 for f16
+ *
+ * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
+ * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
+ * @param[in] src_stride_y     Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] y_offset         Offset from the source tensor from which to start convolution
+ * @param[in] weights_addr     Pointer from where to get weights
+ * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
+ */
+inline half4 convolution_3x3_dilation_stridex1_stridey1_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+{
+    // Load the weights
+    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
+    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
+    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
+
+    half4 pixels0 = 0.0f;
+
+    half4 src00_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset, stride_x_bytes, stride_y_bytes)); // Row0
+    half4 src00_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
+    half4 src00_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
+
+    half4 src10_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes)); // Row1
+    half4 src10_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
+    half4 src10_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
+
+    half4 src20_left  = vload4(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes)); // Row2
+    half4 src20_mid   = vload4(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
+    half4 src20_right = vload4(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
+
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+
+    return pixels0;
+}
+
+/** Perform 3x3 convolution for stride_x=2 and stride_y=2 when DILATION_X>1 or DILATION_Y>1 for F16
+ *
+ * @param[in] src_addr         Pointer to the starting position of where to perform the convolution
+ * @param[in] src_stride_x     Stride of the source tensor in X dimension (in bytes)
+ * @param[in] src_stride_y     Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] y_offset         Offset from the source tensor from which to start convolution
+ * @param[in] weights_addr     Pointer from where to get weights
+ * @param[in] weights_stride_y Stride of weights tesnsor in Y dimension
+ */
+inline half4 convolution_3x3_dilation_stridex2_stridey2_bifrost_f16(__global uchar *src_addr, const int stride_x_bytes, const int stride_y_bytes,
+                                                                    const int y_offset, __global uchar *weights_addr, const int weights_stride_y)
+{
+    // Load the weights
+    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
+    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
+    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
+
+    half4 pixels0 = 0.0f;
+
+    half8 src00_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset, stride_x_bytes, stride_y_bytes)); // Row0
+    half8 src00_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
+    half8 src00_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset, stride_x_bytes, stride_y_bytes));
+
+    half8 src10_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes)); // Row1
+    half8 src10_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
+    half8 src10_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y, stride_x_bytes, stride_y_bytes));
+
+    half8 src20_left  = vload8(0, (__global half *)ptr_offset(src_addr, 0, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes)); // Row2
+    half8 src20_mid   = vload8(0, (__global half *)ptr_offset(src_addr, DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
+    half8 src20_right = vload8(0, (__global half *)ptr_offset(src_addr, 2 * DILATION_X, y_offset + DILATION_Y * 2, stride_x_bytes, stride_y_bytes));
+
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src00_left, src00_mid, src00_right, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src10_left, src10_mid, src10_right, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src20_left, src20_mid, src20_right, weights_row2);
+
+    return pixels0;
+}
+
+#endif // (DILATION_X > 1 && DILATION_Y > 1)
 
 /** Compute a 1D horizontal convolution of size 3 and stride 1 for 16bit floating point type.
  *
@@ -1151,6 +1182,12 @@ inline half4 convolution3x3_f16(
 
 /** This OpenCL kernel computes the depthwise convolution 3x3
  *
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
+ *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
@@ -1175,7 +1212,7 @@ inline half4 convolution3x3_f16(
  * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
  * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the biases vector
- * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: F16/F32
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: F16
  * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
@@ -1216,13 +1253,19 @@ __kernel void depthwise_convolution_3x3_f16(
     pixels += (half4)(*((__global half *)(biases.ptr + channel * biases_stride_x)));
 #endif //defined(HAS_BIAS)
 
-    vstore4(pixels, 0, (__global half *)dst.ptr);
+    vstore4(ACTIVATION_FUNC(pixels), 0, (__global half *)dst.ptr);
 }
 #endif // defined(DEPTH_MULTIPLIER)
 #endif // defined(CONV_STRIDE_X)
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the 16bit floating point depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 1
+ *
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1333,14 +1376,20 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     pixels3 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
-    vstore4(pixels2, 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
-    vstore4(pixels3, 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels0), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels1), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels2), 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels3), 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
 }
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes 16bit floating point the depthwise convolution 3x3
  * when both stride_x and stride_y are equal to 2
+ *
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note If activation function is enabled, the data type must be passed at compile time using -DDATA_TYPE e.g. -DDATA_TYPE=half. Supported data types: half.
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
  * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
@@ -1440,10 +1489,10 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     pixels1 += (half4)bias;
 #endif /* defined(HAS_BIAS) */
 
-    vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
-    vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels0), 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(ACTIVATION_FUNC(pixels1), 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
-#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS)
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER) && defined(DST_CHANNELS) && defined(IS_F16)
 
 #if defined(VEC_SIZE) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT) && defined(DATA_TYPE)
 
@@ -1463,8 +1512,12 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
  * @note The convolution stride along the width must be passed at compile time using -DCONV_STRIDE_X (e.g. -DCONV_STRIDE_Y=X)
  * @note The convolution stride along the height must be passed at compile time using -DCONV_STRIDE_Y (e.g. -DCONV_STRIDE_Y=1)
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
- * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: FP32
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
@@ -1484,7 +1537,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
  * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: F16/F32
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -1599,21 +1652,26 @@ __kernel void depthwise_convolution_3x3_nhwc(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (acc, 0, (__global DATA_TYPE *)(dst_addr));
+    (ACTIVATION_FUNC(acc), 0, (__global DATA_TYPE *)(dst_addr));
 }
 #endif // defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 
 #if defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED)
 /** This function computes the depthwise convolution for NHWC data layout when the stride along the width and height is 1.
  *
+ * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
  * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
  * @note The number of rows processed per thread must be passed at compile time using -DNUM_ROWS_PROCESSED (i.e. -DNUM_ROWS_PROCESSED=2)
  * @note The number of planes processed per thread must be passed at compile time using -DNUM_PLANES_PROCESSED (i.e. -DNUM_PLANES_PROCESSED=2)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_TOP (e.g. -DCONV_PAD_TOP=1)
  * @note The convolution pad top must be passed at compile time using -DCONV_PAD_LEFT (e.g. -DCONV_PAD_LEFT=1)
+ * @note It is possible to select the activation function to apply using -DFUSED_ACTIVATION e.g. -DFUSED_ACTIVATION=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
+ * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size
+ * @note Select data type should be given too with -DSELECT_DATA_TYPE e.g -DSELECT_DATA_TYPE=half
  *
- * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: FP32
+ * @param[in] src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in] src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
@@ -1633,7 +1691,7 @@ __kernel void depthwise_convolution_3x3_nhwc(
  * @param[in] dst_stride_w                          Stride of the destination tensor in W dimension (in bytes)
  * @param[in] dst_step_w                            dst_stride_w * number of elements along W processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: QASYMM8
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: F16/F32
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -1799,18 +1857,18 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 #endif /* defined(DST_DEPTH) */
 
     VSTORE(VEC_SIZE)
-    (acc0, 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
+    (ACTIVATION_FUNC(acc0), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y));
     VSTORE(VEC_SIZE)
-    (acc1, 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
+    (ACTIVATION_FUNC(acc1), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y));
 
 #if((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     if((z * NUM_PLANES_PROCESSED + 1) < DST_DIM_2)
 #endif // ((DST_DIM_2 % NUM_PLANES_PROCESSED) != 0)
     {
         VSTORE(VEC_SIZE)
-        (acc2, 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION_FUNC(acc2), 0, (__global DATA_TYPE *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z));
         VSTORE(VEC_SIZE)
-        (acc3, 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
+        (ACTIVATION_FUNC(acc3), 0, (__global DATA_TYPE *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z));
     }
 }
 
