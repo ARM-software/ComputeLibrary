@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,12 +99,9 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using WeightsReshapeKernel = void(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window);
-
-    WeightsReshapeKernel *_func;
-    const ITensor        *_input;
-    const ITensor        *_bias;
-    ITensor              *_output;
+    const ITensor *_input;
+    const ITensor *_bias;
+    ITensor       *_output;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEWEIGHTSRESHAPEKERNEL_H__ */

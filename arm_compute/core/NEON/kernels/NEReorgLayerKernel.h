@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,24 +75,9 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Template function to run the reorg
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T>
-    void run_reorg(const Window &window);
-
-    /** Common signature for all the specialised reorg functions
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    using ReorgFunctionPtr = void (NEReorgLayerKernel::*)(const Window &window);
-
-private:
-    ReorgFunctionPtr _func;
-    const ITensor   *_input;
-    ITensor         *_output;
-    int32_t          _stride;
+    const ITensor *_input;
+    ITensor       *_output;
+    int32_t        _stride;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEREORGLAYERKERNEL_H__ */

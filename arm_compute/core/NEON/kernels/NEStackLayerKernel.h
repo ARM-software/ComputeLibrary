@@ -84,24 +84,10 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Template function to run the stack
-     *
-     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     */
-    template <typename T>
-    void run_stack(const Window &window);
-
-    /** Common signature for all the specialised stack functions
-     *
-     * @param[in] window Region on which to execute the kernel.
-     */
-    using StackFunctionPtr = void (NEStackLayerKernel::*)(const Window &window);
-
     const ITensor *_input;
     ITensor       *_output;
     unsigned int   _axis;
     unsigned int   _idx_input;
-    StackFunctionPtr _func;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NESTACKLAYERKERNEL_H__ */
