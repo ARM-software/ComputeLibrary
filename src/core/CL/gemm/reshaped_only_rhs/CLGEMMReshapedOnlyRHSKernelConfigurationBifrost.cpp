@@ -133,21 +133,13 @@ std::pair<GEMMLHSMatrixInfo, GEMMRHSMatrixInfo> CLGEMMReshapedOnlyRHSKernelConfi
     {
         if(m == 1)
         {
-            if(n > 2048)
-            {
-                const unsigned int h0 = std::max(n / 4, static_cast<unsigned int>(1));
-                return configure_lhs_rhs_info(m, n, 1, 4, 16, 1, h0, false, true, false, true);
-            }
-            else
-            {
-                const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
-                return configure_lhs_rhs_info(m, n, 1, 2, 16, 1, h0, false, true, false, true);
-            }
+            const unsigned int h0 = std::max(n / 2, static_cast<unsigned int>(1));
+            return configure_lhs_rhs_info(m, n, 1, 2, 4, 1, h0, false, true, false, true);
         }
         else
         {
             const unsigned int h0 = std::max(n / 4, static_cast<unsigned int>(1));
-            return configure_lhs_rhs_info(m, n, 4, 1, 16, 1, h0, false, true, false, true);
+            return configure_lhs_rhs_info(m, n, 2, 2, 16, 1, h0, false, true, false, true);
         }
     }
 }
