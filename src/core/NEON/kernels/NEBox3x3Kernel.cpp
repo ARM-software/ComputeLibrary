@@ -55,52 +55,53 @@ void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data = vld1q_u8(input_bot_ptr + input.offset());
 
-        const float16x8x2_t top_f16 =
+        const uint16x8x2_t top_f16 =
         {
             {
-                vcvtq_f16_u16(vmovl_u8(vget_low_u8(top_data))),
-                vcvtq_f16_u16(vmovl_u8(vget_high_u8(top_data)))
+                vmovl_u8(vget_low_u8(top_data)),
+                vmovl_u8(vget_high_u8(top_data))
             }
         };
 
-        const float16x8x2_t mid_f16 =
+        const uint16x8x2_t mid_f16 =
         {
             {
-                vcvtq_f16_u16(vmovl_u8(vget_low_u8(mid_data))),
-                vcvtq_f16_u16(vmovl_u8(vget_high_u8(mid_data)))
+                vmovl_u8(vget_low_u8(mid_data)),
+                vmovl_u8(vget_high_u8(mid_data))
             }
         };
 
-        const float16x8x2_t bot_f16 =
+        const uint16x8x2_t bot_f16 =
         {
             {
-                vcvtq_f16_u16(vmovl_u8(vget_low_u8(bot_data))),
-                vcvtq_f16_u16(vmovl_u8(vget_high_u8(bot_data)))
+               vmovl_u8(vget_low_u8(bot_data)),
+               vmovl_u8(vget_high_u8(bot_data))
             }
         };
 
         //top left
-        float16x8_t out = top_f16.val[0];
+        uint16x8_t out = top_f16.val[0];
         //top mid
-        out = vaddq_f16(out, vextq_f16(top_f16.val[0], top_f16.val[1], 1));
+        out = vaddq_u16(out, vextq_u16(top_f16.val[0], top_f16.val[1], 1));
         //top right
-        out = vaddq_f16(out, vextq_f16(top_f16.val[0], top_f16.val[1], 2));
+        out = vaddq_u16(out, vextq_u16(top_f16.val[0], top_f16.val[1], 2));
         //mid left
-        out = vaddq_f16(out, mid_f16.val[0]);
+        out = vaddq_u16(out, mid_f16.val[0]);
         //mid mid
-        out = vaddq_f16(out, vextq_f16(mid_f16.val[0], mid_f16.val[1], 1));
+        out = vaddq_u16(out, vextq_u16(mid_f16.val[0], mid_f16.val[1], 1));
         //mid right
-        out = vaddq_f16(out, vextq_f16(mid_f16.val[0], mid_f16.val[1], 2));
+        out = vaddq_u16(out, vextq_u16(mid_f16.val[0], mid_f16.val[1], 2));
         //bot left
-        out = vaddq_f16(out, bot_f16.val[0]);
+        out = vaddq_u16(out, bot_f16.val[0]);
         //bot mid
-        out = vaddq_f16(out, vextq_f16(bot_f16.val[0], bot_f16.val[1], 1));
+        out = vaddq_u16(out, vextq_u16(bot_f16.val[0], bot_f16.val[1], 1));
         //bot right
-        out = vaddq_f16(out, vextq_f16(bot_f16.val[0], bot_f16.val[1], 2));
+        out = vaddq_u16(out, vextq_u16(bot_f16.val[0], bot_f16.val[1], 2));
 
-        out = vmulq_f16(out, oneovernine);
+        float16x8_t outfloat = vcvtq_f16_u16(out);
+        outfloat = vmulq_f16(outfloat, oneovernine);
 
-        vst1_u8(output.ptr(), vqmovun_s16(vcvtq_s16_f16(out)));
+        vst1_u8(output.ptr(), vqmovun_s16(vcvtq_s16_f16(outfloat)));
     },
     input, output);
 }
