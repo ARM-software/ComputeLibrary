@@ -158,7 +158,9 @@ void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
     unsigned char *const input_mid_ptr = _input->ptr_to_element(Coordinates(-1, 0));
     unsigned char *const input_bot_ptr = _input->ptr_to_element(Coordinates(-1, +1));
 
-    const float32x4_t oneovernine = vdupq_n_f32(1.0f / 9.0f);
+    const int       shift       = 19;
+    int             value       = (1 << shift) / 9 + 1; //58255 / (2^19) ~= 1/9
+    const int32x4_t oneovernine = vdupq_n_s32(value);
 
     execute_window_loop(window, [&](const Coordinates &)
     {
@@ -207,14 +209,15 @@ void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
         //bot right
         out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 2));
 
-        float32x4_t outfloathigh = vcvtq_f32_s32(vmovl_s16(vget_high_s16(out)));
-        float32x4_t outfloatlow  = vcvtq_f32_s32(vmovl_s16(vget_low_s16(out)));
+        int32x4_t outfloathigh = vmovl_s16(vget_high_s16(out));
+        int32x4_t outfloatlow  = vmovl_s16(vget_low_s16(out));
 
-        outfloathigh = vmulq_f32(outfloathigh, oneovernine);
-        outfloatlow  = vmulq_f32(outfloatlow, oneovernine);
-
-        out = vcombine_s16(vqmovn_s32(vcvtq_s32_f32(outfloatlow)),
-                           vqmovn_s32(vcvtq_s32_f32(outfloathigh)));
+        outfloathigh = vmulq_s32(outfloathigh, oneovernine);
+        outfloatlow  = vmulq_s32(outfloatlow, oneovernine);
+        outfloathigh = vshrq_n_s32(outfloathigh, shift);
+        outfloatlow  = vshrq_n_s32(outfloatlow, shift);
+        out          = vcombine_s16(vqmovn_s32((outfloatlow)),
+                           vqmovn_s32((outfloathigh)));
 
         vst1_u8(output.ptr(), vqmovun_s16(out));
     },
