@@ -70,7 +70,7 @@ def resolve_includes(target, source, env):
     for i in range(len(source)):
         src = source[i]
         dst = target[i]
-        contents = src.get_contents().splitlines()
+        contents = src.get_contents().decode('utf-8').splitlines()
         entry = FileEntry(target_name=dst, file_contents=contents)
         files.append((os.path.basename(src.get_path()),entry))
 
