@@ -55,7 +55,7 @@ cl_mem import_malloc_memory_helper(void *ptr, size_t size)
 
     cl_int err = CL_SUCCESS;
     cl_mem buf = clImportMemoryARM(CLKernelLibrary::get().context().get(), CL_MEM_READ_WRITE, import_properties, ptr, size, &err);
-    ARM_COMPUTE_EXPECT(err == CL_SUCCESS, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_ASSERT(err == CL_SUCCESS);
 
     return buf;
 }
@@ -108,7 +108,7 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
 TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
-    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory"))
+    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
     {
         return;
     }
