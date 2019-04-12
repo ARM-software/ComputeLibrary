@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,12 +47,12 @@ NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPai
 
     // Split input
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
-    const unsigned int     input_idx         = get_dimension_idx(input_tensor_desc, DataLayoutDimension::CHANNEL);
+    const unsigned int     input_idx         = get_dimension_idx(input_tensor_desc.layout, DataLayoutDimension::CHANNEL);
     NodeID                 input_split       = GraphBuilder::add_split_node(g, params, input, num_groups, input_idx);
 
     // Split weights
     const TensorDescriptor weights_tensor_desc = get_tensor_descriptor(g, g.node(weights)->outputs()[0]);
-    const unsigned int     batch_idx           = get_dimension_idx(weights_tensor_desc, DataLayoutDimension::BATCHES);
+    const unsigned int     batch_idx           = get_dimension_idx(weights_tensor_desc.layout, DataLayoutDimension::BATCHES);
     NodeID                 weights_split       = GraphBuilder::add_split_node(g, params, { weights, 0 }, num_groups, batch_idx);
 
     // Split bias

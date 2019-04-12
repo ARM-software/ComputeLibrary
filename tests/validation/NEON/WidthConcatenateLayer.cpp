@@ -75,8 +75,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         inputs_vector_info_raw.emplace_back(&input);
     }
 
-    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw,
-                                                           &output_info.clone()->set_is_resizable(true),DataLayoutDimension::WIDTH));
+    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(true), 0));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

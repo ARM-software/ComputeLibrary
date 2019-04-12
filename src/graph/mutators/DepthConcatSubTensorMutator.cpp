@@ -62,9 +62,9 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
             // Get output tensor
             auto output_tensor = node->output(0);
 
-            // Check concatenation axis (Sub-tensor optimization is support for concatenation axis >=2)
+            // Check concatenation axis (Sub-tensor optimization is supported for concatenation axis >=2)
             auto *concat_node = arm_compute::utils::cast::polymorphic_downcast<ConcatenateLayerNode *>(node);
-            if(output_tensor == nullptr || get_dimension_idx(output_tensor->desc(), concat_node->concatenation_axis()) < 2)
+            if(output_tensor == nullptr || get_dimension_idx(output_tensor->desc().layout, concat_node->concatenation_axis()) < 2)
             {
                 continue;
             }

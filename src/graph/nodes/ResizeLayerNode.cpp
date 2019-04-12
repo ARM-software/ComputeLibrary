@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,9 +68,10 @@ TensorDescriptor ResizeLayerNode::configure_output(size_t idx) const
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
+    const DataLayout data_layout = src->desc().layout;
     TensorDescriptor output_desc = src->desc();
-    size_t           width_idx   = get_dimension_idx(output_desc, DataLayoutDimension::WIDTH);
-    size_t           height_idx  = get_dimension_idx(output_desc, DataLayoutDimension::HEIGHT);
+    size_t           width_idx   = get_dimension_idx(data_layout, DataLayoutDimension::WIDTH);
+    size_t           height_idx  = get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT);
     output_desc.shape.set(width_idx, static_cast<int>(output_desc.shape[width_idx] * _scale_width));
     output_desc.shape.set(height_idx, static_cast<int>(output_desc.shape[height_idx] * _scale_height));
 

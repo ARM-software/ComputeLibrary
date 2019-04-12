@@ -73,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         inputs_vector_info_raw.emplace_back(&input);
     }
 
-    bool is_valid = bool(CLConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(false), DataLayoutDimension::CHANNEL));
+    bool is_valid = bool(CLConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(false), 2));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -95,7 +95,7 @@ TEST_CASE(Configuration, framework::DatasetMode::ALL)
     // Create and configure function
     CLConcatenateLayer concat_layer;
 
-    concat_layer.configure({ &src1, &src2, &src3 }, &dst, DataLayoutDimension::CHANNEL);
+    concat_layer.configure({ &src1, &src2, &src3 }, &dst, 2);
 }
 template <typename T>
 using CLDepthConcatenateLayerFixture = ConcatenateLayerValidationFixture<CLTensor, ICLTensor, CLAccessor, CLConcatenateLayer, T>;

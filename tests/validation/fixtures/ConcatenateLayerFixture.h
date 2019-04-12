@@ -112,21 +112,7 @@ protected:
 
         // Create and configure function
         FunctionType concat;
-        switch(axis)
-        {
-            case 0:
-                concat.configure(src_ptrs, &dst, DataLayoutDimension::WIDTH);
-                break;
-            case 1:
-                concat.configure(src_ptrs, &dst, DataLayoutDimension::HEIGHT);
-                break;
-            case 2:
-                concat.configure(src_ptrs, &dst, DataLayoutDimension::CHANNEL);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Not supported");
-                break;
-        }
+        concat.configure(src_ptrs, &dst, axis);
 
         for(auto &src : srcs)
         {

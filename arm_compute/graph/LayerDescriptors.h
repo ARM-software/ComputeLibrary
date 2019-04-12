@@ -32,7 +32,7 @@ namespace graph
 {
 namespace descriptors
 {
-/** Common node parameters */
+/** Concatenate layer descriptor */
 struct ConcatLayerDescriptor
 {
     /** Default constructor */

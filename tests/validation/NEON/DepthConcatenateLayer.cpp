@@ -55,13 +55,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                   TensorInfo(TensorShape(23U, 27U, 4U), 1, DataType::F32),
                                                   TensorInfo(TensorShape(16U, 27U, 6U), 1, DataType::F32)
         })),
-                                                              framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 27U, 9U), 1, DataType::F16),
-                                                                                                        TensorInfo(TensorShape(25U, 12U, 9U), 1, DataType::F32),
-                                                                                                        TensorInfo(TensorShape(23U, 27U, 8U), 1, DataType::F32),
-                                                                                                        TensorInfo(TensorShape(16U, 27U, 12U), 1, DataType::F32)
-                                                              })),
-                                                          framework::dataset::make("Expected", { false, false, false, true })),
-               input_info1, input_info2, output_info,expected)
+        framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 27U, 9U), 1, DataType::F16),
+                                                  TensorInfo(TensorShape(25U, 12U, 9U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(23U, 27U, 8U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(16U, 27U, 12U), 1, DataType::F32)
+        })),
+        framework::dataset::make("Expected", { false, false, false, true })),
+        input_info1, input_info2, output_info,expected)
 {
     std::vector<TensorInfo> inputs_vector_info;
     inputs_vector_info.emplace_back(std::move(input_info1));
@@ -73,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
         inputs_vector_info_raw.emplace_back(&input);
     }
 
-    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(false), DataLayoutDimension::CHANNEL));
+    bool is_valid = bool(NEConcatenateLayer::validate(inputs_vector_info_raw, &output_info.clone()->set_is_resizable(false), 2));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

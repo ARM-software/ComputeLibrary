@@ -110,12 +110,12 @@ void release_default_graph_context(GraphContext &ctx);
 size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
 /** Get index of a tensor's given dimension depending on its layout
  *
- * @param[in] descriptor            Descriptor
+ * @param[in] data_layout           Data layout of the tensor
  * @param[in] data_layout_dimension Tensor data layout dimension
  *
  * @return Idx of given dimension
  */
-size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
+size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 /** Get the list of driving nodes of a given node
  *
  * @param[in] node Node to find the driving node of

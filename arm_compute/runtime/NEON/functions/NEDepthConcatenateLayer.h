@@ -89,5 +89,5 @@ private:
     std::unique_ptr<NEFillBorderKernel[]>            _border_handlers_vector;
     unsigned int                                     _num_inputs;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHCONCATENATE_H__ */

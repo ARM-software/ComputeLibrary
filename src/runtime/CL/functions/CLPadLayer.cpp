@@ -141,7 +141,7 @@ void CLPadLayer::configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *o
             }
             // Concatenate the padding before and after with the input.
             ICLTensor *out = (static_cast<int32_t>(i) == last_padding_dimension) ? output : &_concat_results[i];
-            _concat_functions[i].configure(concat_vector, out, get_index_data_layout_dimension(prev->info()->data_layout(), i));
+            _concat_functions[i].configure(concat_vector, out, i);
             prev = out;
         }
     }

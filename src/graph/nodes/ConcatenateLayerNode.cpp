@@ -67,7 +67,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
     ARM_COMPUTE_ERROR_ON(input_descriptors.size() == 0);
 
     TensorDescriptor output_descriptor = input_descriptors[0];
-    const int        axis_idx          = get_dimension_idx(output_descriptor, axis);
+    const int        axis_idx          = get_dimension_idx(output_descriptor.layout, axis);
 
     // Extract shapes
     std::vector<const TensorShape *> shapes;

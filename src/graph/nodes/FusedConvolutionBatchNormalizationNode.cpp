@@ -102,10 +102,11 @@ TensorDescriptor FusedConvolutionBatchNormalizationNode::compute_output_descript
 
     std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
+    const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::WIDTH), output_width);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
 
     return output_descriptor;
 }

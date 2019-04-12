@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,10 +66,11 @@ TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorD
                                                                             info.pad().first, info.pad().second,
                                                                             info.stride().first, info.stride().second);
 
+    const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::WIDTH), output_width);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), weights_descriptor.shape[3]);
 
     return output_descriptor;
 }
