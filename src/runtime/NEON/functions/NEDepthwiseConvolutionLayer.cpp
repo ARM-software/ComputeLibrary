@@ -51,7 +51,8 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
                                                        ITensor                   *output,
                                                        const PadStrideInfo       &conv_info,
                                                        unsigned int               depth_multiplier,
-                                                       const ActivationLayerInfo &act_info)
+                                                       const ActivationLayerInfo &act_info,
+                                                       const Size2D              &dilation)
 {
     ARM_COMPUTE_UNUSED(act_info);
 
@@ -87,8 +88,8 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
         _permute_weights.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
 
-        // Configure optimized depthwise
-        _dwc_kernel.configure(&_permuted_input, &_permuted_weights, (_is_quantized) ? &_accumulator : &_permuted_output, conv_info, depth_multiplier);
+        // Configure depthwise
+        _dwc_kernel.configure(&_permuted_input, &_permuted_weights, (_is_quantized) ? &_accumulator : &_permuted_output, conv_info, depth_multiplier, dilation);
 
         // Configure border handler
         _border_handler.configure(&_permuted_input, _dwc_kernel.border_size(), BorderMode::CONSTANT, zero_value);
@@ -99,7 +100,7 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
     else
     {
         // Configure depthwise convolution kernel
-        _dwc_kernel.configure(input, weights, (_is_quantized) ? &_accumulator : output, conv_info, depth_multiplier);
+        _dwc_kernel.configure(input, weights, (_is_quantized) ? &_accumulator : output, conv_info, depth_multiplier, dilation);
 
         // Configure border handler
         _border_handler.configure(input, _dwc_kernel.border_size(), BorderMode::CONSTANT, zero_value);
@@ -185,10 +186,17 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor       *input,
                                                const ActivationLayerInfo &act_info,
                                                const Size2D              &dilation)
 {
-    ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
-    ARM_COMPUTE_UNUSED(dilation);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+
+    // idx_w and idx_h only used for validation
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_UNUSED(idx_w);
+    ARM_COMPUTE_UNUSED(idx_h);
+
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
 
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -196,7 +204,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor       *input,
     _is_optimized     = NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input->info(),
                                                                                        weights->info(),
                                                                                        conv_info,
-                                                                                       depth_multiplier);
+                                                                                       depth_multiplier, dilation);
     _is_nchw                    = input->info()->data_layout() == DataLayout::NCHW;
     _permute                    = _is_optimized == _is_nchw;
     _is_prepared                = false;
@@ -209,7 +217,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor       *input,
     }
     else
     {
-        configure_generic(input, weights, biases, output, conv_info, depth_multiplier, act_info);
+        configure_generic(input, weights, biases, output, conv_info, depth_multiplier, act_info, dilation);
     }
 
     // Configure activation
@@ -230,7 +238,11 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo         *input
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_w) + (weights->dimension(idx_w) - 1) * (dilation.x() - 1) > input->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_h) + (weights->dimension(idx_h) - 1) * (dilation.y() - 1) > input->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
 
     if(biases != nullptr)
     {
@@ -239,7 +251,7 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo         *input
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
-    if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier))
+    if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation))
     {
         const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
         TensorInfo accumulator  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
@@ -356,12 +368,17 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
 {
     const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_UNUSED(channel_idx);
-    ARM_COMPUTE_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
-    ARM_COMPUTE_UNUSED(dilation);
-
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON((input->info()->dimension(channel_idx) * depth_multiplier) != weights->info()->dimension(channel_idx));
+    // idx_w and idx_h only used for validation
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_UNUSED(idx_w);
+    ARM_COMPUTE_UNUSED(idx_h);
+
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
+    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
 
     _is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
 
@@ -392,7 +409,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     bool append_bias = (biases != nullptr) && !_is_quantized;
 
     // Calculate output shape
-    TensorShape output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
+    TensorShape output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
@@ -420,7 +437,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     shape_im2col.set(1, conv_size);
     shape_im2col.set(2, weights_z);
     _input_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
-    _im2col_kernel.configure(input_to_use, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier);
+    _im2col_kernel.configure(input_to_use, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation);
 
     // Weights reshape configuration
     const TensorShape shape_weights_reshape(patch_size, weights_z);
@@ -491,11 +508,13 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() != 1 || dilation.y() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
 
     const unsigned int width_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const unsigned int height_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) + (weights->dimension(width_idx) - 1) * (dilation.x() - 1) > input->dimension(width_idx) + conv_info.pad_left() + conv_info.pad_right());
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(height_idx) + (weights->dimension(height_idx) - 1) * (dilation.y() - 1) > input->dimension(height_idx) + conv_info.pad_top() + conv_info.pad_bottom());
     // Clone output to use auto init
     auto output_clone = output->clone();
 
@@ -522,7 +541,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
     const bool         is_quantized = is_data_type_quantized_asymmetric(input->data_type());
     const bool         append_bias  = (biases != nullptr) && !is_quantized;
-    TensorShape        output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+    TensorShape        output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
     const size_t       weights_w    = weights_to_use->dimension(0);
     const size_t       weights_h    = weights_to_use->dimension(1);
     const size_t       weights_z    = weights_to_use->dimension(2);
@@ -549,7 +568,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     shape_im2col.set(1, conv_size);
     shape_im2col.set(2, weights_z);
     TensorInfo input_reshaped(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseIm2ColKernel::validate(input_to_use, &input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseIm2ColKernel::validate(input_to_use, &input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation));
 
     // Weights reshape configuration
     const TensorShape shape_weights_reshape(patch_size, weights_z);

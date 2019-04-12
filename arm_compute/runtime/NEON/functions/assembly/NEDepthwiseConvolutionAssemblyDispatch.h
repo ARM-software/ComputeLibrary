@@ -92,10 +92,11 @@ public:
      * @param[in] weights          Weights tensor info.
      * @param[in] conv_info        Convolution layer metadata.
      * @param[in] depth_multiplier (Optional) Depth multiplier to be used.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return True if the assembly kernel could be used else false. Note that transformations of input/output could be needed.
      */
-    static bool is_optimized_supported(const ITensorInfo *input, const ITensorInfo *weights, PadStrideInfo conv_info, unsigned int depth_multiplier = 1);
+    static bool is_optimized_supported(const ITensorInfo *input, const ITensorInfo *weights, PadStrideInfo conv_info, unsigned int depth_multiplier = 1, const Size2D &dilation = Size2D(1, 1));
 
     // Inherited methods overridden:
     void run() override;

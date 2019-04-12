@@ -73,7 +73,7 @@ public:
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
@@ -88,7 +88,7 @@ public:
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */
@@ -110,9 +110,11 @@ private:
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         Activation layer information in case of a fused activation.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     *
      */
     void configure_generic(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
-                           unsigned int depth_multiplier, const ActivationLayerInfo &act_info);
+                           unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation = Size2D(1U, 1U));
     /** Configure the kernels/functions for the optimized pipeline.
      *
      * @param[in]  input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
@@ -186,7 +188,7 @@ public:
      * @param[in]      conv_info        Padding and stride information to use for the convolution.
      * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
+     * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
@@ -201,7 +203,7 @@ public:
      * @param[in] conv_info        Padding and stride information to use for the convolution.
      * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
-     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1). Currently supports (1,1) only.
+     * @param[in] dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */

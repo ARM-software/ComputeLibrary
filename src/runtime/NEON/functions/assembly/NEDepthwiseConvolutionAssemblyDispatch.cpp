@@ -254,7 +254,8 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
 bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITensorInfo *input,
                                                                     const ITensorInfo *weights,
                                                                     PadStrideInfo      conv_info,
-                                                                    unsigned int       depth_multiplier)
+                                                                    unsigned int       depth_multiplier,
+                                                                    const Size2D      &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
 
@@ -290,8 +291,9 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     bool          is_same_padding   = (pad_top == same_pad.pad_top()) && (pad_right == same_pad.pad_right()) && (pad_bottom == same_pad.pad_bottom()) && (pad_left == same_pad.pad_left());
     bool          is_valid_padding  = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
     bool          supported_padding = is_same_padding || is_valid_padding;
+    bool          is_dilation_1     = dilation.x() == 1 && dilation.y() == 1;
 
-    return is_data_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1);
+    return is_data_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_1;
 }
 
 void NEDepthwiseConvolutionAssemblyDispatch::run()
