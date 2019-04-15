@@ -813,6 +813,9 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
+    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
+    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
     const uint8_t *const input_bottom_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 2));
@@ -822,6 +825,8 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
         const auto top_data    = vld1q_u8(reinterpret_cast<const uint8_t *>(input_top_ptr + input.offset()));
         const auto middle_data = vld1q_u8(reinterpret_cast<const uint8_t *>(input_middle_ptr + input.offset()));
         const auto bottom_data = vld1q_u8(reinterpret_cast<const uint8_t *>(input_bottom_ptr + input.offset()));
+        uint8x8_t  fres        = {};
+        uint8x16_t fqres       = {};
 
         if(pooling_type == PoolingType::AVG)
         {
@@ -877,7 +882,7 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
                 scale_vector_s16x8(exclude_padding, res, id, 0, 1,
                                    pool_size, upper_bound_w, upper_bound_h,
                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-                vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(res));
+                fres = vmovn_u16(res);
             }
             else
             {
@@ -889,8 +894,7 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
                 scale_vector_s16x8(exclude_padding, final_sum.val[1], id, 8, 1,
                                    pool_size, upper_bound_w, upper_bound_h,
                                    pool_pad_left, pool_pad_top, pool_stride_x, pool_stride_y);
-                const uint8x16_t res = vcombine_u8(vmovn_u16(final_sum.val[0]), vmovn_u16(final_sum.val[1]));
-                vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), res);
+                fqres = vcombine_u8(vmovn_u16(final_sum.val[0]), vmovn_u16(final_sum.val[1]));
             }
         }
         else
@@ -904,13 +908,30 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
             {
                 const uint8x8x2_t      table      = { { vget_low_u8(final_max), vget_high_u8(final_max) } };
                 static const uint8x8_t lookup_val = { 0, 2, 4, 6, 8, 10, 12, 14 };
-                const uint8x8_t        res        = vtbl2_u8(table, lookup_val);
-                vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), res);
+                fres                              = vtbl2_u8(table, lookup_val);
             }
             else
             {
-                vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), final_max);
+                fqres = final_max;
             }
+        }
+
+        // Store result
+        if(pool_stride_x == 1)
+        {
+            if(input_qinfo != output_qinfo)
+            {
+                fqres = vquantize(vdequantize(fqres, input_qinfo), output_qinfo);
+            }
+            vst1q_u8(reinterpret_cast<uint8_t *>(output.ptr()), fqres);
+        }
+        else
+        {
+            if(input_qinfo != output_qinfo)
+            {
+                fres = vquantize(vdequantize(fres, input_qinfo), output_qinfo);
+            }
+            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), fres);
         }
     },
     input, output);
