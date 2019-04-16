@@ -44,6 +44,8 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr float                    tolerance_num = 0.07f;  /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
                      * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
@@ -212,6 +214,62 @@ TEST_SUITE_END() // W1x1
 
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
+
+template <typename T>
+using NEDeconvolutionLayerQuantizedFixture4x4 = DeconvolutionValidationQuantizedFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 4, 4>;
+
+template <typename T>
+using NEDeconvolutionLayerQuantizedFixture3x3 = DeconvolutionValidationQuantizedFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
+
+template <typename T>
+using NEDeconvolutionLayerQuantizedFixture1x1 = DeconvolutionValidationQuantizedFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+
+TEST_SUITE(W4x4)
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType",
+                                                                                                                       DataType::QASYMM8)),
+                                                                                                                       data_layouts_dataset),
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W4x4
+
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       data_layouts_dataset),
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType",
+                       DataType::QASYMM8)),
+                       data_layouts_dataset),
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W3x3
+
+TEST_SUITE(W1x1)
+FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType",
+                                                                                                                       DataType::QASYMM8)),
+                                                                                                                       data_layouts_dataset),
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
+}
+TEST_SUITE_END() // W1x1
+
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // DeconvolutionLayer
 TEST_SUITE_END() // NEON
