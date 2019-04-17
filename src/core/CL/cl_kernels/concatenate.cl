@@ -132,10 +132,10 @@ __kernel void concatenate_width_x2(
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     src2_values = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in2_ptr);
 
-#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2)
+#if defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_IN2) && defined(SCALE_OUT)
     src1_values = requantize(src1_values, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT);
     src2_values = requantize(src2_values, OFFSET_IN2, OFFSET_OUT, SCALE_IN2, SCALE_OUT);
-#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) && defined(OFFSET_IN2) && defined(SCALE_IN2) */
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_IN2) && defined(OFFSET_OUT) && defined(SCALE_IN1)  && defined(SCALE_IN2) && defined(SCALE_OUT) */
     const VEC_DATA_TYPE(int, VEC_SIZE) x_coords        = SEQ + (VEC_DATA_TYPE(int, VEC_SIZE))(x);
     const VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE) cond = CONVERT(x_coords < (VEC_DATA_TYPE(int, VEC_SIZE))(INPUT1_WIDTH), VEC_DATA_TYPE(COND_DATA_TYPE, VEC_SIZE));
     const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) values    = select(src2_values, src1_values, cond);
