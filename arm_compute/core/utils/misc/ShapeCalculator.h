@@ -1204,6 +1204,7 @@ inline TensorShape calculate_concatenate_shape(const std::vector<T *> &input, si
 {
     TensorShape out_shape = extract_shape(input[0]);
 
+#if defined(ARM_COMPUTE_ASSERTS_ENABLED)
     // All dimensions must match except the axis one
     for(unsigned int i = 0; i < MAX_DIMS; ++i)
     {
@@ -1219,6 +1220,7 @@ inline TensorShape calculate_concatenate_shape(const std::vector<T *> &input, si
             ARM_COMPUTE_ERROR_ON(out_shape[i] != shape[i]);
         }
     }
+#endif // defined(ARM_COMPUTE_ASSERTS_ENABLED)
 
     // Calculate output shape
     size_t new_size = 0;
