@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 
     std::set<framework::DatasetMode> allowed_modes
     {
+        framework::DatasetMode::DISABLED,
         framework::DatasetMode::PRECOMMIT,
         framework::DatasetMode::NIGHTLY,
         framework::DatasetMode::ALL

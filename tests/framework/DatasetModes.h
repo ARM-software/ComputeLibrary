@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,6 +78,9 @@ inline ::std::ostream &operator<<(::std::ostream &stream, DatasetMode mode)
 {
     switch(mode)
     {
+        case DatasetMode::DISABLED:
+            stream << "DISABLED";
+            break;
         case DatasetMode::PRECOMMIT:
             stream << "PRECOMMIT";
             break;
