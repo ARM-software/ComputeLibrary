@@ -279,7 +279,7 @@ Status CLFFTConvolutionLayer::validate(const ITensorInfo *input, const ITensorIn
     if((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON((input->tensor_shape()[idx_height] != output->tensor_shape()[idx_height]) || (input->tensor_shape()[idx_width] != output->tensor_shape()[idx_width]));
 
         // Validate Activation Layer
         if(act_info.enabled())

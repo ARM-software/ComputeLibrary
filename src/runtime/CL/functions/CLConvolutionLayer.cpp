@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,6 +75,13 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
             _function = std::move(f);
             break;
         }
+        case ConvolutionMethod::FFT:
+        {
+            auto f = arm_compute::support::cpp14::make_unique<CLFFTConvolutionLayer>(_memory_manager);
+            f->configure(input, weights, biases, output, conv_info, act_info);
+            _function = std::move(f);
+            break;
+        }
         default:
             ARM_COMPUTE_ERROR("Not supported.");
             break;
@@ -109,6 +116,12 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         {
             // Validate gemm-based convolution layer
             ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups));
+            break;
+        }
+        case ConvolutionMethod::FFT:
+        {
+            // Validate FFT-based convolution layer
+            ARM_COMPUTE_RETURN_ON_ERROR(CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info));
             break;
         }
         default:
@@ -169,12 +182,20 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
         return (*found).second;
     }
 
-    if(dilation != Size2D(1U, 1U) || (input->dimension(idx_c) < 16))
+    if(dilation != Size2D(1U, 1U))
     {
         return ConvolutionMethod::GEMM;
     }
     else
     {
+        if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && ( CLFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        {
+            return ConvolutionMethod::FFT;
+        }
+        if (input->dimension(idx_c) < 16)
+        {
+            return ConvolutionMethod::GEMM;
+        }
         return bool(CLWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
     }
 }
