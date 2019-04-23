@@ -52,21 +52,28 @@ using CLBatchToSpaceLayerFixture = BatchToSpaceLayerValidationFixture<CLTensor, 
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // blockx != blocky && blockx > blocky
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // blockx != blocky && blocky > blockx
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),     // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),     // Wrong data type block shape
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                      }),
                framework::dataset::make("BlockShapeInfo",{ TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
+                                                       TensorInfo(TensorShape(2U, 4U), 1, DataType::S32),
+                                                      TensorInfo(TensorShape(4U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::S32),
                                                      })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U, 16U, 2U, 1U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 32U, 2U, 1U), 1, DataType::F32),
+
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U, 2U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("Expected", { true, false, false, false})),
+               framework::dataset::make("Expected", { true, true,true, false, false, false})),
                input_info, block_shape_info, output_info, expected)
 {
     bool has_error = bool(CLBatchToSpaceLayer::validate(&input_info.clone()->set_is_resizable(false), &block_shape_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false)));
@@ -74,18 +81,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 }
 DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // blockx != blocky && blockx > blocky
+                                                       TensorInfo(TensorShape(16U, 8U, 2U, 16U), 1, DataType::F32),    // blockx != blocky && blocky > blockx
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(16U, 8U, 2U, 4U), 1, DataType::F32),    // Negative block shapes
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 4U, 4U), 1, DataType::F32), // Wrong tensor shape
                                                      }),
-               framework::dataset::make("BlockShapeX", { 2, 2, 2, 2 })),
-               framework::dataset::make("BlockShapeY", { 2, 2, -2, 2 })),
+               framework::dataset::make("BlockShapeX", { 2, 4, 2, 2, 2, 2 })),
+               framework::dataset::make("BlockShapeY", { 2, 2, 4, 2, -2, 2 })),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(64U, 16U, 2U, 1U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 32U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(32U, 16U, 2U, 1U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 8U, 2U, 1U), 1, DataType::F32),
                                                      })),
-               framework::dataset::make("Expected", { true, false, false, false})),
+               framework::dataset::make("Expected", { true, true,true, false, false, false})),
                input_info, block_shape_x, block_shape_y, output_info, expected)
 {
     bool has_error = bool(CLBatchToSpaceLayer::validate(&input_info.clone()->set_is_resizable(false), block_shape_x, block_shape_y, &output_info.clone()->set_is_resizable(false)));

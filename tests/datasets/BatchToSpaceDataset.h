@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,6 +117,8 @@ public:
         add_config(TensorShape(1U, 2U, 2U, 4U), TensorShape(2U), TensorShape(2U, 4U, 2U, 1U));
         add_config(TensorShape(1U, 3U, 1U, 8U), TensorShape(2U), TensorShape(2U, 6U, 1U, 2U));
         add_config(TensorShape(3U, 4U, 1U, 4U), TensorShape(2U), TensorShape(6U, 8U, 1U, 1U));
+        add_config(TensorShape(1U, 1U, 1U, 8U), TensorShape(4U, 2U), TensorShape(4U, 2U, 1U, 1U));
+        add_config(TensorShape(3U, 1U, 1U, 8U), TensorShape(2U, 4U), TensorShape(6U, 4U, 1U, 1U));
     }
 };
 
@@ -127,6 +129,8 @@ public:
     {
         add_config(TensorShape(64U, 32U, 2U, 4U), TensorShape(2U), TensorShape(128U, 64U, 2U, 1U));
         add_config(TensorShape(128U, 16U, 2U, 16U), TensorShape(2U), TensorShape(512U, 64U, 2U, 1U));
+        add_config(TensorShape(16U, 8U, 2U, 8U), TensorShape(4U, 2U), TensorShape(64U, 16U, 2U, 1U));
+        add_config(TensorShape(8U, 16U, 2U, 8U), TensorShape(2U, 4U), TensorShape(16U, 64U, 2U, 1U));
     }
 };
 } // namespace datasets
