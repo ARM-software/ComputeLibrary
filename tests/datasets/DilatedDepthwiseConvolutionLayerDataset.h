@@ -93,7 +93,7 @@ public:
     {
         add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U), PadStrideInfo(1, 2, 0, 1), Size2D(2U, 1U));
         add_config(TensorShape(17U, 31U, 2U), Size2D(5U, 9U), PadStrideInfo(1, 2, 1, 1), Size2D(1U, 2U));
-        add_config(TensorShape(23U, 27U, 5U), Size2D(11U, 3U), PadStrideInfo(1, 2, 0, 0), Size2D(3U, 3U));
+        add_config(TensorShape(23U, 27U, 5U), Size2D(11U, 3U), PadStrideInfo(1, 2, 0, 0), Size2D(1U, 3U));
         add_config(TensorShape(17U, 31U, 2U, 3U), Size2D(5U, 9U), PadStrideInfo(1, 2, 1, 1), Size2D(2U, 2U));
         add_config(TensorShape(233U, 277U, 55U), Size2D(3U, 3U), PadStrideInfo(2, 1, 0, 0), Size2D(2U, 2U));
         add_config(TensorShape(333U, 277U, 77U), Size2D(3U, 3U), PadStrideInfo(3, 2, 1, 0), Size2D(3U, 2U));
