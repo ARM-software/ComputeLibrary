@@ -237,12 +237,30 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v19.05 Public major release
+ - New Neon kernels / functions:
+    - @ref NEBatchToSpaceLayerKernel / @ref NEBatchToSpaceLayer
+    - @ref NECropKernel / @ref NECropResize
+    - @ref NEGEMMLowpOffsetContributionOutputStageKernel
+    - @ref NEHeightConcatenateLayerKernel
+    - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
+ - New OpenCL kernels / functions:
+    - @ref CLCropKernel / @ref CLCropResize
+    - @ref CLFFTDigitReverseKernel
+    - @ref CLFFTRadixStageKernel
+    - @ref CLFFTScaleKernel
+    - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+    - @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+    - @ref CLHeightConcatenateLayerKernel
+    - @ref CLDirectDeconvolutionLayer
+    - @ref CLFFT1D
+    - @ref CLFFT2D
+    - @ref CLFFTConvolutionLayer
  - Deprecated functions/interfaces
-    -  @ref GCDepthConcatenateLayer
-    -  @ref NEWidthConcatenateLayer
-    -  @ref NEDepthConcatenateLayer
-    -  @ref CLWidthConcatenateLayer
-    -  @ref CLDepthConcatenateLayer
+    - @ref GCDepthConcatenateLayer
+    - @ref NEWidthConcatenateLayer
+    - @ref NEDepthConcatenateLayer
+    - @ref CLWidthConcatenateLayer
+    - @ref CLDepthConcatenateLayer
 
 
 v19.02 Public major release
