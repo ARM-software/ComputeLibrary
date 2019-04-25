@@ -85,11 +85,9 @@ Status CLFFT2D::validate(const ITensorInfo *input, const ITensorInfo *output, co
 
 void CLFFT2D::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _first_pass_func.run();
     _second_pass_func.run();
-
-    _memory_group.release();
 }
 } // namespace arm_compute

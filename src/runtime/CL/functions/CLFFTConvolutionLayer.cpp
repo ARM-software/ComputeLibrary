@@ -63,7 +63,7 @@ CLFFTConvolutionLayer::CLFFTConvolutionLayer(std::shared_ptr<IMemoryManager> mem
       _pad_input_func(),
       _pad_weights_func(),
       _transform_input_func(memory_manager),
-      _transform_weights_func(memory_manager),
+      _transform_weights_func(),
       _itransform_output_func(memory_manager),
       _prod_func(),
       _reduce_func(),
@@ -149,7 +149,8 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     _pad_weights_func.configure(&_flipped_weights, &_padded_weights, padding_w);
 
     // Transform weights
-    _transform_weights_func.configure(&_padded_weights, &_transformed_weights, FFT2DInfo());
+    _transform_weights_func = support::cpp14::make_unique<CLFFT2D>();
+    _transform_weights_func->configure(&_padded_weights, &_transformed_weights, FFT2DInfo());
 
     // Pad input
     const PaddingList padding_in = { { 0, kernel_size.x() + pad_valid.x() - 1 }, { 0, kernel_size.y() + pad_valid.y() - 1 } };
@@ -294,7 +295,7 @@ void CLFFTConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Transform input
     if(_needs_permute)
@@ -327,8 +328,6 @@ void CLFFTConvolutionLayer::run()
     {
         _activation_layer_func.run();
     }
-
-    _memory_group.release();
 }
 
 void CLFFTConvolutionLayer::prepare()
@@ -367,11 +366,13 @@ void CLFFTConvolutionLayer::prepare()
         CLScheduler::get().queue().finish();
         _flipped_weights.allocator()->free();
 
-        // Transform weights to frequence domain
+        // Transform weights to frequency domain
         _transformed_weights.allocator()->allocate();
-        _transform_weights_func.run();
+        _transform_weights_func->run();
         _padded_weights.mark_as_unused();
         CLScheduler::get().queue().finish();
+        // Delete object and release internal memory
+        _transform_weights_func.reset();
         _padded_weights.allocator()->free();
 
         _is_prepared = true;

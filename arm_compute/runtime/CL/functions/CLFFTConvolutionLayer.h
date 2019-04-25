@@ -118,7 +118,7 @@ private:
     CLPadLayer                       _pad_input_func;
     CLPadLayer                       _pad_weights_func;
     CLFFT2D                          _transform_input_func;
-    CLFFT2D                          _transform_weights_func;
+    std::unique_ptr<CLFFT2D>         _transform_weights_func;
     CLFFT2D                          _itransform_output_func;
     CLComplexPixelWiseMultiplication _prod_func;
     CLReductionOperation             _reduce_func;
