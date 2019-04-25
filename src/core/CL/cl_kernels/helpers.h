@@ -55,6 +55,17 @@
 
 #define float1 float
 #define half1 half
+#define char1 char
+#define uchar1 uchar
+#define short1 short
+#define ushort1 ushort
+#define int1 int
+#define uint1 uint
+#define long1 long
+#define ulong1 ulong
+#define double1 double
+
+#define vload1(OFFSET, PTR) *(OFFSET + PTR)
 
 #define VEC_DATA_TYPE_STR(type, size) type##size
 #define VEC_DATA_TYPE(type, size) VEC_DATA_TYPE_STR(type, size)
