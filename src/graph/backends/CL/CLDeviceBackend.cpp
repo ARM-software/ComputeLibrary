@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,11 @@ void CLDeviceBackend::set_kernel_tuning(bool enable_tuning)
     _tuner.set_tune_new_kernels(enable_tuning);
 }
 
+void CLDeviceBackend::set_kernel_tuning_mode(CLTunerMode tuning_mode)
+{
+    _tuner.set_tuner_mode(tuning_mode);
+}
+
 void CLDeviceBackend::initialize_backend()
 {
     // Setup Scheduler
@@ -118,6 +123,7 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     }
 
     set_kernel_tuning(ctx.config().use_tuner);
+    set_kernel_tuning_mode(ctx.config().tuner_mode);
 
     // Setup a management backend
     if(ctx.memory_management_ctx(Target::CL) == nullptr)

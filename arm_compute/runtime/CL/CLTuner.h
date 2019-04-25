@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLTUNER_H__
 
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLTunerTypes.h"
 #include "arm_compute/runtime/CL/ICLTuner.h"
 
 #include <unordered_map>
@@ -57,12 +58,26 @@ public:
      * @return True if tuning of new kernels is enabled.
      */
     bool tune_new_kernels() const;
+
+    /** Set OpenCL tuner mode
+     *
+     * @param[in] mode Indicates how exhaustive the search for the optimal LWS should be while tuning. Default is Exhaustive mode
+     */
+    void set_tuner_mode(CLTunerMode mode);
+
+    /** Get the current OpenCL tuner mode
+     *
+     * @return tuner_mode Indicates how exhaustive the search for the optimal LWS should be while tuning
+     */
+    CLTunerMode get_tuner_mode() const;
+
     /** Manually add a LWS for a kernel
      *
      * @param[in] kernel_id   Unique identifiant of the kernel
      * @param[in] optimal_lws Optimal local workgroup size to use for the given kernel
      */
     void add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws);
+
     /** Import LWS table
      *
      * @param[in] lws_table The unordered_map container to import
@@ -118,8 +133,9 @@ private:
     cl::NDRange find_optimal_lws(ICLKernel &kernel);
 
     std::unordered_map<std::string, cl::NDRange> _lws_table;
-    cl::Event _kernel_event;
-    bool      _tune_new_kernels;
+    cl::Event   _kernel_event;
+    bool        _tune_new_kernels;
+    CLTunerMode _tuner_mode;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLTUNER_H__ */
