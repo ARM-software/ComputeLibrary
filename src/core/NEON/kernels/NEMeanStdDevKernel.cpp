@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ std::pair<uint64x1_t, uint64x1_t> accumulate(const Window &window, Iterator &ite
     uint64x1_t sum_squared = vdup_n_u64(0);
 
     // Calculate sum
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t in_data = vld1q_u8(iterator.ptr());
 

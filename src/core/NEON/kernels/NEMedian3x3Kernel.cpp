@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,7 +87,7 @@ void NEMedian3x3Kernel::run(const Window &window, const ThreadInfo &info)
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());

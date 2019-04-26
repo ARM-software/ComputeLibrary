@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,7 +148,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float32x4_t scale  = vdupq_n_f32(_input->info()->quantization_info().scale);
                     const int32x4_t   offset = vdupq_n_s32(_input->info()->quantization_info().offset);
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint8x16_t   texels_u8 = vld1q_u8(input.ptr());
                         const uint16x8x2_t texels_u16 =
@@ -184,7 +184,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float16x8_t scale  = vdupq_n_f16(static_cast<float16_t>(_input->info()->quantization_info().scale));
                     const int16x8_t   offset = vdupq_n_s16(static_cast<int16_t>(_input->info()->quantization_info().offset));
 
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint8x16_t  texels_u8 = vld1q_u8(input.ptr());
                         const int16x8x2_t texels_s16 =
@@ -216,7 +216,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S16:
                 {
                     /* Up-conversion U8 -> S16 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
 
@@ -237,7 +237,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::S32:
                 {
                     /* Up-conversion U8 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
 
@@ -260,7 +260,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                 case DataType::U16:
                 {
                     /* Up-conversion U8 -> U16 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint8x16_t texels_u8 = vld1q_u8(input.ptr());
 
@@ -294,7 +294,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion S16 -> U8 */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates & id)
+                        execute_window_loop(window, [&](const Coordinates &)
                         {
                             const int16x8x2_t texels =
                             {
@@ -310,7 +310,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates & id)
+                        execute_window_loop(window, [&](const Coordinates &)
                         {
                             const int16x8x2_t texels =
                             {
@@ -332,7 +332,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const int32x4_t b = vdupq_n_s32(_shift);
 
                     /* Up-conversion S16 -> S32 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const int16x8x2_t texels =
                         {
@@ -376,7 +376,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     /* Down-conversion U16 -> U8 */
                     if(ConvertPolicy::SATURATE == _policy)
                     {
-                        execute_window_loop(window, [&](const Coordinates & id)
+                        execute_window_loop(window, [&](const Coordinates &)
                         {
                             const uint16x8x2_t texels =
                             {
@@ -392,7 +392,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     }
                     else
                     {
-                        execute_window_loop(window, [&](const Coordinates & id)
+                        execute_window_loop(window, [&](const Coordinates &)
                         {
                             const uint16x8x2_t texels =
                             {
@@ -413,7 +413,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const int32x4_t b = vdupq_n_s32(_shift);
 
                     /* Up-conversion U16 -> U32 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const uint16x8x2_t texels =
                         {
@@ -504,7 +504,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const int32x4_t   zero_val_vec = vdupq_n_s32(0);
 
                     /* Down-conversion F32 -> QASYMM8 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const float32x4x4_t texels =
                         {
@@ -535,7 +535,7 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                     const float32x4_t scale = vdupq_n_f32(1.f / (1 << _shift));
 
                     /* Down-conversion F32 -> F16 */
-                    execute_window_loop(window, [&](const Coordinates & id)
+                    execute_window_loop(window, [&](const Coordinates &)
                     {
                         const float32x4x4_t texels =
                         {

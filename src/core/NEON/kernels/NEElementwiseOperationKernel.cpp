@@ -506,7 +506,7 @@ void elementwise_op(const ITensor *in1, const ITensor *in2, ITensor *out, const 
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             auto                  output_ptr              = reinterpret_cast<OutputScalarType *>(output.ptr());
             const auto            non_broadcast_input_ptr = reinterpret_cast<const InputScalarType *>(non_broadcast_input.ptr());
@@ -531,7 +531,7 @@ void elementwise_op(const ITensor *in1, const ITensor *in2, ITensor *out, const 
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             auto       output_ptr = reinterpret_cast<OutputScalarType *>(output.ptr());
             const auto input1_ptr = reinterpret_cast<const InputScalarType *>(input1.ptr());
@@ -599,7 +599,7 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
@@ -640,7 +640,7 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());

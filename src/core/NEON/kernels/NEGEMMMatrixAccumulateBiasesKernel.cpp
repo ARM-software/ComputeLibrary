@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,7 +122,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadI
     {
         case DataType::F32:
         {
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 const float32x4x4_t accum  = vld4q_f32(reinterpret_cast<const float *>(in0_out.ptr()));
                 const float32x4x4_t biases = vld4q_f32(reinterpret_cast<const float *>(in1.ptr()));
@@ -144,7 +144,7 @@ void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadI
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
-            execute_window_loop(window, [&](const Coordinates & id)
+            execute_window_loop(window, [&](const Coordinates &)
             {
                 const float16x8x2_t accum  = vld2q_f16(reinterpret_cast<const float16_t *>(in0_out.ptr()));
                 const float16x8x2_t biases = vld2q_f16(reinterpret_cast<const float16_t *>(in1.ptr()));

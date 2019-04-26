@@ -444,7 +444,7 @@ void run_offset_contribution_output_stage(const Window &window,
         if(bias != nullptr)
         {
             Iterator bias_it = get_bias_it(collapsed_window, bias);
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
+            execute_window_loop(collapsed_window, [&](const Coordinates &)
             {
                 run_offset_contribution_output_stage_window<false, false, true, is_bounded_relu, is_fixed_point>(nullptr, nullptr, reinterpret_cast<const int32_t *>(bias_it.ptr()), mm_result_it, out_it,
                                                                                                                  result_offset_s32, result_shift_s32, min_u8, max_u8, a_offset, b_offset, k_offset,
@@ -454,7 +454,7 @@ void run_offset_contribution_output_stage(const Window &window,
         }
         else
         {
-            execute_window_loop(collapsed_window, [&](const Coordinates & id)
+            execute_window_loop(collapsed_window, [&](const Coordinates &)
             {
                 run_offset_contribution_output_stage_window<false, false, false, is_bounded_relu, is_fixed_point>(nullptr, nullptr, nullptr, mm_result_it, out_it,
                                                                                                                   result_offset_s32, result_shift_s32, min_u8, max_u8, a_offset, b_offset, k_offset,

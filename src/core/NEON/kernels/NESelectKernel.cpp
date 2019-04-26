@@ -54,7 +54,7 @@ void select_op(const ITensor *cond, const ITensor *in1, const ITensor *in2, ITen
     Iterator input2(in2, win);
     Iterator output(out, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         auto       output_ptr    = reinterpret_cast<ScalarType *>(output.ptr());
         const auto condition_ptr = reinterpret_cast<const uint8_t *>(condition.ptr());

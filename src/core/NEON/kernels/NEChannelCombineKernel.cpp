@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -286,7 +286,7 @@ void NEChannelCombineKernel::combine_3C(const Window &win)
     Iterator p2(_planes[2], win);
     Iterator out(_output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto p0_ptr  = static_cast<uint8_t *>(p0.ptr());
         const auto p1_ptr  = static_cast<uint8_t *>(p1.ptr());
@@ -315,7 +315,7 @@ void NEChannelCombineKernel::combine_4C(const Window &win)
     Iterator p3(_planes[3], win);
     Iterator out(_output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto p0_ptr  = static_cast<uint8_t *>(p0.ptr());
         const auto p1_ptr  = static_cast<uint8_t *>(p1.ptr());
@@ -353,7 +353,7 @@ void NEChannelCombineKernel::combine_YUV_1p(const Window &win)
 
     constexpr auto shift = is_uyvy ? 1 : 0;
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto p0_ptr  = static_cast<uint8_t *>(p0.ptr());
         const auto p1_ptr  = static_cast<uint8_t *>(p1.ptr());
@@ -409,7 +409,7 @@ void NEChannelCombineKernel::combine_YUV_2p(const Window &win)
     // Increase step size after iterator is created to calculate stride correctly for multi channel format
     out_win.set_dimension_step(Window::DimX, out_win.x().step() * _x_subsampling[1]);
 
-    execute_window_loop(out_win, [&](const Coordinates & id)
+    execute_window_loop(out_win, [&](const Coordinates &)
     {
         const uint8x8x2_t pixels =
         {
@@ -444,7 +444,7 @@ void NEChannelCombineKernel::copy_plane(const Window &win, uint32_t plane_id)
     Iterator in(_planes[plane_id], tmp_win);
     Iterator out(_output_multi->plane(plane_id), tmp_win);
 
-    execute_window_loop(tmp_win, [&](const Coordinates & id)
+    execute_window_loop(tmp_win, [&](const Coordinates &)
     {
         const uint8x8_t pixels = vld1_u8(in.ptr());
 

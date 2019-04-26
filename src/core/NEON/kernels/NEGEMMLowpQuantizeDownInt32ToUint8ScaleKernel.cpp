@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,7 +183,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
         Iterator bias(_bias, win_biases);
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -245,7 +245,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel::run(const Window &window)
     }
     else
     {
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;

@@ -195,7 +195,7 @@ NEActivationLayerKernel::activation(const Window &window)
     const auto a       = static_cast<T>(_act_info.a());
     const auto b       = static_cast<T>(_act_info.b());
 
-    execute_window_loop(win_collapsed, [&](const Coordinates & id)
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
         const auto output_ptr = reinterpret_cast<T *>(output.ptr());
@@ -327,7 +327,7 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
     float32x4_t vs = vdupq_n_f32(s);
     float32x4_t vo = vdupq_n_f32(o);
 
-    execute_window_loop(win_collapsed, [&](const Coordinates & id)
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         const auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
         const auto output_ptr = reinterpret_cast<T *>(output.ptr());

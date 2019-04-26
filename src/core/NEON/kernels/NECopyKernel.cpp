@@ -70,7 +70,7 @@ void NECopyKernel::run(const Window &window, const ThreadInfo &info)
         Iterator input_it(_input, out_slice);
         Iterator output_it(_output, out_slice);
 
-        execute_window_loop(out_slice, [&](const Coordinates & id)
+        execute_window_loop(out_slice, [&](const Coordinates &)
         {
             memcpy(output_it.ptr(), input_it.ptr(), _output->info()->dimension(0) * _output->info()->element_size());
         },

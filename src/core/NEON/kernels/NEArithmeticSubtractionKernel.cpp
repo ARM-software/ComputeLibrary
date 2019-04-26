@@ -55,7 +55,7 @@ void sub_wrap_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, con
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t ta1 = vld1q_u8(input1.ptr());
         const uint8x16_t ta2 = vld1q_u8(input2.ptr());
@@ -71,7 +71,7 @@ void sub_saturate_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out,
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t ta1 = vld1q_u8(input1.ptr());
         const uint8x16_t ta2 = vld1q_u8(input2.ptr());
@@ -87,7 +87,7 @@ void sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8(const ITensor *in1, const ITensor *in2
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const float32x4x4_t ta1 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input1.ptr())), in1->info()->quantization_info());
         const float32x4x4_t ta2 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input2.ptr())), in2->info()->quantization_info());
@@ -115,7 +115,7 @@ void sub_wrap_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, 
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const int16x8x2_t ta1 = vld2q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
         const int16x8x2_t ta2 = vld2q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
@@ -139,7 +139,7 @@ void sub_saturate_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *o
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const int16x8x2_t ta1 = vld2q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
         const int16x8x2_t ta2 = vld2q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
@@ -179,7 +179,7 @@ void sub_F16_F16_F16(const ITensor *in1, const ITensor *in2, ITensor *out, const
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const float16x8x2_t a = vld2q_f16(reinterpret_cast<const float16_t *>(input1.ptr()));
         const float16x8x2_t b = vld2q_f16(reinterpret_cast<const float16_t *>(input2.ptr()));
@@ -202,7 +202,7 @@ void sub_F32_F32_F32(const ITensor *in1, const ITensor *in2, ITensor *out, const
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const float32x4x4_t ta1 = vld4q_f32(reinterpret_cast<const float *>(input1.ptr()));
         const float32x4x4_t ta2 = vld4q_f32(reinterpret_cast<const float *>(input2.ptr()));
@@ -227,7 +227,7 @@ void sub_wrap_S16_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, c
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t bv_0 = vld1q_u8(input2.ptr());
         int16x8_t        a1_0 = vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
@@ -248,7 +248,7 @@ void sub_saturate_S16_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *ou
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t bv_0 = vld1q_u8(input2.ptr());
         int16x8_t        a1_0 = vld1q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
@@ -269,7 +269,7 @@ void sub_wrap_U8_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, c
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t bv_0 = vld1q_u8(input1.ptr());
         int16x8_t        a1_0 = vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
@@ -290,7 +290,7 @@ void sub_saturate_U8_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *ou
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t bv_0 = vld1q_u8(input1.ptr());
         int16x8_t        a1_0 = vld1q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
@@ -311,7 +311,7 @@ void sub_wrap_U8_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, co
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t av_0 = vld1q_u8(input1.ptr());
         const uint8x16_t bv_0 = vld1q_u8(input2.ptr());
@@ -333,7 +333,7 @@ void sub_saturate_U8_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t av_0 = vld1q_u8(input1.ptr());
         const uint8x16_t bv_0 = vld1q_u8(input2.ptr());
@@ -515,5 +515,5 @@ BorderSize NEArithmeticSubtractionKernel::border_size() const
 {
     const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize(0, border, 0, 0);
+    return BorderSize{ 0, border, 0, 0 };
 }

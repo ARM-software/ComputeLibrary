@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -120,7 +120,7 @@ void NESobel5x5HorKernel::run(const Window &window, const ThreadInfo &info)
         static const int16x8_t two      = vdupq_n_s16(2);
         static const int16x8_t minustwo = vdupq_n_s16(-2);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -154,7 +154,7 @@ void NESobel5x5HorKernel::run(const Window &window, const ThreadInfo &info)
         static const int16x8_t two      = vdupq_n_s16(2);
         static const int16x8_t minustwo = vdupq_n_s16(-2);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -180,7 +180,7 @@ void NESobel5x5HorKernel::run(const Window &window, const ThreadInfo &info)
         static const int16x8_t six  = vdupq_n_s16(6);
         static const int16x8_t four = vdupq_n_s16(4);
 
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -211,7 +211,7 @@ NESobel5x5VertKernel::NESobel5x5VertKernel()
 
 BorderSize NESobel5x5VertKernel::border_size() const
 {
-    return BorderSize(2, 0);
+    return BorderSize{ 2, 0 };
 }
 
 void NESobel5x5VertKernel::configure(ITensor *input_x, ITensor *input_y, ITensor *output_x, ITensor *output_y, bool border_undefined)
@@ -312,7 +312,7 @@ void NESobel5x5VertKernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             // Convert offset from uint8_t* to uint16_t*
             const size_t input_offset_high_s16 = input_x.offset() / 2;
@@ -361,7 +361,7 @@ void NESobel5x5VertKernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             // Convert offset from uint8_t* to uint16_t*
             const size_t input_offset_high_s16 = input_y.offset() / 2;

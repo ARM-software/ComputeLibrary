@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -152,7 +152,7 @@ void NEMinMaxKernel::minmax_U8(Window win)
 
     Iterator input(_input, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int x = x_start;
 
@@ -209,7 +209,7 @@ void NEMinMaxKernel::minmax_S16(Window win)
 
     Iterator input(_input, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int        x      = x_start;
         const auto in_ptr = reinterpret_cast<const int16_t *>(input.ptr());
@@ -268,7 +268,7 @@ void NEMinMaxKernel::minmax_F32(Window win)
 
     Iterator input(_input, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int        x      = x_start;
         const auto in_ptr = reinterpret_cast<const float *>(input.ptr());
@@ -323,11 +323,11 @@ bool NEMinMaxLocationKernel::is_parallelisable() const
 template <class T, std::size_t... N>
 struct NEMinMaxLocationKernel::create_func_table<T, utility::index_sequence<N...>>
 {
-    static const NEMinMaxLocationKernel::MinMaxLocFunction func_table[sizeof...(N)];
+    static const std::array<NEMinMaxLocationKernel::MinMaxLocFunction, sizeof...(N)> func_table;
 };
 
 template <class T, std::size_t... N>
-const NEMinMaxLocationKernel::MinMaxLocFunction NEMinMaxLocationKernel::create_func_table<T, utility::index_sequence<N...>>::func_table[sizeof...(N)] =
+const std::array<NEMinMaxLocationKernel::MinMaxLocFunction, sizeof...(N)> NEMinMaxLocationKernel::create_func_table<T, utility::index_sequence<N...>>::func_table
 {
     &NEMinMaxLocationKernel::minmax_loc<T, bool(N & 8), bool(N & 4), bool(N & 2), bool(N & 1)>...
 };

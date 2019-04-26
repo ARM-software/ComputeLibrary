@@ -105,10 +105,10 @@ public:
     InterpolationPolicy _method;
     float               _extrapolation_value;
 
-    std::unique_ptr<CLScale[]>      _scale;
-    std::unique_ptr<CLCopyKernel[]> _copy;
-    std::unique_ptr<CLTensor[]>     _crop_results{ nullptr };
-    std::unique_ptr<CLTensor[]>     _scaled_results{ nullptr };
+    std::vector<std::unique_ptr<CLScale>>      _scale;
+    std::vector<std::unique_ptr<CLCopyKernel>> _copy;
+    std::vector<std::unique_ptr<CLTensor>>     _crop_results;
+    std::vector<std::unique_ptr<CLTensor>>     _scaled_results;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_CROP_RESIZE_H__ */

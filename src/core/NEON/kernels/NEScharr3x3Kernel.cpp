@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -161,7 +161,7 @@ void NEScharr3x3Kernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_scharr_x && _run_scharr_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
 
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
@@ -197,7 +197,7 @@ void NEScharr3x3Kernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_scharr_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
 
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
@@ -232,7 +232,7 @@ void NEScharr3x3Kernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_scharr_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
 
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());

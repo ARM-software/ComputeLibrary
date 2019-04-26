@@ -162,7 +162,7 @@ inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
     const int        in_channels = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
     const int        in_batches  = input->info()->dimension(3);
 
-    return Tensor4DShape({ in_batches, in_height, in_width, in_channels });
+    return Tensor4DShape{ in_batches, in_height, in_width, in_channels };
 }
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
@@ -234,7 +234,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
 } //namespace
 
-NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
+NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _memory_group(memory_manager), _gemm_function(memory_manager), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _activationlayer_function(),
       _permute_input(), _permute_weights(), _permute_output(), _input_transformed(), _output_transformed(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(),
       _weights_hwio(), _input(), _weights(), _output(), _is_prepared(false), _is_activationlayer_enabled(false)
@@ -428,7 +428,9 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     d_strides.set(2, 0);
     d_strides.set(3, data_type_size * output_matrix_stride);
 
-    TensorInfo a_info, b_info, d_info;
+    TensorInfo a_info{};
+    TensorInfo b_info{};
+    TensorInfo d_info{};
     a_info.init(a_shape, 1, data_type, a_strides, 0, input_storage_size);
     b_info.init(b_shape, 1, data_type, b_strides, 0, kernel_storage_size);
     d_info.init(d_shape, 1, data_type, d_strides, 0, output_storage_size);

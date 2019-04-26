@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,32 +49,30 @@ inline uint8x8x2_t create_permutation_index(size_t k)
 {
     ARM_COMPUTE_ERROR_ON(k >= PERMUTATIONS);
 
-    static const uint8_t permutations_table[PERMUTATIONS][PERM_SIZE]
-    {
-        { 0, 1, 2, 3, 4, 5, 6, 7, 8, 255, 255, 255, 255, 255, 255, 255 },
-        { 15, 0, 1, 2, 3, 4, 5, 6, 7, 255, 255, 255, 255, 255, 255, 255 },
-        { 14, 15, 0, 1, 2, 3, 4, 5, 6, 255, 255, 255, 255, 255, 255, 255 },
-        { 13, 14, 15, 0, 1, 2, 3, 4, 5, 255, 255, 255, 255, 255, 255, 255 },
-        { 12, 13, 14, 15, 0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 255, 255 },
-        { 11, 12, 13, 14, 15, 0, 1, 2, 3, 255, 255, 255, 255, 255, 255, 255 },
-        { 10, 11, 12, 13, 14, 15, 0, 1, 2, 255, 255, 255, 255, 255, 255, 255 },
-        { 9, 10, 11, 12, 13, 14, 15, 0, 1, 255, 255, 255, 255, 255, 255, 255 },
-        { 8, 9, 10, 11, 12, 13, 14, 15, 0, 255, 255, 255, 255, 255, 255, 255 },
-        { 7, 8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255 },
-        { 6, 7, 8, 9, 10, 11, 12, 13, 14, 255, 255, 255, 255, 255, 255, 255 },
-        { 5, 6, 7, 8, 9, 10, 11, 12, 13, 255, 255, 255, 255, 255, 255, 255 },
-        { 4, 5, 6, 7, 8, 9, 10, 11, 12, 255, 255, 255, 255, 255, 255, 255 },
-        { 3, 4, 5, 6, 7, 8, 9, 10, 11, 255, 255, 255, 255, 255, 255, 255 },
-        { 2, 3, 4, 5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 255, 255, 255 },
-        { 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255 }
+    static const std::array<std::array<uint8_t, PERMUTATIONS>, PERM_SIZE> permutations_table{ { { 0, 1, 2, 3, 4, 5, 6, 7, 8, 255, 255, 255, 255, 255, 255, 255 },
+            { 15, 0, 1, 2, 3, 4, 5, 6, 7, 255, 255, 255, 255, 255, 255, 255 },
+            { 14, 15, 0, 1, 2, 3, 4, 5, 6, 255, 255, 255, 255, 255, 255, 255 },
+            { 13, 14, 15, 0, 1, 2, 3, 4, 5, 255, 255, 255, 255, 255, 255, 255 },
+            { 12, 13, 14, 15, 0, 1, 2, 3, 4, 255, 255, 255, 255, 255, 255, 255 },
+            { 11, 12, 13, 14, 15, 0, 1, 2, 3, 255, 255, 255, 255, 255, 255, 255 },
+            { 10, 11, 12, 13, 14, 15, 0, 1, 2, 255, 255, 255, 255, 255, 255, 255 },
+            { 9, 10, 11, 12, 13, 14, 15, 0, 1, 255, 255, 255, 255, 255, 255, 255 },
+            { 8, 9, 10, 11, 12, 13, 14, 15, 0, 255, 255, 255, 255, 255, 255, 255 },
+            { 7, 8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255 },
+            { 6, 7, 8, 9, 10, 11, 12, 13, 14, 255, 255, 255, 255, 255, 255, 255 },
+            { 5, 6, 7, 8, 9, 10, 11, 12, 13, 255, 255, 255, 255, 255, 255, 255 },
+            { 4, 5, 6, 7, 8, 9, 10, 11, 12, 255, 255, 255, 255, 255, 255, 255 },
+            { 3, 4, 5, 6, 7, 8, 9, 10, 11, 255, 255, 255, 255, 255, 255, 255 },
+            { 2, 3, 4, 5, 6, 7, 8, 9, 10, 255, 255, 255, 255, 255, 255, 255 },
+            { 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255 }
 
-    };
+        } };
 
     const uint8x8x2_t index =
     {
         {
-            vld1_u8(permutations_table[k]),
-            vld1_u8(permutations_table[k] + 8)
+            vld1_u8(permutations_table[k].data()),
+            vld1_u8(permutations_table[k].data() + 8)
         }
     };
 
@@ -112,7 +110,7 @@ inline uint8x8x4_t create_circle_index_register()
         . . 9 8 7 . . .
 
     */
-    static const uint8_t top_right[8] =
+    static const std::array<uint8_t, 8> top_right =
     {
         /* The register r.val[0] will be used to retrieve these texels:
         . . . 0 1 . . .
@@ -130,7 +128,7 @@ inline uint8x8x4_t create_circle_index_register()
         255
     };
 
-    static const uint8_t bottom_right[8] =
+    static const std::array<uint8_t, 8> bottom_right =
     {
         /* The register r.val[1] will be used to retrieve these texels:
         . . . . . . 5 .
@@ -147,7 +145,7 @@ inline uint8x8x4_t create_circle_index_register()
         20 /* low table, third row, elem 5, value 7 in the diagram above*/
     };
 
-    static const uint8_t top_left[8] =
+    static const std::array<uint8_t, 8> top_left =
     {
         /* The register r.val[2] will be used to retrieve these texels:
         . . F . . . . .
@@ -165,7 +163,7 @@ inline uint8x8x4_t create_circle_index_register()
         2 /* top table, first row, elem 3, value F in the diagram above*/
     };
 
-    static const uint8_t bottom_left[8] =
+    static const std::array<uint8_t, 8> bottom_left =
     {
         /* The register r.val[3] will be used to retrieve these texels:
         B . . . . . . .
@@ -185,10 +183,10 @@ inline uint8x8x4_t create_circle_index_register()
     const uint8x8x4_t reg =
     {
         {
-            vld1_u8(top_right),
-            vld1_u8(bottom_right),
-            vld1_u8(top_left),
-            vld1_u8(bottom_left)
+            vld1_u8(top_right.data()),
+            vld1_u8(bottom_right.data()),
+            vld1_u8(top_left.data()),
+            vld1_u8(bottom_left.data())
         }
     };
 
@@ -268,7 +266,7 @@ inline bool is_permutation_corner(const uint8x16_t &permutation, const uint8x16_
     return is_permutation_brighter(permutation, pg) || is_permutation_darker(permutation, pl);
 }
 
-inline bool point_is_fast_corner(uint8_t p, uint8_t threshold, const uint8x8x2_t &tbl_circle_texels, uint8x8x2_t perm_indices[PERMUTATIONS])
+inline bool point_is_fast_corner(uint8_t p, uint8_t threshold, const uint8x8x2_t &tbl_circle_texels, std::array<uint8x8x2_t, PERMUTATIONS> &perm_indices)
 {
     /*
         This function determines whether the point 'p' is a corner.
@@ -287,7 +285,7 @@ inline bool point_is_fast_corner(uint8_t p, uint8_t threshold, const uint8x8x2_t
     return corner_detected;
 }
 
-inline uint8x8x2_t create_circle_tbl(const uint8_t *const __restrict buffer[7], size_t in_offset, const uint8x8x4_t &circle_index_r)
+inline uint8x8x2_t create_circle_tbl(const std::array<uint8_t *const __restrict, 7> &buffer, size_t in_offset, const uint8x8x4_t &circle_index_r)
 {
     /*
         This function builds a LUT holding the 16 texels in the Brensenham circle radius 3.
@@ -329,7 +327,7 @@ inline uint8x8x2_t create_circle_tbl(const uint8_t *const __restrict buffer[7], 
     return tbl_circle_texels;
 }
 
-inline uint8_t get_point_score(uint8_t p, uint8_t tolerance, const uint8x8x2_t &tbl_circle, uint8x8x2_t perm_indices[PERMUTATIONS])
+inline uint8_t get_point_score(uint8_t p, uint8_t tolerance, const uint8x8x2_t &tbl_circle, std::array<uint8x8x2_t, PERMUTATIONS> &perm_indices)
 {
     uint8_t b = 255;
     uint8_t a = tolerance;
@@ -411,7 +409,7 @@ void NEFastCornersKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, window);
     Iterator out(_output, window);
 
-    const uint8_t *const __restrict in_row[7] =
+    const std::array<uint8_t *const __restrict, 7> in_row
     {
         _input->ptr_to_element(Coordinates(-3, -3)),
         _input->ptr_to_element(Coordinates(-3, -2)),
@@ -429,7 +427,7 @@ void NEFastCornersKernel::run(const Window &window, const ThreadInfo &info)
         return p_is_in_ab && q_is_in_ab;
     };
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const size_t  in_offset = in.offset();
         const uint8_t p0        = *in.ptr();
@@ -455,11 +453,11 @@ void NEFastCornersKernel::run(const Window &window, const ThreadInfo &info)
                 /* at this stage we use the full test with the 16 permutations to classify the point as corner or not */
                 const uint8x8x2_t tbl_circle_texel = create_circle_tbl(in_row, in_offset, circle_index_r);
 
-                if(point_is_fast_corner(p0, _threshold, tbl_circle_texel, perm_index.data()))
+                if(point_is_fast_corner(p0, _threshold, tbl_circle_texel, perm_index))
                 {
                     if(_non_max_suppression)
                     {
-                        score = get_point_score(p0, _threshold, tbl_circle_texel, perm_index.data());
+                        score = get_point_score(p0, _threshold, tbl_circle_texel, perm_index);
                     }
                     else
                     {

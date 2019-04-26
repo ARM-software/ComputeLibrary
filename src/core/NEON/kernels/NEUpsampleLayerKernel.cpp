@@ -130,7 +130,7 @@ void NEUpsampleLayerKernel::upsample_f32_nchw(const arm_compute::Window &window)
     Iterator  output(_output, window_out);
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float);
 
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const float32x4_t data      = vld1q_f32(reinterpret_cast<const float *>(input.ptr()));
         const float32x4_t data_out1 = { vgetq_lane_f32(data, 0), vgetq_lane_f32(data, 0), vgetq_lane_f32(data, 1), vgetq_lane_f32(data, 1) };
@@ -157,7 +157,7 @@ void NEUpsampleLayerKernel::upsample_f32_nhwc(const arm_compute::Window &window)
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float);
     const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(float);
 
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const float32x4_t data = vld1q_f32(reinterpret_cast<const float *>(input.ptr()));
         auto              out  = reinterpret_cast<float *>(output.ptr());
@@ -182,7 +182,7 @@ void NEUpsampleLayerKernel::upsample_qasymm8_nchw(const arm_compute::Window &win
     Iterator  output(_output, window_out);
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(uint8_t);
 
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const uint8x16_t data      = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr()));
         const uint8x16_t data_out1 = { vgetq_lane_u8(data, 0), vgetq_lane_u8(data, 0), vgetq_lane_u8(data, 1), vgetq_lane_u8(data, 1),
@@ -218,7 +218,7 @@ void NEUpsampleLayerKernel::upsample_qasymm8_nhwc(const arm_compute::Window &win
 
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(uint8_t);
     const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(uint8_t);
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(reinterpret_cast<const uint8_t *>(input.ptr()));
         auto             out  = reinterpret_cast<uint8_t *>(output.ptr());
@@ -245,7 +245,7 @@ void NEUpsampleLayerKernel::upsample_f16_nchw(const arm_compute::Window &window)
     Iterator  output(_output, window_out);
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float16_t);
 
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const float16x8_t data      = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr()));
         const float16x8_t data_out1 = { vgetq_lane_f16(data, 0), vgetq_lane_f16(data, 0), vgetq_lane_f16(data, 1), vgetq_lane_f16(data, 1),
@@ -278,7 +278,7 @@ void NEUpsampleLayerKernel::upsample_f16_nhwc(const arm_compute::Window &window)
     const int offset_y_out = _output->info()->strides_in_bytes().y() / sizeof(float16_t);
     const int offset_z_out = _output->info()->strides_in_bytes().z() / sizeof(float16_t);
 
-    execute_window_loop(window_out, [&](const Coordinates & id)
+    execute_window_loop(window_out, [&](const Coordinates &)
     {
         const float16x8_t data = vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr()));
         auto              out  = reinterpret_cast<float16_t *>(output.ptr());

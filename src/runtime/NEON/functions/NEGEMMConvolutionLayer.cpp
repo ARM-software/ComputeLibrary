@@ -118,7 +118,8 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input_quantization_info : output->info()->quantization_info();
 
         float multiplier = input_quantization_info.scale * weights->info()->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
+        int   output_multiplier;
+        int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         // Merge activation with output stage
@@ -184,7 +185,8 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input_quantization_info : output->quantization_info();
 
         float multiplier = input_quantization_info.scale * weights->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
+        int   output_multiplier;
+        int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         // Merge activation with output stage
@@ -412,7 +414,10 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const unsigned int kernel_width  = weights->dimension(idx_width);
     const unsigned int kernel_height = weights->dimension(idx_height);
 
-    TensorInfo         im2col_reshaped_info, info_gemm, tmp_info, weights_reshaped_info;
+    TensorInfo         im2col_reshaped_info{};
+    TensorInfo         info_gemm{};
+    TensorInfo         tmp_info{};
+    TensorInfo         weights_reshaped_info{};
     const ITensorInfo *gemm_input_to_use  = input;
     const ITensorInfo *gemm_output_to_use = output;
     const ITensorInfo *weights_to_use     = weights;

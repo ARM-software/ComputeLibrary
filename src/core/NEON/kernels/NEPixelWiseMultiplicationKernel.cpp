@@ -627,7 +627,7 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
 
     if(_func_qasymm8 != nullptr)
     {
-        execute_window_loop(collapsed, [&](const Coordinates & id)
+        execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_qasymm8)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
                              _input1->info()->quantization_info(), _input2->info()->quantization_info(), _output->info()->quantization_info());
@@ -638,7 +638,7 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
     }
     else if(_func_int != nullptr)
     {
-        execute_window_loop(collapsed, [&](const Coordinates & id)
+        execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent);
             collapsed.slide_window_slice_3D(slice_input1);
@@ -649,7 +649,7 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
     else
     {
         ARM_COMPUTE_ERROR_ON(_func_float == nullptr);
-        execute_window_loop(collapsed, [&](const Coordinates & id)
+        execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_float)(input1.ptr(), input2.ptr(), output.ptr(), _scale);
             collapsed.slide_window_slice_3D(slice_input1);
@@ -663,6 +663,6 @@ BorderSize NEPixelWiseMultiplicationKernel::border_size() const
 {
     const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
     const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
-    return BorderSize(0, border, 0, 0);
+    return BorderSize{ 0, border, 0, 0 };
 }
 } // namespace arm_compute

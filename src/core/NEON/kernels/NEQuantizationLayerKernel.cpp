@@ -51,7 +51,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     return Status{};
 }
 
-inline const float32x4x4_t load_value(const float *input_ptr)
+inline float32x4x4_t load_value(const float *input_ptr)
 {
     return { wrapper::vloadq(input_ptr),
              wrapper::vloadq(input_ptr + 4),
@@ -119,7 +119,7 @@ void NEQuantizationLayerKernel::quantize(const Window &window, const Quantizatio
 
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
-    execute_window_loop(win_collapsed, [&](const Coordinates & id)
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
         auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());

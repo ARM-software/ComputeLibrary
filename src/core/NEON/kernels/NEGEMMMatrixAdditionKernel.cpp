@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ void matrix_addition_f32(const ITensor *input, ITensor *output, const Window &wi
     Iterator in(input, window);
     Iterator out(output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto in_ptr  = reinterpret_cast<const float *>(in.ptr());
         const auto out_ptr = reinterpret_cast<float *>(out.ptr());
@@ -87,7 +87,7 @@ void matrix_addition_f16(const ITensor *input, ITensor *output, const Window &wi
     Iterator in(input, window);
     Iterator out(output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto in_ptr  = reinterpret_cast<const float16_t *>(in.ptr());
         const auto out_ptr = reinterpret_cast<float16_t *>(out.ptr());

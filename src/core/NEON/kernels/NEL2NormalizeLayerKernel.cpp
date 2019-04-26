@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ void l2_normalize_X(const ITensor *in, const ITensor *sum, ITensor *out, float e
         const auto sum_value           = *reinterpret_cast<const T *>(sum_it.ptr());
         const auto vec_normalize_value = wrapper::vdup_n(static_cast<T>(1.f / std::sqrt(std::max(sum_value, static_cast<T>(epsilon)))), ExactTagType{});
 
-        execute_window_loop(in_slice, [&](const Coordinates & id)
+        execute_window_loop(in_slice, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const T *>(input_it.ptr());
             const auto out_ptr = reinterpret_cast<T *>(output_it.ptr());
@@ -93,7 +93,7 @@ void l2_normalize_Y(const ITensor *in, const ITensor *sum, ITensor *out, float e
 
         auto eps = wrapper::vdup_n(static_cast<T>(epsilon), ExactTagType{});
 
-        execute_window_loop(in_slice, [&](const Coordinates & id)
+        execute_window_loop(in_slice, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const T *>(input_it.ptr());
             const auto sum_ptr = reinterpret_cast<const T *>(sum_it.ptr());
@@ -127,7 +127,7 @@ void l2_normalize_Z(const ITensor *in, const ITensor *sum, ITensor *out, float e
 
         auto eps = wrapper::vdup_n(static_cast<T>(epsilon), ExactTagType{});
 
-        execute_window_loop(in_slice, [&](const Coordinates & id)
+        execute_window_loop(in_slice, [&](const Coordinates &)
         {
             const auto in_ptr  = reinterpret_cast<const T *>(input_it.ptr());
             const auto sum_ptr = reinterpret_cast<const T *>(sum_it.ptr());

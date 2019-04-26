@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,7 @@ void NEFillInnerBorderKernel::fill_value_single_channel(const Window &window)
 
     Iterator vertical_it(_tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates & id)
+    execute_window_loop(vertical, [&](const Coordinates &)
     {
         std::fill_n(reinterpret_cast<T *>(vertical_it.ptr()), _border_size.left, constant_border_value);
         std::fill_n(reinterpret_cast<T *>(vertical_it.ptr()) + width - _border_size.right, _border_size.right, constant_border_value);
@@ -122,7 +122,7 @@ void NEFillInnerBorderKernel::fill_value_single_channel(const Window &window)
     // All values are set at once
     Iterator horizontal_it(_tensor, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         for(size_t i = 0; i < _border_size.top; ++i)
         {

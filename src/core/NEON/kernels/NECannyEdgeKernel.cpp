@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -950,7 +950,7 @@ void NEGradientKernel::run(const Window &window, const ThreadInfo &info)
     Iterator magnitude(_magnitude, window);
     Iterator phase(_phase, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         (*_func)(gx.ptr(), gy.ptr(), magnitude.ptr(), phase.ptr());
     },
@@ -1034,7 +1034,7 @@ void NEEdgeNonMaxSuppressionKernel::run(const Window &window, const ThreadInfo &
     const size_t input1_stride        = _magnitude->info()->strides_in_bytes()[1];
     const size_t input1_stride_ushort = input1_stride / data_size_from_type(_magnitude->info()->data_type());
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         (*_func)(magnitude.ptr(), phase.ptr(), output.ptr(), input1_stride_ushort, _lower_thr, _upper_thr);
     },
@@ -1113,7 +1113,7 @@ void NEEdgeTraceKernel::run(const Window &window, const ThreadInfo &info)
     const size_t input_stride  = _input->info()->strides_in_bytes()[1];
     const size_t output_stride = _output->info()->strides_in_bytes()[1];
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         edge_trace_U8_U8(input.ptr(), output.ptr(), input_stride, output_stride);
     },

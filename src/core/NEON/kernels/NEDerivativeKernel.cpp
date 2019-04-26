@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,7 +124,7 @@ void NEDerivativeKernel::derivative_x(const Window &window)
     Iterator out_x(_output_x, window);
 
     /* Apply 1-D centered point discrete derivative mask ([-1 0 1]) along the X direction */
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         /* Load left and right data */
         const uint8x16_t l_data = vld1q_u8(in.ptr() - 1);
@@ -153,7 +153,7 @@ void NEDerivativeKernel::derivative_y(const Window &window)
     const size_t stride = _input->info()->strides_in_bytes()[1];
 
     /* Apply 1-D centered point discrete derivative mask ([-1 0 1]^T) along the Y direction */
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         /* Load top and bottom data */
         const uint8x16_t t_data = vld1q_u8(in.ptr() - stride);
@@ -183,7 +183,7 @@ void NEDerivativeKernel::derivative_xy(const Window &window)
     const size_t stride = _input->info()->strides_in_bytes()[1];
 
     /* Apply 1-D centered point discrete derivative masks ([-1 0 1] and [-1 0 1]^T) along the X and Y directions */
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         /* Load top, bottom, left and right data */
         const uint8x16_t t_data = vld1q_u8(in.ptr() - stride);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,7 @@ inline void sort9(uint8x8_t &p0, uint8x8_t &p1, uint8x8_t &p2,
     sort(p4, p2);
 }
 
-inline void sort21(uint8x8_t p[21])
+inline void sort21(std::array<uint8x8_t, 21> &p)
 {
     sort(p[0], p[1]);
     sort(p[2], p[3]);
@@ -222,7 +222,7 @@ inline void sort21(uint8x8_t p[21])
     sort(p[10], p[16]);
 }
 
-inline void sort25(uint8x8_t p[25])
+inline void sort25(std::array<uint8x8_t, 25> &p)
 {
     sort(p[1], p[2]);
     sort(p[0], p[1]);
@@ -429,7 +429,7 @@ void NENonLinearFilterKernel::median_filter_box<3, 3>(const Window &win)
     const auto input_mid_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 0)));
     const auto input_bot_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 1)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
@@ -463,7 +463,7 @@ void NENonLinearFilterKernel::median_filter_box<5, 5>(const Window &win)
     const auto input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
     const auto input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x16_t top2_data = vld1q_u8(input_top2_ptr + input.offset());
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
@@ -471,7 +471,7 @@ void NENonLinearFilterKernel::median_filter_box<5, 5>(const Window &win)
         const uint8x16_t bot_data  = vld1q_u8(input_bot_ptr + input.offset());
         const uint8x16_t bot2_data = vld1q_u8(input_bot2_ptr + input.offset());
 
-        const uint8x8_t d[] =
+        const std::array<uint8x8_t, 10> d =
         {
             vget_low_u8(top2_data),
             vget_high_u8(top2_data),
@@ -485,7 +485,7 @@ void NENonLinearFilterKernel::median_filter_box<5, 5>(const Window &win)
             vget_high_u8(bot2_data)
         };
 
-        uint8x8_t p[25];
+        std::array<uint8x8_t, 25> p{ 0 };
         for(unsigned int i = 0; i < 5; ++i)
         {
             const unsigned int idx_d = i * 2;
@@ -524,7 +524,7 @@ void NENonLinearFilterKernel::min_filter_box(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-k_col_half, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         // Get min of rows
         uint8x16_t rows_min = vld1q_u8(input_ptrs[0] + input.offset());
@@ -563,7 +563,7 @@ void NENonLinearFilterKernel::max_filter_box(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-k_col_half, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         uint8x16_t rows_max = vld1q_u8(input_ptrs[0] + input.offset());
 
@@ -593,7 +593,7 @@ void NENonLinearFilterKernel::median_filter_cross<3, 3>(const Window &win)
     const auto input_mid_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-1, 0)));
     const auto input_bot_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(0, 1)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x8_t  top_data = vld1_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
@@ -624,7 +624,7 @@ void NENonLinearFilterKernel::median_filter_cross<5, 5>(const Window &win)
     const auto input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(0, 1)));
     const auto input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(0, 2)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x8_t  top2_data = vld1_u8(input_top2_ptr + input.offset());
         const uint8x8_t  top_data  = vld1_u8(input_top_ptr + input.offset());
@@ -671,7 +671,7 @@ void NENonLinearFilterKernel::min_filter_cross(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         uint8x8_t rows_min = vld1_u8(input_ptrs[0] + input.offset());
 
@@ -717,7 +717,7 @@ void NENonLinearFilterKernel::max_filter_cross(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         uint8x8_t rows_max = vld1_u8(input_ptrs[0] + input.offset());
 
@@ -754,7 +754,7 @@ void NENonLinearFilterKernel::median_filter_disk<5, 5>(const Window &win)
     const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
     const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
@@ -762,7 +762,7 @@ void NENonLinearFilterKernel::median_filter_disk<5, 5>(const Window &win)
         const uint8x16_t bot_data  = vld1q_u8(input_bot_ptr + input.offset());
         const uint8x16_t bot2_data = vextq_u8(vld1q_u8(input_bot2_ptr + input.offset()), zero, 1);
 
-        uint8x8_t d[] =
+        std::array<uint8x8_t, 10> d =
         {
             vget_low_u8(top2_data),
             vget_high_u8(top2_data),
@@ -776,7 +776,7 @@ void NENonLinearFilterKernel::median_filter_disk<5, 5>(const Window &win)
             vget_high_u8(bot2_data)
         };
 
-        uint8x8_t p[21];
+        std::array<uint8x8_t, 21> p{ 0 };
         p[0]  = d[0];
         p[1]  = vext_u8(d[0], d[1], 1);
         p[2]  = vext_u8(d[0], d[1], 2);
@@ -816,7 +816,7 @@ void NENonLinearFilterKernel::min_filter_disk<5, 5>(const Window &win)
     const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
     const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
@@ -849,7 +849,7 @@ void NENonLinearFilterKernel::max_filter_disk<5, 5>(const Window &win)
     const auto              input_bot_ptr  = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 1)));
     const auto              input_bot2_ptr = static_cast<const unsigned char *>(_input->ptr_to_element(Coordinates(-2, 2)));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const uint8x16_t top2_data = vextq_u8(vld1q_u8(input_top2_ptr + input.offset()), zero, 1);
         const uint8x16_t top_data  = vld1q_u8(input_top_ptr + input.offset());
@@ -889,7 +889,7 @@ void NENonLinearFilterKernel::non_linear_filter_generic(const Window &win)
 
     std::array<uint8_t, mask_size> vals{ {} };
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         // Clear array
         std::fill(std::begin(vals), std::end(vals), 0);

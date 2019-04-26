@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ void NEGaussian5x5HorKernel::run(const Window &window, const ThreadInfo &info)
     static const int16x8_t six  = vdupq_n_s16(6);
     static const int16x8_t four = vdupq_n_s16(4);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -112,7 +112,7 @@ void NEGaussian5x5HorKernel::run(const Window &window, const ThreadInfo &info)
 
 BorderSize NEGaussian5x5VertKernel::border_size() const
 {
-    return BorderSize(2, 0);
+    return BorderSize{ 2, 0 };
 }
 
 void NEGaussian5x5VertKernel::configure(const ITensor *input, ITensor *output, bool border_undefined)
@@ -159,7 +159,7 @@ void NEGaussian5x5VertKernel::run(const Window &window, const ThreadInfo &info)
     const uint16x8_t six  = vdupq_n_u16(6);
     const uint16x8_t four = vdupq_n_u16(4);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const size_t input_offset_high_s16 = input.offset();
         const size_t input_offset_low_s16  = input.offset() + 16;

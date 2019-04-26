@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -126,7 +126,7 @@ void NEAccumulateWeightedFP16Kernel::run(const Window &window, const ThreadInfo 
     const float16x8_t scale_val  = vdupq_n_f16(1.f - _alpha);
     const float16x8_t scale_val2 = vdupq_n_f16(_alpha);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         fp16::acc_we_v16_u8(input.ptr(), accum.ptr(), scale_val, scale_val2);
     },
@@ -271,7 +271,7 @@ void NEAccumulateKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input(_input, window);
     Iterator accum(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         acc_v16_u8(input.ptr(), accum.ptr());
     },
@@ -314,7 +314,7 @@ void NEAccumulateWeightedKernel::run(const Window &window, const ThreadInfo &inf
     const float32x4_t scale_val  = vdupq_n_f32(1.f - _alpha);
     const float32x4_t scale_val2 = vdupq_n_f32(_alpha);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         acc_we_v16_u8(input.ptr(), accum.ptr(), scale_val, scale_val2);
     },
@@ -353,7 +353,7 @@ void NEAccumulateSquaredKernel::run(const Window &window, const ThreadInfo &info
     Iterator input(_input, window);
     Iterator accum(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         acc_sq_v16_u8(input.ptr(), _shift, accum.ptr());
     },

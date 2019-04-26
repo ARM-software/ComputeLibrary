@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,7 +115,9 @@ void CLStridedSliceKernel::configure(const ICLTensor *input, ICLTensor *output,
 
     const TensorShape &input_shape = input->info()->tensor_shape();
 
-    Coordinates starts_abs, ends_abs, final_strides;
+    Coordinates starts_abs;
+    Coordinates ends_abs;
+    Coordinates final_strides;
     std::tie(starts_abs, ends_abs, final_strides) = arm_compute::helpers::tensor_transform::calculate_strided_slice_coords(
                                                         input_shape,
                                                         starts, ends, strides,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -323,7 +323,7 @@ void NEMagnitudePhaseKernel<mag_type, phase_type>::magnitude(const Window &windo
     Iterator gy(_gy, window);
     Iterator magnitude(_magnitude, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const int16x8x2_t input1 =
         {
@@ -369,7 +369,7 @@ void NEMagnitudePhaseKernel<mag_type, phase_type>::phase(const Window &window)
     Iterator gy(_gy, window);
     Iterator phase(_phase, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const int16x8x2_t input1 =
         {
@@ -415,7 +415,7 @@ void NEMagnitudePhaseKernel<mag_type, phase_type>::magnitude_phase(const Window 
     Iterator magnitude(_magnitude, window);
     Iterator phase(_phase, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const int16x8x2_t input1 =
         {

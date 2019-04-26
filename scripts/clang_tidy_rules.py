@@ -4,7 +4,7 @@ import re
 import sys
 
 def get_list_includes():
-    return "include/linux include . 3rdparty/include kernels".split()
+    return "arm_compute/core/NEON/kernels/assembly arm_compute/core/NEON/kernels/convolution/common include/linux include . 3rdparty/include kernels".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]

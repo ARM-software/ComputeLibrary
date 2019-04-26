@@ -231,7 +231,8 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     if(_is_quantized)
     {
         float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
-        int   output_multiplier, output_shift;
+        int   output_multiplier;
+        int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
         _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
         _gemmlowp_output.allocator()->allocate();

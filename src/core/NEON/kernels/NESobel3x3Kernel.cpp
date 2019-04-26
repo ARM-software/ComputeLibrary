@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ NESobel3x3Kernel::NESobel3x3Kernel()
 
 BorderSize NESobel3x3Kernel::border_size() const
 {
-    return BorderSize(1);
+    return BorderSize{ 1 };
 }
 
 void NESobel3x3Kernel::configure(const ITensor *input, ITensor *output_x, ITensor *output_y, bool border_undefined)
@@ -117,7 +117,7 @@ void NESobel3x3Kernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_y && _run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
             const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
@@ -181,7 +181,7 @@ void NESobel3x3Kernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
             const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
@@ -229,7 +229,7 @@ void NESobel3x3Kernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_sobel_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
             const uint8x16_t bot_data = vld1q_u8(input_bot_ptr + input.offset());

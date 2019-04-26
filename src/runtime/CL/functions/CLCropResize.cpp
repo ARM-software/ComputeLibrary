@@ -57,9 +57,9 @@ inline void run_crop(const ICLTensor *input, ICLTensor *output, uint32_t batch_i
     bool is_width_flipped  = end[0] < start[0];
     bool is_height_flipped = end[1] < start[1];
     /** The number of rows out of bounds at the start and end of output. */
-    int32_t rows_out_of_bounds[2];
+    std::array<int32_t, 2> rows_out_of_bounds{ 0 };
     /** The number of columns out of bounds at the start and end of output. */
-    int32_t cols_out_of_bounds[2];
+    std::array<int32_t, 2> cols_out_of_bounds{ 0 };
     if(is_height_flipped)
     {
         rows_out_of_bounds[0] = start[1] >= static_cast<int32_t>(input->info()->dimension(2)) ? std::min(start[1] - input->info()->dimension(2) + 1, output->info()->dimension(2)) : 0;
@@ -164,7 +164,7 @@ inline void run_crop(const ICLTensor *input, ICLTensor *output, uint32_t batch_i
 } // namespace
 
 CLCropResize::CLCropResize()
-    : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy()
+    : _input(nullptr), _boxes(nullptr), _box_ind(nullptr), _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _scale(), _copy(), _crop_results(), _scaled_results()
 {
 }
 
@@ -210,20 +210,19 @@ void CLCropResize::configure(const ICLTensor *input, ICLTensor *boxes, ICLTensor
     // - A scale function is used to resize the cropped image to the size specified by crop_size.
     // - A tensor is required to hold the final scaled image before it is copied into the 4D output
     //   that will hold all final cropped and scaled 3D images using CLCopyKernel.
-    _crop_results   = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_boxes);
-    _scale          = arm_compute::support::cpp14::make_unique<CLScale[]>(_num_boxes);
-    _scaled_results = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_boxes);
-    _copy           = arm_compute::support::cpp14::make_unique<CLCopyKernel[]>(_num_boxes);
-
     for(unsigned int i = 0; i < _num_boxes; ++i)
     {
+        auto       crop_tensor = support::cpp14::make_unique<CLTensor>();
         TensorInfo crop_result_info(1, DataType::F32);
         crop_result_info.set_data_layout(DataLayout::NHWC);
-        _crop_results[i].allocator()->init(crop_result_info);
+        crop_tensor->allocator()->init(crop_result_info);
+        _crop_results.emplace_back(std::move(crop_tensor));
 
+        auto       scale_tensor = support::cpp14::make_unique<CLTensor>();
         TensorInfo scaled_result_info(out_shape, 1, DataType::F32);
         scaled_result_info.set_data_layout(DataLayout::NHWC);
-        _scaled_results[i].allocator()->init(scaled_result_info);
+        scale_tensor->allocator()->init(scaled_result_info);
+        _scaled_results.emplace_back(std::move(scale_tensor));
     }
 }
 
@@ -240,32 +239,37 @@ void CLCropResize::run()
         // Size of the crop box in _boxes and thus the shape of _crop_results[i]
         // may not be known until run-time and so the kernels cannot be configured until then.
         uint32_t    batch_index;
-        Coordinates start, end;
-        configure_crop(_input, _boxes, _box_ind, &_crop_results[i], i, start, end, batch_index);
-        _scale[i].configure(&_crop_results[i], &_scaled_results[i], _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT);
+        Coordinates start{};
+        Coordinates end{};
+        configure_crop(_input, _boxes, _box_ind, _crop_results[i].get(), i, start, end, batch_index);
+
+        auto scale_kernel = support::cpp14::make_unique<CLScale>();
+        scale_kernel->configure(_crop_results[i].get(), _scaled_results[i].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT);
+        _scale.emplace_back(std::move(scale_kernel));
 
         Window win = calculate_max_window(*_output->info());
         win.set(3, Window::Dimension(i, i + 1, 1));
-        _copy[i].configure(&_scaled_results[i], _output, PaddingList(), &win);
 
-        _crop_results[i].allocator()->allocate();
-        _scaled_results[i].allocator()->allocate();
+        auto copy_kernel = support::cpp14::make_unique<CLCopyKernel>();
+        copy_kernel->configure(_scaled_results[i].get(), _output, PaddingList(), &win);
+        _copy.emplace_back(std::move(copy_kernel));
 
-        run_crop(_input, &_crop_results[i], batch_index, start, end, _extrapolation_value);
+        _crop_results[i]->allocator()->allocate();
+        _scaled_results[i]->allocator()->allocate();
+
+        run_crop(_input, _crop_results[i].get(), batch_index, start, end, _extrapolation_value);
     }
     _boxes->unmap(CLScheduler::get().queue());
     _box_ind->unmap(CLScheduler::get().queue());
     CLScheduler::get().sync();
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+    for(auto &kernel : _scale)
     {
-        // Scale the cropped image
-        _scale[i].run();
+        kernel->run();
     }
     CLScheduler::get().sync();
-    for(unsigned int i = 0; i < _num_boxes; ++i)
+    for(auto &kernel : _copy)
     {
-        // Copy scaled image into output.
-        CLScheduler::get().enqueue(_copy[i]);
+        CLScheduler::get().enqueue(*kernel, true);
     }
     CLScheduler::get().sync();
 }

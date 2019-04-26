@@ -287,7 +287,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         }
     }
 
-    TensorInfo info_vector_sum_col, info_vector_sum_row;
+    TensorInfo info_vector_sum_col{};
+    TensorInfo info_vector_sum_row{};
 
     // Validate matrix B reduction kernel only if _a_offset is not equal to 0
     if(a_offset != 0)

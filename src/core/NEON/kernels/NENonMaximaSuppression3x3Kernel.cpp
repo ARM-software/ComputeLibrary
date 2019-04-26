@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -506,7 +506,7 @@ void NENonMaximaSuppression3x3Kernel::run(const Window &window, const ThreadInfo
 
     const size_t input_stride = _input->info()->strides_in_bytes()[1] / element_size_from_data_type(_input->info()->data_type());
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         _func(input.ptr(), output.ptr(), input_stride);
     },

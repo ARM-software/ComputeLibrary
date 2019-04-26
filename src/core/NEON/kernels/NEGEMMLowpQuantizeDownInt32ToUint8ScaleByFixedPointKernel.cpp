@@ -114,7 +114,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
         Iterator bias(_bias, win_biases);
-        execute_window_loop(win_collapsed, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -165,7 +165,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
     }
     else
     {
-        execute_window_loop(win_collapsed, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;

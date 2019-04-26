@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,24 +68,24 @@ Size2D HOGInfo::num_cells_per_block() const
 {
     ARM_COMPUTE_ERROR_ON(_cell_size.width == 0 || _cell_size.height == 0);
 
-    return Size2D(_block_size.width / _cell_size.width,
-                  _block_size.height / _cell_size.height);
+    return Size2D{ _block_size.width / _cell_size.width,
+                   _block_size.height / _cell_size.height };
 }
 
 Size2D HOGInfo::num_cells_per_block_stride() const
 {
     ARM_COMPUTE_ERROR_ON(_cell_size.width == 0 || _cell_size.height == 0);
 
-    return Size2D(_block_stride.width / _cell_size.width,
-                  _block_stride.height / _cell_size.height);
+    return Size2D{ _block_stride.width / _cell_size.width,
+                   _block_stride.height / _cell_size.height };
 }
 
 Size2D HOGInfo::num_block_positions_per_image(const Size2D &image_size) const
 {
     ARM_COMPUTE_ERROR_ON(_block_stride.width == 0 || _block_stride.height == 0);
 
-    return Size2D(((image_size.width - _block_size.width) / _block_stride.width) + 1,
-                  ((image_size.height - _block_size.height) / _block_stride.height) + 1);
+    return Size2D{ ((image_size.width - _block_size.width) / _block_stride.width) + 1,
+                   ((image_size.height - _block_size.height) / _block_stride.height) + 1 };
 }
 
 const Size2D &HOGInfo::cell_size() const

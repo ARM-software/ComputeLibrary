@@ -53,7 +53,7 @@ class NEWinogradConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEWinogradConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *

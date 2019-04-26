@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,7 +144,7 @@ void NEMinMaxLayerKernel::run(const Window &window, const ThreadInfo &info)
         float carry_min_scalar = std::numeric_limits<float>::max();
         float carry_max_scalar = std::numeric_limits<float>::lowest();
 
-        execute_window_loop(window_input, [&](const Coordinates & id)
+        execute_window_loop(window_input, [&](const Coordinates &)
         {
             int        x      = x_start;
             const auto in_ptr = reinterpret_cast<const float *>(input.ptr() + id_batch[1] * _input->info()->strides_in_bytes()[3]);
@@ -203,7 +203,7 @@ void NEMinMaxLayerKernel::reset()
 
     Iterator output(_output, window_output);
 
-    execute_window_loop(window_output, [&](const Coordinates & id)
+    execute_window_loop(window_output, [&](const Coordinates &)
     {
         vst1_f32(reinterpret_cast<float *>(output.ptr()), reset_values);
     },

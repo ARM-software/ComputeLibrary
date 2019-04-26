@@ -111,7 +111,7 @@ void run_dequantization(const ITensor *input, ITensor *output, const Window &win
     Iterator in(input, win_collapsed);
     Iterator out(output, win_collapsed);
 
-    execute_window_loop(win_collapsed, [&](const Coordinates & id)
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
     {
         const auto in_ptr  = reinterpret_cast<const uint8_t *>(in.ptr());
         const auto out_ptr = reinterpret_cast<T *>(out.ptr());

@@ -249,7 +249,8 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeRHSMatrixKernel::validate(b, &tmp_b_info, rhs_info));
     }
 
-    TensorInfo info_vector_sum_col, info_vector_sum_row;
+    TensorInfo info_vector_sum_col{};
+    TensorInfo info_vector_sum_row{};
 
     // Validate matrix B reduction kernel only if _a_offset is not equal to 0
     if(a_offset != 0)
