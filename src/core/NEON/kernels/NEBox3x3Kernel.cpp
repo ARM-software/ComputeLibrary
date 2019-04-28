@@ -33,6 +33,50 @@
 
 using namespace arm_compute;
 
+int16x8_t calculate_kernel( const uint8x16_t &top_data, const uint8x16_t &mid_data, const uint8x16_t &bot_data){
+    const int16x8x2_t top_s16 =
+    {
+        {
+            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(top_data))),
+            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(top_data)))
+        }
+    };
+    const int16x8x2_t mid_s16 =
+    {
+        {
+            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(mid_data))),
+            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(mid_data)))
+        }
+    };
+    const int16x8x2_t bot_s16 =
+    {
+        {
+            vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(bot_data))),
+            vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(bot_data)))
+        }
+    };
+
+    //top left
+    int16x8_t out = top_s16.val[0];
+    //top mid
+    out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 1));
+    //top right
+    out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 2));
+    //mid left
+    out = vaddq_s16(out, mid_s16.val[0]);
+    //mid mid
+    out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 1));
+    //mid right
+    out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 2));
+    //bot left
+    out = vaddq_s16(out, bot_s16.val[0]);
+    //bot mid
+    out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 1));
+    //bot right
+    out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 2));
+    return out;
+}
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
 {
@@ -55,48 +99,7 @@ void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data = vld1q_u8(input_bot_ptr + input.offset());
 
-        const uint16x8x2_t top_f16 =
-        {
-            {
-                vmovl_u8(vget_low_u8(top_data)),
-                vmovl_u8(vget_high_u8(top_data))
-            }
-        };
-
-        const uint16x8x2_t mid_f16 =
-        {
-            {
-                vmovl_u8(vget_low_u8(mid_data)),
-                vmovl_u8(vget_high_u8(mid_data))
-            }
-        };
-
-        const uint16x8x2_t bot_f16 =
-        {
-            {
-               vmovl_u8(vget_low_u8(bot_data)),
-               vmovl_u8(vget_high_u8(bot_data))
-            }
-        };
-
-        //top left
-        uint16x8_t out = top_f16.val[0];
-        //top mid
-        out = vaddq_u16(out, vextq_u16(top_f16.val[0], top_f16.val[1], 1));
-        //top right
-        out = vaddq_u16(out, vextq_u16(top_f16.val[0], top_f16.val[1], 2));
-        //mid left
-        out = vaddq_u16(out, mid_f16.val[0]);
-        //mid mid
-        out = vaddq_u16(out, vextq_u16(mid_f16.val[0], mid_f16.val[1], 1));
-        //mid right
-        out = vaddq_u16(out, vextq_u16(mid_f16.val[0], mid_f16.val[1], 2));
-        //bot left
-        out = vaddq_u16(out, bot_f16.val[0]);
-        //bot mid
-        out = vaddq_u16(out, vextq_u16(bot_f16.val[0], bot_f16.val[1], 1));
-        //bot right
-        out = vaddq_u16(out, vextq_u16(bot_f16.val[0], bot_f16.val[1], 2));
+        int16x8_t out = calculate_kernel(top_data, mid_data, bot_data);
 
         float16x8_t outfloat = vcvtq_f16_u16(out);
         outfloat = vmulq_f16(outfloat, oneovernine);
@@ -169,46 +172,7 @@ void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
         const uint8x16_t bot_data = vld1q_u8(input_bot_ptr + input.offset());
 
-        const int16x8x2_t top_s16 =
-        {
-            {
-                vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(top_data))),
-                vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(top_data)))
-            }
-        };
-        const int16x8x2_t mid_s16 =
-        {
-            {
-                vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(mid_data))),
-                vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(mid_data)))
-            }
-        };
-        const int16x8x2_t bot_s16 =
-        {
-            {
-                vreinterpretq_s16_u16(vmovl_u8(vget_low_u8(bot_data))),
-                vreinterpretq_s16_u16(vmovl_u8(vget_high_u8(bot_data)))
-            }
-        };
-
-        //top left
-        int16x8_t out = top_s16.val[0];
-        //top mid
-        out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 1));
-        //top right
-        out = vaddq_s16(out, vextq_s16(top_s16.val[0], top_s16.val[1], 2));
-        //mid left
-        out = vaddq_s16(out, mid_s16.val[0]);
-        //mid mid
-        out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 1));
-        //mid right
-        out = vaddq_s16(out, vextq_s16(mid_s16.val[0], mid_s16.val[1], 2));
-        //bot left
-        out = vaddq_s16(out, bot_s16.val[0]);
-        //bot mid
-        out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 1));
-        //bot right
-        out = vaddq_s16(out, vextq_s16(bot_s16.val[0], bot_s16.val[1], 2));
+        int16x8_t out = calculate_kernel(top_data, mid_data, bot_data);
 
         int32x4_t outfloathigh = vmovl_s16(vget_high_s16(out));
         int32x4_t outfloatlow  = vmovl_s16(vget_low_s16(out));
