@@ -828,10 +828,11 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
  * @param[in] weights_shape Weights shape
  * @param[in] conv_info     Convolution information (containing strides)
  * @param[in] data_layout   (Optional) Data layout of the input and weights tensor
+ * @param[in] dilation      (Optional) Dilation factor used in the convolution.
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW);
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u));
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *
@@ -846,10 +847,10 @@ PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_sh
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
-                                                                            unsigned int kernel_width, unsigned int kernel_height,
-                                                                            unsigned int padx, unsigned int pady,
-                                                                            unsigned int stride_x, unsigned int stride_y);
+std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                      unsigned int kernel_width, unsigned int kernel_height,
+                                                                      unsigned int padx, unsigned int pady,
+                                                                      unsigned int stride_x, unsigned int stride_y);
 
 /** Returns expected width and height of output scaled tensor depending on dimensions rounding mode.
  *
@@ -862,10 +863,10 @@ const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsi
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
-const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
-                                                              unsigned int kernel_width, unsigned int kernel_height,
-                                                              const PadStrideInfo &pad_stride_info,
-                                                              const Size2D        &dilation = Size2D(1U, 1U));
+std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
+                                                        unsigned int kernel_width, unsigned int kernel_height,
+                                                        const PadStrideInfo &pad_stride_info,
+                                                        const Size2D        &dilation = Size2D(1U, 1U));
 
 /** Convert a tensor format into a string.
  *
