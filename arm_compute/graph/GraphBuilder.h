@@ -51,7 +51,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_const_node(Graph &g, NodeParams params, TensorDescriptor desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID add_const_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an input layer node to the graph
      *
      * @param[in] g        Graph to add the node to
@@ -61,7 +61,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_input_node(Graph &g, NodeParams params, TensorDescriptor desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an output layer node to the graph
      *
      * @param[in] g        Graph to add the node to

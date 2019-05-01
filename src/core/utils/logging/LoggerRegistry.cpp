@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,7 @@ std::shared_ptr<Logger> LoggerRegistry::logger(const std::string &name)
     return (_loggers.find(name) != _loggers.end()) ? _loggers[name] : nullptr;
 }
 
-void LoggerRegistry::create_reserved_loggers(LogLevel log_level, std::vector<std::shared_ptr<Printer>> printers)
+void LoggerRegistry::create_reserved_loggers(LogLevel log_level, const std::vector<std::shared_ptr<Printer>> &printers)
 {
     std::lock_guard<arm_compute::Mutex> lock(_mtx);
     for(const auto &r : _reserved_loggers)

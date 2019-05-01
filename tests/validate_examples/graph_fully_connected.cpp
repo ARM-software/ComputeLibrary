@@ -142,6 +142,7 @@ public:
     /** Default destructor */
     ~FullyConnectedOptions() override = default;
 
+private:
     SimpleOption<int>      *width;              /**< Input width */
     SimpleOption<int>      *batch;              /**< Input batch */
     SimpleOption<float>    *input_scale;        /**< Input Quantization scale from QASSYMM8 */

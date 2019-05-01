@@ -45,9 +45,7 @@ NEDepthConcatenateLayer::NEDepthConcatenateLayer() // NOLINT
 
 void NEDepthConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, ITensor *output) // NOLINT
 {
-    _num_inputs             = inputs_vector.size();
-    _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<NEDepthConcatenateLayerKernel[]>(_num_inputs);
-    _border_handlers_vector = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(_num_inputs);
+    _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info;
     for(unsigned int i = 0; i < _num_inputs; i++)
@@ -61,10 +59,16 @@ void NEDepthConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vec
     ARM_COMPUTE_ERROR_THROW_ON(NEDepthConcatenateLayer::validate(inputs_vector_info, output->info()));
 
     unsigned int depth_offset = 0;
+    _concat_kernels_vector.reserve(_num_inputs);
+    _border_handlers_vector.reserve(_num_inputs);
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
-        _concat_kernels_vector[i].configure(inputs_vector.at(i), depth_offset, output);
-        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
+        auto concat_kernel = support::cpp14::make_unique<NEDepthConcatenateLayerKernel>();
+        auto border_kernel = support::cpp14::make_unique<NEFillBorderKernel>();
+        concat_kernel->configure(inputs_vector.at(i), depth_offset, output);
+        border_kernel->configure(inputs_vector.at(i), concat_kernel->border_size(), BorderMode::CONSTANT, PixelValue(static_cast<float>(0.f)));
+        _border_handlers_vector.emplace_back(std::move(border_kernel));
+        _concat_kernels_vector.emplace_back(std::move(concat_kernel));
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }
@@ -98,7 +102,7 @@ void NEDepthConcatenateLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; ++i)
     {
-        NEScheduler::get().schedule(&_border_handlers_vector[i], Window::DimX);
-        NEScheduler::get().schedule(&_concat_kernels_vector[i], Window::DimX);
+        NEScheduler::get().schedule(_border_handlers_vector[i].get(), Window::DimX);
+        NEScheduler::get().schedule(_concat_kernels_vector[i].get(), Window::DimX);
     }
 }

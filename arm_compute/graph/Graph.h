@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -216,7 +216,7 @@ private:
      *
      * @return Tensor ID
      */
-    TensorID create_tensor(TensorDescriptor desc = TensorDescriptor());
+    TensorID create_tensor(const TensorDescriptor &desc = TensorDescriptor());
 
 private:
     GraphID                              _id      = GraphID(0); /**< Graph id */

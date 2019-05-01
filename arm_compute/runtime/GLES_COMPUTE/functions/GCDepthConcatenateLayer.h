@@ -60,9 +60,9 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<GCDepthConcatenateLayerKernel[]> _concat_kernels_vector;
-    std::unique_ptr<GCFillBorderKernel[]>            _border_handlers_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<std::unique_ptr<GCDepthConcatenateLayerKernel>> _concat_kernels_vector;
+    std::vector<std::unique_ptr<GCFillBorderKernel>>            _border_handlers_vector;
+    unsigned int                                                _num_inputs;
 };
 }
 #endif /* __ARM_COMPUTE_GCDEPTHCONCATENATE_H__ */

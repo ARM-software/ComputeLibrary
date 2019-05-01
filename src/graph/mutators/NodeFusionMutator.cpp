@@ -207,7 +207,7 @@ void NodeFusionMutator::mutate(Graph &g)
     const std::set<Activation> supported_fused_activations = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU };
 
     // Preconditions
-    auto empty_prec = [](INode & n)
+    auto empty_prec = [](INode &)
     {
         return true;
     };

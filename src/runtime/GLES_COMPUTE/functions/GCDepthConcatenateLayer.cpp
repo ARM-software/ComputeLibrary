@@ -47,13 +47,18 @@ void GCDepthConcatenateLayer::configure(std::vector<IGCTensor *> inputs_vector, 
 
     unsigned int depth_offset = 0;
 
-    _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<GCDepthConcatenateLayerKernel[]>(_num_inputs);
-    _border_handlers_vector = arm_compute::support::cpp14::make_unique<GCFillBorderKernel[]>(_num_inputs);
+    _concat_kernels_vector.reserve(_num_inputs);
+    _border_handlers_vector.reserve(_num_inputs);
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
-        _concat_kernels_vector[i].configure(inputs_vector.at(i), depth_offset, output);
-        _border_handlers_vector[i].configure(inputs_vector.at(i), _concat_kernels_vector[i].border_size(), BorderMode::CONSTANT, PixelValue());
+        auto concat_kernel = support::cpp14::make_unique<GCDepthConcatenateLayerKernel>();
+        auto border_kernel = support::cpp14::make_unique<GCFillBorderKernel>();
+
+        concat_kernel->configure(inputs_vector.at(i), depth_offset, output);
+        border_kernel->configure(inputs_vector.at(i), concat_kernel->border_size(), BorderMode::CONSTANT, PixelValue());
+        _concat_kernels_vector.emplace_back(std::move(concat_kernel));
+        _border_handlers_vector.emplace_back(std::move(border_kernel));
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }
@@ -63,8 +68,8 @@ void GCDepthConcatenateLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; i++)
     {
-        GCScheduler::get().dispatch(_border_handlers_vector[i], false);
+        GCScheduler::get().dispatch(*_border_handlers_vector[i].get(), false);
         GCScheduler::get().memory_barrier();
-        GCScheduler::get().dispatch(_concat_kernels_vector[i], true);
+        GCScheduler::get().dispatch(*_concat_kernels_vector[i].get(), true);
     }
 }

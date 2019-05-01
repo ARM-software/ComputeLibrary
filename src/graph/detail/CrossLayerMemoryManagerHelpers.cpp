@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,7 +136,7 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
             // Then add it to the list of transition buffers
             ITensorHandle *tensor_handle = input_edge->tensor()->handle()->parent_handle();
             IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
-            transition_handles.input_handles.push_back(std::make_pair(tensor_handle, mm_group));
+            transition_handles.input_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
         }
     }
 
@@ -149,7 +149,7 @@ TaskHandles get_transition_handles(GraphContext                    &ctx,
         {
             ITensorHandle *tensor_handle = output_tensor->handle()->parent_handle();
             IMemoryGroup *mm_group      = get_memory_group_from_handle(ctx, tensor_handle);
-            transition_handles.output_handles.push_back(std::make_pair(tensor_handle, mm_group));
+            transition_handles.output_handles.emplace_back(std::make_pair(tensor_handle, mm_group));
         }
     }
 

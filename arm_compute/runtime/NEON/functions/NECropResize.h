@@ -98,10 +98,10 @@ public:
     InterpolationPolicy _method;
     float               _extrapolation_value;
 
-    std::unique_ptr<NECropKernel[]> _crop;
-    std::unique_ptr<NEScale[]>      _scale;
-    std::unique_ptr<Tensor[]>       _crop_results{ nullptr };
-    std::unique_ptr<Tensor[]>       _scaled_results{ nullptr };
+    std::vector<std::unique_ptr<NECropKernel>> _crop;
+    std::vector<std::unique_ptr<NEScale>>      _scale;
+    std::vector<std::unique_ptr<Tensor>>       _crop_results;
+    std::vector<std::unique_ptr<Tensor>>       _scaled_results;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEON_CROP_RESIZE_H__ */

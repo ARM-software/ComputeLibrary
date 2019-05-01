@@ -84,10 +84,10 @@ public:
     void run() override;
 
 private:
-    std::vector<ITensor *>                           _inputs_vector;
-    std::unique_ptr<NEDepthConcatenateLayerKernel[]> _concat_kernels_vector;
-    std::unique_ptr<NEFillBorderKernel[]>            _border_handlers_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<ITensor *>                                      _inputs_vector;
+    std::vector<std::unique_ptr<NEDepthConcatenateLayerKernel>> _concat_kernels_vector;
+    std::vector<std::unique_ptr<NEFillBorderKernel>>            _border_handlers_vector;
+    unsigned int                                                _num_inputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHCONCATENATE_H__ */

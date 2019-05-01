@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,9 +39,12 @@
 #include <sstream>
 #include <string>
 
-using namespace arm_compute;
-
-#define MAX_MATRIX_SIZE 81
+namespace arm_compute
+{
+namespace
+{
+constexpr unsigned int max_matrix_size = 81;
+} // namespace
 
 /****************************************************************************************\
  *                                 Square Convolution                                *
@@ -138,8 +141,8 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
     // Set build options
     std::set<std::string> build_opts;
 
-    int16_t mat[matrix_size * matrix_size] = { 0 };
-    memcpy(mat, conv, matrix_size * sizeof(int16_t));
+    std::array<int16_t, matrix_size *matrix_size> mat = { 0 };
+    memcpy(mat.data(), conv, matrix_size * sizeof(int16_t));
 
     for(unsigned int j = 0; j < matrix_size * matrix_size; j++)
     {
@@ -173,7 +176,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
 template <unsigned int matrix_size>
 BorderSize             CLSeparableConvolutionVertKernel<matrix_size>::border_size() const
 {
-    return BorderSize(matrix_size / 2, 0);
+    return BorderSize{ matrix_size / 2, 0 };
 }
 
 template <unsigned int matrix_size>
@@ -190,8 +193,8 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
 
     std::set<std::string> build_opts;
 
-    int16_t mat[matrix_size * matrix_size] = { 0 };
-    memcpy(mat + matrix_size, conv, matrix_size * sizeof(int16_t));
+    std::array<int16_t, matrix_size *matrix_size> mat = { 0 };
+    memcpy(mat.data() + matrix_size, conv, matrix_size * sizeof(int16_t));
 
     for(unsigned int j = 0; j < matrix_size * matrix_size; j++)
     {
@@ -264,11 +267,11 @@ void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *
 
     uint32_t matrix_size = width * height;
 
-    int16_t mat[MAX_MATRIX_SIZE] = { 0 };
+    std::array<int16_t, max_matrix_size> mat = { 0 };
 
-    memcpy(mat, conv, matrix_size * sizeof(int16_t));
+    memcpy(mat.data(), conv, matrix_size * sizeof(int16_t));
 
-    for(unsigned int j = 0; j < MAX_MATRIX_SIZE; j++)
+    for(unsigned int j = 0; j < max_matrix_size; j++)
     {
         options.insert("-DMAT" + support::cpp11::to_string(j) + "=" + support::cpp11::to_string(mat[j]));
     }
@@ -328,3 +331,4 @@ template class arm_compute::CLSeparableConvolutionVertKernel<9>;
 template class arm_compute::CLSeparableConvolutionHorKernel<5>;
 template class arm_compute::CLSeparableConvolutionHorKernel<7>;
 template class arm_compute::CLSeparableConvolutionHorKernel<9>;
+} // namespace arm_compute

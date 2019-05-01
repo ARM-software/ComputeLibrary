@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,10 +91,10 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEFillBorderKernel[]>          _horizontal_border_handler;
-    std::unique_ptr<NEFillBorderKernel[]>          _vertical_border_handler;
-    std::unique_ptr<NEGaussianPyramidHorKernel[]>  _horizontal_reduction;
-    std::unique_ptr<NEGaussianPyramidVertKernel[]> _vertical_reduction;
+    std::vector<std::unique_ptr<NEFillBorderKernel>>          _horizontal_border_handler;
+    std::vector<std::unique_ptr<NEFillBorderKernel>>          _vertical_border_handler;
+    std::vector<std::unique_ptr<NEGaussianPyramidHorKernel>>  _horizontal_reduction;
+    std::vector<std::unique_ptr<NEGaussianPyramidVertKernel>> _vertical_reduction;
 };
 
 /** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following NEON kernels and functions:
@@ -115,8 +115,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEGaussian5x5[]> _gaus5x5;
-    std::unique_ptr<NEScale[]>       _scale_nearest;
+    std::vector<std::unique_ptr<NEGaussian5x5>> _gaus5x5;
+    std::vector<std::unique_ptr<NEScale>>       _scale_nearest;
 };
 }
 #endif /*__ARM_COMPUTE_NEGAUSSIANPYRAMID_H__ */

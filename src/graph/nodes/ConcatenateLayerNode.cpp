@@ -72,6 +72,7 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
 
     // Extract shapes
     std::vector<const TensorShape *> shapes;
+    shapes.reserve(input_descriptors.size());
     for(auto &input_descriptor : input_descriptors)
     {
         shapes.emplace_back(&input_descriptor.shape);

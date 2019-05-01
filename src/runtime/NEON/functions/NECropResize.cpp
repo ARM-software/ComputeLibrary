@@ -30,7 +30,7 @@
 namespace arm_compute
 {
 NECropResize::NECropResize()
-    : _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _crop(), _scale()
+    : _output(nullptr), _num_boxes(0), _method(), _extrapolation_value(0), _crop(), _scale(), _crop_results(), _scaled_results()
 {
 }
 
@@ -70,22 +70,31 @@ void NECropResize::configure(const ITensor *input, const ITensor *boxes, const I
     // - A scale function is used to resize the cropped image to the size specified by crop_size.
     // - A tensor is required to hold the final scaled image before it is copied into the 4D output
     //   that will hold all final cropped and scaled 3D images.
-    _crop           = arm_compute::support::cpp14::make_unique<NECropKernel[]>(_num_boxes);
-    _crop_results   = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_boxes);
-    _scale          = arm_compute::support::cpp14::make_unique<NEScale[]>(_num_boxes);
-    _scaled_results = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_boxes);
+    _crop.reserve(_num_boxes);
+    _crop_results.reserve(_num_boxes);
+    _scaled_results.reserve(_num_boxes);
+    _scale.reserve(_num_boxes);
 
     for(unsigned int i = 0; i < _num_boxes; ++i)
     {
+        auto       crop_tensor = support::cpp14::make_unique<Tensor>();
         TensorInfo crop_result_info(1, DataType::F32);
         crop_result_info.set_data_layout(DataLayout::NHWC);
-        _crop_results[i].allocator()->init(crop_result_info);
+        crop_tensor->allocator()->init(crop_result_info);
 
+        auto       scale_tensor = support::cpp14::make_unique<Tensor>();
         TensorInfo scaled_result_info(out_shape, 1, DataType::F32);
         scaled_result_info.set_data_layout(DataLayout::NHWC);
-        _scaled_results[i].allocator()->init(scaled_result_info);
+        scale_tensor->allocator()->init(scaled_result_info);
 
-        _crop[i].configure(input, boxes, box_ind, &_crop_results[i], i, _extrapolation_value);
+        auto crop_kernel  = support::cpp14::make_unique<NECropKernel>();
+        auto scale_kernel = support::cpp14::make_unique<NEScale>();
+        crop_kernel->configure(input, boxes, box_ind, crop_tensor.get(), i, _extrapolation_value);
+
+        _crop.emplace_back(std::move(crop_kernel));
+        _scaled_results.emplace_back(std::move(scale_tensor));
+        _crop_results.emplace_back(std::move(crop_tensor));
+        _scale.emplace_back(std::move(scale_kernel));
     }
 }
 
@@ -97,17 +106,17 @@ void NECropResize::run()
     {
         // Size of the crop box in _boxes and thus the shape of _crop_results[i]
         // may not be known until run-time and so the kernels cannot be configured until then.
-        _crop[i].configure_output_shape();
-        _crop_results[i].allocator()->allocate();
-        NEScheduler::get().schedule(&_crop[i], Window::DimZ);
+        _crop[i]->configure_output_shape();
+        _crop_results[i]->allocator()->allocate();
+        NEScheduler::get().schedule(_crop[i].get(), Window::DimZ);
 
         // Scale the cropped image.
-        _scale[i].configure(&_crop_results[i], &_scaled_results[i], _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT, false);
-        _scaled_results[i].allocator()->allocate();
-        _scale[i].run();
+        _scale[i]->configure(_crop_results[i].get(), _scaled_results[i].get(), _method, BorderMode::CONSTANT, PixelValue(_extrapolation_value), SamplingPolicy::TOP_LEFT, false);
+        _scaled_results[i]->allocator()->allocate();
+        _scale[i]->run();
 
         // Copy scaled image into output.
-        std::copy_n(_scaled_results[i].buffer(), _scaled_results[i].info()->total_size(), _output->ptr_to_element(Coordinates(0, 0, 0, i)));
+        std::copy_n(_scaled_results[i]->buffer(), _scaled_results[i]->info()->total_size(), _output->ptr_to_element(Coordinates(0, 0, 0, i)));
     }
 }
 } // namespace arm_compute

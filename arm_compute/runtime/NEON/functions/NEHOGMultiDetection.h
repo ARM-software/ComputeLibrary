@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,12 +91,12 @@ public:
 private:
     MemoryGroup                                                   _memory_group;
     NEHOGGradient                                                 _gradient_kernel;
-    std::unique_ptr<NEHOGOrientationBinningKernel[]>              _orient_bin_kernel;
-    std::unique_ptr<NEHOGBlockNormalizationKernel[]>              _block_norm_kernel;
-    std::unique_ptr<NEHOGDetector[]>                              _hog_detect_kernel;
+    std::vector<std::unique_ptr<NEHOGOrientationBinningKernel>>   _orient_bin_kernel;
+    std::vector<std::unique_ptr<NEHOGBlockNormalizationKernel>>   _block_norm_kernel;
+    std::vector<std::unique_ptr<NEHOGDetector>>                   _hog_detect_kernel;
     std::unique_ptr<CPPDetectionWindowNonMaximaSuppressionKernel> _non_maxima_kernel;
-    std::unique_ptr<Tensor[]>                                     _hog_space;
-    std::unique_ptr<Tensor[]>                                     _hog_norm_space;
+    std::vector<std::unique_ptr<Tensor>>                          _hog_space;
+    std::vector<std::unique_ptr<Tensor>>                          _hog_norm_space;
     IDetectionWindowArray                                        *_detection_windows;
     Tensor                                                        _mag;
     Tensor                                                        _phase;
