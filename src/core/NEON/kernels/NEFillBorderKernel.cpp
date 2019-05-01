@@ -168,7 +168,7 @@ void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)
 
     Iterator vertical_it(_tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates & id)
+    execute_window_loop(vertical, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + vertical_it.offset();
         // Fill left and right borders
@@ -188,7 +188,7 @@ void NEFillBorderKernel::fill_replicate_single_channel(const Window &window)
     Iterator plane_it(_tensor, window);
 
     // Iterate over all XY planes
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + plane_it.offset();
         // Top border
@@ -224,7 +224,7 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
 
     Iterator vertical_it(_tensor, vertical);
 
-    execute_window_loop(vertical, [&](const Coordinates & id)
+    execute_window_loop(vertical, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + vertical_it.offset();
         // Fill left and right borders
@@ -244,7 +244,7 @@ void NEFillBorderKernel::fill_constant_value_single_channel(const Window &window
     Iterator plane_it(_tensor, window);
 
     // Iterate over all XY planes
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + plane_it.offset();
         // Top border

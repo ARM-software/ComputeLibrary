@@ -68,9 +68,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ITensor *>     _outputs_vector;
-    std::unique_ptr<NESlice[]> _slice_functions;
-    unsigned int               _num_outputs;
+    std::vector<ITensor *> _outputs_vector;
+    std::vector<NESlice>   _slice_functions;
+    unsigned int           _num_outputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NESPLIT_H__ */

@@ -109,7 +109,7 @@ void CLWidthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
             break;
         default:
             // Configure generic case WidthConcatenate kernels
-            _concat_kernels_vector = arm_compute::support::cpp14::make_unique<CLWidthConcatenateLayerKernel[]>(_num_inputs);
+            _concat_kernels_vector.resize(_num_inputs);
 
             unsigned int width_offset = 0;
             for(unsigned int i = 0; i < _num_inputs; ++i)

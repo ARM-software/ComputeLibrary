@@ -55,7 +55,7 @@ public:
      * @param[in] printers  Printers to attach to the system loggers. Defaults with a @ref StdPrinter.
      */
     void create_logger(const std::string &name, LogLevel log_level = LogLevel::INFO,
-                       std::vector<std::shared_ptr<Printer>> printers = { std::make_shared<StdPrinter>() });
+                       const std::vector<std::shared_ptr<Printer>> &printers = { std::make_shared<StdPrinter>() });
     /** Remove a logger
      *
      * @param name Logger's name

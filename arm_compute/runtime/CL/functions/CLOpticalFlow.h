@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,13 +97,13 @@ public:
 
 private:
     CLMemoryGroup                              _memory_group;
-    std::unique_ptr<CLLKTrackerInitKernel[]>   _tracker_init_kernel;
-    std::unique_ptr<CLLKTrackerStage0Kernel[]> _tracker_stage0_kernel;
-    std::unique_ptr<CLLKTrackerStage1Kernel[]> _tracker_stage1_kernel;
+    std::vector<CLLKTrackerInitKernel>         _tracker_init_kernel;
+    std::vector<CLLKTrackerStage0Kernel>       _tracker_stage0_kernel;
+    std::vector<CLLKTrackerStage1Kernel>       _tracker_stage1_kernel;
     CLLKTrackerFinalizeKernel                  _tracker_finalize_kernel;
-    std::unique_ptr<CLScharr3x3[]>             _func_scharr;
-    std::unique_ptr<CLTensor[]>                _scharr_gx;
-    std::unique_ptr<CLTensor[]>                _scharr_gy;
+    std::vector<CLScharr3x3>                   _func_scharr;
+    std::vector<CLTensor>                      _scharr_gx;
+    std::vector<CLTensor>                      _scharr_gy;
     const ICLKeyPointArray                    *_old_points;
     const ICLKeyPointArray                    *_new_points_estimates;
     ICLKeyPointArray                          *_new_points;

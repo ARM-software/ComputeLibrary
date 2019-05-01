@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -387,7 +387,7 @@ GCKernel GCKernelLibrary::create_kernel(const std::string &shader_name, const St
     return kernel;
 }
 
-const std::string GCKernelLibrary::preprocess_shader(const std::string &shader_source) const
+std::string GCKernelLibrary::preprocess_shader(const std::string &shader_source) const
 {
     enum class ParserStage
     {
@@ -399,7 +399,7 @@ const std::string GCKernelLibrary::preprocess_shader(const std::string &shader_s
 
     // Define a GLES compute shader parser function
     std::function<std::string(const std::string &, ParserStage, int)> cs_parser;
-    cs_parser = [&](const std::string & src, ParserStage stage, int nested_level) -> std::string
+    cs_parser = [&](const std::string & src, ParserStage stage, int) -> std::string
     {
         std::string dst;
 

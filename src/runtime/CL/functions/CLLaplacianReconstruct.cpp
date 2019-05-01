@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,8 +63,8 @@ void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, ICLTensor *inpu
     _tmp_pyr.init(pyramid_info);
 
     // Allocate add and scale functions. Level 0 does not need to be scaled.
-    _addf   = arm_compute::support::cpp14::make_unique<CLArithmeticAddition[]>(num_levels);
-    _scalef = arm_compute::support::cpp14::make_unique<CLScale[]>(num_levels - 1);
+    _addf.resize(num_levels);
+    _scalef.resize(num_levels - 1);
 
     const size_t last_level = num_levels - 1;
 
@@ -85,7 +85,7 @@ void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, ICLTensor *inpu
 
 void CLLaplacianReconstruct::run()
 {
-    ARM_COMPUTE_ERROR_ON_MSG(_addf == nullptr, "Unconfigured function");
+    ARM_COMPUTE_ERROR_ON_MSG(_addf.empty(), "Unconfigured function");
 
     const size_t last_level = _tmp_pyr.info()->num_levels() - 1;
 

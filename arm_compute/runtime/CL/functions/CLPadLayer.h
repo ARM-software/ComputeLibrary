@@ -83,15 +83,15 @@ private:
     void configure_constant_mode(ICLTensor *input, ICLTensor *output, const PaddingList &padding, const PixelValue constant_value);
     void configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *output);
 
-    CLCopyKernel                          _copy_kernel;
-    PaddingMode                           _mode;
-    PaddingList                           _padding;
-    CLMemsetKernel                        _memset_kernel;
-    size_t                                _num_dimensions;
-    std::unique_ptr<CLStridedSlice[]>     _slice_functions;
-    std::unique_ptr<CLConcatenateLayer[]> _concat_functions;
-    std::unique_ptr<CLTensor[]>           _slice_results;
-    std::unique_ptr<CLTensor[]>           _concat_results;
+    CLCopyKernel                    _copy_kernel;
+    PaddingMode                     _mode;
+    PaddingList                     _padding;
+    CLMemsetKernel                  _memset_kernel;
+    size_t                          _num_dimensions;
+    std::vector<CLStridedSlice>     _slice_functions;
+    std::vector<CLConcatenateLayer> _concat_functions;
+    std::vector<CLTensor>           _slice_results;
+    std::vector<CLTensor>           _concat_results;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_PADLAYER_H__ */

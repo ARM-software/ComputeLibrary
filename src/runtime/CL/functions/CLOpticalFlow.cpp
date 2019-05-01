@@ -84,12 +84,12 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
     const int   old_values_list_length = list_length * window_dimension * window_dimension;
 
     // Create kernels and tensors
-    _tracker_init_kernel   = arm_compute::support::cpp14::make_unique<CLLKTrackerInitKernel[]>(_num_levels);
-    _tracker_stage0_kernel = arm_compute::support::cpp14::make_unique<CLLKTrackerStage0Kernel[]>(_num_levels);
-    _tracker_stage1_kernel = arm_compute::support::cpp14::make_unique<CLLKTrackerStage1Kernel[]>(_num_levels);
-    _func_scharr           = arm_compute::support::cpp14::make_unique<CLScharr3x3[]>(_num_levels);
-    _scharr_gx             = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_levels);
-    _scharr_gy             = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_levels);
+    _tracker_init_kernel.resize(_num_levels);
+    _tracker_stage0_kernel.resize(_num_levels);
+    _tracker_stage1_kernel.resize(_num_levels);
+    _func_scharr.resize(_num_levels);
+    _scharr_gx.resize(_num_levels);
+    _scharr_gy.resize(_num_levels);
 
     // Create internal keypoint arrays
     _old_points_internal = arm_compute::support::cpp14::make_unique<CLLKInternalKeypointArray>(list_length);
@@ -118,8 +118,8 @@ void CLOpticalFlow::configure(const CLPyramid *old_pyramid, const CLPyramid *new
         _scharr_gy[i].allocator()->init(tensor_info);
 
         // Manage intermediate buffers
-        _memory_group.manage(_scharr_gx.get() + i);
-        _memory_group.manage(_scharr_gy.get() + i);
+        _memory_group.manage(&_scharr_gx[i]);
+        _memory_group.manage(&_scharr_gy[i]);
 
         // Init Scharr kernel
         _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);

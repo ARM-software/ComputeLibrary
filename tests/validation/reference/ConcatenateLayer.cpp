@@ -41,6 +41,7 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
 {
     // Create reference
     std::vector<TensorShape> shapes;
+    shapes.reserve(srcs.size());
     for(const auto &src : srcs)
     {
         shapes.emplace_back(src.shape());

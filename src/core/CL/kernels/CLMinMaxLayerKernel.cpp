@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -127,7 +127,7 @@ void CLMinMaxLayerKernel::reset(cl::CommandQueue &queue)
     Iterator output(_output, window_output);
 
     // Reset output
-    execute_window_loop(window_output, [&](const Coordinates & id)
+    execute_window_loop(window_output, [&](const Coordinates &)
     {
         auto *ptr = reinterpret_cast<float *>(output.ptr());
         ptr[0]    = std::numeric_limits<float>::max();

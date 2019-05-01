@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,9 @@
 using namespace arm_compute;
 
 MultiHOG::MultiHOG(size_t num_models)
-    : _num_models(num_models), _model(arm_compute::support::cpp14::make_unique<HOG[]>(_num_models))
+    : _num_models(num_models), _model()
 {
+    _model.resize(_num_models);
 }
 
 size_t MultiHOG::num_models() const
@@ -42,11 +43,11 @@ size_t MultiHOG::num_models() const
 IHOG *MultiHOG::model(size_t index)
 {
     ARM_COMPUTE_ERROR_ON(index >= _num_models);
-    return (_model.get() + index);
+    return (&_model[index]);
 }
 
 const IHOG *MultiHOG::model(size_t index) const
 {
     ARM_COMPUTE_ERROR_ON(index >= _num_models);
-    return (_model.get() + index);
+    return (&_model[index]);
 }

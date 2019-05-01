@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,8 +39,8 @@ Size2D num_detection_windows(const TensorShape &shape, const Size2D &window_step
     const size_t num_block_strides_width  = hog_info.detection_window_size().width / hog_info.block_stride().width;
     const size_t num_block_strides_height = hog_info.detection_window_size().height / hog_info.block_stride().height;
 
-    return Size2D(floor_to_multiple(shape.x() - num_block_strides_width, window_step.width) + window_step.width,
-                  floor_to_multiple(shape.y() - num_block_strides_height, window_step.height) + window_step.height);
+    return Size2D{ floor_to_multiple(shape.x() - num_block_strides_width, window_step.width) + window_step.width,
+                   floor_to_multiple(shape.y() - num_block_strides_height, window_step.height) + window_step.height };
 }
 } // namespace
 

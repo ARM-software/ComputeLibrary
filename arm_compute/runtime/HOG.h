@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,8 @@ public:
     float         *descriptor() const override;
 
 private:
-    HOGInfo                  _info;
-    std::unique_ptr<float[]> _descriptor;
+    HOGInfo                    _info;
+    mutable std::vector<float> _descriptor;
 };
 }
 #endif /* __ARM_COMPUTE_HOG_H__ */

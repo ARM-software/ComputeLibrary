@@ -79,10 +79,10 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLWidthConcatenateLayerKernel[]> _concat_kernels_vector;
-    CLWidthConcatenate2TensorsKernel                 _concat_x2_kernel;
-    CLWidthConcatenate4TensorsKernel                 _concat_x4_kernel;
-    unsigned int                                     _num_inputs;
+    std::vector<CLWidthConcatenateLayerKernel> _concat_kernels_vector;
+    CLWidthConcatenate2TensorsKernel           _concat_x2_kernel;
+    CLWidthConcatenate4TensorsKernel           _concat_x4_kernel;
+    unsigned int                               _num_inputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLWIDTHCONCATENATELAYER_H__ */

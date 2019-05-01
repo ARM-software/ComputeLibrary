@@ -308,19 +308,22 @@ private:
         graph.graph().add_connection(split_nid, 3, sigmoid_2_nid, 0);
         set_node_params(graph.graph(), sigmoid_2_nid, sigmoid_2_params);
 
-        SubStream mul_1_ss(graph);
-        mul_1_ss.forward_tail(sigmoid_1_nid);
-        mul_1_ss << EltwiseLayer(std::move(mul_1_ss), std::move(tanh_ss), EltwiseOperation::Mul)
+        SubStream sigmoid_1_ss(graph);
+        sigmoid_1_ss.forward_tail(sigmoid_1_nid);
+        SubStream mul_1_ss(sigmoid_1_ss);
+        mul_1_ss << EltwiseLayer(std::move(sigmoid_1_ss), std::move(tanh_ss), EltwiseOperation::Mul)
                  .set_name(cell_name + "/mul_1");
 
-        SubStream tanh_1_ss(graph);
-        tanh_1_ss.forward_tail(add_nid);
-        tanh_1_ss << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC))
-                  .set_name(cell_name + "/Sigmoid");
-        tanh_1_ss << EltwiseLayer(std::move(tanh_1_ss), std::move(previous_state_c), EltwiseOperation::Mul)
-                  .set_name(cell_name + "/mul");
+        SubStream tanh_1_ss_tmp(graph);
+        tanh_1_ss_tmp.forward_tail(add_nid);
 
-        tanh_1_ss << EltwiseLayer(std::move(tanh_1_ss), std::move(mul_1_ss), EltwiseOperation::Add)
+        tanh_1_ss_tmp << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC))
+                      .set_name(cell_name + "/Sigmoid");
+        SubStream tanh_1_ss_tmp2(tanh_1_ss_tmp);
+        tanh_1_ss_tmp2 << EltwiseLayer(std::move(tanh_1_ss_tmp), std::move(previous_state_c), EltwiseOperation::Mul)
+                       .set_name(cell_name + "/mul");
+        SubStream tanh_1_ss(tanh_1_ss_tmp2);
+        tanh_1_ss << EltwiseLayer(std::move(tanh_1_ss_tmp2), std::move(mul_1_ss), EltwiseOperation::Add)
                   .set_name(cell_name + "/new_state_c");
         SubStream new_state_c(tanh_1_ss);
 

@@ -94,7 +94,7 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, window);
     Iterator out(_output, window_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         memcpy(out.ptr(), in.ptr(), element_size);
     },

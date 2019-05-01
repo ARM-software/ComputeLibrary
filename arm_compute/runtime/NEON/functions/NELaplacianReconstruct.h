@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,10 +82,10 @@ public:
     void run() override;
 
 private:
-    Pyramid                                 _tmp_pyr;
-    std::unique_ptr<NEArithmeticAddition[]> _addf;
-    std::unique_ptr<NEScale[]>              _scalef;
-    NEDepthConvertLayer                     _depthf;
+    Pyramid                           _tmp_pyr;
+    std::vector<NEArithmeticAddition> _addf;
+    std::vector<NEScale>              _scalef;
+    NEDepthConvertLayer               _depthf;
 };
 }
 #endif /*__ARM_COMPUTE_NELAPLACIANRECONSTRUCT_H__ */

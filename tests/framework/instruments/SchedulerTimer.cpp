@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,9 +67,9 @@ public:
         return _real_scheduler.num_threads();
     }
 
-    void set_prefix(std::string prefix)
+    void set_prefix(const std::string &prefix)
     {
-        _prefix = std::move(prefix);
+        _prefix = prefix;
     }
 
     void schedule(ICPPKernel *kernel, const Hints &hints) override
@@ -188,7 +188,7 @@ Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() co
         if(output_timestamps)
         {
             ARM_COMPUTE_ERROR_ON(kernel.measurements.size() != 2);
-            for(auto m : kernel.measurements)
+            for(auto const &m : kernel.measurements)
             {
                 if(m.first.find("[start]") != std::string::npos)
                 {

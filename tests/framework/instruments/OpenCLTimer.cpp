@@ -185,9 +185,12 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
 {
     MeasurementsMap measurements;
     unsigned int    kernel_number = 0;
-    for(auto kernel : _kernels)
+    for(auto const &kernel : _kernels)
     {
-        cl_ulong queued, flushed, start, end;
+        cl_ulong queued;
+        cl_ulong flushed;
+        cl_ulong start;
+        cl_ulong end;
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_QUEUED, &queued);
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_SUBMIT, &flushed);
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);

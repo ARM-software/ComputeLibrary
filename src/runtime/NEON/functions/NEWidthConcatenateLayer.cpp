@@ -79,7 +79,7 @@ inline void NEWidthConcatenateLayer::configure_internal(std::vector<TensorType *
 
     unsigned int width_offset = 0;
 
-    _concat_kernels_vector = arm_compute::support::cpp14::make_unique<NEWidthConcatenateLayerKernel[]>(_num_inputs);
+    _concat_kernels_vector.resize(_num_inputs);
 
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
@@ -112,6 +112,6 @@ void NEWidthConcatenateLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; ++i)
     {
-        NEScheduler::get().schedule(_concat_kernels_vector.get() + i, Window::DimY);
+        NEScheduler::get().schedule(&_concat_kernels_vector[i], Window::DimY);
     }
 }

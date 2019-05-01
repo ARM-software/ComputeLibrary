@@ -42,6 +42,9 @@ def filter_clang_tidy_lines( lines ):
         if "/convolution/" in line:
             continue
 
+        if "/validate_examples/" in line:
+            continue
+
         if "error:" in line:
             if (("Utils.cpp" in line and "'arm_compute_version.embed' file not found" in line) or
                 ("arm_fp16.h" in line) or
@@ -62,11 +65,14 @@ def filter_clang_tidy_lines( lines ):
         elif "warning:" in line:
             if ("uninitialized record type: '__ret'" in line or
                "local variable '__bound_functor' is still referred to by the global variable '__once_callable'" in line or
+               "assigning newly created 'gsl::owner<>'" in line or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "thrown exception type is not nothrow copy constructible" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "uninitialized record type: 'args'" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "do not call c-style vararg functions" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "do not define a C-style variadic function" in line) or
                ("TensorAllocator.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
+               ("TensorAllocator.cpp" in line and "warning: do not declare C-style arrays" in line) or
+               ("RawTensor.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
@@ -95,6 +101,8 @@ def filter_clang_tidy_lines( lines ):
                ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
                ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                ("CPUUtils.cpp" in line and "warning: uninitialized record type" in line) or
+               ("GCKernelLibrary.cpp" in line and "warning: do not declare C-style arrays" in line) or
+               ("Utils.h" in line and "warning: Use of zero-allocated memory" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue

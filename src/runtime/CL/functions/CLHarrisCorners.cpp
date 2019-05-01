@@ -55,7 +55,7 @@ CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
       _gy(),
       _score(),
       _nonmax(),
-      _corners_list(nullptr),
+      _corners_list(),
       _num_corner_candidates(0),
       _corners(nullptr)
 {
@@ -84,7 +84,7 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->init(info_f32);
     _nonmax.allocator()->init(info_f32);
 
-    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list.resize(shape.x() * shape.y());
 
     // Manage intermediate buffers
     _memory_group.manage(&_gx);
@@ -146,13 +146,13 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->allocate();
 
     // Init corner candidates kernel
-    _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
+    _candidates.configure(&_nonmax, _corners_list.data(), &_num_corner_candidates);
 
     // Allocate intermediate buffers
     _nonmax.allocator()->allocate();
 
     // Init euclidean distance
-    _sort_euclidean.configure(_corners_list.get(), _corners, &_num_corner_candidates, min_dist);
+    _sort_euclidean.configure(_corners_list.data(), _corners, &_num_corner_candidates, min_dist);
 }
 
 void CLHarrisCorners::run()

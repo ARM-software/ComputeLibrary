@@ -76,8 +76,7 @@ uint32_t last_padding_dimension(const PaddingList &padding)
 } // namespace
 
 NEPadLayer::NEPadLayer()
-    : _copy_kernel(), _mode(), _padding(), _memset_kernel(), _num_dimensions(0), _slice_functions(nullptr), _concat_functions(nullptr), _slice_results(nullptr), _concat_results(nullptr),
-      _output_subtensor()
+    : _copy_kernel(), _mode(), _padding(), _memset_kernel(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results(), _output_subtensor()
 {
 }
 
@@ -108,11 +107,16 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
 
     // Two strided slice functions will be required for each dimension padded as well as a
     // concatenate function and the tensors to hold the temporary results.
-    _slice_functions  = arm_compute::support::cpp14::make_unique<NEStridedSlice[]>(2 * _num_dimensions);
-    _slice_results    = arm_compute::support::cpp14::make_unique<Tensor[]>(2 * _num_dimensions);
-    _concat_functions = arm_compute::support::cpp14::make_unique<NEConcatenateLayer[]>(_num_dimensions);
-    _concat_results   = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_dimensions - 1);
-    Coordinates starts_before, ends_before, starts_after, ends_after, strides;
+    _slice_functions.resize(2 * _num_dimensions);
+    _slice_results.resize(2 * _num_dimensions);
+    _concat_functions.resize(_num_dimensions);
+    _concat_results.resize(_num_dimensions - 1);
+
+    Coordinates starts_before{};
+    Coordinates ends_before{};
+    Coordinates starts_after{};
+    Coordinates ends_after{};
+    Coordinates strides{};
     ITensor    *prev = input;
     for(uint32_t i = 0; i < _num_dimensions; ++i)
     {
@@ -158,7 +162,7 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
                 if(i < prev->info()->num_dimensions())
                 {
                     _slice_functions[2 * i].configure(prev, &_slice_results[2 * i], starts_before, ends_before, strides, begin_mask_before, end_mask_before);
-                    concat_vector.push_back(&_slice_results[2 * i]);
+                    concat_vector.emplace_back(&_slice_results[2 * i]);
                 }
                 else
                 {
@@ -172,7 +176,7 @@ void NEPadLayer::configure_reflect_symmetric_mode(ITensor *input, ITensor *outpu
                 if(i < prev->info()->num_dimensions())
                 {
                     _slice_functions[2 * i + 1].configure(prev, &_slice_results[2 * i + 1], starts_after, ends_after, strides, begin_mask_after, end_mask_after);
-                    concat_vector.push_back(&_slice_results[2 * i + 1]);
+                    concat_vector.emplace_back(&_slice_results[2 * i + 1]);
                 }
                 else
                 {

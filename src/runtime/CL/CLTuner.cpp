@@ -275,7 +275,7 @@ void CLTuner::save_to_file(const std::string &filename) const
     std::ofstream fs;
     fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     fs.open(filename, std::ios::out);
-    for(auto kernel_data : _lws_table)
+    for(auto const &kernel_data : _lws_table)
     {
         fs << kernel_data.first << ";" << kernel_data.second[0] << ";" << kernel_data.second[1] << ";" << kernel_data.second[2] << std::endl;
     }

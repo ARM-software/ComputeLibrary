@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,12 +67,12 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                           _memory_group;
-    std::unique_ptr<CLReductionOperation[]> _reduction_kernels{ nullptr };
-    std::unique_ptr<CLTensor[]>             _reduced_outs{ nullptr };
-    CLReshapeLayer                          _reshape;
-    unsigned int                            _reduction_ops;
-    bool                                    _keep_dims;
+    CLMemoryGroup                     _memory_group;
+    std::vector<CLReductionOperation> _reduction_kernels;
+    std::vector<CLTensor>             _reduced_outs;
+    CLReshapeLayer                    _reshape;
+    unsigned int                      _reduction_ops;
+    bool                              _keep_dims;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_REDUCE_MEAN_H__ */

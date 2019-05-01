@@ -36,7 +36,7 @@ cl::NDRange CLLWSListExhaustive::operator[](size_t index)
 {
     ARM_COMPUTE_ERROR_ON(index >= size());
     auto coords = index2coords(search_space_shape, index);
-    return cl::NDRange(coords[0] + 1, coords[1] + 1, coords[2] + 1);
+    return cl::NDRange{ coords[0] + 1U, coords[1] + 1U, coords[2] + 1U };
 }
 
 CLLWSListExhaustive::CLLWSListExhaustive(const cl::NDRange &gws)
@@ -49,7 +49,7 @@ cl::NDRange CLLWSListNormal::operator[](size_t index)
 {
     ARM_COMPUTE_ERROR_ON(index >= size());
     auto coords = index2coords(search_space_shape, index);
-    return cl::NDRange(_lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]]);
+    return cl::NDRange{ _lws_x[coords[0]], _lws_y[coords[1]], _lws_z[coords[2]] };
 }
 
 CLLWSListNormal::CLLWSListNormal(const cl::NDRange &gws)

@@ -54,14 +54,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(c
     CLTensor dst = create_tensor<CLTensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[9];
+    std::array<int16_t, 9> conv = { 0 };
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLConvolution3x3 convolution;
-    convolution.configure(&src, &dst, conv, 0, border_mode);
+    convolution.configure(&src, &dst, conv.data(), 0, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
@@ -122,14 +122,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(c
     CLTensor dst = create_tensor<CLTensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[25];
+    std::array<int16_t, 25> conv = { 0 };
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLConvolution5x5 convolution;
-    convolution.configure(&src, &dst, conv, 0, border_mode);
+    convolution.configure(&src, &dst, conv.data(), 0, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
@@ -190,14 +190,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(c
     CLTensor dst = create_tensor<CLTensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[49];
+    std::array<int16_t, 49> conv = { 0 };
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLConvolution7x7 convolution;
-    convolution.configure(&src, &dst, conv, 0, border_mode);
+    convolution.configure(&src, &dst, conv.data(), 0, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
@@ -258,14 +258,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::NIGHTLY, combine(combine(c
     CLTensor dst = create_tensor<CLTensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[81];
+    std::array<int16_t, 81> conv = { 0 };
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLConvolution9x9 convolution;
-    convolution.configure(&src, &dst, conv, 0, border_mode);
+    convolution.configure(&src, &dst, conv.data(), 0, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2));
@@ -328,14 +328,14 @@ shape, output_data_type, border_mode, filter_width, filter_height)
     CLTensor dst = create_tensor<CLTensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[filter_width * filter_height];
+    std::vector<int16_t> conv(filter_width * filter_height);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLConvolutionRectangle convolution;
-    convolution.configure(&src, &dst, conv, filter_width, filter_height, 1, border_mode);
+    convolution.configure(&src, &dst, conv.data(), filter_width, filter_height, 1, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_height / 2, filter_width / 2));

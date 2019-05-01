@@ -178,7 +178,7 @@ inline void out_of_bounds_crop_window(const ITensor *output, float *output_ptr, 
 
 template <bool is_height_flipped, bool has_cols_in_bounds, bool has_cols_out_of_bounds_before, bool has_cols_out_of_bounds_after>
 inline void execute_window(const ITensor *input, const ITensor *output, Coordinates input_offset, float extrapolation_value,
-                           const uint32_t rows_out_of_bounds[], const uint32_t cols_out_of_bounds[], NECropKernel::InBoundsCropFunction *in_bounds_crop_function)
+                           const std::array<uint32_t, 2> &rows_out_of_bounds, const std::array<uint32_t, 2> &cols_out_of_bounds, NECropKernel::InBoundsCropFunction *in_bounds_crop_function)
 {
     // Output is always float.
     const int window_step_x = 16 / sizeof(float);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Error.h"
 
+#include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <iostream>
@@ -32,11 +33,11 @@ using namespace arm_compute;
 
 Status arm_compute::create_error_va_list(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, va_list args)
 {
-    char out[512];
-    int  offset = snprintf(out, sizeof(out), "in %s %s:%d: ", function, file, line);
-    vsnprintf(out + offset, sizeof(out) - offset, msg, args);
+    std::array<char, 512> out{ 0 };
+    int offset = snprintf(out.data(), out.size(), "in %s %s:%d: ", function, file, line);
+    vsnprintf(out.data() + offset, out.size() - offset, msg, args);
 
-    return Status(error_code, std::string(out));
+    return Status(error_code, std::string(out.data()));
 }
 
 Status arm_compute::create_error(ErrorCode error_code, const char *function, const char *file, const int line, const char *msg, ...)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ protected:
     void unlock() override;
 
 private:
-    std::unique_ptr<uint8_t[]> _buffer; /**< CPU memory allocation. */
+    mutable std::vector<uint8_t> _buffer; /**< CPU memory allocation. */
 };
 }
 #endif /* __ARM_COMPUTE_LUTALLOCATOR_H__ */

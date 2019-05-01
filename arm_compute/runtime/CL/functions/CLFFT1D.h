@@ -70,14 +70,14 @@ public:
     void run() override;
 
 protected:
-    CLMemoryGroup                            _memory_group;
-    CLFFTDigitReverseKernel                  _digit_reverse_kernel;
-    std::unique_ptr<CLFFTRadixStageKernel[]> _fft_kernels;
-    CLFFTScaleKernel                         _scale_kernel;
-    CLTensor                                 _digit_reversed_input;
-    CLTensor                                 _digit_reverse_indices;
-    unsigned int                             _num_ffts;
-    bool                                     _run_scale;
+    CLMemoryGroup                      _memory_group;
+    CLFFTDigitReverseKernel            _digit_reverse_kernel;
+    std::vector<CLFFTRadixStageKernel> _fft_kernels;
+    CLFFTScaleKernel                   _scale_kernel;
+    CLTensor                           _digit_reversed_input;
+    CLTensor                           _digit_reverse_indices;
+    unsigned int                       _num_ffts;
+    bool                               _run_scale;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLFFT1D_H__ */

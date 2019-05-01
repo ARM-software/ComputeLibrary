@@ -34,7 +34,7 @@ const cl::Buffer CLTensorAllocator::_empty_buffer = cl::Buffer();
 
 namespace
 {
-std::unique_ptr<ICLMemoryRegion> allocate_region(cl::Context context, size_t size, cl_uint alignment)
+std::unique_ptr<ICLMemoryRegion> allocate_region(const cl::Context &context, size_t size, cl_uint alignment)
 {
     // Try fine-grain SVM
     std::unique_ptr<ICLMemoryRegion> region = support::cpp14::make_unique<CLFineSVMMemoryRegion>(context,

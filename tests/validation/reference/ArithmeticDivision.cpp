@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,7 +77,9 @@ SimpleTensor<T> arithmetic_division(const SimpleTensor<T> &src1, const SimpleTen
 {
     SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), data_type);
 
-    Coordinates id_src1, id_src2, id_dst;
+    Coordinates id_src1{};
+    Coordinates id_src2{};
+    Coordinates id_dst{};
 
     BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, id_src1, id_src2, id_dst);
 

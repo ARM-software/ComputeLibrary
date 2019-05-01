@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -333,7 +333,10 @@ void GCPoolingLayerKernel::run(const Window &window)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    unsigned int pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y = 0;
+    unsigned int pool_pad_x;
+    unsigned int pool_pad_y;
+    unsigned int pool_stride_x;
+    unsigned int pool_stride_y;
     std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
 

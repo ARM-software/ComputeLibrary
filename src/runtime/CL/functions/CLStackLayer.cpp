@@ -46,8 +46,8 @@ CLStackLayer::CLStackLayer() // NOLINT
 
 void CLStackLayer::configure(const std::vector<ICLTensor *> &input, int axis, ICLTensor *output)
 {
-    _num_inputs    = input.size();
-    _stack_kernels = arm_compute::support::cpp14::make_unique<CLStackLayerKernel[]>(_num_inputs);
+    _num_inputs = input.size();
+    _stack_kernels.resize(_num_inputs);
 
     // Wrap around negative values
     const unsigned int axis_u = wrap_around(axis, static_cast<int>(input[0]->info()->num_dimensions() + 1));

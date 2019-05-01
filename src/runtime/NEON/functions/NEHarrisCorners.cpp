@@ -90,7 +90,7 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     _score.allocator()->init(tensor_info_score);
     _nonmax.allocator()->init(tensor_info_score);
 
-    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list.resize(shape.x() * shape.y());
 
     // Set/init Sobel kernel accordingly with gradient_size
     switch(gradient_size)
@@ -171,13 +171,13 @@ void NEHarrisCorners::configure(IImage *input, float threshold, float min_dist,
     _score.allocator()->allocate();
 
     // Init corner candidates kernel
-    _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
+    _candidates.configure(&_nonmax, _corners_list.data(), &_num_corner_candidates);
 
     // Allocate once all the configure methods have been called
     _nonmax.allocator()->allocate();
 
     // Init euclidean distance
-    _sort_euclidean.configure(_corners_list.get(), corners, &_num_corner_candidates, min_dist);
+    _sort_euclidean.configure(_corners_list.data(), corners, &_num_corner_candidates, min_dist);
 }
 
 void NEHarrisCorners::run()

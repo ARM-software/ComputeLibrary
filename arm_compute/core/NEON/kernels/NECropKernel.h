@@ -107,14 +107,14 @@ private:
     uint32_t    _crop_box_ind;
     float       _extrapolation_value;
     /** The number of rows out of bounds at the start and end of output. */
-    uint32_t _rows_out_of_bounds[2];
+    std::array<uint32_t, 2> _rows_out_of_bounds;
     /** The number of columns out of bounds at the start and end of output. */
-    uint32_t _cols_out_of_bounds[2];
+    std::array<uint32_t, 2> _cols_out_of_bounds;
 
     std::pair<NECropKernel::InBoundsCropFunction *, NECropKernel::InBoundsCropFunction *> _in_bounds_crop_functions;
     NECropKernel::InBoundsCropFunction *_in_bounds_crop_function;
 
-    using CropFunction = void(const ITensor *, const ITensor *, Coordinates, float, const uint32_t *, const uint32_t *,
+    using CropFunction = void(const ITensor *, const ITensor *, Coordinates, float, const std::array<uint32_t, 2> &, const std::array<uint32_t, 2> &,
                               NECropKernel::InBoundsCropFunction *);
 
     NECropKernel::CropFunction *_crop_function;

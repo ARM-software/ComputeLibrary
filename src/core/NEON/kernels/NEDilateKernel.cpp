@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,7 +94,8 @@ void NEDilateKernel::run(const Window &window, const ThreadInfo &info)
         uint8x8_t bot_high_data = vget_high_u8(bot_data);
         uint8x8_t bot_low_data  = vget_low_u8(bot_data);
 
-        uint8x8_t p0, p1;
+        uint8x8_t p0;
+        uint8x8_t p1;
 
         p0 = top_low_data;
         p1 = vext_u8(top_low_data, top_high_data, 1);

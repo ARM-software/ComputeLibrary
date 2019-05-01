@@ -92,16 +92,16 @@ private:
     void configure_reflect_symmetric_mode(ITensor *input, ITensor *output);
 
 private:
-    NECopyKernel                          _copy_kernel;
-    PaddingMode                           _mode;
-    PaddingList                           _padding;
-    NEMemsetKernel                        _memset_kernel;
-    uint32_t                              _num_dimensions;
-    std::unique_ptr<NEStridedSlice[]>     _slice_functions;
-    std::unique_ptr<NEConcatenateLayer[]> _concat_functions;
-    std::unique_ptr<Tensor[]>             _slice_results;
-    std::unique_ptr<Tensor[]>             _concat_results;
-    SubTensor                             _output_subtensor;
+    NECopyKernel                    _copy_kernel;
+    PaddingMode                     _mode;
+    PaddingList                     _padding;
+    NEMemsetKernel                  _memset_kernel;
+    uint32_t                        _num_dimensions;
+    std::vector<NEStridedSlice>     _slice_functions;
+    std::vector<NEConcatenateLayer> _concat_functions;
+    std::vector<Tensor>             _slice_results;
+    std::vector<Tensor>             _concat_results;
+    SubTensor                       _output_subtensor;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPADLAYER_H__ */

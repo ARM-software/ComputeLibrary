@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ CLGaussianPyramidHorKernel::CLGaussianPyramidHorKernel()
 
 BorderSize CLGaussianPyramidHorKernel::border_size() const
 {
-    return BorderSize(0, 2);
+    return BorderSize{ 0, 2 };
 }
 
 void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *output)
@@ -130,7 +130,7 @@ CLGaussianPyramidVertKernel::CLGaussianPyramidVertKernel()
 
 BorderSize CLGaussianPyramidVertKernel::border_size() const
 {
-    return BorderSize(2, 0);
+    return BorderSize{ 2, 0 };
 }
 
 void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *output)

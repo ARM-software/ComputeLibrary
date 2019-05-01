@@ -87,10 +87,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ICLTensor *>                         _inputs_vector;
-    std::unique_ptr<CLDepthConcatenateLayerKernel[]> _concat_kernels_vector;
-    std::unique_ptr<CLFillBorderKernel[]>            _border_handlers_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<CLDepthConcatenateLayerKernel> _concat_kernels_vector;
+    std::vector<CLFillBorderKernel>            _border_handlers_vector;
+    unsigned int                               _num_inputs;
 };
 }
 #endif /* __ARM_COMPUTE_CLDEPTHCONCATENATE_H__ */

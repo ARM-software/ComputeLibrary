@@ -79,8 +79,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<NEWidthConcatenateLayerKernel[]> _concat_kernels_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<NEWidthConcatenateLayerKernel> _concat_kernels_vector;
+    unsigned int                               _num_inputs;
     template <typename TensorType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorType>::type, ITensor>::value)>
     void configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output);
     template <typename TensorInfoType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorInfoType>::type, ITensorInfo>::value)>

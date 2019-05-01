@@ -372,7 +372,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const unsigned int kernel_width  = weights->dimension(idx_width);
     const unsigned int kernel_height = weights->dimension(idx_height);
 
-    TensorInfo         im2col_reshaped_info, info_gemm, weights_reshaped_info;
+    TensorInfo         im2col_reshaped_info{};
+    TensorInfo         info_gemm{};
+    TensorInfo         weights_reshaped_info{};
     const ITensorInfo *gemm_input_to_use  = input;
     const ITensorInfo *gemm_output_to_use = output;
     const ITensorInfo *weights_to_use     = weights;

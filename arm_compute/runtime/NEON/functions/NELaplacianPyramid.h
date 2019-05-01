@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,13 +73,13 @@ public:
     void run() override;
 
 private:
-    size_t                                     _num_levels;
-    NEGaussianPyramidHalf                      _gaussian_pyr_function;
-    std::unique_ptr<NEGaussian5x5[]>           _convf;
-    std::unique_ptr<NEArithmeticSubtraction[]> _subf;
-    Pyramid                                    _gauss_pyr;
-    Pyramid                                    _conv_pyr;
-    NEDepthConvertLayer                        _depth_function;
+    size_t                               _num_levels;
+    NEGaussianPyramidHalf                _gaussian_pyr_function;
+    std::vector<NEGaussian5x5>           _convf;
+    std::vector<NEArithmeticSubtraction> _subf;
+    Pyramid                              _gauss_pyr;
+    Pyramid                              _conv_pyr;
+    NEDepthConvertLayer                  _depth_function;
 };
 }
 #endif /*__ARM_COMPUTE_NELAPLACIANPYRAMID_H__ */

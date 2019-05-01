@@ -35,7 +35,7 @@ namespace arm_compute
 {
 namespace
 {
-std::unique_ptr<IFunction> create_function_all_types(arm_gemm::KernelDescription gemm_kernel_info,
+std::unique_ptr<IFunction> create_function_all_types(const arm_gemm::KernelDescription &gemm_kernel_info,
                                                      const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint,
                                                      std::shared_ptr<IMemoryManager> memory_manager)
 

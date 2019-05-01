@@ -117,6 +117,7 @@ std::tuple<Coordinates, Coordinates, Coordinates> calculate_strided_slice_coords
     Coordinates starts_abs{};
     Coordinates ends_abs{};
     Coordinates final_strides{};
+
     for(unsigned int i = 0; i < input_shape.num_dimensions(); ++i)
     {
         const int start_i = calculate_start_on_index(input_shape, i, starts, strides, begin_mask);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,7 +103,9 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
     SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
 
     // Get coordinates
-    Coordinates starts_abs, ends_abs, final_strides;
+    Coordinates starts_abs{};
+    Coordinates ends_abs{};
+    Coordinates final_strides{};
     std::tie(starts_abs, ends_abs, final_strides) = calculate_strided_slice_coords(src_shape,
                                                                                    starts, ends, strides,
                                                                                    begin_mask, end_mask, shrink_axis_mask);

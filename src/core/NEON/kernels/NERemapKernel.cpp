@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -113,8 +113,8 @@ void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const 
     AccessWindowStatic input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
 
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal mapx_access(map_x->info(),    0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal mapy_access(map_y->info(),    0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapx_access(map_x->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapy_access(map_y->info(), 0, num_elems_processed_per_iteration);
 
     update_window_and_padding(win, input_access, mapx_access, mapy_access, output_access);
 
@@ -140,7 +140,7 @@ void NERemapKernel::remap_nearest(const Window &window)
     const float32x4_t height    = vdupq_n_f32(static_cast<float>(_input->info()->dimension(1)));
     const int32x4_t   in_stride = vdupq_n_s32(static_cast<int32_t>(_input->info()->strides_in_bytes()[1]));
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto     mapx_ptr = reinterpret_cast<const float *>(mapx.ptr());
         const auto     mapy_ptr = reinterpret_cast<const float *>(mapy.ptr());
@@ -190,7 +190,7 @@ void NERemapKernel::remap_bilinear(const Window &window)
     const size_t height    = _input->info()->dimension(1);
     const size_t in_stride = _input->info()->strides_in_bytes()[1];
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto     mapx_ptr = reinterpret_cast<float *>(mapx.ptr());
         const auto     mapy_ptr = reinterpret_cast<float *>(mapy.ptr());

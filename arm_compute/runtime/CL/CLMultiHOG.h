@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,8 +49,8 @@ public:
     const ICLHOG *cl_model(size_t index) const override;
 
 private:
-    size_t                   _num_models;
-    std::unique_ptr<CLHOG[]> _model;
+    size_t             _num_models;
+    std::vector<CLHOG> _model;
 };
 }
 #endif /*__ARM_COMPUTE_CLMULTIHOG_H__ */

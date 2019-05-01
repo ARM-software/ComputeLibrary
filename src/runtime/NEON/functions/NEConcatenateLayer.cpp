@@ -51,6 +51,7 @@ void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, 
     _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info;
+    inputs_vector_info.reserve(_num_inputs);
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(inputs_vector.at(i));

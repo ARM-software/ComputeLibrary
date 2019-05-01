@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,12 +68,12 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                             _memory_group;
-    std::unique_ptr<NEReductionOperation[]> _reduction_kernels{ nullptr };
-    std::unique_ptr<Tensor[]>               _reduced_outs{ nullptr };
-    NEReshapeLayer                          _reshape;
-    unsigned int                            _reduction_ops;
-    bool                                    _keep_dims;
+    MemoryGroup                       _memory_group;
+    std::vector<NEReductionOperation> _reduction_kernels;
+    std::vector<Tensor>               _reduced_outs;
+    NEReshapeLayer                    _reshape;
+    unsigned int                      _reduction_ops;
+    bool                              _keep_dims;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEON_REDUCE_MEAN_H__ */

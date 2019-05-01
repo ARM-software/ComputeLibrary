@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,12 +31,11 @@
 using namespace arm_compute;
 
 Distribution1D::Distribution1D(size_t num_bins, int32_t offset, uint32_t range)
-    : IDistribution1D(num_bins, offset, range), _data(arm_compute::support::cpp14::make_unique<uint32_t[]>(num_bins))
+    : IDistribution1D(num_bins, offset, range), _data(num_bins)
 {
 }
 
 uint32_t *Distribution1D::buffer() const
 {
-    ARM_COMPUTE_ERROR_ON(nullptr == _data);
-    return _data.get();
+    return _data.data();
 }

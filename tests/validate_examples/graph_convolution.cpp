@@ -223,6 +223,7 @@ public:
     /** Default destructor */
     ~ConvolutionOptions() override = default;
 
+private:
     SimpleOption<int>                                 *width;              /**< Input width */
     SimpleOption<int>                                 *height;             /**< Input height */
     SimpleOption<int>                                 *channels;           /**< Input channels */

@@ -269,7 +269,7 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
 
     const int min_bound = quant_info.quantize(min, RoundingPolicy::TO_NEAREST_UP);
     const int max_bound = quant_info.quantize(max, RoundingPolicy::TO_NEAREST_UP);
-    return std::pair<int, int>(min_bound, max_bound);
+    return std::pair<int, int> { min_bound, max_bound };
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

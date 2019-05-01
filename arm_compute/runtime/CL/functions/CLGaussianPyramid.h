@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,10 +90,10 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLFillBorderKernel[]>          _horizontal_border_handler;
-    std::unique_ptr<CLFillBorderKernel[]>          _vertical_border_handler;
-    std::unique_ptr<CLGaussianPyramidHorKernel[]>  _horizontal_reduction;
-    std::unique_ptr<CLGaussianPyramidVertKernel[]> _vertical_reduction;
+    std::vector<CLFillBorderKernel>          _horizontal_border_handler;
+    std::vector<CLFillBorderKernel>          _vertical_border_handler;
+    std::vector<CLGaussianPyramidHorKernel>  _horizontal_reduction;
+    std::vector<CLGaussianPyramidVertKernel> _vertical_reduction;
 };
 
 /** Basic function to execute gaussian pyramid with ORB scale factor. This function calls the following OpenCL kernels and functions:
@@ -113,8 +113,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLGaussian5x5[]> _gauss5x5;
-    std::unique_ptr<CLScaleKernel[]> _scale_nearest;
+    std::vector<CLGaussian5x5> _gauss5x5;
+    std::vector<CLScaleKernel> _scale_nearest;
 };
 }
 #endif /*__ARM_COMPUTE_CLGAUSSIANPYRAMID_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,8 +69,8 @@ private:
      */
     void internal_init(const PyramidInfo &info, bool auto_padding);
 
-    PyramidInfo               _info{};
-    std::unique_ptr<Tensor[]> _pyramid{ nullptr };
+    PyramidInfo                 _info{};
+    mutable std::vector<Tensor> _pyramid{};
 };
 }
 #endif /*__ARM_COMPUTE_PYRAMID_H__ */

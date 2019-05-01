@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,20 +29,19 @@
 using namespace arm_compute;
 
 HOG::HOG()
-    : IHOG(), _info(), _descriptor(nullptr)
+    : IHOG(), _info(), _descriptor()
 {
 }
 
 void HOG::init(const HOGInfo &input)
 {
-    ARM_COMPUTE_ERROR_ON(nullptr != _descriptor);
-    _info       = input;
-    _descriptor = arm_compute::support::cpp14::make_unique<float[]>(_info.descriptor_size());
+    _info = input;
+    _descriptor.resize(_info.descriptor_size());
 }
 
 float *HOG::descriptor() const
 {
-    return _descriptor.get();
+    return _descriptor.data();
 }
 
 const HOGInfo *HOG::info() const

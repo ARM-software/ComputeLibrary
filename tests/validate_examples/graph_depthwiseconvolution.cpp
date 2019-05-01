@@ -224,6 +224,7 @@ public:
     /** Default destructor */
     ~DepthConvolutionOptions() override = default;
 
+private:
     SimpleOption<int>                                          *width;              /**< Input width */
     SimpleOption<int>                                          *height;             /**< Input height */
     SimpleOption<int>                                          *channels;           /**< Input channels */

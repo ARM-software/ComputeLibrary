@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 namespace arm_compute
 {
@@ -49,7 +50,7 @@ public:
     uint32_t *buffer() const override;
 
 private:
-    std::unique_ptr<uint32_t[]> _data; /**< The distribution data. */
+    mutable std::vector<uint32_t> _data; /**< The distribution data. */
 };
 }
 #endif /* __ARM_COMPUTE_DISTRIBUTION1D_H__ */

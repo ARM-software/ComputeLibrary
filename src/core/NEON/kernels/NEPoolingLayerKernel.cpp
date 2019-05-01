@@ -352,7 +352,8 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(pool_size.x(), pool_size.y()));
 
     // Check output dimensions
-    unsigned int pooled_w, pooled_h;
+    unsigned int pooled_w;
+    unsigned int pooled_h;
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(idx_width),
                                                      input->info()->dimension(idx_height),
                                                      pool_size.x(),

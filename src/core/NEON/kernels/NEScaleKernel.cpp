@@ -249,7 +249,10 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
         if(is_valid(offset, -border_size, input_width - 1 + border_size, in_yi, -border_size, input_height - 1 + border_size))
         {
-            T a00 = 0, a01 = 0, a10 = 0, a11 = 0;
+            T a00 = 0;
+            T a01 = 0;
+            T a10 = 0;
+            T a11 = 0;
 
             if(border_mode == BorderMode::CONSTANT)
             {

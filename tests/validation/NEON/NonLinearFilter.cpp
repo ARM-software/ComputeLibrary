@@ -52,8 +52,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     const uint8_t                          constant_border_value = distribution_u8(generator);
 
     // Create the mask
-    uint8_t mask[mask_size * mask_size];
-    fill_mask_from_pattern(mask, mask_size, mask_size, pattern);
+    std::vector<uint8_t> mask(mask_size * mask_size);
+    fill_mask_from_pattern(mask.data(), mask_size, mask_size, pattern);
     const auto half_mask_size = static_cast<int>(mask_size / 2);
 
     // Create tensors
@@ -65,7 +65,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     NENonLinearFilter filter;
-    filter.configure(&src, &dst, function, mask_size, pattern, mask, border_mode, constant_border_value);
+    filter.configure(&src, &dst, function, mask_size, pattern, mask.data(), border_mode, constant_border_value);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, border_mode == BorderMode::UNDEFINED, BorderSize(half_mask_size));

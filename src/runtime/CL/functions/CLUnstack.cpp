@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ void CLUnstack::configure(const ICLTensor *input, const std::vector<ICLTensor *>
     // Wrap around negative values
     const unsigned int axis_u = wrap_axis(axis, input->info());
     _num_slices               = std::min(outputs_vector_info.size(), input->info()->dimension(axis_u));
-    _strided_slice_vector     = arm_compute::support::cpp14::make_unique<CLStridedSlice[]>(_num_slices);
+    _strided_slice_vector.resize(_num_slices);
 
     Coordinates slice_start;
     int32_t     slice_end_mask;

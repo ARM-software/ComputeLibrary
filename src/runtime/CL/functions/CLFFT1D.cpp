@@ -62,7 +62,7 @@ void CLFFT1D::configure(const ICLTensor *input, ICLTensor *output, const FFT1DIn
     // Create and configure FFT kernels
     unsigned int Nx = 1;
     _num_ffts       = decomposed_vector.size();
-    _fft_kernels    = arm_compute::support::cpp14::make_unique<CLFFTRadixStageKernel[]>(_num_ffts);
+    _fft_kernels.resize(_num_ffts);
     for(unsigned int i = 0; i < _num_ffts; ++i)
     {
         const unsigned int radix_for_stage = decomposed_vector.at(i);

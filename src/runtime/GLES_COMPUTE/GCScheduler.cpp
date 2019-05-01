@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,7 +97,7 @@ void GCScheduler::setup_context()
     ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_surfaceless_context") == nullptr), "Failed to query EGL_KHR_surfaceless_context");
     ARM_COMPUTE_UNUSED(egl_extension_st);
 
-    const EGLint config_attribs[] =
+    const std::array<EGLint, 3> config_attribs =
     {
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
         EGL_NONE
@@ -105,7 +105,7 @@ void GCScheduler::setup_context()
     EGLConfig cfg;
     EGLint    count;
 
-    res = eglChooseConfig(_display, config_attribs, &cfg, 1, &count);
+    res = eglChooseConfig(_display, config_attribs.data(), &cfg, 1, &count);
 
     ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);
@@ -114,7 +114,7 @@ void GCScheduler::setup_context()
 
     ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to bind api: 0x%x.", eglGetError());
 
-    const EGLint attribs[] =
+    const std::array<EGLint, 3> attribs =
     {
         EGL_CONTEXT_CLIENT_VERSION, 3,
         EGL_NONE
@@ -122,7 +122,7 @@ void GCScheduler::setup_context()
     _context = eglCreateContext(_display,
                                 cfg,
                                 EGL_NO_CONTEXT,
-                                attribs);
+                                attribs.data());
 
     ARM_COMPUTE_ERROR_ON_MSG(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
     ARM_COMPUTE_UNUSED(res);

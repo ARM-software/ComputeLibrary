@@ -31,7 +31,7 @@
 namespace arm_compute
 {
 CLPadLayer::CLPadLayer()
-    : _copy_kernel(), _mode(), _padding(), _memset_kernel(), _num_dimensions(0), _slice_functions(nullptr), _concat_functions(nullptr), _slice_results(nullptr), _concat_results(nullptr)
+    : _copy_kernel(), _mode(), _padding(), _memset_kernel(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
 {
 }
 
@@ -67,11 +67,16 @@ void CLPadLayer::configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *o
 
     // Two strided slice functions will be required for each dimension padded as well as a
     // concatenate function and the tensors to hold the temporary results.
-    _slice_functions  = arm_compute::support::cpp14::make_unique<CLStridedSlice[]>(2 * _num_dimensions);
-    _slice_results    = arm_compute::support::cpp14::make_unique<CLTensor[]>(2 * _num_dimensions);
-    _concat_functions = arm_compute::support::cpp14::make_unique<CLConcatenateLayer[]>(_num_dimensions);
-    _concat_results   = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_dimensions - 1);
-    Coordinates starts_before, ends_before, starts_after, ends_after, strides;
+    _slice_functions.resize(2 * _num_dimensions);
+    _slice_results.resize(2 * _num_dimensions);
+    _concat_functions.resize(_num_dimensions);
+    _concat_results.resize(_num_dimensions - 1);
+
+    Coordinates starts_before{};
+    Coordinates ends_before{};
+    Coordinates starts_after{};
+    Coordinates ends_after{};
+    Coordinates strides{};
     ICLTensor *prev = input;
     for(uint32_t i = 0; i < _num_dimensions; ++i)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,10 +47,10 @@ ValidRegion AccessWindowAutoPadding::compute_valid_region() const
 {
     if(_info == nullptr)
     {
-        return ValidRegion();
+        return ValidRegion{};
     }
 
-    return ValidRegion(Coordinates(), _info->tensor_shape());
+    return ValidRegion{ Coordinates(), _info->tensor_shape() };
 }
 
 void AccessWindowAutoPadding::set_valid_region()

@@ -600,7 +600,7 @@ void CPPDetectionOutputLayer::run()
         if(_info.keep_top_k() > -1 && num_det > _info.keep_top_k())
         {
             std::vector<std::pair<float, std::pair<int, int>>> score_index_pairs;
-            for(auto it : indices)
+            for(auto const &it : indices)
             {
                 const int               label         = it.first;
                 const std::vector<int> &label_indices = it.second;
@@ -614,7 +614,7 @@ void CPPDetectionOutputLayer::run()
                 for(auto idx : label_indices)
                 {
                     ARM_COMPUTE_ERROR_ON(idx > static_cast<int>(scores.size()));
-                    score_index_pairs.push_back(std::make_pair(scores[idx], std::make_pair(label, idx)));
+                    score_index_pairs.emplace_back(std::make_pair(scores[idx], std::make_pair(label, idx)));
                 }
             }
 

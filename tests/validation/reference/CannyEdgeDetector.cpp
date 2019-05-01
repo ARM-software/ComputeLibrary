@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,8 @@ SimpleTensor<T> canny_edge_detector_impl(const SimpleTensor<T> &src, int32_t upp
     ValidRegion     valid_region = shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(gradient_size / 2 + 1));
 
     // Sobel computation: U == int16_t or int32_t
-    SimpleTensor<U> gx, gy;
+    SimpleTensor<U> gx{};
+    SimpleTensor<U> gy{};
     std::tie(gx, gy) = sobel<U>(src, gradient_size, border_mode, constant_border_value, GradientDimension::GRAD_XY);
 
     using unsigned_U = typename traits::make_unsigned_conditional_t<U>::type;
@@ -178,7 +179,8 @@ SimpleTensor<T> canny_edge_detector_impl(const SimpleTensor<T> &src, int32_t upp
             continue;
         }
 
-        unsigned_U mag_90, mag90;
+        unsigned_U mag_90;
+        unsigned_U mag90;
         switch(grad_dir[i])
         {
             case 0: // North/South edge direction, compare against East/West pixels (left & right)
