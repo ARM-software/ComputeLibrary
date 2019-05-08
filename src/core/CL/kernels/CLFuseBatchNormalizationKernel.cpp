@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -139,7 +139,7 @@ void CLFuseBatchNormalizationKernel::configure(const ICLTensor *conv_weights, co
                                                   epsilon));
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration_x = 16 / conv_weights->info()->element_size();
+    const unsigned int num_elems_processed_per_iteration_x = 4;
     const int          output_width_x                      = conv_weights->info()->tensor_shape().x();
     const bool         multi_access_x                      = (output_width_x / num_elems_processed_per_iteration_x > 0);
 
@@ -216,6 +216,6 @@ void CLFuseBatchNormalizationKernel::run(const arm_compute::Window &window, cl::
     {
         add_1D_tensor_argument(idx, _bn_gamma, vector_slice);
     }
-    enqueue(queue, *this, slice, lws_hint());
+    enqueue(queue, *this, slice);
 }
 } // namespace arm_compute
