@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,8 @@ namespace arm_compute
 /** Basic function to execute CLGEMMTranspose1xWKernel. This function calls the following OpenCL kernels:
  *
  *  -# @ref CLGEMMTranspose1xWKernel
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  *
  */
 class CLGEMMTranspose1xW : public ICLSimpleFunction

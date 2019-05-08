@@ -261,7 +261,8 @@ v19.05 Public major release
     - @ref NEDepthConcatenateLayer
     - @ref CLWidthConcatenateLayer
     - @ref CLDepthConcatenateLayer
-
+    - @ref CLGEMMInterleave4x4
+    - @ref CLGEMMTranspose1xW
 
 v19.02 Public major release
  - Various bug fixes.
