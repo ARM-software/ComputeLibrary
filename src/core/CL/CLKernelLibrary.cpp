@@ -1036,6 +1036,9 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     concat_str += " -DARM_COMPUTE_DEBUG_ENABLED";
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
 
+    GPUTarget gpu_arch = get_arch_from_target(get_target_from_device(_device));
+    concat_str += " -DGPU_ARCH=" + support::cpp11::to_string(
+                      static_cast<std::underlying_type<GPUTarget>::type>(gpu_arch));
     if(fp16_supported())
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";

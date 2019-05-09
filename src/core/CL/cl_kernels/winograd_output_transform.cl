@@ -24,7 +24,9 @@
 #include "helpers.h"
 
 #if defined(FUSED_ACTIVATION)
-#include "activation_layer.cl"
+#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
+#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#include "activation_helpers.h"
 #define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
 #else /* defined(FUSED_ACTIVATION) */
 #define ACTIVATION_FUNC(x) (x)

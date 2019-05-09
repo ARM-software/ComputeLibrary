@@ -134,7 +134,6 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     CLBuildOptions build_opts;
     build_opts.add_option_if(!is_logistic_activation_quantized, "-DACT=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
-    build_opts.add_option(("-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
     if(is_data_type_quantized(dt))

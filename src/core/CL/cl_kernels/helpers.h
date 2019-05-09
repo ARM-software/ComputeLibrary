@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,9 @@
 #if defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
+
+#define GPU_ARCH_MIDGARD 0x100
+#define GPU_ARCH_BIFROST 0x200
 
 #define EXPAND(x) x
 
