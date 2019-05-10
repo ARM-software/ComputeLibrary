@@ -578,6 +578,7 @@ enum class ElementWiseUnary
 {
     RSQRT, /**< Reverse square root */
     EXP,   /**< Exponential */
+    NEG,   /**< Negate */
 };
 
 /** The normalization type used for the normalization layer */

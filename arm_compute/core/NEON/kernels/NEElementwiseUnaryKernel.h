@@ -88,7 +88,7 @@ public:
 
 protected:
     // Inherited methods overridden:
-    static Status validate_arguments(const ITensorInfo &input, const ITensorInfo &output);
+    static Status validate_arguments(ElementWiseUnary op, const ITensorInfo &input, const ITensorInfo &output);
 
     /** Function to use for the particular tensor types passed to configure() */
     std::function<void(const ITensor *input, ITensor *output, const Window &window)> _function;
