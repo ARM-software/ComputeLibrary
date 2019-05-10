@@ -241,11 +241,17 @@ v19.05 Public major release
  - Various optimisations.
  - New Neon kernels / functions:
     - @ref NEBatchToSpaceLayerKernel / @ref NEBatchToSpaceLayer
+    - @ref NEComplexPixelWiseMultiplicationKernel / @ref NEComplexPixelWiseMultiplication
     - @ref NECropKernel / @ref NECropResize
+    - @ref NEDepthwiseConvolutionAssemblyDispatch
+    - @ref NEFFTDigitReverseKernel
+    - @ref NEFFTRadixStageKernel
+    - @ref NEFFTScaleKernel
     - @ref NEGEMMLowpOffsetContributionOutputStageKernel
     - @ref NEHeightConcatenateLayerKernel
     - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
  - New OpenCL kernels / functions:
+    - @ref CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
     - @ref CLCropKernel / @ref CLCropResize
     - @ref CLFFTDigitReverseKernel
     - @ref CLFFTRadixStageKernel
@@ -257,6 +263,9 @@ v19.05 Public major release
     - @ref CLFFT1D
     - @ref CLFFT2D
     - @ref CLFFTConvolutionLayer
+    - @ref CLGEMMDeconvolutionLayer
+ - New OpenGLES kernels / functions:
+    - @ref GCConcatenateLayer
  - Deprecated functions/interfaces
     - @ref GCDepthConcatenateLayer
     - @ref NEWidthConcatenateLayer
