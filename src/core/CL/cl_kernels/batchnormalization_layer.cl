@@ -29,18 +29,13 @@
 #define INVSQRT_OP(a) rsqrt((a))
 #define SQCVT_SAT(a) (a)
 
-#if defined(VEC_SIZE) && defined(DATA_TYPE)
-
-#if defined(FUSED_ACTIVATION)
-#define SELECT_TYPE VEC_DATA_TYPE(SELECT_DATA_TYPE, VEC_SIZE)
-#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-#include "activation_helpers.h"
-#define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
-#else /* defined(FUSED_ACTIVATION) */
-#define ACTIVATION_FUNC(x) (x)
-#endif /* defined(FUSED_ACTIVATION) */
+#if defined(VEC_SIZE) && defined(DATA_TYPE) && defined(ACTIVATION_TYPE)
+#include "activation_float_helpers.h"
 
 /** Apply batch normalization.
+ *
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
  * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -144,13 +139,16 @@ __kernel void batchnormalization_layer_nchw(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION_FUNC(res);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);
 }
 
 /** Apply batch normalization on tensors with NHWC format.
+ *
+ * @note It is possible to select the activation function to apply using -DACTIVATION_TYPE e.g. -DACTIVATION_TYPE=relu
+ * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively
  *
  * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
@@ -254,12 +252,12 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
     res = ADD_OP(res, beta_vec);
 #endif /* USE_DEFAULT_BETA */
 
-    res = ACTIVATION_FUNC(res);
+    res = ACTIVATION(ACTIVATION_TYPE, DATA_TYPE, res, A_VAL, B_VAL);
 
     VSTORE(VEC_SIZE)
     (res, 0, (__global DATA_TYPE *)out.ptr);
 }
-#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) */
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE)*/
 
 #if defined(NUM_CHANNELS) && defined(DATA_TYPE) && defined(EPSILON)
 /** Fuse batchnorm parameters to convolution layer parameters

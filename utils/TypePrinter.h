@@ -385,6 +385,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::TANH:
             os << "TANH";
             break;
+        case ActivationLayerInfo::ActivationFunction::IDENTITY:
+            os << "IDENTITY";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

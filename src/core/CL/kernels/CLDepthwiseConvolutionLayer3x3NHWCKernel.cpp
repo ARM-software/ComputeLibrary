@@ -202,7 +202,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
 
     CLBuildOptions build_opts;
-    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_accessed_per_iteration));
     build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
@@ -245,7 +245,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     {
         build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
         build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
-        build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
         build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     }
 

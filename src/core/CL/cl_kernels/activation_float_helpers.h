@@ -63,8 +63,8 @@
 #define linear_op(DATA_TYPE, x, A_VAL, B_VAL) (MLA((DATA_TYPE)B_VAL, (DATA_TYPE)A_VAL, x))
 
 // Identity Activation
-#define _op(DATA_TYPE, x, A_VAL, B_VAL) (x)
+#define identity_op(DATA_TYPE, x, A_VAL, B_VAL) (x)
 
-#define OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(x, DATA_TYPE, A_VAL, B_VAL)
+#define OP(op, DATA_TYPE, x, A_VAL, B_VAL) op##_op(DATA_TYPE, x, A_VAL, B_VAL)
 
-#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) OP(op, x, DATA_TYPE, A_VAL, B_VAL)
+#define ACTIVATION(op, DATA_TYPE, x, A_VAL, B_VAL) OP(op, DATA_TYPE, x, A_VAL, B_VAL)

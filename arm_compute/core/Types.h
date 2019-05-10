@@ -1479,7 +1479,8 @@ public:
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/
-        LINEAR           /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+        LINEAR,          /**< Linear ( \f$ f(x)= ax + b \f$ ) */
+        IDENTITY         /**< Identity ( \f$ f(x)= x \f$ ) */
     };
 
     ActivationLayerInfo() = default;
@@ -1516,7 +1517,7 @@ public:
     }
 
 private:
-    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::LOGISTIC };
+    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::IDENTITY };
     float              _a       = {};
     float              _b       = {};
     bool               _enabled = { false };

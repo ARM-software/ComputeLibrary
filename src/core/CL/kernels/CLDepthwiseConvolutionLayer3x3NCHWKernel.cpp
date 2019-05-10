@@ -241,7 +241,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option_if(act_info.enabled(), "-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+    build_opts.add_option("-DACTIVATION_TYPE=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option("-DDST_CHANNELS=" + support::cpp11::to_string(_output->info()->tensor_shape().z()));
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
@@ -283,7 +283,6 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     {
         build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
         build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
-        build_opts.add_option_if(act_info.enabled(), "-DSELECT_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
         build_opts.add_option_if(act_info.enabled(), "-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
         build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(win_config.second.x().step()));
     }
