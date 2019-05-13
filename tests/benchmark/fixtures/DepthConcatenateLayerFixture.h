@@ -50,34 +50,17 @@ public:
     {
         // Create input shapes
         std::mt19937                    gen(library->seed());
-        std::uniform_int_distribution<> num_dis(2, 6);
+        std::uniform_int_distribution<> num_dis(2, 4);
         const int                       num_tensors = num_dis(gen);
 
-        std::vector<TensorShape>         shapes(num_tensors, shape);
-        std::uniform_int_distribution<>  depth_dis(1, 7);
-        std::bernoulli_distribution      mutate_dis(0.25f);
-        std::uniform_real_distribution<> change_dis(-0.25f, 0.f);
+        std::vector<TensorShape>        shapes(num_tensors, shape);
+        std::uniform_int_distribution<> depth_dis(1, 3);
 
         // Generate more shapes based on the input
         for(auto &s : shapes)
         {
             // Set the depth of the tensor
             s.set(2, depth_dis(gen));
-
-            // Randomly change the first dimension
-            if(mutate_dis(gen))
-            {
-                // Decrease the dimension by a small percentage. Don't increase
-                // as that could make tensor too large. Also the change must be
-                // an even number. Otherwise out depth concatenate fails.
-                s.set(0, s[0] + 2 * static_cast<int>(s[0] * change_dis(gen)));
-            }
-
-            // Repeat the same as above for the second dimension
-            if(mutate_dis(gen))
-            {
-                s.set(1, s[1] + 2 * static_cast<int>(s[1] * change_dis(gen)));
-            }
         }
 
         return shapes;
