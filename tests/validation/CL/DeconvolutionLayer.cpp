@@ -220,7 +220,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDeconvolutionLayerFixture2x2<half>, framework
                                                                                                                   data_layouts_dataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32);
+    validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 TEST_SUITE_END() // W2x2
 
