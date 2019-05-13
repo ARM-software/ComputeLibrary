@@ -65,7 +65,6 @@ def filter_clang_tidy_lines( lines ):
         elif "warning:" in line:
             if ("uninitialized record type: '__ret'" in line or
                "local variable '__bound_functor' is still referred to by the global variable '__once_callable'" in line or
-               "assigning newly created 'gsl::owner<>'" in line or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "thrown exception type is not nothrow copy constructible" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "uninitialized record type: 'args'" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "do not call c-style vararg functions" in line) or
@@ -73,6 +72,8 @@ def filter_clang_tidy_lines( lines ):
                ("TensorAllocator.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
                ("TensorAllocator.cpp" in line and "warning: do not declare C-style arrays" in line) or
                ("RawTensor.cpp" in line and "warning: pointer parameter 'ptr' can be pointer to const" in line) or
+               ("RawTensor.cpp" in line and "warning: do not declare C-style arrays" in line) or
+               ("GCBufferAllocator.cpp" in line and "warning: initializing non-owner" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move constructors should be marked noexcept" in line) or
                ("NEMinMaxLocationKernel.cpp" in line and "move assignment operators should be marked noexcept" in line) or
                ("CLMinMaxLocationKernel.cpp" in line and "Forming reference to null pointer" in line) or
