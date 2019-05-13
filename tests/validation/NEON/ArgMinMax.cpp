@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Traits.h"
 #include "arm_compute/runtime/NEON/functions/NEArgMinMaxLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
@@ -89,6 +90,26 @@ DATA_TEST_CASE(Configuration,
 
 template <typename T>
 using NEArgMinMaxValidationFixture = ArgMinMaxValidationFixture<Tensor, Accessor, NEArgMinMaxLayer, T>;
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEArgMinMaxValidationFixture<int32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEArgMinMaxValidationFixture<int32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::Large4DShapes(), framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference);
+}
+TEST_SUITE_END() // S32
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

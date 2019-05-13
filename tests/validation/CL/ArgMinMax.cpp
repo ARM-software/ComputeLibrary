@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,6 +89,17 @@ DATA_TEST_CASE(Configuration,
 
 template <typename T>
 using CLArgMinMaxValidationFixture = ArgMinMaxValidationFixture<CLTensor, CLAccessor, CLArgMinMaxLayer, T>;
+
+TEST_SUITE(S32)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLArgMinMaxValidationFixture<int32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::Small4DShapes(), framework::dataset::make("DataType", DataType::S32)), framework::dataset::make("Axis", { 0, 1, 2, 3 })), framework::dataset::make("Operation", { ReductionOperation::ARG_IDX_MIN, ReductionOperation::ARG_IDX_MAX })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // S32
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
