@@ -49,21 +49,28 @@ RelativeTolerance<float>             tolerance_fp32(0.02f);     /**< Tolerance f
 constexpr float                      tolerance_num = 0.07f;     /**< Tolerance number */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);      /**< Tolerance for quantized tests */
 
-const auto data_strides         = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
-const auto data_strides_small   = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
-const auto data_ksize_one       = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
-const auto data_ksize_one_small = combine(framework::dataset::make("PadX", 0), combine(framework::dataset::make("PadY", 0), framework::dataset::make("KernelSize", 1)));
-const auto data_ksize_three     = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
-const auto data_ksize_five      = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
-const auto data_all_kernels     = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
+const auto data_strides          = combine(framework::dataset::make("StrideX", 1, 3), framework::dataset::make("StrideY", 1, 3));
+const auto data_strides_small    = combine(framework::dataset::make("StrideX", 1), framework::dataset::make("StrideY", 1));
+const auto data_ksize_one        = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_one_small  = combine(framework::dataset::make("PadX", 0), combine(framework::dataset::make("PadY", 0), framework::dataset::make("KernelSize", 1)));
+const auto data_ksize_three      = combine(framework::dataset::make("PadX", 0, 2), combine(framework::dataset::make("PadY", 0, 2), framework::dataset::make("KernelSize", 3)));
+const auto data_ksize_five       = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 5)));
+const auto data_ksize_nine       = combine(framework::dataset::make("PadX", 0, 3), combine(framework::dataset::make("PadY", 0, 3), framework::dataset::make("KernelSize", 9)));
+const auto data_ksize_nine_small = combine(framework::dataset::make("PadX", 0, 1), combine(framework::dataset::make("PadY", 0, 1), framework::dataset::make("KernelSize", 9)));
 
-const auto data       = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_all_kernels));
-const auto data_small = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_one_small));
+const auto data_all_kernels = concat(concat(data_ksize_one, data_ksize_three), data_ksize_five);
+
+const auto data          = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_all_kernels));
+const auto data9x9       = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides, data_ksize_nine));
+const auto data_small    = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_one_small));
+const auto data_small9x9 = combine(datasets::SmallDirectConvolutionShapes(), combine(data_strides_small, data_ksize_nine_small));
 
 /** Direct convolution nightly data set. */
-const auto data_nightly = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly     = combine(data, framework::dataset::make("NumKernels", { 1, 4 }));
+const auto data_nightly_9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 1, 4 }));
 /** Direct convolution precommit data set. */
-const auto data_precommit = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
+const auto data_precommit     = combine(data_small, framework::dataset::make("NumKernels", { 1 }));
+const auto data_precommit_9x9 = combine(data_small9x9, framework::dataset::make("NumKernels", { 1 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -92,7 +99,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                      }),
                framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(3U, 3U, 3U, 4U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(9U, 9U, 2U, 4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 11U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(5U, 3U, 2U, 4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U, 3U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
@@ -172,6 +179,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<half>, framewor
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
+FIXTURE_DATA_TEST_CASE(RunLarge9x9, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly_9x9, framework::dataset::make("DataType",
+                                                                                                                    DataType::F16)),
+                                                                                                                    ActivationFunctionsDataset),
+                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit_9x9, framework::dataset::make("DataType",
+                                                                                                                      DataType::F16)),
+                                                                                                                      ActivationFunctionsDataset),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
+}
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
@@ -185,6 +206,20 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDirectConvolutionLayerFixture<float>, framewo
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                   ActivationFunctionsDataset),
                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge9x9, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data_nightly_9x9, framework::dataset::make("DataType",
+                                                                                                                     DataType::F32)),
+                                                                                                                     ActivationFunctionsDataset),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC })))
+{
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit_9x9, framework::dataset::make("DataType",
+                                                                                                                       DataType::F32)),
+                                                                                                                       ActivationFunctionsDataset),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
 {
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
