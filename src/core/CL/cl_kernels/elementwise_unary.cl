@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,51 +26,12 @@
 
 #if defined(DATA_TYPE) && defined(OPERATION)
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
-/** Calculate reverse square root
- *
- * @param[in] input Pointer to the first element.
- *
- * @return reverse square root
- */
-inline VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) inverse_sqrt(const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) input)
-{
-    return rsqrt(input);
-}
-
-/** Calculate exponential
- *
- * @param[in] input Pointer to the first element.
- *
- * @return exponential
- */
-inline VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) exponential(const VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE) input)
-{
-    return exp(input);
-}
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-/** Calculate reverse square root
- *
- * @param[in] input Single element.
- *
- * @return reverse square root
- */
-inline DATA_TYPE inverse_sqrt(const DATA_TYPE input)
-{
-    return rsqrt(input);
-}
-
-/** Calculate exponential
- *
- * @param[in] input Single element.
- *
- * @return exponential
- */
-inline DATA_TYPE exponential(const DATA_TYPE input)
-{
-    return exp(input);
-}
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+// Calculate Exponential
+#define exponential(input) exp(input)
+// Calculate reverse square root
+#define inverse_sqrt(input) rsqrt(input)
+// Calculate negative
+#define neg(input) (-input)
 
 /** Applies element wise unary operator in a tensor.
  *

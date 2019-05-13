@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,4 +51,16 @@ Status CLExpLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::EXP);
 }
+
+void CLNegLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::NEG);
+    _kernel = std::move(k);
+}
+Status CLNegLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::NEG);
+}
+
 } // namespace arm_compute
