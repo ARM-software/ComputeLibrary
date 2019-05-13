@@ -57,6 +57,8 @@ inline ScalarType elementwise_op_scalar(const ScalarType &a)
             return std::exp(a);
         case ElementWiseUnary::NEG:
             return -a;
+        case ElementWiseUnary::LOG:
+            return std::log(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -74,13 +76,15 @@ inline VectorType elementwise_op(const VectorType &a)
             return wrapper::vexpq(a);
         case ElementWiseUnary::NEG:
             return wrapper::vneg(a);
+        case ElementWiseUnary::LOG:
+            return wrapper::vlog(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
 }
 
 /* Elementwise operations that are supported for non floats */
-template <ElementWiseUnary op, bool is_float, typename VectorType, typename std::enable_if<!is_float, int>::type = 0>
+template < ElementWiseUnary op, bool is_float, typename VectorType, typename std::enable_if < !is_float, int >::type = 0 >
 inline VectorType elementwise_op(const VectorType &a)
 {
     switch(op)
@@ -190,6 +194,9 @@ void NEElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensor *inp
         case ElementWiseUnary::NEG:
             _function = configure_func<ElementWiseUnary::NEG>(input, output);
             break;
+        case ElementWiseUnary::LOG:
+            _function = configure_func<ElementWiseUnary::LOG>(input, output);
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -202,6 +209,7 @@ Status NEElementwiseUnaryKernel::validate_arguments(ElementWiseUnary op, const I
     {
         case ElementWiseUnary::EXP:
         case ElementWiseUnary::RSQRT:
+        case ElementWiseUnary::LOG:
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
             break;
         case ElementWiseUnary::NEG:
