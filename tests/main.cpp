@@ -146,7 +146,7 @@ int main(int argc, char **argv)
         CLTunerMode::NORMAL,
         CLTunerMode::RAPID
     };
-    auto tuner_mode = parser.add_option<utils::EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::EXHAUSTIVE);
+    auto tuner_mode = parser.add_option<utils::EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::NORMAL);
     tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
 
     auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");

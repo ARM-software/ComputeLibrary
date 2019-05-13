@@ -38,7 +38,7 @@
 namespace arm_compute
 {
 CLTuner::CLTuner(bool tune_new_kernels)
-    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuner_mode(CLTunerMode::EXHAUSTIVE)
+    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _kernel_event(), _tune_new_kernels(tune_new_kernels), _tuner_mode(CLTunerMode::NORMAL)
 {
 }
 

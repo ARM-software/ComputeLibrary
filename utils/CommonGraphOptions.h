@@ -94,7 +94,7 @@ struct CommonGraphParams
     arm_compute::DataType            data_type{ DataType::F32 };
     arm_compute::DataLayout          data_layout{ DataLayout::NHWC };
     bool                             enable_tuner{ false };
-    arm_compute::CLTunerMode         tuner_mode{ CLTunerMode::EXHAUSTIVE };
+    arm_compute::CLTunerMode         tuner_mode{ CLTunerMode::NORMAL };
     arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::Disabled };
     std::string                      data_path{};
     std::string                      image{};
