@@ -79,6 +79,18 @@ Status NEElementwiseDivision::validate(const ITensorInfo *input1, const ITensorI
     return NEDivisionOperationKernel::validate(input1, input2, output);
 }
 
+void NEElementwisePower::configure(ITensor *input1, ITensor *input2, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEPowerOperationKernel>();
+    k->configure(input1, input2, output);
+    _kernel = std::move(k);
+}
+
+Status NEElementwisePower::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+{
+    return NEPowerOperationKernel::validate(input1, input2, output);
+}
+
 template <ComparisonOperation COP>
 void NEElementwiseComparisonStatic<COP>::configure(ITensor *input1, ITensor *input2, ITensor *output)
 {
