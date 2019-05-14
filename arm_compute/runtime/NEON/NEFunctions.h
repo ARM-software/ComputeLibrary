@@ -39,6 +39,7 @@
 #include "arm_compute/runtime/NEON/functions/NEBitwiseXor.h"
 #include "arm_compute/runtime/NEON/functions/NEBox3x3.h"
 #include "arm_compute/runtime/NEON/functions/NECannyEdge.h"
+#include "arm_compute/runtime/NEON/functions/NECast.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelCombine.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
 #include "arm_compute/runtime/NEON/functions/NEChannelShuffleLayer.h"

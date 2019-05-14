@@ -40,6 +40,7 @@ namespace test
 {
 namespace validation
 {
+/*  This function ignores the scale and zeroPoint of quanized tensors, i.e. QASYMM8 input is treated as uint8 values.*/
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
 class DepthConvertLayerValidationBaseFixture : public framework::Fixture
 {
@@ -55,7 +56,7 @@ public:
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i)
+    void fill(U &&tensor, int i, DataType dt_in, DataType dt_out)
     {
         if(is_data_type_quantized(tensor.data_type()))
         {
@@ -66,7 +67,16 @@ protected:
         }
         else
         {
-            library->fill_tensor_uniform(tensor, i);
+            // When converting S32 to F16, both reference and NEON implementations are + or - infinity outside the F16 range.
+            if(dt_in==DataType::S32 && dt_out==DataType::F16)
+            {
+                std::uniform_int_distribution<int32_t> distribution_s32(-65504, 65504);
+                library->fill(tensor, distribution_s32, i);
+            }
+            else
+            {
+                library->fill_tensor_uniform(tensor, i);
+            }
         }
     }
 
@@ -91,7 +101,7 @@ protected:
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src), 0);
+        fill(AccessorType(src), 0, dt_in, dt_out);
 
         // Compute function
         depth_convert.run();
@@ -105,7 +115,7 @@ protected:
         SimpleTensor<T1> src{ shape, dt_in, 1, _quantization_info };
 
         // Fill reference
-        fill(src, 0);
+        fill(src, 0, dt_in, dt_out);
 
         return reference::depth_convert<T1, T2>(src, dt_out, policy, shift);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,14 +48,7 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     {
         for(int i = 0; i < src.num_elements(); ++i)
         {
-            if(is_data_type_quantized(src.data_type()))
-            {
-                result[i] = scvt_f32_qasymm8(src[i], src.quantization_info().scale, src.quantization_info().offset);
-            }
-            else
-            {
-                result[i] = src[i] << shift;
-            }
+            result[i] = src[i] << shift;
         }
     }
     // Down-casting
@@ -82,16 +75,8 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
         // Always saturate on floats
         for(int i = 0; i < src.num_elements(); ++i)
         {
-            if(is_data_type_quantized(dt_out))
-            {
-                T1 val    = utils::rounding::round_half_away_from_zero(src[i]);
-                result[i] = sqcvt_qasymm8_f32(val, src.quantization_info().scale, src.quantization_info().offset);
-            }
-            else
-            {
-                T1 val    = utils::rounding::round_half_away_from_zero(src[i]);
-                result[i] = utils::cast::saturate_cast<T2>(val);
-            }
+            T1 val    = utils::rounding::round_half_away_from_zero(src[i]);
+            result[i] = utils::cast::saturate_cast<T2>(val);
         }
     }
     else
