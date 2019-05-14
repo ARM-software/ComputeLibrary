@@ -185,9 +185,7 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         auto        x           = lws_test[0];
         auto        y           = lws_test[1];
         auto        z           = lws_test[2];
-        bool        invalid_lws = (x * y * z > kernel.get_max_workgroup_size()) || (x == 1 && y == 1 && z == 1);
-
-        invalid_lws = invalid_lws || (x > gws[0]) || (y > gws[1]) || (z > gws[2]);
+        const bool  invalid_lws = (x * y * z > kernel.get_max_workgroup_size()) || (x == 1 && y == 1 && z == 1);
 
         if(invalid_lws)
         {
@@ -206,6 +204,7 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
         const cl_ulong diff  = end - start;
         _kernel_event        = nullptr;
+
         // Check the execution time
         if(diff < min_exec_time)
         {

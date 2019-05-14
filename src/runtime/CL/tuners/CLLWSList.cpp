@@ -41,8 +41,10 @@ cl::NDRange CLLWSListExhaustive::operator[](size_t index)
 
 CLLWSListExhaustive::CLLWSListExhaustive(const cl::NDRange &gws)
 {
-    search_space_shape = TensorShape(std::min(static_cast<unsigned int>(gws[0]), max_lws_supported_x), std::min(static_cast<unsigned int>(gws[1]), max_lws_supported_y),
-                                     std::min(static_cast<unsigned int>(gws[2]), max_lws_supported_z));
+    ARM_COMPUTE_UNUSED(gws);
+    search_space_shape = TensorShape(max_lws_supported_x,
+                                     max_lws_supported_y,
+                                     max_lws_supported_z);
 }
 
 cl::NDRange CLLWSListNormal::operator[](size_t index)
