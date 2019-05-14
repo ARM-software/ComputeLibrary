@@ -202,5 +202,33 @@ public:
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 };
+
+/** Basic function to run @ref CLArithmeticOperationKernel for power
+ *
+ * @note The tensor data type for the inputs must be F16/F32.
+ * @note The function performs an elementwise power of in1 to in2 (i.e., out[i] = in1[i] ^ in2[i])
+ */
+class CLElementwisePower : public ICLSimpleFunction
+{
+public:
+    /** Initialise the kernel's inputs, output and conversion policy.
+     *
+     * @param[in, out] input1 First tensor input. Data types supported: F16/F32.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[in, out] input2 Second tensor input. Data types supported: F16/F32.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[out]     output Output tensor. Data types supported:F16/F32.
+     */
+    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel for power
+     *
+     * @param[in] input1 First tensor input info. Data types supported: F16/F32.
+     * @param[in] input2 Second tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: F16/F32.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLELEMENTWISEOPERATIONS_H__ */

@@ -1394,6 +1394,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ArithmeticOperation 
         case ArithmeticOperation::SQUARED_DIFF:
             os << "SQUARED_DIFF";
             break;
+        case ArithmeticOperation::POWER:
+            os << "POWER";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

@@ -252,6 +252,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "elementwise_operation_MIN", "elementwise_operation.cl" },
     { "elementwise_operation_DIV", "elementwise_operation.cl" },
     { "elementwise_operation_SQUARED_DIFF", "elementwise_operation.cl" },
+    { "elementwise_operation_POWER", "elementwise_operation.cl" },
     { "elementwise_operation_ADD_quantized", "elementwise_operation_quantized.cl" },
     { "elementwise_operation_SUB_quantized", "elementwise_operation_quantized.cl" },
     { "elementwise_operation_MAX_quantized", "elementwise_operation_quantized.cl" },

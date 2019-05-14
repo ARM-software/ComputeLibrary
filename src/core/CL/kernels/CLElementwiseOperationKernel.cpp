@@ -42,6 +42,7 @@ std::map<ArithmeticOperation, std::string> supported_arithmetic_ops =
     { ArithmeticOperation::SQUARED_DIFF, "SQUARED_DIFF" },
     { ArithmeticOperation::MIN, "MIN" },
     { ArithmeticOperation::MAX, "MAX" },
+    { ArithmeticOperation::POWER, "POWER" },
 };
 
 std::map<ArithmeticOperation, std::string> supported_sat_arithmetic_ops =
@@ -64,7 +65,7 @@ std::string generate_id_for_tuning_common(const std::string &kernel_name, const 
     return config_id;
 }
 
-Status validate_arguments_with_division_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
+Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(&input1, &input2, &output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
@@ -344,10 +345,10 @@ void CLArithmeticOperationKernel::configure(ArithmeticOperation op, const ICLTen
 Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
-    if(op == ArithmeticOperation::DIV)
+    if(op == ArithmeticOperation::DIV || op == ArithmeticOperation::POWER)
     {
-        // Division doesn't support integer arithmetic
-        ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_division_rules(*input1, *input2, *output));
+        // Division and Power operators don't support integer arithmetic
+        ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_with_float_only_supported_rules(*input1, *input2, *output));
         ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_for_division(*input1->clone(), *input2->clone(), *output->clone()).first);
     }
     else
@@ -360,9 +361,9 @@ Status CLArithmeticOperationKernel::validate(ArithmeticOperation op, const ITens
 }
 std::pair<Status, Window> CLArithmeticOperationKernel::validate_and_configure_window(ITensorInfo &input1, ITensorInfo &input2, ITensorInfo &output)
 {
-    if(_op == ArithmeticOperation::DIV)
+    if(_op == ArithmeticOperation::DIV || _op == ArithmeticOperation::POWER)
     {
-        // Division doesn't support integer arithmetic
+        // Division and Power operators don't support integer arithmetic
         return validate_and_configure_window_for_division(input1, input2, output);
     }
     else
@@ -372,10 +373,10 @@ std::pair<Status, Window> CLArithmeticOperationKernel::validate_and_configure_wi
 }
 Status CLArithmeticOperationKernel::validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
-    if(_op == ArithmeticOperation::DIV)
+    if(_op == ArithmeticOperation::DIV || _op == ArithmeticOperation::POWER)
     {
-        // Division doesn't support integer arithmetic
-        return validate_arguments_with_division_rules(input1, input2, output);
+        // Division and Power operators don't support integer arithmetic
+        return validate_arguments_with_float_only_supported_rules(input1, input2, output);
     }
     else
     {
