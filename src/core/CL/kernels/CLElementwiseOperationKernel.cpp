@@ -43,6 +43,7 @@ std::map<ArithmeticOperation, std::string> supported_arithmetic_ops =
     { ArithmeticOperation::MIN, "MIN" },
     { ArithmeticOperation::MAX, "MAX" },
     { ArithmeticOperation::POWER, "POWER" },
+    { ArithmeticOperation::PRELU, "PRELU" },
 };
 
 std::map<ArithmeticOperation, std::string> supported_sat_arithmetic_ops =

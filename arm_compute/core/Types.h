@@ -574,6 +574,7 @@ enum class ArithmeticOperation
     MAX,          /**< Max(x, y) */
     SQUARED_DIFF, /**< (x - y)^2 */
     POWER,        /**< x ^ y */
+    PRELU,        /**< y*x if x < 0, x otherwise */
 };
 
 /** Available element wise unary operations */

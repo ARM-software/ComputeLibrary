@@ -38,6 +38,7 @@
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
 #define DIV(x, y) (x / y)
 #define POWER(x, y) pow(x, y)
+#define PRELU(x, y) (select(y * x, x, x > (DATA_TYPE_OUT)0))
 
 #define OP_FUN_NAME_STR(op) elementwise_operation_##op
 #define OP_FUN_NAME(op) OP_FUN_NAME_STR(op)

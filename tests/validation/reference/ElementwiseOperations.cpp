@@ -81,6 +81,13 @@ T arithm_op(ArithmeticOperation op, T src1, T src2, ConvertPolicy convert_policy
             val = std::pow(static_cast<intermediate_type>(src1), static_cast<intermediate_type>(src2));
             break;
         }
+        case ArithmeticOperation::PRELU:
+        {
+            const T x     = static_cast<intermediate_type>(src1);
+            const T alpha = static_cast<intermediate_type>(src2);
+            val           = (x > 0 ? x : alpha * x);
+            break;
+        }
         default:
         {
             ARM_COMPUTE_ERROR("Not handled");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #define MAX(x, y) max((x), (y))
 #define MIN(x, y) min((x), (y))
 #define SQUARED_DIFF(x, y) (x - y) * (x - y)
+#define PRELU(x, y) (select(y * x, x, x > (DATA_TYPE_OUT)0))
 #define DIV(x, y) (x / y)
 
 #define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
