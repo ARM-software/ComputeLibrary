@@ -75,6 +75,9 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
         case ActivationLayerInfo::ActivationFunction::TANH:
             ret = a * std::tanh(b * x);
             break;
+        case ActivationLayerInfo::ActivationFunction::IDENTITY:
+            ret = x;
+            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported activation function");
             break;

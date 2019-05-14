@@ -51,7 +51,8 @@ public:
                             ActivationLayerInfo::ActivationFunction::SOFT_RELU,
                             ActivationLayerInfo::ActivationFunction::SQRT,
                             ActivationLayerInfo::ActivationFunction::SQUARE,
-                            ActivationLayerInfo::ActivationFunction::TANH
+                            ActivationLayerInfo::ActivationFunction::TANH,
+                            ActivationLayerInfo::ActivationFunction::IDENTITY
     })
     {
     }
