@@ -58,7 +58,7 @@ public:
      *                       lhs_info.transpose: false
      * @param[in]  rhs_info  RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
      *                       rhs_info.n0: 2,3,4,8,16
-     *                       rhs_info.k0: 2,3,4,8,16
+     *                       rhs_info.k0: same as lhs_info.k0
      *                       rhs_info.transpose: true
      * @param[in]  gemm_info GEMM information used to retrieve the original dimensions of the input matrices
      *

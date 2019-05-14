@@ -112,50 +112,50 @@
 #define LOAD_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z) LOAD_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, OFFSET, STRIDE_Y, Z)
 
 #define CALCULATE_Z_OFFSET_1(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
-    Z##0 = (0 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##0 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##0);                                                     \
+    Z##0 = (0 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##0 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##0);                                                      \
     Z##0 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_2(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_1(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##1 = (1 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##1 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##1);                                                     \
+    Z##1 = (1 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##1 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##1);                                                      \
     Z##1 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_3(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_2(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##2 = (2 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##2 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##2);                                                     \
+    Z##2 = (2 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##2 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##2);                                                      \
     Z##2 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_4(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_3(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##3 = (3 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##3 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##3);                                                     \
+    Z##3 = (3 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##3 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##3);                                                      \
     Z##3 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_5(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_4(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##4 = (4 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##4 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##4);                                                     \
+    Z##4 = (4 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##4 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##4);                                                      \
     Z##4 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_6(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_5(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##5 = (5 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##5 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##5);                                                     \
+    Z##5 = (5 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##5 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##5);                                                      \
     Z##5 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_7(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_6(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##6 = (6 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##6 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##6);                                                     \
+    Z##6 = (6 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##6 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##6);                                                      \
     Z##6 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 #define CALCULATE_Z_OFFSET_8(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_7(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##7 = (7 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
-    Z##7 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##7);                                                     \
+    Z##7 = (7 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                               \
+    Z##7 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##7);                                                      \
     Z##7 *= (CROSS_PLANE_PAD * STRIDE_Y);
 
 // CALCULATE_Z_OFFSET_n calculates Z for Z##0 to Z##(n-1)
@@ -179,6 +179,7 @@
  */
 #define CALCULATE_Z_OFFSET(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) CALCULATE_Z_OFFSET_STR(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)
 
+// STORE_ROW_n macros
 #define STORE_ROW_1(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
     VSTORE(N0)                                                 \
     (BASENAME##0, 0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
@@ -258,14 +259,105 @@
     VSTORE(N0)                                                  \
     (BASENAME##F, 0, (__global DATA_TYPE *)(PTR + 15 * STRIDE_Y + Z##F));
 
+// CONVERT_STORE_ROW_n macros
+#define CONVERT_STORE_ROW_1(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##0), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 0 * STRIDE_Y + Z##0));
+
+#define CONVERT_STORE_ROW_2(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_1(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##1), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 1 * STRIDE_Y + Z##1));
+
+#define CONVERT_STORE_ROW_3(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_2(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##2), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 2 * STRIDE_Y + Z##2));
+
+#define CONVERT_STORE_ROW_4(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_3(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##3), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 3 * STRIDE_Y + Z##3));
+
+#define CONVERT_STORE_ROW_5(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_4(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##4), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 4 * STRIDE_Y + Z##4));
+
+#define CONVERT_STORE_ROW_6(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_5(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##5), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 5 * STRIDE_Y + Z##5));
+
+#define CONVERT_STORE_ROW_7(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_6(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##6), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 6 * STRIDE_Y + Z##6));
+
+#define CONVERT_STORE_ROW_8(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_7(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##7), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 7 * STRIDE_Y + Z##7));
+
+#define CONVERT_STORE_ROW_9(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_8(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                         \
+    (CONVERT_SAT((BASENAME##8), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 8 * STRIDE_Y + Z##8));
+
+#define CONVERT_STORE_ROW_10(N0, DATA, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_9(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    VSTORE(N0)                                                     \
+    (CONVERT_SAT((BASENAME##9), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 9 * STRIDE_Y + Z##9));
+
+#define CONVERT_STORE_ROW_11(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_10(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##A), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 10 * STRIDE_Y + Z##A));
+
+#define CONVERT_STORE_ROW_12(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_11(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##B), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 11 * STRIDE_Y + Z##B));
+
+#define CONVERT_STORE_ROW_13(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_12(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##C), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 12 * STRIDE_Y + Z##C));
+
+#define CONVERT_STORE_ROW_14(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_13(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##D), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 13 * STRIDE_Y + Z##D));
+
+#define CONVERT_STORE_ROW_15(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_14(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##E), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 14 * STRIDE_Y + Z##E));
+
+#define CONVERT_STORE_ROW_16(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) \
+    CONVERT_STORE_ROW_15(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)     \
+    VSTORE(N0)                                                          \
+    (CONVERT_SAT((BASENAME##F), VEC_DATA_TYPE(DATA_TYPE, N0)), 0, (__global DATA_TYPE *)(PTR + 15 * STRIDE_Y + Z##F));
+
 // STORE_ROW_n stores the rows 0..n-1 from variables BASENAME##0 to BASENAME##(n-1)
 #define STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
-/** Store Blocks of M0 consecutive rows and N0 consecutive columns when using Z offset as well
-* Supported cases M0=1,2,3..16. N0=2,3,4,8,16, for variables BASENAME[0..M]
- * The data to store is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
- * The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
+
+// CONVERT_STORE_ROW_n converts and stores the rows 0..n-1 from variables BASENAME##0 to BASENAME##(n-1)
+#define CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_ROW_##M0(N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+
+/** Store a block of size M0 (rows) x NO (columns).
+ *  Supported cases M0=1,2,3..16. N0=2,3,4,8,16, for variables BASENAME[0..M]
+ *  The data to store is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
+ *  The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
  */
 #define STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
+
+/** Convert and store a block of size M0 (rows) x NO (columns).
+ *  Supported cases M0=1,2,3..16. N0=2,3,4,8,16, for variables BASENAME[0..M]
+ *  The data to store is expected to have consecutive names for each row, For e.g. For M0=3, and basename=c, the expected data is c0, c1 and c2.
+ *  The Z offset is expected to have consecutive names For e.g. For M0=3, and Z=zin, the expected z offsets are zin0, zin1 and zin2.
+ */
+#define CONVERT_STORE_BLOCK(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z) CONVERT_STORE_BLOCK_STR(M0, N0, DATA_TYPE, BASENAME, PTR, STRIDE_Y, Z)
 
 #define SCALE_ROW_1(DATA_TYPE, BASENAME, SCALE) \
     BASENAME##0 = BASENAME##0 * (DATA_TYPE)SCALE;
@@ -336,3 +428,54 @@
  * Supported cases N=1,2,3..16, for variables BASENAME[0..N]
  */
 #define SCALE_BLOCK(N, DATA_TYPE, BASENAME, SCALE) SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE)
+
+/** Given a set of vectors of size K0, these macros create a new vector to contain the values at index IDX_COL (with IDX_COL < N0) for all input vectors */
+#define COLUMN_VECTOR1(IDX_COL, BASENAME, B) \
+    uchar BASENAME##IDX_COL = (uchar)((B##0).s##IDX_COL);
+#define COLUMN_VECTOR2(IDX_COL, BASENAME, B) \
+    uchar2 BASENAME##IDX_COL = (uchar2)((B##0).s##IDX_COL, (B##1).s##IDX_COL);
+#define COLUMN_VECTOR3(IDX_COL, BASENAME, B) \
+    uchar3 BASENAME##IDX_COL = (uchar3)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL);
+#define COLUMN_VECTOR4(IDX_COL, BASENAME, B) \
+    uchar4 BASENAME##IDX_COL = (uchar4)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL);
+#define COLUMN_VECTOR8(IDX_COL, BASENAME, B) \
+    uchar8 BASENAME##IDX_COL = (uchar8)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL, (B##4).s##IDX_COL, (B##5).s##IDX_COL, (B##6).s##IDX_COL, (B##7).s##IDX_COL);
+#define COLUMN_VECTOR16(IDX_COL, BASENAME, B) \
+    uchar16 BASENAME##N0 = (uchar16)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL, (B##4).s##IDX_COL, (B##5).s##IDX_COL, (B##6).s##IDX_COL, (B##7).s##IDX_COL, (B##8).s##IDX_COL, (B##9).s##IDX_COL, (B##A).s##IDX_COL, (B##B).s##IDX_COL, (B##C).s##IDX_COL, (B##D).s##IDX_COL, (B##E).s##IDX_COL, (B##F).s##IDX_COL);
+
+/** Given N0 vectors of size K0, these macros create K0 vectors of size N0 which are the result of a transposition */
+#define TRANSPOSE_K0X1(K0, BASENAME, B) \
+    COLUMN_VECTOR(K0, 0, BASENAME, B);
+#define TRANSPOSE_K0X2(K0, BASENAME, B) \
+    TRANSPOSE_K0X1(K0, BASENAME, B);    \
+    COLUMN_VECTOR(K0, 1, BASENAME, B);
+#define TRANSPOSE_K0X3(K0, BASENAME, B) \
+    TRANSPOSE_K0X2(K0, BASENAME, B);    \
+    COLUMN_VECTOR(K0, 2, BASENAME, B);
+#define TRANSPOSE_K0X4(K0, BASENAME, B) \
+    TRANSPOSE_K0X3(K0, BASENAME, B);    \
+    COLUMN_VECTOR(K0, 3, BASENAME, B);
+#define TRANSPOSE_K0X8(K0, BASENAME, B) \
+    TRANSPOSE_K0X4(K0, BASENAME, B);    \
+    COLUMN_VECTOR(K0, 4, BASENAME, B);  \
+    COLUMN_VECTOR(K0, 5, BASENAME, B);  \
+    COLUMN_VECTOR(K0, 6, BASENAME, B);  \
+    COLUMN_VECTOR(K0, 7, BASENAME, B);
+#define TRANSPOSE_K0X16(K0, BASENAME, B) \
+    TRANSPOSE_K0X8(K0, BASENAME, B);     \
+    COLUMN_VECTOR(K0, 8, BASENAME, B);   \
+    COLUMN_VECTOR(K0, 9, BASENAME, B);   \
+    COLUMN_VECTOR(K0, A, BASENAME, B);   \
+    COLUMN_VECTOR(K0, B, BASENAME, B);   \
+    COLUMN_VECTOR(K0, C, BASENAME, B);   \
+    COLUMN_VECTOR(K0, D, BASENAME, B);   \
+    COLUMN_VECTOR(K0, E, BASENAME, B);   \
+    COLUMN_VECTOR(K0, F, BASENAME, B);
+
+#define COLUMN_VECTOR(K0, IDX_COL, BASENAME, B) \
+    CONCAT(COLUMN_VECTOR, K0)                   \
+    (IDX_COL, BASENAME, B);
+
+#define TRANSPOSE_K0XN0(K0, N0, BASENAME, B) \
+    CONCAT(TRANSPOSE_K0X, N0)                \
+    (K0, BASENAME, B);

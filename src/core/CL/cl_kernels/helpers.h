@@ -43,6 +43,8 @@
 #define GPU_ARCH_MIDGARD 0x100
 #define GPU_ARCH_BIFROST 0x200
 
+#define CONCAT(a, b) a##b
+
 #define EXPAND(x) x
 
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)

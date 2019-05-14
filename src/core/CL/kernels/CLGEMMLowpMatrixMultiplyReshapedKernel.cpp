@@ -214,13 +214,14 @@ void CLGEMMLowpMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, 
     std::string kernel_name("gemmlowp_mm_reshaped_");
     kernel_name += lhs_info.transpose ? "lhs_t_" : "lhs_nt_";
     kernel_name += rhs_info.transpose ? "rhs_t" : "rhs_nt";
-    kernel_name += dot8_supported(CLKernelLibrary::get().get_device()) ? "_dot8" : "";
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += dot8_supported(CLKernelLibrary::get().get_device()) ? "_dot8" : "";
     _config_id += "_";
     _config_id += (_reinterpret_output_as_3d ? "3do_" : "");
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
