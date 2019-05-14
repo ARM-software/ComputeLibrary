@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,21 +55,21 @@ public:
      *
      * @param[in]  input   Source tensor. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
      * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.
-     * @param[in]  axis    Axis along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in]  axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in]  epsilon (Optional) Lower bound value for the normalization.
      */
-    void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, float epsilon = 1e-12f);
+    void configure(ICLTensor *input, ICLTensor *output, int axis, float epsilon = 1e-12f);
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayer.
      *
      * @param[in] input   Source tensor info. Data types supported: F16/F32. Data layouts supported: NCHW/NHWC.
      * @param[in] output  Destination tensor info. Data types and data layouts supported: Same as @p input.
-     * @param[in] axis    Axis along which to reduce. Supported reduction axis : 0, 1, 2
+     * @param[in] axis    Axis along which to reduce. Negative values wrap around. Maximum supported actual reduction axis : 2
      * @param[in] epsilon (Optional) Lower bound value for the normalization.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon = 1e-12f);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, int axis, float epsilon = 1e-12f);
 
     // Inherited methods overridden:
     void run() override;
