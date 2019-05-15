@@ -44,11 +44,11 @@ class ElementWiseUnaryValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type, ElementWiseUnary op)
+    void setup(TensorShape input_shape, DataType input_data_type, ElementWiseUnary op)
     {
         _op        = op;
-        _target    = compute_target(shape, data_type);
-        _reference = compute_reference(shape, data_type);
+        _target    = compute_target(input_shape, input_data_type);
+        _reference = compute_reference(input_shape, input_data_type);
     }
 
 protected:
@@ -100,7 +100,7 @@ protected:
             }
             case ElementWiseUnary::SIN:
             {
-                std::uniform_real_distribution<> distribution(100.0f, -100.0f);
+                std::uniform_real_distribution<> distribution(-100.00f, 100.00f);
                 library->fill(tensor, distribution, i);
                 break;
             }

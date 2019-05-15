@@ -65,13 +65,15 @@ inline ScalarType elementwise_op_scalar(const ScalarType &a)
             return std::abs(a);
         case ElementWiseUnary::ROUND:
             return support::cpp11::nearbyint(a);
+        case ElementWiseUnary::SIN:
+            return std::sin(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
 }
 
 /* Elementwise operations that are supported for float */
-template <ElementWiseUnary op, bool is_float, typename VectorType, typename std::enable_if<is_float, int>::type = 0>
+template <ElementWiseUnary op, typename ScalarType, bool is_float, typename VectorType, typename std::enable_if<is_float, int>::type = 0>
 inline VectorType elementwise_op(const VectorType &a)
 {
     switch(op)
@@ -88,13 +90,15 @@ inline VectorType elementwise_op(const VectorType &a)
             return wrapper::vabs(a);
         case ElementWiseUnary::ROUND:
             return wrapper::vround(a);
+        case ElementWiseUnary::SIN:
+            return wrapper::vsin(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
 }
 
 /* Elementwise operations that are supported for non floats */
-template < ElementWiseUnary op, bool is_float, typename VectorType, typename std::enable_if < !is_float, int >::type = 0 >
+template < ElementWiseUnary op, typename ScalarType, bool is_float, typename VectorType, typename std::enable_if < !is_float, int >::type = 0 >
 inline VectorType elementwise_op(const VectorType &a)
 {
     switch(op)
@@ -129,7 +133,7 @@ void elementwise_op(const ITensor *in, ITensor *out, const Window &window)
         int x = window_start_x;
         for(; x <= window_end_x - window_step_x; x += window_step_x)
         {
-            wrapper::vstore(output_ptr + x, elementwise_op<op, is_float>(wrapper::vloadq(input_ptr + x)));
+            wrapper::vstore(output_ptr + x, elementwise_op<op, ScalarType, is_float>(wrapper::vloadq(input_ptr + x)));
         }
         for(; x < window_end_x; ++x)
         {
@@ -215,6 +219,9 @@ void NEElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensor *inp
         case ElementWiseUnary::ROUND:
             _function = configure_func<ElementWiseUnary::ROUND>(input, output);
             break;
+        case ElementWiseUnary::SIN:
+            _function = configure_func<ElementWiseUnary::SIN>(input, output);
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -229,6 +236,7 @@ Status NEElementwiseUnaryKernel::validate_arguments(ElementWiseUnary op, const I
         case ElementWiseUnary::RSQRT:
         case ElementWiseUnary::LOG:
         case ElementWiseUnary::ROUND:
+        case ElementWiseUnary::SIN:
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
             break;
         case ElementWiseUnary::NEG:

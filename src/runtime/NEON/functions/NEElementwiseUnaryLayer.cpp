@@ -96,4 +96,15 @@ Status NERoundLayer::validate(const ITensorInfo *input, const ITensorInfo *outpu
     return NEElementwiseUnaryKernel::validate(ElementWiseUnary::ROUND, input, output);
 }
 
+void NESinLayer::configure(const ITensor *input, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    k->configure(ElementWiseUnary::SIN, input, output);
+    _kernel = std::move(k);
+}
+Status NESinLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::SIN, input, output);
+}
+
 } // namespace arm_compute

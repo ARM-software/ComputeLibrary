@@ -146,6 +146,22 @@ int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
  */
 int32_t rounding_divide_by_pow2(int32_t x, int exponent);
 
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F32 format.
+ *
+ * @return The calculated sine.
+ */
+float32x4_t vsinq_f32(float32x4_t val);
+
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F32 format.
+ *
+ * @return The calculated sine.
+ */
+float32x2_t vsin_f32(float32x2_t val);
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Calculate hyperbolic tangent.
  *
@@ -217,6 +233,15 @@ float16x8_t vexpq_f16(float16x8_t x);
  * @return The calculated power.
  */
 float16x8_t vpowq_f16(float16x8_t val, float16x8_t n);
+
+/** Calculate sine.
+ *
+ * @param[in] val Input vector value in radians, F16 format.
+ *
+ * @return The calculated sine.
+ */
+float16x8_t vsinq_f16(float16x8_t val);
+
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEMath.inl"
