@@ -29,9 +29,10 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace arm_compute
+{
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _conv_f(),
@@ -51,8 +52,8 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                       unsigned int inner_border_right, unsigned int inner_border_top)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, input);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
@@ -192,3 +193,4 @@ void NEDeconvolutionLayer::prepare()
         _is_prepared = true;
     }
 }
+} // namespace arm_compute

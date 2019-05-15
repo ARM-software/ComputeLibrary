@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class CPPUpsample : public ICPPSimpleFunction
 public:
     /** Configure the upsample CPP kernel
      *
-     * @param[in]  input              The input tensor to upsample. Data types supported: F32
+     * @param[in]  input              The input tensor to upsample. Data types supported: F32/F16/QASYMM8
      * @param[out] output             The output tensor. Data types supported: Same as @p input
      * @param[in]  info               Padding information
      * @param[in]  inner_border_right The number of zeros added to right edge of the input.
