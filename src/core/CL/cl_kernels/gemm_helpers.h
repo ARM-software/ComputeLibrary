@@ -154,7 +154,7 @@
 
 #define CALCULATE_Z_OFFSET_8(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y) \
     CALCULATE_Z_OFFSET_7(M0, DATA_TYPE, Z, Y, HEIGHT_GEMM3D, DEPTH_GEMM3D, CROSS_PLANE_PAD, STRIDE_Y)     \
-    Z##7 = (1 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
+    Z##7 = (7 + (DATA_TYPE)(Y * (DATA_TYPE)M0)) / (DATA_TYPE)HEIGHT_GEMM3D;                              \
     Z##7 = min((DATA_TYPE)(DEPTH_GEMM3D - 1), Z##7);                                                     \
     Z##7 *= (CROSS_PLANE_PAD * STRIDE_Y);
 

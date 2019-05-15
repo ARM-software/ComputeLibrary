@@ -28,7 +28,6 @@
 
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLElementwiseOperationKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
@@ -120,7 +119,7 @@ public:
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                          tensor has also been transposed with CLGEMMReshapeRHSMatrixKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
@@ -139,7 +138,7 @@ public:
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
-     *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *                          tensor has also been transposed with CLGEMMReshapeRHSMatrixKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      * @param[in]  num_groups   (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
