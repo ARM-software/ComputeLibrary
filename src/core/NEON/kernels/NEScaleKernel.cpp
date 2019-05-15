@@ -218,8 +218,9 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
     const int input_height = input->info()->dimension(2);
 
     T border_value;
-    if(use_padding)
+    if(use_padding && border_mode != BorderMode::REPLICATE )
     {
+        // configure() sets top border to 0 for BorderMode::REPLICATE and border_value is not needed in execute_window_loop() for REPLICATE
         border_value = *reinterpret_cast<T *>(input->buffer() + input->info()->offset_first_element_in_bytes() - stride_w);
     }
     else
