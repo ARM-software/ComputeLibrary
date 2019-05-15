@@ -119,8 +119,11 @@ void CLFFTConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights
     ICLTensor       *output_to_use  = _has_bias ? &_bias_output : output;
 
     // Permute bias
-    _permute_bias_func.configure(biases, &_permuted_bias, PermutationVector(1U, 2U, 0U));
-    _permuted_bias.info()->set_data_layout(DataLayout::NCHW);
+    if(biases != nullptr)
+    {
+        _permute_bias_func.configure(biases, &_permuted_bias, PermutationVector(1U, 2U, 0U));
+        _permuted_bias.info()->set_data_layout(DataLayout::NCHW);
+    }
 
     // Permute input if needed
     _needs_permute = input->info()->data_layout() == DataLayout::NHWC;
