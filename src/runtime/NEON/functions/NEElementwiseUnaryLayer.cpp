@@ -74,4 +74,15 @@ Status NELogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
     return NEElementwiseUnaryKernel::validate(ElementWiseUnary::LOG, input, output);
 }
 
+void NEAbsLayer::configure(const ITensor *input, ITensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<NEElementwiseUnaryKernel>();
+    k->configure(ElementWiseUnary::ABS, input, output);
+    _kernel = std::move(k);
+}
+Status NEAbsLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEElementwiseUnaryKernel::validate(ElementWiseUnary::ABS, input, output);
+}
+
 } // namespace arm_compute

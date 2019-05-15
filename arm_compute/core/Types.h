@@ -581,6 +581,7 @@ enum class ElementWiseUnary
     EXP,   /**< Exponential */
     NEG,   /**< Negate */
     LOG,   /**< Natural Logarithm */
+    ABS,   /**< Absolute value */
 };
 
 /** The normalization type used for the normalization layer */

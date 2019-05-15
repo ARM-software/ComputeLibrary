@@ -69,6 +69,7 @@ protected:
                 library->fill(tensor, distribution, i);
                 break;
             }
+            case ElementWiseUnary::ABS:
             case ElementWiseUnary::NEG:
             {
                 switch(data_type)
@@ -188,6 +189,17 @@ public:
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::LOG);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class AbsValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::ABS);
     }
 };
 } // namespace validation

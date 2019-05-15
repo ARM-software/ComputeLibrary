@@ -59,6 +59,8 @@ inline ScalarType elementwise_op_scalar(const ScalarType &a)
             return -a;
         case ElementWiseUnary::LOG:
             return std::log(a);
+        case ElementWiseUnary::ABS:
+            return std::abs(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -78,6 +80,8 @@ inline VectorType elementwise_op(const VectorType &a)
             return wrapper::vneg(a);
         case ElementWiseUnary::LOG:
             return wrapper::vlog(a);
+        case ElementWiseUnary::ABS:
+            return wrapper::vabs(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -91,6 +95,8 @@ inline VectorType elementwise_op(const VectorType &a)
     {
         case ElementWiseUnary::NEG:
             return wrapper::vneg(a);
+        case ElementWiseUnary::ABS:
+            return wrapper::vabs(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -197,6 +203,9 @@ void NEElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensor *inp
         case ElementWiseUnary::LOG:
             _function = configure_func<ElementWiseUnary::LOG>(input, output);
             break;
+        case ElementWiseUnary::ABS:
+            _function = configure_func<ElementWiseUnary::ABS>(input, output);
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -213,10 +222,11 @@ Status NEElementwiseUnaryKernel::validate_arguments(ElementWiseUnary op, const I
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
             break;
         case ElementWiseUnary::NEG:
+        case ElementWiseUnary::ABS:
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32, DataType::S32);
             break;
         default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+            ARM_COMPUTE_ERROR("ElementWiseUnary operation not supported");
     }
     // Validate in case of configured output
     if(output.total_size() > 0)
