@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
+#include "arm_compute/core/utils/misc/MMappedFile.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
@@ -165,6 +166,74 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
     }
 }
+
+#if !defined(BARE_METAL)
+TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
+{
+    // Check if import extension is supported
+    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
+    {
+        return;
+    }
+    else
+    {
+        const ActivationLayerInfo act_info(ActivationLayerInfo::ActivationFunction::RELU);
+        const TensorShape         shape     = TensorShape(24U, 16U, 3U);
+        const DataType            data_type = DataType::F32;
+
+        // Create tensor
+        const TensorInfo info(shape, 1, data_type);
+        CLTensor         tensor;
+        tensor.allocator()->init(info);
+
+        // Create and configure activation function
+        CLActivationLayer act_func;
+        act_func.configure(&tensor, nullptr, act_info);
+
+        // Get number of elements
+        const size_t total_size_in_elems = tensor.info()->tensor_shape().total_size();
+        const size_t total_size_in_bytes = tensor.info()->total_size();
+
+        // Create file
+        std::ofstream output_file("test_mmap_import.bin", std::ios::binary | std::ios::out);
+        output_file.seekp(total_size_in_bytes - 1);
+        output_file.write("", 1);
+        output_file.close();
+
+        // Map file
+        utils::mmap_io::MMappedFile mmapped_file("test_mmap_import.bin", 0 /** Whole file */, 0);
+        ARM_COMPUTE_EXPECT(mmapped_file.is_mapped(), framework::LogLevel::ERRORS);
+        unsigned char *data = mmapped_file.data();
+
+        cl::Buffer wrapped_buffer(import_malloc_memory_helper(data, total_size_in_bytes));
+        ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(wrapped_buffer)), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensor
+        std::uniform_real_distribution<float> distribution(-5.f, 5.f);
+        std::mt19937                          gen(library->seed());
+        auto                                 *typed_ptr = reinterpret_cast<float *>(data);
+        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        {
+            typed_ptr[i] = distribution(gen);
+        }
+
+        // Execute function and sync
+        act_func.run();
+        CLScheduler::get().sync();
+
+        // Validate result by checking that the input has no negative values
+        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        {
+            ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
+        }
+
+        // Release resources
+        tensor.allocator()->free();
+        ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+}
+#endif // !defined(BARE_METAL)
 
 TEST_SUITE_END() // TensorAllocator
 TEST_SUITE_END() // UNIT

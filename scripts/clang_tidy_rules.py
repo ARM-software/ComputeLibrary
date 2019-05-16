@@ -66,6 +66,7 @@ def filter_clang_tidy_lines( lines ):
             if ("uninitialized record type: '__ret'" in line or
                "local variable '__bound_functor' is still referred to by the global variable '__once_callable'" in line or
                "assigning newly created 'gsl::owner<>'" in line or
+               "calling legacy resource function without passing a 'gsl::owner<>'" in line or
                "deleting a pointer through a type that is not marked 'gsl::owner<>'" in line or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "thrown exception type is not nothrow copy constructible" in line) or
                (any(f in line for f in ["Error.cpp","Error.h"]) and "uninitialized record type: 'args'" in line) or

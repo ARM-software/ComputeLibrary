@@ -164,6 +164,7 @@ core_files += Glob('src/core/CPP/kernels/*.cpp')
 core_files += Glob('src/core/utils/helpers/*.cpp')
 core_files += Glob('src/core/utils/io/*.cpp')
 core_files += Glob('src/core/utils/quantization/*.cpp')
+core_files += Glob('src/core/utils/misc/*.cpp')
 if env["logging"]:
     core_files += Glob('src/core/utils/logging/*.cpp')
 
