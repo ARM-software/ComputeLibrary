@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
@@ -37,6 +38,8 @@ Status NEReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
 {
     ARM_COMPUTE_UNUSED(keep_dims);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() > input->num_dimensions());
 
     TensorShape        out_shape     = input->tensor_shape();

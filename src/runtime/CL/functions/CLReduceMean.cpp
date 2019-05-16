@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
@@ -99,6 +100,8 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
 Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() > input->num_dimensions());
 
     TensorShape out_shape = input->tensor_shape();
