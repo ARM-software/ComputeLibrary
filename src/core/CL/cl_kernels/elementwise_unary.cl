@@ -26,14 +26,16 @@
 
 #if defined(DATA_TYPE) && defined(OPERATION)
 
-// Calculate Exponential
-#define exponential(input) exp(input)
+// Calculate exponential
+#define exp_op(input) exp(input)
 // Calculate reverse square root
-#define inverse_sqrt(input) rsqrt(input)
+#define rsqrt_op(input) rsqrt(input)
 // Calculate negative
-#define neg(input) (-input)
+#define neg_op(input) (-input)
 // Calculate sine
-#define sine(input) sin(input)
+#define sin_op(input) sin(input)
+// Calculate abs for floating point values
+#define fabs_op(input) fabs(input)
 
 /** Applies element wise unary operator in a tensor.
  *

@@ -109,5 +109,25 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
+
+/** Basic function to get the absolute value of an input tensor. */
+class CLAbsLayer : public ICLSimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ICLTensor *input, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLAbsLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLELEMENTWISEUNARYLAYER_H__ */

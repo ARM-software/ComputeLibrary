@@ -79,16 +79,19 @@ void CLElementWiseUnaryLayerKernel::configure(const ICLTensor *input, ICLTensor 
     switch(op)
     {
         case ElementWiseUnary::RSQRT:
-            build_opts.add_option("-DOPERATION=inverse_sqrt");
+            build_opts.add_option("-DOPERATION=rsqrt_op");
             break;
         case ElementWiseUnary::EXP:
-            build_opts.add_option("-DOPERATION=exponential");
+            build_opts.add_option("-DOPERATION=exp_op");
             break;
         case ElementWiseUnary::NEG:
-            build_opts.add_option("-DOPERATION=neg");
+            build_opts.add_option("-DOPERATION=neg_op");
             break;
         case ElementWiseUnary::SIN:
-            build_opts.add_option("-DOPERATION=sine");
+            build_opts.add_option("-DOPERATION=sin_op");
+            break;
+        case ElementWiseUnary::ABS:
+            build_opts.add_option("-DOPERATION=fabs_op");
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
