@@ -98,6 +98,12 @@ protected:
                 library->fill(tensor, distribution, i);
                 break;
             }
+            case ElementWiseUnary::SIN:
+            {
+                std::uniform_real_distribution<> distribution(100.0f, -100.0f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
         }
@@ -200,6 +206,17 @@ public:
     void setup(const TensorShape &shape, DataType data_type)
     {
         ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::ABS);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class SinValidationFixture : public ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType data_type)
+    {
+        ElementWiseUnaryValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, ElementWiseUnary::SIN);
     }
 };
 } // namespace validation

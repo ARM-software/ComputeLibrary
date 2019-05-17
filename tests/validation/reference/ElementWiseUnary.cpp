@@ -55,6 +55,9 @@ SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary o
             case ElementWiseUnary::ABS:
                 dst[i] = std::abs(src[i]);
                 break;
+            case ElementWiseUnary::SIN:
+                dst[i] = std::sin(src[i]);
+                break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
         }

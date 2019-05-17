@@ -32,6 +32,8 @@
 #define inverse_sqrt(input) rsqrt(input)
 // Calculate negative
 #define neg(input) (-input)
+// Calculate sine
+#define sine(input) sin(input)
 
 /** Applies element wise unary operator in a tensor.
  *

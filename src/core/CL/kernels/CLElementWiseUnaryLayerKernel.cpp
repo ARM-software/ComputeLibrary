@@ -87,6 +87,9 @@ void CLElementWiseUnaryLayerKernel::configure(const ICLTensor *input, ICLTensor 
         case ElementWiseUnary::NEG:
             build_opts.add_option("-DOPERATION=neg");
             break;
+        case ElementWiseUnary::SIN:
+            build_opts.add_option("-DOPERATION=sine");
+            break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
     }
