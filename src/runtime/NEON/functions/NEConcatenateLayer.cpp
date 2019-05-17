@@ -23,8 +23,9 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 
-#include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"
+#include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -44,7 +45,28 @@ NEConcatenateLayer::NEConcatenateLayer()
 {
 }
 
-void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, size_t axis)
+void NEConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, ITensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+void NEConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, ITensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+Status NEConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+template <typename TensorType, typename>
+void NEConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
@@ -97,7 +119,8 @@ void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, 
     }
 }
 
-Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+template <typename TensorInfoType, typename>
+Status NEConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);

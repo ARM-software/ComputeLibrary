@@ -267,11 +267,11 @@ v19.05 Public major release
  - New OpenGLES kernels / functions:
     - @ref GCConcatenateLayer
  - Deprecated functions/interfaces
-    - @ref GCDepthConcatenateLayer
-    - @ref NEWidthConcatenateLayer
-    - @ref NEDepthConcatenateLayer
-    - @ref CLWidthConcatenateLayer
-    - @ref CLDepthConcatenateLayer
+    - GCDepthConcatenateLayer
+    - NEWidthConcatenateLayer
+    - NEDepthConcatenateLayer
+    - CLWidthConcatenateLayer
+    - CLDepthConcatenateLayer
     - CLGEMMInterleave4x4
     - CLGEMMTranspose1xW
  - Support different quantization info in CLConcatLayer.
@@ -424,7 +424,7 @@ v18.11 Public major release
  - Added documentation for add a new function or kernel.
  - Improved doxygen documentation adding a list of the existing functions.
  - Add 4D tensors support to
-    - @ref CLWidthConcatenateLayer
+    - CLWidthConcatenateLayer
     - @ref CLFlattenLayer
     - @ref CLSoftmaxLayer
  - Add dot product support for @ref CLDepthwiseConvolutionLayer3x3NHWCKernel non-unit stride
@@ -453,7 +453,7 @@ v18.08 Public major release
  - Removed support for QS8/QS16 data types.
  - Added support for grouped convolution in @ref CLConvolutionLayer.
  - Added NHWC data layout support to:
-    - @ref NEDepthConcatenateLayer / @ref CLDepthConcatenateLayer
+    - NEDepthConcatenateLayer / CLDepthConcatenateLayer
     - @ref NEWinogradConvolutionLayer / @ref CLWinogradConvolutionLayer
     - @ref CLDepthwiseConvolutionLayer
     - @ref CLDirectConvolutionLayer
@@ -496,7 +496,7 @@ v18.05 Public major release
     - @ref CLCopy / @ref CLCopyKernel
     - @ref CLLSTMLayer
     - @ref CLRNNLayer
-    - @ref CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
+    - CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
     - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
  - New Neon kernels / functions:
@@ -619,7 +619,7 @@ v17.12 Public major release
     - @ref GCActivationLayerKernel / @ref GCActivationLayer
     - @ref GCBatchNormalizationLayerKernel / @ref GCBatchNormalizationLayer
     - @ref GCCol2ImKernel
-    - @ref GCDepthConcatenateLayerKernel / @ref GCDepthConcatenateLayer
+    - @ref GCDepthConcatenateLayerKernel / GCDepthConcatenateLayer
     - @ref GCDirectConvolutionLayerKernel / @ref GCDirectConvolutionLayer
     - @ref GCDropoutLayerKernel / @ref GCDropoutLayer
     - @ref GCFillBorderKernel / @ref GCFillBorder
@@ -707,7 +707,7 @@ v17.06 Public major release
  - User can specify his own scheduler by implementing the @ref IScheduler interface.
  - New OpenCL kernels / functions:
     - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
-    - @ref CLDepthConcatenateLayerKernel / @ref CLDepthConcatenateLayer
+    - @ref CLDepthConcatenateLayerKernel / CLDepthConcatenateLayer
     - @ref CLHOGOrientationBinningKernel @ref CLHOGBlockNormalizationKernel, @ref CLHOGDetectorKernel / @ref CLHOGDescriptor @ref CLHOGDetector @ref CLHOGGradient @ref CLHOGMultiDetection
     - @ref CLLocallyConnectedMatrixMultiplyKernel / @ref CLLocallyConnectedLayer
     - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
@@ -715,7 +715,7 @@ v17.06 Public major release
     - @ref CPPDetectionWindowNonMaximaSuppressionKernel
  - New NEON kernels / functions:
     - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
-    - @ref NEDepthConcatenateLayerKernel / @ref NEDepthConcatenateLayer
+    - @ref NEDepthConcatenateLayerKernel / NEDepthConcatenateLayer
     - @ref NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
     - @ref NELocallyConnectedMatrixMultiplyKernel / @ref NELocallyConnectedLayer
     - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights

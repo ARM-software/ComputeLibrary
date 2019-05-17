@@ -23,11 +23,13 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
+#include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenate4TensorsKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"

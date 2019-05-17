@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/Types.h"
 
 #include <memory>
@@ -41,9 +41,9 @@ class Status;
 
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref CLWidthConcatenateLayer (if underlying concatenation axis is 0).
+ * -# @ref CLWidthConcatenateLayerKernel (if underlying concatenation axis is 0).
  * -# @ref CLHeightConcatenateLayerKernel (if underlying concatenation axis is 1).
- * -# @ref CLDepthConcatenateLayer (if underlying concatenation axis is 2).
+ * -# @ref CLDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
  */
 class CLConcatenateLayer : public IFunction
 {
@@ -53,7 +53,7 @@ public:
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayerKernel, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayerKernel.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
@@ -63,7 +63,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayerKernel, @ref CLHeightConcatenateLayerKernel and @ref CLDepthConcatenateLayerKernel.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.

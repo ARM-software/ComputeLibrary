@@ -32,9 +32,9 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
-#include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
@@ -176,11 +176,11 @@ private:
     NEActivationLayerKernel         _projection_clip;
     NECopyKernel                    _copy_cell_state;
     NECopyKernel                    _copy_output;
-    NEWidthConcatenateLayer         _concat_scratch_buffer;
-    NEWidthConcatenateLayer         _concat_inputs_forget_gate;
-    NEWidthConcatenateLayer         _concat_weights_forget_gate;
-    NEWidthConcatenateLayer         _concat_weights_input_gate;
-    NEWidthConcatenateLayer         _concat_weights_output;
+    NEConcatenateLayer              _concat_scratch_buffer;
+    NEConcatenateLayer              _concat_inputs_forget_gate;
+    NEConcatenateLayer              _concat_weights_forget_gate;
+    NEConcatenateLayer              _concat_weights_input_gate;
+    NEConcatenateLayer              _concat_weights_output;
     Tensor                          _input_gate_out1;
     Tensor                          _input_gate_out2;
     Tensor                          _input_gate_out3;

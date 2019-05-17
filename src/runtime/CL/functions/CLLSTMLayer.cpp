@@ -316,7 +316,7 @@ void CLLSTMLayer::configure(const ICLTensor *input,
     scratch_inputs.emplace_back(&_cell_state_out1);
     scratch_inputs.emplace_back(forget_gate_out);
     scratch_inputs.emplace_back(output_gate_out);
-    _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer);
+    _concat_scratch_buffer.configure(scratch_inputs, scratch_buffer, Window::DimX);
     input_gate_out->allocator()->allocate();
     _cell_state_out1.allocator()->allocate();
     forget_gate_out->allocator()->allocate();
@@ -497,7 +497,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input,
     inputs_vector_info_raw.push_back(&forget_gate);
     inputs_vector_info_raw.push_back(&output_gate_tmp);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenateLayer::validate(inputs_vector_info_raw, scratch_buffer));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConcatenateLayer::validate(inputs_vector_info_raw, scratch_buffer, Window::DimX));
     return Status{};
 }
 

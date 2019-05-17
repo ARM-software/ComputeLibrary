@@ -31,7 +31,6 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCConvolutionLayer.h"
-#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDropoutLayer.h"

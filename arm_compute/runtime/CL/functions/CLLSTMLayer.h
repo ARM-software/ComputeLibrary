@@ -35,10 +35,10 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
-#include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
 
@@ -184,7 +184,7 @@ private:
     CLActivationLayerKernel              _projection_clip;
     CLCopyKernel                         _copy_cell_state;
     CLCopyKernel                         _copy_output;
-    CLWidthConcatenateLayer              _concat_scratch_buffer;
+    CLConcatenateLayer                   _concat_scratch_buffer;
     CLWidthConcatenate2TensorsKernel     _concat_inputs_forget_gate;
     CLWidthConcatenate2TensorsKernel     _concat_weights_forget_gate;
     CLWidthConcatenate2TensorsKernel     _concat_weights_input_gate;

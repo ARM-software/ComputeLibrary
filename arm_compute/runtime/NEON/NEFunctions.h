@@ -51,7 +51,6 @@
 #include "arm_compute/runtime/NEON/functions/NECopy.h"
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseSeparableConvolutionLayer.h"
@@ -142,7 +141,6 @@
 #include "arm_compute/runtime/NEON/functions/NEUpsampleLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
-#include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEYOLOLayer.h"
 

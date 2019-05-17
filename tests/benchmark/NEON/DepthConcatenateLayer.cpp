@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -44,7 +44,7 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
-using NEDepthConcatenateLayerFixture = DepthConcatenateLayerFixture<Tensor, ITensor, NEDepthConcatenateLayer, Accessor>;
+using NEDepthConcatenateLayerFixture = DepthConcatenateLayerFixture<Tensor, ITensor, NEConcatenateLayer, Accessor>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(DepthConcatenateLayer)
