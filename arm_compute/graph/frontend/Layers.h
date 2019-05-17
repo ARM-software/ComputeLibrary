@@ -856,6 +856,30 @@ private:
     PriorBoxLayerInfo _prior_info;
 };
 
+/** Quantization Layer */
+class QuantizationLayer final : public ILayer
+{
+public:
+    /** Construct a quantization layer.
+     *
+     * @param[in] out_quant_info Output tensor quantization info
+     */
+    QuantizationLayer(QuantizationInfo out_quant_info)
+        : _out_quant_info(out_quant_info)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_quantization_node(s.graph(), common_params, input, _out_quant_info);
+    }
+
+private:
+    QuantizationInfo _out_quant_info;
+};
+
 /** Reorg Layer */
 class ReorgLayer final : public ILayer
 {

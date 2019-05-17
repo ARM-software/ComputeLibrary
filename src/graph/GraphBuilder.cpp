@@ -566,6 +566,11 @@ NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair 
     return prior_nid;
 }
 
+NodeID GraphBuilder::add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, QuantizationInfo out_quant_info)
+{
+    return create_simple_single_input_output_node<QuantizationLayerNode>(g, params, input, out_quant_info);
+}
+
 NodeID GraphBuilder::add_reorg_node(Graph &g, NodeParams params, NodeIdxPair input, int stride)
 {
     return create_simple_single_input_output_node<ReorgLayerNode>(g, params, input, stride);

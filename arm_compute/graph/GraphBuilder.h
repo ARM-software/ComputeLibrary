@@ -354,6 +354,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info);
+    /** Adds a quantization layer node to the graph
+     *
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the quantization layer node as a NodeID-Index pair
+     * @param[in] out_quant_info Output quantization info
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, QuantizationInfo out_quant_info);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to

@@ -148,6 +148,7 @@ enum class NodeType
     PermuteLayer,
     PoolingLayer,
     PriorBoxLayer,
+    QuantizationLayer,
     ReorgLayer,
     ReshapeLayer,
     ResizeLayer,

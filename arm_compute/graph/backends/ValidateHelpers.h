@@ -350,6 +350,29 @@ Status validate_priorbox_layer(PriorBoxLayerNode &node)
     return PriorBoxLayer::validate(input0, input1, output, prior_info);
 }
 
+/** Validates a Quantization layer node
+ *
+ * @tparam QuantizationLayer Quantization layer type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename QuantizationLayer>
+Status validate_quantization_layer(QuantizationLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating QuantizationLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract input and output
+    arm_compute::ITensorInfo *input  = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output = get_backing_tensor_info(node.output(0));
+
+    // Validate function
+    return QuantizationLayer::validate(input, output);
+}
+
 /** Validates a Reorg layer node
  *
  * @tparam ReorgLayer Reorg layer type

@@ -72,6 +72,8 @@ Status CLNodeValidator::validate(INode *node)
             return detail::validate_permute_layer<CLPermute>(*polymorphic_downcast<PermuteLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::validate_priorbox_layer<CLPriorBoxLayer>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::QuantizationLayer:
+            return detail::validate_quantization_layer<CLQuantizationLayer>(*polymorphic_downcast<QuantizationLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::validate_reorg_layer<CLReorgLayer>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:

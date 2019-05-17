@@ -126,6 +126,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(PriorBoxLayerNode &n) = 0;
+    /** Visit QuantizationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(QuantizationLayerNode &n) = 0;
     /** Visit ReshapeLayerNode.
      *
      * @param[in] n Node to visit.
@@ -230,6 +235,10 @@ public:
         default_visit();
     }
     virtual void visit(PriorBoxLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(QuantizationLayerNode &n) override
     {
         default_visit();
     }

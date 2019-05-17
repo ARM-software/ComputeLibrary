@@ -230,6 +230,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_pooling_layer<NEPoolingLayer, NETargetInfo>(*polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::PriorBoxLayer:
             return detail::create_priorbox_layer<NEPriorBoxLayer, NETargetInfo>(*polymorphic_downcast<PriorBoxLayerNode *>(node));
+        case NodeType::QuantizationLayer:
+            return detail::create_quantization_layer<NEQuantizationLayer, NETargetInfo>(*polymorphic_downcast<QuantizationLayerNode *>(node));
         case NodeType::ReorgLayer:
             return detail::create_reorg_layer<NEReorgLayer, NETargetInfo>(*polymorphic_downcast<ReorgLayerNode *>(node));
         case NodeType::ReshapeLayer:

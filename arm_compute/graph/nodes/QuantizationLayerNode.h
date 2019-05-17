@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,50 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class BoundingBoxTransformLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DetectionOutputLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class FusedConvolutionBatchNormalizationNode;
-class GenerateProposalsLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class NormalizePlanarYUVLayerNode;
-class OutputNode;
-class PadLayerNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class PriorBoxLayerNode;
-class QuantizationLayerNode;
-class ReorgLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class ROIAlignLayerNode;
-class SoftmaxLayerNode;
-class SliceLayerNode;
-class SplitLayerNode;
-class StackLayerNode;
-class UpsampleLayerNode;
-class YOLOLayerNode;
+/** Quantization Layer node */
+class QuantizationLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] out_quant_info Output quantization info
+     */
+    QuantizationLayerNode(QuantizationInfo out_quant_info);
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+    static constexpr NodeType node_type = NodeType::QuantizationLayer;
+
+private:
+    QuantizationInfo _out_quant_info;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_QUANTIZATION_LAYER_NODE_H__ */
