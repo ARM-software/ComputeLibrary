@@ -1058,6 +1058,29 @@ inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const 
     return output_shape;
 }
 
+/** Calculate the space to batch output shape of a tensor
+ *
+ * @param[in] input       Input tensor info
+ * @param[in] block_shape Block shape value
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_space_to_depth_shape(const ITensorInfo *input, int32_t block_shape)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_depth   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    output_shape.set(idx_width, input->tensor_shape()[idx_width] * block_shape);
+    output_shape.set(idx_height, input->tensor_shape()[idx_height] * block_shape);
+    output_shape.set(idx_depth, input->tensor_shape()[idx_depth] / (block_shape * block_shape));
+
+    return output_shape;
+}
+
 /** Calculate the prior box output shape of a tensor
  *
  * @param[in] input Input tensor info

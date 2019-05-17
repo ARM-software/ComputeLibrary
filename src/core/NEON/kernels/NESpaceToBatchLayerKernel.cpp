@@ -167,12 +167,6 @@ void NESpaceToBatchLayerKernel::run(const Window &window, const ThreadInfo &info
     const size_t batch_size = _input->info()->dimension(3);
 
     Window slice_out = window.first_slice_window_3D();
-    Window slice_in  = window.first_slice_window_4D();
-
-    slice_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-    slice_in.set(3, Window::Dimension(0, 0, 0));
 
     int batch_id = 0;
 
