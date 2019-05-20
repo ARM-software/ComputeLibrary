@@ -417,6 +417,7 @@ struct RedOpX
             case ReductionOperation::ARG_IDX_MAX:
             case ReductionOperation::ARG_IDX_MIN:
             case ReductionOperation::MIN:
+            case ReductionOperation::MAX:
             {
                 init_res_value = *reinterpret_cast<T *>(input.ptr());
                 break;
@@ -466,6 +467,11 @@ struct RedOpX
                 case ReductionOperation::MIN:
                 {
                     vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                    break;
+                }
+                case ReductionOperation::MAX:
+                {
+                    vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
                     break;
                 }
                 default:
@@ -518,6 +524,11 @@ struct RedOpX
                 *(reinterpret_cast<T *>(output.ptr())) = wrapper::vgetlane(calculate_min(vec_res_value), 0);
                 break;
             }
+            case ReductionOperation::MAX:
+            {
+                *(reinterpret_cast<T *>(output.ptr())) = wrapper::vgetlane(calculate_max(vec_res_value), 0);
+                break;
+            }
             default:
                 ARM_COMPUTE_ERROR("Not supported");
         }
@@ -541,7 +552,7 @@ struct RedOpX_qasymm8
 
         uint8x16_t vec_res_value = { 0 };
 
-        if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN)
+        if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX)
         {
             vec_res_value = wrapper::vdup_n(*input.ptr(), wrapper::traits::vector_128_tag{});
         }
@@ -618,6 +629,11 @@ struct RedOpX_qasymm8
                     vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
                     break;
                 }
+                case ReductionOperation::MAX:
+                {
+                    vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
+                    break;
+                }
                 default:
                     ARM_COMPUTE_ERROR("Not supported");
             }
@@ -636,6 +652,11 @@ struct RedOpX_qasymm8
             case ReductionOperation::MIN:
             {
                 *(output.ptr()) = static_cast<uint8_t>(wrapper::vgetlane(calculate_min(vec_res_value), 0));
+                break;
+            }
+            case ReductionOperation::MAX:
+            {
+                *(output.ptr()) = static_cast<uint8_t>(wrapper::vgetlane(calculate_max(vec_res_value), 0));
                 break;
             }
             case ReductionOperation::PROD:
@@ -694,6 +715,7 @@ struct RedOpYZW
                 case ReductionOperation::ARG_IDX_MAX:
                 case ReductionOperation::ARG_IDX_MIN:
                 case ReductionOperation::MIN:
+                case ReductionOperation::MAX:
                 {
                     vec_res_value = wrapper::vloadq(reinterpret_cast<T *>(input.ptr()));
                     break;
@@ -759,6 +781,11 @@ struct RedOpYZW
                     case ReductionOperation::MIN:
                     {
                         vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                        break;
+                    }
+                    case ReductionOperation::MAX:
+                    {
+                        vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
                         break;
                     }
                     default:
@@ -948,6 +975,11 @@ struct RedOpYZW_qasymm8
                     case ReductionOperation::MIN:
                     {
                         vec_res_value = wrapper::vmin(vec_elements, vec_res_value);
+                        break;
+                    }
+                    case ReductionOperation::MAX:
+                    {
+                        vec_res_value = wrapper::vmax(vec_elements, vec_res_value);
                         break;
                     }
                     default:

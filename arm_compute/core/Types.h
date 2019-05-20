@@ -561,6 +561,7 @@ enum class ReductionOperation
     SUM_SQUARE,  /**< Sum of squares */
     SUM,         /**< Sum */
     MIN,         /**< Min */
+    MAX,         /**< Max */
 };
 
 /** Available element-wise operations */

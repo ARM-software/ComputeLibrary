@@ -53,6 +53,7 @@ const auto ReductionOperations = framework::dataset::make("ReductionOperation",
     ReductionOperation::SUM,
     ReductionOperation::PROD,
     ReductionOperation::MIN,
+    ReductionOperation::MAX,
 });
 
 const auto QuantizationInfos = framework::dataset::make("QuantizationInfo",

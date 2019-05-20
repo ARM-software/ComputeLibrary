@@ -51,6 +51,7 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
         }
         break;
         case ReductionOperation::MIN:
+        case ReductionOperation::MAX:
         {
             res = *ptr;
         }
@@ -84,6 +85,12 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
                     break;
                 case ReductionOperation::MIN:
                     if(static_cast<T>(int_res) > elem)
+                    {
+                        int_res = elem;
+                    }
+                    break;
+                case ReductionOperation::MAX:
+                    if(static_cast<T>(int_res) < elem)
                     {
                         int_res = elem;
                     }
@@ -129,6 +136,12 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
                     break;
                 case ReductionOperation::MIN:
                     if(res > elem)
+                    {
+                        res = elem;
+                    }
+                    break;
+                case ReductionOperation::MAX:
+                    if(res < elem)
                     {
                         res = elem;
                     }
