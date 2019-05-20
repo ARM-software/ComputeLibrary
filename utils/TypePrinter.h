@@ -1522,6 +1522,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ElementWiseUnary &op
         case ElementWiseUnary::NEG:
             os << "NEG";
             break;
+        case ElementWiseUnary::LOG:
+            os << "LOG";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

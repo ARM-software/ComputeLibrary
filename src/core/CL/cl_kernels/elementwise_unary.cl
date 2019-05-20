@@ -36,6 +36,8 @@
 #define sin_op(input) sin(input)
 // Calculate abs for floating point values
 #define fabs_op(input) fabs(input)
+// Calculate natural_log
+#define natural_log_op(input) log(input)
 
 /** Applies element wise unary operator in a tensor.
  *
