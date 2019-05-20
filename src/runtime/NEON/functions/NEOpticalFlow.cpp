@@ -74,10 +74,15 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
 
     const float pyr_scale = old_pyramid->info()->scale();
 
-    _func_scharr.reserve(_num_levels);
-    _kernel_tracker.reserve(_num_levels);
-    _scharr_gx.reserve(_num_levels);
-    _scharr_gy.reserve(_num_levels);
+    _func_scharr.clear();
+    _kernel_tracker.clear();
+    _scharr_gx.clear();
+    _scharr_gy.clear();
+
+    _func_scharr.resize(_num_levels);
+    _kernel_tracker.resize(_num_levels);
+    _scharr_gx.resize(_num_levels);
+    _scharr_gy.resize(_num_levels);
 
     _old_points_internal = LKInternalKeypointArray(old_points->num_values());
     _new_points_internal = LKInternalKeypointArray(old_points->num_values());
@@ -95,34 +100,25 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
 
         TensorInfo tensor_info(TensorShape(width_ith, height_ith), Format::S16);
 
-        auto scharr_gx = support::cpp14::make_unique<Tensor>();
-        auto scharr_gy = support::cpp14::make_unique<Tensor>();
-        scharr_gx->allocator()->init(tensor_info);
-        scharr_gy->allocator()->init(tensor_info);
+        _scharr_gx[i].allocator()->init(tensor_info);
+        _scharr_gy[i].allocator()->init(tensor_info);
 
         // Manage intermediate buffers
-        _memory_group.manage(scharr_gx.get());
-        _memory_group.manage(scharr_gy.get());
+        _memory_group.manage(&_scharr_gx[i]);
+        _memory_group.manage(&_scharr_gy[i]);
 
         // Init Scharr kernel
-        auto func_scharr = support::cpp14::make_unique<NEScharr3x3>();
-        func_scharr->configure(old_ith_input, scharr_gx.get(), scharr_gy.get(), border_mode, constant_border_value);
+        _func_scharr[i].configure(old_ith_input, &_scharr_gx[i], &_scharr_gy[i], border_mode, constant_border_value);
 
         // Init Lucas-Kanade kernel
-        auto kernel_tracker = support::cpp14::make_unique<NELKTrackerKernel>();
-        kernel_tracker->configure(old_ith_input, new_ith_input, scharr_gx.get(), scharr_gy.get(),
-                                  old_points, new_points_estimates, new_points,
-                                  &_old_points_internal, &_new_points_internal,
-                                  termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
-                                  i, _num_levels, pyr_scale);
+        _kernel_tracker[i].configure(old_ith_input, new_ith_input, &_scharr_gx[i], &_scharr_gy[i],
+                                     old_points, new_points_estimates, new_points,
+                                     &_old_points_internal, &_new_points_internal,
+                                     termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
+                                     i, _num_levels, pyr_scale);
 
-        scharr_gx->allocator()->allocate();
-        scharr_gy->allocator()->allocate();
-
-        _func_scharr.emplace_back(std::move(func_scharr));
-        _kernel_tracker.emplace_back(std::move(kernel_tracker));
-        _scharr_gx.emplace_back(std::move(scharr_gx));
-        _scharr_gy.emplace_back(std::move(scharr_gy));
+        _scharr_gx[i].allocator()->allocate();
+        _scharr_gy[i].allocator()->allocate();
     }
 }
 
@@ -135,9 +131,9 @@ void NEOpticalFlow::run()
     for(unsigned int level = _num_levels; level > 0; --level)
     {
         // Run Scharr kernel
-        _func_scharr[level - 1].get()->run();
+        _func_scharr[level - 1].run();
 
         // Run Lucas-Kanade kernel
-        NEScheduler::get().schedule(_kernel_tracker[level - 1].get(), Window::DimX);
+        NEScheduler::get().schedule(&_kernel_tracker[level - 1], Window::DimX);
     }
 }
