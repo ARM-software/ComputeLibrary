@@ -1446,6 +1446,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
         case ReductionOperation::PROD:
             os << "PROD";
             break;
+        case ReductionOperation::MIN:
+            os << "MIN";
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }

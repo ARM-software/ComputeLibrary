@@ -42,7 +42,24 @@ template <typename T, typename OT>
 OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, int stride)
 {
     using type = typename std::remove_cv<OT>::type;
-    auto res   = (op == ReductionOperation::PROD) ? type(1) : type(0);
+    T res;
+    switch(op)
+    {
+        case ReductionOperation::PROD:
+        {
+            res = type(1);
+        }
+        break;
+        case ReductionOperation::MIN:
+        {
+            res = *ptr;
+        }
+        break;
+        default:
+        {
+            res = type(0);
+        }
+    }
 
     if(std::is_integral<type>::value)
     {
@@ -63,6 +80,12 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
                     if(*(ptr + stride * static_cast<uint32_t>(int_res)) < elem)
                     {
                         int_res = static_cast<uint32_t>(i);
+                    }
+                    break;
+                case ReductionOperation::MIN:
+                    if(static_cast<T>(int_res) > elem)
+                    {
+                        int_res = elem;
                     }
                     break;
                 case ReductionOperation::SUM_SQUARE:
@@ -102,6 +125,12 @@ OT reduce_operation(const T *ptr, int reduce_elements, ReductionOperation op, in
                     if(*(ptr + stride * static_cast<uint32_t>(res)) < elem)
                     {
                         res = static_cast<uint32_t>(i);
+                    }
+                    break;
+                case ReductionOperation::MIN:
+                    if(res > elem)
+                    {
+                        res = elem;
                     }
                     break;
                 case ReductionOperation::SUM_SQUARE:

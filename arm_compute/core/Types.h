@@ -559,7 +559,8 @@ enum class ReductionOperation
     MEAN_SUM,    /**< Mean of sum */
     PROD,        /**< Product */
     SUM_SQUARE,  /**< Sum of squares */
-    SUM          /**< Sum */
+    SUM,         /**< Sum */
+    MIN,         /**< Min */
 };
 
 /** Available element-wise operations */
