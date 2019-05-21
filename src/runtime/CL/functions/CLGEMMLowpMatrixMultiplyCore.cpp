@@ -77,8 +77,8 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     _is_prepared                 = false;
     _original_b                  = b;
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
-    _a_offset                    = a->info()->quantization_info().offset;
-    _b_offset                    = b->info()->quantization_info().offset;
+    _a_offset                    = a->info()->quantization_info().uniform().offset;
+    _b_offset                    = b->info()->quantization_info().uniform().offset;
 
     // Get the GPU target
     const GPUTarget gpu_target = CLScheduler::get().target();
@@ -213,8 +213,8 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
-    int32_t a_offset = a->quantization_info().offset;
-    int32_t b_offset = b->quantization_info().offset;
+    int32_t a_offset = a->quantization_info().uniform().offset;
+    int32_t b_offset = b->quantization_info().uniform().offset;
 
     const ITensorInfo *matrix_a_info = a;
     const ITensorInfo *matrix_b_info = b;

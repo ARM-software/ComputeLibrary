@@ -355,6 +355,8 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
             *reinterpret_cast<uint8_t *>(ptr) = value;
             break;
         case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             *reinterpret_cast<int8_t *>(ptr) = value;
             break;
         case DataType::U16:

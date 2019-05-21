@@ -122,42 +122,43 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     int                a_const_int                       = 0;
     int                b_const_int                       = 0;
 
+    const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(dt);
     // Create quantized version of constants a, b if needed
-    if(is_data_type_quantized(dt))
+    if(is_quantized_asymmetric)
     {
-        a_const_int = input->info()->quantization_info().quantize(a_const, RoundingPolicy::TO_NEAREST_UP);
-        b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        a_const_int                           = quantize_qasymm8(a_const, iq_info);
+        b_const_int                           = quantize_qasymm8(b_const, iq_info);
     }
 
-    const bool is_logistic_activation_quantized = is_data_type_quantized_asymmetric(dt) && act_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC;
+    const bool is_logistic_activation_quantized = is_quantized_asymmetric && act_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC;
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option_if(!is_logistic_activation_quantized, "-DACT=" + lower_string(string_from_activation_func(act_info.activation())));
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(dt)));
     build_opts.add_option(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
 
-    if(is_data_type_quantized(dt))
+    if(is_quantized_asymmetric)
     {
         build_opts.add_option(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
         build_opts.add_option(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
-        const int   o1 = input->info()->quantization_info().offset;
-        const float s1 = input->info()->quantization_info().scale;
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+
         // Quantized value of 0 corresponds to the offset o1
-        build_opts.add_option(("-DCONST_0=" + support::cpp11::to_string(o1)));
-        build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
-        build_opts.add_option(("-DO1_VAL=" + support::cpp11::to_string(o1)));
+        build_opts.add_option(("-DCONST_0=" + support::cpp11::to_string(iq_info.offset)));
+        build_opts.add_option(("-DS1_VAL=" + float_to_string_with_full_precision(iq_info.scale)));
+        build_opts.add_option(("-DO1_VAL=" + support::cpp11::to_string(iq_info.offset)));
 
         // Set scale and offset of the input and output if they have different quantization info
-        if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
+        if(is_quantized_asymmetric && output != nullptr)
         {
-            const float s2 = output->info()->quantization_info().scale;
-            const int   o2 = output->info()->quantization_info().offset;
+            const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
-            if(o1 != o2 || s1 != s2)
+            if(iq_info != oq_info)
             {
-                build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
-                build_opts.add_option(("-DO2_VAL=" + support::cpp11::to_string(o2)));
+                build_opts.add_option(("-DS2_VAL=" + float_to_string_with_full_precision(oq_info.scale)));
+                build_opts.add_option(("-DO2_VAL=" + support::cpp11::to_string(oq_info.offset)));
             }
         }
     }
@@ -171,7 +172,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
     // Create kernel
     std::string kernel_name = std::string("activation_layer");
-    if(is_data_type_quantized_asymmetric(dt))
+    if(is_quantized_asymmetric)
     {
         kernel_name += is_logistic_activation_quantized ? std::string("_logistic_qa8") : std::string("_qa8");
     }

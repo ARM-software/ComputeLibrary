@@ -182,7 +182,7 @@ inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_mul
  *
  * @return Dequantized values in a neon vector
  */
-inline float32x4x2_t vdequantize(const uint8x8_t &qv, const QuantizationInfo &qi)
+inline float32x4x2_t vdequantize(const uint8x8_t &qv, const UniformQuantizationInfo &qi)
 {
     const float         scale   = qi.scale;
     const int           offset  = qi.offset;
@@ -205,7 +205,7 @@ inline float32x4x2_t vdequantize(const uint8x8_t &qv, const QuantizationInfo &qi
  *
  * @return Dequantized values in a neon vector
  */
-inline float32x4x4_t vdequantize(const uint8x16_t &qv, const QuantizationInfo &qi)
+inline float32x4x4_t vdequantize(const uint8x16_t &qv, const UniformQuantizationInfo &qi)
 {
     const float         scale   = qi.scale;
     const int           offset  = qi.offset;
@@ -230,7 +230,7 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const QuantizationInfo &q
  *
  * @return A neon vector holding the quantized values
  */
-inline uint8x8_t vquantize(const float32x4x2_t &qv, const QuantizationInfo &qi)
+inline uint8x8_t vquantize(const float32x4x2_t &qv, const UniformQuantizationInfo &qi)
 {
     const float       scale     = qi.scale;
     const int         offset    = qi.offset;
@@ -258,7 +258,7 @@ inline uint8x8_t vquantize(const float32x4x2_t &qv, const QuantizationInfo &qi)
  *
  * @return A neon vector holding the quantized values
  */
-inline uint8x16_t vquantize(const float32x4x4_t &qv, const QuantizationInfo &qi)
+inline uint8x16_t vquantize(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
 {
     const float       scale     = qi.scale;
     const int         offset    = qi.offset;

@@ -213,30 +213,34 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
 
     if(is_qasymm)
     {
-        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        const UniformQuantizationInfo iq_info = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = _weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = _output->info()->quantization_info().uniform();
+
+        float multiplier        = iq_info.scale * wq_info.scale / oq_info.scale;
         int   output_multiplier = 0;
         int   output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
         build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
-        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-_input->info()->quantization_info().offset));
-        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-_weights->info()->quantization_info().offset));
-        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(_output->info()->quantization_info().offset));
-        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
+        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-iq_info.offset));
+        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-wq_info.offset));
+        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(oq_info.offset));
+        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * iq_info.offset * wq_info.offset));
         build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
         build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
 
         if(act_info.enabled())
         {
-            const int a_val = output->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_val = output->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
-            const int o1    = output->info()->quantization_info().offset;
+            const int a_val = quantize_qasymm8(act_info.a(), oq_info);
+            const int b_val = quantize_qasymm8(act_info.b(), oq_info);
+            const int o1    = oq_info.offset;
 
             build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
             build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
             build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
 
-            const float s1 = input->info()->quantization_info().scale;
+            const float s1 = iq_info.scale;
             build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
             build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
         }

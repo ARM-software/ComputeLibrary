@@ -72,7 +72,7 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
         _memory_group.manage(&_accumulator);
         _accumulator.allocator()->init(TensorInfo(accum_shape, 1, DataType::S32, output->info()->quantization_info()));
         _accumulator.info()->set_data_layout(accum_layout);
-        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().uniform().offset));
     }
 
     if(!_is_nchw)
@@ -109,13 +109,15 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
     // Configure biases accumulation
     if(_is_quantized)
     {
-        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = (output->info()->total_size() == 0) ? iq_info : output->info()->quantization_info().uniform();
 
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
         int   output_multiplier;
         int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, output_quant_info.offset);
+        _output_stage_kernel.configure(&_accumulator, biases, _is_nchw ? output : &_permuted_output, output_multiplier, output_shift, oq_info.offset);
         _accumulator.allocator()->allocate();
     }
     else if(_has_bias)
@@ -459,13 +461,15 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     // Output staged configuration
     if(_is_quantized)
     {
-        const QuantizationInfo output_quant_info = output->info()->quantization_info();
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
         int   output_multiplier;
         int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_output_reshaped, biases, output_to_use, output_multiplier, output_shift, output_quant_info.offset);
+        _output_stage_kernel.configure(&_output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset);
         _output_reshaped.allocator()->allocate();
     }
 
@@ -483,8 +487,8 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     PixelValue zero_w(static_cast<int32_t>(0));
     if(_is_quantized)
     {
-        zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().offset));
-        zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().offset));
+        zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().uniform().offset));
+        zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().uniform().offset));
     }
     BorderSize border_size = _v2mm_kernel.border_size();
     _v2mm_input_fill_border.configure(&_input_reshaped, border_size, BorderMode::CONSTANT, zero_in);

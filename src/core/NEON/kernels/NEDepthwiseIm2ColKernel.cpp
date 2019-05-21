@@ -92,7 +92,7 @@ void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
     auto zero = static_cast<T>(0);
     if(std::is_same<T, uint8_t>::value)
     {
-        zero = _input->info()->quantization_info().offset;
+        zero = _input->info()->quantization_info().uniform().offset;
     }
 
     execute_window_loop(window_out, [&](const Coordinates & id)

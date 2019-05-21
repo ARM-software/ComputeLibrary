@@ -87,10 +87,14 @@ void sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8(const ITensor *in1, const ITensor *in2
     Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
     Iterator output(out, window);
 
+    const UniformQuantizationInfo iq1_info = in1->info()->quantization_info().uniform();
+    const UniformQuantizationInfo iq2_info = in2->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info  = out->info()->quantization_info().uniform();
+
     execute_window_loop(window, [&](const Coordinates &)
     {
-        const float32x4x4_t ta1 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input1.ptr())), in1->info()->quantization_info());
-        const float32x4x4_t ta2 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input2.ptr())), in2->info()->quantization_info());
+        const float32x4x4_t ta1 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input1.ptr())), iq1_info);
+        const float32x4x4_t ta2 = vdequantize(vld1q_u8(reinterpret_cast<const qasymm8_t *>(input2.ptr())), iq2_info);
 
         const float32x4x4_t ta3 =
         {
@@ -102,7 +106,7 @@ void sub_saturate_QAYSMM8_QAYSMM8_QAYSMM8(const ITensor *in1, const ITensor *in2
             }
         };
 
-        const uint8x16_t result = vquantize(ta3, out->info()->quantization_info());
+        const uint8x16_t result = vquantize(ta3, oq_info);
 
         vst1q_u8(reinterpret_cast<qasymm8_t *>(output.ptr()), result);
     },

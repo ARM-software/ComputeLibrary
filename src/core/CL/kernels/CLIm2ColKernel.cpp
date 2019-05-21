@@ -162,10 +162,11 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
     const std::pair<unsigned int, unsigned int> convolved_dims = scaled_dimensions(input_width, input_height, kernel_dims.width, kernel_dims.height, conv_info, dilation);
 
     // Im2Col configuration
-    std::string    kernel_name = "im2col_generic_";
-    CLBuildOptions build_opts;
-    unsigned int   num_elems_processed_per_iteration = 1;
-    bool           is_padding_required_nchw          = false;
+    std::string                   kernel_name = "im2col_generic_";
+    CLBuildOptions                build_opts;
+    unsigned int                  num_elems_processed_per_iteration = 1;
+    bool                          is_padding_required_nchw          = false;
+    const UniformQuantizationInfo qinfo                             = input->quantization_info().uniform();
 
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->element_size()));
@@ -185,7 +186,7 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
     build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
     build_opts.add_option_if(num_groups > 1, "-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
-    build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(input->quantization_info().offset), "-DPAD_VALUE=0");
+    build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(qinfo.offset), "-DPAD_VALUE=0");
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
 
     if(data_layout == DataLayout::NHWC)

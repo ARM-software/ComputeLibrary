@@ -134,12 +134,16 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &i
     build_opts.add_option("-DOP=" + operation_string);
     if(is_data_type_quantized_asymmetric(input1.data_type()))
     {
-        build_opts.add_option("-DOFFSET_IN1=" + support::cpp11::to_string(input1.quantization_info().offset));
-        build_opts.add_option("-DOFFSET_IN2=" + support::cpp11::to_string(input2.quantization_info().offset));
-        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(output.quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input1.quantization_info().scale));
-        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(input2.quantization_info().scale));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output.quantization_info().scale));
+        const UniformQuantizationInfo iq1info = input1.quantization_info().uniform();
+        const UniformQuantizationInfo iq2info = input2.quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo  = output.quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + support::cpp11::to_string(iq1info.offset));
+        build_opts.add_option("-DOFFSET_IN2=" + support::cpp11::to_string(iq2info.offset));
+        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(oqinfo.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1info.scale));
+        build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(iq2info.scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
     return build_opts;
 }

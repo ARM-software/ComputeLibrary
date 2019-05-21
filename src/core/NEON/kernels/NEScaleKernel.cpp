@@ -218,7 +218,7 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
     const int input_height = input->info()->dimension(2);
 
     T border_value;
-    if(use_padding && border_mode != BorderMode::REPLICATE )
+    if(use_padding && border_mode != BorderMode::REPLICATE)
     {
         // configure() sets top border to 0 for BorderMode::REPLICATE and border_value is not needed in execute_window_loop() for REPLICATE
         border_value = *reinterpret_cast<T *>(input->buffer() + input->info()->offset_first_element_in_bytes() - stride_w);
@@ -235,9 +235,9 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
     int border_size = (border_mode == BorderMode::UNDEFINED) ? 0 : 1;
 
-    const bool             is_quantized = (input->info()->data_type() == DataType::QASYMM8);
-    const QuantizationInfo iq_info      = input->info()->quantization_info();
-    const QuantizationInfo oq_info      = output->info()->quantization_info();
+    const bool                    is_quantized = (input->info()->data_type() == DataType::QASYMM8);
+    const UniformQuantizationInfo iq_info      = input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info      = output->info()->quantization_info().uniform();
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -295,11 +295,11 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
             //dequantize quantized input
             if(is_quantized)
             {
-                float inp00 = iq_info.dequantize(a00);
-                float inp01 = iq_info.dequantize(a01);
-                float inp10 = iq_info.dequantize(a10);
-                float inp11 = iq_info.dequantize(a11);
-                res         = static_cast<T>(oq_info.quantize((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), RoundingPolicy::TO_NEAREST_UP));
+                float inp00 = dequantize_qasymm8(a00, iq_info);
+                float inp01 = dequantize_qasymm8(a01, iq_info);
+                float inp10 = dequantize_qasymm8(a10, iq_info);
+                float inp11 = dequantize_qasymm8(a11, iq_info);
+                res         = static_cast<T>(quantize_qasymm8((inp00 * w1 + inp01 * w2 + inp10 * w3 + inp11 * w4), oq_info));
             }
             else
             {
@@ -651,9 +651,9 @@ void NEScaleKernel::scale_bilinear_nchw(const Window &window)
     const size_t in_stide_in_bytes = _input->info()->strides_in_bytes()[1];
     const size_t in_stride         = in_stide_in_bytes / _input->info()->element_size();
 
-    const bool             is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
-    const QuantizationInfo iq_info      = _input->info()->quantization_info();
-    const QuantizationInfo oq_info      = _output->info()->quantization_info();
+    const bool                    is_quantized = (_input->info()->data_type() == DataType::QASYMM8);
+    const UniformQuantizationInfo iq_info      = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info      = _output->info()->quantization_info().uniform();
 
     switch(_input->info()->data_type())
     {

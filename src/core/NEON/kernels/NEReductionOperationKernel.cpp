@@ -542,6 +542,9 @@ struct RedOpX_qasymm8
     inline void operator()(Iterator &input, Iterator &output, Window &in_slice, Window &out_slice, const TensorInfo &in_info, const ReductionOperation op)
     {
         ARM_COMPUTE_UNUSED(out_slice);
+
+        const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
+
         auto vec_res_value1 = vdupq_n_u32(static_cast<uint32_t>(0.f));
         auto vec_res_value2 = vdupq_n_u32(static_cast<uint32_t>(0.f));
         auto vec_res_value3 = vdupq_n_u32(static_cast<uint32_t>(0.f));
@@ -584,8 +587,8 @@ struct RedOpX_qasymm8
                 }
                 case ReductionOperation::PROD:
                 {
-                    const auto offset32x4f_4 = vdupq_n_f32(in_info.quantization_info().offset);
-                    const auto scale32x4f_4  = vdupq_n_f32(in_info.quantization_info().scale);
+                    const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
+                    const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
 
                     const auto temp16x8t_1 = vmovl_u8(vget_low_u8(vec_elements));
                     const auto temp16x8t_2 = vmovl_u8(vget_high_u8(vec_elements));
@@ -673,7 +676,7 @@ struct RedOpX_qasymm8
                 res *= wrapper::vgetlane(carry_res, 3);
 
                 //re-quantize result
-                res             = sqcvt_qasymm8_f32(res, in_info.quantization_info().scale, in_info.quantization_info().offset);
+                res             = quantize_qasymm8(res, iq_info);
                 *(output.ptr()) = static_cast<uint8_t>(res);
                 break;
             }
@@ -877,6 +880,8 @@ struct RedOpYZW_qasymm8
     {
         ARM_COMPUTE_UNUSED(out_slice);
 
+        const UniformQuantizationInfo iq_info = in_info.quantization_info().uniform();
+
         execute_window_loop(in_slice, [&](const Coordinates &)
         {
             uint32x4x4_t vec_res_idx{ { 0 } };
@@ -932,8 +937,8 @@ struct RedOpYZW_qasymm8
                     }
                     case ReductionOperation::PROD:
                     {
-                        const auto offset32x4f_4 = vdupq_n_f32(in_info.quantization_info().offset);
-                        const auto scale32x4f_4  = vdupq_n_f32(in_info.quantization_info().scale);
+                        const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
+                        const auto scale32x4f_4  = vdupq_n_f32(iq_info.scale);
 
                         const auto temp16x8t_1 = vmovl_u8(vget_low_u8(vec_elements));
                         const auto temp16x8t_2 = vmovl_u8(vget_high_u8(vec_elements));
@@ -1004,8 +1009,8 @@ struct RedOpYZW_qasymm8
             }
             else if(op == ReductionOperation::PROD)
             {
-                const auto offset32x4f_4 = vdupq_n_f32(in_info.quantization_info().offset);
-                const auto iscale32x4f_4 = vinvq_f32(vdupq_n_f32(in_info.quantization_info().scale));
+                const auto offset32x4f_4 = vdupq_n_f32(iq_info.offset);
+                const auto iscale32x4f_4 = vinvq_f32(vdupq_n_f32(iq_info.scale));
 
                 //re-quantize
                 vec_res_value1_f = vaddq_f32(vmulq_f32(vec_res_value1_f, iscale32x4f_4), offset32x4f_4);

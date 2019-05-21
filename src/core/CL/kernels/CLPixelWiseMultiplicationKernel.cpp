@@ -181,12 +181,16 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
     CLBuildOptions build_opts;
     if(is_quantized)
     {
-        build_opts.add_option("-DOFFSET_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
-        build_opts.add_option("-DOFFSET_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().offset));
-        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().scale));
-        build_opts.add_option("-DSCALE_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().scale));
-        build_opts.add_option("-DSCALE_OUT=" + support::cpp11::to_string(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info  = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + support::cpp11::to_string(iq1_info.offset));
+        build_opts.add_option("-DOFFSET_IN2=" + support::cpp11::to_string(iq2_info.offset));
+        build_opts.add_option("-DOFFSET_OUT=" + support::cpp11::to_string(oq_info.offset));
+        build_opts.add_option("-DSCALE_IN1=" + support::cpp11::to_string(iq1_info.scale));
+        build_opts.add_option("-DSCALE_IN2=" + support::cpp11::to_string(iq2_info.scale));
+        build_opts.add_option("-DSCALE_OUT=" + support::cpp11::to_string(oq_info.scale));
         kernel_name += "_quantized";
     }
     else

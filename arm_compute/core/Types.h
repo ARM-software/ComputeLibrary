@@ -25,8 +25,7 @@
 #define __ARM_COMPUTE_TYPES_H__
 
 #include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/QAsymm8.h"
-#include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/QuantizationInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
@@ -73,20 +72,22 @@ enum class Format
 /** Available data types */
 enum class DataType
 {
-    UNKNOWN, /**< Unknown data type */
-    U8,      /**< unsigned 8-bit number */
-    S8,      /**< signed 8-bit number */
-    QASYMM8, /**< quantized, asymmetric fixed-point 8-bit number */
-    U16,     /**< unsigned 16-bit number */
-    S16,     /**< signed 16-bit number */
-    U32,     /**< unsigned 32-bit number */
-    S32,     /**< signed 32-bit number */
-    U64,     /**< unsigned 64-bit number */
-    S64,     /**< signed 64-bit number */
-    F16,     /**< 16-bit floating-point number */
-    F32,     /**< 32-bit floating-point number */
-    F64,     /**< 64-bit floating-point number */
-    SIZET    /**< size_t */
+    UNKNOWN,            /**< Unknown data type */
+    U8,                 /**< unsigned 8-bit number */
+    S8,                 /**< signed 8-bit number */
+    QSYMM8,             /**< quantized, symmetric fixed-point 8-bit number */
+    QASYMM8,            /**< quantized, asymmetric fixed-point 8-bit number */
+    QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
+    U16,                /**< unsigned 16-bit number */
+    S16,                /**< signed 16-bit number */
+    U32,                /**< unsigned 32-bit number */
+    S32,                /**< signed 32-bit number */
+    U64,                /**< unsigned 64-bit number */
+    S64,                /**< signed 64-bit number */
+    F16,                /**< 16-bit floating-point number */
+    F32,                /**< 32-bit floating-point number */
+    F64,                /**< 64-bit floating-point number */
+    SIZET               /**< size_t */
 };
 
 /** Available Sampling Policies */
@@ -158,86 +159,6 @@ enum class ComparisonOperation
     GreaterEqual, /**< Greater equal comparison ( \f$ x >= y \f$ ) */
     Less,         /**< Less comparison ( \f$ x < y \f$ ) */
     LessEqual     /**< Less equal comparison ( \f$ x <= y \f$ ) */
-};
-
-/** Quantization settings (used for QASYMM8 data type) */
-struct QuantizationInfo
-{
-    /** Default constructor */
-    QuantizationInfo() noexcept
-        : scale(0.0f),
-          offset(0)
-    {
-    }
-
-    /** Construct quantization info.
-     *
-     * @param[in] scale  Scale.
-     * @param[in] offset Offset.
-     */
-    QuantizationInfo(float scale, int offset)
-        : scale(scale), offset(offset)
-    {
-    }
-
-    /** Check whether equal to a given quantization info.
-     *
-     * @param[in] other Other quantization info.
-     *
-     * @return True if the given quantization info is the same.
-     */
-    bool operator==(const QuantizationInfo &other) const
-    {
-        return scale == other.scale && offset == other.offset;
-    }
-
-    /** Check whether not equal to a given quantization info.
-     *
-     * @param[in] other Other quantization info.
-     *
-     * @return True if the given quantization info is not the same.
-     */
-    bool operator!=(const QuantizationInfo &other) const
-    {
-        return !(*this == other);
-    }
-
-    float scale;  /**< scale */
-    int   offset; /**< offset */
-
-    /** Quantizes a value using the scale/offset in this QuantizationInfo
-     *
-     * @param[in] value           Value to quantize.
-     * @param[in] rounding_policy Policy to use when rounding.
-     *
-     * @return the quantized value.
-     */
-    qasymm8_t quantize(float value, RoundingPolicy rounding_policy) const
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
-        return sqcvt_qasymm8_f32(value, scale, offset, rounding_policy);
-    }
-
-    /** Dequantizes a value using the scale/offset in this QuantizationInfo
-     *
-     * @param[in] value Value to dequantize.
-     *
-     * @return the original value before quantization.
-     */
-    float dequantize(qasymm8_t value) const
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
-        return scvt_f32_qasymm8(value, scale, offset);
-    }
-
-    /** Indicates whether this QuantizationInfo has valid settings or not
-     *
-     * @return True if the this has invalid settings.
-     */
-    bool empty() const
-    {
-        return scale == 0;
-    }
 };
 
 /** Container for valid region of a window */

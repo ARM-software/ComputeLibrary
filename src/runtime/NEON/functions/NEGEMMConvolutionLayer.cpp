@@ -109,15 +109,15 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
-        const QuantizationInfo input_quantization_info   = input->info()->quantization_info();
-        const QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
+        const UniformQuantizationInfo iqinfo = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = weights->info()->quantization_info().uniform();
 
-        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
-        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+        input->info()->set_quantization_info(QuantizationInfo(iqinfo.scale, -iqinfo.offset));
+        weights->info()->set_quantization_info(QuantizationInfo(wqinfo.scale, -wqinfo.offset));
 
-        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input_quantization_info : output->info()->quantization_info();
+        const UniformQuantizationInfo oqinfo = (output->info()->total_size() == 0) ? iqinfo : output->info()->quantization_info().uniform();
 
-        float multiplier = input_quantization_info.scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
         int   output_multiplier;
         int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
@@ -132,10 +132,10 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
                                                                                  };
         if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = quantize_qasymm8(act_info.a(), oqinfo);
+            const int b_const_int = quantize_qasymm8(act_info.b(), oqinfo);
 
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oqinfo.offset : b_const_int;
             max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
 
             _is_activationlayer_enabled = false;
@@ -143,7 +143,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
 
         GEMMLowpOutputStageInfo output_info;
         output_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-        output_info.gemmlowp_offset     = output_quant_info.offset;
+        output_info.gemmlowp_offset     = oqinfo.offset;
         output_info.gemmlowp_multiplier = output_multiplier;
         output_info.gemmlowp_shift      = output_shift;
         output_info.gemmlowp_min_bound  = min_activation;
@@ -152,8 +152,8 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info));
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
-        input->info()->set_quantization_info(input_quantization_info);
-        weights->info()->set_quantization_info(weights_quantization_info);
+        input->info()->set_quantization_info(QuantizationInfo(iqinfo.scale, iqinfo.offset));
+        weights->info()->set_quantization_info(QuantizationInfo(wqinfo.scale, wqinfo.offset));
     }
     else
     {
@@ -174,17 +174,17 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
         // Extract and negate input and weights offset
-        const QuantizationInfo input_quantization_info   = input->quantization_info();
-        const QuantizationInfo weights_quantization_info = weights->quantization_info();
+        const UniformQuantizationInfo iqinfo = input->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = weights->quantization_info().uniform();
 
         std::unique_ptr<ITensorInfo> input_qa   = input->clone();
         std::unique_ptr<ITensorInfo> weights_qa = weights->clone();
-        input_qa->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
-        weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+        input_qa->set_quantization_info(QuantizationInfo(iqinfo.scale, -iqinfo.offset));
+        weights_qa->set_quantization_info(QuantizationInfo(wqinfo.scale, -wqinfo.offset));
 
-        const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input_quantization_info : output->quantization_info();
+        const UniformQuantizationInfo oqinfo = (output->total_size() == 0) ? iqinfo : output->quantization_info().uniform();
 
-        float multiplier = input_quantization_info.scale * weights->quantization_info().scale / output_quant_info.scale;
+        float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
         int   output_multiplier;
         int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
@@ -199,16 +199,16 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
                                                                                  };
         if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = quantize_qasymm8(act_info.a(), oqinfo);
+            const int b_const_int = quantize_qasymm8(act_info.b(), oqinfo);
 
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? oqinfo.offset : b_const_int;
             max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
         }
 
         GEMMLowpOutputStageInfo output_info;
         output_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
-        output_info.gemmlowp_offset     = output_quant_info.offset;
+        output_info.gemmlowp_offset     = oqinfo.offset;
         output_info.gemmlowp_multiplier = output_multiplier;
         output_info.gemmlowp_shift      = output_shift;
         output_info.gemmlowp_min_bound  = min_activation;

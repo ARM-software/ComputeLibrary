@@ -279,7 +279,7 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     const int pad_top        = _conv_info.pad_top();
     const int stride_x       = _conv_info.stride().first;
     const int stride_y       = _conv_info.stride().second;
-    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
+    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().uniform().offset : 0;
 
     Window window_in_out(window);
     // The first three dimensions of the input and output are increased by the inner loops

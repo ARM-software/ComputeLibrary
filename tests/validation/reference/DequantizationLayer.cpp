@@ -34,14 +34,14 @@ namespace reference
 template <typename T>
 SimpleTensor<T> dequantization_layer(const SimpleTensor<uint8_t> &src)
 {
-    const DataType          dst_data_type     = std::is_same<T, float>::value ? DataType::F32 : DataType::F16;
-    const QuantizationInfo &quantization_info = src.quantization_info();
+    const DataType                 dst_data_type     = std::is_same<T, float>::value ? DataType::F32 : DataType::F16;
+    const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
 
     SimpleTensor<T> dst{ src.shape(), dst_data_type };
 
     for(int i = 0; i < src.num_elements(); ++i)
     {
-        dst[i] = static_cast<T>(quantization_info.dequantize(src[i]));
+        dst[i] = static_cast<T>(dequantize_qasymm8(src[i], quantization_info));
     }
 
     return dst;

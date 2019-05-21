@@ -142,9 +142,9 @@ inline ScalarType elementwise_arithm_op_scalar(const ScalarType &a, const Scalar
 }
 
 template <ArithmeticOperation op>
-inline uint8_t elementwise_arithm_op_quantized_scalar(const float &a, const float &b, QuantizationInfo qinfo)
+inline uint8_t elementwise_arithm_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
 {
-    return qinfo.quantize(elementwise_arithm_op_scalar<op>(a, b), RoundingPolicy::TO_NEAREST_UP);
+    return quantize_qasymm8(elementwise_arithm_op_scalar<op>(a, b), qinfo);
 }
 
 template <ArithmeticOperation op, typename VectorType>
@@ -253,7 +253,7 @@ inline uint8_t elementwise_comp_op_scalar(const InputScalarType &a, const InputS
 }
 
 template <ComparisonOperation op>
-inline uint8_t elementwise_comp_op_quantized_scalar(const float &a, const float &b, QuantizationInfo qinfo)
+inline uint8_t elementwise_comp_op_quantized_scalar(const float &a, const float &b, UniformQuantizationInfo qinfo)
 {
     ARM_COMPUTE_UNUSED(qinfo);
     return elementwise_comp_op_scalar<op>(a, b);
@@ -567,7 +567,7 @@ void elementwise_op(const ITensor *in1, const ITensor *in2, ITensor *out, const 
 }
 
 void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window,
-                              uint8_t (*scalar_func)(const float &, const float &, QuantizationInfo),
+                              uint8_t (*scalar_func)(const float &, const float &, UniformQuantizationInfo),
                               int (*broadcast_func)(int, int, int, const uint8_t *, float32x4x4_t, uint8_t *, int32x4_t, float32x4_t,
                                                     float32x4_t, float32x4_t, const bool),
                               int (*neon_func)(int, int, int, const uint8_t *, const uint8_t *, uint8_t *,
@@ -587,12 +587,11 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
     const auto window_end_x          = static_cast<int>(window.x().end());
     const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const float output_scale  = out->info()->quantization_info().scale;
-    const int   output_offset = out->info()->quantization_info().offset;
+    const UniformQuantizationInfo output_qinfo = out->info()->quantization_info().uniform();
 
     // Output quantization info (add 0.5 to round toward the nearest integer - 0.5 rounds away from zero)
-    const float32x4_t voffseto   = vdupq_n_f32(output_offset + 0.5f);
-    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_scale);
+    const float32x4_t voffseto   = vdupq_n_f32(output_qinfo.offset + 0.5f);
+    const float32x4_t invvscaleo = vdupq_n_f32(1.f / output_qinfo.scale);
 
     if(is_broadcast_across_x)
     {
@@ -603,8 +602,8 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
         const ITensor *broadcast_tensor     = is_broadcast_input_2 ? in2 : in1;
         const ITensor *non_broadcast_tensor = !is_broadcast_input_2 ? in2 : in1;
 
-        const QuantizationInfo broadcast_qinfo     = broadcast_tensor->info()->quantization_info();
-        const QuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info();
+        const UniformQuantizationInfo broadcast_qinfo     = broadcast_tensor->info()->quantization_info().uniform();
+        const UniformQuantizationInfo non_broadcast_qinfo = non_broadcast_tensor->info()->quantization_info().uniform();
 
         const int32x4_t   voffset_non_broadcast = vdupq_n_s32(non_broadcast_qinfo.offset);
         const float32x4_t vscale_non_broadcast  = vdupq_n_f32(non_broadcast_qinfo.scale);
@@ -628,30 +627,29 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
                                       voffset_non_broadcast, vscale_non_broadcast, voffseto, invvscaleo, !is_broadcast_input_2);
             for(; x < window_end_x; ++x)
             {
-                const float afs   = scvt_f32_qasymm8(*(non_broadcast_input_ptr + x), non_broadcast_qinfo.scale, non_broadcast_qinfo.offset);
-                const float bfs   = scvt_f32_qasymm8(broadcast_value, broadcast_qinfo.scale, broadcast_qinfo.offset);
-                *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs, !is_broadcast_input_2 ? afs : bfs,
-                                                   out->info()->quantization_info());
+                const float afs   = dequantize_qasymm8(*(non_broadcast_input_ptr + x), non_broadcast_qinfo);
+                const float bfs   = dequantize_qasymm8(broadcast_value, broadcast_qinfo);
+                *(output_ptr + x) = (*scalar_func)(!is_broadcast_input_2 ? bfs : afs, !is_broadcast_input_2 ? afs : bfs, output_qinfo);
             }
         },
         broadcast_input, non_broadcast_input, output);
     }
     else
     {
+        const UniformQuantizationInfo input1_qinfo = in1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo input2_qinfo = in2->info()->quantization_info().uniform();
+
         // Input1 quantization info
-        const int32x4_t   voffset1 = vdupq_n_s32(in1->info()->quantization_info().offset);
-        const float32x4_t vscale1  = vdupq_n_f32(in1->info()->quantization_info().scale);
+        const int32x4_t   voffset1 = vdupq_n_s32(input1_qinfo.offset);
+        const float32x4_t vscale1  = vdupq_n_f32(input1_qinfo.scale);
 
         // Input2 quantization info
-        const int32x4_t   voffset2 = vdupq_n_s32(in2->info()->quantization_info().offset);
-        const float32x4_t vscale2  = vdupq_n_f32(in2->info()->quantization_info().scale);
+        const int32x4_t   voffset2 = vdupq_n_s32(input2_qinfo.offset);
+        const float32x4_t vscale2  = vdupq_n_f32(input2_qinfo.scale);
 
         // Clear X Dimension on execution window as we handle manually
         input1_win.set(Window::DimX, Window::Dimension(0, 1, 1));
         input2_win.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-        const QuantizationInfo input1_qinfo = in1->info()->quantization_info();
-        const QuantizationInfo input2_qinfo = in2->info()->quantization_info();
 
         Iterator input1(in1, input1_win);
         Iterator input2(in2, input2_win);
@@ -667,9 +665,9 @@ void elementwise_op_quantized(const ITensor *in1, const ITensor *in2, ITensor *o
                                  vscale1, vscale2, voffseto, invvscaleo);
             for(; x < window_end_x; ++x)
             {
-                const float afs   = scvt_f32_qasymm8(*(input1_ptr + x), input1_qinfo.scale, input1_qinfo.offset);
-                const float bfs   = scvt_f32_qasymm8(*(input2_ptr + x), input2_qinfo.scale, input2_qinfo.offset);
-                *(output_ptr + x) = (*scalar_func)(afs, bfs, out->info()->quantization_info());
+                const float afs   = dequantize_qasymm8(*(input1_ptr + x), input1_qinfo);
+                const float bfs   = dequantize_qasymm8(*(input2_ptr + x), input2_qinfo);
+                *(output_ptr + x) = (*scalar_func)(afs, bfs, output_qinfo);
             }
         },
         input1, input2, output);

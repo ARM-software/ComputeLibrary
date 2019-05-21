@@ -562,6 +562,10 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
 
     const int scale_step_x = (pool_stride_x == 1) ? 2 : 1;
 
+    const UniformQuantizationInfo input_qinfo          = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo output_qinfo         = _output->info()->quantization_info().uniform();
+    const bool                    have_different_qinfo = input_qinfo != output_qinfo;
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const auto top_data    = vld1q_u8(reinterpret_cast<const uint8_t *>(input_top_ptr + input.offset()));
@@ -640,9 +644,7 @@ void NEPoolingLayerKernel::pooling2_qasymm8_nchw(const Window &window_input, con
             }
         }
 
-        const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-        const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
-        if(input_qinfo != output_qinfo)
+        if(have_different_qinfo)
         {
             const auto requantized_output = vquantize(vdequantize(vcombine_u8(lower_res, upper_res), input_qinfo), output_qinfo);
             lower_res                     = vget_low_u8(requantized_output);
@@ -814,8 +816,8 @@ void NEPoolingLayerKernel::pooling3_qasymm8_nchw(const Window &window_input, con
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
 
     const uint8_t *const input_top_ptr    = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top)));
     const uint8_t *const input_middle_ptr = _input->ptr_to_element(Coordinates(-static_cast<int>(pool_pad_left), -static_cast<int>(pool_pad_top) + 1));
@@ -1598,6 +1600,9 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
     const int upper_bound_w = _input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_bottom);
 
+    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         uint8_t res = 0;
@@ -1671,11 +1676,7 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nchw(const Window &window_input, c
         }
 
         // Store result
-        const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-        const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
-        res                                  = (input_qinfo != output_qinfo) ? sqcvt_qasymm8_f32(scvt_f32_qasymm8(res, input_qinfo.scale, input_qinfo.offset), output_qinfo.scale,
-                                                                                                 output_qinfo.offset) :
-                                               res;
+        res                                          = (input_qinfo != output_qinfo) ? quantize_qasymm8(dequantize_qasymm8(res, input_qinfo), output_qinfo) : res;
         *(reinterpret_cast<uint8_t *>(output.ptr())) = res;
     },
     input, output);
@@ -1698,9 +1699,9 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
     const int upper_bound_w = _input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_right);
     const int upper_bound_h = _input->info()->dimension(2) + (exclude_padding ? 0 : pool_pad_bottom);
 
-    const float32x4_t       half_scale_v = vdupq_n_f32(0.5f);
-    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    const float32x4_t             half_scale_v = vdupq_n_f32(0.5f);
+    const UniformQuantizationInfo input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo output_qinfo = _output->info()->quantization_info().uniform();
 
     execute_window_loop(window, [&](const Coordinates & id)
     {

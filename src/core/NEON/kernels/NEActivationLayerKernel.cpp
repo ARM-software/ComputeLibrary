@@ -30,7 +30,6 @@
 #include "arm_compute/core/NEON/NEFixedPoint.h"
 #include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
-#include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -320,15 +319,15 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
     Iterator input(_input, win_collapsed);
     Iterator output(_output, win_collapsed);
 
-    const QuantizationInfo qi_in    = _input->info()->quantization_info();
-    const QuantizationInfo qi_out   = _output->info()->quantization_info();
-    const qasymm8x16_t     va       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
-    const qasymm8x16_t     vb       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
-    const qasymm8_t        a        = sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset);
-    const qasymm8_t        b        = sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset);
-    const qasymm8_t        const_0  = sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset);
-    const qasymm8x16_t     vconst_0 = vdupq_n_u8(const_0);
-    const auto             vconst_1 = vdupq_n_f32(1.f);
+    const UniformQuantizationInfo qi_in    = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo qi_out   = _output->info()->quantization_info().uniform();
+    const qasymm8x16_t            va       = vdupq_n_u8(quantize_qasymm8(_act_info.a(), qi_in));
+    const qasymm8x16_t            vb       = vdupq_n_u8(quantize_qasymm8(_act_info.b(), qi_in));
+    const qasymm8_t               a        = quantize_qasymm8(_act_info.a(), qi_in);
+    const qasymm8_t               b        = quantize_qasymm8(_act_info.b(), qi_in);
+    const qasymm8_t               const_0  = quantize_qasymm8(0.f, qi_in);
+    const qasymm8x16_t            vconst_0 = vdupq_n_u8(const_0);
+    const auto                    vconst_1 = vdupq_n_f32(1.f);
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
@@ -415,9 +414,9 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             }
             else if(act == ActivationFunction::LOGISTIC)
             {
-                float tmp_f = scvt_f32_qasymm8(in, qi_in.scale, qi_in.offset);
+                float tmp_f = dequantize_qasymm8(in, qi_in);
                 tmp_f       = 1.f / (1.f + std::exp(-tmp_f));
-                tmp         = sqcvt_qasymm8_f32(tmp_f, qi_out.scale, qi_out.offset);
+                tmp         = quantize_qasymm8(tmp_f, qi_out);
             }
             else
             {

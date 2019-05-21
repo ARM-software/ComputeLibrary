@@ -51,8 +51,8 @@ public:
     static void convolve(const Window &window, unsigned int num_elems_written_per_iteration,
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
     {
-        const int input_offset   = -input->info()->quantization_info().offset;
-        const int weights_offset = -weights->info()->quantization_info().offset;
+        const int input_offset   = -input->info()->quantization_info().uniform().offset;
+        const int weights_offset = -weights->info()->quantization_info().uniform().offset;
 
         const int          input_stride_x  = input->info()->strides_in_bytes().x();
         const int          input_stride_y  = input->info()->strides_in_bytes().y();

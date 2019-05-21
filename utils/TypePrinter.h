@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TYPE_PRINTER_H__
 
-#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
@@ -316,15 +315,21 @@ inline std::string to_string(const GenerateProposalsInfo &proposals_info)
 
 /** Formatted output of the QuantizationInfo type.
  *
- * @param[out] os                Output stream.
- * @param[in]  quantization_info Type to output.
+ * @param[out] os    Output stream.
+ * @param[in]  qinfo Type to output.
  *
  * @return Modified output stream.
  */
-inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
+inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &qinfo)
 {
-    os << "Scale:" << quantization_info.scale << "~"
-       << "Offset:" << quantization_info.offset;
+    if(!qinfo.scale.empty())
+    {
+        os << "Scale:" << qinfo.scale[0] << "~";
+    }
+    if(!qinfo.empty())
+    {
+        os << "Offset:" << qinfo.offset[0];
+    }
     return os;
 }
 
@@ -619,8 +624,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::U8:
             os << "U8";
             break;
+        case DataType::QSYMM8:
+            os << "QSYMM8";
+            break;
         case DataType::QASYMM8:
             os << "QASYMM8";
+            break;
+        case DataType::QSYMM8_PER_CHANNEL:
+            os << "QSYMM8_PER_CHANNEL";
             break;
         case DataType::S8:
             os << "S8";

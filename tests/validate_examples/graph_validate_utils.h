@@ -453,16 +453,17 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(tensor.data_type() != arm_compute::DataType::QASYMM8);
 
-        std::mt19937 gen(seed);
+        const UniformQuantizationInfo qinfo = tensor.quantization_info().uniform();
 
-        uint8_t qasymm8_low  = tensor.quantization_info().quantize(low, RoundingPolicy::TO_NEAREST_UP);
-        uint8_t qasymm8_high = tensor.quantization_info().quantize(high, RoundingPolicy::TO_NEAREST_UP);
+        uint8_t qasymm8_low  = quantize_qasymm8(low, qinfo);
+        uint8_t qasymm8_high = quantize_qasymm8(high, qinfo);
 
+        std::mt19937                           gen(seed);
         std::uniform_int_distribution<uint8_t> distribution(qasymm8_low, qasymm8_high);
 
         for(int i = 0; i < tensor.num_elements(); ++i)
         {
-            tensor[i] = tensor.quantization_info().quantize(distribution(gen), RoundingPolicy::TO_NEAREST_UP);
+            tensor[i] = quantize_qasymm8(distribution(gen), qinfo);
         }
     }
     /** Fill S32 tensor with Random values.

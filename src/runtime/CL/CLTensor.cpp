@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,11 @@ TensorInfo *CLTensor::info()
 const cl::Buffer &CLTensor::cl_buffer() const
 {
     return _allocator.cl_data();
+}
+
+CLQuantization CLTensor::quantization() const
+{
+    return _allocator.quantization();
 }
 
 CLTensorAllocator *CLTensor::allocator()

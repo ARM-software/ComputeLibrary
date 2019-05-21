@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -9,14 +9,14 @@
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *asymm_int_mult
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, asymm_int_multDAMAGES OR OTHER
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
@@ -101,12 +101,16 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
     const TB *b_ptr   = bias.data() + b_offset;
     T        *out_ptr = out.data() + o_offset;
 
-    const int   input_offset   = -in.quantization_info().offset;
-    const float input_scale    = in.quantization_info().scale;
-    const int   weights_offset = -weights.quantization_info().offset;
-    const float weights_scale  = weights.quantization_info().scale;
-    const int   output_offset  = out.quantization_info().offset;
-    const float output_scale   = out.quantization_info().scale;
+    const UniformQuantizationInfo iq_info = in.quantization_info().uniform();
+    const UniformQuantizationInfo wq_info = weights.quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = out.quantization_info().uniform();
+
+    const int   input_offset   = -iq_info.offset;
+    const float input_scale    = iq_info.scale;
+    const int   weights_offset = -wq_info.offset;
+    const float weights_scale  = wq_info.scale;
+    const int   output_offset  = oq_info.offset;
+    const float output_scale   = oq_info.scale;
 
     int         output_multiplier = 0;
     int         output_shift      = 0;

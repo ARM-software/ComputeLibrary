@@ -134,10 +134,13 @@ void CLComparisonKernel::configure(const ICLTensor *input1, const ICLTensor *inp
     build_opts.emplace("-DOP_NAME=" + lower_string(operation_name));
     if(is_data_type_quantized_asymmetric(input1->info()->data_type()))
     {
-        build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
-        build_opts.emplace("-DOFFSET_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().offset));
-        build_opts.emplace("-DSCALE_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().scale));
-        build_opts.emplace("-DSCALE_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().scale));
+        const UniformQuantizationInfo iq1_info = input1->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq2_info = input2->info()->quantization_info().uniform();
+
+        build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(iq1_info.offset));
+        build_opts.emplace("-DOFFSET_IN2=" + support::cpp11::to_string(iq2_info.offset));
+        build_opts.emplace("-DSCALE_IN1=" + float_to_string_with_full_precision(iq1_info.scale));
+        build_opts.emplace("-DSCALE_IN2=" + float_to_string_with_full_precision(iq2_info.scale));
         kernel_name += "_quantized";
     }
 

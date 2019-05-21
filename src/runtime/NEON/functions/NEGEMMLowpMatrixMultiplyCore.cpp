@@ -61,8 +61,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     _mtx_b_reshape_kernel = nullptr;
 
     // Set internal variables
-    _a_offset                         = a->info()->quantization_info().offset;
-    _b_offset                         = b->info()->quantization_info().offset;
+    _a_offset                         = a->info()->quantization_info().uniform().offset;
+    _b_offset                         = b->info()->quantization_info().uniform().offset;
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _is_prepared                      = false;
@@ -224,8 +224,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     TensorInfo tmp_b_info{};
     TensorInfo mm_result_s32_info{};
 
-    int32_t    a_offset                    = a->quantization_info().offset;
-    int32_t    b_offset                    = b->quantization_info().offset;
+    int32_t    a_offset                    = a->quantization_info().uniform().offset;
+    int32_t    b_offset                    = b->quantization_info().uniform().offset;
     const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
 
     bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;

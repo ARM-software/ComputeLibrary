@@ -206,8 +206,9 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
     if(call_quantized_kernel)
     {
-        build_opts.add_option("-DSCALE=" + support::cpp11::to_string(input->info()->quantization_info().scale));
-        build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset));
+        const UniformQuantizationInfo qinfo = input->info()->quantization_info().uniform();
+        build_opts.add_option("-DSCALE=" + support::cpp11::to_string(qinfo.scale));
+        build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qinfo.offset));
     }
 
     std::string interpolation_name = string_from_interpolation_policy(policy);

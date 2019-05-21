@@ -66,6 +66,7 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorAllocator)
 
+/** Validates import memory interface when importing cl buffer objects */
 TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
 {
     // Init tensor info
@@ -106,6 +107,7 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(t4.cl_buffer().get() != buf.get(), framework::LogLevel::ERRORS);
 }
 
+/** Validates import memory interface when importing malloced memory */
 TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
@@ -168,6 +170,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 }
 
 #if !defined(BARE_METAL)
+/** Validates import memory interface when importing memory mapped objects */
 TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
@@ -234,6 +237,45 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
     }
 }
 #endif // !defined(BARE_METAL)
+
+/** Validates symmetric per channel quantization */
+TEST_CASE(Symm8PerChannelQuantizationInfo, framework::DatasetMode::ALL)
+{
+    // Create tensor
+    CLTensor                 tensor;
+    const std::vector<float> scale = { 0.25f, 1.4f, 3.2f, 2.3f, 4.7f };
+    const TensorInfo         info(TensorShape(32U, 16U), 1, DataType::QSYMM8_PER_CHANNEL, QuantizationInfo(scale));
+    tensor.allocator()->init(info);
+
+    // Check quantization information
+    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().scale.empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().scale.size() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().offset.empty(), framework::LogLevel::ERRORS);
+
+    CLQuantization quantization = tensor.quantization();
+    ARM_COMPUTE_ASSERT(quantization.scale != nullptr);
+    ARM_COMPUTE_ASSERT(quantization.offset != nullptr);
+
+    // Check OpenCL quantization arrays before allocating
+    ARM_COMPUTE_EXPECT(quantization.scale->max_num_values() == 0, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(quantization.offset->max_num_values() == 0, framework::LogLevel::ERRORS);
+
+    // Check OpenCL quantization arrays after allocating
+    tensor.allocator()->allocate();
+    ARM_COMPUTE_EXPECT(quantization.scale->max_num_values() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(quantization.offset->max_num_values() == 0, framework::LogLevel::ERRORS);
+
+    // Validate that the scale values are the same
+    auto  cl_scale_buffer = quantization.scale->cl_buffer();
+    void *mapped_ptr      = CLScheduler::get().queue().enqueueMapBuffer(cl_scale_buffer, CL_TRUE, CL_MAP_READ, 0, scale.size());
+    auto  cl_scale_ptr    = static_cast<float *>(mapped_ptr);
+    for(unsigned int i = 0; i < scale.size(); ++i)
+    {
+        ARM_COMPUTE_EXPECT(cl_scale_ptr[i] == scale[i], framework::LogLevel::ERRORS);
+    }
+    CLScheduler::get().queue().enqueueUnmapMemObject(cl_scale_buffer, mapped_ptr);
+}
 
 TEST_SUITE_END() // TensorAllocator
 TEST_SUITE_END() // UNIT

@@ -36,7 +36,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo quantization_info);
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

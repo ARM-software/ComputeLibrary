@@ -123,8 +123,9 @@ void CLNormalizePlanarYUVLayerKernel::configure(const ICLTensor *input, ICLTenso
     std::string kernel_name = "normalize_planar_yuv_layer_";
     if(is_data_type_quantized(dt))
     {
-        build_opts.add_option(("-DOFFSET=" + support::cpp11::to_string(input->info()->quantization_info().offset)));
-        build_opts.add_option(("-DSCALE=" + support::cpp11::to_string(input->info()->quantization_info().scale)));
+        const UniformQuantizationInfo qinfo = input->info()->quantization_info().uniform();
+        build_opts.add_option(("-DOFFSET=" + support::cpp11::to_string(qinfo.offset)));
+        build_opts.add_option(("-DSCALE=" + support::cpp11::to_string(qinfo.scale)));
         kernel_name += "q8_";
     }
 

@@ -72,9 +72,9 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     // Create quantized convolver
     if(data_type == DataType::QASYMM8)
     {
-        const QuantizationInfo &input_qinfo   = input->info()->quantization_info();
-        const QuantizationInfo &weights_qinfo = weights->info()->quantization_info();
-        const QuantizationInfo &output_qinfo  = output->info()->quantization_info();
+        const UniformQuantizationInfo input_qinfo   = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo weights_qinfo = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo output_qinfo  = output->info()->quantization_info().uniform();
 
         // Check that quantization info are in the range [0, 255]
         ARM_COMPUTE_ERROR_ON(input_qinfo.offset < 0 || input_qinfo.offset > 255);

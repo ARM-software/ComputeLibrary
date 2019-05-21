@@ -102,20 +102,17 @@ public:
      */
     void consume_parameters(ExampleParams &common_params)
     {
-        common_params.input.width             = width->value();
-        common_params.input.batch             = batch->value();
-        common_params.input.quant_info.scale  = input_scale->value();
-        common_params.input.quant_info.offset = input_offset->value();
-        common_params.input.range_low         = input_range_low->value();
-        common_params.input.range_high        = input_range_high->value();
+        common_params.input.width      = width->value();
+        common_params.input.batch      = batch->value();
+        common_params.input.quant_info = QuantizationInfo(input_scale->value(), input_offset->value());
+        common_params.input.range_low  = input_range_low->value();
+        common_params.input.range_high = input_range_high->value();
 
-        common_params.weights.quant_info.scale  = weights_scale->value();
-        common_params.weights.quant_info.offset = weights_offset->value();
-        common_params.weights.range_low         = weights_range_low->value();
-        common_params.weights.range_high        = weights_range_high->value();
+        common_params.weights.quant_info = QuantizationInfo(weights_scale->value(), weights_offset->value());
+        common_params.weights.range_low  = weights_range_low->value();
+        common_params.weights.range_high = weights_range_high->value();
 
-        common_params.output.quant_info.scale  = output_scale->value();
-        common_params.output.quant_info.offset = output_offset->value();
+        common_params.output.quant_info = QuantizationInfo(output_scale->value(), output_offset->value());
 
         common_params.data_type                   = data_type->value();
         common_params.fully_connected.num_outputs = num_outputs->value();

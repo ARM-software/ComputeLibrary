@@ -112,11 +112,11 @@ void NEWidthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &
     uint8_t *output_ptr = _output->buffer() + _output->info()->offset_first_element_in_bytes() + _width_offset * _output->info()->strides_in_bytes()[0];
 
     // Create iterators
-    Iterator                input(_input, window);
-    Iterator                output(_output, window);
-    const DataType          dt           = _input->info()->data_type();
-    const QuantizationInfo &input_qinfo  = _input->info()->quantization_info();
-    const QuantizationInfo &output_qinfo = _output->info()->quantization_info();
+    Iterator                       input(_input, window);
+    Iterator                       output(_output, window);
+    const DataType                 dt           = _input->info()->data_type();
+    const UniformQuantizationInfo &input_qinfo  = _input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo &output_qinfo = _output->info()->quantization_info().uniform();
     if(dt == DataType::QASYMM8 && input_qinfo != output_qinfo)
     {
         execute_window_loop(window, [&](const Coordinates &)

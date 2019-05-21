@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,9 +104,12 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
     // Add static arguments
     if(is_quantized)
     {
+        const UniformQuantizationInfo iq0_info = _input0->info()->quantization_info().uniform();
+        const UniformQuantizationInfo iq1_info = _input1->info()->quantization_info().uniform();
+
         unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor() + num_arguments_per_1D_tensor();
-        _kernel.setArg<int>(idx++, -_input0->info()->quantization_info().offset);
-        _kernel.setArg<int>(idx++, -_input1->info()->quantization_info().offset);
+        _kernel.setArg<int>(idx++, -iq0_info.offset);
+        _kernel.setArg<int>(idx++, -iq1_info.offset);
     }
 
     // Configure kernel window

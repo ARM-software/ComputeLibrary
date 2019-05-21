@@ -115,7 +115,7 @@ private:
      *
      */
     using MulFunctionQASYMM8 = void(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                    const QuantizationInfo &input1_qua_info, const QuantizationInfo &input2_qua_info, const QuantizationInfo &output_qua_info);
+                                    const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info);
 
     MulFunctionFloat   *_func_float;
     MulFunctionInt     *_func_int;

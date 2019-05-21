@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include <map>
 
 namespace arm_compute

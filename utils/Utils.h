@@ -168,6 +168,8 @@ inline std::string get_typestring(DataType data_type)
         case DataType::QASYMM8:
             return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
         case DataType::S8:
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return no_endianness + "i" + support::cpp11::to_string(sizeof(int8_t));
         case DataType::U16:
             return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));

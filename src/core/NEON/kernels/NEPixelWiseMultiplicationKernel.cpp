@@ -174,7 +174,7 @@ inline uint16x8_t scale255_U16_U16(uint16x8_t in)
 }
 
 void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n(const void *__restrict input1_ptr, const void *__restrict input2_ptr, void *__restrict output_ptr, float scale,
-                                            const QuantizationInfo &input1_qua_info, const QuantizationInfo &input2_qua_info, const QuantizationInfo &output_qua_info)
+                                            const UniformQuantizationInfo &input1_qua_info, const UniformQuantizationInfo &input2_qua_info, const UniformQuantizationInfo &output_qua_info)
 {
     const auto input1 = static_cast<const qasymm8_t *__restrict>(input1_ptr);
     const auto input2 = static_cast<const qasymm8_t *__restrict>(input2_ptr);
@@ -187,7 +187,7 @@ void mul_saturate_QASYMM8_QASYMM8_QASYMM8_n(const void *__restrict input1_ptr, c
     const float32x4x4_t in1_f32x4x4 = vdequantize(input1_q, input1_qua_info);
     const float32x4x4_t in2_f32x4x4 = vdequantize(input2_q, input2_qua_info);
 
-    const QuantizationInfo tmp_qua_info = QuantizationInfo(output_qua_info.scale / scale, output_qua_info.offset);
+    const UniformQuantizationInfo tmp_qua_info = { output_qua_info.scale / scale, output_qua_info.offset };
 
     const float32x4x4_t out_f32x4x4 =
     {
@@ -660,7 +660,7 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
         execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_qasymm8)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
-                             _input1->info()->quantization_info(), _input2->info()->quantization_info(), _output->info()->quantization_info());
+                             _input1->info()->quantization_info().uniform(), _input2->info()->quantization_info().uniform(), _output->info()->quantization_info().uniform());
             collapsed.slide_window_slice_3D(slice_input1);
             collapsed.slide_window_slice_3D(slice_input2);
         },

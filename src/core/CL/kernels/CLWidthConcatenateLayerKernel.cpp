@@ -109,10 +109,13 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
 
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && input->info()->quantization_info() != output->info()->quantization_info())
     {
-        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().offset));
-        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
-        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input->info()->quantization_info().scale));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
+        const UniformQuantizationInfo iqinfo = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = output->info()->quantization_info().uniform();
+
+        build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(iqinfo.offset));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(oqinfo.offset));
+        build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(iqinfo.scale));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(oqinfo.scale));
     }
 
     // Create kernel

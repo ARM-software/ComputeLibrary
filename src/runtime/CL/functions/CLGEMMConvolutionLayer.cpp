@@ -115,8 +115,8 @@ void CLGEMMConvolutionLayer::configure_mm(const ICLTensor *input, const ICLTenso
         const QuantizationInfo input_quantization_info   = input->info()->quantization_info();
         const QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
 
-        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
-        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.uniform().scale, -input_quantization_info.uniform().offset));
+        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.uniform().scale, -weights_quantization_info.uniform().offset));
 
         _mm_gemmlowp.configure(input, weights, biases, output, gemm_info);
 
@@ -151,8 +151,8 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 
         std::unique_ptr<ITensorInfo> input_qa   = input->clone();
         std::unique_ptr<ITensorInfo> weights_qa = weights->clone();
-        input_qa->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
-        weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+        input_qa->set_quantization_info(QuantizationInfo(input_quantization_info.uniform().scale, -input_quantization_info.uniform().offset));
+        weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.uniform().scale, -weights_quantization_info.uniform().offset));
 
         // Perform validation step on GEMMLowp
         return CLGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, output, gemm_info);
@@ -189,6 +189,10 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
     const unsigned int kernel_height = weights->info()->dimension(idx_height);
+
+    const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+    const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
 
     _is_prepared                = weights_info.retain_internal_weights();
     _original_weights           = weights;
@@ -281,9 +285,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     // Configure output stage for quantized case
     if(_is_quantized)
     {
-        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+        const auto output_quant_info = (output->info()->total_size() == 0) ? iq_info : oq_info;
 
-        const float multiplier        = (input->info()->quantization_info().scale * weights->info()->quantization_info().scale) / output_quant_info.scale;
+        const float multiplier        = (iq_info.scale * wq_info.scale) / output_quant_info.scale;
         int         output_multiplier = 0;
         int         output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
@@ -298,8 +302,8 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
         if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = quantize_qasymm8(act_info.a(), output_quant_info);
+            const int b_const_int = quantize_qasymm8(act_info.b(), output_quant_info);
 
             min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
             max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
@@ -387,6 +391,10 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // In case of F16, fused bias will be used in GEMM
     const bool run_addition = (skip_im2col) && (append_bias) && (data_type != DataType::F16);
 
+    const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+    const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+    const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * num_groups) != input->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
@@ -468,9 +476,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     if(is_quantized)
     {
-        const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input->quantization_info() : output->quantization_info();
+        const auto output_quant_info = (output->total_size() == 0) ? iq_info : oq_info;
 
-        const float multiplier        = (input->quantization_info().scale * weights->quantization_info().scale) / output_quant_info.scale;
+        const float multiplier        = (iq_info.scale * wq_info.scale) / output_quant_info.scale;
         int         output_multiplier = 0;
         int         output_shift      = 0;
 
@@ -486,8 +494,8 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
         if(is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
         {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int a_const_int = quantize_qasymm8(act_info.a(), output_quant_info);
+            const int b_const_int = quantize_qasymm8(act_info.b(), output_quant_info);
 
             min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
             max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,7 @@ public:
     ITensorInfo      *info() const override;
     ITensorInfo      *info() override;
     const cl::Buffer &cl_buffer() const override;
+    CLQuantization    quantization() const override;
 
 protected:
     // Inherited methods overridden:

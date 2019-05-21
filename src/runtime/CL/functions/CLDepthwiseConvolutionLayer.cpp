@@ -130,7 +130,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     PixelValue &&zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()))
     {
-        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
+        zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().uniform().offset));
     }
     _border_handler.configure(input_to_use, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
 }
@@ -288,6 +288,10 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         const size_t patch_size = weights_w * weights_h + ((append_bias) ? 1 : 0);
         const size_t conv_size  = conv_w * conv_h;
 
+        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+
         // Im2Col configuration
         TensorShape shape_im2col = input->info()->tensor_shape();
         shape_im2col.set(0, patch_size);
@@ -319,9 +323,9 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         // Output staged configuration
         if(_is_quantized)
         {
-            const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+            const UniformQuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? iq_info : oq_info;
 
-            float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+            float multiplier = iq_info.scale * wq_info.scale / output_quant_info.scale;
             int   output_multiplier;
             int   output_shift;
             quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
@@ -334,8 +338,8 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         PixelValue zero_w(static_cast<int32_t>(0));
         if(_is_quantized)
         {
-            zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().offset));
-            zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().offset));
+            zero_in = PixelValue(static_cast<int32_t>(iq_info.offset));
+            zero_w  = PixelValue(static_cast<int32_t>(wq_info.offset));
         }
         BorderSize border_size = _v2mm_kernel.border_size();
         _v2mm_input_fill_border.configure(&_input_reshaped, border_size, BorderMode::CONSTANT, zero_in);

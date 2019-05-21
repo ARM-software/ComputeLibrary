@@ -97,7 +97,7 @@ inline void store_result<float16_t>(float16_t *ptr, const float32x4x4_t &v)
 template <typename T>
 void run_dequantization(const ITensor *input, ITensor *output, const Window &window)
 {
-    const QuantizationInfo &qinfo = input->info()->quantization_info();
+    const UniformQuantizationInfo &qinfo = input->info()->quantization_info().uniform();
 
     const int  window_step_x  = 16;
     const auto window_start_x = static_cast<int>(window.x().start());
@@ -129,7 +129,7 @@ void run_dequantization(const ITensor *input, ITensor *output, const Window &win
         for(; x < window_end_x; ++x)
         {
             uint8_t val    = *(in_ptr + x);
-            *(out_ptr + x) = static_cast<T>(qinfo.dequantize(val));
+            *(out_ptr + x) = static_cast<T>(dequantize_qasymm8(val, qinfo));
         }
     },
     in, out);

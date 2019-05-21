@@ -452,16 +452,20 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     // Set static kernel arguments
     if(is_data_type_quantized_asymmetric(data_type))
     {
+        const UniformQuantizationInfo iqinfo = _input->info()->quantization_info().uniform();
+        const UniformQuantizationInfo wqinfo = _weights->info()->quantization_info().uniform();
+        const UniformQuantizationInfo oqinfo = _output->info()->quantization_info().uniform();
+
         int output_multiplier = 0;
         int output_shift      = 0;
 
-        float multiplier = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
         ARM_COMPUTE_THROW_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 
         unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0) + 1;
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
+        _kernel.setArg(idx++, -iqinfo.offset);
+        _kernel.setArg(idx++, -wqinfo.offset);
+        _kernel.setArg(idx++, oqinfo.offset);
         _kernel.setArg(idx++, output_multiplier);
         _kernel.setArg(idx++, output_shift);
     }

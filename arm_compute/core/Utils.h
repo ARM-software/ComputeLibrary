@@ -111,7 +111,9 @@ inline size_t data_size_from_type(DataType data_type)
     {
         case DataType::U8:
         case DataType::S8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -183,7 +185,9 @@ inline size_t element_size_from_data_type(DataType dt)
     {
         case DataType::S8:
         case DataType::U8:
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -521,7 +525,9 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::U32;
         case DataType::S16:
             return DataType::S32;
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
         case DataType::F16:
         case DataType::U32:
         case DataType::S32:
@@ -999,7 +1005,9 @@ inline bool is_data_type_quantized(DataType dt)
 {
     switch(dt)
     {
+        case DataType::QSYMM8:
         case DataType::QASYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
             return true;
         default:
             return false;
@@ -1059,14 +1067,14 @@ inline size_t num_of_elements_in_range(const float start, const float end, const
 
 /** Returns true if the value can be represented by the given data type
  *
- * @param[in] val        value to be checked
- * @param[in] dt         data type that is checked
- * @param[in] quant_info quantization info if the data type is QASYMM8
+ * @param[in] val   value to be checked
+ * @param[in] dt    data type that is checked
+ * @param[in] qinfo (Optional) quantization info if the data type is QASYMM8
  *
  * @return true if the data type can hold the value.
  */
 template <typename T>
-bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = QuantizationInfo())
+bool check_value_range(T val, DataType dt, QuantizationInfo qinfo = QuantizationInfo())
 {
     switch(dt)
     {
@@ -1074,8 +1082,8 @@ bool check_value_range(T val, DataType dt, QuantizationInfo quant_info = Quantiz
             return ((static_cast<uint8_t>(val) == val) && val >= std::numeric_limits<uint8_t>::lowest() && val <= std::numeric_limits<uint8_t>::max());
         case DataType::QASYMM8:
         {
-            double min = static_cast<double>(quant_info.dequantize(0));
-            double max = static_cast<double>(quant_info.dequantize(std::numeric_limits<uint8_t>::max()));
+            double min = static_cast<double>(dequantize_qasymm8(0, qinfo));
+            double max = static_cast<double>(dequantize_qasymm8(std::numeric_limits<uint8_t>::max(), qinfo));
             return ((double)val >= min && (double)val <= max);
         }
         case DataType::S8:

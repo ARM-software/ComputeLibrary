@@ -158,29 +158,26 @@ public:
      */
     void consume_parameters(ExampleParams &common_params)
     {
-        common_params.input.width             = width->value();
-        common_params.input.height            = height->value();
-        common_params.input.fm                = channels->value();
-        common_params.input.batch             = batch->value();
-        common_params.input.quant_info.scale  = scale->value();
-        common_params.input.quant_info.offset = offset->value();
-        common_params.input.npy               = input_npy->value();
-        common_params.input.range_low         = input_range_low->value();
-        common_params.input.range_high        = input_range_high->value();
+        common_params.input.width      = width->value();
+        common_params.input.height     = height->value();
+        common_params.input.fm         = channels->value();
+        common_params.input.batch      = batch->value();
+        common_params.input.quant_info = QuantizationInfo(scale->value(), offset->value());
+        common_params.input.npy        = input_npy->value();
+        common_params.input.range_low  = input_range_low->value();
+        common_params.input.range_high = input_range_high->value();
 
-        common_params.weights.width             = weights_width->value();
-        common_params.weights.height            = weights_height->value();
-        common_params.weights.npy               = weights_npy->value();
-        common_params.weights.range_low         = weights_range_low->value();
-        common_params.weights.range_high        = weights_range_high->value();
-        common_params.weights.quant_info.scale  = weights_scale->value();
-        common_params.weights.quant_info.offset = weights_offset->value();
+        common_params.weights.width      = weights_width->value();
+        common_params.weights.height     = weights_height->value();
+        common_params.weights.npy        = weights_npy->value();
+        common_params.weights.range_low  = weights_range_low->value();
+        common_params.weights.range_high = weights_range_high->value();
+        common_params.weights.quant_info = QuantizationInfo(weights_scale->value(), weights_offset->value());
 
         common_params.bias.npy = bias_npy->value();
 
-        common_params.output.quant_info.scale  = output_scale->value();
-        common_params.output.quant_info.offset = output_offset->value();
-        common_params.output.npy               = output_npy->value();
+        common_params.output.quant_info = QuantizationInfo(output_scale->value(), output_offset->value());
+        common_params.output.npy        = output_npy->value();
 
         common_params.convolution.padding_mode     = padding_mode->value();
         common_params.convolution.padding_top      = padding_top->value();

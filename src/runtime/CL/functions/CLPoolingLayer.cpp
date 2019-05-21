@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     PixelValue pixel_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
     {
-        pixel_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+        pixel_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().uniform().offset));
     }
     switch(input->info()->data_layout())
     {

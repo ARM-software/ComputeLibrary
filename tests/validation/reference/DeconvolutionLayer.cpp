@@ -68,7 +68,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 
     if(src.data_type() == DataType::QASYMM8)
     {
-        const uint8_t quantized_zero = src.quantization_info().offset;
+        const uint8_t quantized_zero = src.quantization_info().uniform().offset;
         std::fill_n(scaled.data(), scaled.num_elements(), quantized_zero);
     }
     else
