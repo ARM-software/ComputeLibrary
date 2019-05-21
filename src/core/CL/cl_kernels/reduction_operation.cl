@@ -197,6 +197,8 @@ __kernel void reduction_operation_non_parallel_x(
 #elif defined(ARG_MIN)
         indx = select(indx, x, ISLESS(in, res));
         res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+#elif defined(MIN)
+        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #else  // !(defined(ARG_MAX) || defined(ARG_MIN))
         res += in;
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
@@ -209,7 +211,11 @@ __kernel void reduction_operation_non_parallel_x(
 #if defined(MEAN)
     res /= WIDTH;
 #endif // defined(MEAN)
+#if defined(MIN)
+    *((__global DATA_TYPE_PROMOTED *)output.ptr) = res;
+#else // defined(MIN)
     *((__global uchar *)output.ptr) = convert_uchar(res);
+#endif // defined(MIN)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif // defined(WIDTH)
@@ -262,6 +268,8 @@ __kernel void reduction_operation_y(
 #elif defined(ARG_MIN)
         uint16  cond_conv           = CONVERT(ISLESS(in, res), uint16);
         indx                        = select(indx, y, cond_conv);
+        res                         = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
         res                         = select(res, in, ISLESS(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
@@ -349,6 +357,8 @@ __kernel void reduction_operation_z(
 #elif defined(ARG_MIN)
         uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
         indx             = select(indx, z, cond_conv);
+        res              = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
         res              = select(res, in, ISLESS(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
@@ -438,6 +448,8 @@ __kernel void reduction_operation_w(
 #elif defined(ARG_MIN)
         uint16 cond_conv = CONVERT(ISLESS(in, res), uint16);
         indx             = select(indx, w, cond_conv);
+        res              = select(res, in, ISLESS(in, res));
+#elif defined(MIN)
         res              = select(res, in, ISLESS(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
