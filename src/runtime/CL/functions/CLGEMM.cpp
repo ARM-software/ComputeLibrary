@@ -242,10 +242,6 @@ void CLGEMM::configure_reshaped_v2(const ICLTensor *a, const ICLTensor *b, const
 
 void CLGEMM::configure_reshaped_only_rhs(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON(c != nullptr);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(c);
-
     DataType           data_type               = a->info()->data_type();
     bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
     const unsigned int m                       = reinterpret_input_as_3d ? (a->info()->dimension(1) * a->info()->dimension(2)) : a->info()->dimension(1);
@@ -254,11 +250,12 @@ void CLGEMM::configure_reshaped_only_rhs(const ICLTensor *a, const ICLTensor *b,
     const unsigned int batch_size              = reinterpret_input_as_3d ? a->info()->dimension(3) : a->info()->dimension(2);
     const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
     const GPUTarget    gpu_target              = CLScheduler::get().target();
+    bool               broadcast_bias          = gemm_info.broadcast_bias();
 
     // Set the target for the kernels
     _mm_kernel.set_target(gpu_target);
 
-    GEMMReshapeInfo reshape_info(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d);
+    GEMMReshapeInfo reshape_info(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d, broadcast_bias);
 
     // Manage intermediate buffers
     if(!_reshape_b_only_on_first_run)
@@ -279,7 +276,7 @@ void CLGEMM::configure_reshaped_only_rhs(const ICLTensor *a, const ICLTensor *b,
     _reshape_rhs_kernel.configure(b, &_tmp_b, rhs_info);
 
     // Configure and tune matrix multiply kernel
-    _mm_reshaped_only_rhs_kernel.configure(a, &_tmp_b, output, alpha, lhs_info, rhs_info, reshape_info);
+    _mm_reshaped_only_rhs_kernel.configure(a, &_tmp_b, c, output, alpha, beta, lhs_info, rhs_info, reshape_info);
 
     if(!_reshape_b_only_on_first_run)
     {
@@ -426,7 +423,6 @@ Status CLGEMM::validate_reshaped_v2(const ITensorInfo *a, const ITensorInfo *b, 
         // Validate matrix addition kernel
         ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, output, beta));
     }
-
     return Status{};
 }
 
@@ -438,17 +434,16 @@ Status CLGEMM::validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInf
     TensorInfo tmp_b_info{};
 
     // Get the GPU target
-    const GPUTarget    gpu_target              = CLScheduler::get().target();
-    const DataType     data_type               = a->data_type();
-    bool               reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
-    const unsigned int m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
-    const unsigned int n                       = b->dimension(0);
-    const unsigned int k                       = a->dimension(0);
-    const unsigned int batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
-    const int          depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
-    const bool         add_c                   = (beta != 0.f && c != nullptr);
-
-    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d);
+    const GPUTarget       gpu_target              = CLScheduler::get().target();
+    const DataType        data_type               = a->data_type();
+    bool                  reinterpret_input_as_3d = gemm_info.reinterpret_input_as_3d();
+    const unsigned int    m                       = reinterpret_input_as_3d ? (a->dimension(1) * a->dimension(2)) : a->dimension(1);
+    const unsigned int    n                       = b->dimension(0);
+    const unsigned int    k                       = a->dimension(0);
+    const unsigned int    batch_size              = reinterpret_input_as_3d ? a->dimension(3) : a->dimension(2);
+    const int             depth_output_gemm3d     = gemm_info.depth_output_gemm3d();
+    const bool            broadcast_bias          = gemm_info.broadcast_bias();
+    const GEMMReshapeInfo reshape_info            = GEMMReshapeInfo(m, n, k, 1, 1, depth_output_gemm3d, reinterpret_input_as_3d, broadcast_bias);
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
@@ -464,13 +459,7 @@ Status CLGEMM::validate_reshaped_only_rhs(const ITensorInfo *a, const ITensorInf
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMReshapeRHSMatrixKernel::validate(b, &tmp_b_info, rhs_info));
 
     // Validate matrix multiply
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::validate(a, &tmp_b_info, output, alpha, lhs_info, rhs_info, reshape_info));
-
-    if(add_c)
-    {
-        // Validate matrix addition kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, output, beta));
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::validate(a, &tmp_b_info, c, output, alpha, beta, lhs_info, rhs_info, reshape_info));
 
     return Status{};
 }
@@ -497,10 +486,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     // Select GEMMType
     _gemm_type = select_gemm_type(m, n, k, a->info()->data_type(), _reshape_b_only_on_first_run, gpu_target);
 
-    const bool is_gemm_v2  = (_gemm_type == GEMMType::RESHAPED_V2) || (_gemm_type == GEMMType::RESHAPED_ONLY_RHS);
-    const bool add_c       = (beta != 0.f && c != nullptr);
-    const bool is_beta_one = std::abs(1.0f - beta) < 0.00001f;
-    const bool fuse_add    = is_beta_one && (c != nullptr && c->info()->num_dimensions() == 1) && !is_gemm_v2;
+    const bool is_gemm_reshaped_only_rhs = _gemm_type == GEMMType::RESHAPED_ONLY_RHS;
+    const bool add_c                     = (beta != 0.f && c != nullptr);
+    const bool is_beta_one               = std::abs(1.0f - beta) < 0.00001f;
+    const bool fuse_add                  = (is_beta_one && (c != nullptr && c->info()->num_dimensions() == 1)) || is_gemm_reshaped_only_rhs;
 
     switch(_gemm_type)
     {

@@ -1602,7 +1602,7 @@ class GEMMReshapeInfo final
 public:
     /** Default constructor */
     GEMMReshapeInfo()
-        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false)
+        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _broadcast_bias(false)
     {
     }
     /** Constructor
@@ -1615,11 +1615,12 @@ public:
      * @param[in] depth_output_gemm3d       (Optional) Depth (third dimension) of the output tensor to be used with the GEMM3D kernel.
      *                                      If 0 the output will not be reinterpreted as 3D. Default 0
      * @param[in] reinterpret_input_as_3d   (Optional) Reinterpret the input as 3D tensor. (i.e. this flag should be set to true when GEMM is used
-     *                                                 to perform 1x1 convolutions with the NHWC data layout)
+     *                                      to perform 1x1 convolutions with the NHWC data layout)
+     * @param[in] broadcast_bias            (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      */
-    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false)
+    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool broadcast_bias = false)
         : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d)
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _broadcast_bias(broadcast_bias)
     {
     }
     /** Number of matrix A rows
@@ -1681,6 +1682,14 @@ public:
     {
         return _reinterpret_input_as_3d;
     };
+    /** Flag which specifies whether to broadcast the shape of the bias tensor.
+     *
+     * @return True if the shape of the bias tensor is to be broadcasted.
+     */
+    bool broadcast_bias() const
+    {
+        return _broadcast_bias;
+    };
 
 private:
     const int  _m;
@@ -1690,6 +1699,7 @@ private:
     const int  _mult_interleave4x4_height;
     const int  _depth_output_gemm3d;
     const bool _reinterpret_input_as_3d;
+    const bool _broadcast_bias;
 };
 
 struct DepthwiseConvolutionReshapeInfo
@@ -1749,7 +1759,7 @@ public:
     /** Default constructor */
     GEMMInfo()
         : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(true), _depth_output_gemm3d(0), _reinterpret_input_as_3d(false), _retain_internal_weights(false), _gemmlowp_output_stage(),
-          _fp_mixed_precision(false)
+          _fp_mixed_precision(false), _broadcast_bias(false)
     {
     }
     /** Constructor
@@ -1764,12 +1774,13 @@ public:
      * @param[in] retain_internal_weights     (Optional) Retain the weights tensor from previous run
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
      * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
-     *
+     * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false)
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false)
         : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _depth_output_gemm3d(depth_output_gemm3d),
-          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage), _fp_mixed_precision(fp_mixed_precision)
+          _reinterpret_input_as_3d(reinterpret_input_as_3d), _retain_internal_weights(retain_internal_weights), _gemmlowp_output_stage(gemmlowp_output_stage), _fp_mixed_precision(fp_mixed_precision),
+          _broadcast_bias(broadcast_bias)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1838,6 +1849,14 @@ public:
     {
         return _fp_mixed_precision;
     };
+    /** Flag which specifies whether to broadcast the shape of the bias tensor.
+     *
+     * @return True if the shape of the bias tensor is to be broadcasted.
+     */
+    bool broadcast_bias() const
+    {
+        return _broadcast_bias;
+    };
 
 private:
     const bool                    _is_a_reshaped;
@@ -1848,6 +1867,7 @@ private:
     const bool                    _retain_internal_weights;
     const GEMMLowpOutputStageInfo _gemmlowp_output_stage;
     const bool                    _fp_mixed_precision;
+    const bool                    _broadcast_bias;
 };
 
 /** Winograd information */
