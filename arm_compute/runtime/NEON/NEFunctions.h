@@ -53,6 +53,7 @@
 #include "arm_compute/runtime/NEON/functions/NECropResize.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthToSpaceLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseSeparableConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"

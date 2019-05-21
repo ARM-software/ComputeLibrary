@@ -975,6 +975,30 @@ inline TensorShape compute_batch_to_space_shape(const ITensorInfo *input, const 
     return output_shape;
 }
 
+/** Calculate the depth to space output shape of a tensor
+ *
+ * @param[in] input Input tensor info
+ * @param[in] block Block shape value
+ *
+ * @return the calculated shape
+ */
+inline TensorShape compute_depth_to_space_shape(const ITensorInfo *input, int block)
+{
+    ARM_COMPUTE_ERROR_ON(block < 2);
+
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(idx_width, input->dimension(idx_width) * block);
+    output_shape.set(idx_height, input->dimension(idx_height) * block);
+    output_shape.set(idx_channel, input->dimension(idx_channel) / (block * block));
+
+    return output_shape;
+}
+
 /** Calculate the split output shape of a tensor
  *
  * @param[in] input      Input tensor info
