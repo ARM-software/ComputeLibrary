@@ -110,6 +110,11 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
                 intermediate_kernel_op = ReductionOperation::MIN;
                 last_kernel_op         = ReductionOperation::MIN;
                 break;
+            case ReductionOperation::MAX:
+                first_kernel_op        = ReductionOperation::MAX;
+                intermediate_kernel_op = ReductionOperation::MAX;
+                last_kernel_op         = ReductionOperation::MAX;
+                break;
             default:
                 ARM_COMPUTE_ERROR("Not supported");
         }
@@ -203,6 +208,33 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                     case DataType::QASYMM8:
                     {
                         pixelValue = PixelValue(255, input->info()->data_type(), input->info()->quantization_info());
+                        break;
+                    }
+                    default:
+                    {
+                        ARM_COMPUTE_ERROR("Unsupported DataType");
+                    }
+                }
+                break;
+            case ReductionOperation::MAX:
+                first_kernel_op        = ReductionOperation::MAX;
+                intermediate_kernel_op = ReductionOperation::MAX;
+                last_kernel_op         = ReductionOperation::MAX;
+                switch(input->info()->data_type())
+                {
+                    case DataType::F32:
+                    {
+                        pixelValue = PixelValue(-std::numeric_limits<float>::max());
+                        break;
+                    }
+                    case DataType::F16:
+                    {
+                        pixelValue = PixelValue(static_cast<half>(-65504.0f));
+                        break;
+                    }
+                    case DataType::QASYMM8:
+                    {
+                        pixelValue = PixelValue(0, input->info()->data_type(), input->info()->quantization_info());
                         break;
                     }
                     default:

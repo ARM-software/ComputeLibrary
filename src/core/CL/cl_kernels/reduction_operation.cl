@@ -198,7 +198,9 @@ __kernel void reduction_operation_non_parallel_x(
         indx = select(indx, x, ISLESS(in, res));
         res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MIN)
-        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+        res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
+#elif defined(MAX)
+        res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
 #else  // !(defined(ARG_MAX) || defined(ARG_MIN))
         res += in;
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
@@ -211,11 +213,11 @@ __kernel void reduction_operation_non_parallel_x(
 #if defined(MEAN)
     res /= WIDTH;
 #endif // defined(MEAN)
-#if defined(MIN)
+#if defined(MIN) || defined(MAX)
     *((__global DATA_TYPE_PROMOTED *)output.ptr) = res;
-#else // defined(MIN)
+#else  // defined(MIN) || defined(MAX)
     *((__global uchar *)output.ptr) = convert_uchar(res);
-#endif // defined(MIN)
+#endif // defined(MIN) || defined(MAX)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif // defined(WIDTH)
@@ -266,11 +268,13 @@ __kernel void reduction_operation_y(
         indx             = select(indx, y, cond_conv);
         res              = select(res, in, ISGREATER(in, res));
 #elif defined(ARG_MIN)
-        uint16  cond_conv           = CONVERT(ISLESS(in, res), uint16);
-        indx                        = select(indx, y, cond_conv);
-        res                         = select(res, in, ISLESS(in, res));
+        uint16 cond_conv                         = CONVERT(ISLESS(in, res), uint16);
+        indx                                     = select(indx, y, cond_conv);
+        res                                      = select(res, in, ISLESS(in, res));
 #elif defined(MIN)
-        res                         = select(res, in, ISLESS(in, res));
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;
@@ -359,7 +363,9 @@ __kernel void reduction_operation_z(
         indx             = select(indx, z, cond_conv);
         res              = select(res, in, ISLESS(in, res));
 #elif defined(MIN)
-        res              = select(res, in, ISLESS(in, res));
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;
@@ -450,7 +456,9 @@ __kernel void reduction_operation_w(
         indx             = select(indx, w, cond_conv);
         res              = select(res, in, ISLESS(in, res));
 #elif defined(MIN)
-        res              = select(res, in, ISLESS(in, res));
+        res = select(res, in, ISLESS(in, res));
+#elif defined(MAX)
+        res = select(res, in, ISGREATER(in, res));
 #else // !(defined(ARG_MAX) || defined(ARG_MIN))
 #if defined(SUM_SQUARE)
         in *= in;

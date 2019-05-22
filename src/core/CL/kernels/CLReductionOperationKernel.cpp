@@ -89,7 +89,8 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool               window_changed                    = false;
-    const bool         is_serial_op                      = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || is_data_type_quantized(input->data_type()));
+    const bool         is_serial_op                      = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN
+                                                            || op == ReductionOperation::MAX || is_data_type_quantized(input->data_type()));
 
     switch(axis)
     {
@@ -170,6 +171,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
     build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
     build_opts.add_option_if(op == ReductionOperation::MIN, "-DMIN");
+    build_opts.add_option_if(op == ReductionOperation::MAX, "-DMAX");
     build_opts.add_option_if(input->info()->num_channels() == 2, "-DCOMPLEX");
 
     switch(op)
@@ -184,6 +186,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
         case ReductionOperation::ARG_IDX_MAX:
         case ReductionOperation::ARG_IDX_MIN:
         case ReductionOperation::MIN:
+        case ReductionOperation::MAX:
             break;
         case ReductionOperation::PROD:
             build_opts.add_option(("-DOPERATION=product"));
@@ -195,7 +198,8 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
     std::string kernel_axis_name;
-    const bool  is_serial_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || is_data_type_quantized(input->info()->data_type()));
+    const bool  is_serial_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX
+                                || is_data_type_quantized(input->info()->data_type()));
     switch(axis)
     {
         case 0:
@@ -260,7 +264,8 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    const bool is_serial_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN || _op == ReductionOperation::MIN || is_data_type_quantized(_input->info()->data_type()));
+    const bool is_serial_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN || _op == ReductionOperation::MIN || _op == ReductionOperation::MAX
+                               || is_data_type_quantized(_input->info()->data_type()));
     switch(_reduction_axis)
     {
         case 0:
