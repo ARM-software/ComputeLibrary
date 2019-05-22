@@ -397,7 +397,6 @@ public:
     {
         TensorShape{ 3U, 3U, 7U, 4U },
                      TensorShape{ 3U, 3U, 4U, 13U },
-                     TensorShape{ 3U, 3U, 9U, 2U },
                      TensorShape{ 3U, 3U, 3U, 5U },
     })
     {
@@ -413,7 +412,6 @@ public:
     {
         TensorShape{ 3U, 1U, 7U, 4U },
                      TensorShape{ 3U, 1U, 4U, 13U },
-                     TensorShape{ 3U, 1U, 9U, 2U },
                      TensorShape{ 3U, 1U, 3U, 5U },
     })
     {
@@ -429,7 +427,6 @@ public:
     {
         TensorShape{ 1U, 3U, 7U, 4U },
                      TensorShape{ 1U, 3U, 4U, 13U },
-                     TensorShape{ 1U, 3U, 9U, 2U },
                      TensorShape{ 1U, 3U, 3U, 5U },
     })
     {
@@ -446,7 +443,6 @@ public:
         TensorShape{ 3U, 3U, 32U, 64U },
                      TensorShape{ 3U, 3U, 51U, 13U },
                      TensorShape{ 3U, 3U, 53U, 47U },
-                     TensorShape{ 3U, 3U, 128U, 384U },
     })
     {
     }
@@ -462,7 +458,6 @@ public:
         TensorShape{ 3U, 1U, 32U, 64U },
                      TensorShape{ 3U, 1U, 51U, 13U },
                      TensorShape{ 3U, 1U, 53U, 47U },
-                     TensorShape{ 3U, 1U, 128U, 384U },
     })
     {
     }
@@ -478,7 +473,6 @@ public:
         TensorShape{ 1U, 3U, 32U, 64U },
                      TensorShape{ 1U, 3U, 51U, 13U },
                      TensorShape{ 1U, 3U, 53U, 47U },
-                     TensorShape{ 1U, 3U, 128U, 384U },
     })
     {
     }
@@ -493,7 +487,6 @@ public:
     {
         TensorShape{ 5U, 5U, 7U, 4U },
                      TensorShape{ 5U, 5U, 4U, 13U },
-                     TensorShape{ 5U, 5U, 9U, 2U },
                      TensorShape{ 5U, 5U, 3U, 5U },
     })
     {
@@ -510,7 +503,6 @@ public:
         TensorShape{ 5U, 5U, 32U, 64U },
                      TensorShape{ 5U, 5U, 51U, 13U },
                      TensorShape{ 5U, 5U, 53U, 47U },
-                     TensorShape{ 5U, 5U, 128U, 384U },
     })
     {
     }
@@ -525,7 +517,6 @@ public:
     {
         TensorShape{ 5U, 1U, 7U, 4U },
                      TensorShape{ 5U, 1U, 4U, 13U },
-                     TensorShape{ 5U, 1U, 9U, 2U },
                      TensorShape{ 5U, 1U, 3U, 5U },
     })
     {
@@ -542,7 +533,6 @@ public:
         TensorShape{ 5U, 1U, 32U, 64U },
                      TensorShape{ 5U, 1U, 51U, 13U },
                      TensorShape{ 5U, 1U, 53U, 47U },
-                     TensorShape{ 5U, 1U, 128U, 384U },
     })
     {
     }
@@ -557,7 +547,6 @@ public:
     {
         TensorShape{ 1U, 5U, 7U, 4U },
                      TensorShape{ 1U, 5U, 4U, 13U },
-                     TensorShape{ 1U, 5U, 9U, 2U },
                      TensorShape{ 1U, 5U, 3U, 5U },
     })
     {
@@ -574,7 +563,6 @@ public:
         TensorShape{ 1U, 5U, 32U, 64U },
                      TensorShape{ 1U, 5U, 51U, 13U },
                      TensorShape{ 1U, 5U, 53U, 47U },
-                     TensorShape{ 1U, 5U, 128U, 384U },
     })
     {
     }
@@ -589,7 +577,6 @@ public:
     {
         TensorShape{ 1U, 7U, 7U, 4U },
                      TensorShape{ 1U, 7U, 4U, 13U },
-                     TensorShape{ 1U, 7U, 9U, 2U },
                      TensorShape{ 1U, 7U, 3U, 5U },
     })
     {
@@ -606,7 +593,6 @@ public:
         TensorShape{ 1U, 7U, 32U, 64U },
                      TensorShape{ 1U, 7U, 51U, 13U },
                      TensorShape{ 1U, 7U, 53U, 47U },
-                     TensorShape{ 1U, 7U, 128U, 384U },
     })
     {
     }
@@ -621,7 +607,6 @@ public:
     {
         TensorShape{ 7U, 7U, 7U, 4U },
                      TensorShape{ 7U, 7U, 4U, 13U },
-                     TensorShape{ 7U, 7U, 9U, 2U },
                      TensorShape{ 7U, 7U, 3U, 5U },
     })
     {
@@ -638,7 +623,6 @@ public:
         TensorShape{ 7U, 7U, 32U, 64U },
                      TensorShape{ 7U, 7U, 51U, 13U },
                      TensorShape{ 7U, 7U, 53U, 47U },
-                     TensorShape{ 7U, 7U, 128U, 384U },
     })
     {
     }
@@ -653,7 +637,6 @@ public:
     {
         TensorShape{ 7U, 1U, 7U, 4U },
                      TensorShape{ 7U, 1U, 4U, 13U },
-                     TensorShape{ 7U, 1U, 9U, 2U },
                      TensorShape{ 7U, 1U, 3U, 5U },
     })
     {
@@ -670,7 +653,6 @@ public:
         TensorShape{ 7U, 1U, 32U, 64U },
                      TensorShape{ 7U, 1U, 51U, 13U },
                      TensorShape{ 7U, 1U, 53U, 47U },
-                     TensorShape{ 7U, 1U, 128U, 384U },
     })
     {
     }
