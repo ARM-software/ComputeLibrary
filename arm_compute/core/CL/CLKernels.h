@@ -51,6 +51,7 @@
 #include "arm_compute/core/CL/kernels/CLDeconvolutionReshapeOutputKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthToSpaceLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayerReshapeWeightsGenericKernel.h"

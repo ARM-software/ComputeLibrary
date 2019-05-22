@@ -54,6 +54,7 @@
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConvertLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDepthToSpaceLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDepthwiseSeparableConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"

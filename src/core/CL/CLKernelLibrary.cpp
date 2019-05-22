@@ -225,6 +225,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "dwc_3x3_reshaped_qasymm8_nhwc", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_reshaped_qasymm8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
     { "dwc_3x3_reshaped_qasymm8_dot8_stride1_nhwc", "depthwise_convolution_quantized.cl" },
+    { "depth_to_space_nchw", "depth_to_space.cl" },
+    { "depth_to_space_nhwc", "depth_to_space.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32", "depthwise_convolution.cl" },
@@ -666,6 +668,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "depth_convert.cl",
 #include "./cl_kernels/depth_convert.clembed"
+    },
+    {
+        "depth_to_space.cl",
+#include "./cl_kernels/depth_to_space.clembed"
     },
     {
         "depthwise_convolution.cl",
