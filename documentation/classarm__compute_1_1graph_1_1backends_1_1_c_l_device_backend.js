@@ -11,6 +11,7 @@ var classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend =
     [ "is_backend_supported", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#a96a97b6b97a89e6940f8853d1dcbf213", null ],
     [ "release_backend_context", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#aa24d3f58d6e9c1d8c171d25defcdfb54", null ],
     [ "set_kernel_tuning", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#a96e32e9d96b05d238f46be2e90d0e60b", null ],
+    [ "set_kernel_tuning_mode", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#a3d7becfb1d12f49d38942b88845421ec", null ],
     [ "setup_backend_context", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#a7b1a687adb038e7e989e5d33b26651dc", null ],
     [ "validate_node", "classarm__compute_1_1graph_1_1backends_1_1_c_l_device_backend.xhtml#af8c9f941cc0efcdc112ac8534a204dd0", null ]
 ];

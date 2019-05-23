@@ -1,8 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml" title="Tensor handle interface object." alt="" coords="5,107,116,133"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml" title="OpenCL Sub&#45;Tensor handle interface object." alt="" coords="165,5,314,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml" title="OpenCL Tensor handle interface object." alt="" coords="178,56,301,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml" title="GLES compute tensor handle interface object." alt="" coords="176,107,303,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml" title="NEON Sub&#45;Tensor handle interface object." alt="" coords="164,157,315,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml" title="NEON Tensor handle interface object." alt="" coords="176,208,303,235"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,111,88,138"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml" title="Vector is considered a container." alt="" coords="141,5,283,47"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,71,280,112"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_t_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="136,136,288,177"/>
+<area shape="rect" id="node5" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point_3_01half_01_4.xhtml" title=" " alt="" coords="144,201,280,243"/>
 </map>

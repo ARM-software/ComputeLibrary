@@ -17,6 +17,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEBatchNormalizationLayerKernel.h", "_n_e_batch_normalization_layer_kernel_8h.xhtml", [
       [ "NEBatchNormalizationLayerKernel", "classarm__compute_1_1_n_e_batch_normalization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_batch_normalization_layer_kernel" ]
     ] ],
+    [ "NEBatchToSpaceLayerKernel.h", "_n_e_batch_to_space_layer_kernel_8h.xhtml", [
+      [ "NEBatchToSpaceLayerKernel", "classarm__compute_1_1_n_e_batch_to_space_layer_kernel.xhtml", "classarm__compute_1_1_n_e_batch_to_space_layer_kernel" ]
+    ] ],
     [ "NEBitwiseAndKernel.h", "_n_e_bitwise_and_kernel_8h.xhtml", [
       [ "NEBitwiseAndKernel", "classarm__compute_1_1_n_e_bitwise_and_kernel.xhtml", "classarm__compute_1_1_n_e_bitwise_and_kernel" ]
     ] ],
@@ -56,6 +59,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEConvolutionKernel.h", "_n_e_convolution_kernel_8h.xhtml", "_n_e_convolution_kernel_8h" ],
     [ "NECopyKernel.h", "_n_e_copy_kernel_8h.xhtml", [
       [ "NECopyKernel", "classarm__compute_1_1_n_e_copy_kernel.xhtml", "classarm__compute_1_1_n_e_copy_kernel" ]
+    ] ],
+    [ "NECropKernel.h", "_n_e_crop_kernel_8h.xhtml", [
+      [ "NECropKernel", "classarm__compute_1_1_n_e_crop_kernel.xhtml", "classarm__compute_1_1_n_e_crop_kernel" ]
     ] ],
     [ "NECumulativeDistributionKernel.h", "_n_e_cumulative_distribution_kernel_8h.xhtml", [
       [ "NECumulativeDistributionKernel", "classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml", "classarm__compute_1_1_n_e_cumulative_distribution_kernel" ]
@@ -108,6 +114,15 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEFastCornersKernel.h", "_n_e_fast_corners_kernel_8h.xhtml", [
       [ "NEFastCornersKernel", "classarm__compute_1_1_n_e_fast_corners_kernel.xhtml", "classarm__compute_1_1_n_e_fast_corners_kernel" ]
     ] ],
+    [ "NEFFTDigitReverseKernel.h", "_n_e_f_f_t_digit_reverse_kernel_8h.xhtml", [
+      [ "NEFFTDigitReverseKernel", "classarm__compute_1_1_n_e_f_f_t_digit_reverse_kernel.xhtml", "classarm__compute_1_1_n_e_f_f_t_digit_reverse_kernel" ]
+    ] ],
+    [ "NEFFTRadixStageKernel.h", "_n_e_f_f_t_radix_stage_kernel_8h.xhtml", [
+      [ "NEFFTRadixStageKernel", "classarm__compute_1_1_n_e_f_f_t_radix_stage_kernel.xhtml", "classarm__compute_1_1_n_e_f_f_t_radix_stage_kernel" ]
+    ] ],
+    [ "NEFFTScaleKernel.h", "_n_e_f_f_t_scale_kernel_8h.xhtml", [
+      [ "NEFFTScaleKernel", "classarm__compute_1_1_n_e_f_f_t_scale_kernel.xhtml", "classarm__compute_1_1_n_e_f_f_t_scale_kernel" ]
+    ] ],
     [ "NEFillArrayKernel.h", "_n_e_fill_array_kernel_8h.xhtml", [
       [ "NEFillArrayKernel", "classarm__compute_1_1_n_e_fill_array_kernel.xhtml", "classarm__compute_1_1_n_e_fill_array_kernel" ]
     ] ],
@@ -152,6 +167,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEGEMMLowpOffsetContributionKernel.h", "_n_e_g_e_m_m_lowp_offset_contribution_kernel_8h.xhtml", [
       [ "NEGEMMLowpOffsetContributionKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel" ]
     ] ],
+    [ "NEGEMMLowpOffsetContributionOutputStageKernel.h", "_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel_8h.xhtml", [
+      [ "NEGEMMLowpOffsetContributionOutputStageKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel" ]
+    ] ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h", "_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8h.xhtml", [
       [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel" ]
     ] ],
@@ -181,6 +199,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEHarrisCornersKernel.h", "_n_e_harris_corners_kernel_8h.xhtml", [
       [ "INEHarrisScoreKernel", "classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_i_n_e_harris_score_kernel" ],
       [ "NEHarrisScoreKernel", "classarm__compute_1_1_n_e_harris_score_kernel.xhtml", "classarm__compute_1_1_n_e_harris_score_kernel" ]
+    ] ],
+    [ "NEHeightConcatenateLayerKernel.h", "_n_e_height_concatenate_layer_kernel_8h.xhtml", [
+      [ "NEHeightConcatenateLayerKernel", "classarm__compute_1_1_n_e_height_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_n_e_height_concatenate_layer_kernel" ]
     ] ],
     [ "NEHistogramKernel.h", "_n_e_histogram_kernel_8h.xhtml", [
       [ "NEHistogramKernel", "classarm__compute_1_1_n_e_histogram_kernel.xhtml", "classarm__compute_1_1_n_e_histogram_kernel" ]
@@ -235,7 +256,8 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "NEPermuteKernel", "classarm__compute_1_1_n_e_permute_kernel.xhtml", "classarm__compute_1_1_n_e_permute_kernel" ]
     ] ],
     [ "NEPixelWiseMultiplicationKernel.h", "_n_e_pixel_wise_multiplication_kernel_8h.xhtml", [
-      [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel" ]
+      [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel" ],
+      [ "NEComplexPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel" ]
     ] ],
     [ "NEPoolingLayerKernel.h", "_n_e_pooling_layer_kernel_8h.xhtml", [
       [ "NEPoolingLayerKernel", "classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml", "classarm__compute_1_1_n_e_pooling_layer_kernel" ]
@@ -290,6 +312,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NESoftmaxLayerKernel.h", "_n_e_softmax_layer_kernel_8h.xhtml", [
       [ "NELogits1DMaxKernel", "classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_max_kernel" ],
       [ "NELogits1DSoftmaxKernel", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel" ]
+    ] ],
+    [ "NESpaceToBatchLayerKernel.h", "_n_e_space_to_batch_layer_kernel_8h.xhtml", [
+      [ "NESpaceToBatchLayerKernel", "classarm__compute_1_1_n_e_space_to_batch_layer_kernel.xhtml", "classarm__compute_1_1_n_e_space_to_batch_layer_kernel" ]
     ] ],
     [ "NEStackLayerKernel.h", "_n_e_stack_layer_kernel_8h.xhtml", [
       [ "NEStackLayerKernel", "classarm__compute_1_1_n_e_stack_layer_kernel.xhtml", "classarm__compute_1_1_n_e_stack_layer_kernel" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,7 @@ DatasetMode dataset_mode_from_name(const std::string &name)
     static const std::map<std::string, DatasetMode> modes =
     {
         { "all", DatasetMode::ALL },
+        { "disabled", DatasetMode::DISABLED },
         { "precommit", DatasetMode::PRECOMMIT },
         { "nightly", DatasetMode::NIGHTLY },
     };

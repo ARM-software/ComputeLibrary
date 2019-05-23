@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,10 @@
 
 #include "arm_compute/core/NEON/kernels/NEWidthConcatenateLayerKernel.h"
 
+#include "arm_compute/core/utils/misc/Requires.h"
+
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 namespace arm_compute
@@ -41,6 +44,8 @@ class ITensor;
 /** Basic function to execute concatenate tensors along x axis. This function calls the following kernel:
  *
  * -# @ref NEWidthConcatenateLayerKernel
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  */
 class NEWidthConcatenateLayer : public IFunction
 {
@@ -56,6 +61,7 @@ public:
      *                           The first dimension (width) is the sum of the input tensors' widths.
      */
     void configure(std::vector<ITensor *> inputs_vector, ITensor *output);
+    void configure(std::vector<const ITensor *> inputs_vector, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEWidthConcatenateLayer
      *
      * @param[in] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
@@ -67,13 +73,18 @@ public:
      * @return a status
      */
     static Status validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output);
+    static Status validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    std::unique_ptr<NEWidthConcatenateLayerKernel[]> _concat_kernels_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<NEWidthConcatenateLayerKernel> _concat_kernels_vector;
+    unsigned int                               _num_inputs;
+    template <typename TensorType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorType>::type, ITensor>::value)>
+    void configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output);
+    template <typename TensorInfoType, REQUIRES_TA(std::is_same<typename std::remove_cv<TensorInfoType>::type, ITensorInfo>::value)>
+    static Status validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output);
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEWIDTHCONCATENATELAYER_H__ */

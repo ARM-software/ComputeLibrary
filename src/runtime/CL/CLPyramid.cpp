@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 using namespace arm_compute;
 
 CLPyramid::CLPyramid()
-    : _info(), _pyramid(nullptr)
+    : _info(), _pyramid()
 {
 }
 
@@ -51,8 +51,8 @@ void CLPyramid::init_auto_padding(const PyramidInfo &info)
 
 void CLPyramid::internal_init(const PyramidInfo &info, bool auto_padding)
 {
-    _info    = info;
-    _pyramid = arm_compute::support::cpp14::make_unique<CLTensor[]>(_info.num_levels());
+    _info = info;
+    _pyramid.resize(_info.num_levels());
 
     size_t      w            = _info.width();
     size_t      h            = _info.height();
@@ -109,11 +109,9 @@ void CLPyramid::internal_init(const PyramidInfo &info, bool auto_padding)
 
 void CLPyramid::allocate()
 {
-    ARM_COMPUTE_ERROR_ON(_pyramid == nullptr);
-
     for(size_t i = 0; i < _info.num_levels(); ++i)
     {
-        (_pyramid.get() + i)->allocator()->allocate();
+        _pyramid[i].allocator()->allocate();
     }
 }
 
@@ -126,5 +124,5 @@ CLTensor *CLPyramid::get_pyramid_level(size_t index) const
 {
     ARM_COMPUTE_ERROR_ON(index >= _info.num_levels());
 
-    return (_pyramid.get() + index);
+    return &_pyramid[index];
 }

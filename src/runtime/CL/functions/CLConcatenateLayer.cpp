@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,9 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
+#include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
 
@@ -35,56 +38,168 @@
 namespace arm_compute
 {
 CLConcatenateLayer::CLConcatenateLayer()
-    : _concat_function(nullptr)
+    : _concat_kernels(),
+      _num_inputs(0),
+      _axis(Window::DimX)
 {
 }
 
-void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, DataLayoutDimension axis)
+void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
+    _axis       = axis;
+    _num_inputs = inputs_vector.size();
 
-    switch(get_data_layout_dimension_index(output->info()->data_layout(), axis))
+    std::vector<ITensorInfo *> inputs_vector_info(inputs_vector.size());
+    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](ICLTensor * t)
     {
-        case 0:
+        ARM_COMPUTE_ERROR_ON_NULLPTR(t);
+        return t->info();
+    });
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, _axis);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
+    ARM_COMPUTE_ERROR_THROW_ON(CLConcatenateLayer::validate(inputs_vector_info, output->info(), axis));
+
+    unsigned int offset = 0;
+    switch(_axis)
+    {
+        case Window::DimX:
         {
-            auto func = support::cpp14::make_unique<CLWidthConcatenateLayer>();
-            func->configure(inputs_vector, output);
-            _concat_function = std::move(func);
+            switch(_num_inputs)
+            {
+                case 2:
+                {
+                    // Configure WidthConcatenate2Tensors kernel
+                    auto kernel = support::cpp14::make_unique<CLWidthConcatenate2TensorsKernel>();
+                    kernel->configure(inputs_vector.at(0), inputs_vector.at(1), output);
+                    _concat_kernels.emplace_back(std::move(kernel));
+                    break;
+                }
+                case 4:
+                {
+                    // Configure WidthConcatenate4Tensors kernel
+                    auto kernel = support::cpp14::make_unique<CLWidthConcatenate4TensorsKernel>();
+                    kernel->configure(inputs_vector.at(0), inputs_vector.at(1), inputs_vector.at(2), inputs_vector.at(3), output);
+                    _concat_kernels.emplace_back(std::move(kernel));
+                    break;
+                }
+                default:
+                {
+                    // Configure generic case WidthConcatenate kernels
+                    for(unsigned int i = 0; i < _num_inputs; ++i)
+                    {
+                        auto kernel = support::cpp14::make_unique<CLWidthConcatenateLayerKernel>();
+                        kernel->configure(inputs_vector.at(i), offset, output);
+                        offset += inputs_vector.at(i)->info()->dimension(_axis);
+                        _concat_kernels.emplace_back(std::move(kernel));
+                    }
+                    break;
+                }
+            }
             break;
         }
-        case 2:
+        case Window::DimY:
         {
-            auto func = support::cpp14::make_unique<CLDepthConcatenateLayer>();
-            func->configure(inputs_vector, output);
-            _concat_function = std::move(func);
+            for(unsigned int i = 0; i < _num_inputs; ++i)
+            {
+                auto kernel = support::cpp14::make_unique<CLHeightConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                _concat_kernels.emplace_back(std::move(kernel));
+            }
+            break;
+        }
+        case Window::DimZ:
+        {
+            for(unsigned int i = 0; i < _num_inputs; ++i)
+            {
+                auto kernel = support::cpp14::make_unique<CLDepthConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                _concat_kernels.emplace_back(std::move(kernel));
+            }
             break;
         }
         default:
-            ARM_COMPUTE_ERROR("Concatenation is supported across width and depth only!");
+            ARM_COMPUTE_ERROR("Axis not supported");
     }
 }
 
-Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, DataLayoutDimension axis)
+Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
+    const unsigned int num_inputs = inputs_vector.size();
 
-    switch(get_data_layout_dimension_index(output->data_layout(), axis))
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(num_inputs < 2);
+
+    unsigned int offset = 0;
+    switch(axis)
     {
-        case 0:
-            ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenateLayer::validate(inputs_vector, output));
+        case Window::DimX:
+        {
+            switch(num_inputs)
+            {
+                case 2:
+                    // Validate WidthConcatenate2Tensors kernels if there are 2 inputs
+                    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(inputs_vector[0], inputs_vector[1]);
+                    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate2TensorsKernel::validate(inputs_vector[0], inputs_vector[1], output));
+                    break;
+                case 4:
+                    // Validate WidthConcatenate4Tensors kernels if there are 4 inputs
+                    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(inputs_vector[0], inputs_vector[1], inputs_vector[2], inputs_vector[3]);
+                    ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenate4TensorsKernel::validate(inputs_vector[0], inputs_vector[1], inputs_vector[2], inputs_vector[3], output));
+                    break;
+                default:
+                    // Validate generic case of WidthConcatenate kernel
+                    for(const auto &input : inputs_vector)
+                    {
+                        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+                        ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenateLayerKernel::validate(input, offset, output));
+                        offset += input->dimension(axis);
+                    }
+                    break;
+            }
             break;
-        case 2:
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayer::validate(inputs_vector, output));
+        }
+        case Window::DimY:
+        {
+            for(const auto &input : inputs_vector)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(CLHeightConcatenateLayerKernel::validate(input, offset, output));
+                offset += input->dimension(axis);
+            }
             break;
+        }
+        case Window::DimZ:
+        {
+            for(const auto &input : inputs_vector)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayerKernel::validate(input, offset, output));
+                offset += input->dimension(axis);
+            }
+            break;
+        }
         default:
-            ARM_COMPUTE_RETURN_ERROR_MSG("Concatenation is supported across width and depth only!");
+            ARM_COMPUTE_ERROR("Axis not supported");
     }
+
+    if(output->total_size() != 0)
+    {
+        TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, axis);
+        ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() != output->tensor_shape().total_size());
+    }
+
     return Status{};
 }
 
 void CLConcatenateLayer::run()
 {
-    ARM_COMPUTE_ERROR_ON(_concat_function == nullptr);
-    _concat_function->run();
+    for(auto &kernel : _concat_kernels)
+    {
+        CLScheduler::get().enqueue(*kernel, true);
+    }
 }
 } // namespace arm_compute

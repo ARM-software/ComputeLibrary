@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,14 +73,15 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
 
     // Initialize _scaled_output buffer
-    const int width_scaled  = _output->info()->dimension(0);
-    const int height_scaled = _output->info()->dimension(1);
-    const int stride_x      = _info.stride().first;
-    const int stride_y      = _info.stride().second;
-    const int start_x       = _info.pad().first;
-    const int start_y       = _inner_border.second + _info.pad().second;
-    const int end_y         = height_scaled - _info.pad().second;
-    const int end_x         = width_scaled - _inner_border.first - _info.pad().first;
+    const int    width_scaled  = _output->info()->dimension(0);
+    const int    height_scaled = _output->info()->dimension(1);
+    const int    stride_x      = _info.stride().first;
+    const int    stride_y      = _info.stride().second;
+    const int    start_x       = _info.pad().first;
+    const int    start_y       = _inner_border.second + _info.pad().second;
+    const int    end_y         = height_scaled - _info.pad().second;
+    const int    end_x         = width_scaled - _inner_border.first - _info.pad().first;
+    const size_t element_size  = _input->info()->element_size();
 
     std::fill_n(_output->buffer(), _output->info()->total_size(), 0);
 
@@ -93,9 +94,9 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     Iterator in(_input, window);
     Iterator out(_output, window_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
-        *(reinterpret_cast<float *>(out.ptr())) = *(reinterpret_cast<const float *>(in.ptr()));
+        memcpy(out.ptr(), in.ptr(), element_size);
     },
     in, out);
 }

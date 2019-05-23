@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -150,7 +150,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>BoxWithNonMaximaSuppressionLimit Information class. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00625">625</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00641">641</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa1d81460ec22dc75efcb8f4eada940f6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa1d81460ec22dc75efcb8f4eada940f6">&#9670;&nbsp;</a></span>BoxNMSLimitInfo()</h2>
@@ -258,17 +258,17 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00642">642</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;        : _score_thresh(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a535a6f56c148f286729fad7749a58e9b">score_thresh</a>), _nms(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a90dc98d4ae6b7ab06d5e089378817672">nms</a>), _detections_per_im(detections), _soft_nms_enabled(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a9bfc32f4601b11c9c5b18648ad6ae0fc">soft_nms_enabled</a>), _soft_nms_method(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ab1de5a83f57e76567391915b23d2b483">soft_nms_method</a>), _soft_nms_sigma(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ad54fb0c74b50fe8594e530abc8765888">soft_nms_sigma</a>),</div><div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;          _soft_nms_min_score_thres(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a8ce2eccce44a2d3bf9dce07cbf821cd4">soft_nms_min_score_thres</a>), _suppress_size(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a0c1430ec3d495d93f98731a5f1c89f08">suppress_size</a>), _min_size(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#aa7d375782a8b80e3d4efee296a059855">min_size</a>), _im_width(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a5d68f71fde6fb8401332cbe3973368a2">im_width</a>), _im_height(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ac2a327bd7d58d9fa1c49c302fefbbcba">im_height</a>)</div><div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;    {</div><div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a5d68f71fde6fb8401332cbe3973368a2"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a5d68f71fde6fb8401332cbe3973368a2">arm_compute::BoxNMSLimitInfo::im_width</a></div><div class="ttdeci">float im_width() const</div><div class="ttdoc">Get image width (NMS may suppress boxes whose center sits beyond the image width)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00696">Types.h:696</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a535a6f56c148f286729fad7749a58e9b"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a535a6f56c148f286729fad7749a58e9b">arm_compute::BoxNMSLimitInfo::score_thresh</a></div><div class="ttdeci">float score_thresh() const</div><div class="ttdoc">Get the score threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00651">Types.h:651</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a0c1430ec3d495d93f98731a5f1c89f08"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a0c1430ec3d495d93f98731a5f1c89f08">arm_compute::BoxNMSLimitInfo::suppress_size</a></div><div class="ttdeci">bool suppress_size() const</div><div class="ttdoc">Get if NMS will suppress boxes based on their size/position.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00686">Types.h:686</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a90dc98d4ae6b7ab06d5e089378817672"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a90dc98d4ae6b7ab06d5e089378817672">arm_compute::BoxNMSLimitInfo::nms</a></div><div class="ttdeci">float nms() const</div><div class="ttdoc">Get the NMS.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00656">Types.h:656</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a8ce2eccce44a2d3bf9dce07cbf821cd4"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a8ce2eccce44a2d3bf9dce07cbf821cd4">arm_compute::BoxNMSLimitInfo::soft_nms_min_score_thres</a></div><div class="ttdeci">float soft_nms_min_score_thres() const</div><div class="ttdoc">Get soft nms min score threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00681">Types.h:681</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_aa7d375782a8b80e3d4efee296a059855"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#aa7d375782a8b80e3d4efee296a059855">arm_compute::BoxNMSLimitInfo::min_size</a></div><div class="ttdeci">float min_size() const</div><div class="ttdoc">Get size suppression threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00691">Types.h:691</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ab1de5a83f57e76567391915b23d2b483"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ab1de5a83f57e76567391915b23d2b483">arm_compute::BoxNMSLimitInfo::soft_nms_method</a></div><div class="ttdeci">NMSType soft_nms_method() const</div><div class="ttdoc">Get soft NMS method.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00671">Types.h:671</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ac2a327bd7d58d9fa1c49c302fefbbcba"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ac2a327bd7d58d9fa1c49c302fefbbcba">arm_compute::BoxNMSLimitInfo::im_height</a></div><div class="ttdeci">float im_height() const</div><div class="ttdoc">Get image height (NMS may suppress boxes whose center sits beyond the image height)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00701">Types.h:701</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ad54fb0c74b50fe8594e530abc8765888"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ad54fb0c74b50fe8594e530abc8765888">arm_compute::BoxNMSLimitInfo::soft_nms_sigma</a></div><div class="ttdeci">float soft_nms_sigma() const</div><div class="ttdoc">Get soft NMS sigma.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00676">Types.h:676</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a9bfc32f4601b11c9c5b18648ad6ae0fc"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a9bfc32f4601b11c9c5b18648ad6ae0fc">arm_compute::BoxNMSLimitInfo::soft_nms_enabled</a></div><div class="ttdeci">bool soft_nms_enabled() const</div><div class="ttdoc">Check if soft NMS is enabled.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00666">Types.h:666</a></div></div>
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00658">658</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;        : _score_thresh(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a535a6f56c148f286729fad7749a58e9b">score_thresh</a>), _nms(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a90dc98d4ae6b7ab06d5e089378817672">nms</a>), _detections_per_im(detections), _soft_nms_enabled(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a9bfc32f4601b11c9c5b18648ad6ae0fc">soft_nms_enabled</a>), _soft_nms_method(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ab1de5a83f57e76567391915b23d2b483">soft_nms_method</a>), _soft_nms_sigma(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ad54fb0c74b50fe8594e530abc8765888">soft_nms_sigma</a>),</div><div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;          _soft_nms_min_score_thres(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a8ce2eccce44a2d3bf9dce07cbf821cd4">soft_nms_min_score_thres</a>), _suppress_size(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a0c1430ec3d495d93f98731a5f1c89f08">suppress_size</a>), _min_size(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#aa7d375782a8b80e3d4efee296a059855">min_size</a>), _im_width(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a5d68f71fde6fb8401332cbe3973368a2">im_width</a>), _im_height(<a class="code" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ac2a327bd7d58d9fa1c49c302fefbbcba">im_height</a>)</div><div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;    {</div><div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a5d68f71fde6fb8401332cbe3973368a2"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a5d68f71fde6fb8401332cbe3973368a2">arm_compute::BoxNMSLimitInfo::im_width</a></div><div class="ttdeci">float im_width() const</div><div class="ttdoc">Get image width (NMS may suppress boxes whose center sits beyond the image width)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00712">Types.h:712</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a535a6f56c148f286729fad7749a58e9b"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a535a6f56c148f286729fad7749a58e9b">arm_compute::BoxNMSLimitInfo::score_thresh</a></div><div class="ttdeci">float score_thresh() const</div><div class="ttdoc">Get the score threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00667">Types.h:667</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a0c1430ec3d495d93f98731a5f1c89f08"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a0c1430ec3d495d93f98731a5f1c89f08">arm_compute::BoxNMSLimitInfo::suppress_size</a></div><div class="ttdeci">bool suppress_size() const</div><div class="ttdoc">Get if NMS will suppress boxes based on their size/position.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00702">Types.h:702</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a90dc98d4ae6b7ab06d5e089378817672"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a90dc98d4ae6b7ab06d5e089378817672">arm_compute::BoxNMSLimitInfo::nms</a></div><div class="ttdeci">float nms() const</div><div class="ttdoc">Get the NMS.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00672">Types.h:672</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a8ce2eccce44a2d3bf9dce07cbf821cd4"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a8ce2eccce44a2d3bf9dce07cbf821cd4">arm_compute::BoxNMSLimitInfo::soft_nms_min_score_thres</a></div><div class="ttdeci">float soft_nms_min_score_thres() const</div><div class="ttdoc">Get soft nms min score threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00697">Types.h:697</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_aa7d375782a8b80e3d4efee296a059855"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#aa7d375782a8b80e3d4efee296a059855">arm_compute::BoxNMSLimitInfo::min_size</a></div><div class="ttdeci">float min_size() const</div><div class="ttdoc">Get size suppression threshold.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00707">Types.h:707</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ab1de5a83f57e76567391915b23d2b483"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ab1de5a83f57e76567391915b23d2b483">arm_compute::BoxNMSLimitInfo::soft_nms_method</a></div><div class="ttdeci">NMSType soft_nms_method() const</div><div class="ttdoc">Get soft NMS method.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00687">Types.h:687</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ac2a327bd7d58d9fa1c49c302fefbbcba"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ac2a327bd7d58d9fa1c49c302fefbbcba">arm_compute::BoxNMSLimitInfo::im_height</a></div><div class="ttdeci">float im_height() const</div><div class="ttdoc">Get image height (NMS may suppress boxes whose center sits beyond the image height)</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00717">Types.h:717</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_ad54fb0c74b50fe8594e530abc8765888"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#ad54fb0c74b50fe8594e530abc8765888">arm_compute::BoxNMSLimitInfo::soft_nms_sigma</a></div><div class="ttdeci">float soft_nms_sigma() const</div><div class="ttdoc">Get soft NMS sigma.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00692">Types.h:692</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_box_n_m_s_limit_info_xhtml_a9bfc32f4601b11c9c5b18648ad6ae0fc"><div class="ttname"><a href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml#a9bfc32f4601b11c9c5b18648ad6ae0fc">arm_compute::BoxNMSLimitInfo::soft_nms_enabled</a></div><div class="ttdeci">bool soft_nms_enabled() const</div><div class="ttdoc">Check if soft NMS is enabled.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00682">Types.h:682</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -298,8 +298,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the number of detections. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00661">661</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;    {</div><div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;        <span class="keywordflow">return</span> _detections_per_im;</div><div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00677">677</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;    {</div><div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;        <span class="keywordflow">return</span> _detections_per_im;</div><div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;    }</div></div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="_c_p_p_box_with_non_maxima_suppression_limit_kernel_8cpp_source.xhtml#l00198">CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()</a>.</p>
 
 </div>
@@ -329,8 +329,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get image height (NMS may suppress boxes whose center sits beyond the image height) </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00701">701</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00702"></a><span class="lineno">  702</span>&#160;    {</div><div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160;        <span class="keywordflow">return</span> _im_height;</div><div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00717">717</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160;    {</div><div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;        <span class="keywordflow">return</span> _im_height;</div><div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a5d68f71fde6fb8401332cbe3973368a2"></a>
@@ -358,8 +358,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get image width (NMS may suppress boxes whose center sits beyond the image width) </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00696">696</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160;    {</div><div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;        <span class="keywordflow">return</span> _im_width;</div><div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00712">712</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00713"></a><span class="lineno">  713</span>&#160;    {</div><div class="line"><a name="l00714"></a><span class="lineno">  714</span>&#160;        <span class="keywordflow">return</span> _im_width;</div><div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="aa7d375782a8b80e3d4efee296a059855"></a>
@@ -387,8 +387,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get size suppression threshold. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00691">691</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;    {</div><div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;        <span class="keywordflow">return</span> _min_size;</div><div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00707">707</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;    {</div><div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;        <span class="keywordflow">return</span> _min_size;</div><div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a90dc98d4ae6b7ab06d5e089378817672"></a>
@@ -416,8 +416,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the NMS. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00656">656</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160;    {</div><div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;        <span class="keywordflow">return</span> _nms;</div><div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00672">672</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;    {</div><div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;        <span class="keywordflow">return</span> _nms;</div><div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a535a6f56c148f286729fad7749a58e9b"></a>
@@ -445,8 +445,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the score threshold. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00651">651</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;    {</div><div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;        <span class="keywordflow">return</span> _score_thresh;</div><div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00667">667</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;    {</div><div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;        <span class="keywordflow">return</span> _score_thresh;</div><div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;    }</div></div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="_c_p_p_box_with_non_maxima_suppression_limit_kernel_8cpp_source.xhtml#l00198">CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()</a>.</p>
 
 </div>
@@ -476,8 +476,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Check if soft NMS is enabled. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00666">666</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;    {</div><div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;        <span class="keywordflow">return</span> _soft_nms_enabled;</div><div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00682">682</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;    {</div><div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;        <span class="keywordflow">return</span> _soft_nms_enabled;</div><div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;    }</div></div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="_c_p_p_box_with_non_maxima_suppression_limit_kernel_8cpp_source.xhtml#l00198">CPPBoxWithNonMaximaSuppressionLimitKernel::run_nmslimit()</a>.</p>
 
 </div>
@@ -507,8 +507,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get soft NMS method. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00671">671</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;    {</div><div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;        <span class="keywordflow">return</span> _soft_nms_method;</div><div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00687">687</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;    {</div><div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;        <span class="keywordflow">return</span> _soft_nms_method;</div><div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a8ce2eccce44a2d3bf9dce07cbf821cd4"></a>
@@ -536,8 +536,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get soft nms min score threshold. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00681">681</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;    {</div><div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;        <span class="keywordflow">return</span> _soft_nms_min_score_thres;</div><div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00697">697</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;    {</div><div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;        <span class="keywordflow">return</span> _soft_nms_min_score_thres;</div><div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ad54fb0c74b50fe8594e530abc8765888"></a>
@@ -565,8 +565,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get soft NMS sigma. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00676">676</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;    {</div><div class="line"><a name="l00678"></a><span class="lineno">  678</span>&#160;        <span class="keywordflow">return</span> _soft_nms_sigma;</div><div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00692">692</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;    {</div><div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;        <span class="keywordflow">return</span> _soft_nms_sigma;</div><div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a0c1430ec3d495d93f98731a5f1c89f08"></a>
@@ -594,8 +594,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Get if NMS will suppress boxes based on their size/position. </p>
 
-<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00686">686</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;    {</div><div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;        <span class="keywordflow">return</span> _suppress_size;</div><div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00702">702</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160;    {</div><div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;        <span class="keywordflow">return</span> _suppress_size;</div><div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -607,7 +607,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_box_n_m_s_limit_info.xhtml">BoxNMSLimitInfo</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:58 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

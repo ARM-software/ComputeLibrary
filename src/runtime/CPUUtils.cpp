@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,16 +54,16 @@
 /* Make sure the bits we care about are defined, just in case asm/hwcap.h is
  * out of date (or for bare metal mode) */
 #ifndef HWCAP_ASIMDHP
-#define HWCAP_ASIMDHP (1 << 10)
-#endif /* HWCAP_ASIMDHP */
+#define HWCAP_ASIMDHP (1 << 10) // NOLINT
+#endif                          /* HWCAP_ASIMDHP */
 
 #ifndef HWCAP_CPUID
-#define HWCAP_CPUID (1 << 11)
-#endif /* HWCAP_CPUID */
+#define HWCAP_CPUID (1 << 11) // NOLINT
+#endif                        /* HWCAP_CPUID */
 
 #ifndef HWCAP_ASIMDDP
-#define HWCAP_ASIMDDP (1 << 20)
-#endif /* HWCAP_ASIMDDP */
+#define HWCAP_ASIMDDP (1 << 20) // NOLINT
+#endif                          /* HWCAP_ASIMDDP */
 
 namespace
 {
@@ -146,12 +146,12 @@ CPUModel midr_to_model(const unsigned int midr)
                 break;
         }
     }
-    else if(implementer == 0x48) // HiSilicon CPUs
+    else if(implementer == 0x48)
     {
         // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
         switch(cpunum)
         {
-            case 0xd40: // A76 (Kirin 980)
+            case 0xd40: // A76
                 model = CPUModel::GENERIC_FP16_DOT;
                 break;
             default:
@@ -220,8 +220,8 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 
         while(bool(getline(file, line)))
         {
-            regmatch_t match[2];
-            ret_status = regexec(&proc_regex, line.c_str(), 2, match, 0);
+            std::array<regmatch_t, 2> match;
+            ret_status = regexec(&proc_regex, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string id     = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
@@ -244,7 +244,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                 continue;
             }
 
-            ret_status = regexec(&imp_regex, line.c_str(), 2, match, 0);
+            ret_status = regexec(&imp_regex, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
@@ -254,7 +254,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                 continue;
             }
 
-            ret_status = regexec(&var_regex, line.c_str(), 2, match, 0);
+            ret_status = regexec(&var_regex, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
@@ -264,7 +264,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                 continue;
             }
 
-            ret_status = regexec(&part_regex, line.c_str(), 2, match, 0);
+            ret_status = regexec(&part_regex, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
@@ -274,7 +274,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
                 continue;
             }
 
-            ret_status = regexec(&rev_regex, line.c_str(), 2, match, 0);
+            ret_status = regexec(&rev_regex, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string subexp = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));
@@ -302,8 +302,7 @@ void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 
 int get_max_cpus()
 {
-    int max_cpus = 1;
-#if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
+    int           max_cpus = 1;
     std::ifstream CPUspresent;
     CPUspresent.open("/sys/devices/system/cpu/present", std::ios::in);
     bool success = false;
@@ -341,7 +340,6 @@ int get_max_cpus()
     {
         max_cpus = std::thread::hardware_concurrency();
     }
-#endif /* BARE_METAL */
     return max_cpus;
 }
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
@@ -427,8 +425,8 @@ unsigned int get_threads_hint()
         std::string line;
         while(bool(getline(cpuinfo, line)))
         {
-            regmatch_t match[2];
-            ret_status = regexec(&cpu_part_rgx, line.c_str(), 2, match, 0);
+            std::array<regmatch_t, 2> match;
+            ret_status = regexec(&cpu_part_rgx, line.c_str(), 2, match.data(), 0);
             if(ret_status == 0)
             {
                 std::string cpu_part = line.substr(match[1].rm_so, (match[1].rm_eo - match[1].rm_so));

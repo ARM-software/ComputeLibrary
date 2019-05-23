@@ -67,7 +67,7 @@ void NEMemsetKernel::run(const Window &window, const ThreadInfo &info)
     collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
 
     Iterator tensor_it(_tensor, collapsed);
-    execute_window_loop(collapsed, [&](const Coordinates & id)
+    execute_window_loop(collapsed, [&](const Coordinates &)
     {
         uint8_t *base_addr = start_valid_region + tensor_it.offset();
         // Set memory

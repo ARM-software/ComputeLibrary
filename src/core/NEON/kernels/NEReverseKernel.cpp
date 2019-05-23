@@ -189,31 +189,21 @@ void NEReverseKernel::run(const Window &window, const ThreadInfo &info)
     switch(_input->info()->data_type())
     {
         case DataType::F32:
-            run_reverse<float>(window, _input, _axis, _output);
+        case DataType::U32:
+        case DataType::S32:
+            run_reverse<uint32_t>(window, _input, _axis, _output);
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
-            run_reverse<float16_t>(window, _input, _axis, _output);
-            break;
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::U32:
-            run_reverse<uint32_t>(window, _input, _axis, _output);
-            break;
-        case DataType::S32:
-            run_reverse<int32_t>(window, _input, _axis, _output);
-            break;
         case DataType::S16:
-            run_reverse<int16_t>(window, _input, _axis, _output);
-            break;
         case DataType::U16:
             run_reverse<uint16_t>(window, _input, _axis, _output);
             break;
         case DataType::QASYMM8:
         case DataType::U8:
-            run_reverse<uint8_t>(window, _input, _axis, _output);
-            break;
         case DataType::S8:
-            run_reverse<int8_t>(window, _input, _axis, _output);
+            run_reverse<uint8_t>(window, _input, _axis, _output);
             break;
         default:
             ARM_COMPUTE_ERROR("Data type not supported");

@@ -45,6 +45,17 @@ using qasymm8x16_t  = uint8x16_t;  /**< 8 bit quantized asymmetric vector with 1
  */
 int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
 
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Element to divide.
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32_t rounding_divide_by_pow2(int32_t x, int exponent);
+
 /** Perform a multiply-accumulate on all 16 components of a QASYMM8 vector
  *
  * vd*vs + vo
@@ -125,10 +136,72 @@ uint8x16_t finalize_quantization(int32x4x4_t &in_s32,
     return out_u8;
 }
 
+/** Performs final quantization step on single element
+ *
+ * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
+ *
+ * @param[in] in_value                      Input to be quantized.
+ * @param[in] result_fixedpoint_multiplier  Result multiplier parameter
+ * @param[in] result_shift                  Result shift parameter
+ * @param[in] result_offset_after_shift_s32 Result offset parameter
+ * @param[in] min_u8                        Relu lower bound
+ * @param[in] max_u8                        Relu upper bound
+ *
+ * @return Quantized value
+ */
+template <bool is_bounded_relu>
+inline uint8_t finalize_quantization(int32_t in_value, int result_fixedpoint_multiplier,
+                                     int32_t result_shift, int32_t result_offset_after_shift_s32,
+                                     uint8_t min_u8, uint8_t max_u8)
+{
+    int32x4_t in_s32 = vdupq_n_s32(in_value);
+
+    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
+    in_value = vgetq_lane_s32(vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier), 0);
+
+    // Shift value by result_shift_s32
+    in_value = rounding_divide_by_pow2(in_value, result_shift);
+
+    // Add the offset term
+    in_value += result_offset_after_shift_s32;
+
+    // Bound the result
+    uint8_t out_u8 = static_cast<uint8_t>(std::max<int32_t>(0, std::min<int32_t>(255, in_value)));
+    if(is_bounded_relu)
+    {
+        out_u8 = static_cast<uint8_t>(std::max(min_u8, std::min(max_u8, out_u8)));
+    }
+
+    return out_u8;
+}
+
+/** Dequantize a neon vector holding 8 quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x2_t vdequantize(const uint8x8_t &qv, const QuantizationInfo &qi)
+{
+    const float         scale   = qi.scale;
+    const int           offset  = qi.offset;
+    const int32x4_t     voffset = vdupq_n_s32(offset);
+    const float32x4_t   vscale  = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_low_u16(vmovl_u8(qv)))), voffset)), vscale),
+            vmulq_f32(vcvtq_f32_s32(vsubq_s32(vreinterpretq_s32_u32(vmovl_u16(vget_high_u16(vmovl_u8(qv)))), voffset)), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
 /** Dequantize a neon vector holding 16 quantized values.
  *
- * @param qv                            Input values to be dequantized.
- * @param qi                            Quantization information to be used in the computation.
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
  *
  * @return Dequantized values in a neon vector
  */
@@ -150,10 +223,38 @@ inline float32x4x4_t vdequantize(const uint8x16_t &qv, const QuantizationInfo &q
     return vdequantized_input;
 }
 
+/** Quantize a neon vector holding 8 floating point values.
+ *
+ * @param[in] qv Input values to be quantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return A neon vector holding the quantized values
+ */
+inline uint8x8_t vquantize(const float32x4x2_t &qv, const QuantizationInfo &qi)
+{
+    const float       scale     = qi.scale;
+    const int         offset    = qi.offset;
+    const float32x4_t voffset   = vdupq_n_f32(offset);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+#else  //__aarch64__
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmlaq_f32(voffset, qv.val[1], vinvscale)),
+#endif //__aarch64__
+        }
+    };
+    return vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])));
+}
+
 /** Quantize a neon vector holding 16 floating point values.
  *
- * @param qv                            Input values to be quantized.
- * @param qi                            Quantization information to be used in the computation.
+ * @param[in] qv Input values to be quantized.
+ * @param[in] qi Quantization information to be used in the computation.
  *
  * @return A neon vector holding the quantized values
  */
@@ -183,7 +284,6 @@ inline uint8x16_t vquantize(const float32x4x4_t &qv, const QuantizationInfo &qi)
     const uint8x8_t pb = vqmovun_s16(vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])));
     return vcombine_u8(pa, pb);
 }
-
 } // namespace arm_compute
 #include "arm_compute/core/NEON/NEAsymm.inl"
 #endif // __ARM_COMPUTE_NEASYMM_H__

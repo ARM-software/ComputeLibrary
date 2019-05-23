@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -271,7 +271,7 @@ private:
      *
      * @return Preprocessed GLES shader object.
      */
-    const std::string preprocess_shader(const std::string &shader_source) const;
+    std::string preprocess_shader(const std::string &shader_source) const;
     /** Load program and its dependencies.
      *
      * @param[in] program_name Name of the program to load.

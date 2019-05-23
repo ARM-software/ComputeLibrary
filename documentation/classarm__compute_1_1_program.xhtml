@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -378,7 +378,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml#l00106">106</a> of file <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml">CLKernelLibrary.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;{</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">try</span></div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    {</div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        <span class="keywordflow">return</span> program.build(build_options.c_str()) == CL_SUCCESS;</div><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordflow">catch</span>(<span class="keyword">const</span> cl::Error &amp;e)</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    {</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        cl_int     err        = CL_SUCCESS;</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span> build_info = program.getBuildInfo&lt;CL_PROGRAM_BUILD_LOG&gt;(&amp;err);</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp;pair : build_info)</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        {</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;            std::cerr &lt;&lt; pair.second &lt;&lt; std::endl;</div><div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        }</div><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml#l00126">Program::build()</a>, and <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml#l00964">CLKernelLibrary::create_kernel()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml#l00126">Program::build()</a>, and <a class="el" href="_c_l_kernel_library_8cpp_source.xhtml#l01023">CLKernelLibrary::create_kernel()</a>.</p>
 
 </div>
 </div>
@@ -540,7 +540,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_program.xhtml">Program</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:04 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

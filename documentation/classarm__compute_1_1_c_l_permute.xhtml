@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -190,7 +190,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_permute_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_c_l_permute_8cpp_source.xhtml">CLPermute.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;CLPermuteKernel&gt;();</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    k-&gt;configure(input, output, perm);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00047">CLDepthwiseConvolutionLayer3x3::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_depthwise_convolution_layer_8cpp_source.xhtml#l00047">CLDepthwiseConvolutionLayer3x3::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, and <a class="el" href="_c_l_g_e_m_m_deconvolution_layer_8cpp_source.xhtml#l00186">CLGEMMDeconvolutionLayer::configure()</a>.</p>
 
 </div>
 </div>
@@ -252,6 +252,8 @@ Static Public Member Functions</h2></td></tr>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00193">ARM_COMPUTE_RETURN_ON_ERROR</a>, and <a class="el" href="_c_l_permute_kernel_8cpp_source.xhtml#l00117">CLPermuteKernel::validate()</a>.</p>
 
+<p class="reference">Referenced by <a class="el" href="_c_l_g_e_m_m_deconvolution_layer_8cpp_source.xhtml#l00093">CLGEMMDeconvolutionLayer::validate()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -264,7 +266,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_permute.xhtml">CLPermute</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:00 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

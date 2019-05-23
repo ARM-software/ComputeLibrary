@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,7 +117,7 @@ void JSONPrinter::print_list_tests(const std::vector<TestInfo> &infos)
 {
     *_stream << R"(, "list_tests" : {)";
     bool first = true;
-    for(auto info : infos)
+    for(auto const &info : infos)
     {
         if(!first)
         {

@@ -109,7 +109,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                         TensorInfo(TensorShape(16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(16U, 2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(11U, 13U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(11U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(16U, 2U), 1, DataType::F32),
                })),
                framework::dataset::make("ScratchInfo", { TensorInfo(TensorShape(64U, 2U), 1, DataType::F32),

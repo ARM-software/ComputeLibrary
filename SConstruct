@@ -204,6 +204,7 @@ elif env['arch'] == 'x86_32':
     env.Append(CCFLAGS = ['-m32'])
     env.Append(LINKFLAGS = ['-m32'])
 elif env['arch'] == 'x86_64':
+    env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(CCFLAGS = ['-m64'])
     env.Append(LINKFLAGS = ['-m64'])
 
@@ -296,6 +297,9 @@ env.Append(LINKFLAGS = env['extra_link_flags'])
 
 Default( install_include("arm_compute"))
 Default( install_include("support"))
+Default( install_include("utils"))
+for dirname in os.listdir("./include"):
+    Default( install_include("include/%s" % dirname))
 
 Export('version_at_least')
 

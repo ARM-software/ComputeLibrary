@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,11 +56,11 @@ SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const Tensor
     // i_coordinates[0] = xi, i_coordinates[1] = yi, i_coordinates[2] = zi
     // i_coordinates[3] = bi, i_coordinates[4] = i, i_coordinates[5] = 0
     // i_coordinates[5] will be always zero and used for not incrementing the output when the input has less than 4 dimensions
-    int i_coordinates[6] = { 0 };
+    std::array<int, 6> i_coordinates{ 0 };
 
     // Array of pointers used to map the output coordinates to the input ones accordingly with the axis
     // This array is initialized with &i_coordinates[5] since this will be always zero
-    int *o_coordinates[5] = { &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5] };
+    std::array<int *, 5> o_coordinates = { &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5] };
 
     // Set the axis coordinate
     o_coordinates[axis] = &i_coordinates[4];

@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_GRAPH_BUILDER_H__
 
 #include "arm_compute/graph/ITensorAccessor.h"
+#include "arm_compute/graph/LayerDescriptors.h"
 #include "arm_compute/graph/Types.h"
 
 namespace arm_compute
@@ -50,7 +51,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_const_node(Graph &g, NodeParams params, TensorDescriptor desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID add_const_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an input layer node to the graph
      *
      * @param[in] g        Graph to add the node to
@@ -60,7 +61,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_input_node(Graph &g, NodeParams params, TensorDescriptor desc, ITensorAccessorUPtr accessor = nullptr);
+    static NodeID add_input_node(Graph &g, NodeParams params, const TensorDescriptor &desc, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an output layer node to the graph
      *
      * @param[in] g        Graph to add the node to
@@ -73,14 +74,16 @@ public:
     static NodeID add_output_node(Graph &g, NodeParams params, NodeIdxPair input, ITensorAccessorUPtr accessor = nullptr);
     /** Adds an activation layer node to the graph
      *
-     * @param[in] g        Graph to add the node to
-     * @param[in] params   Common node parameters
-     * @param[in] input    Input to the activation layer node as a NodeID-Index pair
-     * @param[in] act_info Activation layer information
+     * @param[in] g              Graph to add the node to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the activation layer node as a NodeID-Index pair
+     * @param[in] act_info       Activation layer information
+     * @param[in] out_quant_info (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info);
+    static NodeID add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
+                                      const QuantizationInfo out_quant_info = QuantizationInfo());
     /** Adds a batch normalization layer node to the graph
      *
      * @param[in] g              Graph to add the node to
@@ -163,14 +166,14 @@ public:
                                          ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
     /** Adds a depth concatenate node to the graph
      *
-     * @param[in] g      Graph to add the node to
-     * @param[in] params Common node parameters
-     * @param[in] inputs Inputs to the depth concatenate layer node as a NodeID-Index pair
-     * @param[in] axis   Concatenation axis
+     * @param[in] g                 Graph to add the node to
+     * @param[in] params            Common node parameters
+     * @param[in] inputs            Inputs to the concatenate layer node as a NodeID-Index pair
+     * @param[in] concat_descriptor Concatenation layer descriptor
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_concatenate_node(Graph &g, NodeParams params, std::vector<NodeIdxPair> inputs, DataLayoutDimension axis);
+    static NodeID add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, descriptors::ConcatLayerDescriptor concat_descriptor);
     /** Adds a depth-wise convolution layer node to the graph
      *
      * @param[in] g                     Graph to add the node to
@@ -183,13 +186,15 @@ public:
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
      * @param[in] quant_info            (Optional) Weights quantization info
+     * @param[in] out_quant_info        (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                                  Size2D kernel_spatial_extend, PadStrideInfo conv_info, int depth_multiplier = 1,
                                                  DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::Default,
-                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo());
+                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo(),
+                                                 const QuantizationInfo out_quant_info = QuantizationInfo());
     /** Adds an element-wise layer node to the graph
      *
      * @param[in] g         Graph to add the node to
@@ -212,7 +217,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, DetectionOutputLayerInfo detect_info);
+    static NodeID add_detection_output_node(Graph &g, NodeParams params, NodeIdxPair input_loc, NodeIdxPair input_conf, NodeIdxPair input_priorbox, const DetectionOutputLayerInfo &detect_info);
     /** Adds a Dummy node to the graph
      *
      * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.
@@ -234,6 +239,23 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_flatten_node(Graph &g, NodeParams params, NodeIdxPair input);
+    /** Adds a fully connected layer node to the graph
+     *
+     * @param[in] g              Graph to add the layer to
+     * @param[in] params         Common node parameters
+     * @param[in] input          Input to the fully connected layer node as a NodeID-Index pair
+     * @param[in] num_outputs    Number of output neurons
+     * @param[in] weights_nid    Node ID of the weights node data
+     * @param[in] bias_nid       (Optional) Node ID of the bias node data. Defaults to EmptyNodeID
+     * @param[in] fc_info        (Optional) Fully connected layer metadata
+     * @param[in] out_quant_info (Optional) Output quantization info
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
+                                            NodeID weights_nid, NodeID bias_nid = EmptyNodeID,
+                                            const FullyConnectedLayerInfo fc_info        = FullyConnectedLayerInfo(),
+                                            const QuantizationInfo        out_quant_info = QuantizationInfo());
     /** Adds a fully connected layer node to the graph
      *
      * @param[in] g                  Graph to add the layer to
@@ -331,7 +353,7 @@ public:
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
-    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, PriorBoxLayerInfo prior_info);
+    static NodeID add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, const PriorBoxLayerInfo &prior_info);
     /** Adds a reorg layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -421,6 +443,16 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
+    /** Adds a stack layer node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] inputs Inputs to the reorg layer node as a NodeID-Index pair
+     * @param[in] axis   Axis along which the input tensors have to be packed
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_stack_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, int axis);
     /** Adds an upsample layer to the graph
      *
      * @param[in] g                 Graph to add the node to

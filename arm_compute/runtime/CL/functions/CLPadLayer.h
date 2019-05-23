@@ -25,10 +25,13 @@
 #define __ARM_COMPUTE_CLPADLAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
 #include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
@@ -53,9 +56,12 @@ public:
      * @param[out] output         Output tensor. Data type supported: same as @p input
      * @param[in]  padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                            specifies the front and the end padding in the i-th dimension.
-     * @param[in]  constant_value (Optional) Constant value to be used for the padding
+     * @param[in]  constant_value (Optional) Constant value to be used for the padding.
+     * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
+     *                              is currently supported.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
+    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
     /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
      *
@@ -64,16 +70,28 @@ public:
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
      * @param[in] constant_value (Optional) Constant value to be used for the padding
+     * @param[in] mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
+     *                              is currently supported.
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue());
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
     void run() override;
 
 private:
-    CLCopyKernel       _copy_kernel;
-    CLFillBorderKernel _fillborder_kernel;
-    CLMemsetKernel     _memset_kernel;
+    void configure_constant_mode(ICLTensor *input, ICLTensor *output, const PaddingList &padding, const PixelValue constant_value);
+    void configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *output);
+
+    CLCopyKernel                    _copy_kernel;
+    PaddingMode                     _mode;
+    PaddingList                     _padding;
+    CLMemsetKernel                  _memset_kernel;
+    size_t                          _num_dimensions;
+    std::vector<CLStridedSlice>     _slice_functions;
+    std::vector<CLConcatenateLayer> _concat_functions;
+    std::vector<CLTensor>           _slice_results;
+    std::vector<CLTensor>           _concat_results;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_PADLAYER_H__ */

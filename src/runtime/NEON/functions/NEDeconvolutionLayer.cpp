@@ -51,8 +51,8 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                       unsigned int inner_border_right, unsigned int inner_border_top)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
@@ -68,7 +68,11 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    if(bias != nullptr)
+    if(is_data_type_quantized_asymmetric(input->data_type()))
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+    }
+    else
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
     }
@@ -111,10 +115,11 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _inner_border     = std::make_pair(inner_border_right, inner_border_top);
     _is_prepared      = false;
 
-    const unsigned int stride_x = info.stride().first;
-    const unsigned int stride_y = info.stride().second;
+    const DataLayout   data_layout = input->info()->data_layout();
+    const unsigned int stride_x    = info.stride().first;
+    const unsigned int stride_y    = info.stride().second;
 
-    _weights_flipped.allocator()->init(TensorInfo(weights->info()->tensor_shape(), 1, weights->info()->data_type()));
+    _weights_flipped.allocator()->init(weights->info()->clone()->set_data_layout(data_layout));
     _flip_weights.configure(weights, &_weights_flipped);
 
     auto out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
@@ -159,12 +164,10 @@ void NEDeconvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _upsample_f.run();
     _conv_f.run();
-
-    _memory_group.release();
 }
 
 void NEDeconvolutionLayer::prepare()

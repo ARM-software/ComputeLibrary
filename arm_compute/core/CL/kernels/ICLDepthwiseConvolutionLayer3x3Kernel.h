@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,15 +52,16 @@ public:
      *
      * @param[in]  input            Source tensor. DataType supported: QASYMM8/F16/F32.
      * @param[in]  weights          Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]  biases           (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     * @param[in]  biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
      *                              Data type supported: Same as @p input.
      * @param[out] output           Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info        Padding and stride information to use for the convolution.
      * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for QASYMM8 supported.
+     * @param[in]  dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
     virtual void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
-                           ActivationLayerInfo act_info = ActivationLayerInfo()) = 0;
+                           ActivationLayerInfo act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U)) = 0;
 
 protected:
     BorderSize       _border_size;

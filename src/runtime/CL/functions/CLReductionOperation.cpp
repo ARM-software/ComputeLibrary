@@ -71,7 +71,7 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
     else
     {
         // Create temporary tensor infos
-        auto sums_vector = arm_compute::support::cpp14::make_unique<TensorInfo[]>(num_of_stages - 1);
+        std::vector<TensorInfo> sums_vector(num_of_stages - 1);
 
         // Create intermediate tensor info
         TensorShape shape{ input->tensor_shape() };
@@ -110,17 +110,17 @@ Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInf
         }
 
         // Validate ReductionOperation only on first kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, sums_vector.get(), axis, first_kernel_op));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, &sums_vector[0], axis, first_kernel_op));
 
         // Validate ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < num_of_stages - 1; ++i)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + i - 1, sums_vector.get() + i, axis, intermediate_kernel_op));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(&sums_vector[i - 1], &sums_vector[i], axis, intermediate_kernel_op));
         }
 
         // Validate ReductionOperation on the last stage
         const unsigned int last_stage = num_of_stages - 1;
-        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + last_stage - 1, output, axis, last_kernel_op, input->dimension(0)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(&sums_vector[last_stage - 1], output, axis, last_kernel_op, input->dimension(0)));
     }
 
     return Status{};
@@ -133,7 +133,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     _is_serial      = is_data_type_quantized(input->info()->data_type()) || axis != 0;
 
     // Configure reduction operation kernels
-    _reduction_kernels_vector = arm_compute::support::cpp14::make_unique<CLReductionOperationKernel[]>(_num_of_stages);
+    _reduction_kernels_vector.resize(_num_of_stages);
 
     // Create temporary tensors
     if(_is_serial)
@@ -142,8 +142,8 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
     }
     else
     {
-        _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_of_stages);
-        _results_vector         = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_of_stages - 1);
+        _border_handlers_vector.resize(_num_of_stages);
+        _results_vector.resize(_num_of_stages - 1);
         TensorShape shape{ input->info()->tensor_shape() };
         for(unsigned int i = 0; i < _num_of_stages - 1; i++)
         {
@@ -152,7 +152,7 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
         }
 
         // Apply ReductionOperation only on first kernel
-        _memory_group.manage(_results_vector.get());
+        _memory_group.manage(&_results_vector[0]);
 
         ReductionOperation first_kernel_op;
         ReductionOperation intermediate_kernel_op;
@@ -183,30 +183,30 @@ void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsign
                 ARM_COMPUTE_ERROR("Not supported");
         }
 
-        _reduction_kernels_vector[0].configure(input, _results_vector.get(), axis, first_kernel_op);
+        _reduction_kernels_vector[0].configure(input, &_results_vector[0], axis, first_kernel_op);
         _border_handlers_vector[0].configure(input, _reduction_kernels_vector[0].border_size(), BorderMode::CONSTANT, pixelValue);
 
         // Apply ReductionOperation on intermediate stages
         for(unsigned int i = 1; i < _num_of_stages - 1; ++i)
         {
-            _memory_group.manage(_results_vector.get() + i);
-            _reduction_kernels_vector[i].configure(_results_vector.get() + i - 1, _results_vector.get() + i, axis, intermediate_kernel_op);
-            _border_handlers_vector[i].configure(_results_vector.get() + i - 1, _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
+            _memory_group.manage(&_results_vector[i]);
+            _reduction_kernels_vector[i].configure(&_results_vector[i - 1], &_results_vector[i], axis, intermediate_kernel_op);
+            _border_handlers_vector[i].configure(&_results_vector[i - 1], _reduction_kernels_vector[i].border_size(), BorderMode::CONSTANT, pixelValue);
             _results_vector[i - 1].allocator()->allocate();
         }
 
         // Apply ReductionOperation on the last stage
         const unsigned int last_stage  = _num_of_stages - 1;
         const unsigned int input_width = input->info()->dimension(0);
-        _reduction_kernels_vector[last_stage].configure(_results_vector.get() + last_stage - 1, output, axis, last_kernel_op, input_width);
-        _border_handlers_vector[last_stage].configure(_results_vector.get() + last_stage - 1, _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
+        _reduction_kernels_vector[last_stage].configure(&_results_vector[last_stage - 1], output, axis, last_kernel_op, input_width);
+        _border_handlers_vector[last_stage].configure(&_results_vector[last_stage - 1], _reduction_kernels_vector[last_stage].border_size(), BorderMode::CONSTANT, pixelValue);
         _results_vector[last_stage - 1].allocator()->allocate();
     }
 }
 
 void CLReductionOperation::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_is_serial)
     {
@@ -220,6 +220,4 @@ void CLReductionOperation::run()
             CLScheduler::get().enqueue(_reduction_kernels_vector[i], false);
         }
     }
-
-    _memory_group.release();
 }

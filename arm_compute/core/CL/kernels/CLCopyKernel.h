@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,20 +47,22 @@ public:
     CLCopyKernel &operator=(CLCopyKernel &&) = default;
     /** Initialize the kernel's input, output.
      *
-     * @param[in]  input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[out] output  Destination tensor. Data types supported: same as @p input.
-     * @param[in]  padding (Optional) Padding to be applied to the input tensor
+     * @param[in]  input         Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[out] output        Destination tensor. Data types supported: same as @p input.
+     * @param[in]  padding       (Optional) Padding to be applied to the input tensor
+     * @param[in]  output_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList());
+    void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCopyKernel
      *
-     * @param[in] input   Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[in] output  Destination tensor info. Data types supported: same as @p input.
-     * @param[in] padding (Optional) Padding to be applied to the input tensor
+     * @param[in] input         Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] output        Destination tensor info. Data types supported: same as @p input.
+     * @param[in] padding       (Optional) Padding to be applied to the input tensor
+     * @param[in] output_window (Optional) Window to be used in case only copying into part of a tensor. Default is nullptr.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList());
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList(), Window *output_window = nullptr);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
@@ -68,6 +70,8 @@ public:
 private:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    Window           _output_window;
+    bool             _has_output_window;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLCOPYKERNEL_H__ */

@@ -1,15 +1,13 @@
 var _shape_calculator_8h =
 [
-    [ "calculate_depth_concatenate_shape", "_shape_calculator_8h.xhtml#a4acdd230226c5888e773bbac3be74941", null ],
+    [ "calculate_concatenate_shape", "_shape_calculator_8h.xhtml#a6100aeb494088632647c3e0d639c99ab", null ],
     [ "calculate_unstack_shape", "_shape_calculator_8h.xhtml#acedb0877d41f2ae0591a2d4e84318140", null ],
-    [ "calculate_width_concatenate_shape", "_shape_calculator_8h.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3", null ],
     [ "compute_batch_to_space_shape", "_shape_calculator_8h.xhtml#ac4d688e137d670d209b647ec37592a92", null ],
     [ "compute_col2im_shape", "_shape_calculator_8h.xhtml#a264e2e6d3ff632e90d450435fce66d54", null ],
     [ "compute_deconvolution_output_shape", "_shape_calculator_8h.xhtml#ae270329cfe3dbab009b700318e8af8b4", null ],
     [ "compute_deconvolution_upsampled_shape", "_shape_calculator_8h.xhtml#a5c2e95d65407a26489ea38431ad851f5", null ],
     [ "compute_deep_convolution_shape", "_shape_calculator_8h.xhtml#a5d320d308c16b8ddda3c9d3f60fad79c", null ],
-    [ "compute_depthwise_convolution_shape", "_shape_calculator_8h.xhtml#ab51afcfdb9caea9e8185ae6a42ba4779", null ],
-    [ "compute_depthwise_convolution_shape", "_shape_calculator_8h.xhtml#a928f49376c42cf52fcff1d615034486f", null ],
+    [ "compute_depthwise_convolution_shape", "_shape_calculator_8h.xhtml#ac7147815227e7ba91814cfdcd38f23ed", null ],
     [ "compute_flatten_shape", "_shape_calculator_8h.xhtml#a83efb6708574e67d13965bcd2059ad75", null ],
     [ "compute_gather_shape", "_shape_calculator_8h.xhtml#ae6578c8df1088c90dfa0d1be6bca605d", null ],
     [ "compute_im2col_conv_shape", "_shape_calculator_8h.xhtml#a8a9286d053e9f3a958064e4f3cdd02f7", null ],
@@ -49,5 +47,7 @@ var _shape_calculator_8h =
     [ "compute_winograd_output_transform_shape", "_shape_calculator_8h.xhtml#a5699c316d27b41f0790827791e88ae26", null ],
     [ "extract_shape", "_shape_calculator_8h.xhtml#acb3f0c947411cfe1d8c5f67af2cad851", null ],
     [ "extract_shape", "_shape_calculator_8h.xhtml#af79493c6c07a3eb2b3a27712221b66b8", null ],
-    [ "extract_shape", "_shape_calculator_8h.xhtml#ae7f0e5491e0f43e371f7db047a03dd4c", null ]
+    [ "extract_shape", "_shape_calculator_8h.xhtml#a4205a4be15a80494979ec1f19a66b21a", null ],
+    [ "extract_shape", "_shape_calculator_8h.xhtml#ae7f0e5491e0f43e371f7db047a03dd4c", null ],
+    [ "extract_shape", "_shape_calculator_8h.xhtml#a29fee5f196a5154a39526b7b88594059", null ]
 ];

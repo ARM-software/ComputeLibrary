@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthwiseConvolutionLayer.h"

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -174,6 +174,7 @@ File organisation</h1>
 </ul>
 <p>You should have the following file organisation: </p><pre class="fragment">.
 ├── arm_compute --&gt; All the arm_compute headers
+│   ├── graph.h --&gt; Includes all the Graph headers at once.
 │   ├── core
 │   │   ├── CL
 │   │   │   ├── CLKernelLibrary.h --&gt; Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
@@ -264,7 +265,6 @@ File organisation</h1>
 │   ├── graph_*.cpp --&gt; Graph examples
 │   ├── neoncl_*.cpp --&gt; NEON / OpenCL interoperability examples
 │   └── neon_*.cpp --&gt; NEON examples
-├── graph.h --&gt; Includes all the Graph headers at once.
 ├── include
 │   ├── CL
 │   │   └── Khronos OpenCL C headers and C++ wrapper
@@ -309,8 +309,6 @@ File organisation</h1>
 │   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 │   ├── framework
 │   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
-│   ├── networks
-│   │   └── Examples of how to instantiate networks.
 │   └── validation --&gt; Sources for validation
 │       ├── Validation specific files
 │       ├── fixtures
@@ -333,6 +331,84 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v19.05 Public major release</p><ul>
+<li>Various bug fixes.</li>
+<li>Various optimisations.</li>
+<li>New Neon kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_n_e_batch_to_space_layer_kernel.xhtml">NEBatchToSpaceLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_batch_to_space_layer.xhtml">NEBatchToSpaceLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_complex_pixel_wise_multiplication_kernel.xhtml">NEComplexPixelWiseMultiplicationKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_complex_pixel_wise_multiplication.xhtml">NEComplexPixelWiseMultiplication</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_crop_kernel.xhtml">NECropKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_crop_resize.xhtml">NECropResize</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_assembly_dispatch.xhtml">NEDepthwiseConvolutionAssemblyDispatch</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t_digit_reverse_kernel.xhtml">NEFFTDigitReverseKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t_radix_stage_kernel.xhtml">NEFFTRadixStageKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t_scale_kernel.xhtml">NEFFTScaleKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_output_stage_kernel.xhtml">NEGEMMLowpOffsetContributionOutputStageKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_height_concatenate_layer_kernel.xhtml">NEHeightConcatenateLayerKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer_kernel.xhtml">NESpaceToBatchLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_space_to_batch_layer.xhtml">NESpaceToBatchLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t1_d.xhtml">NEFFT1D</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t2_d.xhtml">NEFFT2D</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_f_f_t_convolution_layer.xhtml">NEFFTConvolutionLayer</a></li>
+</ul>
+</li>
+<li>New OpenCL kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_complex_pixel_wise_multiplication_kernel.xhtml">CLComplexPixelWiseMultiplicationKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_complex_pixel_wise_multiplication.xhtml">CLComplexPixelWiseMultiplication</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_crop_kernel.xhtml">CLCropKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_crop_resize.xhtml">CLCropResize</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_deconvolution_reshape_output_kernel.xhtml">CLDeconvolutionReshapeOutputKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t_digit_reverse_kernel.xhtml">CLFFTDigitReverseKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t_radix_stage_kernel.xhtml">CLFFTRadixStageKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t_scale_kernel.xhtml">CLFFTScaleKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_only_r_h_s_kernel.xhtml">CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel.xhtml">CLGEMMMatrixMultiplyReshapedOnlyRHSKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_height_concatenate_layer_kernel.xhtml">CLHeightConcatenateLayerKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml">CLDirectDeconvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t1_d.xhtml">CLFFT1D</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t2_d.xhtml">CLFFT2D</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_f_f_t_convolution_layer.xhtml">CLFFTConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer.xhtml">CLGEMMDeconvolutionLayer</a></li>
+</ul>
+</li>
+<li>New OpenGLES kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_g_c_concatenate_layer.xhtml">GCConcatenateLayer</a></li>
+</ul>
+</li>
+<li>Deprecated functions/interfaces<ul>
+<li><a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml">GCDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml">NEWidthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml">NEDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_width_concatenate_layer.xhtml">CLWidthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">CLDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml">CLGEMMInterleave4x4</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w.xhtml">CLGEMMTranspose1xW</a></li>
+</ul>
+</li>
+<li>Support different quantization info in CLConcatLayer.</li>
+<li>Add checks on different input/output quantization info were not supported.</li>
+<li>Tensors have different quantization information.</li>
+<li>Add FP16 support checks.</li>
+<li>Fix output quantization CLDeptwiseConv3x3 when activation is fused.</li>
+<li>New graph examples:<ul>
+<li>graph_convolution</li>
+<li>graph_fully_connected</li>
+<li>graph_depthwise_convolution</li>
+<li>Deepspeech v0.4.1</li>
+</ul>
+</li>
+<li>Add support for QASYMM8 in <a class="el" href="classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml" title="Interface for the kernel to perform subtraction between two tensors.">NEArithmeticSubtractionKernel</a>.</li>
+<li>Add support for QASYMM8 in <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml" title="Interface for the kernel to perform addition between two tensors.">NEPixelWiseMultiplicationKernel</a>.</li>
+<li>Add support for QASYMM8 NEDeconvolution.</li>
+<li>Add support for DequantizationLayer for NEON/CL.</li>
+<li>Add support for dilation in CLDepthwiseConvolution.</li>
+<li>Fuse offset contribution with the output stage when we use <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml" title="Basic function to execute GEMMLowpMatrixMultiplyCore on NEON.">NEGEMMLowpMatrixMultiplyCore</a>.</li>
+<li>Optimize CLDeconvolution.</li>
+<li>Add StackLayer to the graph API.</li>
+<li>Add support for "reflect" padding mode in NEPad.</li>
+<li>Winograd 7x7 NHWC on OpenCL.</li>
+<li>Rework CL ML layers to run exclusively on CL.</li>
+<li>Support different quantization info in PoolingLayer.</li>
+<li>Implement and test import memory interfaces.</li>
+<li>Added new tests and removed old ones.</li>
+<li>Various clang-tidy fixes.</li>
+</ul>
 <p>v19.02 Public major release</p><ul>
 <li>Various bug fixes.</li>
 <li>Various optimisations.</li>
@@ -1112,7 +1188,7 @@ Building for Android</h2>
 <p>Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a></p>
 <ul>
 <li>Download the NDK r17b from here: <a href="https://developer.android.com/ndk/downloads/index.html">https://developer.android.com/ndk/downloads/index.html</a></li>
-<li>Make sure you have Python 2 installed on your machine.</li>
+<li>Make sure you have Python 2.7 installed on your machine.</li>
 <li>Generate the 32 and/or 64 toolchains by running the following commands:</li>
 </ul>
 <pre class="fragment">$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
@@ -1231,7 +1307,7 @@ Performance improvements</h3>
 <p>SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.</p>
 <h2><a class="anchor" id="S3_9_cl_tuner"></a>
 OpenCL Tuner</h2>
-<p>The OpenCL tuner, a.k.a. <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface.">CLTuner</a>, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS). The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file. The OpenCL tuner performs a brute-force approach: it runs the same OpenCL kernel for a range of local workgroup sizes and keep the local workgroup size of the fastest run to use in subsequent calls to the kernel. In order for the performance numbers to be meaningful you must disable the GPU power management and set it to a fixed frequency for the entire duration of the tuning phase.</p>
+<p>The OpenCL tuner, a.k.a. <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface.">CLTuner</a>, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS). The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file. The OpenCL tuner runs the same OpenCL kernel for a range of local workgroup sizes and keeps the local workgroup size of the fastest run to use in subsequent calls to the kernel. It supports three modes of tuning with different trade-offs between the time taken to tune and the kernel execution time achieved using the best LWS found. In the Exhaustive mode, it searches all the supported values of LWS. This mode takes the longest time to tune and is the most likely to find the optimal LWS. Normal mode searches a subset of LWS values to yield a good approximation of the optimal LWS. It takes less time to tune than Exhaustive mode. Rapid mode takes the shortest time to tune and finds an LWS value that is at least as good or better than the default LWS value. The mode affects only the search for the optimal LWS and has no effect when the LWS value is imported from a file. In order for the performance numbers to be meaningful you must disable the GPU power management and set it to a fixed frequency for the entire duration of the tuning phase.</p>
 <p>If you wish to know more about LWS and the important role on improving the GPU cache utilization, we suggest having a look at the presentation "Even Faster CNNs: Exploring the New Class of Winograd Algorithms available at the following link:</p>
 <p><a href="https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice">https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice</a></p>
 <p>Tuning a network from scratch can be long and affect considerably the execution time for the first run of your network. It is recommended for this reason to store the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface.">CLTuner</a>'s result in a file to amortize this time when you either re-use the same network or the functions with the same configurations. The tuning is performed only once for each OpenCL kernel.</p>
@@ -1262,7 +1338,7 @@ How to use it</h3>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:07 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

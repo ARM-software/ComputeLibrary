@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,8 @@ class ITensor;
 /** Basic function to execute CLGEMMInterleave4x4Kernel. This function calls the following OpenCL kernel:
  *
  *  -# @ref CLGEMMInterleave4x4Kernel
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  *
  */
 class CLGEMMInterleave4x4 : public ICLSimpleFunction

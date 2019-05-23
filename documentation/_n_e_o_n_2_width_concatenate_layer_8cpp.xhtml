@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -105,7 +105,7 @@ $(document).ready(function(){initNavTree('_n_e_o_n_2_width_concatenate_layer_8cp
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_width_concatenate_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_concatenate_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEConcatenateLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
@@ -114,7 +114,7 @@ $(document).ready(function(){initNavTree('_n_e_o_n_2_width_concatenate_layer_8cp
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
-<code>#include &quot;tests/validation/fixtures/WidthConcatenateLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/validation/fixtures/ConcatenateLayerFixture.h&quot;</code><br />
 </div>
 <p><a href="_n_e_o_n_2_width_concatenate_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -130,22 +130,22 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ad6c6e68cbdfbdff41a0f267cef6b3fc6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ad6c6e68cbdfbdff41a0f267cef6b3fc6"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad6c6e68cbdfbdff41a0f267cef6b3fc6">NEWidthConcatenateLayerFixture</a> = WidthConcatenateLayerValidationFixture&lt; Tensor, ITensor, Accessor, NEWidthConcatenateLayer, T &gt;</td></tr>
-<tr class="separator:ad6c6e68cbdfbdff41a0f267cef6b3fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affd6e45f867a420d0557f24c88ce239c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:affd6e45f867a420d0557f24c88ce239c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#affd6e45f867a420d0557f24c88ce239c">NEWidthConcatenateLayerFixture</a> = ConcatenateLayerValidationFixture&lt; Tensor, ITensor, Accessor, NEConcatenateLayer, T &gt;</td></tr>
+<tr class="separator:affd6e45f867a420d0557f24c88ce239c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0806d3aa5c8a059553ad93b573e4b82c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0806d3aa5c8a059553ad93b573e4b82c">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo1&quot;, { TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32) }), framework::dataset::make(&quot;InputInfo2&quot;, { TensorInfo(TensorShape(24U, 27U, 4U), 1, DataType::F32), TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32) })), framework::dataset::make(&quot;OutputInfo&quot;, { TensorInfo(TensorShape(47U, 27U, 5U), 1, DataType::F16), TensorInfo(TensorShape(75U, 12U, 5U), 1, DataType::F32), TensorInfo(TensorShape(11U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(32U, 27U, 5U), 1, DataType::F32) })), framework::dataset::make(&quot;Expected&quot;, { false, false, false, true })), input_info1, input_info2, output_info, expected)</td></tr>
-<tr class="separator:a0806d3aa5c8a059553ad93b573e4b82c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acaab998da6cd1cdd17563621365bb95c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acaab998da6cd1cdd17563621365bb95c">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEWidthConcatenateLayerFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
-<tr class="separator:acaab998da6cd1cdd17563621365bb95c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf8b75b2ed7f99e32fead5970ffc287f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf8b75b2ed7f99e32fead5970ffc287f">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEWidthConcatenateLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
-<tr class="separator:acf8b75b2ed7f99e32fead5970ffc287f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5921d4278edecb48a6bea0ec35d0a1a6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5921d4278edecb48a6bea0ec35d0a1a6">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEWidthConcatenateLayerFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)))</td></tr>
-<tr class="separator:a5921d4278edecb48a6bea0ec35d0a1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95c022778b396ed59b33bd09c60b9cac"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a95c022778b396ed59b33bd09c60b9cac">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEWidthConcatenateLayerFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)))</td></tr>
-<tr class="separator:a95c022778b396ed59b33bd09c60b9cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb8240666f7c1c72ff9cd4c38a0b7971"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#afb8240666f7c1c72ff9cd4c38a0b7971">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputInfo1&quot;, { TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(21U, 35U, 5U), 1, DataType::F32) }), framework::dataset::make(&quot;InputInfo2&quot;, { TensorInfo(TensorShape(24U, 27U, 4U), 1, DataType::F32), TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(52U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(16U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(10U, 35U, 5U), 1, DataType::F32) })), framework::dataset::make(&quot;OutputInfo&quot;, { TensorInfo(TensorShape(47U, 27U, 5U), 1, DataType::F16), TensorInfo(TensorShape(75U, 12U, 5U), 1, DataType::F32), TensorInfo(TensorShape(11U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(32U, 27U, 5U), 1, DataType::F32), TensorInfo(TensorShape(31U, 35U, 5U), 1, DataType::F32) })), framework::dataset::make(&quot;Expected&quot;, { false, false, false, true, true })), input_info1, input_info2, output_info, expected)</td></tr>
+<tr class="separator:afb8240666f7c1c72ff9cd4c38a0b7971"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad84a0184037855e8a93a049a0a585b66"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad84a0184037855e8a93a049a0a585b66">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEWidthConcatenateLayerFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Axis&quot;, 0)))</td></tr>
+<tr class="separator:ad84a0184037855e8a93a049a0a585b66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c73d3ac9c13d33270af6aaada04a5cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6c73d3ac9c13d33270af6aaada04a5cb">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEWidthConcatenateLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Axis&quot;, 0)))</td></tr>
+<tr class="separator:a6c73d3ac9c13d33270af6aaada04a5cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac253857021c0b6c214066ce5a0bb366"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aac253857021c0b6c214066ce5a0bb366">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEWidthConcatenateLayerFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;Axis&quot;, 0)))</td></tr>
+<tr class="separator:aac253857021c0b6c214066ce5a0bb366"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad77508afe87d5addd142c745f700e0c1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad77508afe87d5addd142c745f700e0c1">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEWidthConcatenateLayerFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::ConcatenateLayerShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;Axis&quot;, 0)))</td></tr>
+<tr class="separator:ad77508afe87d5addd142c745f700e0c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -153,7 +153,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_o_n_2_width_concatenate_layer_8cpp.xhtml">WidthConcatenateLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,10 +82,10 @@ public:
     void run() override;
 
 private:
-    CLPyramid                               _tmp_pyr;
-    std::unique_ptr<CLArithmeticAddition[]> _addf;
-    std::unique_ptr<CLScale[]>              _scalef;
-    CLDepthConvertLayer                     _depthf;
+    CLPyramid                         _tmp_pyr;
+    std::vector<CLArithmeticAddition> _addf;
+    std::vector<CLScale>              _scalef;
+    CLDepthConvertLayer               _depthf;
 };
 }
 #endif /*__ARM_COMPUTE_CLLAPLACIANRECONSTRUCT_H__ */

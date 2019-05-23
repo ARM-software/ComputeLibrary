@@ -262,7 +262,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
 
-        // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
+        // TODO(COMPMID-2078): input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo info_gemm(shape_gemm, 1, data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
@@ -372,7 +372,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const unsigned int kernel_width  = weights->dimension(idx_width);
     const unsigned int kernel_height = weights->dimension(idx_height);
 
-    TensorInfo         im2col_reshaped_info, info_gemm, weights_reshaped_info;
+    TensorInfo         im2col_reshaped_info{};
+    TensorInfo         info_gemm{};
+    TensorInfo         weights_reshaped_info{};
     const ITensorInfo *gemm_input_to_use  = input;
     const ITensorInfo *gemm_output_to_use = output;
     const ITensorInfo *weights_to_use     = weights;
@@ -526,7 +528,7 @@ void CLGEMMConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run im2col
     if(!_skip_im2col)
@@ -562,8 +564,6 @@ void CLGEMMConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-
-    _memory_group.release();
 }
 
 void CLGEMMConvolutionLayer::prepare()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,7 +162,7 @@ void NECannyEdge::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run sobelNxN
     _sobel->run();
@@ -184,6 +184,4 @@ void NECannyEdge::run()
 
     // Run edge tracing
     NEScheduler::get().schedule(&_edge_trace, Window::DimY);
-
-    _memory_group.release();
 }

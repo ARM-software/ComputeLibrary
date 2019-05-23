@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/FFTConvolutionLayerFixture.h"
 #include "tests/benchmark/fixtures/WinogradConvolutionLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
@@ -41,6 +42,9 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "utils/TypePrinter.h"
+#include <arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h>
+#include <tests/datasets/SmallConvolutionLayerDataset.h>
+#include <tests/datasets/system_tests/resnet12/ResNet12ConvolutionLayerDataset.h>
 
 namespace arm_compute
 {
@@ -53,11 +57,17 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QASYMM8 });
 } // namespace
 
-using CLGEMMConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLGEMMConvolutionLayer, CLAccessor>;
-
 TEST_SUITE(CL)
 
-using CLWinogradLayerFixture = WinogradConvolutionLayerFixture<CLTensor, CLWinogradConvolutionLayer, CLAccessor>;
+using CLGEMMConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLGEMMConvolutionLayer, CLAccessor>;
+using CLWinogradLayerFixture        = WinogradConvolutionLayerFixture<CLTensor, CLWinogradConvolutionLayer, CLAccessor>;
+using CLFFTConvolutionLayerFixture  = FFTConvolutionLayerFixture<CLTensor, CLFFTConvolutionLayer, CLAccessor>;
+
+REGISTER_FIXTURE_DATA_TEST_CASE(ResNet12FFTLayer, CLFFTConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::ResNet12FFTConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
+                                                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                            framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(),

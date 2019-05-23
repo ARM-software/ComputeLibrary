@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,7 +93,7 @@ void NEFastCorners::run()
 {
     NEScheduler::get().schedule(&_border_handler, Window::DimZ);
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     NEScheduler::get().schedule(&_fast_corners_kernel, Window::DimY);
 
@@ -103,6 +103,4 @@ void NEFastCorners::run()
     }
 
     NEScheduler::get().schedule(&_fill_kernel, Window::DimY);
-
-    _memory_group.release();
 }

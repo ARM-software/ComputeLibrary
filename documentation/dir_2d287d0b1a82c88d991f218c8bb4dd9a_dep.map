@@ -1,0 +1,6 @@
+<map id="arm_compute/core/CL/gemm" name="arm_compute/core/CL/gemm">
+<area shape="rect" id="node2" href="dir_b380ea7850246e3d17a9b2ca7d641d9f.xhtml" title="reshaped" alt="" coords="203,63,285,111"/>
+<area shape="rect" id="node3" href="dir_49c6f2cdaf048b4777902725298492e0.xhtml" title="reshaped_only_rhs" alt="" coords="37,63,179,111"/>
+<area shape="rect" id="clust2" href="dir_2d287d0b1a82c88d991f218c8bb4dd9a.xhtml" alt="" coords="27,52,392,121"/>
+<area shape="rect" id="clust1" href="dir_1633709b037eda5b8477677909f78129.xhtml" title="CL" alt="" coords="16,16,403,132"/>
+</map>

@@ -32,6 +32,7 @@
 #include "gemv_pretransposed.hpp"
 
 #include "kernels/a32_sgemm_8x6.hpp"
+#include "kernels/a64_hybrid_fp32_mla_16x4.hpp"
 #include "kernels/a64_sgemm_12x8.hpp"
 #include "kernels/a64_sgemm_native_16x4.hpp"
 #include "kernels/a64_sgemm_nativeA_pretransposeB_16x4.hpp"
@@ -112,6 +113,13 @@ static const GemmImplementation<float, float> gemm_fp32_methods[] =
     [](const GemmArgs<float> &args) { return new GemmHybrid<sgemm_nativeA_pretransposeB_16x4, float, float>(args); }
 },
 {
+    GemmMethod::GEMM_HYBRID,
+    "hybrid_fp32_mla_16x4",
+    [](const GemmArgs<float> &args) { return (args._Ksize >= 4) && (args._alpha == 1.0f) && !args._trA && args._pretransposed_hint; },
+    [](const GemmArgs<float> &args) { return ((args._Ksize <= 256) && (args._Nsize <= 256)) || ((args._nmulti > 1) && ((args._Msize / args._maxthreads) < 8)); },
+    [](const GemmArgs<float> &args) { return new GemmHybrid<hybrid_fp32_mla_16x4, float, float>(args); }
+},
+{
     GemmMethod::GEMM_NATIVE,
     "sgemm_native_16x4",
     [](const GemmArgs<float> &args) { return (args._Ksize>4 && (args._Nsize % 16)==0 && args._alpha==1.0f && !args._trA && !args._trB); },
@@ -165,6 +173,6 @@ const GemmImplementation<float, float> *gemm_implementation_list<float, float>()
 template UniqueGemmCommon<float, float> gemm<float, float>(const GemmArgs<float> &args);
 template KernelDescription get_gemm_method<float, float>(const GemmArgs<float> &args);
 template bool method_is_compatible<float, float>(GemmMethod method, const GemmArgs<float> &args);
-template std::vector<std::string> get_compatible_kernels<float, float> (const GemmArgs<float> &args);
+template std::vector<KernelDescription> get_compatible_kernels<float, float> (const GemmArgs<float> &args);
 
 } // namespace arm_gemm

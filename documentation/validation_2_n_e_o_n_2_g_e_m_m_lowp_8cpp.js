@@ -3,6 +3,7 @@ var validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp =
     [ "NEGEMMAssemblyFixture_S8", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a2a3ba835cab60c32a83400ab9b6dd3d5", null ],
     [ "NEGEMMAssemblyFixture_U8", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a81a5e6a019eb49bf186adbae0baa7325", null ],
     [ "NEGEMMLowpMatrixMultiplyCoreFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#ad6880410d254bb87a46a663bcdd944bf", null ],
+    [ "NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#aacc518ecfae05fa0b46c5d4564230deb", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a0bc691ca26723ad9d84ad9aafb928438", null ],
     [ "NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#a174a5f51b17ff15bdf18ece0907ce1b0", null ],
     [ "DATA_TEST_CASE", "validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml#aa2492479cb961e36976a096e29d2b9d4", null ],

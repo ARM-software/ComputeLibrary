@@ -117,7 +117,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     {
         case 0:
             kernel_name = "x";
-            idx         = num_arguments_per_1D_tensor() * 3;
+            idx         = num_arguments_per_2D_tensor() * 3;
             break;
         case 1:
             kernel_name = "y";
@@ -169,17 +169,17 @@ void CLL2NormalizeLayerKernel::run(const Window &window, cl::CommandQueue &queue
         case 0:
         {
             window_sum.set(Window::DimX, Window::Dimension(0, 0, 0));
-            Window in_slice  = window.first_slice_window_1D();
-            Window sum_slice = window_sum.first_slice_window_1D();
+            Window in_slice  = window.first_slice_window_2D();
+            Window sum_slice = window_sum.first_slice_window_2D();
             do
             {
                 unsigned int idx = 0;
-                add_1D_tensor_argument(idx, _input, in_slice);
-                add_1D_tensor_argument(idx, _sum, sum_slice);
-                add_1D_tensor_argument(idx, _output, in_slice);
+                add_2D_tensor_argument(idx, _input, in_slice);
+                add_2D_tensor_argument(idx, _sum, sum_slice);
+                add_2D_tensor_argument(idx, _output, in_slice);
                 enqueue(queue, *this, in_slice);
             }
-            while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
+            while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(sum_slice));
         }
         break;
         case 1:

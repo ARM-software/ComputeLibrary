@@ -35,6 +35,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/helpers/tensor_info.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/ToolchainSupport.h"
@@ -111,14 +112,16 @@ void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const 
     build_opts.add_option("-DINPUT1_WIDTH=" + support::cpp11::to_string(input1->info()->dimension(0)));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input1->info()->element_size()));
 
-    if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && input1->info()->quantization_info() != output->info()->quantization_info())
+    // If input have different quantization info set quantization parameters needed for the re-quantization process
+    const bool have_different_qinfo = helpers::tensor_info::tensors_have_different_quantization_info(output->info(), input1->info(), input2->info());
+    if(is_data_type_quantized_asymmetric(input1->info()->data_type()) && have_different_qinfo)
     {
         build_opts.add_option("-DOFFSET_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().offset));
-        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
         build_opts.add_option("-DSCALE_IN1=" + float_to_string_with_full_precision(input1->info()->quantization_info().scale));
-        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
         build_opts.add_option("-DOFFSET_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().offset));
         build_opts.add_option("-DSCALE_IN2=" + float_to_string_with_full_precision(input2->info()->quantization_info().scale));
+        build_opts.add_option("-DOFFSET_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().offset));
+        build_opts.add_option("-DSCALE_OUT=" + float_to_string_with_full_precision(output->info()->quantization_info().scale));
     }
 
     // Create kernel

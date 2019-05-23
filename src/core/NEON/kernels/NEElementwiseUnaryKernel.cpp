@@ -87,7 +87,7 @@ void elementwise_op(const ITensor *in, ITensor *out, const Window &window)
     Iterator input(in, win);
     Iterator output(out, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         auto       output_ptr = reinterpret_cast<ScalarType *>(output.ptr());
         const auto input_ptr  = reinterpret_cast<const ScalarType *>(input.ptr());

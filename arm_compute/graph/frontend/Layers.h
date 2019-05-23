@@ -72,22 +72,24 @@ class OutputLayer final : public ILayer
 public:
     /** Construct an output layer.
      *
-     * @param[in] accessor Accessor to give output tensor data to.
+     * @param[in] accessor       Accessor to give output tensor data to.
+     * @param[in] connection_idx (Optional) Input connection index
      */
-    OutputLayer(ITensorAccessorUPtr accessor)
-        : _accessor(std::move(accessor))
+    OutputLayer(ITensorAccessorUPtr accessor, unsigned int connection_idx = 0)
+        : _accessor(std::move(accessor)), _connection_idx(connection_idx)
     {
     }
 
     NodeID create_layer(IStream &s) override
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
-        NodeIdxPair input         = { s.tail_node(), 0 };
+        NodeIdxPair input         = { s.tail_node(), _connection_idx };
         return GraphBuilder::add_output_node(s.graph(), common_params, input, std::move(_accessor));
     }
 
 private:
     ITensorAccessorUPtr _accessor;
+    unsigned int        _connection_idx;
 };
 
 /** Activation Layer */
@@ -96,10 +98,13 @@ class ActivationLayer final : public ILayer
 public:
     /** Construct an activation layer.
      *
-     * @param[in] act_info Activation information
+     * @param[in] act_info       Activation information
+     * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ActivationLayer(ActivationLayerInfo act_info)
-        : _act_info(act_info)
+    ActivationLayer(ActivationLayerInfo    act_info,
+                    const QuantizationInfo out_quant_info = QuantizationInfo())
+        : _act_info(act_info),
+          _out_quant_info(std::move(out_quant_info))
     {
     }
 
@@ -107,11 +112,12 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_activation_node(s.graph(), common_params, input, _act_info);
+        return GraphBuilder::add_activation_node(s.graph(), common_params, input, _act_info, std::move(_out_quant_info));
     }
 
 private:
-    ActivationLayerInfo _act_info;
+    ActivationLayerInfo    _act_info;
+    const QuantizationInfo _out_quant_info;
 };
 
 /** Batchnormalization Layer */
@@ -225,7 +231,7 @@ public:
      */
     template <typename... Ts>
     ConcatLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
-        : _sub_streams(), _axis(DataLayoutDimension::CHANNEL)
+        : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
         _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
         _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
@@ -238,14 +244,14 @@ public:
     }
     /** Construct a concatenation layer
      *
-     * @param[in] axis             Axis over the concatenation will be performed
-     * @param[in] sub_stream1      First graph branch
-     * @param[in] sub_stream2      Second graph branch
-     * @param[in] rest_sub_streams Rest sub-graph branches
+     * @param[in] concat_descriptor Concat layer descriptor
+     * @param[in] sub_stream1       First graph branch
+     * @param[in] sub_stream2       Second graph branch
+     * @param[in] rest_sub_streams  Rest sub-graph branches
      */
     template <typename... Ts>
-    ConcatLayer(DataLayoutDimension axis, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
-        : _sub_streams(), _axis(axis)
+    ConcatLayer(descriptors::ConcatLayerDescriptor concat_descriptor, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
+        : _sub_streams(), _concat_descriptor(concat_descriptor)
     {
         _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
         _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
@@ -262,7 +268,7 @@ public:
      */
     template <typename... Ts>
     ConcatLayer(SubStream &&sub_stream)
-        : _sub_streams(), _axis(DataLayoutDimension::CHANNEL)
+        : _sub_streams(), _concat_descriptor(DataLayoutDimension::CHANNEL)
     {
         _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
     }
@@ -289,14 +295,14 @@ public:
                     }
                 }
             }
-            nid = GraphBuilder::add_concatenate_node(s.graph(), common_params, nodes, _axis);
+            nid = GraphBuilder::add_concatenate_node(s.graph(), common_params, nodes, _concat_descriptor);
         }
         return nid;
     }
 
 private:
     std::vector<std::unique_ptr<SubStream>> _sub_streams;
-    DataLayoutDimension                     _axis;
+    descriptors::ConcatLayerDescriptor      _concat_descriptor;
 };
 
 /** Convolution Layer */
@@ -414,28 +420,31 @@ class DepthwiseConvolutionLayer final : public ILayer
 public:
     /** Construct a depthwise convolution layer.
      *
-     * @param[in] conv_width       Convolution width.
-     * @param[in] conv_height      Convolution height.
-     * @param[in] weights          Accessor to get kernel weights from.
-     * @param[in] bias             Accessor to get kernel bias from.
-     * @param[in] conv_info        Padding and stride information.
-     * @param[in] depth_multiplier (Optional) Depth multiplier parameter.
-     * @param[in] quant_info       (Optional) Quantization info used for weights
+     * @param[in] conv_width         Convolution width.
+     * @param[in] conv_height        Convolution height.
+     * @param[in] weights            Accessor to get kernel weights from.
+     * @param[in] bias               Accessor to get kernel bias from.
+     * @param[in] conv_info          Padding and stride information.
+     * @param[in] depth_multiplier   (Optional) Depth multiplier parameter.
+     * @param[in] weights_quant_info (Optional) Quantization info used for weights
+     * @param[in] out_quant_info     (Optional) Output quantization info
      */
     DepthwiseConvolutionLayer(unsigned int           conv_width,
                               unsigned int           conv_height,
                               ITensorAccessorUPtr    weights,
                               ITensorAccessorUPtr    bias,
                               PadStrideInfo          conv_info,
-                              int                    depth_multiplier = 1,
-                              const QuantizationInfo quant_info       = QuantizationInfo())
+                              int                    depth_multiplier   = 1,
+                              const QuantizationInfo weights_quant_info = QuantizationInfo(),
+                              const QuantizationInfo out_quant_info     = QuantizationInfo())
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _conv_info(std::move(conv_info)),
           _weights(std::move(weights)),
           _bias(std::move(bias)),
           _depth_multiplier(depth_multiplier),
-          _quant_info(std::move(quant_info))
+          _weights_quant_info(std::move(weights_quant_info)),
+          _out_quant_info(std::move(out_quant_info))
     {
     }
 
@@ -446,7 +455,7 @@ public:
         return GraphBuilder::add_depthwise_convolution_node(s.graph(), common_params,
                                                             input, Size2D(_conv_width, _conv_height), _conv_info, _depth_multiplier,
                                                             s.hints().depthwise_convolution_method_hint,
-                                                            std::move(_weights), std::move(_bias), std::move(_quant_info));
+                                                            std::move(_weights), std::move(_bias), std::move(_weights_quant_info), std::move(_out_quant_info));
     }
 
 private:
@@ -456,7 +465,8 @@ private:
     ITensorAccessorUPtr    _weights;
     ITensorAccessorUPtr    _bias;
     int                    _depth_multiplier;
-    const QuantizationInfo _quant_info;
+    const QuantizationInfo _weights_quant_info;
+    const QuantizationInfo _out_quant_info;
 };
 /** DetectionOutput Layer */
 class DetectionOutputLayer final : public ILayer
@@ -468,7 +478,7 @@ public:
      * @param[in] sub_stream_prior PriorBox graph sub-stream.
      * @param[in] detect_info      DetectionOutput parameters.
      */
-    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, DetectionOutputLayerInfo detect_info)
+    DetectionOutputLayer(SubStream &&sub_stream_conf, SubStream &&sub_stream_prior, const DetectionOutputLayerInfo &detect_info)
         : _ss_conf(std::move(sub_stream_conf)), _ss_prior(std::move(sub_stream_prior)), _detect_info(detect_info)
     {
     }
@@ -578,6 +588,34 @@ public:
         : _num_outputs(num_outputs),
           _weights(std::move(weights)),
           _bias(std::move(bias)),
+          _weights_ss(nullptr),
+          _bias_ss(nullptr),
+          _fc_info(fc_info),
+          _weights_quant_info(std::move(weights_quant_info)),
+          _out_quant_info(std::move(out_quant_info))
+    {
+    }
+
+    /** Construct a fully connected layer.
+     *
+     * @param[in] num_outputs        Number of outputs.
+     * @param[in] sub_stream_weights Graph sub-stream for the weights.
+     * @param[in] sub_stream_bias    Graph sub-stream for the bias.
+     * @param[in] fc_info            (Optional) Fully connected layer metadata
+     * @param[in] weights_quant_info (Optional) Weights quantization information
+     * @param[in] out_quant_info     (Optional) Output quantization info
+     */
+    FullyConnectedLayer(unsigned int                  num_outputs,
+                        SubStream                   &&sub_stream_weights,
+                        SubStream                   &&sub_stream_bias,
+                        const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                        const QuantizationInfo        weights_quant_info = QuantizationInfo(),
+                        const QuantizationInfo        out_quant_info     = QuantizationInfo())
+        : _num_outputs(num_outputs),
+          _weights(nullptr),
+          _bias(nullptr),
+          _weights_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_weights))),
+          _bias_ss(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream_bias))),
           _fc_info(fc_info),
           _weights_quant_info(std::move(weights_quant_info)),
           _out_quant_info(std::move(out_quant_info))
@@ -594,15 +632,29 @@ public:
     {
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
-        return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
-                                                       std::move(_weights), std::move(_bias), _fc_info,
-                                                       std::move(_weights_quant_info), std::move(_out_quant_info));
+        if(_weights != nullptr)
+        {
+            return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
+                                                           std::move(_weights), std::move(_bias), _fc_info,
+                                                           std::move(_weights_quant_info), std::move(_out_quant_info));
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR_ON(_weights_ss == nullptr);
+
+            NodeID bias_nid = (_bias_ss == nullptr) ? EmptyNodeID : _bias_ss->tail_node();
+            return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
+                                                           _weights_ss->tail_node(), bias_nid, _fc_info,
+                                                           std::move(_out_quant_info));
+        }
     }
 
 private:
     unsigned int                  _num_outputs;
     ITensorAccessorUPtr           _weights;
     ITensorAccessorUPtr           _bias;
+    std::unique_ptr<SubStream>    _weights_ss;
+    std::unique_ptr<SubStream>    _bias_ss;
     const FullyConnectedLayerInfo _fc_info;
     const QuantizationInfo        _weights_quant_info;
     const QuantizationInfo        _out_quant_info;
@@ -786,7 +838,7 @@ public:
      * @param[in] sub_stream First graph sub-stream
      * @param[in] prior_info PriorBox parameters.
      */
-    PriorBoxLayer(SubStream &&sub_stream, PriorBoxLayerInfo prior_info)
+    PriorBoxLayer(SubStream &&sub_stream, const PriorBoxLayerInfo &prior_info)
         : _ss(std::move(sub_stream)), _prior_info(prior_info)
     {
     }
@@ -984,6 +1036,92 @@ public:
 
 private:
     float _beta;
+};
+
+/** Stack Layer */
+class StackLayer final : public ILayer
+{
+public:
+    /** Construct a concatenation layer
+     *
+     * @param[in] sub_stream1      First graph branch
+     * @param[in] sub_stream2      Second graph branch
+     * @param[in] rest_sub_streams Rest sub-graph branches
+     */
+    template <typename... Ts>
+    StackLayer(SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
+        : _sub_streams(), _axis(0)
+    {
+        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+
+        utility::for_each([&](SubStream && sub_stream)
+        {
+            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        },
+        std::move(rest_sub_streams)...);
+    }
+    /** Construct a concatenation layer
+     *
+     * @param[in] axis             Stack layer axis along which to stack the inputs
+     * @param[in] sub_stream1      First graph branch
+     * @param[in] sub_stream2      Second graph branch
+     * @param[in] rest_sub_streams Rest sub-graph branches
+     */
+    template <typename... Ts>
+    StackLayer(int axis, SubStream &&sub_stream1, SubStream &&sub_stream2, Ts &&... rest_sub_streams)
+        : _sub_streams(), _axis(axis)
+    {
+        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream1)));
+        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream2)));
+
+        utility::for_each([&](SubStream && sub_stream)
+        {
+            _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+        },
+        std::move(rest_sub_streams)...);
+    }
+    /** Construct a concat layer
+     *
+     * @param[in] sub_stream Sub-stream
+     */
+    template <typename... Ts>
+    StackLayer(SubStream &&sub_stream)
+        : _sub_streams(), _axis(0)
+    {
+        _sub_streams.push_back(arm_compute::support::cpp14::make_unique<SubStream>(std::move(sub_stream)));
+    }
+    NodeID create_layer(IStream &s) override
+    {
+        NodeID     nid           = EmptyNodeID;
+        NodeParams common_params = { name(), s.hints().target_hint };
+        if(_sub_streams.size() == 1 && _sub_streams.at(0) != nullptr)
+        {
+            nid = _sub_streams[0]->tail_node();
+        }
+        else
+        {
+            // Collect tail nodes and stack
+            std::vector<NodeIdxPair> nodes;
+            for(auto &ss : _sub_streams)
+            {
+                if(ss && (ss->tail_node() != EmptyNodeID))
+                {
+                    const auto tail_node = s.graph().node(ss->tail_node());
+                    if(tail_node != nullptr && tail_node->type() != NodeType::Output)
+                    {
+                        nodes.push_back({ ss->tail_node(), 0 });
+                    }
+                }
+            }
+            nid = GraphBuilder::add_stack_node(s.graph(), common_params, nodes, _axis);
+        }
+        return nid;
+    }
+
+private:
+    std::vector<std::unique_ptr<SubStream>> _sub_streams;
+    int                                     _axis;
 };
 
 /** Upsample Layer */

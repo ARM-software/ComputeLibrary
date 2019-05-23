@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 
 namespace arm_compute
 {
+// Forward declaration
 class ICLTensor;
 
 /** Basic function to run @ref CLPixelWiseMultiplicationKernel. */
@@ -64,5 +65,27 @@ public:
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
                            ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
 };
-}
+
+/** Basic function to run @ref CLComplexPixelWiseMultiplicationKernel. */
+class CLComplexPixelWiseMultiplication : public ICLSimpleFunction
+{
+public:
+    /** Initialise the kernel's inputs, output.
+     *
+     * @param[in, out] input1 An input tensor. Data types supported: F32. Number of channels supported: 2.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[in, out] input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[out]     output The output tensor, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     */
+    void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLComplexPixelWiseMultiplication
+     *
+     * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2.
+     * @param[in] input2 An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] output The output tensor info, Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
+};
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLPIXELWISEMULTIPLICATION_H__ */

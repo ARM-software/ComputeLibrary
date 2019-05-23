@@ -40,7 +40,8 @@ namespace backends
 /** Target specific information structure used to pass information to the layer templates */
 struct CLTargetInfo
 {
-    using TensorType = arm_compute::ICLTensor;
+    using TensorType         = arm_compute::ICLTensor;
+    using TensorConcreteType = CLTensor;
     static Target TargetType;
 };
 
@@ -69,6 +70,14 @@ struct CLEltwiseFunctions
     using Subtraction    = CLArithmeticSubtraction;
     using Multiplication = CLPixelWiseMultiplication;
 };
+
+/** Function and tensor types to be used inside a CL fused convolution/batch normalization layer */
+struct CLFusedLayerTypes
+{
+    using ConvolutionLayer       = CLConvolutionLayer;
+    using FuseBatchNormalization = CLFuseBatchNormalization;
+};
+
 // TODO (isagot01): Remove once we support heterogeneous scheduling at function level
 /** Wrapper for the CPP Function in the OpenCL backend **/
 class CPPWrapperFunction : public IFunction
@@ -192,6 +201,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_flatten_layer<CLFlattenLayer, CLTargetInfo>(*polymorphic_downcast<FlattenLayerNode *>(node));
         case NodeType::FullyConnectedLayer:
             return detail::create_fully_connected_layer<CLFullyConnectedLayer, CLTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
+        case NodeType::FusedConvolutionBatchNormalizationLayer:
+            return detail::create_fused_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return detail::create_generate_proposals_layer<CLGenerateProposalsLayer, CLTargetInfo>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
@@ -218,6 +229,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_slice_layer<CLSlice, CLTargetInfo>(*polymorphic_downcast<SliceLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return detail::create_softmax_layer<CLSoftmaxLayer, CLTargetInfo>(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
+        case NodeType::StackLayer:
+            return detail::create_stack_layer<CLStackLayer, CLTargetInfo>(*polymorphic_downcast<StackLayerNode *>(node));
         case NodeType::UpsampleLayer:
             return detail::create_upsample_layer<CLUpsampleLayer, CLTargetInfo>(*polymorphic_downcast<UpsampleLayerNode *>(node), ctx);
         case NodeType::YOLOLayer:

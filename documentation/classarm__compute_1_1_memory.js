@@ -1,7 +1,7 @@
 var classarm__compute_1_1_memory =
 [
     [ "Memory", "classarm__compute_1_1_memory.xhtml#a3820126b0751b4da40f870ee7a3e188c", null ],
-    [ "Memory", "classarm__compute_1_1_memory.xhtml#a935135d85e324e3ce38e8f7d6dfcdecb", null ],
+    [ "Memory", "classarm__compute_1_1_memory.xhtml#afcdc02b530141f84c98459ac4408376d", null ],
     [ "Memory", "classarm__compute_1_1_memory.xhtml#a9dd734e7c351764602415d4613d8447b", null ],
     [ "Memory", "classarm__compute_1_1_memory.xhtml#a190be71167f70cb0c6b7a53504c8c189", null ],
     [ "Memory", "classarm__compute_1_1_memory.xhtml#a1f3d413f358b1996d56d79979308f463", null ],

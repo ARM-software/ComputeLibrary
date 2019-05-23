@@ -28,6 +28,8 @@
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/graph/TypePrinter.h"
 #include "arm_compute/graph/Types.h"
+#include "arm_compute/graph/Utils.h"
+#include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
@@ -108,7 +110,7 @@ std::unique_ptr<IFunction> create_activation_layer(ActivationLayerNode &node)
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
                                << node.name()
                                << " Type: " << node.type()
-                               << " Target " << TargetInfo::TargetType
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Shape: " << input->info()->tensor_shape()
                                << " Activation function: " << act_info.activation()
@@ -135,11 +137,12 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
     validate_node<TargetInfo>(node, 5 /* expected inputs */, 1 /* expected outputs */);
 
     // Extract IO and info
-    typename TargetInfo::TensorType *input     = get_backing_tensor<TargetInfo>(node.input(0));
-    typename TargetInfo::TensorType *mean      = get_backing_tensor<TargetInfo>(node.input(1));
-    typename TargetInfo::TensorType *var       = get_backing_tensor<TargetInfo>(node.input(2));
-    typename TargetInfo::TensorType *beta      = get_backing_tensor<TargetInfo>(node.input(3));
-    typename TargetInfo::TensorType *gamma     = get_backing_tensor<TargetInfo>(node.input(4));
+    typename TargetInfo::TensorType *input = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *mean  = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *var   = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *beta  = get_backing_tensor<TargetInfo>(node.input(3));
+    typename TargetInfo::TensorType *gamma = get_backing_tensor<TargetInfo>(node.input(4));
+
     typename TargetInfo::TensorType *output    = get_backing_tensor<TargetInfo>(node.output(0));
     const float                      epsilon   = node.epsilon();
     const ActivationLayerInfo        fused_act = node.fused_activation();
@@ -160,6 +163,61 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
                                << " InPlace: " << is_in_place_operation(input, output)
                                << std::endl);
 
+    return std::move(func);
+}
+
+/** Create a backend batch normalization layer function
+ *
+ * @tparam BatchNormalizationLayerFunction Backend batch normalization function
+ * @tparam TargetInfo                      Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend batch normalization layer function
+ */
+template <typename FusedLayerTypes, typename TargetInfo>
+std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(FusedConvolutionBatchNormalizationNode &node)
+{
+    validate_node<TargetInfo>(node, 7 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *mean    = get_backing_tensor<TargetInfo>(node.input(3));
+    typename TargetInfo::TensorType *var     = get_backing_tensor<TargetInfo>(node.input(4));
+    typename TargetInfo::TensorType *beta    = get_backing_tensor<TargetInfo>(node.input(5));
+    typename TargetInfo::TensorType *gamma   = get_backing_tensor<TargetInfo>(node.input(6));
+
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+
+    const PadStrideInfo       conv_info  = node.convolution_info();
+    const unsigned int        num_groups = node.num_groups();
+    const bool                fast_math  = node.fast_math_hint() == FastMathHint::Enabled;
+    const ActivationLayerInfo fused_act  = node.fused_activation();
+    const float               epsilon    = node.epsilon();
+
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+    if(is_quantized && biases != nullptr)
+    {
+        biases->info()->set_data_type(DataType::S32);
+    }
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<FusedConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>>();
+    func->configure(input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, num_groups, fast_math, fused_act);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.name()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Weights shape: " << weights->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
+                               << std::endl);
     return std::move(func);
 }
 
@@ -188,8 +246,10 @@ std::unique_ptr<IFunction> create_bounding_box_transform_layer(BoundingBoxTransf
     func->configure(input, output, deltas, bbox_info);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << TargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Shape: " << input->info()->tensor_shape()
                                << " BoundingBox Info img W: " << bbox_info.img_width() << " "
@@ -262,13 +322,20 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
         inputs.push_back(get_backing_tensor<TargetInfo>(node.input(i)));
     }
     typename TargetInfo::TensorType *output      = get_backing_tensor<TargetInfo>(node.output(0));
-    const DataLayoutDimension        concat_axis = node.concatenation_axis();
+    const DataLayout                 data_layout = node.output(0) != nullptr ? node.output(0)->desc().layout : DataLayout::UNKNOWN;
+    const size_t                     concat_axis = get_dimension_idx(data_layout, node.concatenation_axis());
 
     // Create and configure function
     auto func = support::cpp14::make_unique<ConcatenateLayerFunction>();
     func->configure(inputs, output, concat_axis);
 
     // Log info
+    const bool         is_quantized = is_data_type_quantized_asymmetric(output->info()->data_type());
+    std::ostringstream qss;
+    if(is_quantized)
+    {
+        qss << " Output QuantInfo: " << output->info()->quantization_info();
+    }
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
                                << node.name()
                                << " Type: " << node.type()
@@ -277,6 +344,7 @@ std::unique_ptr<arm_compute::IFunction> create_concatenate_layer(ConcatenateLaye
                                << " Shape: " << output->info()->tensor_shape()
                                << " Num Inputs: " << inputs.size()
                                << " Axis: " << concat_axis
+                               << qss.str()
                                << std::endl);
 
     return std::move(func);
@@ -364,10 +432,10 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Groups: " << num_groups
-                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
@@ -479,11 +547,11 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
                                << " Type: " << func_name
                                << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
-                               << qss.str()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
                                << " Depth multiplier: " << depth_multiplier
+                               << qss.str()
                                << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
                                << std::endl);
     return func;
@@ -1120,8 +1188,10 @@ std::unique_ptr<IFunction> create_roi_align_layer(ROIAlignLayerNode &node)
     func->configure(input, rois, output, pool_info);
 
     // Log info
-    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
-                               << " Target " << TargetInfo::TargetType
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -1204,6 +1274,49 @@ std::unique_ptr<IFunction> create_softmax_layer(SoftmaxLayerNode &node, GraphCon
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(func);
+}
+
+/** Create a backend layer stack function
+ *
+ * @tparam StackLayerFunction Backend stack function
+ * @tparam TargetInfo         Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend stack layer function
+ */
+template <typename StackLayerFunction, typename TargetInfo>
+std::unique_ptr<arm_compute::IFunction> create_stack_layer(StackLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Creating Stack node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    std::vector<typename TargetInfo::TensorType *> inputs;
+    for(unsigned int i = 0; i < node.num_inputs(); ++i)
+    {
+        inputs.push_back(get_backing_tensor<TargetInfo>(node.input(i)));
+    }
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    const int                        axis   = node.axis();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<StackLayerFunction>();
+    func->configure(inputs, axis, output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << output->info()->data_type()
+                               << " Inputs shape: " << inputs[0]->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Num Inputs: " << inputs.size()
+                               << " Axis: " << axis
                                << std::endl);
 
     return std::move(func);

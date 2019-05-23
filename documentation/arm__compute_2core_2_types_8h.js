@@ -83,7 +83,8 @@ var arm__compute_2core_2_types_8h =
     [ "ConvolutionMethod", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517d", [
       [ "GEMM", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3", null ],
       [ "DIRECT", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da4c5d06b02c97731aaa976179c62dcf76", null ],
-      [ "WINOGRAD", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8", null ]
+      [ "WINOGRAD", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8", null ],
+      [ "FFT", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da86de502ad3fe05ceedaba87164d54d28", null ]
     ] ],
     [ "DataLayout", "arm__compute_2core_2_types_8h.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0", [
       [ "UNKNOWN", "arm__compute_2core_2_types_8h.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a696b031073e74bf2cb98e5ef201d4aa3", null ],
@@ -111,6 +112,10 @@ var arm__compute_2core_2_types_8h =
       [ "F32", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a44ad4ef5a76e6aa6fb3e3fa079a54fda", null ],
       [ "F64", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a1ad5f6f3069070ec4cbbdc94d5e61e0e", null ],
       [ "SIZET", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1", null ]
+    ] ],
+    [ "DeconvolutionMethod", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ad", [
+      [ "GEMM", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada5174aac3927faa9ee34befb7fc87a9e3", null ],
+      [ "DIRECT", "arm__compute_2core_2_types_8h.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada4c5d06b02c97731aaa976179c62dcf76", null ]
     ] ],
     [ "DetectionOutputLayerCodeType", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830", [
       [ "CORNER", "arm__compute_2core_2_types_8h.xhtml#ad818ba0ecd4a87d8f1bb0d5b17f07830ac411afd31d32cec664d372acc12f404a", null ],
@@ -185,6 +190,11 @@ var arm__compute_2core_2_types_8h =
       [ "IN_MAP_1D", "arm__compute_2core_2_types_8h.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caaca2475ab7883ebb9f125241141896190", null ],
       [ "IN_MAP_2D", "arm__compute_2core_2_types_8h.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa6ff8bd96743aae9fd283cd822b84278e", null ],
       [ "CROSS_MAP", "arm__compute_2core_2_types_8h.xhtml#ad4bb8dabdbf8ad75e34220cc666b59caa980fef040549733973683b1a868f96e5", null ]
+    ] ],
+    [ "PaddingMode", "arm__compute_2core_2_types_8h.xhtml#a14d24d90ab4ba2956e92e27890ba4c91", [
+      [ "CONSTANT", "arm__compute_2core_2_types_8h.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a8d6b5cada83510220f59e00ce86d4d92", null ],
+      [ "REFLECT", "arm__compute_2core_2_types_8h.xhtml#a14d24d90ab4ba2956e92e27890ba4c91ae4f6a05f82ed398f984f4bc1a55838df", null ],
+      [ "SYMMETRIC", "arm__compute_2core_2_types_8h.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a161b3d9016563aba9ac190fc02ada9bb", null ]
     ] ],
     [ "PhaseType", "arm__compute_2core_2_types_8h.xhtml#af00a42ecad444bbda75cde1b64bd7e72", [
       [ "SIGNED", "arm__compute_2core_2_types_8h.xhtml#af00a42ecad444bbda75cde1b64bd7e72a6898b46a1cde8a1572e2722c44c5ab07", null ],

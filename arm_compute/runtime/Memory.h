@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
      *
      * @param[in] memory Memory to be imported
      */
-    Memory(std::shared_ptr<IMemoryRegion> memory);
+    Memory(const std::shared_ptr<IMemoryRegion> &memory);
     /** Default Constructor
      *
      * @note Ownership of the memory is not transferred to this object.

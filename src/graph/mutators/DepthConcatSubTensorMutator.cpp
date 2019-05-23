@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,18 +62,19 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
             // Get output tensor
             auto output_tensor = node->output(0);
 
-            // Check concatenation axis (Sub-tensor optimization is support for concatenation axis >=2)
+            // Check concatenation axis (Sub-tensor optimization is supported for concatenation axis >=2)
             auto *concat_node = arm_compute::utils::cast::polymorphic_downcast<ConcatenateLayerNode *>(node);
-            if(output_tensor == nullptr || get_dimension_idx(output_tensor->desc(), concat_node->concatenation_axis()) < 2)
+            if(output_tensor == nullptr || get_dimension_idx(output_tensor->desc().layout, concat_node->concatenation_axis()) < 2)
             {
                 continue;
             }
 
-            // Check that all tensor have the same target and valid inputs
+            // Check that all tensor have the same target, valid inputs and same quantization info
             bool is_valid = std::all_of(node->input_edges().cbegin(), node->input_edges().cend(),
                                         [&](const EdgeID & eid)
             {
-                return (g.edge(eid) != nullptr) && (g.edge(eid)->tensor() != nullptr) && (g.edge(eid)->tensor()->desc().target == output_tensor->desc().target);
+                return (g.edge(eid) != nullptr) && (g.edge(eid)->tensor() != nullptr) && (g.edge(eid)->tensor()->desc().target == output_tensor->desc().target)
+                       && (g.edge(eid)->tensor()->desc().quant_info == output_tensor->desc().quant_info);
             });
 
             // Create subtensors

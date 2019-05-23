@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,10 +76,10 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
 
     if(num_levels > 1)
     {
-        _horizontal_border_handler = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
-        _vertical_border_handler   = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
-        _horizontal_reduction      = arm_compute::support::cpp14::make_unique<CLGaussianPyramidHorKernel[]>(num_levels - 1);
-        _vertical_reduction        = arm_compute::support::cpp14::make_unique<CLGaussianPyramidVertKernel[]>(num_levels - 1);
+        _horizontal_border_handler.resize(num_levels - 1);
+        _vertical_border_handler.resize(num_levels - 1);
+        _horizontal_reduction.resize(num_levels - 1);
+        _vertical_reduction.resize(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
@@ -153,8 +153,8 @@ void CLGaussianPyramidOrb::configure(ICLTensor *input, CLPyramid *pyramid, Borde
 
     if(num_levels > 1)
     {
-        _gauss5x5      = arm_compute::support::cpp14::make_unique<CLGaussian5x5[]>(num_levels - 1);
-        _scale_nearest = arm_compute::support::cpp14::make_unique<CLScaleKernel[]>(num_levels - 1);
+        _gauss5x5.resize(num_levels - 1);
+        _scale_nearest.resize(num_levels - 1);
 
         PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_ORB, pyramid->info()->tensor_shape(), Format::U8);
 

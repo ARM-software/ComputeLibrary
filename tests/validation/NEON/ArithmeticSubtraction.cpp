@@ -43,18 +43,37 @@ namespace validation
 {
 namespace
 {
+
+#ifdef __aarch64__
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#else  //__aarch64__
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#endif //__aarch64__
+
 /** Input data sets **/
-const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)),
-                                                    framework::dataset::make("DataType",
-                                                                             DataType::U8));
-const auto ArithmeticSubtractionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
+const auto ArithmeticSubtractionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8),
+                                                                 framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                         framework::dataset::make("DataType", DataType::QASYMM8));
+
+const auto ArithmeticSubtractionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8),
+                                                            framework::dataset::make("DataType", DataType::U8)),
+                                                    framework::dataset::make("DataType", DataType::U8));
+
+const auto ArithmeticSubtractionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }),
+                                                             framework::dataset::make("DataType", DataType::S16)),
                                                      framework::dataset::make("DataType", DataType::S16));
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const auto ArithmeticSubtractionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
+const auto ArithmeticSubtractionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16),
+                                                              framework::dataset::make("DataType", DataType::F16)),
                                                       framework::dataset::make("DataType", DataType::F16));
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const auto ArithmeticSubtractionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F32)),
+const auto ArithmeticSubtractionFP32Dataset = combine(combine(framework::dataset::make("DataType", DataType::F32),
+                                                              framework::dataset::make("DataType", DataType::F32)),
                                                       framework::dataset::make("DataType", DataType::F32));
+
+const auto ArithmeticSubtractionQuantizationInfoDataset = combine(combine(framework::dataset::make("QuantizationInfoIn1", { QuantizationInfo(10, 120) }),
+                                                                          framework::dataset::make("QuantizationInfoIn2", { QuantizationInfo(20, 110) })),
+                                                                  framework::dataset::make("QuantizationInfoOut", { QuantizationInfo(15, 125) }));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -65,29 +84,41 @@ using NEArithmeticSubtractionFixture = ArithmeticSubtractionValidationFixture<Te
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
         framework::dataset::make("Input1Info", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                  TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),      // Window shrink
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),      // Invalid data type combination
                                                  TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
+                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::QASYMM8), // Mismatching types
+                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8), // Invalid convert policy
         }),
         framework::dataset::make("Input2Info",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
         })),
         framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::S16),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
+                                                TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
         })),
-        framework::dataset::make("Expected", { true, true, false, false, false})),
-        input1_info, input2_info, output_info, expected)
+        framework::dataset::make("ConvertPolicy",{ ConvertPolicy::WRAP,
+                                                ConvertPolicy::SATURATE,
+                                                ConvertPolicy::WRAP,
+                                                ConvertPolicy::SATURATE,
+                                                ConvertPolicy::WRAP,
+                                                ConvertPolicy::WRAP,
+        })),
+        framework::dataset::make("Expected", { true, true, false, false, false, false, false})),
+        input1_info, input2_info, output_info, policy, expected)
 {
-    ARM_COMPUTE_EXPECT(bool(NEArithmeticSubtraction::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), ConvertPolicy::WRAP)) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(NEArithmeticSubtraction::validate(&input1_info.clone()->set_is_resizable(false), &input2_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), policy)) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
@@ -123,6 +154,45 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionFixture<uint8_t>, framew
     validate(Accessor(_target), _reference);
 }
 TEST_SUITE_END() // U8
+
+using NEArithmeticSubtractionQuantFixture = ArithmeticSubtractionQuantValidationFixture<Tensor, Accessor, NEArithmeticSubtraction>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+               shape, policy)
+{
+    // Create tensors
+    Tensor ref_src1 = create_tensor<Tensor>(shape, DataType::QASYMM8);
+    Tensor ref_src2 = create_tensor<Tensor>(shape, DataType::QASYMM8);
+    Tensor dst      = create_tensor<Tensor>(shape, DataType::QASYMM8);
+
+    // Create and Configure function
+    NEArithmeticSubtraction sub;
+    sub.configure(&ref_src1, &ref_src2, &dst, policy);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticSubtractionQuantFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(
+                                                                                                                     datasets::SmallShapes(),
+                                                                                                                     ArithmeticSubtractionQASYMM8Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
+                                                                                                                 ArithmeticSubtractionQuantizationInfoDataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE(S16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),

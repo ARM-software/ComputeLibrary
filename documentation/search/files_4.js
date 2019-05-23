@@ -32,6 +32,8 @@ var searchData=
   ['derivative_2eh',['Derivative.h',['../_derivative_8h.xhtml',1,'']]],
   ['detectionoutputlayernode_2ecpp',['DetectionOutputLayerNode.cpp',['../_detection_output_layer_node_8cpp.xhtml',1,'']]],
   ['detectionoutputlayernode_2eh',['DetectionOutputLayerNode.h',['../_detection_output_layer_node_8h.xhtml',1,'']]],
+  ['dft_2ecpp',['DFT.cpp',['../_c_p_p_2_d_f_t_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_d_f_t_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['dft_2eh',['DFT.h',['../_d_f_t_8h.xhtml',1,'']]],
   ['dilate_2ecl',['dilate.cl',['../dilate_8cl.xhtml',1,'']]],
   ['dilate_2ecpp',['Dilate.cpp',['../_c_l_2_dilate_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_dilate_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_dilate_8cpp.xhtml',1,'(Global Namespace)']]],
   ['dilate_2eh',['Dilate.h',['../_dilate_8h.xhtml',1,'']]],

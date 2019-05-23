@@ -35,7 +35,7 @@ namespace arm_compute
 {
 namespace
 {
-std::unique_ptr<IFunction> create_function_all_types(arm_gemm::KernelDescription gemm_kernel_info,
+std::unique_ptr<IFunction> create_function_all_types(const arm_gemm::KernelDescription &gemm_kernel_info,
                                                      const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint,
                                                      std::shared_ptr<IMemoryManager> memory_manager)
 
@@ -375,7 +375,7 @@ bool NEGEMMAssemblyDispatch::is_configured() const
 
 void NEGEMMAssemblyDispatch::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
     if(_function != nullptr)
     {
         _function->run();
@@ -385,6 +385,5 @@ void NEGEMMAssemblyDispatch::run()
         ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
         _arm_gemm->run();
     }
-    _memory_group.release();
 }
 } //namespace arm_compute

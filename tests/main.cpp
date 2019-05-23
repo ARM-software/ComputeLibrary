@@ -39,7 +39,7 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
-
+#include "utils/TypePrinter.h"
 #endif /* ARM_COMPUTE_CL */
 #ifdef ARM_COMPUTE_GC
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 
     std::set<framework::DatasetMode> allowed_modes
     {
+        framework::DatasetMode::DISABLED,
         framework::DatasetMode::PRECOMMIT,
         framework::DatasetMode::NIGHTLY,
         framework::DatasetMode::ALL
@@ -138,6 +139,16 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
     auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
+
+    const std::set<CLTunerMode> supported_tuner_modes
+    {
+        CLTunerMode::EXHAUSTIVE,
+        CLTunerMode::NORMAL,
+        CLTunerMode::RAPID
+    };
+    auto tuner_mode = parser.add_option<utils::EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::NORMAL);
+    tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
+
     auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
     tuner_file->set_help("File to load/save CLTuner values");
 #endif /* ARM_COMPUTE_CL */
@@ -160,7 +171,9 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
         if(enable_tuner->is_set())
         {
-            cl_tuner.set_tune_new_kernels(enable_tuner->value());
+            //set tuner mode
+            cl_tuner.set_tuner_mode(tuner_mode->value());
+
             // If that's the first run then the file won't exist yet
             if(file_exists(tuner_file->value()))
             {

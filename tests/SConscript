@@ -30,7 +30,6 @@ SConscript('./framework/SConscript', duplicate=0)
 
 # vars is imported from arm_compute:
 variables = [
-    #FIXME Switch the following two options to False before releasing
     BoolVariable("validation_tests", "Build validation test programs", False),
     BoolVariable("benchmark_tests", "Build benchmark test programs", False),
     ("test_filter", "Pattern to specify the tests' filenames to be compiled", "*.cpp")

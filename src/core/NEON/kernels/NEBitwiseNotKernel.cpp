@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ void NEBitwiseNotKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         bitwise_not_U8_U8(input.ptr(), output.ptr());
     },

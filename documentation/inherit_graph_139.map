@@ -1,4 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1traits_1_1is__contained.xhtml" title=" " alt="" coords="5,5,157,47"/>
-<area shape="rect" id="node2" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_u_00_01_ts_8_8_8_01_4_01_4.xhtml" title=" " alt="" coords="205,5,357,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_node_visitor.xhtml" title="Node visitor interface." alt="" coords="5,5,104,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_default_node_visitor.xhtml" title="Default visitor implementation." alt="" coords="152,5,295,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml" title="Graph printer visitor." alt="" coords="343,5,467,32"/>
 </map>

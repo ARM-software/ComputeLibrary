@@ -1,5 +1,6 @@
 var dir_1633709b037eda5b8477677909f78129 =
 [
+    [ "gemm", "dir_2d287d0b1a82c88d991f218c8bb4dd9a.xhtml", "dir_2d287d0b1a82c88d991f218c8bb4dd9a" ],
     [ "kernels", "dir_f906bbebc596bc606d589ccb705e6595.xhtml", "dir_f906bbebc596bc606d589ccb705e6595" ],
     [ "CLHelpers.h", "core_2_c_l_2_c_l_helpers_8h.xhtml", "core_2_c_l_2_c_l_helpers_8h" ],
     [ "CLKernelLibrary.h", "_c_l_kernel_library_8h.xhtml", [
@@ -14,6 +15,9 @@ var dir_1633709b037eda5b8477677909f78129 =
     [ "ICLArray.h", "_i_c_l_array_8h.xhtml", "_i_c_l_array_8h" ],
     [ "ICLDistribution1D.h", "_i_c_l_distribution1_d_8h.xhtml", [
       [ "ICLDistribution1D", "classarm__compute_1_1_i_c_l_distribution1_d.xhtml", "classarm__compute_1_1_i_c_l_distribution1_d" ]
+    ] ],
+    [ "ICLGEMMKernelConfiguration.h", "_i_c_l_g_e_m_m_kernel_configuration_8h.xhtml", [
+      [ "ICLGEMMKernelConfiguration", "classarm__compute_1_1_i_c_l_g_e_m_m_kernel_configuration.xhtml", "classarm__compute_1_1_i_c_l_g_e_m_m_kernel_configuration" ]
     ] ],
     [ "ICLHOG.h", "_i_c_l_h_o_g_8h.xhtml", [
       [ "ICLHOG", "classarm__compute_1_1_i_c_l_h_o_g.xhtml", "classarm__compute_1_1_i_c_l_h_o_g" ]

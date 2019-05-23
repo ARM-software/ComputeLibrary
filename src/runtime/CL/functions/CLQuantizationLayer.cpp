@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,54 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"
+#include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
-CLQuantizationLayer::CLQuantizationLayer()
-    : _quantize_kernel(), _min_max_kernel(), _min_max()
+namespace arm_compute
 {
+void CLQuantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLQuantizationLayerKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
 }
 
 Status CLQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-
-    TensorInfo min_max{ input->num_channels(), input->data_type() };
-    ARM_COMPUTE_RETURN_ON_ERROR(CLMinMaxLayerKernel::validate(input, &min_max));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLQuantizationLayerKernel::validate(input, output, &min_max));
-
-    return Status{};
+    return CLQuantizationLayerKernel::validate(input, output);
 }
-
-void CLQuantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Configure min-max kernel. _min_max tensor will be auto-configured within the kernel.
-    _min_max_kernel.configure(input, &_min_max);
-
-    // Configure quantize kernel
-    _quantize_kernel.configure(input, output, &_min_max);
-
-    // Allocate min_max tensor
-    _min_max.allocator()->allocate();
-}
-
-void CLQuantizationLayer::run()
-{
-    cl::CommandQueue q = CLScheduler::get().queue();
-
-    // Reset min and max
-    _min_max_kernel.reset(q);
-
-    // Run min-max kernel
-    CLScheduler::get().enqueue(_min_max_kernel, false);
-
-    // Run quantize kernel
-    CLScheduler::get().enqueue(_quantize_kernel, false);
-}
+} // namespace arm_compute

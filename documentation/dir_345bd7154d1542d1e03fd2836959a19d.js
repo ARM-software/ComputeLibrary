@@ -24,6 +24,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEBatchNormalizationLayer.h", "_n_e_batch_normalization_layer_8h.xhtml", [
       [ "NEBatchNormalizationLayer", "classarm__compute_1_1_n_e_batch_normalization_layer.xhtml", "classarm__compute_1_1_n_e_batch_normalization_layer" ]
     ] ],
+    [ "NEBatchToSpaceLayer.h", "_n_e_batch_to_space_layer_8h.xhtml", [
+      [ "NEBatchToSpaceLayer", "classarm__compute_1_1_n_e_batch_to_space_layer.xhtml", "classarm__compute_1_1_n_e_batch_to_space_layer" ]
+    ] ],
     [ "NEBitwiseAnd.h", "_n_e_bitwise_and_8h.xhtml", [
       [ "NEBitwiseAnd", "classarm__compute_1_1_n_e_bitwise_and.xhtml", "classarm__compute_1_1_n_e_bitwise_and" ]
     ] ],
@@ -70,6 +73,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NECopy.h", "_n_e_copy_8h.xhtml", [
       [ "NECopy", "classarm__compute_1_1_n_e_copy.xhtml", "classarm__compute_1_1_n_e_copy" ]
     ] ],
+    [ "NECropResize.h", "_n_e_crop_resize_8h.xhtml", [
+      [ "NECropResize", "classarm__compute_1_1_n_e_crop_resize.xhtml", "classarm__compute_1_1_n_e_crop_resize" ]
+    ] ],
     [ "NEDeconvolutionLayer.h", "_n_e_deconvolution_layer_8h.xhtml", [
       [ "NEDeconvolutionLayer", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml", "classarm__compute_1_1_n_e_deconvolution_layer" ]
     ] ],
@@ -111,6 +117,15 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEFastCorners.h", "_n_e_fast_corners_8h.xhtml", [
       [ "NEFastCorners", "classarm__compute_1_1_n_e_fast_corners.xhtml", "classarm__compute_1_1_n_e_fast_corners" ]
+    ] ],
+    [ "NEFFT1D.h", "_n_e_f_f_t1_d_8h.xhtml", [
+      [ "NEFFT1D", "classarm__compute_1_1_n_e_f_f_t1_d.xhtml", "classarm__compute_1_1_n_e_f_f_t1_d" ]
+    ] ],
+    [ "NEFFT2D.h", "_n_e_f_f_t2_d_8h.xhtml", [
+      [ "NEFFT2D", "classarm__compute_1_1_n_e_f_f_t2_d.xhtml", "classarm__compute_1_1_n_e_f_f_t2_d" ]
+    ] ],
+    [ "NEFFTConvolutionLayer.h", "_n_e_f_f_t_convolution_layer_8h.xhtml", [
+      [ "NEFFTConvolutionLayer", "classarm__compute_1_1_n_e_f_f_t_convolution_layer.xhtml", "classarm__compute_1_1_n_e_f_f_t_convolution_layer" ]
     ] ],
     [ "NEFillBorder.h", "_n_e_fill_border_8h.xhtml", [
       [ "NEFillBorder", "classarm__compute_1_1_n_e_fill_border.xhtml", "classarm__compute_1_1_n_e_fill_border" ]
@@ -240,7 +255,8 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
       [ "NEPhase", "classarm__compute_1_1_n_e_phase.xhtml", "classarm__compute_1_1_n_e_phase" ]
     ] ],
     [ "NEPixelWiseMultiplication.h", "_n_e_pixel_wise_multiplication_8h.xhtml", [
-      [ "NEPixelWiseMultiplication", "classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_n_e_pixel_wise_multiplication" ]
+      [ "NEPixelWiseMultiplication", "classarm__compute_1_1_n_e_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_n_e_pixel_wise_multiplication" ],
+      [ "NEComplexPixelWiseMultiplication", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_n_e_complex_pixel_wise_multiplication" ]
     ] ],
     [ "NEPoolingLayer.h", "_n_e_pooling_layer_8h.xhtml", [
       [ "NEPoolingLayer", "classarm__compute_1_1_n_e_pooling_layer.xhtml", "classarm__compute_1_1_n_e_pooling_layer" ]
@@ -304,6 +320,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NESoftmaxLayer.h", "_n_e_softmax_layer_8h.xhtml", [
       [ "NESoftmaxLayer", "classarm__compute_1_1_n_e_softmax_layer.xhtml", "classarm__compute_1_1_n_e_softmax_layer" ]
+    ] ],
+    [ "NESpaceToBatchLayer.h", "_n_e_space_to_batch_layer_8h.xhtml", [
+      [ "NESpaceToBatchLayer", "classarm__compute_1_1_n_e_space_to_batch_layer.xhtml", "classarm__compute_1_1_n_e_space_to_batch_layer" ]
     ] ],
     [ "NESplit.h", "_n_e_split_8h.xhtml", [
       [ "NESplit", "classarm__compute_1_1_n_e_split.xhtml", "classarm__compute_1_1_n_e_split" ]

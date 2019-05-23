@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@
 
 using namespace arm_compute;
 
-void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint)
+void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint, bool use_dummy_work_items)
 {
     if(kernel.kernel()() == nullptr)
     {
@@ -56,6 +56,13 @@ void arm_compute::enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Wind
     if(gws.dimensions() == 0)
     {
         return;
+    }
+
+    // Use dummy work-items
+    if(use_dummy_work_items)
+    {
+        gws.get()[0] = get_next_power_two(gws[0]);
+        gws.get()[1] = get_next_power_two(gws[1]);
     }
 
     cl::NDRange valid_lws;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -152,7 +152,7 @@ bool Graph::remove_connection(EdgeID eid)
     return true;
 }
 
-TensorID Graph::create_tensor(TensorDescriptor desc)
+TensorID Graph::create_tensor(const TensorDescriptor &desc)
 {
     TensorID tid    = _tensors.size();
     auto     tensor = support::cpp14::make_unique<Tensor>(tid, desc);

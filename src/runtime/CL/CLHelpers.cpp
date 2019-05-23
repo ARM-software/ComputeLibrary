@@ -47,7 +47,7 @@ void printf_callback(const char *buffer, unsigned int len, size_t complete, void
  * @return A pointer to the context properties which can be used to create an opencl context
  */
 
-void initialise_context_properties(const cl::Platform &platform, const cl::Device &device, cl_context_properties prop[7])
+void initialise_context_properties(const cl::Platform &platform, const cl::Device &device, std::array<cl_context_properties, 7> &prop)
 {
     ARM_COMPUTE_UNUSED(device);
 #if defined(ARM_COMPUTE_ASSERTS_ENABLED)
@@ -55,7 +55,7 @@ void initialise_context_properties(const cl::Platform &platform, const cl::Devic
     if(arm_compute::device_supports_extension(device, "cl_arm_printf"))
     {
         // Create a cl_context with a printf_callback and user specified buffer size.
-        cl_context_properties properties_printf[] =
+        std::array<cl_context_properties, 7> properties_printf =
         {
             CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform()),
             // Enable a printf callback function for this context.
@@ -65,17 +65,17 @@ void initialise_context_properties(const cl::Platform &platform, const cl::Devic
             CL_PRINTF_BUFFERSIZE_ARM, 0x1000,
             0
         };
-        std::copy_n(properties_printf, 7, prop);
+        prop = properties_printf;
     }
     else
 #endif // defined(ARM_COMPUTE_ASSERTS_ENABLED)
     {
-        cl_context_properties properties[] =
+        std::array<cl_context_properties, 3> properties =
         {
             CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(platform()),
             0
         };
-        std::copy_n(properties, 3, prop);
+        std::copy(properties.begin(), properties.end(), prop.begin());
     };
 }
 } //namespace
@@ -94,11 +94,11 @@ create_opencl_context_and_device()
     std::vector<cl::Device> platform_devices;
     p.getDevices(CL_DEVICE_TYPE_DEFAULT, &platform_devices);
     ARM_COMPUTE_ERROR_ON_MSG(platform_devices.size() == 0, "Couldn't find any OpenCL device");
-    device                              = platform_devices[0];
-    cl_int                err           = CL_SUCCESS;
-    cl_context_properties properties[7] = { 0, 0, 0, 0, 0, 0, 0 };
+    device     = platform_devices[0];
+    cl_int err = CL_SUCCESS;
+    std::array<cl_context_properties, 7> properties = { 0, 0, 0, 0, 0, 0, 0 };
     initialise_context_properties(p, device, properties);
-    cl::Context cl_context = cl::Context(device, properties, nullptr, nullptr, &err);
+    cl::Context cl_context = cl::Context(device, properties.data(), nullptr, nullptr, &err);
     ARM_COMPUTE_ERROR_ON_MSG(err != CL_SUCCESS, "Failed to create OpenCL context");
     return std::make_tuple(cl_context, device, err);
 }

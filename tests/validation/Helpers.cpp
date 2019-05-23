@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,45 +72,6 @@ void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pat
         std::uniform_int_distribution<uint8_t> distribution_u8(0, ((cols * rows) - 1));
         mask[distribution_u8(gen)] = 255;
     }
-}
-
-TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes)
-{
-    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
-
-    TensorShape out_shape = input_shapes[0];
-
-    size_t max_x = 0;
-    size_t max_y = 0;
-    size_t depth = 0;
-
-    for(const auto &shape : input_shapes)
-    {
-        max_x = std::max(shape.x(), max_x);
-        max_y = std::max(shape.y(), max_y);
-        depth += shape.z();
-    }
-
-    out_shape.set(0, max_x);
-    out_shape.set(1, max_y);
-    out_shape.set(2, depth);
-
-    return out_shape;
-}
-
-TensorShape calculate_width_concatenate_shape(const std::vector<TensorShape> &input_shapes)
-{
-    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
-
-    TensorShape out_shape = input_shapes[0];
-
-    int width = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [](int sum, const TensorShape & shape)
-    {
-        return sum + shape.x();
-    });
-    out_shape.set(0, width);
-
-    return out_shape;
 }
 
 HarrisCornersParameters harris_corners_parameters()
@@ -308,7 +269,7 @@ std::pair<int, int> get_quantized_bounds(const QuantizationInfo &quant_info, flo
 
     const int min_bound = quant_info.quantize(min, RoundingPolicy::TO_NEAREST_UP);
     const int max_bound = quant_info.quantize(max, RoundingPolicy::TO_NEAREST_UP);
-    return std::pair<int, int>(min_bound, max_bound);
+    return std::pair<int, int> { min_bound, max_bound };
 }
 
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);

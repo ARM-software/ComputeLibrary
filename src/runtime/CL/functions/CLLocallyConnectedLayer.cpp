@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,7 +176,7 @@ void CLLocallyConnectedLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run input reshaping
     CLScheduler::get().enqueue(_input_im2col_kernel);
@@ -186,8 +186,6 @@ void CLLocallyConnectedLayer::run()
 
     // Reshape output matrix
     CLScheduler::get().enqueue(_output_col2im_kernel, false);
-
-    _memory_group.release();
 }
 
 void CLLocallyConnectedLayer::prepare()

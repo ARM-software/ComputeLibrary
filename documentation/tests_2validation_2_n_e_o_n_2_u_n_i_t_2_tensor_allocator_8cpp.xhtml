@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -107,10 +107,16 @@ $(document).ready(function(){initNavTree('tests_2validation_2_n_e_o_n_2_u_n_i_t_
 <code>#include &quot;<a class="el" href="_utility_8h_source.xhtml">arm_compute/core/utils/misc/Utility.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_memory_group_8h_source.xhtml">arm_compute/runtime/MemoryGroup.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_memory_region_8h_source.xhtml">arm_compute/runtime/MemoryRegion.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_activation_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEActivationLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_toolchain_support_8h_source.xhtml">support/ToolchainSupport.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_globals_8h_source.xhtml">tests/Globals.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2_utils_8h_source.xhtml">tests/Utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_asserts_8h_source.xhtml">tests/framework/Asserts.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_activation_layer_8h_source.xhtml">tests/validation/reference/ActivationLayer.h</a>&quot;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;random&gt;</code><br />
 </div>
 <p><a href="tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -126,8 +132,10 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a567a0fd1d570601eeb9a3ea311a8f82f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a567a0fd1d570601eeb9a3ea311a8f82f">TEST_CASE</a> (ImportMemory, framework::DatasetMode::ALL)</td></tr>
-<tr class="separator:a567a0fd1d570601eeb9a3ea311a8f82f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01fc4fffa59e809a19e061a70d32a86e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a01fc4fffa59e809a19e061a70d32a86e">TEST_CASE</a> (ImportMemory, framework::DatasetMode::ALL)</td></tr>
+<tr class="separator:a01fc4fffa59e809a19e061a70d32a86e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb7303d43439b4407f4ca94606c60ba2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aeb7303d43439b4407f4ca94606c60ba2">TEST_CASE</a> (ImportMemoryMalloc, framework::DatasetMode::ALL)</td></tr>
+<tr class="separator:aeb7303d43439b4407f4ca94606c60ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa33b5b965fca34d01c787ebb04f04c11"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa33b5b965fca34d01c787ebb04f04c11">TEST_CASE</a> (AlignedAlloc, framework::DatasetMode::ALL)</td></tr>
 <tr class="separator:aa33b5b965fca34d01c787ebb04f04c11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -137,7 +145,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_6fc87decd8cffc07e5f49c197ca3de10.xhtml">UNIT</a></li><li class="navelem"><a class="el" href="tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp.xhtml">TensorAllocator.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -5,7 +5,7 @@ var classarm__compute_1_1_n_e_scale_kernel =
     [ "NEScaleKernel", "classarm__compute_1_1_n_e_scale_kernel.xhtml#ae1d7843aaf1b5e13bf8403e44249b97a", null ],
     [ "~NEScaleKernel", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a20422dd80d0c568f0c07730923a0d8d0", null ],
     [ "border_size", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7", null ],
-    [ "configure", "classarm__compute_1_1_n_e_scale_kernel.xhtml#aa13b6f52790e5ec90e37a9834611c1c8", null ],
+    [ "configure", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a736d88971e28999a64f54ebf4d111c35", null ],
     [ "name", "classarm__compute_1_1_n_e_scale_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scale_kernel.xhtml#a9bc5c918a86ea34e0a7cc2559c010596", null ],
     [ "operator=", "classarm__compute_1_1_n_e_scale_kernel.xhtml#aa2d0e6d7ced452bc623cd3020e3026c7", null ],

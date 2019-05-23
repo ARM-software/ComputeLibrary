@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -153,6 +153,8 @@ Functions</h2></td></tr>
 <tr class="separator:af3c1de77fd86df539395c75c17ec230e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aedc846191741fb759460952ef3dbf6d2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aedc846191741fb759460952ef3dbf6d2">ARM_COMPUTE_EXPECT</a> (dst.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
 <tr class="separator:aedc846191741fb759460952ef3dbf6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1783f94b5942a7c78100c398e192569"><td class="memItemLeft" align="right" valign="top">convolution configure &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac1783f94b5942a7c78100c398e192569">src</a> (), 0, border_mode</td></tr>
+<tr class="separator:ac1783f94b5942a7c78100c398e192569"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6813132c943295888972727864ea5c2f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6813132c943295888972727864ea5c2f">validate</a> (dst.info() -&gt;valid_region(), dst_valid_region)</td></tr>
 <tr class="separator:a6813132c943295888972727864ea5c2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9374ade0a8f9d2e8b1831942a2247700"><td class="memItemLeft" align="right" valign="top">PaddingCalculator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9374ade0a8f9d2e8b1831942a2247700">calculator</a> (shape.x(), 8)</td></tr>
@@ -191,6 +193,8 @@ Functions</h2></td></tr>
 <tr class="separator:a19c74c8eb965d15f4372d8a50f565718"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0e9ebd0d3a9f8a0fe9f158005ef96529"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0e9ebd0d3a9f8a0fe9f158005ef96529">combine</a> (combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, { DataType::U8, DataType::S16 })), datasets::BorderModes()), framework::dataset::make(&quot;filter_width&quot;, { 3, 5, 7, 9 })), framework::dataset::make(&quot;filter_height&quot;, { 3, 5, 7, 9 }))</td></tr>
 <tr class="separator:a0e9ebd0d3a9f8a0fe9f158005ef96529"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71fde389d5d0408923311a439f7e8d47"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a71fde389d5d0408923311a439f7e8d47">conv</a> (filter_width *filter_height)</td></tr>
+<tr class="separator:a71fde389d5d0408923311a439f7e8d47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aae364968da28604884452ee304580304"><td class="memItemLeft" align="right" valign="top">calculator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aae364968da28604884452ee304580304">set_border_size</a> (filter_width/2)</td></tr>
 <tr class="separator:aae364968da28604884452ee304580304"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25638bd9e4ad41227394df07f79da831"><td class="memItemLeft" align="right" valign="top">calculator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a25638bd9e4ad41227394df07f79da831">set_access_offset</a> (-(filter_width/2))</td></tr>
@@ -214,8 +218,8 @@ Variables</h2></td></tr>
 <tr class="separator:a5471e46933e7a9c4709972d91fc4ea65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2237230a1357685ba2472c2d6fca17fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2237230a1357685ba2472c2d6fca17fa">filter_size</a></td></tr>
 <tr class="separator:a2237230a1357685ba2472c2d6fca17fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adab2e84e4e20f041fdcd075e2864b132"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adab2e84e4e20f041fdcd075e2864b132">conv</a> [25] = {}</td></tr>
-<tr class="separator:adab2e84e4e20f041fdcd075e2864b132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a006546051719c5fb4b20c966a26b9c76"><td class="memItemLeft" align="right" valign="top">std::array&lt; int16_t, 25 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a006546051719c5fb4b20c966a26b9c76">conv</a> = { 0 }</td></tr>
+<tr class="separator:a006546051719c5fb4b20c966a26b9c76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae38161fda91461cff23b750a95e47e6f"><td class="memItemLeft" align="right" valign="top">CLConvolution5x5&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae38161fda91461cff23b750a95e47e6f">convolution</a></td></tr>
 <tr class="separator:ae38161fda91461cff23b750a95e47e6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c697c8d77faa9d6f180635d6509873c"><td class="memItemLeft" align="right" valign="top">const ValidRegion&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1c697c8d77faa9d6f180635d6509873c">dst_valid_region</a> = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_size / 2))</td></tr>
@@ -239,7 +243,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="validation_2_c_l_2_convolution_8cpp.xhtml">Convolution.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -177,7 +177,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
 
 void CLCannyEdge::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run sobel
     _sobel->run();
@@ -199,6 +199,4 @@ void CLCannyEdge::run()
     _l1_list_counter.clear(CLScheduler::get().queue());
     _l1_stack.clear(CLScheduler::get().queue());
     CLScheduler::get().enqueue(_edge_trace, true);
-
-    _memory_group.release();
 }

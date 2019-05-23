@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>YOLO Layer. </p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01016">1016</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01154">1154</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a38c7fe824c7ceaa8b93b11d77648e14e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a38c7fe824c7ceaa8b93b11d77648e14e">&#9670;&nbsp;</a></span>YOLOLayer()</h2>
@@ -181,8 +181,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01024">1024</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01025"></a><span class="lineno"> 1025</span>&#160;        : _act_info(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">act_info</a>), _num_classes(num_classes)</div><div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;    {</div><div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a1f8aca235c095df227e7444f6b237eb1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">arm_compute::test::validation::act_info</a></div><div class="ttdeci">act_info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">ConvolutionLayer.cpp:175</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01162">1162</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01163"></a><span class="lineno"> 1163</span>&#160;        : _act_info(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">act_info</a>), _num_classes(num_classes)</div><div class="line"><a name="l01164"></a><span class="lineno"> 1164</span>&#160;    {</div><div class="line"><a name="l01165"></a><span class="lineno"> 1165</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a1f8aca235c095df227e7444f6b237eb1"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f8aca235c095df227e7444f6b237eb1">arm_compute::test::validation::act_info</a></div><div class="ttdeci">act_info</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00175">ConvolutionLayer.cpp:175</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -222,11 +222,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#afd0f42ef97e62ef3b6849bcbb8a7533a">ILayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01029">1029</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160;    {</div><div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a2a0e27fb3cd961fc292b73bd92c7e0ad">GraphBuilder::add_yolo_node</a>(s.graph(), common_params, input, _act_info, _num_classes);</div><div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a2a0e27fb3cd961fc292b73bd92c7e0ad"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a2a0e27fb3cd961fc292b73bd92c7e0ad">arm_compute::graph::GraphBuilder::add_yolo_node</a></div><div class="ttdeci">static NodeID add_yolo_node(Graph &amp;g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, int32_t num_classes)</div><div class="ttdoc">Adds a yolo layer to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00607">GraphBuilder.cpp:607</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_layers_8h_source.xhtml#l01167">1167</a> of file <a class="el" href="_layers_8h_source.xhtml">Layers.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01168"></a><span class="lineno"> 1168</span>&#160;    {</div><div class="line"><a name="l01169"></a><span class="lineno"> 1169</span>&#160;        NodeParams  common_params = { <a class="code" href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">name</a>(), s.hints().target_hint };</div><div class="line"><a name="l01170"></a><span class="lineno"> 1170</span>&#160;        NodeIdxPair input         = { s.tail_node(), 0 };</div><div class="line"><a name="l01171"></a><span class="lineno"> 1171</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a2a0e27fb3cd961fc292b73bd92c7e0ad">GraphBuilder::add_yolo_node</a>(s.graph(), common_params, input, _act_info, _num_classes);</div><div class="line"><a name="l01172"></a><span class="lineno"> 1172</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1graph_1_1_graph_builder_xhtml_a2a0e27fb3cd961fc292b73bd92c7e0ad"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_graph_builder.xhtml#a2a0e27fb3cd961fc292b73bd92c7e0ad">arm_compute::graph::GraphBuilder::add_yolo_node</a></div><div class="ttdeci">static NodeID add_yolo_node(Graph &amp;g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info, int32_t num_classes)</div><div class="ttdoc">Adds a yolo layer to the graph.</div><div class="ttdef"><b>Definition:</b> <a href="_graph_builder_8cpp_source.xhtml#l00654">GraphBuilder.cpp:654</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1frontend_1_1_i_layer_xhtml_ad8227ba86a01f26e4f173cd5e219d5d1"><div class="ttname"><a href="classarm__compute_1_1graph_1_1frontend_1_1_i_layer.xhtml#ad8227ba86a01f26e4f173cd5e219d5d1">arm_compute::graph::frontend::ILayer::name</a></div><div class="ttdeci">const std::string &amp; name() const</div><div class="ttdoc">Layer name accessor.</div><div class="ttdef"><b>Definition:</b> <a href="_i_layer_8h_source.xhtml#l00064">ILayer.h:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00607">GraphBuilder::add_yolo_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
+<p class="reference">References <a class="el" href="_graph_builder_8cpp_source.xhtml#l00654">GraphBuilder::add_yolo_node()</a>, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_i_stream.xhtml#a2f9edb3a23ff98069aaa52590d53bf5f">IStream::graph()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00073">IStream::hints()</a>, <a class="el" href="_i_layer_8h_source.xhtml#l00064">ILayer::name()</a>, <a class="el" href="_i_stream_8h_source.xhtml#l00065">IStream::tail_node()</a>, and <a class="el" href="arm__compute_2graph_2frontend_2_types_8h_source.xhtml#l00063">StreamHints::target_hint</a>.</p>
 
 </div>
 </div>
@@ -239,7 +239,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml">frontend</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_y_o_l_o_layer.xhtml">YOLOLayer</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:05 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

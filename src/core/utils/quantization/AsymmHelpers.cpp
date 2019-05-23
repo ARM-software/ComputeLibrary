@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,12 +29,12 @@
 
 using namespace arm_compute::quantization;
 
-constexpr int64_t fixed_point_one_Q0 = (1ll << 31);
+constexpr int64_t fixed_point_one_Q0 = (1LL << 31);
 constexpr float   epsilon            = 0.00001f;
 
 arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_less_than_one(float multiplier,
-                                                                                            int   *quant_multiplier,
-                                                                                            int   *right_shift)
+                                                                                            int *quant_multiplier,
+                                                                                            int *right_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quant_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(right_shift == nullptr);
@@ -71,8 +71,8 @@ arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_le
 }
 
 arm_compute::Status arm_compute::quantization::calculate_quantized_multiplier_greater_than_one(float multiplier,
-                                                                                               int   *quantized_multiplier,
-                                                                                               int   *left_shift)
+                                                                                               int *quantized_multiplier,
+                                                                                               int *left_shift)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(quantized_multiplier == nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(left_shift == nullptr);

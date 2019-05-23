@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -317,7 +317,7 @@ NEConvolutionKernel<matrix_size>::NEConvolutionKernel()
 template <unsigned int matrix_size>
 BorderSize             NEConvolutionKernel<matrix_size>::border_size() const
 {
-    return BorderSize(matrix_size / 2);
+    return BorderSize{ matrix_size / 2 };
 }
 
 template <unsigned int matrix_size>
@@ -388,7 +388,7 @@ void NEConvolutionKernel<3>::convolution(const Window &win)
     const unsigned char *input_mid_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-1, 0));
     const unsigned char *input_low_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-1, 1));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4_t out  = vdupq_n_s32(0);
         int32x4_t out2 = vdupq_n_s32(0);
@@ -437,7 +437,7 @@ void NEConvolutionKernel<5>::convolution(const Window &win)
     const unsigned char *input_low1_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-2, 1));
     const unsigned char *input_low2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-2, 2));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4_t out  = vdupq_n_s32(0);
         int32x4_t out2 = vdupq_n_s32(0);
@@ -496,7 +496,7 @@ void NEConvolutionKernel<7>::convolution(const Window &win)
     const unsigned char *input_low2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-3, 2));
     const unsigned char *input_low3_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-3, 3));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4_t out  = vdupq_n_s32(0);
         int32x4_t out2 = vdupq_n_s32(0);
@@ -565,7 +565,7 @@ void NEConvolutionKernel<9>::convolution(const Window &win)
     const unsigned char *input_low3_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-4, 3));
     const unsigned char *input_low4_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-4, 4));
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4_t out  = vdupq_n_s32(0);
         int32x4_t out2 = vdupq_n_s32(0);
@@ -728,7 +728,7 @@ inline void NESeparableConvolutionHorKernel<5>::convolve<uint16_t>(const Window 
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -761,7 +761,7 @@ inline void NESeparableConvolutionHorKernel<5>::convolve<int16_t>(const Window &
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -794,7 +794,7 @@ void NESeparableConvolutionHorKernel<5>::convolve<int32_t>(const Window &window)
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -840,7 +840,7 @@ inline void NESeparableConvolutionHorKernel<7>::convolve<uint16_t>(const Window 
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -875,7 +875,7 @@ inline void NESeparableConvolutionHorKernel<7>::convolve<int16_t>(const Window &
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -910,7 +910,7 @@ void NESeparableConvolutionHorKernel<7>::convolve<int32_t>(const Window &window)
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -962,7 +962,7 @@ inline void NESeparableConvolutionHorKernel<9>::convolve<uint16_t>(const Window 
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -999,7 +999,7 @@ inline void NESeparableConvolutionHorKernel<9>::convolve<int16_t>(const Window &
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -1036,7 +1036,7 @@ void NESeparableConvolutionHorKernel<9>::convolve<int32_t>(const Window &window)
     Iterator input(_input, win_in);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 
@@ -1096,7 +1096,7 @@ NESeparableConvolutionVertKernel<matrix_size>::NESeparableConvolutionVertKernel(
 template <unsigned int matrix_size>
 BorderSize             NESeparableConvolutionVertKernel<matrix_size>::border_size() const
 {
-    return BorderSize(matrix_size / 2, 0);
+    return BorderSize{ matrix_size / 2, 0 };
 }
 
 template <unsigned int matrix_size>
@@ -1209,7 +1209,7 @@ void NESeparableConvolutionVertKernel<matrix_size>::convolution_u16(const Window
         input_ptrs[k_half + i] = _input->ptr_to_element(Coordinates(0, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         uint16x8_t out0 = vdupq_n_u16(0);
         uint16x8_t out1 = vdupq_n_u16(0);
@@ -1275,7 +1275,7 @@ void NESeparableConvolutionVertKernel<matrix_size>::convolution_s16(const Window
         input_ptrs[k_half + i] = _input->ptr_to_element(Coordinates(0, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int16x8_t out0 = vdupq_n_s16(0);
         int16x8_t out1 = vdupq_n_s16(0);
@@ -1343,7 +1343,7 @@ void NESeparableConvolutionVertKernel<matrix_size>::convolution_s32(const Window
 
     const int32x4_t zero = vdupq_n_s32(0);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4x2_t out0 =
         {
@@ -1576,7 +1576,7 @@ void NEConvolutionRectangleKernel::convolution(const Window &win)
         input_ptrs[k_row_half + i] = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(-k_col_half, i));
     }
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         int32x4_t out  = vdupq_n_s32(0);
         int32x4_t out2 = vdupq_n_s32(0);

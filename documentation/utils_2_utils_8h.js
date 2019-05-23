@@ -8,7 +8,7 @@ var utils_2_utils_8h =
       [ "PPM", "utils_2_utils_8h.xhtml#a3154c405c975616503bac23f51b78fc0a4bb1ebdeeb70354069bc644b9c94ee5f", null ],
       [ "JPEG", "utils_2_utils_8h.xhtml#a3154c405c975616503bac23f51b78fc0a907e06a16862d82ca6907a28a68d0ad6", null ]
     ] ],
-    [ "compare_tensor", "utils_2_utils_8h.xhtml#a680c6253a783cf8591d65c3da13d3337", null ],
+    [ "compare_tensor", "utils_2_utils_8h.xhtml#a4894358ea9a576be19615608a6b8b152", null ],
     [ "draw_detection_rectangle", "utils_2_utils_8h.xhtml#ad1b5373f466a3945e1f0ef1c9943c357", null ],
     [ "fill_random_tensor", "utils_2_utils_8h.xhtml#abe777f4e6d2b0d9964eee32f5ae3fca7", null ],
     [ "get_image_type_from_file", "utils_2_utils_8h.xhtml#a779702024b509e6797b2d526d382cf65", null ],

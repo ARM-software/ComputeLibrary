@@ -73,6 +73,7 @@ You should have the following file organisation:
 
 	.
 	├── arm_compute --> All the arm_compute headers
+	│   ├── graph.h --> Includes all the Graph headers at once.
 	│   ├── core
 	│   │   ├── CL
 	│   │   │   ├── CLKernelLibrary.h --> Manages all the OpenCL kernels compilation and caching, provides accessors for the OpenCL Context.
@@ -163,7 +164,6 @@ You should have the following file organisation:
 	│   ├── graph_*.cpp --> Graph examples
 	│   ├── neoncl_*.cpp --> NEON / OpenCL interoperability examples
 	│   └── neon_*.cpp --> NEON examples
-	├── graph.h --> Includes all the Graph headers at once.
 	├── include
 	│   ├── CL
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
@@ -208,8 +208,6 @@ You should have the following file organisation:
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 	│   ├── framework
 	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
-	│   ├── networks
-	│   │   └── Examples of how to instantiate networks.
 	│   └── validation --> Sources for validation
 	│       ├── Validation specific files
 	│       ├── fixtures
@@ -237,6 +235,74 @@ If there is more than one release in a month then an extra sequential number is 
 @note We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.
 
 @subsection S2_2_changelog Changelog
+
+v19.05 Public major release
+ - Various bug fixes.
+ - Various optimisations.
+ - New Neon kernels / functions:
+    - @ref NEBatchToSpaceLayerKernel / @ref NEBatchToSpaceLayer
+    - @ref NEComplexPixelWiseMultiplicationKernel / @ref NEComplexPixelWiseMultiplication
+    - @ref NECropKernel / @ref NECropResize
+    - @ref NEDepthwiseConvolutionAssemblyDispatch
+    - @ref NEFFTDigitReverseKernel
+    - @ref NEFFTRadixStageKernel
+    - @ref NEFFTScaleKernel
+    - @ref NEGEMMLowpOffsetContributionOutputStageKernel
+    - @ref NEHeightConcatenateLayerKernel
+    - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
+    - @ref NEFFT1D
+    - @ref NEFFT2D
+    - @ref NEFFTConvolutionLayer
+ - New OpenCL kernels / functions:
+    - @ref CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
+    - @ref CLCropKernel / @ref CLCropResize
+    - @ref CLDeconvolutionReshapeOutputKernel
+    - @ref CLFFTDigitReverseKernel
+    - @ref CLFFTRadixStageKernel
+    - @ref CLFFTScaleKernel
+    - @ref CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
+    - @ref CLGEMMMatrixMultiplyReshapedOnlyRHSKernel
+    - @ref CLHeightConcatenateLayerKernel
+    - @ref CLDirectDeconvolutionLayer
+    - @ref CLFFT1D
+    - @ref CLFFT2D
+    - @ref CLFFTConvolutionLayer
+    - @ref CLGEMMDeconvolutionLayer
+ - New OpenGLES kernels / functions:
+    - @ref GCConcatenateLayer
+ - Deprecated functions/interfaces
+    - @ref GCDepthConcatenateLayer
+    - @ref NEWidthConcatenateLayer
+    - @ref NEDepthConcatenateLayer
+    - @ref CLWidthConcatenateLayer
+    - @ref CLDepthConcatenateLayer
+    - @ref CLGEMMInterleave4x4
+    - @ref CLGEMMTranspose1xW
+ - Support different quantization info in CLConcatLayer.
+ - Add checks on different input/output quantization info were not supported.
+ - Tensors have different quantization information.
+ - Add FP16 support checks.
+ - Fix output quantization CLDeptwiseConv3x3 when activation is fused.
+ - New graph examples:
+     - graph_convolution
+     - graph_fully_connected
+     - graph_depthwise_convolution
+     - Deepspeech v0.4.1
+ - Add support for QASYMM8 in NEArithmeticSubtractionKernel.
+ - Add support for QASYMM8 in NEPixelWiseMultiplicationKernel.
+ - Add support for QASYMM8 NEDeconvolution.
+ - Add support for DequantizationLayer for NEON/CL.
+ - Add support for dilation in CLDepthwiseConvolution.
+ - Fuse offset contribution with the output stage when we use NEGEMMLowpMatrixMultiplyCore.
+ - Optimize CLDeconvolution.
+ - Add StackLayer to the graph API.
+ - Add support for "reflect" padding mode in NEPad.
+ - Winograd 7x7 NHWC on OpenCL.
+ - Rework CL ML layers to run exclusively on CL.
+ - Support different quantization info in PoolingLayer.
+ - Implement and test import memory interfaces.
+ - Added new tests and removed old ones.
+ - Various clang-tidy fixes.
 
 v19.02 Public major release
  - Various bug fixes.
@@ -1041,7 +1107,7 @@ For Android, the library was successfully built and tested using Google's standa
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
 - Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
-- Make sure you have Python 2 installed on your machine.
+- Make sure you have Python 2.7 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
 
@@ -1253,7 +1319,7 @@ SVM allocations are supported for all the underlying allocations in Compute Libr
 
 The OpenCL tuner, a.k.a. CLTuner, is a module of Arm Compute Library that can improve the performance of the OpenCL kernels tuning the Local-Workgroup-Size (LWS).
 The optimal LWS for each unique OpenCL kernel configuration is stored in a table. This table can be either imported or exported from/to a file.
-The OpenCL tuner performs a brute-force approach: it runs the same OpenCL kernel for a range of local workgroup sizes and keep the local workgroup size of the fastest run to use in subsequent calls to the kernel.
+The OpenCL tuner runs the same OpenCL kernel for a range of local workgroup sizes and keeps the local workgroup size of the fastest run to use in subsequent calls to the kernel. It supports three modes of tuning with different trade-offs between the time taken to tune and the kernel execution time achieved using the best LWS found. In the Exhaustive mode, it searches all the supported values of LWS. This mode takes the longest time to tune and is the most likely to find the optimal LWS. Normal mode searches a subset of LWS values to yield a good approximation of the optimal LWS. It takes less time to tune than Exhaustive mode. Rapid mode takes the shortest time to tune and finds an LWS value that is at least as good or better than the default LWS value. The mode affects only the search for the optimal LWS and has no effect when the LWS value is imported from a file.
 In order for the performance numbers to be meaningful you must disable the GPU power management and set it to a fixed frequency for the entire duration of the tuning phase.
 
 If you wish to know more about LWS and the important role on improving the GPU cache utilization, we suggest having a look at the presentation "Even Faster CNNs: Exploring the New Class of Winograd Algorithms available at the following link:

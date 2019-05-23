@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,11 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type)
     {
+        const QuantizationInfo q_info(0.5f, -10);
+
         // Create tensors
         src = create_tensor<TensorType>(shape, data_type);
-        dst = create_tensor<TensorType>(shape, DataType::U8);
+        dst = create_tensor<TensorType>(shape, DataType::QASYMM8, 1, q_info);
 
         // Create and configure function
         quantization_func.configure(&src, &dst);

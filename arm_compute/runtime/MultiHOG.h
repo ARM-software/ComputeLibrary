@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,8 +50,8 @@ public:
     const IHOG *model(size_t index) const override;
 
 private:
-    size_t                 _num_models;
-    std::unique_ptr<HOG[]> _model;
+    size_t           _num_models;
+    std::vector<HOG> _model;
 };
 }
 

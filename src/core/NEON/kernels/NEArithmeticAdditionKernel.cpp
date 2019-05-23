@@ -84,7 +84,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const T *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<T *>(output.ptr());
@@ -120,7 +120,7 @@ void add_same(const ITensor *in1, const ITensor *in2, ITensor *out, ConvertPolic
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const T *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const T *>(input2.ptr());
@@ -165,8 +165,8 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
     const auto window_end_x          = static_cast<int>(window.x().end());
     const bool is_broadcast_across_x = (input1_win.x().step() == 0) || (input2_win.x().step() == 0);
 
-    const float output_scale    = out->info()->quantization_info().scale;
-    const int   output_offset   = out->info()->quantization_info().offset;
+    const float output_scale  = out->info()->quantization_info().scale;
+    const int   output_offset = out->info()->quantization_info().offset;
 
     const float32x4_t vscale1    = vdupq_n_f32(in1->info()->quantization_info().scale);
     const float32x4_t vscale2    = vdupq_n_f32(in2->info()->quantization_info().scale);
@@ -192,7 +192,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
         Iterator non_broadcast_input(non_broadcast_tensor, non_broadcast_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto non_broadcast_input_ptr = reinterpret_cast<const uint8_t *>(non_broadcast_input.ptr());
             const auto output_ptr              = reinterpret_cast<uint8_t *>(output.ptr());
@@ -234,7 +234,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
-#else //__aarch64__
+#else  //__aarch64__
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
@@ -252,7 +252,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             for(; x < window_end_x; ++x)
             {
                 const float afs   = static_cast<int32_t>(*(non_broadcast_input_ptr + x) - non_broadcast_qinfo.offset) * non_broadcast_qinfo.scale;
-                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs),RoundingPolicy::TO_NEAREST_UP);
+                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs), RoundingPolicy::TO_NEAREST_UP);
             }
         },
         broadcast_input, non_broadcast_input, output);
@@ -270,7 +270,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
         Iterator input2(in2, input2_win);
         Iterator output(out, win);
 
-        execute_window_loop(win, [&](const Coordinates & id)
+        execute_window_loop(win, [&](const Coordinates &)
         {
             const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
             const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
@@ -311,7 +311,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
                         vcvtnq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[3], bf.val[3]), invvscaleo)),
-#else //__aarch64__
+#else  //__aarch64__
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[0], bf.val[0]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[1], bf.val[1]), invvscaleo)),
                         vcvtq_s32_f32(vmlaq_f32(voffseto, vaddq_f32(af.val[2], bf.val[2]), invvscaleo)),
@@ -330,7 +330,7 @@ void add_QASYMM8_QASYMM8_QASYMM8(const ITensor *in1, const ITensor *in2, ITensor
             {
                 const float afs   = static_cast<int32_t>((*(input1_ptr + x)) - input1_qinfo.offset) * input1_qinfo.scale;
                 const float bfs   = static_cast<int32_t>((*(input2_ptr + x)) - input2_qinfo.offset) * input2_qinfo.scale;
-                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs),RoundingPolicy::TO_NEAREST_UP);
+                *(output_ptr + x) = out->info()->quantization_info().quantize((afs + bfs), RoundingPolicy::TO_NEAREST_UP);
             }
         },
         input1, input2, output);
@@ -357,7 +357,7 @@ void add_S16_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, Conver
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const int16_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());
@@ -427,7 +427,7 @@ void add_U8_U8_S16(const ITensor *in1, const ITensor *in2, ITensor *out, Convert
     const auto window_start_x = static_cast<int>(window.x().start());
     const auto window_end_x   = static_cast<int>(window.x().end());
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto input1_ptr = reinterpret_cast<const uint8_t *>(input1.ptr());
         const auto input2_ptr = reinterpret_cast<const uint8_t *>(input2.ptr());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,13 +103,17 @@ public:
     void free() override;
     /** Import an existing memory as a tensor's backing memory
      *
-     * @warning ownership of memory is not transferred
+     * @warning memory should have been created under the same context that ACL uses.
+     * @warning memory is expected to be aligned with the device requirements.
+     * @warning tensor shouldn't be memory managed.
+     * @warning ownership of memory is not transferred.
+     * @note buffer size will be checked to be compliant with total_size reported by ITensorInfo.
      *
-     * @param[in] buffer Buffer to import
+     * @param[in] buffer Buffer to be used as backing memory
      *
-     * @return error status
+     * @return An error status
      */
-    arm_compute::Status import_memory(cl::Buffer buffer);
+    Status import_memory(cl::Buffer buffer);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with

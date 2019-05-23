@@ -42,6 +42,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "FullyConnectedLayerNode.h", "_fully_connected_layer_node_8h.xhtml", [
       [ "FullyConnectedLayerNode", "classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml", "classarm__compute_1_1graph_1_1_fully_connected_layer_node" ]
     ] ],
+    [ "FusedConvolutionBatchNormalizationNode.h", "_fused_convolution_batch_normalization_node_8h.xhtml", [
+      [ "FusedConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node" ]
+    ] ],
     [ "GenerateProposalsLayerNode.h", "_generate_proposals_layer_node_8h.xhtml", [
       [ "GenerateProposalsLayerNode", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node" ]
     ] ],
@@ -91,6 +94,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     ] ],
     [ "SplitLayerNode.h", "_split_layer_node_8h.xhtml", [
       [ "SplitLayerNode", "classarm__compute_1_1graph_1_1_split_layer_node.xhtml", "classarm__compute_1_1graph_1_1_split_layer_node" ]
+    ] ],
+    [ "StackLayerNode.h", "_stack_layer_node_8h.xhtml", [
+      [ "StackLayerNode", "classarm__compute_1_1graph_1_1_stack_layer_node.xhtml", "classarm__compute_1_1graph_1_1_stack_layer_node" ]
     ] ],
     [ "UpsampleLayerNode.h", "_upsample_layer_node_8h.xhtml", [
       [ "UpsampleLayerNode", "classarm__compute_1_1graph_1_1_upsample_layer_node.xhtml", "classarm__compute_1_1graph_1_1_upsample_layer_node" ]

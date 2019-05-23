@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -315,7 +315,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00053">53</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;{</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordflow">return</span> _mapping;</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00149">CLAccessor::data()</a>, <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00057">CLDeconvolutionLayerUpsample::run()</a>, and <a class="el" href="_c_l_l_s_t_m_layer_8cpp_source.xhtml#l00465">CLLSTMLayer::run()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_f_f_t1_d_8cpp_source.xhtml#l00038">CLFFT1D::configure()</a>, <a class="el" href="_c_l_f_f_t_convolution_layer_8cpp_source.xhtml#l00098">CLFFTConvolutionLayer::configure()</a>, <a class="el" href="_c_l_direct_deconvolution_layer_8cpp_source.xhtml#l00108">CLDirectDeconvolutionLayer::configure()</a>, and <a class="el" href="_c_l_accessor_8h_source.xhtml#l00149">CLAccessor::data()</a>.</p>
 
 </div>
 </div>
@@ -347,7 +347,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a53c338c0d76f41c472cdbf66fafdfe91">CLSubTensor</a>, and <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml#a53c338c0d76f41c472cdbf66fafdfe91">CLTensor</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_i_c_l_kernel_8cpp_source.xhtml#l00082">ICLKernel::add_tensor_argument()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00055">CLSubTensor::cl_buffer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_i_c_l_kernel_8cpp_source.xhtml#l00089">ICLKernel::add_tensor_argument()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00055">CLSubTensor::cl_buffer()</a>.</p>
 
 </div>
 </div>
@@ -424,7 +424,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00035">35</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    _mapping = do_map(q, blocking);</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00055">CLTensor::map()</a>, <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">CLSubTensor::map()</a>, <a class="el" href="_c_l_deconvolution_layer_8cpp_source.xhtml#l00185">CLDeconvolutionLayer::prepare()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, and <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00057">CLDeconvolutionLayerUpsample::run()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00055">CLTensor::map()</a>, <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00066">CLSubTensor::map()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, and <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>.</p>
 
 </div>
 </div>
@@ -511,7 +511,7 @@ Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00040">40</a> of file <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml">ICLTensor.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    do_unmap(q);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    _mapping = <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_deconvolution_layer_8cpp_source.xhtml#l00185">CLDeconvolutionLayer::prepare()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, <a class="el" href="_c_l_deconvolution_layer_upsample_8cpp_source.xhtml#l00057">CLDeconvolutionLayerUpsample::run()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00060">CLTensor::unmap()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">CLSubTensor::unmap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_i_c_l_tensor_8cpp_source.xhtml#l00046">ICLTensor::clear()</a>, <a class="el" href="_c_l_min_max_layer_kernel_8cpp_source.xhtml#l00119">CLMinMaxLayerKernel::reset()</a>, <a class="el" href="_c_l_crop_resize_8cpp_source.xhtml#l00229">CLCropResize::run()</a>, <a class="el" href="_c_l_tensor_8cpp_source.xhtml#l00060">CLTensor::unmap()</a>, and <a class="el" href="_c_l_sub_tensor_8cpp_source.xhtml#l00071">CLSubTensor::unmap()</a>.</p>
 
 </div>
 </div>
@@ -525,7 +525,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:01 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

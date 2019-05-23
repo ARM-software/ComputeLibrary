@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,6 +100,53 @@ inline ::std::istream &operator>>(::std::istream &stream, Target &target)
     target = target_from_name(value);
     return stream;
 }
+
+/** Converts a string to a strong types enumeration @ref ConvolutionMethod
+ *
+ * @param[in] name String to convert
+ *
+ * @return Converted Target enumeration
+ */
+ConvolutionMethod Convolution_method_from_name(const std::string &name);
+
+/** Input Stream operator for @ref ConvolutionMethod
+ *
+ * @param[in]  stream Stream to parse
+ * @param[out] target Output target
+ *
+ * @return Updated stream
+ */
+inline ::std::istream &operator>>(::std::istream &stream, ConvolutionMethod &target)
+{
+    std::string value;
+    stream >> value;
+    target = Convolution_method_from_name(value);
+    return stream;
+}
+
+/** Converts a string to a strong types enumeration @ref DepthwiseConvolutionMethod
+ *
+ * @param[in] name String to convert
+ *
+ * @return Converted Target enumeration
+ */
+DepthwiseConvolutionMethod depthwise_convolution_method_from_name(const std::string &name);
+
+/** Input Stream operator for @ref DepthwiseConvolutionMethod
+ *
+ * @param[in]  stream Stream to parse
+ * @param[out] target Output target
+ *
+ * @return Updated stream
+ */
+inline ::std::istream &operator>>(::std::istream &stream, DepthwiseConvolutionMethod &target)
+{
+    std::string value;
+    stream >> value;
+    target = depthwise_convolution_method_from_name(value);
+    return stream;
+}
+
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_TYPE_LOADER_H__ */

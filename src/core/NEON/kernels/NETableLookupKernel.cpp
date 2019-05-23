@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ void NETableLookupKernel::tableLookup(const Window &window)
     Iterator input  = Iterator(_input, window);
     Iterator output = Iterator(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
         auto output_ptr = reinterpret_cast<T *>(output.ptr());
@@ -92,7 +92,7 @@ void NETableLookupKernel::tableLookup<uint8_t>(const Window &window)
     Iterator input  = Iterator(_input, window);
     Iterator output = Iterator(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8_t *input_ptr  = input.ptr();
         uint8_t       *output_ptr = output.ptr();

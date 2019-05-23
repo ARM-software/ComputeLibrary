@@ -192,7 +192,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMLowpMatrixMultiplyReshaped3DFixture, fr
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END() // GEMMLowpMatrixMulipltyReshaped
+TEST_SUITE_END() // GEMMLowpMatrixMultiplyReshaped
 TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test

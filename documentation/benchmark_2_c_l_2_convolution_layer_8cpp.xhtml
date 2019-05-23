@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -112,6 +112,7 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_convolution_layer_8c
 <code>#include &quot;<a class="el" href="_c_l_winograd_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
 <code>#include &quot;tests/benchmark/fixtures/ConvolutionLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/FFTConvolutionLayerFixture.h&quot;</code><br />
 <code>#include &quot;tests/benchmark/fixtures/WinogradConvolutionLayerFixture.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h&quot;</code><br />
@@ -124,6 +125,9 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_convolution_layer_8c
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &lt;<a class="el" href="_c_l_f_f_t_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h</a>&gt;</code><br />
+<code>#include &lt;tests/datasets/SmallConvolutionLayerDataset.h&gt;</code><br />
+<code>#include &lt;tests/datasets/system_tests/resnet12/ResNet12ConvolutionLayerDataset.h&gt;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_convolution_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -143,9 +147,13 @@ Typedefs</h2></td></tr>
 <tr class="separator:a834ff3152a662fff46917ed60519aaae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d95b818519b5889e077646206bf30f8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a5d95b818519b5889e077646206bf30f8">CLWinogradLayerFixture</a> = WinogradConvolutionLayerFixture&lt; CLTensor, CLWinogradConvolutionLayer, CLAccessor &gt;</td></tr>
 <tr class="separator:a5d95b818519b5889e077646206bf30f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22fb86f77a20d298ea600a2d24713c5e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a22fb86f77a20d298ea600a2d24713c5e">CLFFTConvolutionLayerFixture</a> = FFTConvolutionLayerFixture&lt; CLTensor, CLFFTConvolutionLayer, CLAccessor &gt;</td></tr>
+<tr class="separator:a22fb86f77a20d298ea600a2d24713c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a8dab429067a52460b5ccf7e8b6446049"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a8dab429067a52460b5ccf7e8b6446049">REGISTER_FIXTURE_DATA_TEST_CASE</a> (ResNet12FFTLayer, CLFFTConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::ResNet12FFTConvolutionLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))), framework::dataset::make(&quot;DataType&quot;, { DataType::F32 })), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
+<tr class="separator:a8dab429067a52460b5ccf7e8b6446049"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9417b987aac4f6d77fe0108abd72995f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a9417b987aac4f6d77fe0108abd72995f">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))), framework::dataset::make(&quot;DataType&quot;, { DataType::F16, DataType::F32 })), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
 <tr class="separator:a9417b987aac4f6d77fe0108abd72995f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a973ba17f360be01d2e090f8170198171"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a973ba17f360be01d2e090f8170198171">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1WinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1WinogradLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))), framework::dataset::make(&quot;DataType&quot;, { DataType::F16, DataType::F32 })), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
@@ -195,7 +203,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_convolution_layer_8cpp.xhtml">ConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

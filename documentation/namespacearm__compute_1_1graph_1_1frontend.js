@@ -31,6 +31,7 @@ var namespacearm__compute_1_1graph_1_1frontend =
     [ "ScaleLayer", "classarm__compute_1_1graph_1_1frontend_1_1_scale_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_scale_layer" ],
     [ "SliceLayer", "classarm__compute_1_1graph_1_1frontend_1_1_slice_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_slice_layer" ],
     [ "SoftmaxLayer", "classarm__compute_1_1graph_1_1frontend_1_1_softmax_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_softmax_layer" ],
+    [ "StackLayer", "classarm__compute_1_1graph_1_1frontend_1_1_stack_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_stack_layer" ],
     [ "Stream", "classarm__compute_1_1graph_1_1frontend_1_1_stream.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_stream" ],
     [ "StreamHints", "structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml", "structarm__compute_1_1graph_1_1frontend_1_1_stream_hints" ],
     [ "SubStream", "classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_sub_stream" ],

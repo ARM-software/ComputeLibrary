@@ -238,16 +238,14 @@ void NEGEMM::run()
 {
     prepare();
 
+    MemoryGroupResourceScope scope_mg(_memory_group);
+
     if(_asm_glue.is_configured())
     {
-        _memory_group.acquire();
         _asm_glue.run();
-        _memory_group.release();
     }
     else
     {
-        _memory_group.acquire();
-
         if(!_run_vector_matrix_multiplication)
         {
             // Run interleave kernel
@@ -261,8 +259,6 @@ void NEGEMM::run()
         }
 
         NEScheduler::get().schedule(&_mm_kernel, _run_vector_matrix_multiplication ? Window::DimX : Window::DimY);
-
-        _memory_group.release();
 
         // Run matrix addition kernel
         if(_run_addition)

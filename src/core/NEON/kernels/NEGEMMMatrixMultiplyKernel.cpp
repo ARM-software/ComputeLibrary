@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -388,7 +388,7 @@ void matrix_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with NEGEMMInterleave4x4 and NEGEMMTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         auto mtx_a0 = reinterpret_cast<const float *>(ina.ptr());
         auto mtx_b0 = reinterpret_cast<const float *>(inb.ptr());
@@ -687,7 +687,7 @@ void matrix_matrix_multiply_f16(const ITensor *input0, const ITensor *input1, IT
 
     const float16x8_t alpha_f16 = vdupq_n_f16(alpha);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto   *mtx_a0  = reinterpret_cast<const float16_t *>(ina.ptr());
         const auto   *mtx_b0  = reinterpret_cast<const float16_t *>(inb.ptr());

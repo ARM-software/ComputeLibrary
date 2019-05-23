@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,12 +128,11 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
     _num_block_norm_kernel  = input_block_norm.size(); // Number of CLHOGBlockNormalizationKernel kernels to compute
     _num_hog_detect_kernel  = input_hog_detect.size(); // Number of CLHOGDetector functions to compute
 
-    _orient_bin_kernel = arm_compute::support::cpp14::make_unique<CLHOGOrientationBinningKernel[]>(_num_orient_bin_kernel);
-    _block_norm_kernel = arm_compute::support::cpp14::make_unique<CLHOGBlockNormalizationKernel[]>(_num_block_norm_kernel);
-    _hog_detect_kernel = arm_compute::support::cpp14::make_unique<CLHOGDetector[]>(_num_hog_detect_kernel);
-    _non_maxima_kernel = arm_compute::support::cpp14::make_unique<CPPDetectionWindowNonMaximaSuppressionKernel>();
-    _hog_space         = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_orient_bin_kernel);
-    _hog_norm_space    = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_block_norm_kernel);
+    _orient_bin_kernel.resize(_num_orient_bin_kernel);
+    _block_norm_kernel.resize(_num_block_norm_kernel);
+    _hog_detect_kernel.resize(_num_hog_detect_kernel);
+    _hog_space.resize(_num_orient_bin_kernel);
+    _hog_norm_space.resize(_num_block_norm_kernel);
 
     // Allocate tensors for magnitude and phase
     TensorInfo info_mag(shape_img, Format::S16);
@@ -172,10 +171,10 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
         _hog_space[i].allocator()->init(info_space);
 
         // Manage intermediate buffers
-        _memory_group.manage(_hog_space.get() + i);
+        _memory_group.manage(&_hog_space[i]);
 
         // Initialise orientation binning kernel
-        _orient_bin_kernel[i].configure(&_mag, &_phase, _hog_space.get() + i, multi_hog->model(idx_multi_hog)->info());
+        _orient_bin_kernel[i].configure(&_mag, &_phase, &_hog_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -193,10 +192,10 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
         _hog_norm_space[i].allocator()->init(tensor_info);
 
         // Manage intermediate buffers
-        _memory_group.manage(_hog_norm_space.get() + i);
+        _memory_group.manage(&_hog_norm_space[i]);
 
         // Initialize block normalization kernel
-        _block_norm_kernel[i].configure(_hog_space.get() + idx_orient_bin, _hog_norm_space.get() + i, multi_hog->model(idx_multi_hog)->info());
+        _block_norm_kernel[i].configure(&_hog_space[idx_orient_bin], &_hog_norm_space[i], multi_hog->model(idx_multi_hog)->info());
     }
 
     // Allocate intermediate tensors
@@ -212,13 +211,13 @@ void CLHOGMultiDetection::configure(ICLTensor *input, const ICLMultiHOG *multi_h
     {
         const size_t idx_block_norm = input_hog_detect[i];
 
-        _hog_detect_kernel[i].configure(_hog_norm_space.get() + idx_block_norm, multi_hog->cl_model(i), detection_windows, detection_window_strides->at(i), threshold, i);
+        _hog_detect_kernel[i].configure(&_hog_norm_space[idx_block_norm], multi_hog->cl_model(i), detection_windows, detection_window_strides->at(i), threshold, i);
     }
 
     detection_window_strides->unmap(CLScheduler::get().queue());
 
     // Configure non maxima suppression kernel
-    _non_maxima_kernel->configure(_detection_windows, min_distance);
+    _non_maxima_kernel.configure(_detection_windows, min_distance);
 
     // Allocate intermediate tensors
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
@@ -231,7 +230,7 @@ void CLHOGMultiDetection::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_detection_windows == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Reset detection window
     _detection_windows->clear();
@@ -242,13 +241,13 @@ void CLHOGMultiDetection::run()
     // Run orientation binning kernel
     for(size_t i = 0; i < _num_orient_bin_kernel; ++i)
     {
-        CLScheduler::get().enqueue(*(_orient_bin_kernel.get() + i), false);
+        CLScheduler::get().enqueue(_orient_bin_kernel[i], false);
     }
 
     // Run block normalization kernel
     for(size_t i = 0; i < _num_block_norm_kernel; ++i)
     {
-        CLScheduler::get().enqueue(*(_block_norm_kernel.get() + i), false);
+        CLScheduler::get().enqueue(_block_norm_kernel[i], false);
     }
 
     // Run HOG detector kernel
@@ -262,9 +261,7 @@ void CLHOGMultiDetection::run()
     {
         // Map detection windows array before computing non maxima suppression
         _detection_windows->map(CLScheduler::get().queue(), true);
-        Scheduler::get().schedule(_non_maxima_kernel.get(), Window::DimY);
+        Scheduler::get().schedule(&_non_maxima_kernel, Window::DimY);
         _detection_windows->unmap(CLScheduler::get().queue());
     }
-
-    _memory_group.release();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,11 +68,9 @@ Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
 void NEL2NormalizeLayer::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     _reduce_func.run();
     NEScheduler::get().schedule(&_normalize_kernel, Window::DimY);
-
-    _memory_group.release();
 }
 } // namespace arm_compute

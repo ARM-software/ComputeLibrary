@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@ const cl::Buffer CLTensorAllocator::_empty_buffer = cl::Buffer();
 
 namespace
 {
-std::unique_ptr<ICLMemoryRegion> allocate_region(cl::Context context, size_t size, cl_uint alignment)
+std::unique_ptr<ICLMemoryRegion> allocate_region(const cl::Context &context, size_t size, cl_uint alignment)
 {
     // Try fine-grain SVM
     std::unique_ptr<ICLMemoryRegion> region = support::cpp14::make_unique<CLFineSVMMemoryRegion>(context,
@@ -101,10 +101,10 @@ void CLTensorAllocator::free()
     info().set_is_resizable(true);
 }
 
-arm_compute::Status CLTensorAllocator::import_memory(cl::Buffer buffer)
+Status CLTensorAllocator::import_memory(cl::Buffer buffer)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(buffer.get() == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON(buffer.getInfo<CL_MEM_SIZE>() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(buffer.getInfo<CL_MEM_SIZE>() < info().total_size());
     ARM_COMPUTE_RETURN_ERROR_ON(buffer.getInfo<CL_MEM_CONTEXT>().get() != CLScheduler::get().context().get());
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
 

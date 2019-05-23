@@ -55,21 +55,17 @@ TEST_SUITE(QuantizationLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),  // Wrong input data type
-                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),  // Invalid shape
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),  // Wrong input data type
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Wrong output data type
-                                                       TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::U8),  // Missmatching shapes
-                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::U8),  // Shrink window
+                                                       TensorInfo(TensorShape(16U, 16U, 2U, 5U), 1, DataType::F32),  // Missmatching shapes
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),  // Valid
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(16U, 5U, 16U), 1, DataType::U8),
                                                        TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U16),
-                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(17U, 16U, 16U, 5U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::U8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
+                                                       TensorInfo(TensorShape(16U, 16U, 16U, 5U), 1, DataType::QASYMM8),
                                                      })),
-               framework::dataset::make("Expected", { false, false, false, false, false, true})),
+               framework::dataset::make("Expected", { false, false, false, true})),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEQuantizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
@@ -81,7 +77,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationS
 {
     // Create tensors
     Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::QASYMM8);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -96,9 +92,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(QuantizationS
     validate(dst.info()->valid_region(), valid_region);
 
     // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), 8).required_padding();
-    validate(src.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
+    validate(src.info()->padding(), PaddingSize());
+    validate(dst.info()->padding(), PaddingSize());
 }
 
 template <typename T>
@@ -106,20 +101,42 @@ using NEQuantizationLayerFixture = QuantizationValidationFixture<Tensor, Accesso
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                               framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                             framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                                                                                                                     framework::dataset::make("DataType", DataType::F32)),
+                                                                                                             framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE(Half)
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEQuantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+                                                                                                              framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_u8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEQuantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                                                                                                                    framework::dataset::make("DataType", DataType::F16)),
+                                                                                                            framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_u8);
+}
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Half
+#endif           //  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE_END() // QuantizationLayer
 TEST_SUITE_END() // NEON

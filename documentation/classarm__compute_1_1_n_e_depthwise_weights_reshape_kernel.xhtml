@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -305,12 +305,12 @@ Static Public Member Functions</h2></td></tr>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a0e95dc1e53c361348314873b168ae237"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">arm_compute::ITensor::info</a></div><div class="ttdeci">virtual ITensorInfo * info() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor's metadata.</div></div>
 <div class="ttc" id="classarm__compute_1_1_i_tensor_info_xhtml_aa459796b5489eca8a9160cb5dcf1a103"><div class="ttname"><a href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">arm_compute::ITensorInfo::element_size</a></div><div class="ttdeci">virtual size_t element_size() const =0</div><div class="ttdoc">Element size in bytes calculated as data_size() * num_channels()</div></div>
 <div class="ttc" id="_validate_8h_xhtml_a921b705e9e3e0fe928928447869e62a5"><div class="ttname"><a href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_NULLPTR(...)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00161">Validate.h:161</a></div></div>
-<div class="ttc" id="structarm__compute_1_1_valid_region_xhtml"><div class="ttname"><a href="structarm__compute_1_1_valid_region.xhtml">arm_compute::ValidRegion</a></div><div class="ttdoc">Container for valid region of a window.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00228">Types.h:228</a></div></div>
+<div class="ttc" id="structarm__compute_1_1_valid_region_xhtml"><div class="ttname"><a href="structarm__compute_1_1_valid_region.xhtml">arm_compute::ValidRegion</a></div><div class="ttdoc">Container for valid region of a window.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00244">Types.h:244</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_window_xhtml"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml">arm_compute::Window</a></div><div class="ttdoc">Describe a multidimensional execution window.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00039">Window.h:39</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, <a class="el" href="_validate_8h_source.xhtml#l00161">ARM_COMPUTE_ERROR_ON_NULLPTR</a>, <a class="el" href="_error_8h_source.xhtml#l00327">ARM_COMPUTE_ERROR_THROW_ON</a>, <a class="el" href="src_2core_2_helpers_8cpp_source.xhtml#l00028">arm_compute::calculate_max_window()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103">ITensorInfo::element_size()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a9586081a29fceb532ab270bd843abee6">ITensorInfo::set_valid_region()</a>, and <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_layer_8cpp_source.xhtml#l00268">NEDepthwiseConvolutionLayer::configure()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_layer_8cpp_source.xhtml#l00367">NEDepthwiseConvolutionLayer::configure()</a>.</p>
 
 </div>
 </div>
@@ -520,7 +520,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_validate_8h_source.xhtml#l00163">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>, and <a class="el" href="_error_8h_source.xhtml#l00193">ARM_COMPUTE_RETURN_ON_ERROR</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_layer_8cpp_source.xhtml#l00401">NEDepthwiseConvolutionLayer::validate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_depthwise_convolution_layer_8cpp_source.xhtml#l00508">NEDepthwiseConvolutionLayer::validate()</a>.</p>
 
 </div>
 </div>
@@ -534,7 +534,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml">NEDepthwiseWeightsReshapeKernel</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:02 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:33 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

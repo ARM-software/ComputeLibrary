@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -158,7 +158,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic implementation of the 1D distribution interface. </p>
 
-<p class="definition">Definition at line <a class="el" href="_distribution1_d_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_distribution1_d_8h_source.xhtml">Distribution1D.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_distribution1_d_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_distribution1_d_8h_source.xhtml">Distribution1D.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a243c829bced69df597b496eb7456efb0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a243c829bced69df597b496eb7456efb0">&#9670;&nbsp;</a></span>Distribution1D()</h2>
@@ -203,9 +203,8 @@ Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_distribution1_d_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_distribution1_d_8cpp_source.xhtml">Distribution1D.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#a9c3a40b0dbbd79ed909471d9e05283aa">IDistribution1D</a>(<a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ad96530ddba514601d376f991b568b346">num_bins</a>, <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ae0b0cc1f1b29c65e4e3ea56171816981">offset</a>, <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#a39bcb5b07a60b37fb1d6b5c9f83f85e9">range</a>), _data(<a class="code" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a1d95a84d1a4610af6a128ad96c907e8b">arm_compute::support::cpp14::make_unique</a>&lt;uint32_t[]&gt;(<a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ad96530ddba514601d376f991b568b346">num_bins</a>))</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_distribution1_d_xhtml_a39bcb5b07a60b37fb1d6b5c9f83f85e9"><div class="ttname"><a href="classarm__compute_1_1_i_distribution1_d.xhtml#a39bcb5b07a60b37fb1d6b5c9f83f85e9">arm_compute::IDistribution1D::range</a></div><div class="ttdeci">uint32_t range() const</div><div class="ttdoc">Returns the range of the distribution.</div><div class="ttdef"><b>Definition:</b> <a href="_i_distribution1_d_8cpp_source.xhtml#l00046">IDistribution1D.cpp:46</a></div></div>
+<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    : <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#a9c3a40b0dbbd79ed909471d9e05283aa">IDistribution1D</a>(<a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ad96530ddba514601d376f991b568b346">num_bins</a>, <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ae0b0cc1f1b29c65e4e3ea56171816981">offset</a>, <a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#a39bcb5b07a60b37fb1d6b5c9f83f85e9">range</a>), _data(<a class="code" href="classarm__compute_1_1_i_distribution1_d.xhtml#ad96530ddba514601d376f991b568b346">num_bins</a>)</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_i_distribution1_d_xhtml_a39bcb5b07a60b37fb1d6b5c9f83f85e9"><div class="ttname"><a href="classarm__compute_1_1_i_distribution1_d.xhtml#a39bcb5b07a60b37fb1d6b5c9f83f85e9">arm_compute::IDistribution1D::range</a></div><div class="ttdeci">uint32_t range() const</div><div class="ttdoc">Returns the range of the distribution.</div><div class="ttdef"><b>Definition:</b> <a href="_i_distribution1_d_8cpp_source.xhtml#l00046">IDistribution1D.cpp:46</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_distribution1_d_xhtml_a9c3a40b0dbbd79ed909471d9e05283aa"><div class="ttname"><a href="classarm__compute_1_1_i_distribution1_d.xhtml#a9c3a40b0dbbd79ed909471d9e05283aa">arm_compute::IDistribution1D::IDistribution1D</a></div><div class="ttdeci">IDistribution1D(size_t num_bins, int32_t offset, uint32_t range)</div><div class="ttdoc">Constructor: Creates a 1D Distribution of a consecutive interval [offset, offset + range - 1] defined...</div><div class="ttdef"><b>Definition:</b> <a href="_i_distribution1_d_8cpp_source.xhtml#l00030">IDistribution1D.cpp:30</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1support_1_1cpp14_xhtml_a1d95a84d1a4610af6a128ad96c907e8b"><div class="ttname"><a href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a1d95a84d1a4610af6a128ad96c907e8b">arm_compute::support::cpp14::make_unique</a></div><div class="ttdeci">_Unique_if&lt; T &gt;::_Single_object make_unique(Args &amp;&amp;... args)</div><div class="ttdoc">Construct a single object and return a unique pointer to it.</div><div class="ttdef"><b>Definition:</b> <a href="_toolchain_support_8h_source.xhtml#l00382">ToolchainSupport.h:382</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_distribution1_d_xhtml_ad96530ddba514601d376f991b568b346"><div class="ttname"><a href="classarm__compute_1_1_i_distribution1_d.xhtml#ad96530ddba514601d376f991b568b346">arm_compute::IDistribution1D::num_bins</a></div><div class="ttdeci">size_t num_bins() const</div><div class="ttdoc">Returns the number of bins that the distribution has.</div><div class="ttdef"><b>Definition:</b> <a href="_i_distribution1_d_8cpp_source.xhtml#l00036">IDistribution1D.cpp:36</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_distribution1_d_xhtml_ae0b0cc1f1b29c65e4e3ea56171816981"><div class="ttname"><a href="classarm__compute_1_1_i_distribution1_d.xhtml#ae0b0cc1f1b29c65e4e3ea56171816981">arm_compute::IDistribution1D::offset</a></div><div class="ttdeci">int32_t offset() const</div><div class="ttdoc">Returns the offset of the distribution.</div><div class="ttdef"><b>Definition:</b> <a href="_i_distribution1_d_8cpp_source.xhtml#l00041">IDistribution1D.cpp:41</a></div></div>
 </div><!-- fragment -->
@@ -242,10 +241,7 @@ Public Member Functions</h2></td></tr>
 <p>Implements <a class="el" href="classarm__compute_1_1_i_distribution.xhtml#a0eb5856c63562cb144938ed77d6823a0">IDistribution</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="_distribution1_d_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_distribution1_d_8cpp_source.xhtml">Distribution1D.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(<span class="keyword">nullptr</span> == _data);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">return</span> _data.get();</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00337">Error.h:337</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>.</p>
-
+<div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">return</span> _data.data();</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -258,7 +254,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_distribution1_d.xhtml">Distribution1D</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:01 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:31 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

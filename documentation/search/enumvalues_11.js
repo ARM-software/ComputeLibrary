@@ -19,9 +19,11 @@ var searchData=
   ['square',['SQUARE',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa12dec4e1f7ec620651b2b95c440ffac0',1,'arm_compute::ActivationLayerInfo']]],
   ['squared_5fdiff',['SQUARED_DIFF',['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea46ea186b87dc545033d86ba8d6e63916',1,'arm_compute']]],
   ['st',['ST',['../classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7aec8e57d71f07e31203035548b79d03c8',1,'arm_compute::Scheduler']]],
+  ['stacklayer',['StackLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a6a1f3bd45caa35d2537fcacb4460920e',1,'arm_compute::graph']]],
   ['static',['STATIC',['../classarm__compute_1_1_i_scheduler.xhtml#ad3ab921e075d1edd827faf95870aa808afe6f99ef1ec99efbdc19a9786cf1facc',1,'arm_compute::IScheduler']]],
-  ['sub',['SUB',['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea241dd841abade20fcb27b8a9f494e1eb',1,'arm_compute::SUB()'],['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea241dd841abade20fcb27b8a9f494e1eb',1,'arm_compute::test::validation::reference::SUB()'],['../namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4ae80155eceb940c89e2de63ad05868db2',1,'arm_compute::graph::Sub()']]],
+  ['sub',['Sub',['../namespacearm__compute_1_1graph.xhtml#aa12973876c037bddff8e9ece94aca0e4ae80155eceb940c89e2de63ad05868db2',1,'arm_compute::graph::Sub()'],['../namespacearm__compute.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea241dd841abade20fcb27b8a9f494e1eb',1,'arm_compute::SUB()'],['../namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a23d9f0c01c9e120dfb828ee922b7a8aea241dd841abade20fcb27b8a9f494e1eb',1,'arm_compute::test::validation::reference::SUB()']]],
   ['success',['SUCCESS',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a67a0db04d321a74b7e7fcfd3f1a3f70bad0749aaba8b833466dfcbb0428e4f89c',1,'arm_compute::test::framework::TestResult']]],
   ['sum',['SUM',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba6970bdc2201030b9c03fbdcf3973858a',1,'arm_compute']]],
-  ['sum_5fsquare',['SUM_SQUARE',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64',1,'arm_compute']]]
+  ['sum_5fsquare',['SUM_SQUARE',['../namespacearm__compute.xhtml#a5827eb9cb394e74af87f74bd354fb45ba2ce6e134b828b72fad160fa17c8d1b64',1,'arm_compute']]],
+  ['symmetric',['SYMMETRIC',['../namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a161b3d9016563aba9ac190fc02ada9bb',1,'arm_compute']]]
 ];

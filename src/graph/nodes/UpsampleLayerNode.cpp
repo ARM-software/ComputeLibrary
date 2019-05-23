@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,9 +54,10 @@ TensorDescriptor UpsampleLayerNode::compute_output_descriptor(const TensorDescri
     const unsigned int input_width  = get_dimension_size(input_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int input_height = get_dimension_size(input_descriptor, DataLayoutDimension::HEIGHT);
 
+    const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::WIDTH), input_width * info.x());
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::HEIGHT), input_height * info.y());
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), input_width * info.x());
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), input_height * info.y());
 
     return output_descriptor;
 }

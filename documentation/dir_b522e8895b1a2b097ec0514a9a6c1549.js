@@ -14,6 +14,7 @@ var dir_b522e8895b1a2b097ec0514a9a6c1549 =
     [ "EltwiseLayerNode.cpp", "_eltwise_layer_node_8cpp.xhtml", null ],
     [ "FlattenLayerNode.cpp", "_flatten_layer_node_8cpp.xhtml", null ],
     [ "FullyConnectedLayer.cpp", "src_2graph_2nodes_2_fully_connected_layer_8cpp.xhtml", null ],
+    [ "FusedConvolutionBatchNormalizationNode.cpp", "_fused_convolution_batch_normalization_node_8cpp.xhtml", null ],
     [ "GenerateProposalsLayerNode.cpp", "_generate_proposals_layer_node_8cpp.xhtml", null ],
     [ "InputNode.cpp", "_input_node_8cpp.xhtml", null ],
     [ "NormalizationLayerNode.cpp", "_normalization_layer_node_8cpp.xhtml", null ],
@@ -30,6 +31,7 @@ var dir_b522e8895b1a2b097ec0514a9a6c1549 =
     [ "SliceLayerNode.cpp", "_slice_layer_node_8cpp.xhtml", null ],
     [ "SoftmaxLayerNode.cpp", "_softmax_layer_node_8cpp.xhtml", null ],
     [ "SplitLayerNode.cpp", "_split_layer_node_8cpp.xhtml", null ],
+    [ "StackLayerNode.cpp", "_stack_layer_node_8cpp.xhtml", null ],
     [ "UpsampleLayerNode.cpp", "_upsample_layer_node_8cpp.xhtml", null ],
     [ "YOLOLayerNode.cpp", "_y_o_l_o_layer_node_8cpp.xhtml", null ]
 ];

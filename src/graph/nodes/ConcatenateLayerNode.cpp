@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,8 @@ namespace arm_compute
 {
 namespace graph
 {
-ConcatenateLayerNode::ConcatenateLayerNode(unsigned int total_nodes, DataLayoutDimension axis)
-    : _total_nodes(total_nodes), _axis(axis), _is_enabled(true)
+ConcatenateLayerNode::ConcatenateLayerNode(unsigned int total_nodes, descriptors::ConcatLayerDescriptor concat_descriptor)
+    : _total_nodes(total_nodes), _concat_descriptor(std::move(concat_descriptor)), _is_enabled(true)
 {
     _input_edges.resize(_total_nodes, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -53,7 +53,12 @@ bool ConcatenateLayerNode::is_enabled() const
 
 DataLayoutDimension ConcatenateLayerNode::concatenation_axis() const
 {
-    return _axis;
+    return _concat_descriptor.axis;
+}
+
+QuantizationInfo ConcatenateLayerNode::output_quantization_info() const
+{
+    return _concat_descriptor.output_qinfo;
 }
 
 TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors,
@@ -62,28 +67,18 @@ TensorDescriptor ConcatenateLayerNode::compute_output_descriptor(const std::vect
     ARM_COMPUTE_ERROR_ON(input_descriptors.size() == 0);
 
     TensorDescriptor output_descriptor = input_descriptors[0];
-    const int        axis_idx          = get_dimension_idx(output_descriptor, axis);
+    const int        axis_idx          = get_dimension_idx(output_descriptor.layout, axis);
+    ARM_COMPUTE_ERROR_ON_MSG(axis_idx > 2, "Unsupported concatenation axis!");
 
     // Extract shapes
     std::vector<const TensorShape *> shapes;
+    shapes.reserve(input_descriptors.size());
     for(auto &input_descriptor : input_descriptors)
     {
         shapes.emplace_back(&input_descriptor.shape);
     }
 
-    // Calculate output shape
-    if(axis_idx == 0)
-    {
-        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(shapes);
-    }
-    else if(axis_idx == 2)
-    {
-        output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(shapes);
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR("Unsupported concatenation axis!");
-    }
+    output_descriptor.shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(shapes, axis_idx);
 
     return output_descriptor;
 }
@@ -122,7 +117,11 @@ TensorDescriptor ConcatenateLayerNode::configure_output(size_t idx) const
             ARM_COMPUTE_ERROR_ON(t == nullptr);
             inputs_descriptors.push_back(t->desc());
         }
-        output_info = compute_output_descriptor(inputs_descriptors, _axis);
+        output_info = compute_output_descriptor(inputs_descriptors, _concat_descriptor.axis);
+        if(!_concat_descriptor.output_qinfo.empty())
+        {
+            output_info.quant_info = _concat_descriptor.output_qinfo;
+        }
     }
 
     return output_info;

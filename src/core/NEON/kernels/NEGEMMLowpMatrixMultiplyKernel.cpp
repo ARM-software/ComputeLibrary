@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -479,7 +479,7 @@ void inline vector_matrix_multiply_s8(Iterator &ina, Iterator &inb, Iterator &ou
 
 void inline matrix_multiply_u8(Iterator &ina, Iterator &inb, Iterator &out, int width_b, size_t out_stride, const Window &window)
 {
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8_t *mtx_a0 = ina.ptr();
         const uint8_t *mtx_b0 = inb.ptr();
@@ -599,7 +599,7 @@ void inline matrix_multiply_s8(Iterator &ina, Iterator &inb, Iterator &out, int 
     // The implementation assumes that the matrix A and Matrix B have been reshaped respectively with NEGEMMInterleave4x4 and NEGEMMTranspose1xW
     // The reshaping of the matrices helps to have a cache friendly implementation and helps to avoid the data re-arrangements needed for computing 16x4 elements per iteration
     // All the values needed for computing a single 4x4 block will be read from consecutive memory positions
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         auto *mtx_a0 = reinterpret_cast<const int8_t *>(ina.ptr());
         auto *mtx_b0 = reinterpret_cast<const int8_t *>(inb.ptr());

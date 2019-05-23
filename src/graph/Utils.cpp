@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,13 +104,14 @@ void release_default_graph_context(GraphContext &ctx)
     }
 }
 
-void setup_default_graph_context(GraphContext &ctx)
+void setup_requested_backend_context(GraphContext &ctx, Target target)
 {
-    for(const auto &backend : backends::BackendRegistry::get().backends())
+    if(backends::BackendRegistry::get().contains(target))
     {
-        if(backend.second->is_backend_supported())
+        const auto &backend = backends::BackendRegistry::get().find_backend(target);
+        if(backend->is_backend_supported())
         {
-            backend.second->setup_backend_context(ctx);
+            backend->setup_backend_context(ctx);
         }
     }
 }
@@ -118,12 +119,12 @@ void setup_default_graph_context(GraphContext &ctx)
 size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension)
 {
     ARM_COMPUTE_ERROR_ON_MSG(descriptor.layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
-    return descriptor.shape[get_dimension_idx(descriptor, data_layout_dimension)];
+    return descriptor.shape[get_dimension_idx(descriptor.layout, data_layout_dimension)];
 }
 
-size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension)
+size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_layout_dimension)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(descriptor.layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+    ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
 
     /* Return the index based on the data layout
      * [N C H W]
@@ -133,13 +134,13 @@ size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDim
     switch(data_layout_dimension)
     {
         case DataLayoutDimension::CHANNEL:
-            return (descriptor.layout == DataLayout::NCHW) ? 2 : 0;
+            return (data_layout == DataLayout::NCHW) ? 2 : 0;
             break;
         case DataLayoutDimension::HEIGHT:
-            return (descriptor.layout == DataLayout::NCHW) ? 1 : 2;
+            return (data_layout == DataLayout::NCHW) ? 1 : 2;
             break;
         case DataLayoutDimension::WIDTH:
-            return (descriptor.layout == DataLayout::NCHW) ? 0 : 1;
+            return (data_layout == DataLayout::NCHW) ? 0 : 1;
             break;
         case DataLayoutDimension::BATCHES:
             return 3;

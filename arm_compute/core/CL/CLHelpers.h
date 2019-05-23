@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,5 +144,14 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
  * @return preferred vector width
  */
 size_t preferred_vector_width(const cl::Device &device, DataType dt);
+
+/** Helper function to check if "dummy work-items" are preferred to have a power of two NDRange
+ * In case dummy work-items is enabled, it is OpenCL kernel responsibility to check if the work-item is out-of range or not
+ *
+ * @param[in] device A CL device
+ *
+ * @return True if dummy work-items should be preferred to dispatch the NDRange
+ */
+bool preferred_dummy_work_items_support(const cl::Device &device);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

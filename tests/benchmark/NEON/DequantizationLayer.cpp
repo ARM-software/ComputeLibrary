@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,8 +41,12 @@ namespace benchmark
 {
 namespace
 {
-const auto data_types_src = framework::dataset::make("DataType", { DataType::U8 });
+const auto data_types_src = framework::dataset::make("DataType", { DataType::QASYMM8 });
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+const auto data_types_dst = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 const auto data_types_dst = framework::dataset::make("DataType", { DataType::F32 });
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 using NEDequantizationLayerFixture = DequantizationLayerFixture<Tensor, NEDequantizationLayer, Accessor>;
@@ -53,7 +57,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(DequantizationLayer, NEDequantizationLayerFixtur
                                 framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::Small3DShapes(), data_types_src), data_types_dst));
 
-TEST_SUITE_END()
+TEST_SUITE_END() // NEON
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute

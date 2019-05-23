@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ inline void NEThresholdKernel::run_binary(const Window &window)
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
         const uint8x16_t mask = vcgtq_u8(data, threshold);
@@ -106,7 +106,7 @@ inline void NEThresholdKernel::run_range(const Window &window)
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t data = vld1q_u8(input.ptr());
 

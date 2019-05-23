@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -228,7 +228,8 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     if(_is_quantized)
     {
         float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
-        int   output_multiplier, output_shift;
+        int   output_multiplier;
+        int   output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
         _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
         _gemmlowp_output.allocator()->allocate();
@@ -333,7 +334,7 @@ void NEFullyConnectedLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
@@ -363,8 +364,6 @@ void NEFullyConnectedLayer::run()
             NEScheduler::get().schedule(&_accumulate_biases_kernel, Window::DimY);
         }
     }
-
-    _memory_group.release();
 }
 
 void NEFullyConnectedLayer::prepare()

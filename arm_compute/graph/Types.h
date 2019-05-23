@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTunerTypes.h"
 
 #include <limits>
 #include <string>
@@ -34,6 +35,7 @@ namespace arm_compute
 {
 namespace graph
 {
+using arm_compute::CLTunerMode;
 using arm_compute::Status;
 
 using arm_compute::Coordinates;
@@ -71,13 +73,13 @@ constexpr EdgeID EmptyEdgeID = std::numeric_limits<EdgeID>::max();
 
 // Forward declarations
 class TensorDescriptor;
-
 /** Graph configuration structure */
 struct GraphConfig
 {
     bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
     bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
     bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    CLTunerMode tuner_mode{ CLTunerMode::EXHAUSTIVE }; /**< Tuner mode to be used by the CL tuner */
     int         num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
     std::string tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */
 };
@@ -138,6 +140,7 @@ enum class NodeType
     EltwiseLayer,
     FlattenLayer,
     FullyConnectedLayer,
+    FusedConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     NormalizationLayer,
     NormalizePlanarYUVLayer,
@@ -152,6 +155,7 @@ enum class NodeType
     SoftmaxLayer,
     SliceLayer,
     SplitLayer,
+    StackLayer,
     UpsampleLayer,
     YOLOLayer,
 

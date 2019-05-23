@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,7 +150,7 @@ void GCFullyConnectedLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
@@ -173,8 +173,6 @@ void GCFullyConnectedLayer::run()
 
         GCScheduler::get().dispatch(_accumulate_biases_kernel);
     }
-
-    _memory_group.release();
 }
 
 void GCFullyConnectedLayer::prepare()

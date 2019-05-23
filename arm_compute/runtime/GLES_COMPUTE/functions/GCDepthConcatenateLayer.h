@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@ class IGCTensor;
 
 /** Basic function to execute concatenate tensors along z axis. This function calls the following kernels:
  *
+ * @deprecated This function is deprecated and will be removed in release 19.08
  * -# @ref GCFillBorderKernel (executed if input's lowest two dimensions are smaller than respective output's dimensions)
  * -# @ref GCDepthConcatenateLayerKernel
  *
@@ -59,9 +60,9 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<GCDepthConcatenateLayerKernel[]> _concat_kernels_vector;
-    std::unique_ptr<GCFillBorderKernel[]>            _border_handlers_vector;
-    unsigned int                                     _num_inputs;
+    std::vector<std::unique_ptr<GCDepthConcatenateLayerKernel>> _concat_kernels_vector;
+    std::vector<std::unique_ptr<GCFillBorderKernel>>            _border_handlers_vector;
+    unsigned int                                                _num_inputs;
 };
 }
 #endif /* __ARM_COMPUTE_GCDEPTHCONCATENATE_H__ */

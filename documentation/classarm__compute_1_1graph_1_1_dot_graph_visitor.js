@@ -9,6 +9,7 @@ var classarm__compute_1_1graph_1_1_dot_graph_visitor =
     [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#a9f9ccf9586c79250a79c85fb562cc2f5", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#aed4fc061f50c81e08328eeead9f6ca3c", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#a1e48e66ec69d2ae228f73f6a7fc8aab6", null ],
+    [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#a8e3f67935e124ab096533434b188d66b", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#aac5b1d0d521f3e24c6eb1b0ca3bc8016", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#a9aa6abdf5e8362bc489cd55509f4f317", null ]
 ];

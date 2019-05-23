@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -170,8 +170,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00679">679</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;    : _already_loaded(<span class="keyword">false</span>), _filename(std::move(filename)), _file_layout(file_layout)</div><div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160;{</div><div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00685">685</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;    : _already_loaded(<span class="keyword">false</span>), _filename(std::move(filename)), _file_layout(file_layout)</div><div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;{</div><div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a4f32ab9a631e79fe364fed57a1d0145b"></a>
@@ -238,8 +238,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml#a497873c25847d7b4f60f37a1a3aa7665">ITensorAccessor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00684">684</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;{</div><div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;    <span class="keywordflow">if</span>(!_already_loaded)</div><div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;    {</div><div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;        utils::NPYLoader loader;</div><div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;        loader.open(_filename, _file_layout);</div><div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;        loader.fill_tensor(tensor);</div><div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;    }</div><div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;</div><div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;    _already_loaded = !_already_loaded;</div><div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;    <span class="keywordflow">return</span> _already_loaded;</div><div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;}</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00690">690</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;{</div><div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;    <span class="keywordflow">if</span>(!_already_loaded)</div><div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;    {</div><div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;        utils::NPYLoader loader;</div><div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;        loader.open(_filename, _file_layout);</div><div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;        loader.fill_tensor(tensor);</div><div class="line"><a name="l00697"></a><span class="lineno">  697</span>&#160;    }</div><div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;</div><div class="line"><a name="l00699"></a><span class="lineno">  699</span>&#160;    _already_loaded = !_already_loaded;</div><div class="line"><a name="l00700"></a><span class="lineno">  700</span>&#160;    <span class="keywordflow">return</span> _already_loaded;</div><div class="line"><a name="l00701"></a><span class="lineno">  701</span>&#160;}</div></div><!-- fragment -->
 <p class="reference">References <a class="el" href="utils_2_utils_8h_source.xhtml#l00396">NPYLoader::fill_tensor()</a>, and <a class="el" href="utils_2_utils_8h_source.xhtml#l00332">NPYLoader::open()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00143">NumPyAccessor::NumPyAccessor()</a>.</p>
@@ -256,7 +256,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml">graph_utils</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml">NumPyBinLoader</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:05 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:36 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

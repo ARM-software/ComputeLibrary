@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -18,7 +18,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * dst OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 #include "PixelWiseMultiplication.h"
@@ -139,7 +139,9 @@ SimpleTensor<T2> pixel_wise_multiplication(const SimpleTensor<T1> &src1, const S
         ARM_COMPUTE_ERROR("Scale of pixel-wise multiplication must be non-negative");
     }
 
-    Coordinates id_src1, id_src2, id_dst;
+    Coordinates id_src1{};
+    Coordinates id_src2{};
+    Coordinates id_dst{};
 
     BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, scale, convert_policy, rounding_policy, id_src1, id_src2, id_dst);
 
@@ -166,7 +168,9 @@ SimpleTensor<uint8_t> pixel_wise_multiplication(const SimpleTensor<uint8_t> &src
             ARM_COMPUTE_ERROR("Scale of pixel-wise multiplication must be non-negative");
         }
 
-        Coordinates id_src1, id_src2, id_dst;
+        Coordinates id_src1{};
+        Coordinates id_src2{};
+        Coordinates id_dst{};
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, scale, convert_policy, rounding_policy, id_src1, id_src2, id_dst);
     }
     return dst;

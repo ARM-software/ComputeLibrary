@@ -7,6 +7,7 @@ var dir_cab437ca4f6ec1fbc573ae83f91b2654 =
     [ "ICloneable.h", "_i_cloneable_8h.xhtml", [
       [ "ICloneable", "classarm__compute_1_1misc_1_1_i_cloneable.xhtml", "classarm__compute_1_1misc_1_1_i_cloneable" ]
     ] ],
+    [ "InfoHelpers.h", "_info_helpers_8h.xhtml", "_info_helpers_8h" ],
     [ "Iterable.h", "_iterable_8h.xhtml", "_iterable_8h" ],
     [ "Random.h", "_random_8h.xhtml", [
       [ "RangedUniformDistribution", "classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution.xhtml", "classarm__compute_1_1utils_1_1random_1_1_ranged_uniform_distribution" ]

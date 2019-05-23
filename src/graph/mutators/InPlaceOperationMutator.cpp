@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,8 +56,8 @@ void InPlaceOperationMutator::mutate(Graph &g)
 
                 ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr || new_output_tensor == nullptr);
 
-                // Prevent in-place operation if there is an accessor bound to the in-place tensor
-                if(new_output_tensor->accessor() == nullptr)
+                // Prevent in-place operation if there is an accessor bound to the in-place tensor or quantization info are different
+                if(new_output_tensor->accessor() == nullptr || current_output_tensor->desc().quant_info == new_output_tensor->desc().quant_info)
                 {
                     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Switching to in-place computation for the node with ID : "
                                                   << node->id() << " and name : " << node->name() << std::endl);

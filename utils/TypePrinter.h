@@ -34,6 +34,7 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/CLTunerTypes.h"
 
 #include <ostream>
 #include <sstream>
@@ -978,7 +979,6 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
-//FIXME: Check why this doesn't work and the TensorShape and Coordinates overload are needed
 /** Formatted output of the Dimensions type.
  *
  * @param[in] dimensions Type to output.
@@ -1181,6 +1181,46 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
     os << "+" << rect.x << "+" << rect.y;
 
     return os;
+}
+
+/** Formatted output of the PaddingMode type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  mode Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PaddingMode &mode)
+{
+    switch(mode)
+    {
+        case PaddingMode::CONSTANT:
+            os << "CONSTANT";
+            break;
+        case PaddingMode::REFLECT:
+            os << "REFLECT";
+            break;
+        case PaddingMode::SYMMETRIC:
+            os << "SYMMETRIC";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the PaddingMode type.
+ *
+ * @param[in] mode Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PaddingMode &mode)
+{
+    std::stringstream str;
+    str << mode;
+    return str.str();
 }
 
 /** Formatted output of the PadStrideInfo type.
@@ -2177,6 +2217,49 @@ template <typename T>
 inline std::string to_string(const T &val)
 {
     return support::cpp11::to_string(val);
+}
+
+/** Convert a CLTunerMode value to a string
+ *
+ * @param val CLTunerMode value to be converted
+ *
+ * @return String representing the corresponding CLTunerMode.
+ */
+inline std::string to_string(const CLTunerMode val)
+{
+    switch(val)
+    {
+        case CLTunerMode::EXHAUSTIVE:
+        {
+            return std::string("Exhaustive");
+        }
+        case CLTunerMode::NORMAL:
+        {
+            return std::string("Normal");
+        }
+        case CLTunerMode::RAPID:
+        {
+            return std::string("Rapid");
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Invalid tuner mode.");
+            return std::string("UNDEFINED");
+        }
+    }
+}
+/** [Print CLTunerMode type] **/
+/** Formatted output of the CLTunerMode type.
+ *
+ * @param[out] os  Output stream.
+ * @param[in]  val CLTunerMode to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const CLTunerMode &val)
+{
+    os << to_string(val);
+    return os;
 }
 
 } // namespace arm_compute

@@ -4,7 +4,7 @@ var classarm__compute_1_1_n_e_dequantization_layer_kernel =
     [ "NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#abbd393219754d80bcf47dcfd5831c37f", null ],
     [ "NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a59036b04885e7f4c1bd66066d5585aaa", null ],
     [ "~NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a59cad833a05971a46a8426a7456f96dd", null ],
-    [ "configure", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a644ff49365300e418f2343f112753b74", null ],
+    [ "configure", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a83a344e60eb7db895953a942abf16628", null ],
     [ "name", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a406393d4b1f6f5c6ce79c20df507a31c", null ],
     [ "operator=", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a16209f1e14086b57f0f932a3b609c96f", null ],

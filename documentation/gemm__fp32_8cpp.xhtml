@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -113,6 +113,7 @@ $(document).ready(function(){initNavTree('gemm__fp32_8cpp.xhtml','');});
 <code>#include &quot;<a class="el" href="gemv__native__transposed_8hpp_source.xhtml">gemv_native_transposed.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="gemv__pretransposed_8hpp_source.xhtml">gemv_pretransposed.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a32__sgemm__8x6_8hpp_source.xhtml">kernels/a32_sgemm_8x6.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="a64__hybrid__fp32__mla__16x4_8hpp_source.xhtml">kernels/a64_hybrid_fp32_mla_16x4.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemm__12x8_8hpp_source.xhtml">kernels/a64_sgemm_12x8.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemm__native__16x4_8hpp_source.xhtml">kernels/a64_sgemm_native_16x4.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="a64__sgemm__native_a__pretranspose_b__16x4_8hpp_source.xhtml">kernels/a64_sgemm_nativeA_pretransposeB_16x4.hpp</a>&quot;</code><br />
@@ -142,8 +143,8 @@ Functions</h2></td></tr>
 <tr class="separator:a2b318608a1cec6f3e8e97af9d98781e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a791d95ca13db6a0d41f12fc3e3e2c180"><td class="memItemLeft" align="right" valign="top">template bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#a791d95ca13db6a0d41f12fc3e3e2c180">method_is_compatible&lt; float, float &gt;</a> (GemmMethod method, const GemmArgs&lt; float &gt; &amp;args)</td></tr>
 <tr class="separator:a791d95ca13db6a0d41f12fc3e3e2c180"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0132f55c6d1d908e4537c628c17e004"><td class="memItemLeft" align="right" valign="top">template std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#ae0132f55c6d1d908e4537c628c17e004">get_compatible_kernels&lt; float, float &gt;</a> (const GemmArgs&lt; float &gt; &amp;args)</td></tr>
-<tr class="separator:ae0132f55c6d1d908e4537c628c17e004"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1609aad732cd148829c5d7a1cfc92b7"><td class="memItemLeft" align="right" valign="top">template std::vector&lt; KernelDescription &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__gemm.xhtml#ac1609aad732cd148829c5d7a1cfc92b7">get_compatible_kernels&lt; float, float &gt;</a> (const GemmArgs&lt; float &gt; &amp;args)</td></tr>
+<tr class="separator:ac1609aad732cd148829c5d7a1cfc92b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -151,7 +152,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_d91e1966cc57df4f49d1e07be7697713.xhtml">NEON</a></li><li class="navelem"><a class="el" href="dir_1ce938f580a6f304b99685e2c1dd19db.xhtml">kernels</a></li><li class="navelem"><a class="el" href="dir_9847dd9cb7a28e46201717fa7336cf62.xhtml">arm_gemm</a></li><li class="navelem"><a class="el" href="gemm__fp32_8cpp.xhtml">gemm_fp32.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

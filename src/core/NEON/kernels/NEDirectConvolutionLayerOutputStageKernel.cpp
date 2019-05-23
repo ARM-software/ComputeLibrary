@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -266,7 +266,7 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
 
     if(in_place) // In place accumulate
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             // Get bias and pointer to input
             const auto in_ptr   = reinterpret_cast<T1 *>(in.ptr());
@@ -287,7 +287,7 @@ void output_stage_nhwc(ITensor *input, const ITensor *bias, const Window &window
     else // Out of place accumulate
     {
         Iterator out(output, window);
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             // Get bias and pointer to input
             const auto in_ptr   = reinterpret_cast<T1 *>(in.ptr());
@@ -363,7 +363,7 @@ void output_stage_nchw<int32_t, uint8_t, false, false>(ITensor *input, const ITe
 
     Iterator in(input, window);
     Iterator out(output, window);
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         // Get bias and pointer to input
         const auto  in_ptr = reinterpret_cast<int32_t *>(in.ptr());
@@ -399,7 +399,7 @@ void output_stage_nhwc<int32_t, uint8_t, false, true>(ITensor *input, const ITen
     Iterator bi(bias, window_bias);
 
     Iterator out(output, window);
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         // Get bias and pointer to input
         const auto in_ptr   = reinterpret_cast<int32_t *>(in.ptr());
@@ -433,7 +433,7 @@ void output_stage_nhwc<int32_t, uint8_t, false, false>(ITensor *input, const ITe
 
     Iterator in(input, window);
     Iterator out(output, window);
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         // Get pointer to input
         const auto in_ptr = reinterpret_cast<int32_t *>(in.ptr());

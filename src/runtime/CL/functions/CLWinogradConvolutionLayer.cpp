@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,11 @@ Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims,
         output_tile = Size2D(kernel_dims.width == 1 ? 1U : 4U,
                              kernel_dims.height == 1 ? 1U : 4U);
     }
+    else if(kernel_max_dim == 7U)
+    {
+        output_tile = Size2D(kernel_dims.width == 1 ? 1U : 2U,
+                             kernel_dims.height == 1 ? 1U : 2U);
+    }
 
     return output_tile;
 }
@@ -73,7 +78,8 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
     std::vector<WinogradConfiguration> fast_math_winograd =
     {
-        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
+        WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7))
     };
 
     auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),
@@ -198,7 +204,7 @@ void CLWinogradConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run input transform
     _input_transform.run();
@@ -208,8 +214,6 @@ void CLWinogradConvolutionLayer::run()
 
     // Run output transform
     CLScheduler::get().enqueue(_output_transform);
-
-    _memory_group.release();
 }
 
 void CLWinogradConvolutionLayer::prepare()

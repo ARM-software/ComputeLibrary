@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,8 @@ GCMemory::GCMemory()
 {
 }
 
-GCMemory::GCMemory(std::shared_ptr<IGCMemoryRegion> memory)
-    : _region(nullptr), _region_owned(std::move(memory))
+GCMemory::GCMemory(const std::shared_ptr<IGCMemoryRegion> &memory)
+    : _region(nullptr), _region_owned(memory)
 {
     _region_owned = memory;
     _region       = _region_owned.get();

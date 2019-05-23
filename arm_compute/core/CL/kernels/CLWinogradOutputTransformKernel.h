@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,6 +99,7 @@ private:
     const ICLTensor *_input;
     const ICLTensor *_bias;
     ICLTensor       *_output;
+    bool             _is_nhwc;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLWINOGRADOUTPUTTRANSFORMKERNEL_H__ */

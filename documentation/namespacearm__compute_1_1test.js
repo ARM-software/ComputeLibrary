@@ -31,5 +31,6 @@ var namespacearm__compute_1_1test =
     [ "RawLutAccessor", "classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_raw_lut_accessor" ],
     [ "RawTensor", "classarm__compute_1_1test_1_1_raw_tensor.xhtml", "classarm__compute_1_1test_1_1_raw_tensor" ],
     [ "SimpleTensor", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", "classarm__compute_1_1test_1_1_simple_tensor" ],
+    [ "SimpleTensorAccessor", "classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml", "classarm__compute_1_1test_1_1_simple_tensor_accessor" ],
     [ "TensorCache", "classarm__compute_1_1test_1_1_tensor_cache.xhtml", "classarm__compute_1_1test_1_1_tensor_cache" ]
 ];

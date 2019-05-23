@@ -1,6 +1,7 @@
 var namespacearm__compute_1_1graph =
 [
     [ "backends", "namespacearm__compute_1_1graph_1_1backends.xhtml", "namespacearm__compute_1_1graph_1_1backends" ],
+    [ "descriptors", "namespacearm__compute_1_1graph_1_1descriptors.xhtml", "namespacearm__compute_1_1graph_1_1descriptors" ],
     [ "frontend", "namespacearm__compute_1_1graph_1_1frontend.xhtml", "namespacearm__compute_1_1graph_1_1frontend" ],
     [ "ActivationLayerNode", "classarm__compute_1_1graph_1_1_activation_layer_node.xhtml", "classarm__compute_1_1graph_1_1_activation_layer_node" ],
     [ "BatchNormalizationLayerNode", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node" ],
@@ -23,6 +24,7 @@ var namespacearm__compute_1_1graph =
     [ "ExecutionWorkload", "structarm__compute_1_1graph_1_1_execution_workload.xhtml", "structarm__compute_1_1graph_1_1_execution_workload" ],
     [ "FlattenLayerNode", "classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml", "classarm__compute_1_1graph_1_1_flatten_layer_node" ],
     [ "FullyConnectedLayerNode", "classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml", "classarm__compute_1_1graph_1_1_fully_connected_layer_node" ],
+    [ "FusedConvolutionBatchNormalizationNode", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml", "classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node" ],
     [ "GenerateProposalsLayerNode", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml", "classarm__compute_1_1graph_1_1_generate_proposals_layer_node" ],
     [ "Graph", "classarm__compute_1_1graph_1_1_graph.xhtml", "classarm__compute_1_1graph_1_1_graph" ],
     [ "GraphBuilder", "classarm__compute_1_1graph_1_1_graph_builder.xhtml", null ],
@@ -59,6 +61,7 @@ var namespacearm__compute_1_1graph =
     [ "SoftmaxLayerNode", "classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer_node" ],
     [ "SplitLayerNode", "classarm__compute_1_1graph_1_1_split_layer_node.xhtml", "classarm__compute_1_1graph_1_1_split_layer_node" ],
     [ "SplitLayerSubTensorMutator", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator" ],
+    [ "StackLayerNode", "classarm__compute_1_1graph_1_1_stack_layer_node.xhtml", "classarm__compute_1_1graph_1_1_stack_layer_node" ],
     [ "TaskExecutor", "classarm__compute_1_1graph_1_1_task_executor.xhtml", "classarm__compute_1_1graph_1_1_task_executor" ],
     [ "Tensor", "classarm__compute_1_1graph_1_1_tensor.xhtml", "classarm__compute_1_1graph_1_1_tensor" ],
     [ "TensorDescriptor", "structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml", "structarm__compute_1_1graph_1_1_tensor_descriptor" ],

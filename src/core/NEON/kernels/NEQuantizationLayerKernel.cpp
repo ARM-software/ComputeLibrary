@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,15 @@
  */
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
 
-#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/NEON/NEAsymm.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+
+#include "arm_compute/core/CPP/Validate.h"
 
 #include <arm_neon.h>
 
@@ -36,72 +39,103 @@ using namespace arm_compute;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() < 3);
-
-    if(output->tensor_shape().total_size() > 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape().total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     return Status{};
 }
 
-std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *min_max)
+inline float32x4x4_t load_value(const float *input_ptr)
 {
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, DataType::U8);
-
-    constexpr unsigned int num_elems_processed_per_iteration = 8;
-
-    // Configure window
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     min_max_access(min_max, 0, 0, 2, min_max->dimension(1));
-
-    // Update window and padding
-    bool window_changed = update_window_and_padding(win, input_access, output_access, min_max_access);
-
-    output_access.set_valid_region(win, input->valid_region());
-
-    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_tuple(err, win);
+    return { wrapper::vloadq(input_ptr),
+             wrapper::vloadq(input_ptr + 4),
+             wrapper::vloadq(input_ptr + 8),
+             wrapper::vloadq(input_ptr + 12) };
 }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+inline const float32x4x4_t load_value(const float16_t *input_ptr)
+{
+    return { vcvt_f32_f16(wrapper::vload(input_ptr)),
+             vcvt_f32_f16(wrapper::vload(input_ptr + 4)),
+             vcvt_f32_f16(wrapper::vload(input_ptr + 8)),
+             vcvt_f32_f16(wrapper::vload(input_ptr + 12)) };
+}
+
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 } // namespace
 
 NEQuantizationLayerKernel::NEQuantizationLayerKernel()
-    : _input(nullptr), _output(nullptr), _min_max(nullptr)
+    : _input(nullptr), _output(nullptr)
 {
 }
 
-void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output, const ITensor *min_max)
+void NEQuantizationLayerKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), min_max->info()));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
-    _input   = input;
-    _output  = output;
-    _min_max = min_max;
+    _input  = input;
+    _output = output;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), min_max->info());
+    Window win_config = calculate_max_window(*input->info(), Steps());
 
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
+    Coordinates coord;
+    coord.set_num_dimensions(output->info()->num_dimensions());
+    output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
-    INEKernel::configure(std::get<1>(win_config));
+    INEKernel::configure(win_config);
 }
 
-Status NEQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+Status NEQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, min_max));
-    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), min_max->clone().get())));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
 
     return Status{};
+}
+
+template <typename T>
+void NEQuantizationLayerKernel::quantize(const Window &window, const QuantizationInfo &qinfo)
+{
+    constexpr auto window_step    = 16;
+    const auto     window_start_x = static_cast<int>(window.x().start());
+    const auto     window_end_x   = static_cast<int>(window.x().end());
+
+#ifdef __aarch64__
+    constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
+#else  //__aarch64__
+    constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_ZERO;
+#endif //__aarch64__
+
+    // Collapse window and reset first dimension to handle tail calculations manually
+    Window win_collapsed = window.collapse_if_possible(window, Window::DimZ);
+    win_collapsed.set(Window::DimX, Window::Dimension(0, 1, 1));
+
+    Iterator input(_input, win_collapsed);
+    Iterator output(_output, win_collapsed);
+    execute_window_loop(win_collapsed, [&](const Coordinates &)
+    {
+        auto input_ptr  = reinterpret_cast<const T *>(input.ptr());
+        auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr());
+
+        int x = window_start_x;
+        for(; x <= (window_end_x - window_step); x += window_step)
+        {
+            wrapper::vstore(&output_ptr[x], vquantize(load_value(&input_ptr[x]), qinfo));
+        }
+        // Compute left-over elements
+        for(; x < window_end_x; ++x)
+        {
+            output_ptr[x] = qinfo.quantize(input_ptr[x], rounding_policy);
+        }
+    },
+    input, output);
 }
 
 void NEQuantizationLayerKernel::run(const Window &window, const ThreadInfo &info)
@@ -110,65 +144,19 @@ void NEQuantizationLayerKernel::run(const Window &window, const ThreadInfo &info
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    Window window_input_output(window);
-    window_input_output.set(3, Window::Dimension(0, 1, 1));
+    const QuantizationInfo &qinfo = _output->info()->quantization_info();
 
-    Window window_min_max;
-    window_min_max.use_tensor_dimensions(_min_max->info()->tensor_shape());
-    window_min_max.set(Window::DimX, Window::Dimension(0, 1, 1));
-
-    Iterator input(_input, window_input_output);
-    Iterator output(_output, window_input_output);
-    Iterator min_max(_min_max, window_min_max);
-
-    execute_window_loop(window_min_max, [&](const Coordinates & id_batch)
+    switch(_input->info()->data_type())
     {
-        // Get the min and max
-        float min = *(reinterpret_cast<const float *>(min_max.ptr()) + 0);
-        float max = *(reinterpret_cast<const float *>(min_max.ptr()) + 1);
-
-        // Saturate the result if min = max
-        if(min == max)
-        {
-            min = 0.0f;
-            max = 1.0f;
-        }
-
-        const float32x4_t vmin             = vdupq_n_f32(min);
-        const float32x4_t inv_range        = vdupq_n_f32(1.0f / (max - min));
-        const float32x4_t quantization_max = vdupq_n_f32(255.0f);
-        const float32x4_t quantization_mul = vdupq_n_f32(256.0f);
-
-        // Uniformly map values to range 8bit integers, i.e. [min, max] -> [0, 255]
-        execute_window_loop(window_input_output, [&](const Coordinates & id)
-        {
-            // Get the input values
-            const auto    input_ptr = reinterpret_cast<const float *>(input.ptr() + id_batch[1] * _input->info()->strides_in_bytes()[3]);
-            float32x4x2_t val       = vld2q_f32(input_ptr);
-
-            // Map float values to range [0.0, 1.0]
-            val.val[0] = vsubq_f32(val.val[0], vmin);
-            val.val[1] = vsubq_f32(val.val[1], vmin);
-            val.val[0] = vmulq_f32(val.val[0], inv_range);
-            val.val[1] = vmulq_f32(val.val[1], inv_range);
-
-            // Quantize
-            val.val[0] = vmulq_f32(val.val[0], quantization_mul);
-            val.val[1] = vmulq_f32(val.val[1], quantization_mul);
-            val.val[0] = vminq_f32(val.val[0], quantization_max);
-            val.val[1] = vminq_f32(val.val[1], quantization_max);
-
-            const uint32x4_t   val_u32_low  = vcvtq_u32_f32(val.val[0]);
-            const uint32x4_t   val_u32_high = vcvtq_u32_f32(val.val[1]);
-            const uint16x4x2_t val_u16      = vzip_u16(vmovn_u32(val_u32_low), vmovn_u32(val_u32_high));
-
-            const uint8x8_t quantized = vmovn_u16(vcombine_u16(val_u16.val[0], val_u16.val[1]));
-
-            // Store the quantized values
-            auto output_ptr = reinterpret_cast<uint8_t *>(output.ptr() + id_batch[1] * _output->info()->strides_in_bytes()[3]);
-            vst1_u8(output_ptr, quantized);
-        },
-        input, output);
-    },
-    min_max);
+        case DataType::F32:
+            NEQuantizationLayerKernel::quantize<float>(window, qinfo);
+            break;
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            NEQuantizationLayerKernel::quantize<float16_t>(window, qinfo);
+            break;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type.");
+    }
 }

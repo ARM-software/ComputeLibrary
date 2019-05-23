@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -92,8 +92,8 @@ void NELaplacianPyramid::configure(const ITensor *input, IPyramid *pyramid, ITen
     // Create Gaussian Pyramid function
     _gaussian_pyr_function.configure(input, &_gauss_pyr, border_mode, constant_border_value);
 
-    _convf = arm_compute::support::cpp14::make_unique<NEGaussian5x5[]>(_num_levels);
-    _subf  = arm_compute::support::cpp14::make_unique<NEArithmeticSubtraction[]>(_num_levels);
+    _convf.resize(_num_levels);
+    _subf.resize(_num_levels);
 
     for(unsigned int i = 0; i < _num_levels; ++i)
     {

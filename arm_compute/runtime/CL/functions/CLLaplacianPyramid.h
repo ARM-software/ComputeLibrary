@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,13 +73,13 @@ public:
     void run() override;
 
 private:
-    size_t                                     _num_levels;
-    CLGaussianPyramidHalf                      _gaussian_pyr_function;
-    std::unique_ptr<CLGaussian5x5[]>           _convf;
-    std::unique_ptr<CLArithmeticSubtraction[]> _subf;
-    CLDepthConvertLayer                        _depth_function;
-    CLPyramid                                  _gauss_pyr;
-    CLPyramid                                  _conv_pyr;
+    size_t                               _num_levels;
+    CLGaussianPyramidHalf                _gaussian_pyr_function;
+    std::vector<CLGaussian5x5>           _convf;
+    std::vector<CLArithmeticSubtraction> _subf;
+    CLDepthConvertLayer                  _depth_function;
+    CLPyramid                            _gauss_pyr;
+    CLPyramid                            _conv_pyr;
 };
 }
 #endif /*__ARM_COMPUTE_CLLAPLACIANPYRAMID_H__ */

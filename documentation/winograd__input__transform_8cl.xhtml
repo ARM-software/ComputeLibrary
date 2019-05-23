@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -110,8 +110,46 @@ $(document).ready(function(){initNavTree('winograd__input__transform_8cl.xhtml',
 Macros</h2></td></tr>
 <tr class="memitem:a993dcfcc7bd076d4d0f33be70e42e2b9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="winograd__input__transform_8cl.xhtml#a993dcfcc7bd076d4d0f33be70e42e2b9">OUTPUT_ROW_4x4_5x5</a>(out,  tmp,  comm_fact)</td></tr>
 <tr class="separator:a993dcfcc7bd076d4d0f33be70e42e2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b01af9651d23ef289e82a4db19aac7f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="winograd__input__transform_8cl.xhtml#a4b01af9651d23ef289e82a4db19aac7f">OUTPUT_ROW_2x2_7x7</a>(out,  tmp,  comm_fact)</td></tr>
+<tr class="separator:a4b01af9651d23ef289e82a4db19aac7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a4b01af9651d23ef289e82a4db19aac7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b01af9651d23ef289e82a4db19aac7f">&#9670;&nbsp;</a></span>OUTPUT_ROW_2x2_7x7</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define OUTPUT_ROW_2x2_7x7</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">out, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">tmp, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">comm_fact&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                             \</div><div class="line">        comm_fact.s0 = 36.0f * tmp.s2 - 13.0f * tmp.s4 + tmp.s6;                                   \</div><div class="line">        comm_fact.s1 = 36.0f * tmp.s1 - 13.0f * tmp.s3 + 1.0f * tmp.s5;                            \</div><div class="line">        comm_fact.s2 = 9.0f * tmp.s2 - 10.0f * tmp.s4 + tmp.s6;                                    \</div><div class="line">        comm_fact.s3 = 18.0f * tmp.s1 - 20.0f * tmp.s3 + 2.0f * tmp.s5;                            \</div><div class="line">        comm_fact.s4 = 4.0f * tmp.s2 - 5.0f * tmp.s4 + tmp.s6;                                     \</div><div class="line">        comm_fact.s5 = 12.0f * tmp.s1 - 15.0f * tmp.s3 + 3.0f * tmp.s5;                            \</div><div class="line">        out.s0       = -36.0f * tmp.s0 + 49.0f * tmp.s2 + -14.0f * tmp.s4 + tmp.s6;                \</div><div class="line">        out.s1       = comm_fact.s0 - comm_fact.s1;                                                \</div><div class="line">        out.s2       = comm_fact.s0 + comm_fact.s1;                                                \</div><div class="line">        out.s3       = comm_fact.s2 - comm_fact.s3;                                                \</div><div class="line">        out.s4       = comm_fact.s2 + comm_fact.s3;                                                \</div><div class="line">        out.s5       = comm_fact.s4 - comm_fact.s5;                                                \</div><div class="line">        out.s6       = comm_fact.s4 + comm_fact.s5;                                                \</div><div class="line">        out.s7       = -36.0f * tmp.s1 + 0.0f * tmp.s2 + 49.0f * tmp.s3 - 14.0f * tmp.s5 + tmp.s7; \</div><div class="line">    })</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="winograd__input__transform_8cl_source.xhtml#l00046">46</a> of file <a class="el" href="winograd__input__transform_8cl_source.xhtml">winograd_input_transform.cl</a>.</p>
+
+</div>
+</div>
 <a id="a993dcfcc7bd076d4d0f33be70e42e2b9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a993dcfcc7bd076d4d0f33be70e42e2b9">&#9670;&nbsp;</a></span>OUTPUT_ROW_4x4_5x5</h2>
 
@@ -154,7 +192,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="winograd__input__transform_8cl.xhtml">winograd_input_transform.cl</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

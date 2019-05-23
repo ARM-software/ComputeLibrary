@@ -45,7 +45,7 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
                           const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
-                          BorderMode border_mode, SamplingPolicy sampling_policy)
+                          BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32, DataType::QASYMM8);
@@ -53,7 +53,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output == input);
     ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER && sampling_policy != SamplingPolicy::TOP_LEFT);
-    ARM_COMPUTE_UNUSED(border_mode);
+    ARM_COMPUTE_RETURN_ERROR_ON(!use_padding && border_mode != BorderMode::CONSTANT);
+    ARM_COMPUTE_UNUSED(constant_border_value);
 
     const DataLayout data_layout = input->data_layout();
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)) == 0);
@@ -121,40 +122,44 @@ std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input,
 
 std::pair<Status, Window> validate_and_configure_window_nhwc(ITensorInfo *input, ITensorInfo *output,
                                                              InterpolationPolicy policy, bool border_undefined,
-                                                             SamplingPolicy sampling_policy, BorderSize border_size)
+                                                             SamplingPolicy sampling_policy, BorderSize border_size, bool use_padding)
 {
     bool   window_changed{ false };
     Window win{};
 
-    const unsigned int num_elems_processed_per_iteration = (policy == InterpolationPolicy::NEAREST_NEIGHBOR) ? 16 / input->element_size() : 1;
+    const unsigned int num_elems_processed_per_iteration = (use_padding && policy == InterpolationPolicy::NEAREST_NEIGHBOR) ? 16 / input->element_size() : 1;
 
     // Configure kernel window
     win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic input_access(input, 0, -border_size.top,
-                                    ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration),
-                                    input->tensor_shape()[1]);
-    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-    window_changed = update_window_and_padding(win, input_access, output_access);
-    output->set_valid_region(calculate_valid_region_scale(*input, output->tensor_shape(),
-                                                          policy, sampling_policy, border_undefined));
+    if(use_padding)
+    {
+        AccessWindowStatic input_access(input, 0, -border_size.top, use_padding ? ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration) : num_elems_processed_per_iteration,
+                                        input->tensor_shape()[1]);
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        window_changed = update_window_and_padding(win, input_access, output_access);
+        output->set_valid_region(calculate_valid_region_scale(*input, output->tensor_shape(), policy, sampling_policy, border_undefined));
+    }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *dx, ITensorInfo *dy, ITensorInfo *offsets, ITensorInfo *output,
-                                                        InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size)
+                                                        InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size, bool use_padding)
 {
     std::pair<Status, Window> win_config;
     switch(input->data_layout())
     {
         case DataLayout::NCHW:
+            if(!use_padding)
+            {
+                return std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Padding required for NCHW"), Window{});
+            }
             win_config = validate_and_configure_window_nchw(input, dx, dy, offsets, output, policy, border_undefined, sampling_policy, border_size);
             break;
         case DataLayout::NHWC:
-            win_config = validate_and_configure_window_nhwc(input, output, policy, border_undefined, sampling_policy, border_size);
+            win_config = validate_and_configure_window_nhwc(input, output, policy, border_undefined, sampling_policy, border_size, use_padding);
             break;
         default:
             win_config = std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported data layout!"), Window{});
@@ -167,6 +172,12 @@ template <typename T>
 inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets, ITensor *output,
                                     float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c)
 {
+    const int  window_step_x  = 16 / sizeof(T);
+    const auto window_start_x = static_cast<int32_t>(window.x().start());
+    const auto window_end_x   = static_cast<int32_t>(window.x().end());
+
+    window.set(Window::DimX, Window::Dimension(0, 1, 1));
+
     Iterator in(input, win_in);
     Iterator out(output, window);
 
@@ -174,18 +185,28 @@ inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-        const int  in_yi      = (id.z() + 0.5f) * hr;
-        const int  offset_row = in_yi * stride_h + id.x() * stride_c;
-        wrapper::vstore(reinterpret_cast<T *>(out.ptr()),
-                        wrapper::vloadq(reinterpret_cast<const T *>(in.ptr() + offset * offsets_stride + offset_row)));
+        const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
+        const int     in_yi      = (id.z() + 0.5f) * hr;
+        const int     offset_row = in_yi * stride_h;
+        int32_t       x          = window_start_x;
+        for(; x < window_end_x - window_step_x; x += window_step_x)
+        {
+            wrapper::vstore(reinterpret_cast<T *>(out.ptr()) + x,
+                            wrapper::vloadq(reinterpret_cast<const T *>(in.ptr() + offset * offsets_stride + offset_row + x * stride_c)));
+        }
+        for(; x < window_end_x; ++x)
+        {
+            *(reinterpret_cast<T *>(out.ptr()) + x) =
+                *(reinterpret_cast<const T *>(in.ptr() + offset * offsets_stride + offset_row + x * stride_c));
+        }
     },
     in, out);
 }
 
-template <typename T>
+template <typename T, typename ConstType>
 inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offsets, const ITensor *dx, const ITensor *dy, ITensor *output,
-                                     float hr, float sampling_offset, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c, BorderMode border_mode)
+                                     float hr, float sampling_offset, Window window, const Window &win_in, size_t stride_w, size_t stride_h,
+                                     size_t stride_c, BorderMode border_mode, PixelValue constant_border_value, bool use_padding)
 {
     Iterator in(input, win_in);
     Iterator out(output, window);
@@ -196,7 +217,15 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
     const int input_width  = input->info()->dimension(1);
     const int input_height = input->info()->dimension(2);
 
-    const T *border_area = reinterpret_cast<T *>(input->buffer() + input->info()->offset_first_element_in_bytes() - stride_w);
+    T border_value;
+    if(use_padding)
+    {
+        border_value = *reinterpret_cast<T *>(input->buffer() + input->info()->offset_first_element_in_bytes() - stride_w);
+    }
+    else
+    {
+        border_value = static_cast<T>(constant_border_value.get<ConstType>());
+    }
 
     auto is_valid = [](int x, int low_x, int high_x, int y, int low_y, int high_y)
     {
@@ -220,14 +249,17 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 
         if(is_valid(offset, -border_size, input_width - 1 + border_size, in_yi, -border_size, input_height - 1 + border_size))
         {
-            T a00 = 0, a01 = 0, a10 = 0, a11 = 0;
+            T a00 = 0;
+            T a01 = 0;
+            T a10 = 0;
+            T a11 = 0;
 
             if(border_mode == BorderMode::CONSTANT)
             {
-                a00 = is_valid(offset, 0, input_width - 1, in_yi, 0, input_height - 1) ? *in_ptr : *border_area;
-                a01 = is_valid(offset + 1, 0, input_width - 1, in_yi, 0, input_height - 1) ? *(in_ptr + stride_w_elems) : *border_area;
-                a10 = is_valid(offset, 0, input_width - 1, in_yi + 1, 0, input_height - 1) ? *(in_ptr + stride_h_elems) : *border_area;
-                a11 = is_valid(offset + 1, 0, input_width - 1, in_yi + 1, 0, input_height - 1) ? *(in_ptr + stride_h_elems + stride_w_elems) : *border_area;
+                a00 = is_valid(offset, 0, input_width - 1, in_yi, 0, input_height - 1) ? *in_ptr : border_value;
+                a01 = is_valid(offset + 1, 0, input_width - 1, in_yi, 0, input_height - 1) ? *(in_ptr + stride_w_elems) : border_value;
+                a10 = is_valid(offset, 0, input_width - 1, in_yi + 1, 0, input_height - 1) ? *(in_ptr + stride_h_elems) : border_value;
+                a11 = is_valid(offset + 1, 0, input_width - 1, in_yi + 1, 0, input_height - 1) ? *(in_ptr + stride_h_elems + stride_w_elems) : border_value;
             }
             else if(border_mode == BorderMode::REPLICATE)
             {
@@ -279,7 +311,7 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
         {
             if(border_mode == BorderMode::CONSTANT)
             {
-                *reinterpret_cast<T *>(out.ptr()) = *border_area;
+                *reinterpret_cast<T *>(out.ptr()) = border_value;
             }
             else if(border_mode == BorderMode::REPLICATE)
             {
@@ -294,7 +326,8 @@ inline void scale_bilinear_nhwc_core(const ITensor *input, const ITensor *offset
 } // namespace
 
 NEScaleKernel::NEScaleKernel()
-    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _sampling_offset(0)
+    : _func(nullptr), _offsets(nullptr), _dx(nullptr), _dy(nullptr), _input(nullptr), _output(nullptr), _policy(), _border_size(1), _border_mode(), _constant_border_value(PixelValue()),
+      _sampling_offset(0), _use_padding(true)
 {
 }
 
@@ -304,31 +337,33 @@ BorderSize NEScaleKernel::border_size() const
 }
 
 void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets,
-                              ITensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
+                              ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy,
+                              bool use_padding)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
                                                   dx != nullptr ? dx->info() : nullptr,
                                                   dy != nullptr ? dy->info() : nullptr,
                                                   offsets != nullptr ? offsets->info() : nullptr,
                                                   output->info(),
-                                                  policy, border_mode, sampling_policy));
+                                                  policy, border_mode, constant_border_value, sampling_policy, use_padding));
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    _input       = input;
-    _output      = output;
-    _offsets     = offsets;
-    _dx          = dx;
-    _dy          = dy;
-    _policy      = policy;
-    _border_size = BorderSize(1);
-    _border_mode = border_mode;
+    _input                 = input;
+    _output                = output;
+    _offsets               = offsets;
+    _dx                    = dx;
+    _dy                    = dy;
+    _policy                = policy;
+    _border_size           = BorderSize(1);
+    _border_mode           = border_mode;
+    _constant_border_value = constant_border_value;
+    _use_padding           = use_padding;
 
     if(sampling_policy == SamplingPolicy::CENTER)
     {
@@ -342,7 +377,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     // Add constant border only on top in case of NHWC layout
     if(data_layout == DataLayout::NHWC)
     {
-        _border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
+        _border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR && use_padding) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
     }
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
@@ -379,7 +414,8 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
                                                                          dy != nullptr ? dy->info() : nullptr,
                                                                          offsets != nullptr ? offsets->info() : nullptr,
                                                                          output->info(),
-                                                                         policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size());
+                                                                         policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size(), use_padding);
+
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }
@@ -904,8 +940,8 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<uint8_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
-                                                  window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+                scale_bilinear_nhwc_core<uint8_t, uint8_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                           window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode, _constant_border_value, _use_padding);
             }
             break;
         }
@@ -917,8 +953,8 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<int16_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
-                                                  window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+                scale_bilinear_nhwc_core<int16_t, int16_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                           window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode, _constant_border_value, _use_padding);
             }
             break;
         }
@@ -932,8 +968,8 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<float16_t>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
-                                                    window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+                scale_bilinear_nhwc_core<float16_t, half>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                          window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode, _constant_border_value, _use_padding);
             }
             break;
         }
@@ -946,8 +982,8 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             }
             else
             {
-                scale_bilinear_nhwc_core<float>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
-                                                window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode);
+                scale_bilinear_nhwc_core<float, float>(_input, _offsets, _dx, _dy, _output, hr, _sampling_offset,
+                                                       window, win_in, input_stride_w, input_stride_h, input_stride_c, _border_mode, _constant_border_value, _use_padding);
             }
             break;
         }
@@ -959,7 +995,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
 
 Status NEScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
                                const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
-                               BorderMode border_mode, SamplingPolicy sampling_policy)
+                               BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy, bool use_padding)
 {
     BorderSize border_size(1);
     if(input->data_layout() == DataLayout::NHWC)
@@ -967,13 +1003,13 @@ Status NEScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *dx, 
         border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, policy, border_mode, sampling_policy));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, policy, border_mode, constant_border_value, sampling_policy, use_padding));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
                                                               dx != nullptr ? dx->clone().get() : nullptr,
                                                               dy != nullptr ? dy->clone().get() : nullptr,
                                                               offsets != nullptr ? offsets->clone().get() : nullptr,
                                                               output->clone().get(),
-                                                              policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size)
+                                                              policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size, use_padding)
                                 .first);
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,21 @@
  * SOFTWARE.
  */
 #include "helpers.h"
+
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+#define VEC_FLOAT(VEC_SIZE) \
+    VEC_DATA_TYPE(float, VEC_SIZE)
+#define VEC_INT(VEC_SIZE) VEC_DATA_TYPE(int, VEC_SIZE)
+#define VEC_UCHAR(VEC_SIZE) VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
+#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
+#define REQUANTIZE(VEC_SIZE, input, in_offset, out_offset, in_scale, out_scale, res)                                                                                  \
+    {                                                                                                                                                                 \
+        const VEC_FLOAT(VEC_SIZE) in_f32  = (CONVERT(input, VEC_FLOAT(VEC_SIZE)) - (VEC_FLOAT(VEC_SIZE))((float)in_offset)) * (VEC_FLOAT(VEC_SIZE))((float)in_scale); \
+        const VEC_FLOAT(VEC_SIZE) out_f32 = in_f32 / ((VEC_FLOAT(VEC_SIZE))(float)out_scale) + ((VEC_FLOAT(VEC_SIZE))((float)out_offset));                            \
+        res                               = CONVERT_SAT(CONVERT_DOWN(out_f32, VEC_INT(VEC_SIZE)), VEC_UCHAR(VEC_SIZE));                                               \
+    }
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
 
 #if defined(POOL_AVG)
 #define POOL_OP(x, y) ((x) + (y))
@@ -118,8 +133,22 @@ __kernel void pooling_layer_MxN_quantized_nchw(
     res = round(DIV_OP(res, calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y)));
 #endif /* defined(POOL_AVG) */
 
-    // Store result
-    *(__global uchar *)output.ptr = convert_uchar(res);
+    uchar result_u8 = convert_uchar(res);
+
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+
+    const float result_f32   = convert_float(result_u8);
+    const float input_offset = (float)OFFSET_IN1;
+    const float input_scale  = (float)SCALE_IN1;
+    const float scale_out    = (float)SCALE_OUT;
+    const float offset_out   = (float)OFFSET_OUT;
+    const float in_f32       = (result_f32 - input_offset) * input_scale;
+    const float out_f32      = in_f32 / scale_out + offset_out;
+    result_u8                = convert_uchar_sat(convert_int_rte(out_f32));
+
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+
+    *(__global uchar *)output.ptr = result_u8;
 }
 
 int calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
@@ -217,6 +246,11 @@ __kernel void pooling_layer_MxN_quantized_nhwc(
     vdata = convert_int8(round(DIV_OP_NHWC(vdata, calculate_avg_scale_nhwc(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y))));
 #endif /* defined(POOL_AVG) */
 
+    uchar8 out_u8 = convert_uchar8(vdata);
+#if defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT)
+    REQUANTIZE(8, out_u8, OFFSET_IN1, OFFSET_OUT, SCALE_IN1, SCALE_OUT, out_u8);
+#endif /* defined(OFFSET_IN1) && defined(OFFSET_OUT) && defined(SCALE_IN1) && defined(SCALE_OUT) */
+
     // Store result
-    vstore8(convert_uchar8(vdata), 0, (__global uchar *)output.ptr);
+    vstore8(out_u8, 0, (__global uchar *)output.ptr);
 }

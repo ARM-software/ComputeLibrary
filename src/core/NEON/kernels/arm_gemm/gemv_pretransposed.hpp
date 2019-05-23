@@ -148,7 +148,6 @@ public:
         return _buffer_per_multi * _nmultis * sizeof(To);
     }
 
-    using GemmCommon<To, Tr>::pretranspose_B_array;
     void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride) override {
         Toi *A_buffer = reinterpret_cast<Toi *>(buffer);
 

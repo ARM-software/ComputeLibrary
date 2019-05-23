@@ -1,5 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_i_h_o_g_accessor.xhtml" title="Common interface to access HOG structure." alt="" coords="5,31,119,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_c_l_h_o_g_accessor.xhtml" title="Accessor implementation for CLHOG objects." alt="" coords="167,5,293,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_h_o_g_accessor.xhtml" title="Accessor implementation for HOG objects." alt="" coords="175,56,285,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title=" " alt="" coords="5,5,231,32"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml" title="Tensor metadata class." alt="" coords="279,5,408,32"/>
 </map>

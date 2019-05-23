@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -136,18 +136,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a1d56c5f246a7ed8c16f5eefa59bb587f"><td class="memItemLeft" align="right" valign="top">PassManager&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a1d56c5f246a7ed8c16f5eefa59bb587f">create_default_pass_manager</a> (Target target)</td></tr>
 <tr class="memdesc:a1d56c5f246a7ed8c16f5eefa59bb587f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a default <a class="el" href="classarm__compute_1_1graph_1_1_pass_manager.xhtml">PassManager</a>.  <a href="namespacearm__compute_1_1graph.xhtml#a1d56c5f246a7ed8c16f5eefa59bb587f">More...</a><br /></td></tr>
 <tr class="separator:a1d56c5f246a7ed8c16f5eefa59bb587f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2d442d0925c0a509698b1b11aba0c8a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#ac2d442d0925c0a509698b1b11aba0c8a">setup_default_graph_context</a> (GraphContext &amp;ctx)</td></tr>
-<tr class="memdesc:ac2d442d0925c0a509698b1b11aba0c8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default setups the graph context if not done manually.  <a href="namespacearm__compute_1_1graph.xhtml#ac2d442d0925c0a509698b1b11aba0c8a">More...</a><br /></td></tr>
-<tr class="separator:ac2d442d0925c0a509698b1b11aba0c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaef0102f19fc08d670766506b1a0b66e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#aaef0102f19fc08d670766506b1a0b66e">setup_requested_backend_context</a> (GraphContext &amp;ctx, Target target)</td></tr>
+<tr class="memdesc:aaef0102f19fc08d670766506b1a0b66e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setups requested backend context if it exists, is supported and hasn't been initialized already.  <a href="namespacearm__compute_1_1graph.xhtml#aaef0102f19fc08d670766506b1a0b66e">More...</a><br /></td></tr>
+<tr class="separator:aaef0102f19fc08d670766506b1a0b66e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9562c1c1399af2f10714a7d901e19311"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a9562c1c1399af2f10714a7d901e19311">release_default_graph_context</a> (GraphContext &amp;ctx)</td></tr>
 <tr class="memdesc:a9562c1c1399af2f10714a7d901e19311"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default releases the graph context if not done manually.  <a href="namespacearm__compute_1_1graph.xhtml#a9562c1c1399af2f10714a7d901e19311">More...</a><br /></td></tr>
 <tr class="separator:a9562c1c1399af2f10714a7d901e19311"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75f8e464c6b01b0a4771de38669ee9a1"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a75f8e464c6b01b0a4771de38669ee9a1">get_dimension_size</a> (const TensorDescriptor &amp;descriptor, const DataLayoutDimension data_layout_dimension)</td></tr>
 <tr class="memdesc:a75f8e464c6b01b0a4771de38669ee9a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get size of a tensor's given dimension depending on its layout.  <a href="namespacearm__compute_1_1graph.xhtml#a75f8e464c6b01b0a4771de38669ee9a1">More...</a><br /></td></tr>
 <tr class="separator:a75f8e464c6b01b0a4771de38669ee9a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9707da1c4d86f7695586fe1207883e7"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#ae9707da1c4d86f7695586fe1207883e7">get_dimension_idx</a> (const TensorDescriptor &amp;descriptor, const DataLayoutDimension data_layout_dimension)</td></tr>
-<tr class="memdesc:ae9707da1c4d86f7695586fe1207883e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get index of a tensor's given dimension depending on its layout.  <a href="namespacearm__compute_1_1graph.xhtml#ae9707da1c4d86f7695586fe1207883e7">More...</a><br /></td></tr>
-<tr class="separator:ae9707da1c4d86f7695586fe1207883e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1df15aed3ed531f442ecea2a131d65a4"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a1df15aed3ed531f442ecea2a131d65a4">get_dimension_idx</a> (DataLayout data_layout, const DataLayoutDimension data_layout_dimension)</td></tr>
+<tr class="memdesc:a1df15aed3ed531f442ecea2a131d65a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get index of a tensor's given dimension depending on its layout.  <a href="namespacearm__compute_1_1graph.xhtml#a1df15aed3ed531f442ecea2a131d65a4">More...</a><br /></td></tr>
+<tr class="separator:a1df15aed3ed531f442ecea2a131d65a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a634230f98a5918f214e47d913c452d3b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; NodeIdxPair &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a634230f98a5918f214e47d913c452d3b">get_driving_nodes</a> (const INode &amp;node)</td></tr>
 <tr class="memdesc:a634230f98a5918f214e47d913c452d3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of driving nodes of a given node.  <a href="namespacearm__compute_1_1graph.xhtml#a634230f98a5918f214e47d913c452d3b">More...</a><br /></td></tr>
 <tr class="separator:a634230f98a5918f214e47d913c452d3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,7 +161,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_99ae3712d1eecd2a93fc4d38b59a99ba.xhtml">graph</a></li><li class="navelem"><a class="el" href="arm__compute_2graph_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:55 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

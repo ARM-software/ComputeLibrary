@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -137,6 +137,9 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#ac7369c169e6de526fcb6f68e4a959444">arm_compute::test::benchmark</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac8906ce871f33363926bf6bfc0e5e41e">arm_compute::test::validation</a>
 </li>
+<li>NEBatchToSpaceLayerFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a56bc82b4c76371c36d037772ed9fb0af">arm_compute::test::validation</a>
+</li>
 <li>NEBitwiseAndFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8494fb0930740d4443cb4176180effd8">arm_compute::test::validation</a>
 </li>
@@ -227,6 +230,21 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <li>NECopyFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6ed50b0f095f13eef5f3d9fb5b8cd874">arm_compute::test::validation</a>
 </li>
+<li>NECropResizeFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aaea8e95ff3943b3e9a1139a2bee38ab0">arm_compute::test::validation</a>
+</li>
+<li>NECropResizeFixture&lt; int16_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3ac611dfbbd1e9948552edea57a05266">arm_compute::test::validation</a>
+</li>
+<li>NECropResizeFixture&lt; int32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4991bbe6b66a3cd43820e0d3d116ed57">arm_compute::test::validation</a>
+</li>
+<li>NECropResizeFixture&lt; uint16_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8ba3ae0391c42bd4b4db72303d8e5b30">arm_compute::test::validation</a>
+</li>
+<li>NECropResizeFixture&lt; uint32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac04c485f77b569f155fb6ae66b1b0f25">arm_compute::test::validation</a>
+</li>
 <li>NEDeconvolutionLayerFixture1x1
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a538208282c3b9b8cc121cf8508d2a3e6">arm_compute::test::validation</a>
 </li>
@@ -242,9 +260,21 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <li>NEDeconvolutionLayerFixture4x4
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adc7e218231a8128f71ecf1beaef1b9c5">arm_compute::test::validation</a>
 </li>
+<li>NEDeconvolutionLayerQuantizedFixture1x1
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a504620223beb769d936523b27032b44c">arm_compute::test::validation</a>
+</li>
+<li>NEDeconvolutionLayerQuantizedFixture1x1&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a43fb6fd0762bd4080bad0b70528479d5">arm_compute::test::validation</a>
+</li>
+<li>NEDeconvolutionLayerQuantizedFixture3x3
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1b052afcae87047e6cf6eb64aeace32d">arm_compute::test::validation</a>
+</li>
+<li>NEDeconvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae07c9291b99dd132b86e6d38a7b8aff0">arm_compute::test::validation</a>
+</li>
 <li>NEDepthConcatenateLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#ac1621ae0b84d28f536bf10b0b8667ea7">arm_compute::test::benchmark</a>
-, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2edd00299986f6f9945504cb6af06c21">arm_compute::test::validation</a>
+, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a884bd3d0dcec77be72e8a3d30b69fb82">arm_compute::test::validation</a>
 </li>
 <li>NEDepthConvertLayerQuantizedToF16Fixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa00a28e95c442493cb666d16f8637152">arm_compute::test::validation</a>
@@ -278,6 +308,9 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 </li>
 <li>NEDepthwiseConvolutionLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7dc2a897706e1f2567436cd05c17f2ce">arm_compute::test::validation</a>
+</li>
+<li>NEDepthwiseConvolutionLayerFixture3x3&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a79d5d5d061932dcc3bc29df86843c9e5">arm_compute::test::validation</a>
 </li>
 <li>NEDepthwiseConvolutionLayerQuantizedFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af87b20687c8018b2e629fc3b7f5324fd">arm_compute::test::validation</a>
@@ -358,6 +391,17 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a1581c9fcc096df47331b37ded983d029">arm_compute::test::benchmark</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a91c3c0dac7b566f39e6dc2012772c6c7">arm_compute::test::validation</a>
 </li>
+<li>NEFFT1DFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#acfbc4ed4c1c9d9ed776e03a6f91889cc">arm_compute::test::benchmark</a>
+, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a917bc1e962d991e6a1e7b3110fcbb090">arm_compute::test::validation</a>
+</li>
+<li>NEFFT2DFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a5797f499839b1e5c293dd84998382608">arm_compute::test::benchmark</a>
+, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a44bae26b5fb6b97d8a427488ba7daf0f">arm_compute::test::validation</a>
+</li>
+<li>NEFFTConvolutionLayerFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a71ea1274166c92b1914398cf4a369802">arm_compute::test::benchmark</a>
+</li>
 <li>NEFlattenLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a00e95983de8e4d699d9f2b7fb64fcb43">arm_compute::test::validation</a>
 </li>
@@ -427,6 +471,9 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <li>NEGEMMLowpMatrixMultiplyCoreFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad6880410d254bb87a46a663bcdd944bf">arm_compute::test::validation</a>
 </li>
+<li>NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aacc518ecfae05fa0b46c5d4564230deb">arm_compute::test::validation</a>
+</li>
 <li>NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0bc691ca26723ad9d84ad9aafb928438">arm_compute::test::validation</a>
 </li>
@@ -451,6 +498,12 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <li>NEHarrisCornersFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a1aa05c5a190c320fbb0e259c9af430d2">arm_compute::test::benchmark</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a56a25219f8de732328604fce8d0a3ba9">arm_compute::test::validation</a>
+</li>
+<li>NEHeightConcatenateLayerFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8f636c7f2d23b139d5d6b70c03088fd4">arm_compute::test::validation</a>
+</li>
+<li>NEHeightConcatenateLayerFixture&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a226ef1563f0ee79b00eff51e9b752135">arm_compute::test::validation</a>
 </li>
 <li>NEHistogramFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a31b7ef65a781a1e1f450a62399429a40">arm_compute::test::benchmark</a>
@@ -553,9 +606,6 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <li>NEPaddingFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8742eecef9bb6c44aba3af838e31d99b">arm_compute::test::validation</a>
 </li>
-<li>NEPaddingFixture&lt; int8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a716b58e0558c447fcefeb343e385bbc1">arm_compute::test::validation</a>
-</li>
 <li>NEPaddingFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aad64ac2e6cc0572ed02599ef9d934c7b">arm_compute::test::validation</a>
 </li>
@@ -577,6 +627,9 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 </li>
 <li>NEPixelWiseMultiplicationToF32Fixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2de8d560e3aa77dcd9f7f6d9094d1174">arm_compute::test::validation</a>
+</li>
+<li>NEPixelWiseMultiplicationToQASYMM8Fixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa921ce7fbdee2382820106df2da6f67a">arm_compute::test::validation</a>
 </li>
 <li>NEPixelWiseMultiplicationToS16Fixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa89d74432688d58ba7731203876c55cb">arm_compute::test::validation</a>
@@ -702,6 +755,12 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a332c02fe617367f14266075c7c046823">arm_compute::test::benchmark</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa5c860447aeecd9eda9bdbf2d3e31e20">arm_compute::test::validation</a>
 </li>
+<li>NESpaceToBatchLayerFixture
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4cdc6c8d20661048001373b77c893e64">arm_compute::test::validation</a>
+</li>
+<li>NESpaceToBatchLayerFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad4d4a60619a10fd4fe9657ad30b0a8a6">arm_compute::test::validation</a>
+</li>
 <li>NESpecialPoolingLayerFixture
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af668c50d20aabcb45b26e5310b1b6556">arm_compute::test::validation</a>
 </li>
@@ -756,7 +815,7 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1d7164aca011490876c383d2c0827d86">arm_compute::test::validation</a>
 </li>
 <li>NEWidthConcatenateLayerFixture
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad6c6e68cbdfbdff41a0f267cef6b3fc6">arm_compute::test::validation</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#affd6e45f867a420d0557f24c88ce239c">arm_compute::test::validation</a>
 </li>
 <li>NEWinogradConvolutionLayerFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a123fca581853db28cc4d78255ab19c31">arm_compute::test::validation</a>
@@ -786,7 +845,7 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a76dd3fc8793c1e670a54fad76c147781">arm_compute::test::validation::reference</a>
 </li>
 <li>non_maxima_suppression()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a354498d36b78c3c042d34e44d95b0287">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a4f89718e67b6cc5ce13ce5ea3a789a88">arm_compute::test::validation::reference</a>
 </li>
 <li>NonLinearFilterFunction
 : <a class="el" href="namespacearm__compute.xhtml#adf2ced65e536375a1c96425d9fced858">arm_compute</a>
@@ -795,7 +854,7 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a451c44627ad6c06f72667812f2a9782d">arm_compute::test::validation::reference</a>
 </li>
 <li>normalize_planar_yuv_layer()
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a039062a11bac2e68d7921e057bacf779">arm_compute::test::validation::reference</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a68b5b2b23cdd66a34348456f30f61a6c">arm_compute::test::validation::reference</a>
 </li>
 <li>normalize_planar_yuv_layer&lt; uint8_t &gt;()
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a27565b2b0910dcc67b2d93d96d842768">arm_compute::test::validation::reference</a>
@@ -839,7 +898,7 @@ $(document).ready(function(){initNavTree('namespacemembers_n.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:07 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

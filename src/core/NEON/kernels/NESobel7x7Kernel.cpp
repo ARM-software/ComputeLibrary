@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -215,7 +215,7 @@ void NESobel7x7HorKernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_y && _run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr() - 3);
 
@@ -244,7 +244,7 @@ void NESobel7x7HorKernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr() - 3);
 
@@ -269,7 +269,7 @@ void NESobel7x7HorKernel::run(const Window &window, const ThreadInfo &info)
     }
     else if(_run_sobel_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const uint8x16_t data = vld1q_u8(input.ptr() - 3);
 
@@ -301,7 +301,7 @@ NESobel7x7VertKernel::NESobel7x7VertKernel()
 
 BorderSize NESobel7x7VertKernel::border_size() const
 {
-    return BorderSize(3, 0);
+    return BorderSize{ 3, 0 };
 }
 
 void NESobel7x7VertKernel::configure(const ITensor *input_x, const ITensor *input_y, ITensor *output_x, ITensor *output_y, bool border_undefined)
@@ -382,7 +382,7 @@ void NESobel7x7VertKernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_x)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             auto in_ptr = reinterpret_cast<int32_t *>(input_x.ptr()) - 3 * in_x_stride;
 
@@ -453,7 +453,7 @@ void NESobel7x7VertKernel::run(const Window &window, const ThreadInfo &info)
 
     if(_run_sobel_y)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             auto in_ptr = reinterpret_cast<int32_t *>(input_y.ptr()) - 3 * in_y_stride;
 

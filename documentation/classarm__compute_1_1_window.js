@@ -15,6 +15,7 @@ var classarm__compute_1_1_window =
     [ "first_slice_window_4D", "classarm__compute_1_1_window.xhtml#a14bbbcfa75deb1a56c83406bfc37eec2", null ],
     [ "num_iterations", "classarm__compute_1_1_window.xhtml#a2fb4b3d6b185c9d225073f923f1827c3", null ],
     [ "num_iterations_total", "classarm__compute_1_1_window.xhtml#a0654fca130488c15b4b66a9b7131c142", null ],
+    [ "operator=", "classarm__compute_1_1_window.xhtml#a920f28ad2a867b3a6c0fa538a5183e11", null ],
     [ "operator[]", "classarm__compute_1_1_window.xhtml#ac13b9cd31178cde1e6b25302d619ea05", null ],
     [ "scale", "classarm__compute_1_1_window.xhtml#a5e8e5ab06329702df09ab7eb07e9b84d", null ],
     [ "set", "classarm__compute_1_1_window.xhtml#acd3d2bba51cb84d34dd7656ad2375a6e", null ],
@@ -31,5 +32,6 @@ var classarm__compute_1_1_window =
     [ "validate", "classarm__compute_1_1_window.xhtml#ab3a68a01a1c7c22bfbd9f3f6d20e7d5a", null ],
     [ "x", "classarm__compute_1_1_window.xhtml#a273fd2ecdd45169b2f702f01a7e5e382", null ],
     [ "y", "classarm__compute_1_1_window.xhtml#a1b522b073f3ca32d24eb4e03495ef8a6", null ],
-    [ "z", "classarm__compute_1_1_window.xhtml#a51a8c7a9d2fa20943c213e85eb8d9caf", null ]
+    [ "z", "classarm__compute_1_1_window.xhtml#a51a8c7a9d2fa20943c213e85eb8d9caf", null ],
+    [ "swap", "classarm__compute_1_1_window.xhtml#ae181d6e147a7230d02611fb9077959f0", null ]
 ];

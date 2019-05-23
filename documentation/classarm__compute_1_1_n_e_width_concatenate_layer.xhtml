@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -123,6 +123,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a76335aeca633fd0ec9e787315e0d4487"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#a76335aeca633fd0ec9e787315e0d4487">configure</a> (std::vector&lt; <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> * &gt; inputs_vector, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)</td></tr>
 <tr class="memdesc:a76335aeca633fd0ec9e787315e0d4487"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs vector and output.  <a href="#a76335aeca633fd0ec9e787315e0d4487">More...</a><br /></td></tr>
 <tr class="separator:a76335aeca633fd0ec9e787315e0d4487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44472012385ae47275b5ec5ea828a500"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#a44472012385ae47275b5ec5ea828a500">configure</a> (std::vector&lt; const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> * &gt; inputs_vector, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)</td></tr>
+<tr class="separator:a44472012385ae47275b5ec5ea828a500"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,15 +141,19 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:af03a00ff6ac9807e1417ed25101e1102"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#af03a00ff6ac9807e1417ed25101e1102">validate</a> (const std::vector&lt; <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> * &gt; &amp;inputs_vector, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
 <tr class="memdesc:af03a00ff6ac9807e1417ed25101e1102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml">NEWidthConcatenateLayer</a>.  <a href="#af03a00ff6ac9807e1417ed25101e1102">More...</a><br /></td></tr>
 <tr class="separator:af03a00ff6ac9807e1417ed25101e1102"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52c6955e1a7077f7d0d854557a1bfdb7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#a52c6955e1a7077f7d0d854557a1bfdb7">validate</a> (const std::vector&lt; const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> * &gt; &amp;inputs_vector, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
+<tr class="separator:a52c6955e1a7077f7d0d854557a1bfdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to execute concatenate tensors along x axis. </p>
 <p>This function calls the following kernel:</p>
 <ol type="1">
-<li><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml">NEWidthConcatenateLayerKernel</a> </li>
+<li><p class="startli"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml">NEWidthConcatenateLayerKernel</a></p>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.xhtml#_deprecated000008">Deprecated:</a></b></dt><dd>This function is deprecated and will be removed in release 19.08 </dd></dl>
+</li>
 </ol>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8h_source.xhtml#l00045">45</a> of file <a class="el" href="_n_e_width_concatenate_layer_8h_source.xhtml">NEWidthConcatenateLayer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8h_source.xhtml#l00050">50</a> of file <a class="el" href="_n_e_width_concatenate_layer_8h_source.xhtml">NEWidthConcatenateLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="abb894ee6ec4336cf067d2273eea64ad8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abb894ee6ec4336cf067d2273eea64ad8">&#9670;&nbsp;</a></span>NEWidthConcatenateLayer()</h2>
@@ -172,7 +178,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a76335aeca633fd0ec9e787315e0d4487"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76335aeca633fd0ec9e787315e0d4487">&#9670;&nbsp;</a></span>configure()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a76335aeca633fd0ec9e787315e0d4487">&#9670;&nbsp;</a></span>configure() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -206,19 +212,40 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00064">64</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;{</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    _num_inputs = inputs_vector.size();</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    std::vector&lt;ITensorInfo *&gt; inputs_vector_info;</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; _num_inputs; ++i)</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    {</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        inputs_vector_info.emplace_back(inputs_vector.at(i)-&gt;info());</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    }</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <a class="code" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a> = <a class="code" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape</a>(inputs_vector);</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="comment">// Output auto inizialitation if not yet initialized</span></div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <a class="code" href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">auto_init_if_empty</a>(*output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>(), <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a>, 1, inputs_vector[0]-&gt;info()-&gt;data_type());</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <a class="code" href="_error_8h.xhtml#a938dcd406ce611ef5345ad2531cdb948">ARM_COMPUTE_ERROR_THROW_ON</a>(<a class="code" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#af03a00ff6ac9807e1417ed25101e1102">NEWidthConcatenateLayer::validate</a>(inputs_vector_info, output-&gt;<a class="code" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">info</a>()));</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> width_offset = 0;</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    _concat_kernels_vector = arm_compute::support::cpp14::make_unique&lt;NEWidthConcatenateLayerKernel[]&gt;(_num_inputs);</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; _num_inputs; ++i)</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    {</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        _concat_kernels_vector[i].configure(inputs_vector.at(i), width_offset, output);</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        width_offset += inputs_vector.at(i)-&gt;info()-&gt;dimension(0);</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    }</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_shape_xhtml"><div class="ttname"><a href="classarm__compute_1_1_tensor_shape.xhtml">arm_compute::TensorShape</a></div><div class="ttdoc">Shape of a tensor.</div><div class="ttdef"><b>Definition:</b> <a href="_tensor_shape_8h_source.xhtml#l00039">TensorShape.h:39</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1misc_1_1shape__calculator_xhtml_a333e4da262f8d985e8f9ab2c39a9c3f3"><div class="ttname"><a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape</a></div><div class="ttdeci">TensorShape calculate_width_concatenate_shape(const std::vector&lt; T * &gt; &amp;inputs_vector)</div><div class="ttdoc">Calculate the width concatenate output shape of a vector of tensors.</div><div class="ttdef"><b>Definition:</b> <a href="_shape_calculator_8h_source.xhtml#l01227">ShapeCalculator.h:1227</a></div></div>
-<div class="ttc" id="_error_8h_xhtml_a938dcd406ce611ef5345ad2531cdb948"><div class="ttname"><a href="_error_8h.xhtml#a938dcd406ce611ef5345ad2531cdb948">ARM_COMPUTE_ERROR_THROW_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_THROW_ON(status)</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00327">Error.h:327</a></div></div>
-<div class="ttc" id="namespacearm__compute_xhtml_a47be6fa38308d0003c25b60b7dbc45ce"><div class="ttname"><a href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">arm_compute::auto_init_if_empty</a></div><div class="ttdeci">bool auto_init_if_empty(ITensorInfo &amp;info, const TensorShape &amp;shape, int num_channels, DataType data_type, QuantizationInfo quantization_info=QuantizationInfo())</div><div class="ttdoc">Auto initialize the tensor info (shape, number of channels and data type) if the current assignment i...</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00201">Helpers.inl:201</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a7fc93f37dac131a1a40b7921f9df3a9a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">arm_compute::test::validation::output_shape</a></div><div class="ttdeci">output_shape</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_i_tensor_xhtml_a0e95dc1e53c361348314873b168ae237"><div class="ttname"><a href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">arm_compute::ITensor::info</a></div><div class="ttdeci">virtual ITensorInfo * info() const =0</div><div class="ttdoc">Interface to be implemented by the child class to return the tensor's metadata.</div></div>
-<div class="ttc" id="classarm__compute_1_1_n_e_width_concatenate_layer_xhtml_af03a00ff6ac9807e1417ed25101e1102"><div class="ttname"><a href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml#af03a00ff6ac9807e1417ed25101e1102">arm_compute::NEWidthConcatenateLayer::validate</a></div><div class="ttdeci">static Status validate(const std::vector&lt; ITensorInfo * &gt; &amp;inputs_vector, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEWidthConcatenateLayer.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00043">NEWidthConcatenateLayer.cpp:43</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00327">ARM_COMPUTE_ERROR_THROW_ON</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l01227">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::output_shape</a>, and <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00043">NEWidthConcatenateLayer::validate()</a>.</p>
-
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00091">91</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;{</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    configure_internal(std::move(inputs_vector), output);</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div></div><!-- fragment -->
 <p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00053">NELSTMLayer::configure()</a>.</p>
 
+</div>
+</div>
+<a id="a44472012385ae47275b5ec5ea828a500"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44472012385ae47275b5ec5ea828a500">&#9670;&nbsp;</a></span>configure() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void configure </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> * &gt;&#160;</td>
+          <td class="paramname"><em>inputs_vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00096">96</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    configure_internal(std::move(inputs_vector), output);</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ad1717410afd0be936c6213a63c8005fb"></a>
@@ -260,19 +287,19 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00090">90</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;{</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> i = 0; i &lt; _num_inputs; ++i)</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    {</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <a class="code" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">NEScheduler::get</a>().<a class="code" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a>(_concat_kernels_vector.get() + i, <a class="code" href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">Window::DimY</a>);</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    }</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_ad2d402364fa822b0b7775081291eeca9"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">arm_compute::Window::DimY</a></div><div class="ttdeci">static constexpr size_t DimY</div><div class="ttdoc">Alias for dimension 1 also known as Y dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00045">Window.h:45</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00111">111</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;{</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> i = 0; i &lt; _num_inputs; ++i)</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    {</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <a class="code" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">NEScheduler::get</a>().<a class="code" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a>(&amp;_concat_kernels_vector[i], <a class="code" href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">Window::DimY</a>);</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_ad2d402364fa822b0b7775081291eeca9"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">arm_compute::Window::DimY</a></div><div class="ttdeci">static constexpr size_t DimY</div><div class="ttdoc">Alias for dimension 1 also known as Y dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00045">Window.h:45</a></div></div>
 <div class="ttc" id="classarm__compute_1_1_i_scheduler_xhtml_a4e58f95544bd5ac6559a421671bd9842"><div class="ttname"><a href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">arm_compute::IScheduler::schedule</a></div><div class="ttdeci">virtual void schedule(ICPPKernel *kernel, const Hints &amp;hints)=0</div><div class="ttdoc">Runs the kernel in the same thread as the caller synchronously.</div></div>
 <div class="ttc" id="classarm__compute_1_1_scheduler_xhtml_a0d63ca713bab377aabcfb63c192b8429"><div class="ttname"><a href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">arm_compute::Scheduler::get</a></div><div class="ttdeci">static IScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_scheduler_8cpp_source.xhtml#l00096">Scheduler.cpp:96</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="_window_8h_source.xhtml#l00045">Window::DimY</a>, <a class="el" href="_scheduler_8cpp_source.xhtml#l00096">Scheduler::get()</a>, and <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler::schedule()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00466">NELSTMLayer::run()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00572">NELSTMLayer::prepare()</a>, and <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00492">NELSTMLayer::run()</a>.</p>
 
 </div>
 </div>
 <a id="af03a00ff6ac9807e1417ed25101e1102"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af03a00ff6ac9807e1417ed25101e1102">&#9670;&nbsp;</a></span>validate()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af03a00ff6ac9807e1417ed25101e1102">&#9670;&nbsp;</a></span>validate() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -315,24 +342,48 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00043">43</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;{</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <a class="code" href="_validate_8h.xhtml#aff911654521523937ff24372a870b89f">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>(output);</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <a class="code" href="_error_8h.xhtml#a206d6e247e0957ac3dee45d27756fc25">ARM_COMPUTE_RETURN_ERROR_ON</a>(inputs_vector.size() &lt; 2);</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="comment">// Output auto inizialitation if not yet initialized</span></div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    <a class="code" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a>  tmp_output_info = *output-&gt;<a class="code" href="classarm__compute_1_1misc_1_1_i_cloneable.xhtml#a4d10e5012a872e7f78f2b539b673049d">clone</a>();</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <a class="code" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a>    = <a class="code" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape</a>(inputs_vector);</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <a class="code" href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">auto_init_if_empty</a>(tmp_output_info, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a>, 1, inputs_vector[0]-&gt;<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14">data_type</a>());</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> width_offset = 0;</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keywordflow">for</span>(<span class="keyword">const</span> <span class="keyword">auto</span> &amp;input : inputs_vector)</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    {</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <a class="code" href="_validate_8h.xhtml#aff911654521523937ff24372a870b89f">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>(input);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <a class="code" href="_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4">ARM_COMPUTE_RETURN_ON_ERROR</a>(<a class="code" href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml#adecdb3cc6b7b36f8bfbcd777ff021809">NEWidthConcatenateLayerKernel::validate</a>(input, width_offset, &amp;tmp_output_info));</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        width_offset += input-&gt;dimension(0);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    }</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_status.xhtml">Status</a>{};</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_tensor_shape_xhtml"><div class="ttname"><a href="classarm__compute_1_1_tensor_shape.xhtml">arm_compute::TensorShape</a></div><div class="ttdoc">Shape of a tensor.</div><div class="ttdef"><b>Definition:</b> <a href="_tensor_shape_8h_source.xhtml#l00039">TensorShape.h:39</a></div></div>
-<div class="ttc" id="_error_8h_xhtml_a8a1e1c105f0bdaf37db408c7cfcb77a4"><div class="ttname"><a href="_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4">ARM_COMPUTE_RETURN_ON_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ON_ERROR(status)</div><div class="ttdoc">Checks if a status contains an error and returns it.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00193">Error.h:193</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1misc_1_1shape__calculator_xhtml_a333e4da262f8d985e8f9ab2c39a9c3f3"><div class="ttname"><a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape</a></div><div class="ttdeci">TensorShape calculate_width_concatenate_shape(const std::vector&lt; T * &gt; &amp;inputs_vector)</div><div class="ttdoc">Calculate the width concatenate output shape of a vector of tensors.</div><div class="ttdef"><b>Definition:</b> <a href="_shape_calculator_8h_source.xhtml#l01227">ShapeCalculator.h:1227</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_status_xhtml"><div class="ttname"><a href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a></div><div class="ttdoc">Status class.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00052">Error.h:52</a></div></div>
-<div class="ttc" id="_error_8h_xhtml_a206d6e247e0957ac3dee45d27756fc25"><div class="ttname"><a href="_error_8h.xhtml#a206d6e247e0957ac3dee45d27756fc25">ARM_COMPUTE_RETURN_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true, an error is returned.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00244">Error.h:244</a></div></div>
-<div class="ttc" id="namespacearm__compute_xhtml_a47be6fa38308d0003c25b60b7dbc45ce"><div class="ttname"><a href="namespacearm__compute.xhtml#a47be6fa38308d0003c25b60b7dbc45ce">arm_compute::auto_init_if_empty</a></div><div class="ttdeci">bool auto_init_if_empty(ITensorInfo &amp;info, const TensorShape &amp;shape, int num_channels, DataType data_type, QuantizationInfo quantization_info=QuantizationInfo())</div><div class="ttdoc">Auto initialize the tensor info (shape, number of channels and data type) if the current assignment i...</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00201">Helpers.inl:201</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ac2ad7f431e3446fddcd9b6b9f93c4c14"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14">arm_compute::test::validation::data_type</a></div><div class="ttdeci">data_type</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a7fc93f37dac131a1a40b7921f9df3a9a"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">arm_compute::test::validation::output_shape</a></div><div class="ttdeci">output_shape</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">ConvolutionLayer.cpp:174</a></div></div>
-<div class="ttc" id="classarm__compute_1_1misc_1_1_i_cloneable_xhtml_a4d10e5012a872e7f78f2b539b673049d"><div class="ttname"><a href="classarm__compute_1_1misc_1_1_i_cloneable.xhtml#a4d10e5012a872e7f78f2b539b673049d">arm_compute::misc::ICloneable::clone</a></div><div class="ttdeci">virtual std::unique_ptr&lt; T &gt; clone() const =0</div><div class="ttdoc">Provide a clone of the current object of class T.</div></div>
-<div class="ttc" id="_validate_8h_xhtml_aff911654521523937ff24372a870b89f"><div class="ttname"><a href="_validate_8h.xhtml#aff911654521523937ff24372a870b89f">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(...)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00163">Validate.h:163</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_tensor_info_xhtml"><div class="ttname"><a href="classarm__compute_1_1_tensor_info.xhtml">arm_compute::TensorInfo</a></div><div class="ttdoc">Store the tensor's metadata.</div><div class="ttdef"><b>Definition:</b> <a href="_tensor_info_8h_source.xhtml#l00045">TensorInfo.h:45</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_n_e_width_concatenate_layer_kernel_xhtml_adecdb3cc6b7b36f8bfbcd777ff021809"><div class="ttname"><a href="classarm__compute_1_1_n_e_width_concatenate_layer_kernel.xhtml#adecdb3cc6b7b36f8bfbcd777ff021809">arm_compute::NEWidthConcatenateLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEWidthConcatenateLayerK...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_width_concatenate_layer_kernel_8cpp_source.xhtml#l00098">NEWidthConcatenateLayerKernel.cpp:98</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00244">ARM_COMPUTE_RETURN_ERROR_ON</a>, <a class="el" href="_validate_8h_source.xhtml#l00163">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>, <a class="el" href="_error_8h_source.xhtml#l00193">ARM_COMPUTE_RETURN_ON_ERROR</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l01227">arm_compute::misc::shape_calculator::calculate_width_concatenate_shape()</a>, <a class="el" href="classarm__compute_1_1misc_1_1_i_cloneable.xhtml#a4d10e5012a872e7f78f2b539b673049d">ICloneable&lt; T &gt;::clone()</a>, <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::data_type</a>, <a class="el" href="validation_2_c_l_2_convolution_layer_8cpp_source.xhtml#l00174">arm_compute::test::validation::output_shape</a>, and <a class="el" href="_n_e_width_concatenate_layer_kernel_8cpp_source.xhtml#l00098">NEWidthConcatenateLayerKernel::validate()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00101">101</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;{</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="keywordflow">return</span> validate_internal(inputs_vector, output);</div><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00318">NELSTMLayer::validate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00064">NEWidthConcatenateLayer::configure()</a>, <a class="el" href="_n_e_concatenate_layer_8cpp_source.xhtml#l00067">NEConcatenateLayer::validate()</a>, and <a class="el" href="_n_e_l_s_t_m_layer_8cpp_source.xhtml#l00306">NELSTMLayer::validate()</a>.</p>
+</div>
+</div>
+<a id="a52c6955e1a7077f7d0d854557a1bfdb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52c6955e1a7077f7d0d854557a1bfdb7">&#9670;&nbsp;</a></span>validate() <span class="overload">[2/2]</span></h2>
 
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>inputs_vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml#l00106">106</a> of file <a class="el" href="_n_e_width_concatenate_layer_8cpp_source.xhtml">NEWidthConcatenateLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;{</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">return</span> validate_internal(inputs_vector, output);</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -345,7 +396,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_width_concatenate_layer.xhtml">NEWidthConcatenateLayer</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:04 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

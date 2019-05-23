@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -113,6 +113,7 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_lowp_8c
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_o_n_2_helper_8h_source.xhtml">tests/NEON/Helper.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_padding_calculator_8h_source.xhtml">tests/PaddingCalculator.h</a>&quot;</code><br />
+<code>#include &quot;tests/datasets/GEMMLowpFusedOffsetOutputDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/LargeGEMMLowpDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/ShapeDatasets.h&quot;</code><br />
 <code>#include &quot;tests/datasets/SmallGEMMLowpDataset.h&quot;</code><br />
@@ -143,6 +144,8 @@ Typedefs</h2></td></tr>
 <tr class="separator:a81a5e6a019eb49bf186adbae0baa7325"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6880410d254bb87a46a663bcdd944bf"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad6880410d254bb87a46a663bcdd944bf">NEGEMMLowpMatrixMultiplyCoreFixture</a> = GEMMLowpMatrixMultiplyCoreValidationFixture&lt; Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore &gt;</td></tr>
 <tr class="separator:ad6880410d254bb87a46a663bcdd944bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacc518ecfae05fa0b46c5d4564230deb"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aacc518ecfae05fa0b46c5d4564230deb">NEGEMMLowpMatrixMultiplyCoreFusedOffsetOutputFixture</a> = GEMMLowpMatrixMultiplyCoreFusedOffsetOutputValidationFixture&lt; Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore &gt;</td></tr>
+<tr class="separator:aacc518ecfae05fa0b46c5d4564230deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a174a5f51b17ff15bdf18ece0907ce1b0"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a174a5f51b17ff15bdf18ece0907ce1b0">NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture</a> = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture&lt; Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8Scale &gt;</td></tr>
 <tr class="separator:a174a5f51b17ff15bdf18ece0907ce1b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0bc691ca26723ad9d84ad9aafb928438"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0bc691ca26723ad9d84ad9aafb928438">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointFixture</a> = GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture&lt; Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint &gt;</td></tr>
@@ -189,7 +192,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml">GEMMLowp.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

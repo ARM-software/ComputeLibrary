@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ void NEGaussian3x3Kernel::run(const Window &window, const ThreadInfo &info)
     static const int16x8_t two  = vdupq_n_s16(2);
     static const int16x8_t four = vdupq_n_s16(4);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
         uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());

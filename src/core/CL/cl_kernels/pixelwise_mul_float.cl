@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,3 +95,51 @@ __kernel void pixelwise_mul_float(
     vstore16(res, 0, (__global DATA_TYPE_OUT *)out.ptr);
 }
 #endif /* defined(DATA_TYPE_IN1) && defined(DATA_TYPE_IN2) && defined(DATA_TYPE_RES) && defined(DATA_TYPE_OUT) */
+
+/** Performs a pixelwise multiplication of complex float values
+ *
+ * @param[in]  in1_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in]  in1_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  in1_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in1_step_y                        in1_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in1_stride_z                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in1_step_z                        in1_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in1_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in]  in2_ptr                           Pointer to the source image. Supported data types: same as @p in1_ptr
+ * @param[in]  in2_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in]  in2_step_x                        in2_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  in2_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in2_step_y                        in2_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in2_stride_z                      Stride of the source image in Y dimension (in bytes)
+ * @param[in]  in2_step_z                        in2_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[out] out_ptr                           Pointer to the destination image. Supported data types: same as @p in1_ptr
+ * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  out_step_y                        out_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_stride_z                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  out_step_z                        out_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  out_offset_first_element_in_bytes The offset of the first element in the destination image
+ */
+__kernel void pixelwise_mul_complex(
+    TENSOR3D_DECLARATION(in1),
+    TENSOR3D_DECLARATION(in2),
+    TENSOR3D_DECLARATION(out))
+{
+    // Get pixels pointer
+    Tensor3D in1 = CONVERT_TO_TENSOR3D_STRUCT(in1);
+    Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
+    Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
+
+    // Load data
+    float2 vin1 = vload2(0, (__global float *)in1.ptr);
+    float2 vin2 = vload2(0, (__global float *)in2.ptr);
+
+    // Perform complex multiplication
+    float2 res = { vin1.x *vin2.x - vin1.y * vin2.y, vin1.x *vin2.y + vin2.x * vin1.y };
+
+    // Store result
+    vstore2(res, 0, (__global float *)out.ptr);
+}

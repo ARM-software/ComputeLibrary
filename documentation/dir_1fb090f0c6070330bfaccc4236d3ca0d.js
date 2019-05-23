@@ -57,6 +57,11 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
     [ "ITensorInfo.h", "_i_tensor_info_8h.xhtml", [
       [ "ITensorInfo", "classarm__compute_1_1_i_tensor_info.xhtml", "classarm__compute_1_1_i_tensor_info" ]
     ] ],
+    [ "KernelDescriptors.h", "_kernel_descriptors_8h.xhtml", [
+      [ "FFTScaleKernelInfo", "structarm__compute_1_1_f_f_t_scale_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_scale_kernel_info" ],
+      [ "FFTDigitReverseKernelInfo", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_digit_reverse_kernel_info" ],
+      [ "FFTRadixStageKernelInfo", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml", "structarm__compute_1_1_f_f_t_radix_stage_kernel_info" ]
+    ] ],
     [ "Log.h", "_log_8h.xhtml", "_log_8h" ],
     [ "MultiImageInfo.h", "_multi_image_info_8h.xhtml", [
       [ "MultiImageInfo", "classarm__compute_1_1_multi_image_info.xhtml", "classarm__compute_1_1_multi_image_info" ]
@@ -95,6 +100,6 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "Window", "classarm__compute_1_1_window.xhtml", "classarm__compute_1_1_window" ],
       [ "Dimension", "classarm__compute_1_1_window_1_1_dimension.xhtml", "classarm__compute_1_1_window_1_1_dimension" ]
     ] ],
-    [ "Window.inl", "_window_8inl.xhtml", null ],
+    [ "Window.inl", "_window_8inl.xhtml", "_window_8inl" ],
     [ "WindowIterator.h", "_window_iterator_8h.xhtml", "_window_iterator_8h" ]
 ];

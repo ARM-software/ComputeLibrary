@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ NEGaussianPyramidHorKernel::NEGaussianPyramidHorKernel()
 
 BorderSize NEGaussianPyramidHorKernel::border_size() const
 {
-    return BorderSize(0, 2);
+    return BorderSize{ 0, 2 };
 }
 
 void NEGaussianPyramidHorKernel::configure(const ITensor *input, ITensor *output)
@@ -126,7 +126,7 @@ void NEGaussianPyramidHorKernel::run(const Window &window, const ThreadInfo &inf
 
     Iterator out(_output, win_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16x2_t data_2q   = vld2q_u8(in.ptr());
         const uint8x16_t &data_even = data_2q.val[0];
@@ -155,7 +155,7 @@ NEGaussianPyramidVertKernel::NEGaussianPyramidVertKernel()
 
 BorderSize NEGaussianPyramidVertKernel::border_size() const
 {
-    return BorderSize(2, 0);
+    return BorderSize{ 2, 0 };
 }
 
 void NEGaussianPyramidVertKernel::configure(const ITensor *input, ITensor *output)
@@ -236,7 +236,7 @@ void NEGaussianPyramidVertKernel::run(const Window &window, const ThreadInfo &in
     const uint8_t *input_low_ptr  = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 3));
     const uint8_t *input_low2_ptr = _input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(0, 4));
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         // Low data
         const uint16x8_t data_low_t2 = vreinterpretq_u16_s16(vld1q_s16(reinterpret_cast<const int16_t *>(input_top2_ptr + in.offset())));

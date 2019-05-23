@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,7 @@ void PrettyPrinter::print_error(const std::exception &error, bool expected)
 
 void PrettyPrinter::print_list_tests(const std::vector<TestInfo> &infos)
 {
-    for(auto info : infos)
+    for(auto const &info : infos)
     {
         *_stream << "[" << info.id << ", " << info.mode << ", " << info.status << "] " << info.name << "\n";
     }

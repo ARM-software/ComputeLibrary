@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,6 +129,17 @@ public:
     {
         add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U, 1U), TensorShape(1U), TensorShape(14U, 8U, 1U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(14U, 14U, 2U), TensorShape(1U, 7U, 2U), TensorShape(1U), TensorShape(14U, 14U, 1U), PadStrideInfo(1, 1, 0, 3));
+    }
+};
+
+class SmallFFTConvolutionLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallFFTConvolutionLayerDataset()
+    {
+        add_config(TensorShape(8U, 7U, 3U), TensorShape(3U, 3U, 3U, 2U), TensorShape(2U), TensorShape(8U, 7U, 2U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(64U, 32U, 5U), TensorShape(5U, 5U, 5U, 10U), TensorShape(10U), TensorShape(64U, 32U, 10U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(192U, 128U, 8U), TensorShape(9U, 9U, 8U, 3U), TensorShape(3U), TensorShape(192U, 128U, 3U), PadStrideInfo(1, 1, 4, 4));
     }
 };
 

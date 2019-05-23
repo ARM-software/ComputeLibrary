@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,7 @@ void NEIntegralImageKernel::configure(const ITensor *input, ITensor *output)
 
 BorderSize NEIntegralImageKernel::border_size() const
 {
-    return BorderSize(1, 0, 0, 1);
+    return BorderSize{ 1, 0, 0, 1 };
 }
 
 bool NEIntegralImageKernel::is_parallelisable() const
@@ -83,7 +83,7 @@ void NEIntegralImageKernel::run(const Window &window, const ThreadInfo &info)
     const auto output_top_left = reinterpret_cast<const uint32_t *>(_output->ptr_to_element(Coordinates(-1, -1)));
     const auto output_top_mid  = reinterpret_cast<const uint32_t *>(_output->ptr_to_element(Coordinates(0, -1)));
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t input_pixels = vld1q_u8(input.ptr());
 

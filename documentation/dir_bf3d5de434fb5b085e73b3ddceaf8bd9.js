@@ -4,6 +4,7 @@ var dir_bf3d5de434fb5b085e73b3ddceaf8bd9 =
     [ "GCActivationLayer.cpp", "_g_c_activation_layer_8cpp.xhtml", null ],
     [ "GCArithmeticAddition.cpp", "_g_c_arithmetic_addition_8cpp.xhtml", null ],
     [ "GCBatchNormalizationLayer.cpp", "_g_c_batch_normalization_layer_8cpp.xhtml", null ],
+    [ "GCConcatenateLayer.cpp", "_g_c_concatenate_layer_8cpp.xhtml", null ],
     [ "GCConvolutionLayer.cpp", "_g_c_convolution_layer_8cpp.xhtml", null ],
     [ "GCDepthConcatenateLayer.cpp", "_g_c_depth_concatenate_layer_8cpp.xhtml", null ],
     [ "GCDepthwiseConvolutionLayer.cpp", "_g_c_depthwise_convolution_layer_8cpp.xhtml", null ],

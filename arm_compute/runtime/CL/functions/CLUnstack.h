@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,8 +69,8 @@ public:
     void run() override;
 
 private:
-    unsigned int                      _num_slices;
-    std::unique_ptr<CLStridedSlice[]> _strided_slice_vector;
+    unsigned int                _num_slices;
+    std::vector<CLStridedSlice> _strided_slice_vector;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLUNSTACK_H__ */

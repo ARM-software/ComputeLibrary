@@ -10,7 +10,7 @@ var _c_l_2_pixel_wise_multiplication_8cpp =
     [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a274d2afc8082b3cdf926001c5969d317", null ],
     [ "DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a2d8ceb03a628fbc166c979678ab5ceef", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a51106824477557cde3c3693d611722ea", null ],
-    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a57e64692477752bc5e2c635dadace705", null ],
+    [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a01962845f989db0f81be2e564230df02", null ],
     [ "TEST_SUITE_END", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
     [ "CLPixelWiseMultiplicationBroadcastFixture< float >", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a3e75bd77bb0651928ec6c635c0e2612d", null ],
     [ "CLPixelWiseMultiplicationToF32Fixture< float >", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a7358bbca9e5c79b0b9f8c336fd38c5a1", null ]

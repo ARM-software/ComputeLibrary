@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -97,7 +97,8 @@ $(document).ready(function(){initNavTree('depthwise__convolution_8cl.xhtml','');
 
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">depthwise_convolution.cl File Reference</div>  </div>
 </div><!--header-->
@@ -108,6 +109,16 @@ $(document).ready(function(){initNavTree('depthwise__convolution_8cl.xhtml','');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
+<tr class="memitem:a150fbfa48767f3bf602b812f8ecb3ad9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">ACTIVATION_FUNC</a>(x)&#160;&#160;&#160;(x)</td></tr>
+<tr class="separator:a150fbfa48767f3bf602b812f8ecb3ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae40b0f25b3985d4853b944151ffddb44"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#ae40b0f25b3985d4853b944151ffddb44">CONVOLUTION1x3_BIFROST2X1_STRIDE1</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
+<tr class="separator:ae40b0f25b3985d4853b944151ffddb44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2da35283a28c35fd9f8b0d534e5a5a44"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a2da35283a28c35fd9f8b0d534e5a5a44">CONVOLUTION1x3_BIFROST2X1_STRIDE2</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
+<tr class="separator:a2da35283a28c35fd9f8b0d534e5a5a44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0916b921e5c01cc64afede6dc7bd5caa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a0916b921e5c01cc64afede6dc7bd5caa">CONVOLUTION1x3_BIFROST4X1_STRIDE1</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
+<tr class="separator:a0916b921e5c01cc64afede6dc7bd5caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa18ba8a4892890c942fea83c5cad8dbc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#aa18ba8a4892890c942fea83c5cad8dbc">CONVOLUTION1x3_BIFROST4X1_STRIDE2</a>(acc,  src0_left,  src0_mid,  src0_right,  weights_row0)</td></tr>
+<tr class="separator:aa18ba8a4892890c942fea83c5cad8dbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5447e2c4e1aae8fff9290b775fe813ff"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a5447e2c4e1aae8fff9290b775fe813ff">in_stride_x</a>&#160;&#160;&#160;src_stride_y</td></tr>
 <tr class="separator:a5447e2c4e1aae8fff9290b775fe813ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac353c0687abd8c71a4fa096d322b39ec"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#ac353c0687abd8c71a4fa096d322b39ec">in_stride_y</a>&#160;&#160;&#160;src_stride_z</td></tr>
@@ -120,8 +131,226 @@ Macros</h2></td></tr>
 <tr class="separator:ac8b6b732372937bba276e6391944d1e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a128f47cb6aacde29e07fde2c4b9f5dd2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a128f47cb6aacde29e07fde2c4b9f5dd2">out_stride_z</a>&#160;&#160;&#160;dst_stride_x</td></tr>
 <tr class="separator:a128f47cb6aacde29e07fde2c4b9f5dd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a4201b7aeda129409f16dd5a5cfe56450"><td class="memItemLeft" align="right" valign="top">__global uchar *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="depthwise__convolution_8cl.xhtml#a4201b7aeda129409f16dd5a5cfe56450">ptr_offset</a> (__global uchar *ptr, const int x, const int y, const int stride_x, const int stride_y)</td></tr>
+<tr class="memdesc:a4201b7aeda129409f16dd5a5cfe56450"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the pointer position at a certain offset in x and y direction.  <a href="#a4201b7aeda129409f16dd5a5cfe56450">More...</a><br /></td></tr>
+<tr class="separator:a4201b7aeda129409f16dd5a5cfe56450"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="a150fbfa48767f3bf602b812f8ecb3ad9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a150fbfa48767f3bf602b812f8ecb3ad9">&#9670;&nbsp;</a></span>ACTIVATION_FUNC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define ACTIVATION_FUNC</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00033">33</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+
+</div>
+</div>
+<a id="ae40b0f25b3985d4853b944151ffddb44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae40b0f25b3985d4853b944151ffddb44">&#9670;&nbsp;</a></span>CONVOLUTION1x3_BIFROST2X1_STRIDE1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CONVOLUTION1x3_BIFROST2X1_STRIDE1</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">acc, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_left, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_mid, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_right, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">weights_row0&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00107">107</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+
+</div>
+</div>
+<a id="a2da35283a28c35fd9f8b0d534e5a5a44"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2da35283a28c35fd9f8b0d534e5a5a44">&#9670;&nbsp;</a></span>CONVOLUTION1x3_BIFROST2X1_STRIDE2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CONVOLUTION1x3_BIFROST2X1_STRIDE2</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">acc, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_left, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_mid, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_right, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">weights_row0&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">    })</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00117">117</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+
+</div>
+</div>
+<a id="a0916b921e5c01cc64afede6dc7bd5caa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0916b921e5c01cc64afede6dc7bd5caa">&#9670;&nbsp;</a></span>CONVOLUTION1x3_BIFROST4X1_STRIDE1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CONVOLUTION1x3_BIFROST4X1_STRIDE1</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">acc, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_left, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_mid, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_right, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">weights_row0&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s1, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s1, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s1, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = fma(src0_left.s2, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = fma(src0_mid.s2, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = fma(src0_right.s2, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = fma(src0_left.s3, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = fma(src0_mid.s3, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = fma(src0_right.s3, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00127">127</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+
+</div>
+</div>
+<a id="aa18ba8a4892890c942fea83c5cad8dbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa18ba8a4892890c942fea83c5cad8dbc">&#9670;&nbsp;</a></span>CONVOLUTION1x3_BIFROST4X1_STRIDE2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define CONVOLUTION1x3_BIFROST4X1_STRIDE2</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">acc, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_left, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_mid, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">src0_right, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">weights_row0&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">({                                                                                        \</div><div class="line">        acc.s0 = fma(src0_left.s0, weights_row0.s0, acc.s0);                                  \</div><div class="line">        acc.s0 = fma(src0_mid.s0, weights_row0.s1, acc.s0);                                   \</div><div class="line">        acc.s0 = fma(src0_right.s0, weights_row0.s2, acc.s0);                                 \</div><div class="line">        acc.s1 = fma(src0_left.s2, weights_row0.s0, acc.s1);                                  \</div><div class="line">        acc.s1 = fma(src0_mid.s2, weights_row0.s1, acc.s1);                                   \</div><div class="line">        acc.s1 = fma(src0_right.s2, weights_row0.s2, acc.s1);                                 \</div><div class="line">        acc.s2 = fma(src0_left.s4, weights_row0.s0, acc.s2);                                  \</div><div class="line">        acc.s2 = fma(src0_mid.s4, weights_row0.s1, acc.s2);                                   \</div><div class="line">        acc.s2 = fma(src0_right.s4, weights_row0.s2, acc.s2);                                 \</div><div class="line">        acc.s3 = fma(src0_left.s6, weights_row0.s0, acc.s3);                                  \</div><div class="line">        acc.s3 = fma(src0_mid.s6, weights_row0.s1, acc.s3);                                   \</div><div class="line">        acc.s3 = fma(src0_right.s6, weights_row0.s2, acc.s3);                                 \</div><div class="line">    })</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00143">143</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+
+</div>
+</div>
 <a id="a5447e2c4e1aae8fff9290b775fe813ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5447e2c4e1aae8fff9290b775fe813ff">&#9670;&nbsp;</a></span>in_stride_x</h2>
 
@@ -134,7 +363,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00573">573</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00793">793</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -150,7 +379,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00574">574</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00794">794</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -166,7 +395,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00575">575</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00795">795</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -182,7 +411,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00576">576</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00796">796</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -198,7 +427,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00577">577</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00797">797</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
 </div>
 </div>
@@ -214,8 +443,78 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00578">578</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00798">798</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
 
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="a4201b7aeda129409f16dd5a5cfe56450"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4201b7aeda129409f16dd5a5cfe56450">&#9670;&nbsp;</a></span>ptr_offset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">__global uchar* ptr_offset </td>
+          <td>(</td>
+          <td class="paramtype">__global uchar *&#160;</td>
+          <td class="paramname"><em>ptr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>stride_x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>stride_y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the pointer position at a certain offset in x and y direction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>Pointer to the starting position of the buffer </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>Relative X position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>Relative Y position </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride_x</td><td>Stride of the source tensor in X dimension (in bytes) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride_y</td><td>Stride of the source tensor in Y dimension (in bytes)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a uchar </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="depthwise__convolution_8cl_source.xhtml#l00046">46</a> of file <a class="el" href="depthwise__convolution_8cl_source.xhtml">depthwise_convolution.cl</a>.</p>
+<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordflow">return</span> ptr + x * stride_x + y * stride_y;</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->
@@ -224,7 +523,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="depthwise__convolution_8cl.xhtml">depthwise_convolution.cl</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

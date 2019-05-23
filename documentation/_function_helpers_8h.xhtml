@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -107,6 +107,8 @@ $(document).ready(function(){initNavTree('_function_helpers_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="graph_2_tensor_8h_source.xhtml">arm_compute/graph/Tensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2graph_2_type_printer_8h_source.xhtml">arm_compute/graph/TypePrinter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml">arm_compute/graph/Types.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="arm__compute_2graph_2_utils_8h_source.xhtml">arm_compute/graph/Utils.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_fused_convolution_batch_normalization_function_8h_source.xhtml">arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">arm_compute/graph/backends/Utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_nodes_8h_source.xhtml">arm_compute/graph/nodes/Nodes.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
@@ -145,6 +147,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a5d1a73ab4a0b267033a569c46813b9d5"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; IFunction &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a5d1a73ab4a0b267033a569c46813b9d5">create_batch_normalization_layer</a> (BatchNormalizationLayerNode &amp;node)</td></tr>
 <tr class="memdesc:a5d1a73ab4a0b267033a569c46813b9d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend batch normalization layer function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a5d1a73ab4a0b267033a569c46813b9d5">More...</a><br /></td></tr>
 <tr class="separator:a5d1a73ab4a0b267033a569c46813b9d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a493f9b9869bce476611a3590315563a2"><td class="memTemplParams" colspan="2">template&lt;typename FusedLayerTypes , typename TargetInfo &gt; </td></tr>
+<tr class="memitem:a493f9b9869bce476611a3590315563a2"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; IFunction &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a493f9b9869bce476611a3590315563a2">create_fused_convolution_batch_normalization_layer</a> (FusedConvolutionBatchNormalizationNode &amp;node)</td></tr>
+<tr class="memdesc:a493f9b9869bce476611a3590315563a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend batch normalization layer function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a493f9b9869bce476611a3590315563a2">More...</a><br /></td></tr>
+<tr class="separator:a493f9b9869bce476611a3590315563a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3787ac008a709edda8d347370bbad61"><td class="memTemplParams" colspan="2">template&lt;typename BoundingBoxTransformLayerFunction , typename TargetInfo &gt; </td></tr>
 <tr class="memitem:ab3787ac008a709edda8d347370bbad61"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; IFunction &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ab3787ac008a709edda8d347370bbad61">create_bounding_box_transform_layer</a> (BoundingBoxTransformLayerNode &amp;node)</td></tr>
 <tr class="memdesc:ab3787ac008a709edda8d347370bbad61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend bounding box transform layer function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ab3787ac008a709edda8d347370bbad61">More...</a><br /></td></tr>
@@ -237,6 +243,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a5271c97b6bef5972c5e259307d52a4da"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; IFunction &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a5271c97b6bef5972c5e259307d52a4da">create_softmax_layer</a> (SoftmaxLayerNode &amp;node, GraphContext &amp;ctx)</td></tr>
 <tr class="memdesc:a5271c97b6bef5972c5e259307d52a4da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend softmax layer function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#a5271c97b6bef5972c5e259307d52a4da">More...</a><br /></td></tr>
 <tr class="separator:a5271c97b6bef5972c5e259307d52a4da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae157076aa533f9db0960dea1d5fc5014"><td class="memTemplParams" colspan="2">template&lt;typename StackLayerFunction , typename TargetInfo &gt; </td></tr>
+<tr class="memitem:ae157076aa533f9db0960dea1d5fc5014"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ae157076aa533f9db0960dea1d5fc5014">create_stack_layer</a> (StackLayerNode &amp;node)</td></tr>
+<tr class="memdesc:ae157076aa533f9db0960dea1d5fc5014"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend layer stack function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#ae157076aa533f9db0960dea1d5fc5014">More...</a><br /></td></tr>
+<tr class="separator:ae157076aa533f9db0960dea1d5fc5014"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd9d23be81ad915ff875876c6606f576"><td class="memTemplParams" colspan="2">template&lt;typename UpsampleLayerFunction , typename TargetInfo &gt; </td></tr>
 <tr class="memitem:acd9d23be81ad915ff875876c6606f576"><td class="memTemplItemLeft" align="right" valign="top">std::unique_ptr&lt; IFunction &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#acd9d23be81ad915ff875876c6606f576">create_upsample_layer</a> (UpsampleLayerNode &amp;node, GraphContext &amp;ctx)</td></tr>
 <tr class="memdesc:acd9d23be81ad915ff875876c6606f576"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a backend Upsample layer function.  <a href="namespacearm__compute_1_1graph_1_1backends_1_1detail.xhtml#acd9d23be81ad915ff875876c6606f576">More...</a><br /></td></tr>
@@ -252,7 +262,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_99ae3712d1eecd2a93fc4d38b59a99ba.xhtml">graph</a></li><li class="navelem"><a class="el" href="dir_59b2231210c554f4cc243709030bf1f8.xhtml">backends</a></li><li class="navelem"><a class="el" href="_function_helpers_8h.xhtml">FunctionHelpers.h</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

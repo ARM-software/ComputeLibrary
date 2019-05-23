@@ -38,7 +38,8 @@ using namespace arm_compute;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
+                          const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier, const Size2D &dilation)
 {
     ARM_COMPUTE_UNUSED(conv_info);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
@@ -48,6 +49,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != output->dimension(2));
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || dilation.y() < 1);
 
     return Status{};
 }
@@ -84,7 +86,7 @@ void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
     Iterator out(_output, window_out);
 
     const int full_length   = input_w + pad_left + pad_right;
-    const int max_initial_x = stride_x * (((full_length - _kernel_dims.width) / stride_x) + 1);
+    const int max_initial_x = stride_x * (((full_length - (_kernel_dims.width + (_kernel_dims.width - 1) * (_dilation.x() - 1))) / stride_x) + 1);
 
     // Define pad value
     auto zero = static_cast<T>(0);
@@ -103,12 +105,12 @@ void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr() + id.z() / _depth_multiplier * input_stride_z;
         auto                 output_ptr = reinterpret_cast<T *>(out.ptr());
-        const int            height     = src_y + _kernel_dims.height;
-        const int            width      = src_x + _kernel_dims.width;
+        const int            height     = src_y + (_kernel_dims.height + (_kernel_dims.height - 1) * (_dilation.y() - 1));
+        const int            width      = src_x + (_kernel_dims.width + (_kernel_dims.width - 1) * (_dilation.x() - 1));
 
-        for(int y = src_y; y < height; ++y)
+        for(int y = src_y; y < height; y += _dilation.y())
         {
-            for(int x = src_x; x < width; ++x, ++output_ptr)
+            for(int x = src_x; x < width; x += _dilation.x(), ++output_ptr)
             {
                 if(x < 0 || x >= input_w || y < 0 || y >= input_h)
                 {
@@ -130,15 +132,16 @@ void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
 }
 
 NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _kernel_dims(), _conv_info(), _has_bias(), _depth_multiplier(1)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _kernel_dims(), _conv_info(), _has_bias(), _depth_multiplier(1), _dilation()
 {
 }
 
-void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
+void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier,
+                                        const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, depth_multiplier));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, depth_multiplier, dilation));
 
     _input            = input;
     _output           = output;
@@ -146,6 +149,7 @@ void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, c
     _conv_info        = conv_info;
     _has_bias         = has_bias;
     _depth_multiplier = depth_multiplier;
+    _dilation         = dilation;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -172,10 +176,11 @@ void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, c
     INEKernel::configure(win);
 }
 
-Status NEDepthwiseIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
+Status NEDepthwiseIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier,
+                                         const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, depth_multiplier));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, depth_multiplier, dilation));
     return Status{};
 }
 

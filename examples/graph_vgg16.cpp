@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -225,6 +225,7 @@ public:
         GraphConfig config;
         config.num_threads = common_params.threads;
         config.use_tuner   = common_params.enable_tuner;
+        config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
 
         graph.finalize(common_params.target, config);

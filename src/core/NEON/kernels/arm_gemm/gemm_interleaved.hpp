@@ -480,7 +480,6 @@ public:
         return total;
     }
 
-    using GemmCommon<To, Tr>::pretranspose_B_array;
     void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
         blockwalker current(*this);
         Toi *buffer = reinterpret_cast<Toi *>(in_buffer);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,22 +26,13 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
-
-NEQuantizationLayer::NEQuantizationLayer()
-    : _quantize_kernel(), _min_max_kernel(), _min_max()
-{
-}
 
 Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-
-    TensorInfo min_max{ input->num_channels(), input->data_type() };
-    ARM_COMPUTE_RETURN_ON_ERROR(NEMinMaxLayerKernel::validate(input, &min_max));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEQuantizationLayerKernel::validate(input, output, &min_max));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEQuantizationLayerKernel::validate(input, output));
 
     return Status{};
 }
@@ -50,24 +41,8 @@ void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    // Configure min-max kernel. _min_max tensor will be auto-configured within the kernel
-    _min_max_kernel.configure(input, &_min_max);
-
     // Configure quantize kernel
-    _quantize_kernel.configure(input, output, &_min_max);
-
-    // Allocate min_max tensor
-    _min_max.allocator()->allocate();
-}
-
-void NEQuantizationLayer::run()
-{
-    // Reset min and max
-    _min_max_kernel.reset();
-
-    // Run min and max kernel
-    NEScheduler::get().schedule(&_min_max_kernel, Window::DimY);
-
-    // Run quantize kernel
-    NEScheduler::get().schedule(&_quantize_kernel, Window::DimY);
+    auto k = arm_compute::support::cpp14::make_unique<NEQuantizationLayerKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
 }

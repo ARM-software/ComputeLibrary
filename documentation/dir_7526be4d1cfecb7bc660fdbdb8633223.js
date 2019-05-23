@@ -37,6 +37,7 @@ var dir_7526be4d1cfecb7bc660fdbdb8633223 =
       [ "ScaleLayer", "classarm__compute_1_1graph_1_1frontend_1_1_scale_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_scale_layer" ],
       [ "SliceLayer", "classarm__compute_1_1graph_1_1frontend_1_1_slice_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_slice_layer" ],
       [ "SoftmaxLayer", "classarm__compute_1_1graph_1_1frontend_1_1_softmax_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_softmax_layer" ],
+      [ "StackLayer", "classarm__compute_1_1graph_1_1frontend_1_1_stack_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_stack_layer" ],
       [ "UpsampleLayer", "classarm__compute_1_1graph_1_1frontend_1_1_upsample_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_upsample_layer" ],
       [ "YOLOLayer", "classarm__compute_1_1graph_1_1frontend_1_1_y_o_l_o_layer.xhtml", "classarm__compute_1_1graph_1_1frontend_1_1_y_o_l_o_layer" ]
     ] ],

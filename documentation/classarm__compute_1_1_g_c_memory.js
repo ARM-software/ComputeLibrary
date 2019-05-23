@@ -1,7 +1,7 @@
 var classarm__compute_1_1_g_c_memory =
 [
     [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#a06e98bcb4408fe2f57a6828ad00d0313", null ],
-    [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#a0acb56e49444c7e5f8a6866e26cdf4d1", null ],
+    [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#a1bcbc16c9072f45ba678cbae0922cc47", null ],
     [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#a746daa24b29bf3703b49440f60631c57", null ],
     [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#a5dddf84189e20357c04216feda4d1bf9", null ],
     [ "GCMemory", "classarm__compute_1_1_g_c_memory.xhtml#aeaa87fed8ae634667cdbcb5d7a81e7ba", null ],

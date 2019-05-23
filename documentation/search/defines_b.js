@@ -7,7 +7,6 @@ var searchData=
   ['make_5ftype_5fparams',['MAKE_TYPE_PARAMS',['../tests_2framework_2_macros_8h.xhtml#a2c9e3879e1ad83c6a47f4630c6ca22ee',1,'Macros.h']]],
   ['mat_5findex',['MAT_INDEX',['../convolution__rectangle_8cl.xhtml#a61020724430287ed1cd963e312ca47d2',1,'convolution_rectangle.cl']]],
   ['max',['MAX',['../elementwise__operation_8cl.xhtml#aacc3ee1a7f283f8ef65cea31f4436a95',1,'MAX():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#aacc3ee1a7f283f8ef65cea31f4436a95',1,'MAX():&#160;elementwise_operation_quantized.cl']]],
-  ['max_5fmatrix_5fsize',['MAX_MATRIX_SIZE',['../_c_l_convolution_kernel_8cpp.xhtml#aa2c0d6237cdb5575f0790092613533ce',1,'CLConvolutionKernel.cpp']]],
   ['max_5fop',['MAX_OP',['../softmax__layer_8cl.xhtml#abaa48ad818c44e415fd3f9dd0f27bf01',1,'MAX_OP():&#160;softmax_layer.cl'],['../softmax__layer__quantized_8cl.xhtml#abaa48ad818c44e415fd3f9dd0f27bf01',1,'MAX_OP():&#160;softmax_layer_quantized.cl']]],
   ['min',['MIN',['../elementwise__operation_8cl.xhtml#a74e75242132eaabbc1c512488a135926',1,'MIN():&#160;elementwise_operation.cl'],['../elementwise__operation__quantized_8cl.xhtml#a74e75242132eaabbc1c512488a135926',1,'MIN():&#160;elementwise_operation_quantized.cl']]],
   ['minval',['MINVAL',['../softmax__layer_8cl.xhtml#a80b22c555ddadb47cc6ca338a9c49126',1,'softmax_layer.cl']]],

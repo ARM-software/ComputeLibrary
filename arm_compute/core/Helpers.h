@@ -707,6 +707,15 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord);
  */
 inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 
+/** Get the DataLayoutDimension of a given index and layout.
+ *
+ * @param[in] data_layout The data layout.
+ * @param[in] index       The data layout index.
+ *
+ * @return The dimension which this index is requested for.
+ */
+inline DataLayoutDimension get_index_data_layout_dimension(const DataLayout data_layout, const size_t index);
+
 /** Calculate the normalization dimension index for a given normalization type
  *
  * @param[in] layout Data layout of the input and output tensor
@@ -755,6 +764,34 @@ template <typename T>
 inline T wrap_around(T x, T m)
 {
     return x >= 0 ? x % m : (x % m + m) % m;
+}
+
+/** Given an integer value, this function returns the next power of two
+ *
+ * @param[in] x Input value
+ *
+ * @return the next power of two
+ */
+inline unsigned int get_next_power_two(unsigned int x)
+{
+    // Decrement by 1
+    x--;
+
+    // Shift right by 1
+    x |= x >> 1u;
+    // Shift right by 2
+    x |= x >> 2u;
+    // Shift right by 4
+    x |= x >> 4u;
+    // Shift right by 8
+    x |= x >> 8u;
+    // Shift right by 16
+    x |= x >> 16u;
+
+    // Increment by 1
+    x++;
+
+    return x;
 }
 } // namespace arm_compute
 

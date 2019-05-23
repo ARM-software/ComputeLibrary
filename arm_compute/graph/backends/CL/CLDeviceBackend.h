@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,11 @@ public:
      * @param[in] enable_tuning Enables tuning if false else true
      */
     void set_kernel_tuning(bool enable_tuning);
+    /** Set kernel tuning mode
+     *
+     * @param[in] tuning_mode Indicates how exhaustive the search for the optimal LWS should be while tuning
+     */
+    void set_kernel_tuning_mode(CLTunerMode tuning_mode);
 
     // Inherited overridden methods
     void initialize_backend() override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,13 +73,10 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
-    BorderSize border_size() const override;
 
 private:
     const ICLTensor *_input;
     ICLTensor       *_output;
-    int              _top_bottom;
-    int              _left_right;
     unsigned int     _depth_offset;
 };
 } // namespace arm_compute

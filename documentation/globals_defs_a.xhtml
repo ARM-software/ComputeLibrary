@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,8 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 : <a class="el" href="_g_c_g_e_m_m_matrix_accumulate_biases_kernel_8cpp.xhtml#a1662de6128d240b3112d483269a38c12">GCGEMMMatrixAccumulateBiasesKernel.cpp</a>
 </li>
 <li>ACTIVATION_FUNC
-: <a class="el" href="winograd__output__transform_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">winograd_output_transform.cl</a>
+: <a class="el" href="depthwise__convolution_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">depthwise_convolution.cl</a>
+, <a class="el" href="winograd__output__transform_8cl.xhtml#a150fbfa48767f3bf602b812f8ecb3ad9">winograd_output_transform.cl</a>
 </li>
 <li>ACTIVATION_OP
 : <a class="el" href="activation__layer__qa8_8cl.xhtml#a5a310089a4e6b6de57a075a9bd4ced82">activation_layer_qa8.cl</a>
@@ -116,12 +117,12 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 , <a class="el" href="elementwise__operation__quantized_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">elementwise_operation_quantized.cl</a>
 </li>
 <li>ADD_OP
-: <a class="el" href="direct__convolution1x1_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution1x1.cl</a>
+: <a class="el" href="batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">batchnormalization_layer.cl</a>
+, <a class="el" href="direct__convolution1x1_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution1x1.cl</a>
 , <a class="el" href="direct__convolution3x3_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution3x3.cl</a>
 , <a class="el" href="normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504">normalization_layer.cl</a>
 , <a class="el" href="softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer.cl</a>
 , <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
-, <a class="el" href="batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">batchnormalization_layer.cl</a>
 </li>
 <li>ALLOC_ROUND
 : <a class="el" href="gemm__interleaved_8hpp.xhtml#abd1ded15e3688096ead983e87f83fbd1">gemm_interleaved.hpp</a>
@@ -438,11 +439,11 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#a3d8a3968a069eb8abbc28d31c20f6b8c">helpers_asymm.h</a>
 </li>
-<li>asymm_exp_on_negative_values
-: <a class="el" href="softmax__layer__quantized_8cl.xhtml#a54aedfa17c5ac2567107d5f488b0f4af">softmax_layer_quantized.cl</a>
-</li>
 <li>ASYMM_EXP_ON_NEGATIVE_VALUES
 : <a class="el" href="helpers__asymm_8h.xhtml#a3a4f1b5d8f1cd67ac31bc62c9a6f4aa8">helpers_asymm.h</a>
+</li>
+<li>asymm_exp_on_negative_values
+: <a class="el" href="softmax__layer__quantized_8cl.xhtml#a54aedfa17c5ac2567107d5f488b0f4af">softmax_layer_quantized.cl</a>
 </li>
 <li>ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#a4d0a02b30d8cc5725d0a11781b488852">helpers_asymm.h</a>
@@ -516,7 +517,7 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:08 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

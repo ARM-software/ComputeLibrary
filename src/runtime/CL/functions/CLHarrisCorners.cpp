@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,7 @@ CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
       _gy(),
       _score(),
       _nonmax(),
-      _corners_list(nullptr),
+      _corners_list(),
       _num_corner_candidates(0),
       _corners(nullptr)
 {
@@ -84,7 +84,7 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->init(info_f32);
     _nonmax.allocator()->init(info_f32);
 
-    _corners_list = arm_compute::support::cpp14::make_unique<InternalKeypoint[]>(shape.x() * shape.y());
+    _corners_list.resize(shape.x() * shape.y());
 
     // Manage intermediate buffers
     _memory_group.manage(&_gx);
@@ -146,20 +146,20 @@ void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist
     _score.allocator()->allocate();
 
     // Init corner candidates kernel
-    _candidates.configure(&_nonmax, _corners_list.get(), &_num_corner_candidates);
+    _candidates.configure(&_nonmax, _corners_list.data(), &_num_corner_candidates);
 
     // Allocate intermediate buffers
     _nonmax.allocator()->allocate();
 
     // Init euclidean distance
-    _sort_euclidean.configure(_corners_list.get(), _corners, &_num_corner_candidates, min_dist);
+    _sort_euclidean.configure(_corners_list.data(), _corners, &_num_corner_candidates, min_dist);
 }
 
 void CLHarrisCorners::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_sobel == nullptr, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Init to 0 number of corner candidates
     _num_corner_candidates = 0;
@@ -185,6 +185,4 @@ void CLHarrisCorners::run()
     _corners->map(CLScheduler::get().queue(), true);
     Scheduler::get().schedule(&_sort_euclidean, Window::DimY);
     _corners->unmap(CLScheduler::get().queue());
-
-    _memory_group.release();
 }

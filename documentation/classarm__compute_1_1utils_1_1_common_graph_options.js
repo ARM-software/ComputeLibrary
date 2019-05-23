@@ -17,6 +17,7 @@ var classarm__compute_1_1utils_1_1_common_graph_options =
     [ "target", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a770e3e82cb8e4632d754e651fd29b9cb", null ],
     [ "threads", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#ad6174941c7ae1c945e4f7fcb3261f87c", null ],
     [ "tuner_file", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#aac3ce1ee0a145bb6c131c9d94f30062e", null ],
+    [ "tuner_mode", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a152c80450373e13e5e2f543b4ae4bb3b", null ],
     [ "validation_file", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a30fbf7b83e14786a1cdab47e5e389cba", null ],
     [ "validation_path", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a9846145d91730995d71b3cc3a92d2a84", null ],
     [ "validation_range", "classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a553cdf5b02f190b9ed0f9b4ec711019c", null ]

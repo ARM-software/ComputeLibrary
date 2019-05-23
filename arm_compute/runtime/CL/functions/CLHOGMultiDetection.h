@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,21 +89,21 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                                                 _memory_group;
-    CLHOGGradient                                                 _gradient_kernel;
-    std::unique_ptr<CLHOGOrientationBinningKernel[]>              _orient_bin_kernel;
-    std::unique_ptr<CLHOGBlockNormalizationKernel[]>              _block_norm_kernel;
-    std::unique_ptr<CLHOGDetector[]>                              _hog_detect_kernel;
-    std::unique_ptr<CPPDetectionWindowNonMaximaSuppressionKernel> _non_maxima_kernel;
-    std::unique_ptr<CLTensor[]>                                   _hog_space;
-    std::unique_ptr<CLTensor[]>                                   _hog_norm_space;
-    ICLDetectionWindowArray                                      *_detection_windows;
-    CLTensor                                                      _mag;
-    CLTensor                                                      _phase;
-    bool                                                          _non_maxima_suppression;
-    size_t                                                        _num_orient_bin_kernel;
-    size_t                                                        _num_block_norm_kernel;
-    size_t                                                        _num_hog_detect_kernel;
+    CLMemoryGroup                                _memory_group;
+    CLHOGGradient                                _gradient_kernel;
+    std::vector<CLHOGOrientationBinningKernel>   _orient_bin_kernel;
+    std::vector<CLHOGBlockNormalizationKernel>   _block_norm_kernel;
+    std::vector<CLHOGDetector>                   _hog_detect_kernel;
+    CPPDetectionWindowNonMaximaSuppressionKernel _non_maxima_kernel;
+    std::vector<CLTensor>                        _hog_space;
+    std::vector<CLTensor>                        _hog_norm_space;
+    ICLDetectionWindowArray                     *_detection_windows;
+    CLTensor                                     _mag;
+    CLTensor                                     _phase;
+    bool                                         _non_maxima_suppression;
+    size_t                                       _num_orient_bin_kernel;
+    size_t                                       _num_block_norm_kernel;
+    size_t                                       _num_hog_detect_kernel;
 };
 }
 

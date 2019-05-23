@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,6 +91,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FullyConnectedLayerNode &n) = 0;
+    /** Visit FusedConvolutionBatchNormalizationNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
     /** Visit InputNode.
      *
      * @param[in] n Node to visit.
@@ -136,6 +141,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(SplitLayerNode &n) = 0;
+    /** Visit StackLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(StackLayerNode &n) = 0;
 };
 
 /** Default visitor implementation
@@ -195,6 +205,10 @@ public:
     {
         default_visit();
     }
+    virtual void visit(FusedConvolutionBatchNormalizationNode &n) override
+    {
+        default_visit();
+    }
     virtual void visit(InputNode &n) override
     {
         default_visit();
@@ -228,6 +242,10 @@ public:
         default_visit();
     }
     virtual void visit(SplitLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(StackLayerNode &n) override
     {
         default_visit();
     }

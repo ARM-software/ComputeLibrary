@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -96,8 +96,6 @@ $(document).ready(function(){initNavTree('copy__tensor_8cl.xhtml','');});
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">copy_tensor.cl File Reference</div>  </div>
 </div><!--header-->
@@ -105,167 +103,13 @@ $(document).ready(function(){initNavTree('copy__tensor_8cl.xhtml','');});
 <div class="textblock"><code>#include &quot;<a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml">helpers.h</a>&quot;</code><br />
 </div>
 <p><a href="copy__tensor_8cl_source.xhtml">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a5f7a81ece3c8141222bfaa46592f0913"><td class="memItemLeft" align="right" valign="top">__kernel void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="copy__tensor_8cl.xhtml#a5f7a81ece3c8141222bfaa46592f0913">copy_tensor</a> (__global uchar *in_ptr, uint <a class="el" href="depthwise__convolution_8cl.xhtml#a5447e2c4e1aae8fff9290b775fe813ff">in_stride_x</a>, uint in_step_x, uint <a class="el" href="depthwise__convolution_8cl.xhtml#ac353c0687abd8c71a4fa096d322b39ec">in_stride_y</a>, uint in_step_y, uint <a class="el" href="depthwise__convolution_8cl.xhtml#a32137dd220c1110408a7b498108de2c5">in_stride_z</a>, uint in_step_z, uint in_offset_first_element_in_bytes, __global uchar *out_ptr, uint <a class="el" href="depthwise__convolution_8cl.xhtml#a68fce1f0ee4080ed89c9427496d625f2">out_stride_x</a>, uint out_step_x, uint <a class="el" href="depthwise__convolution_8cl.xhtml#ac8b6b732372937bba276e6391944d1e1">out_stride_y</a>, uint out_step_y, uint <a class="el" href="depthwise__convolution_8cl.xhtml#a128f47cb6aacde29e07fde2c4b9f5dd2">out_stride_z</a>, uint out_step_z, uint out_offset_first_element_in_bytes)</td></tr>
-<tr class="memdesc:a5f7a81ece3c8141222bfaa46592f0913"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a copy of input tensor to the output tensor.  <a href="#a5f7a81ece3c8141222bfaa46592f0913">More...</a><br /></td></tr>
-<tr class="separator:a5f7a81ece3c8141222bfaa46592f0913"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a5f7a81ece3c8141222bfaa46592f0913"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f7a81ece3c8141222bfaa46592f0913">&#9670;&nbsp;</a></span>copy_tensor()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">__kernel void copy_tensor </td>
-          <td>(</td>
-          <td class="paramtype">__global uchar *&#160;</td>
-          <td class="paramname"><em>in_ptr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_stride_x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_step_x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_stride_y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_step_y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_stride_z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_step_z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>in_offset_first_element_in_bytes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">__global uchar *&#160;</td>
-          <td class="paramname"><em>out_ptr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_stride_x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_step_x</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_stride_y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_step_y</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_stride_z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_step_z</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint&#160;</td>
-          <td class="paramname"><em>out_offset_first_element_in_bytes</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs a copy of input tensor to the output tensor. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_ptr</td><td>Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_stride_x</td><td>Stride of the source tensor in X dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_step_x</td><td>input_stride_x * number of elements along X processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_stride_y</td><td>Stride of the source tensor in Y dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_step_y</td><td>input_stride_y * number of elements along Y processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_stride_z</td><td>Stride of the source tensor in Z dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_step_z</td><td>input_stride_z * number of elements along Z processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">in_offset_first_element_in_bytes</td><td>The offset of the first element in the source tensor </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">out_ptr</td><td>Pointer to the destination tensor. Supported data types: same as <code>in_ptr</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_stride_x</td><td>Stride of the destination tensor in X dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_step_x</td><td>output_stride_x * number of elements along X processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_stride_y</td><td>Stride of the destination tensor in Y dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_step_y</td><td>output_stride_y * number of elements along Y processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_stride_z</td><td>Stride of the source tensor in Z dimension (in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_step_z</td><td>output_stride_z * number of elements along Z processed per workitem(in bytes) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">out_offset_first_element_in_bytes</td><td>The offset of the first element in the destination tensor </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="copy__tensor_8cl_source.xhtml#l00099">99</a> of file <a class="el" href="copy__tensor_8cl_source.xhtml">copy_tensor.cl</a>.</p>
-<div class="fragment"><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;{</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> in  = <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(in);</div><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <a class="code" href="struct_tensor3_d.xhtml">Tensor3D</a> out = <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a>(out);</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="comment">// Load data</span></div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(<a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a>, VEC_SIZE)</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    data = <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a287e2fc366c312b468382c95bb90f91f">VLOAD</a>(VEC_SIZE)(0, (__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)in.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <span class="comment">// Store result</span></div><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <a class="code" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54">VSTORE</a>(VEC_SIZE)</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    (data, 0, (__global <a class="code" href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a> *)out.<a class="code" href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">ptr</a>);</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}</div><div class="ttc" id="convolution3x3_8cl_xhtml_afb8c72ce35c4a1f4a2588d6573e54aa1"><div class="ttname"><a href="convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1">DATA_TYPE</a></div><div class="ttdeci">#define DATA_TYPE</div><div class="ttdef"><b>Definition:</b> <a href="convolution3x3_8cl_source.xhtml#l00027">convolution3x3.cl:27</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml"><div class="ttname"><a href="struct_tensor3_d.xhtml">Tensor3D</a></div><div class="ttdoc">Structure to hold 3D tensor information.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00160">helpers.h:160</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a31c8c760f08fb1a331b16b7c204321dc"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a31c8c760f08fb1a331b16b7c204321dc">CONVERT_TO_TENSOR3D_STRUCT</a></div><div class="ttdeci">#define CONVERT_TO_TENSOR3D_STRUCT(name)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00128">helpers.h:128</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_acb282042d1edeeaa3cc979a206f78b54"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#acb282042d1edeeaa3cc979a206f78b54">VSTORE</a></div><div class="ttdeci">#define VSTORE(size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00051">helpers.h:51</a></div></div>
-<div class="ttc" id="struct_tensor3_d_xhtml_acf52c23cbd7424606c10a606524e3e32"><div class="ttname"><a href="struct_tensor3_d.xhtml#acf52c23cbd7424606c10a606524e3e32">Tensor3D::ptr</a></div><div class="ttdeci">__global uchar * ptr</div><div class="ttdoc">Pointer to the starting postion of the buffer.</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">helpers.h:162</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a287e2fc366c312b468382c95bb90f91f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a287e2fc366c312b468382c95bb90f91f">VLOAD</a></div><div class="ttdeci">#define VLOAD(size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00048">helpers.h:48</a></div></div>
-<div class="ttc" id="src_2core_2_c_l_2cl__kernels_2_helpers_8h_xhtml_a36f754c05b6fddf6df0d8d0a74f8159f"><div class="ttname"><a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a></div><div class="ttdeci">#define VEC_DATA_TYPE(type, size)</div><div class="ttdef"><b>Definition:</b> <a href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">helpers.h:57</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00128">CONVERT_TO_TENSOR3D_STRUCT</a>, <a class="el" href="convolution3x3_8cl_source.xhtml#l00027">DATA_TYPE</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00162">Tensor3D::ptr</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00057">VEC_DATA_TYPE</a>, <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00048">VLOAD</a>, and <a class="el" href="src_2core_2_c_l_2cl__kernels_2_helpers_8h_source.xhtml#l00051">VSTORE</a>.</p>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="copy__tensor_8cl.xhtml">copy_tensor.cl</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

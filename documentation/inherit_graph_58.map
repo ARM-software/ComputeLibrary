@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml" title="Enable bitwise operations on GPUTarget enumerations." alt="" coords="5,5,223,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="5,5,176,47"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_steps.xhtml" title="Class to describe a number of elements in each dimension." alt="" coords="224,13,283,39"/>
 </map>

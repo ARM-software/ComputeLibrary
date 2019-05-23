@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ void abs_diff_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, con
     Iterator input2(in2, window);
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t input1_val = vld1q_u8(input1.ptr());
         const uint8x16_t input2_val = vld1q_u8(input2.ptr());
@@ -78,7 +78,7 @@ void abs_diff_S16_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, 
     Iterator input2(in2, window);
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         int16x8x2_t input1_val = vld2q_s16(reinterpret_cast<const int16_t *>(input1.ptr()));
         int16x8x2_t input2_val = vld2q_s16(reinterpret_cast<const int16_t *>(input2.ptr()));
@@ -93,7 +93,7 @@ void abs_diff_U8_S16_S16(const ITensor *in1, const ITensor *in2, ITensor *out, c
     Iterator input2(in2, window);
     Iterator output(out, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t  input1_val = vld1q_u8(input1.ptr());
         const int16x8x2_t input2_val =

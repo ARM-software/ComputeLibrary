@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,6 +130,9 @@ public:
     DECLARE_FUNCTION_PTR(clEnqueueSVMUnmap);
     DECLARE_FUNCTION_PTR(clEnqueueMarker);
     DECLARE_FUNCTION_PTR(clWaitForEvents);
+
+    // Third-party extensions
+    DECLARE_FUNCTION_PTR(clImportMemoryARM);
 
 #undef DECLARE_FUNCTION_PTR
 

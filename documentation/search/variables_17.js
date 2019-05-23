@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['w',['w',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1a367830ae09bf6138df822888ec1d71',1,'arm_compute::test::validation']]],
   ['weights',['weights',['../namespacearm__compute_1_1test_1_1validation.xhtml#a64a08a9fec5aeee8650e7182b6d171d0',1,'arm_compute::test::validation']]],
   ['weights_5finfo',['weights_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a7cb842ebfe255726066039853a4322f0',1,'arm_compute::test::validation']]],
   ['weights_5fquantization_5finfo',['weights_quantization_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#afff44a0110c3767f144c9cb8e6f81625',1,'arm_compute::test::validation']]],

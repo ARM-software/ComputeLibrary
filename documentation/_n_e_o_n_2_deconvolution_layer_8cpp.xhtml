@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -142,6 +142,12 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a538208282c3b9b8cc121cf8508d2a3e6"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a538208282c3b9b8cc121cf8508d2a3e6"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a538208282c3b9b8cc121cf8508d2a3e6">NEDeconvolutionLayerFixture1x1</a> = DeconvolutionValidationFixture&lt; Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1 &gt;</td></tr>
 <tr class="separator:a538208282c3b9b8cc121cf8508d2a3e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b052afcae87047e6cf6eb64aeace32d"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a1b052afcae87047e6cf6eb64aeace32d"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1b052afcae87047e6cf6eb64aeace32d">NEDeconvolutionLayerQuantizedFixture3x3</a> = DeconvolutionValidationQuantizedFixture&lt; Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3 &gt;</td></tr>
+<tr class="separator:a1b052afcae87047e6cf6eb64aeace32d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a504620223beb769d936523b27032b44c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a504620223beb769d936523b27032b44c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a504620223beb769d936523b27032b44c">NEDeconvolutionLayerQuantizedFixture1x1</a> = DeconvolutionValidationQuantizedFixture&lt; Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1 &gt;</td></tr>
+<tr class="separator:a504620223beb769d936523b27032b44c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -159,6 +165,14 @@ Functions</h2></td></tr>
 <tr class="separator:a3ba5002c3abe00c29ed121456da6bef8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab54c48914ca65f33018a38386b8ffa54"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab54c48914ca65f33018a38386b8ffa54">combine</a> (combine(data1x1, framework::dataset::make(&quot;DataType&quot;, DataType::F32)), data_layouts_dataset))</td></tr>
 <tr class="separator:ab54c48914ca65f33018a38386b8ffa54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedada1ccebaf3c9050b02ba383bf2433"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aedada1ccebaf3c9050b02ba383bf2433">FIXTURE_DATA_TEST_CASE</a> (Run, NEDeconvolutionLayerQuantizedFixture4x4&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), data_layouts_dataset), framework::dataset::make(&quot;QuantizationInfo&quot;, QuantizationInfo(2.f/255.f, 0))))</td></tr>
+<tr class="separator:aedada1ccebaf3c9050b02ba383bf2433"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae83dab1ca8ce039a0e86bce9995e34e1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae83dab1ca8ce039a0e86bce9995e34e1">combine</a> (combine(combine(data3x3_precommit, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), data_layouts_dataset), framework::dataset::make(&quot;QuantizationInfo&quot;, QuantizationInfo(2.f/255.f, 0))))</td></tr>
+<tr class="separator:ae83dab1ca8ce039a0e86bce9995e34e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5470fc9ed3e49dbd80cfd9169e907c06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5470fc9ed3e49dbd80cfd9169e907c06">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEDeconvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), data_layouts_dataset), framework::dataset::make(&quot;QuantizationInfo&quot;, QuantizationInfo(2.f/255.f, 0))))</td></tr>
+<tr class="separator:a5470fc9ed3e49dbd80cfd9169e907c06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf0de1edb53f9a3db81176655762b09c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acf0de1edb53f9a3db81176655762b09c">combine</a> (combine(combine(data1x1, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), data_layouts_dataset), framework::dataset::make(&quot;QuantizationInfo&quot;, QuantizationInfo(2.f/255.f, 0))))</td></tr>
+<tr class="separator:acf0de1edb53f9a3db81176655762b09c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
@@ -166,6 +180,10 @@ Variables</h2></td></tr>
 <tr class="separator:a0f05a74d6cdba8d07416a78eb33daf01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af894fe5767dbf05b07778e5031acde6b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af894fe5767dbf05b07778e5031acde6b">NEDeconvolutionLayerFixture1x1&lt; float &gt;</a></td></tr>
 <tr class="separator:af894fe5767dbf05b07778e5031acde6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae07c9291b99dd132b86e6d38a7b8aff0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae07c9291b99dd132b86e6d38a7b8aff0">NEDeconvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;</a></td></tr>
+<tr class="separator:ae07c9291b99dd132b86e6d38a7b8aff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43fb6fd0762bd4080bad0b70528479d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a43fb6fd0762bd4080bad0b70528479d5">NEDeconvolutionLayerQuantizedFixture1x1&lt; uint8_t &gt;</a></td></tr>
+<tr class="separator:a43fb6fd0762bd4080bad0b70528479d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -173,7 +191,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_o_n_2_deconvolution_layer_8cpp.xhtml">DeconvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:27 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

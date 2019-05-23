@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,10 @@ $(document).ready(function(){initNavTree('_c_l_g_e_m_m_8cpp.xhtml','');});
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMM.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_i_c_l_g_e_m_m_kernel_configuration_8h_source.xhtml">arm_compute/core/CL/ICLGEMMKernelConfiguration.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_i_c_l_tensor_8h_source.xhtml">arm_compute/core/CL/ICLTensor.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_reshaped_kernel_configuration_8h_source.xhtml">arm_compute/core/CL/gemm/reshaped/CLGEMMReshapedKernelConfiguration.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_8h_source.xhtml">arm_compute/core/CL/gemm/reshaped_only_rhs/CLGEMMReshapedOnlyRHSKernelConfiguration.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_g_p_u_target_8h_source.xhtml">arm_compute/core/GPUTarget.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml">arm_compute/core/Helpers.h</a>&quot;</code><br />
@@ -113,7 +116,6 @@ $(document).ready(function(){initNavTree('_c_l_g_e_m_m_8cpp.xhtml','');});
 <code>#include &quot;<a class="el" href="_validate_8h_source.xhtml">arm_compute/core/Validate.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_shape_calculator_8h_source.xhtml">arm_compute/core/utils/misc/ShapeCalculator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_scheduler_8h_source.xhtml">arm_compute/runtime/CL/CLScheduler.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_c_l_g_e_m_m_reshaped_configuration_8h_source.xhtml">arm_compute/runtime/CL/gemm_reshaped/CLGEMMReshapedConfiguration.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_i_tensor_allocator_8h_source.xhtml">arm_compute/runtime/ITensorAllocator.h</a>&quot;</code><br />
 </div>
 <p><a href="_c_l_g_e_m_m_8cpp_source.xhtml">Go to the source code of this file.</a></p>
@@ -130,7 +132,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_bf9f26469d00835ba20ff8d80ee5a804.xhtml">runtime</a></li><li class="navelem"><a class="el" href="dir_43c3fdbf778d1fd99e2e38f09fddd920.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_0304d3529340c629ae0050036d07056a.xhtml">functions</a></li><li class="navelem"><a class="el" href="_c_l_g_e_m_m_8cpp.xhtml">CLGEMM.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,7 +58,7 @@ public:
     CLGEMMLowpOffsetContributionKernel &operator=(CLGEMMLowpOffsetContributionKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in, out] mm_result      Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel
+     * @param[in, out] mm_result      Input tensor containing the result of @ref CLGEMMLowpMatrixMultiplyKernel. Data type supported: S32
      * @param[in]      vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
      *                                Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
      * @param[in]      vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.

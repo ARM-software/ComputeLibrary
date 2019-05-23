@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_CLCONVOLUTIONLAYER_H__
 
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
+#include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -39,6 +40,7 @@ namespace arm_compute
  * -# @ref CLGEMMConvolutionLayer
  * -# @ref CLWinogradConvolutionLayer
  * -# @ref CLDirectConvolutionLayer
+ * -# @ref CLFFTConvolutionLayer
  */
 class CLConvolutionLayer : public IFunction
 {

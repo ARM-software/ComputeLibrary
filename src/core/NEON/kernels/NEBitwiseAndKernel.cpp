@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,7 +106,7 @@ void NEBitwiseAndKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input2(_input2, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         bitwise_and<uint8_t>(input1.ptr(), input2.ptr(), output.ptr());
     },

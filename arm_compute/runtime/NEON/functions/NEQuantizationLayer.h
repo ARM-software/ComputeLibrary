@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,9 +26,8 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEMinMaxLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
-#include "arm_compute/runtime/Tensor.h"
+#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 
 #include "arm_compute/core/Types.h"
 
@@ -38,39 +37,29 @@ class ITensor;
 
 /** Basic function to simulate a quantization layer. This function calls the following NEON kernels:
  *
- * @note The implementation supports only 3D input tensors
  *
- * -# @ref NEMinMaxLayerKernel
  * -# @ref NEQuantizationLayerKernel
  *
  */
-class NEQuantizationLayer : public IFunction
+class NEQuantizationLayer : public INESimpleFunctionNoBorder
 {
 public:
     /** Default constructor */
-    NEQuantizationLayer();
+    NEQuantizationLayer() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32
-     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: U8
+     * @param[in]  input  Source tensor. The dimensions over the third will be interpreted as batches. Data types supported: F32
+     * @param[out] output Destination tensor with the same dimensions of input. Data types supported: QASYMM8
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayer
      *
      * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F32.
-     * @param[in] output Output tensor info. Data types supported: U8
+     * @param[in] output Output tensor info. Data types supported: QASYMM8
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    void run() override;
-
-private:
-    NEQuantizationLayerKernel _quantize_kernel;
-    NEMinMaxLayerKernel       _min_max_kernel;
-    Tensor                    _min_max;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEQUANTIZATIONLAYER_H__ */

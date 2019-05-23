@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,36 +31,24 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
-SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, const SimpleTensor<float> &min_max)
+template <typename T>
+SimpleTensor<T> dequantization_layer(const SimpleTensor<uint8_t> &src)
 {
-    // Create reference
-    SimpleTensor<float> dst{ src.shape(), DataType::F32 };
+    const DataType          dst_data_type     = std::is_same<T, float>::value ? DataType::F32 : DataType::F16;
+    const QuantizationInfo &quantization_info = src.quantization_info();
 
-    // Compute reference
-    const int width       = src.shape().x();
-    const int height      = src.shape().y();
-    const int depth       = src.shape().z();
-    const int stride_w    = width * height * depth;
-    const int num_batches = min_max.shape().total_size_upper(1);
+    SimpleTensor<T> dst{ src.shape(), dst_data_type };
 
-    for(int k = 0; k < num_batches; ++k)
+    for(int i = 0; i < src.num_elements(); ++i)
     {
-        const float min     = min_max[k * 2 + 0];
-        const float max     = min_max[k * 2 + 1];
-        const float range   = max - min;
-        const float scaling = range / 255.0f;
-
-        for(int i = 0; i < stride_w; ++i)
-        {
-            dst[i + k * stride_w] = (static_cast<float>(src[i + k * stride_w]) * scaling) + min;
-        }
+        dst[i] = static_cast<T>(quantization_info.dequantize(src[i]));
     }
 
     return dst;
 }
 
-template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<float> &min_max);
+template SimpleTensor<half> dequantization_layer(const SimpleTensor<uint8_t> &src);
+template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,7 +95,7 @@ void NEHOGDescriptor::configure(ITensor *input, ITensor *output, const IHOG *hog
 
 void NEHOGDescriptor::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run gradient
     _gradient.run();
@@ -105,6 +105,4 @@ void NEHOGDescriptor::run()
 
     // Run block normalization kernel
     NEScheduler::get().schedule(&_block_norm, Window::DimY);
-
-    _memory_group.release();
 }

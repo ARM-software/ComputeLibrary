@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
 
     const float16x8_t oneovernine = vdupq_n_f16(1.0f / 9.0f);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());
@@ -160,7 +160,7 @@ void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
 
     const float32x4_t oneovernine = vdupq_n_f32(1.0f / 9.0f);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint8x16_t top_data = vld1q_u8(input_top_ptr + input.offset());
         const uint8x16_t mid_data = vld1q_u8(input_mid_ptr + input.offset());

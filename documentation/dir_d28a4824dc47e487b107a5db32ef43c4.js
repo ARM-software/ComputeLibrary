@@ -6,6 +6,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "gc_absdiff.cpp", "gc__absdiff_8cpp.xhtml", "gc__absdiff_8cpp" ],
     [ "gc_dc.cpp", "gc__dc_8cpp.xhtml", "gc__dc_8cpp" ],
     [ "graph_alexnet.cpp", "graph__alexnet_8cpp.xhtml", "graph__alexnet_8cpp" ],
+    [ "graph_deepspeech_v0_4_1.cpp", "graph__deepspeech__v0__4__1_8cpp.xhtml", "graph__deepspeech__v0__4__1_8cpp" ],
     [ "graph_googlenet.cpp", "graph__googlenet_8cpp.xhtml", "graph__googlenet_8cpp" ],
     [ "graph_inception_resnet_v1.cpp", "graph__inception__resnet__v1_8cpp.xhtml", "graph__inception__resnet__v1_8cpp" ],
     [ "graph_inception_resnet_v2.cpp", "graph__inception__resnet__v2_8cpp.xhtml", "graph__inception__resnet__v2_8cpp" ],

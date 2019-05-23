@@ -12,6 +12,7 @@ var searchData=
   ['gcbufferallocator',['GCBufferAllocator',['../classarm__compute_1_1_g_c_buffer_allocator.xhtml',1,'arm_compute']]],
   ['gcbuffermemoryregion',['GCBufferMemoryRegion',['../classarm__compute_1_1_g_c_buffer_memory_region.xhtml',1,'arm_compute']]],
   ['gccol2imkernel',['GCCol2ImKernel',['../classarm__compute_1_1_g_c_col2_im_kernel.xhtml',1,'arm_compute']]],
+  ['gcconcatenatelayer',['GCConcatenateLayer',['../classarm__compute_1_1_g_c_concatenate_layer.xhtml',1,'arm_compute']]],
   ['gcconvolutionlayer',['GCConvolutionLayer',['../classarm__compute_1_1_g_c_convolution_layer.xhtml',1,'arm_compute']]],
   ['gcconvolutionlayerreshapeweights',['GCConvolutionLayerReshapeWeights',['../classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml',1,'arm_compute']]],
   ['gcdepthconcatenatelayer',['GCDepthConcatenateLayer',['../classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml',1,'arm_compute']]],

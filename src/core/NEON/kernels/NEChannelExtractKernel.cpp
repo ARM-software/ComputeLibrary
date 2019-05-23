@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,7 +192,7 @@ void NEChannelExtractKernel::extract_1C_from_2C_img(const Window &win)
     Iterator in(_input, win);
     Iterator out(_output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
         const auto out_ptr = static_cast<uint8_t *>(out.ptr());
@@ -207,7 +207,7 @@ void NEChannelExtractKernel::extract_1C_from_3C_img(const Window &win)
     Iterator in(_input, win);
     Iterator out(_output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
         const auto out_ptr = static_cast<uint8_t *>(out.ptr());
@@ -222,7 +222,7 @@ void NEChannelExtractKernel::extract_1C_from_4C_img(const Window &win)
     Iterator in(_input, win);
     Iterator out(_output, win);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
         const auto out_ptr = static_cast<uint8_t *>(out.ptr());
@@ -242,7 +242,7 @@ void NEChannelExtractKernel::extract_YUYV_uv(const Window &win)
     Iterator in(_input, win);
     Iterator out(_output, win_out);
 
-    execute_window_loop(win, [&](const Coordinates & id)
+    execute_window_loop(win, [&](const Coordinates &)
     {
         const auto in_ptr  = static_cast<uint8_t *>(in.ptr());
         const auto out_ptr = static_cast<uint8_t *>(out.ptr());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ private:
     Image                                 _gy;                    /**< Source image - Gy component */
     Image                                 _score;                 /**< Source image - Harris score */
     Image                                 _nonmax;                /**< Source image - Non-Maxima suppressed image */
-    std::unique_ptr<InternalKeypoint[]>   _corners_list;          /**< Array of InternalKeypoint. It stores the potential corner candidates */
+    std::vector<InternalKeypoint>         _corners_list;          /**< Array of InternalKeypoint. It stores the potential corner candidates */
     int32_t                               _num_corner_candidates; /**< Number of potential corner candidates */
 };
 }

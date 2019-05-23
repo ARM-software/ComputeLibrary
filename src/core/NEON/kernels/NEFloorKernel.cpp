@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -111,7 +111,7 @@ void NEFloorKernel::run(const Window &window, const ThreadInfo &info)
 
     if(data_type == DataType::F32)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const float32x4_t res = vfloorq_f32(vld1q_f32(reinterpret_cast<const float *>(input.ptr())));
             vst1q_f32(reinterpret_cast<float *>(output.ptr()), res);
@@ -121,7 +121,7 @@ void NEFloorKernel::run(const Window &window, const ThreadInfo &info)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     else if(data_type == DataType::F16)
     {
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             const float16x8_t res = vfloorq_f16(vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr())));
             vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), res);

@@ -73,6 +73,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLCopy.h", "_c_l_copy_8h.xhtml", [
       [ "CLCopy", "classarm__compute_1_1_c_l_copy.xhtml", "classarm__compute_1_1_c_l_copy" ]
     ] ],
+    [ "CLCropResize.h", "_c_l_crop_resize_8h.xhtml", [
+      [ "CLCropResize", "classarm__compute_1_1_c_l_crop_resize.xhtml", "classarm__compute_1_1_c_l_crop_resize" ]
+    ] ],
     [ "CLDeconvolutionLayer.h", "_c_l_deconvolution_layer_8h.xhtml", [
       [ "CLDeconvolutionLayer", "classarm__compute_1_1_c_l_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer" ]
     ] ],
@@ -104,6 +107,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLDirectConvolutionLayer.h", "_c_l_direct_convolution_layer_8h.xhtml", [
       [ "CLDirectConvolutionLayer", "classarm__compute_1_1_c_l_direct_convolution_layer.xhtml", "classarm__compute_1_1_c_l_direct_convolution_layer" ]
     ] ],
+    [ "CLDirectDeconvolutionLayer.h", "_c_l_direct_deconvolution_layer_8h.xhtml", [
+      [ "CLDirectDeconvolutionLayer", "classarm__compute_1_1_c_l_direct_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_direct_deconvolution_layer" ]
+    ] ],
     [ "CLElementwiseOperations.h", "_c_l_elementwise_operations_8h.xhtml", [
       [ "CLArithmeticAddition", "classarm__compute_1_1_c_l_arithmetic_addition.xhtml", "classarm__compute_1_1_c_l_arithmetic_addition" ],
       [ "CLArithmeticSubtraction", "classarm__compute_1_1_c_l_arithmetic_subtraction.xhtml", "classarm__compute_1_1_c_l_arithmetic_subtraction" ],
@@ -124,6 +130,15 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLFastCorners.h", "_c_l_fast_corners_8h.xhtml", [
       [ "CLFastCorners", "classarm__compute_1_1_c_l_fast_corners.xhtml", "classarm__compute_1_1_c_l_fast_corners" ]
+    ] ],
+    [ "CLFFT1D.h", "_c_l_f_f_t1_d_8h.xhtml", [
+      [ "CLFFT1D", "classarm__compute_1_1_c_l_f_f_t1_d.xhtml", "classarm__compute_1_1_c_l_f_f_t1_d" ]
+    ] ],
+    [ "CLFFT2D.h", "_c_l_f_f_t2_d_8h.xhtml", [
+      [ "CLFFT2D", "classarm__compute_1_1_c_l_f_f_t2_d.xhtml", "classarm__compute_1_1_c_l_f_f_t2_d" ]
+    ] ],
+    [ "CLFFTConvolutionLayer.h", "_c_l_f_f_t_convolution_layer_8h.xhtml", [
+      [ "CLFFTConvolutionLayer", "classarm__compute_1_1_c_l_f_f_t_convolution_layer.xhtml", "classarm__compute_1_1_c_l_f_f_t_convolution_layer" ]
     ] ],
     [ "CLFillBorder.h", "_c_l_fill_border_8h.xhtml", [
       [ "CLFillBorder", "classarm__compute_1_1_c_l_fill_border.xhtml", "classarm__compute_1_1_c_l_fill_border" ]
@@ -161,6 +176,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLGEMMConvolutionLayer.h", "_c_l_g_e_m_m_convolution_layer_8h.xhtml", [
       [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
       [ "CLGEMMConvolutionLayer", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer" ]
+    ] ],
+    [ "CLGEMMDeconvolutionLayer.h", "_c_l_g_e_m_m_deconvolution_layer_8h.xhtml", [
+      [ "CLGEMMDeconvolutionLayer", "classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_deconvolution_layer" ]
     ] ],
     [ "CLGEMMInterleave4x4.h", "_c_l_g_e_m_m_interleave4x4_8h.xhtml", [
       [ "CLGEMMInterleave4x4", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4" ]
@@ -250,7 +268,8 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLPhase", "classarm__compute_1_1_c_l_phase.xhtml", "classarm__compute_1_1_c_l_phase" ]
     ] ],
     [ "CLPixelWiseMultiplication.h", "_c_l_pixel_wise_multiplication_8h.xhtml", [
-      [ "CLPixelWiseMultiplication", "classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_c_l_pixel_wise_multiplication" ]
+      [ "CLPixelWiseMultiplication", "classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_c_l_pixel_wise_multiplication" ],
+      [ "CLComplexPixelWiseMultiplication", "classarm__compute_1_1_c_l_complex_pixel_wise_multiplication.xhtml", "classarm__compute_1_1_c_l_complex_pixel_wise_multiplication" ]
     ] ],
     [ "CLPoolingLayer.h", "_c_l_pooling_layer_8h.xhtml", [
       [ "CLPoolingLayer", "classarm__compute_1_1_c_l_pooling_layer.xhtml", "classarm__compute_1_1_c_l_pooling_layer" ]

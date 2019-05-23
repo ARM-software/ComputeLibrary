@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,6 +132,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                     _memory_group;
@@ -176,16 +177,20 @@ private:
     NECopyKernel                    _copy_cell_state;
     NECopyKernel                    _copy_output;
     NEWidthConcatenateLayer         _concat_scratch_buffer;
+    NEWidthConcatenateLayer         _concat_inputs_forget_gate;
+    NEWidthConcatenateLayer         _concat_weights_forget_gate;
+    NEWidthConcatenateLayer         _concat_weights_input_gate;
+    NEWidthConcatenateLayer         _concat_weights_output;
     Tensor                          _input_gate_out1;
     Tensor                          _input_gate_out2;
     Tensor                          _input_gate_out3;
     Tensor                          _input_gate_out4;
-    Tensor                          _input_gate_out5;
     Tensor                          _forget_gate_out1;
     Tensor                          _forget_gate_out2;
     Tensor                          _forget_gate_out3;
     Tensor                          _forget_gate_out4;
     Tensor                          _forget_gate_out5;
+    Tensor                          _forget_gate_out6;
     Tensor                          _cell_state_out1;
     Tensor                          _cell_state_out2;
     Tensor                          _cell_state_out3;
@@ -195,7 +200,6 @@ private:
     Tensor                          _output2;
     Tensor                          _output3;
     Tensor                          _output4;
-    Tensor                          _output5;
     Tensor                          _cell_state_activation;
     Tensor                          _output_state1;
     Tensor                          _ones;
@@ -204,6 +208,7 @@ private:
     bool                            _perform_cell_clipping;
     bool                            _has_projection_weights;
     bool                            _perform_projection_clipping;
+    bool                            _is_prepared;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NELSTMLAYER_H__ */

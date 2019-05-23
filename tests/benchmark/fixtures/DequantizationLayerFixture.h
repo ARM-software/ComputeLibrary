@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,25 +44,18 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type_src, DataType data_type_dst)
     {
-        TensorShape shape_min_max = shape;
-        shape_min_max.set(Window::DimX, 2);
-
-        // Remove Y and Z dimensions and keep the batches
-        shape_min_max.remove_dimension(1);
-        shape_min_max.remove_dimension(1);
+        const QuantizationInfo q_info(0.5f, -10);
 
         // Create tensors
-        src     = create_tensor<TensorType>(shape, data_type_src);
-        dst     = create_tensor<TensorType>(shape, data_type_dst);
-        min_max = create_tensor<TensorType>(shape_min_max, data_type_dst);
+        src = create_tensor<TensorType>(shape, data_type_src, 1, q_info);
+        dst = create_tensor<TensorType>(shape, data_type_dst, 1, q_info);
 
         // Create and configure function
-        dequantization_func.configure(&src, &dst, &min_max);
+        dequantization_func.configure(&src, &dst);
 
         // Allocate tensors
         src.allocator()->allocate();
         dst.allocator()->allocate();
-        min_max.allocator()->allocate();
     }
 
     void run()
@@ -80,13 +73,11 @@ public:
     {
         src.allocator()->free();
         dst.allocator()->free();
-        min_max.allocator()->free();
     }
 
 private:
     TensorType src{};
     TensorType dst{};
-    TensorType min_max{};
     Function   dequantization_func{};
 };
 } // namespace benchmark

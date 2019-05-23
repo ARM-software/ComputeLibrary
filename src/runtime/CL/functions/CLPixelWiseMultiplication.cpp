@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,8 @@
 
 #include <utility>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void CLPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, float scale,
                                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
@@ -54,3 +54,26 @@ Status CLPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITen
 {
     return CLPixelWiseMultiplicationKernel::validate(input1, input2, output, scale, overflow_policy, rounding_policy);
 }
+
+void CLComplexPixelWiseMultiplication::configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLComplexPixelWiseMultiplicationKernel>();
+    k->configure(input1, input2, output);
+    _kernel = std::move(k);
+
+    if(output->info()->dimension(0) > 1)
+    {
+        ICLTensor *broadcasted_info = (input1->info()->dimension(0) == 1) ? input1 : input2;
+
+        if(broadcasted_info->info()->dimension(0) == 1)
+        {
+            _border_handler.configure(broadcasted_info, _kernel->border_size(), BorderMode::REPLICATE);
+        }
+    }
+}
+
+Status CLComplexPixelWiseMultiplication::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)
+{
+    return CLComplexPixelWiseMultiplicationKernel::validate(input1, input2, output);
+}
+} // namespace arm_compute

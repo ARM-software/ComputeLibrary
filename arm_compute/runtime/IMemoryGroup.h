@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,37 @@ public:
     virtual void release() = 0;
     /** Gets the memory mapping of the group */
     virtual MemoryMappings &mappings() = 0;
+};
+
+/** Memory group resources scope handling class */
+class MemoryGroupResourceScope
+{
+public:
+    /** Constructor
+     *
+     * @param[in] memory_group Memory group to handle
+     */
+    explicit MemoryGroupResourceScope(IMemoryGroup &memory_group)
+        : _memory_group(memory_group)
+    {
+        _memory_group.acquire();
+    }
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    MemoryGroupResourceScope(const MemoryGroupResourceScope &) = delete;
+    /** Default move constructor */
+    MemoryGroupResourceScope(MemoryGroupResourceScope &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    MemoryGroupResourceScope &operator=(const MemoryGroupResourceScope &) = delete;
+    /** Default move assignment operator */
+    MemoryGroupResourceScope &operator=(MemoryGroupResourceScope &&) = default;
+    /** Destructor */
+    ~MemoryGroupResourceScope()
+    {
+        _memory_group.release();
+    }
+
+private:
+    IMemoryGroup &_memory_group;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_IMEMORYGROUP_H__ */

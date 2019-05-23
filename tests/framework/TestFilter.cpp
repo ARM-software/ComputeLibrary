@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,8 @@ TestFilter::TestFilter(DatasetMode mode, const std::string &name_filter, const s
 
 bool TestFilter::is_selected(const TestInfo &info) const
 {
-    if((info.mode & _dataset_mode) == DatasetMode::DISABLED)
+    const bool include_disabled = (info.mode == _dataset_mode) && (_dataset_mode == DatasetMode::DISABLED);
+    if((info.mode & _dataset_mode) == DatasetMode::DISABLED && !include_disabled)
     {
         return false;
     }

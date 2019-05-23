@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace benchmark
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::F16 });
 } // namespace
 
 using CLQuantizationLayerFixture = QuantizationLayerFixture<CLTensor, CLQuantizationLayer, CLAccessor>;

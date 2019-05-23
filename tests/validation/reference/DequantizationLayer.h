@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-SimpleTensor<float> dequantization_layer(const SimpleTensor<T> &src, const SimpleTensor<float> &min_max);
+template <typename T>
+SimpleTensor<T> dequantization_layer(const SimpleTensor<uint8_t> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

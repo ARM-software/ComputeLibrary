@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,12 +103,10 @@ void                   NEConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
-        _memory_group.acquire();
+        MemoryGroupResourceScope scope_mg(_memory_group);
 
         NEScheduler::get().schedule(&_kernel_hor, Window::DimY);
         NEScheduler::get().schedule(&_kernel_vert, Window::DimY);
-
-        _memory_group.release();
     }
     else
     {

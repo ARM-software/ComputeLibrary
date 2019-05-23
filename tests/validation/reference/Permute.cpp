@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,11 +47,11 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     // Compute reference
     for(int i = 0; i < src.num_elements(); ++i)
     {
-        Coordinates coord = index2coord(src.shape(), i);
-        permute(coord, perm);
-        const size_t dst_index = coord2index(dst.shape(), coord);
+        const Coordinates src_coords = index2coord(src.shape(), i);
+        Coordinates       dst_coords = src_coords;
+        permute(dst_coords, perm);
 
-        dst[dst_index] = src[i];
+        std::copy_n(static_cast<const T *>(src(src_coords)), src.num_channels(), static_cast<T *>(dst(dst_coords)));
     }
 
     return dst;

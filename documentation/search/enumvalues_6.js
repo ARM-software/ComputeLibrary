@@ -11,7 +11,7 @@ var searchData=
   ['g76',['G76',['../namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3aa46ce37da51477a1af33a8810e0ed04d',1,'arm_compute']]],
   ['gaussian',['GAUSSIAN',['../namespacearm__compute.xhtml#a201391f6e13e2a1ac203256a77792718a0fceff26ae86a047835cafbb6cadb1b9',1,'arm_compute']]],
   ['gc',['GC',['../namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35da7359c3eb5c57547295a76ac1bf775b29',1,'arm_compute::graph']]],
-  ['gemm',['GEMM',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::GEMM()'],['../namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::graph::GEMM()']]],
+  ['gemm',['GEMM',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::GEMM()'],['../namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::GEMM()'],['../namespacearm__compute_1_1graph.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3',1,'arm_compute::graph::GEMM()']]],
   ['gemv',['GEMV',['../namespacearm__compute_1_1graph.xhtml#a75ce9b1baad4303a53124d6f0795821fa87dc825930f866018839a6374a5e68d2',1,'arm_compute::graph']]],
   ['generateproposalslayer',['GenerateProposalsLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16a728d2f08dedae314e27241a256449973',1,'arm_compute::graph']]],
   ['generic',['GENERIC',['../namespacearm__compute.xhtml#aa41d7415a5386798147cccae2333d5d4ac942dc2a9f958acddc67e11472d3ca0b',1,'arm_compute']]],

@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -128,6 +128,9 @@ Data Structures</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml">CLTensorHandle</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml" title="Tensor object.">Tensor</a> handle interface object.  <a href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml">FusedConvolutionBatchNormalizationFunction</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper function to first apply {NE, CL}BatchNormalizationLayer on the weights and then run {NE, CL}ConvolutionLayer with the modified weights.  <a href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml">GCDeviceBackend</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">GLES Compute device backend.  <a href="classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml#details">More...</a><br /></td></tr>
@@ -309,9 +312,9 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00088">88</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;{</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordtype">bool</span> enabled = ctx.config().use_function_memory_manager &amp;&amp; (ctx.memory_management_ctx(target) != <span class="keyword">nullptr</span>);</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keywordflow">return</span> enabled ? ctx.memory_management_ctx(target)-&gt;intra_mm : <span class="keyword">nullptr</span>;</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">References <a class="el" href="_graph_context_8cpp_source.xhtml#l00045">GraphContext::config()</a>, <a class="el" href="_graph_context_8h_source.xhtml#l00042">MemoryManagerContext::intra_mm</a>, <a class="el" href="_graph_context_8cpp_source.xhtml#l00067">GraphContext::memory_management_ctx()</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00078">GraphConfig::use_function_memory_manager</a>.</p>
+<p class="reference">References <a class="el" href="_graph_context_8cpp_source.xhtml#l00045">GraphContext::config()</a>, <a class="el" href="_graph_context_8h_source.xhtml#l00042">MemoryManagerContext::intra_mm</a>, <a class="el" href="_graph_context_8cpp_source.xhtml#l00067">GraphContext::memory_management_ctx()</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00079">GraphConfig::use_function_memory_manager</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00296">arm_compute::graph::backends::detail::create_convolution_layer()</a>, <a class="el" href="_g_c_functions_factory_8cpp_source.xhtml#l00109">arm_compute::graph::backends::detail::create_convolution_layer&lt; GCConvolutionLayerFunctions, GCTargetInfo &gt;()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00083">arm_compute::graph::backends::detail::create_convolution_layer&lt; NEConvolutionLayerFunctions, NETargetInfo &gt;()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00387">arm_compute::graph::backends::detail::create_deconvolution_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00648">arm_compute::graph::backends::detail::create_fully_connected_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00702">arm_compute::graph::backends::detail::create_generate_proposals_layer()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00151">arm_compute::graph::backends::detail::create_normalization_layer&lt; NENormalizationLayer, NETargetInfo &gt;()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l01184">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00364">arm_compute::graph::backends::detail::create_convolution_layer()</a>, <a class="el" href="_g_c_functions_factory_8cpp_source.xhtml#l00109">arm_compute::graph::backends::detail::create_convolution_layer&lt; GCConvolutionLayerFunctions, GCTargetInfo &gt;()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00091">arm_compute::graph::backends::detail::create_convolution_layer&lt; NEConvolutionLayerFunctions, NETargetInfo &gt;()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00455">arm_compute::graph::backends::detail::create_deconvolution_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00716">arm_compute::graph::backends::detail::create_fully_connected_layer()</a>, <a class="el" href="_function_helpers_8h_source.xhtml#l00770">arm_compute::graph::backends::detail::create_generate_proposals_layer()</a>, <a class="el" href="_n_e_function_factory_8cpp_source.xhtml#l00161">arm_compute::graph::backends::detail::create_normalization_layer&lt; NENormalizationLayer, NETargetInfo &gt;()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l01254">arm_compute::graph::backends::detail::create_softmax_layer()</a>.</p>
 
 </div>
 </div>
@@ -361,7 +364,7 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml#l00076">76</a> of file <a class="el" href="arm__compute_2graph_2backends_2_utils_8h_source.xhtml">Utils.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;{</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keywordflow">return</span> (output == <span class="keyword">nullptr</span>) || (input == output);</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00095">arm_compute::graph::backends::detail::create_activation_layer()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l00133">arm_compute::graph::backends::detail::create_batch_normalization_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00097">arm_compute::graph::backends::detail::create_activation_layer()</a>, and <a class="el" href="_function_helpers_8h_source.xhtml#l00135">arm_compute::graph::backends::detail::create_batch_normalization_layer()</a>.</p>
 
 </div>
 </div>
@@ -371,7 +374,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph_1_1backends.xhtml">backends</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:05 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

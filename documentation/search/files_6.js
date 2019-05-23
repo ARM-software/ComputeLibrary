@@ -3,6 +3,11 @@ var searchData=
   ['fast_5fcorners_2ecl',['fast_corners.cl',['../fast__corners_8cl.xhtml',1,'']]],
   ['fastcorners_2ecpp',['FastCorners.cpp',['../benchmark_2_c_l_2_fast_corners_8cpp.xhtml',1,'(Global Namespace)'],['../benchmark_2_n_e_o_n_2_fast_corners_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_c_l_2_fast_corners_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2_n_e_o_n_2_fast_corners_8cpp.xhtml',1,'(Global Namespace)'],['../validation_2reference_2_fast_corners_8cpp.xhtml',1,'(Global Namespace)']]],
   ['fastcorners_2eh',['FastCorners.h',['../_fast_corners_8h.xhtml',1,'']]],
+  ['fft_2ecl',['fft.cl',['../fft_8cl.xhtml',1,'']]],
+  ['fft_2ecpp',['fft.cpp',['../src_2core_2utils_2helpers_2fft_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2benchmark_2_c_l_2fft_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2benchmark_2_n_e_o_n_2fft_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_c_l_2fft_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_n_e_o_n_2fft_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['fft_2eh',['fft.h',['../fft_8h.xhtml',1,'']]],
+  ['fft_5fdigit_5freverse_2ecl',['fft_digit_reverse.cl',['../fft__digit__reverse_8cl.xhtml',1,'']]],
+  ['fft_5fscale_2ecl',['fft_scale.cl',['../fft__scale_8cl.xhtml',1,'']]],
   ['filehandler_2ecpp',['FileHandler.cpp',['../_file_handler_8cpp.xhtml',1,'']]],
   ['filehandler_2eh',['FileHandler.h',['../_file_handler_8h.xhtml',1,'']]],
   ['fileprinter_2ecpp',['FilePrinter.cpp',['../_file_printer_8cpp.xhtml',1,'']]],
@@ -24,5 +29,9 @@ var searchData=
   ['fullyconnectedlayer_2ecpp',['FullyConnectedLayer.cpp',['../src_2graph_2nodes_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2benchmark_2_c_l_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2benchmark_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_c_l_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_g_l_e_s___c_o_m_p_u_t_e_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2_n_e_o_n_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)'],['../tests_2validation_2reference_2_fully_connected_layer_8cpp.xhtml',1,'(Global Namespace)']]],
   ['fullyconnectedlayer_2eh',['FullyConnectedLayer.h',['../_fully_connected_layer_8h.xhtml',1,'']]],
   ['fullyconnectedlayernode_2eh',['FullyConnectedLayerNode.h',['../_fully_connected_layer_node_8h.xhtml',1,'']]],
-  ['functionhelpers_2eh',['FunctionHelpers.h',['../_function_helpers_8h.xhtml',1,'']]]
+  ['functiondescriptors_2eh',['FunctionDescriptors.h',['../_function_descriptors_8h.xhtml',1,'']]],
+  ['functionhelpers_2eh',['FunctionHelpers.h',['../_function_helpers_8h.xhtml',1,'']]],
+  ['fusedconvolutionbatchnormalizationfunction_2eh',['FusedConvolutionBatchNormalizationFunction.h',['../_fused_convolution_batch_normalization_function_8h.xhtml',1,'']]],
+  ['fusedconvolutionbatchnormalizationnode_2ecpp',['FusedConvolutionBatchNormalizationNode.cpp',['../_fused_convolution_batch_normalization_node_8cpp.xhtml',1,'']]],
+  ['fusedconvolutionbatchnormalizationnode_2eh',['FusedConvolutionBatchNormalizationNode.h',['../_fused_convolution_batch_normalization_node_8h.xhtml',1,'']]]
 ];

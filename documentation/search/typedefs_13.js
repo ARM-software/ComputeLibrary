@@ -2,7 +2,9 @@ var searchData=
 [
   ['tensor3d',['Tensor3D',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a1a857bfe99727c6051e9a3ee285d70f6',1,'helpers.h']]],
   ['tensor4d',['Tensor4D',['../src_2core_2_c_l_2cl__kernels_2_helpers_8h.xhtml#a3b8a88f73e80a621aecfe7ced12c1676',1,'helpers.h']]],
+  ['tensorconcretetype',['TensorConcreteType',['../classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a991b6faefbee1cf7b9cf77647c30a6ec',1,'arm_compute::graph::backends::FusedConvolutionBatchNormalizationFunction']]],
   ['tensorid',['TensorID',['../namespacearm__compute_1_1graph.xhtml#a615af95e19b5d9f74d2760183566a9a3',1,'arm_compute::graph']]],
+  ['tensortype',['TensorType',['../classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a4ae2727819a8e5fb0b0d9087e7ebd5ca',1,'arm_compute::graph::backends::FusedConvolutionBatchNormalizationFunction']]],
   ['thresholdfixture',['ThresholdFixture',['../namespacearm__compute_1_1test_1_1validation.xhtml#a31d631a1d87f30b46a1d81f2e3393d9a',1,'arm_compute::test::validation']]],
   ['transforminputkernel',['TransformInputKernel',['../classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#afad7d48b2aacdab4c4d731e1aab98c6f',1,'arm_compute::NEWinogradLayerConfiguration']]],
   ['transformoutputkernel',['TransformOutputKernel',['../classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#a3637009f3df69cdc77be902ee35b02a1',1,'arm_compute::NEWinogradLayerConfiguration']]],

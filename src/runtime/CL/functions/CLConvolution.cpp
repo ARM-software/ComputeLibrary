@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,13 +58,13 @@ void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *ou
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(conv == nullptr);
-    int16_t conv_col[matrix_size];
-    int16_t conv_row[matrix_size];
-    _is_separable = separate_matrix(conv, conv_col, conv_row, matrix_size);
+    std::array<int16_t, matrix_size> conv_col{ 0 };
+    std::array<int16_t, matrix_size> conv_row{ 0 };
+    _is_separable = separate_matrix(conv, conv_col.data(), conv_row.data(), matrix_size);
 
     if(_is_separable)
     {
-        std::pair<DataType, DataType> type_pair = data_type_for_convolution(conv_col, conv_row, matrix_size);
+        std::pair<DataType, DataType> type_pair = data_type_for_convolution(conv_col.data(), conv_row.data(), matrix_size);
         _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, type_pair.first));
 
         // Manage intermediate buffers
@@ -75,8 +75,8 @@ void CLConvolutionSquare<matrix_size>::configure(ICLTensor *input, ICLTensor *ou
             scale = calculate_matrix_scale(conv, matrix_size);
         }
 
-        _kernel_hor.configure(input, &_tmp, conv_row, border_mode == BorderMode::UNDEFINED);
-        _kernel_vert.configure(&_tmp, output, conv_col, scale, border_mode == BorderMode::UNDEFINED, type_pair.second);
+        _kernel_hor.configure(input, &_tmp, conv_row.data(), border_mode == BorderMode::UNDEFINED);
+        _kernel_vert.configure(&_tmp, output, conv_col.data(), scale, border_mode == BorderMode::UNDEFINED, type_pair.second);
         _border_handler.configure(input, _kernel_hor.border_size(), border_mode, PixelValue(constant_border_value));
 
         // Allocate intermediate buffer
@@ -96,12 +96,10 @@ void                   CLConvolutionSquare<matrix_size>::run()
 
     if(_is_separable)
     {
-        _memory_group.acquire();
+        MemoryGroupResourceScope scope_mg(_memory_group);
 
         CLScheduler::get().enqueue(_kernel_hor, false);
         CLScheduler::get().enqueue(_kernel_vert);
-
-        _memory_group.release();
     }
     else
     {

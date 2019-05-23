@@ -42,13 +42,13 @@ enum class GemmMethod
     GEMM_INTERLEAVED
 };
 
-
 struct KernelDescription
 {
-    GemmMethod   method = GemmMethod::DEFAULT;
-    std::string  name   = "";
+    GemmMethod   method      = GemmMethod::DEFAULT;
+    std::string  name        = "";
+    bool         is_default  = false;
 
-    KernelDescription(GemmMethod m, std::string n) : method(m), name(n) { }
+    KernelDescription(GemmMethod m, std::string n, bool d=false) : method(m), name(n), is_default(d) { }
     KernelDescription() { }
 };
 
@@ -166,16 +166,16 @@ UniqueGemmCommon<Top, Tret> gemm(const CPUInfo &ci,
 }
 
 template<typename Top, typename Tret>
-std::vector<std::string> get_compatible_kernels(const GemmArgs<Tret> &args);
+std::vector<KernelDescription> get_compatible_kernels(const GemmArgs<Tret> &args);
 
 template<typename Top, typename Tret>
-std::vector<std::string> get_compatible_kernels(const CPUInfo &ci,
-                                                const unsigned int M, const unsigned int N, const unsigned int K,
-                                                const unsigned int nbatches, const unsigned int nmulti,
-                                                const bool trA, const bool trB, const Tret alpha, const Tret beta,
-                                                const int maxthreads, const bool pretransposed_hint)
+std::vector<KernelDescription> get_compatible_kernels(const CPUInfo &ci,
+                                                      const unsigned int M, const unsigned int N, const unsigned int K,
+                                                      const unsigned int nbatches, const unsigned int nmulti,
+                                                      const bool trA, const bool trB, const Tret alpha, const Tret beta,
+                                                      const int maxthreads, const bool pretransposed_hint, GemmConfig *cfg=nullptr)
 {
-    GemmArgs<Tret> args(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint);
+    GemmArgs<Tret> args(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint, cfg);
 
     return get_compatible_kernels<Top, Tret>(args);
 }

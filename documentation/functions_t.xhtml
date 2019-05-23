@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -156,6 +156,9 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <li>TensorAllocator()
 : <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a20c11f37f59a434b1dd0b69f62771ac6">TensorAllocator</a>
 </li>
+<li>TensorConcreteType
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a991b6faefbee1cf7b9cf77647c30a6ec">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
+</li>
 <li>TensorDescriptor()
 : <a class="el" href="structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml#afb1242d3a5cd10691afac084fa49713f">TensorDescriptor</a>
 </li>
@@ -167,6 +170,9 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 </li>
 <li>TensorShape()
 : <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml#a091252b04a1c79d499dd6184f9f5d715">TensorShape</a>
+</li>
+<li>TensorType
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml#a4ae2727819a8e5fb0b0d9087e7ebd5ca">FusedConvolutionBatchNormalizationFunction&lt; TargetInfo, FusedLayerTypes &gt;</a>
 </li>
 <li>termination
 : <a class="el" href="structarm__compute_1_1_optical_flow_parameters.xhtml#a77d1ea96211300e9417b965981953c81">OpticalFlowParameters</a>
@@ -246,7 +252,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_detection_output_layer_info.xhtml#acf35ae15a9350f47bcba0d0cedeb3e7c">DetectionOutputLayerInfo</a>
 </li>
 <li>TopNPredictionsAccessor()
-: <a class="el" href="classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml#ad12f4e3c945ec4fad9ab6386954a3550">TopNPredictionsAccessor</a>
+: <a class="el" href="classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml#a08ecfd9353ff51163e76e32aaeef2bc8">TopNPredictionsAccessor</a>
 </li>
 <li>total_size()
 : <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a18064e0011c3869d884653e9e7c47b66">ITensorInfo</a>
@@ -315,6 +321,11 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#aac3ce1ee0a145bb6c131c9d94f30062e">CommonGraphOptions</a>
 , <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a5cabfb35cd0014387f7ec2a0c362c20f">CommonGraphParams</a>
 </li>
+<li>tuner_mode
+: <a class="el" href="structarm__compute_1_1graph_1_1_graph_config.xhtml#a249f3f713c6ea8f564e760559cf509f4">GraphConfig</a>
+, <a class="el" href="classarm__compute_1_1utils_1_1_common_graph_options.xhtml#a152c80450373e13e5e2f543b4ae4bb3b">CommonGraphOptions</a>
+, <a class="el" href="structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a3ebea56a33e2632ae2a9b25b160e0705">CommonGraphParams</a>
+</li>
 <li>TWO_GB_IN_KB
 : <a class="el" href="classarm__compute_1_1_m_e_m_info.xhtml#abd0ddfc9f23b25d70cdcf6e2e0d37782">MEMInfo</a>
 </li>
@@ -335,6 +346,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">EltwiseLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">FlattenLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">FullyConnectedLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">FusedConvolutionBatchNormalizationNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">GenerateProposalsLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a6b2d83e561886647467f86c20ce39bec">INode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_input_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">InputNode</a>
@@ -352,6 +364,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_slice_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SliceLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SoftmaxLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">SplitLayerNode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_stack_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">StackLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_upsample_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">UpsampleLayerNode</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_y_o_l_o_layer_node.xhtml#a65d13dc93e2df5e8ab725263cf9f4ac5">YOLOLayerNode</a>
 , <a class="el" href="classarm__compute_1_1_i_lut.xhtml#aa1917b40b57ce0a0f1c69722b46f3f46">ILut</a>
@@ -385,7 +398,7 @@ $(document).ready(function(){initNavTree('functions_t.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:07 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -49,25 +49,41 @@ public:
     CLGEMMMatrixMultiplyReshapedKernel &operator=(CLGEMMMatrixMultiplyReshapedKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16
-     * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0
+     * @param[in]  input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @param[in]  input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[out] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  lhs_info  LHS matrix information used for reshaping the input0 tensor
-     * @param[in]  rhs_info  RHS matrix information used for reshaping the input1 tensor
+     * @param[in]  lhs_info  LHS matrix information used for reshaping the input0 tensor.  Only the following values are supported:
+     *                       lhs_info.m0: 2,3,4,5,6,7,8
+     *                       lhs_info.k0: 2,3,4,8,16
+     *                       lhs_info.transpose: false
+     * @param[in]  rhs_info  RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
+     *                       rhs_info.n0: 2,3,4,8,16
+     *                       rhs_info.k0: 2,3,4,8,16
+     *                       rhs_info.transpose: true
      * @param[in]  gemm_info GEMM information used to retrieve the original dimensions of the input matrices
+     *
+     * @note lhs_info.k0 must be equal to rhs_info.k0
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                    const GEMMReshapeInfo &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedKernel
      *
-     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16
-     * @param[in] input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0
+     * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4
+     * @param[in] input1    Input tensor containing the RHS reshaped matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3
      * @param[in] output    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in] alpha     Weight of the matrix product
-     * @param[in] lhs_info  LHS matrix information used for reshaping the input0 tensor
-     * @param[in] rhs_info  RHS matrix information used for reshaping the input1 tensor
+     * @param[in] lhs_info  LHS matrix information used for reshaping the input0 tensor.  Only the following values are supported:
+     *                      lhs_info.m0: 2,3,4,5,6,7,8
+     *                      lhs_info.k0: 2,3,4,8,16
+     *                      lhs_info.transpose: false
+     * @param[in] rhs_info  RHS matrix information used for reshaping the input1 tensor.  Only the following values are supported:
+     *                      rhs_info.n0: 2,3,4,8,16
+     *                      rhs_info.k0: 2,3,4,8,16
+     *                      rhs_info.transpose: true
      * @param[in] gemm_info GEMM information used to retrieve the original dimensions of the input matrices
+     *
+     * @note lhs_info.k0 must be equal to rhs_info.k0
      *
      * @return a status
      */
@@ -84,6 +100,7 @@ private:
     bool             _slide_matrix_b;
     bool             _reinterpret_output_as_3d;
     unsigned int     _k;
+    bool             _use_dummy_work_items;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLGEMMMATRIXMULTIPLYRESHAPEDKERNEL_H__*/

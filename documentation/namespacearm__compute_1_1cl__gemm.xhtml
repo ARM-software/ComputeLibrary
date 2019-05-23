@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -97,7 +97,8 @@ $(document).ready(function(){initNavTree('namespacearm__compute_1_1cl__gemm.xhtm
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Data Structures</a>  </div>
+<a href="#nested-classes">Data Structures</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">arm_compute::cl_gemm Namespace Reference</div>  </div>
 </div><!--header-->
@@ -105,20 +106,138 @@ $(document).ready(function(){initNavTree('namespacearm__compute_1_1cl__gemm.xhtm
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_configuration_bifrost.xhtml">CLGEMMReshapedConfigurationBifrost</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bifrost based OpenCL GEMM reshaped configuration.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_configuration_bifrost.xhtml#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_bifrost.xhtml">CLGEMMReshapedKernelConfigurationBifrost</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bifrost based OpenCL GEMMReshaped configuration.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_bifrost.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_configuration_factory.xhtml">CLGEMMReshapedConfigurationFactory</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuner factory class.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_configuration_factory.xhtml#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_factory.xhtml">CLGEMMReshapedKernelConfigurationFactory</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CLGEMMReshaped factory class.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_kernel_configuration_factory.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost.xhtml">CLGEMMReshapedOnlyRHSKernelConfigurationBifrost</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bifrost based OpenCL GEMMReshapedOnlyRHS configuration.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_bifrost.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_factory.xhtml">CLGEMMReshapedOnlyRHSKernelConfigurationFactory</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">CLGEMMReshapedOnlyRHS factory class.  <a href="classarm__compute_1_1cl__gemm_1_1_c_l_g_e_m_m_reshaped_only_r_h_s_kernel_configuration_factory.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ab299f3a09724bb80492d4e74d1b3b0bc"><td class="memItemLeft" align="right" valign="top">std::pair&lt; <a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml">GEMMLHSMatrixInfo</a>, <a class="el" href="structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml">GEMMRHSMatrixInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1cl__gemm.xhtml#ab299f3a09724bb80492d4e74d1b3b0bc">configure_lhs_rhs_info</a> (unsigned int m, unsigned int n, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool lhs_interleave, bool rhs_interleave, bool lhs_transpose, bool rhs_transpose)</td></tr>
+<tr class="memdesc:ab299f3a09724bb80492d4e74d1b3b0bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure <a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml">GEMMLHSMatrixInfo</a> and <a class="el" href="structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml">GEMMRHSMatrixInfo</a>.  <a href="#ab299f3a09724bb80492d4e74d1b3b0bc">More...</a><br /></td></tr>
+<tr class="separator:ab299f3a09724bb80492d4e74d1b3b0bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ab299f3a09724bb80492d4e74d1b3b0bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab299f3a09724bb80492d4e74d1b3b0bc">&#9670;&nbsp;</a></span>configure_lhs_rhs_info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; <a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml">GEMMLHSMatrixInfo</a>, <a class="el" href="structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml">GEMMRHSMatrixInfo</a> &gt; configure_lhs_rhs_info </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>m</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>m0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>n0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>k0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>v0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>h0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>lhs_interleave</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>rhs_interleave</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>lhs_transpose</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>rhs_transpose</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configure <a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml">GEMMLHSMatrixInfo</a> and <a class="el" href="structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml">GEMMRHSMatrixInfo</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">m</td><td>Number of rows (M) in the LHS matrix not reshaped </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>Number of columns (N) in the RHS matrix not reshaped </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">m0</td><td>Number of rows processed by each thread/work-item </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n0</td><td>Number of columns processed by each thread/work-item </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">k0</td><td>Number of inner accumulation performed by each thread/work-item </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v0</td><td>Number of vertical blocks of size (m0xk0) stored on the same output row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">h0</td><td>Number of horizontal blocks of size (k0xn0) stored on the same output row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lhs_interleave</td><td>True if the v0 (m0xk0) blocks have to be interleaved in the output row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rhs_interleave</td><td>True if the h0 (k0xn0) blocks have to be interleaved in the output row </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lhs_transpose</td><td>True if the (m0xk0) block has to be transposed before been stored </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rhs_transpose</td><td>True if the (k0xn0) block has to be transposed before been stored</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structarm__compute_1_1_g_e_m_m_l_h_s_matrix_info.xhtml">GEMMLHSMatrixInfo</a> and <a class="el" href="structarm__compute_1_1_g_e_m_m_r_h_s_matrix_info.xhtml">GEMMRHSMatrixInfo</a> </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="_c_l_g_e_m_m_helpers_8cpp_source.xhtml#l00032">32</a> of file <a class="el" href="_c_l_g_e_m_m_helpers_8cpp_source.xhtml">CLGEMMHelpers.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;{</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    GEMMLHSMatrixInfo lhs_info;</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    GEMMRHSMatrixInfo rhs_info;</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="comment">// Configure GEMMLHSMatrixInfo</span></div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    lhs_info.m0         = m0;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    lhs_info.k0         = k0;</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    lhs_info.v0         = ((m / (lhs_info.m0 * v0)) == 0) ? 1 : v0;</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    lhs_info.interleave = lhs_interleave;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    lhs_info.transpose  = lhs_transpose;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="comment">// Configure GEMMRHSMatrixInfo</span></div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    rhs_info.n0         = n0;</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    rhs_info.k0         = lhs_info.k0;</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    rhs_info.h0         = ((n / (rhs_info.n0 * h0)) == 0) ? 1 : h0;</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    rhs_info.interleave = rhs_interleave;</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    rhs_info.transpose  = rhs_transpose;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keywordflow">return</span> std::make_pair(lhs_info, rhs_info);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01805">GEMMRHSMatrixInfo::h0</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01797">GEMMLHSMatrixInfo::interleave</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01807">GEMMRHSMatrixInfo::interleave</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01794">GEMMLHSMatrixInfo::k0</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01804">GEMMRHSMatrixInfo::k0</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01793">GEMMLHSMatrixInfo::m0</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01803">GEMMRHSMatrixInfo::n0</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01796">GEMMLHSMatrixInfo::transpose</a>, <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01806">GEMMRHSMatrixInfo::transpose</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01795">GEMMLHSMatrixInfo::v0</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1cl__gemm.xhtml">cl_gemm</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:04 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

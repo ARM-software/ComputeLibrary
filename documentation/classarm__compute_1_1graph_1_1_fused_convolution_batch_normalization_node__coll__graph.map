@@ -1,0 +1,4 @@
+<map id="FusedConvolutionBatchNormalizationNode" name="FusedConvolutionBatchNormalizationNode">
+<area shape="rect" id="node1" title="Batch Normalization node." alt="" coords="5,80,300,107"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="123,5,182,32"/>
+</map>

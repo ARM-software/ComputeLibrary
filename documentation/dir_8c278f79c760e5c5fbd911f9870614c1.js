@@ -1,6 +1,7 @@
 var dir_8c278f79c760e5c5fbd911f9870614c1 =
 [
     [ "cl_kernels", "dir_25885286e9dad4fa105b7b25a8031bbf.xhtml", "dir_25885286e9dad4fa105b7b25a8031bbf" ],
+    [ "gemm", "dir_acedbc3c1c025eedca19641ef7b62820.xhtml", "dir_acedbc3c1c025eedca19641ef7b62820" ],
     [ "kernels", "dir_8a6a287e420ec4de95804825506d2fde.xhtml", "dir_8a6a287e420ec4de95804825506d2fde" ],
     [ "CLHelpers.cpp", "core_2_c_l_2_c_l_helpers_8cpp.xhtml", "core_2_c_l_2_c_l_helpers_8cpp" ],
     [ "CLKernelLibrary.cpp", "_c_l_kernel_library_8cpp.xhtml", null ],

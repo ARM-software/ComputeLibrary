@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,6 +83,7 @@ namespace utils
     os << "Data type : " << common_params.data_type << std::endl;
     os << "Data layout : " << common_params.data_layout << std::endl;
     os << "Tuner enabled? : " << (common_params.enable_tuner ? true_str : false_str) << std::endl;
+    os << "Tuner mode : " << common_params.tuner_mode << std::endl;
     os << "Tuner file : " << common_params.tuner_file << std::endl;
     os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::Enabled ? true_str : false_str) << std::endl;
     if(!common_params.data_path.empty())
@@ -117,6 +118,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       data_type(),
       data_layout(),
       enable_tuner(parser.add_option<ToggleOption>("enable-tuner")),
+      tuner_mode(),
       fast_math_hint(parser.add_option<ToggleOption>("fast-math")),
       data_path(parser.add_option<SimpleOption<std::string>>("data")),
       image(parser.add_option<SimpleOption<std::string>>("image")),
@@ -146,9 +148,17 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
         DataLayout::NCHW,
     };
 
+    const std::set<CLTunerMode> supported_tuner_modes
+    {
+        CLTunerMode::EXHAUSTIVE,
+        CLTunerMode::NORMAL,
+        CLTunerMode::RAPID
+    };
+
     target      = parser.add_option<EnumOption<Target>>("target", supported_targets, Target::NEON);
     data_type   = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
     data_layout = parser.add_option<EnumOption<DataLayout>>("layout", supported_data_layouts);
+    tuner_mode  = parser.add_option<EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::NORMAL);
 
     help->set_help("Show this help message");
     threads->set_help("Number of threads to use");
@@ -156,6 +166,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     data_type->set_help("Data type to use");
     data_layout->set_help("Data layout to use");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
+    tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");
@@ -181,6 +192,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
         common_params.data_layout = options.data_layout->value();
     }
     common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
+    common_params.tuner_mode             = options.tuner_mode->value();
     common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path              = options.data_path->value();
     common_params.image                  = options.image->value();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,29 +37,58 @@ class NEPixelWiseMultiplication : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in, out] input1          An input tensor. Data types supported: U8/S16/F16/F32.
-     *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2          An input tensor. Data types supported: same as @p input1.
-     *                                 The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output          Output tensor. Data types supported: U8/S16/F16/F32.
+     * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
+     *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
+     *
+     * @param[in, out] input1          An input tensor. Data types supported: U8/QASYMM8/S16/F16/F32
+     *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[in, out] input2          An input tensor. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     *                                 This input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[out]     output          Output tensor. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
      * @param[in]      scale           Scale to apply after multiplication.
      *                                 Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
-     * @param[in]      overflow_policy Overflow policy.
+     * @param[in]      overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8.
      * @param[in]      rounding_policy Rounding policy.
      */
     void configure(ITensor *input1, ITensor *input2, ITensor *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPixelWiseMultiplication
      *
-     * @param[in] input1          First tensor info input. Data types supported: U8/S16/F16/F32.
-     * @param[in] input2          Second tensor info input. Data types supported: U8/S16/F16/F32.
-     * @param[in] output          Output tensor info. Data types supported: U8/S16/F16/F32.
-     * @param[in] scale           Scale to apply after multiplication. Must be positive.
-     * @param[in] overflow_policy Overflow policy.
+     * @note For @p scale equal to 1/255 only round to nearest even (implemented as round half up) is supported.
+     *       For all other scale values only round to zero (implemented as round towards minus infinity) is supported.
+     *
+     * @param[in] input1          An input tensor info. Data types supported: U8/QASYMM8/S16/F16/F32
+     * @param[in] input2          An input tensor info. Data types supported: U8, QASYMM8 (only if @p input1 is QASYMM8), S16, F16 (only if @p input1 is F16), F32 (only if @p input1 is F32).
+     * @param[in] output          Output tensor info. Data types supported: U8 (Only if both inputs are U8), QASYMM8 (only if both inputs are QASYMM8), S16/F16 (only if @p input1 is F16), F32 (only if both inputs are F32).
+     * @param[in] scale           Scale to apply after multiplication.
+     *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
+     * @param[in] overflow_policy Overflow policy. ConvertPolicy cannot be WRAP if datatype is QASYMM8.
      * @param[in] rounding_policy Rounding policy.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale, ConvertPolicy overflow_policy, RoundingPolicy rounding_policy);
+};
+
+/** Basic function to run @ref NEComplexPixelWiseMultiplicationKernel. */
+class NEComplexPixelWiseMultiplication : public INESimpleFunction
+{
+public:
+    /** Initialise the kernel's inputs, output.
+     *
+     * @param[in, out] input1 An input tensor. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[in, out] input2 An input tensor. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
+     * @param[out]     output The output tensor. Data types supported: same as @p input1. Number of channels: same as @p input1.
+     */
+    void configure(ITensor *input1, ITensor *input2, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEComplexPixelWiseMultiplication
+     *
+     * @param[in] input1 An input tensor info. Data types supported: F32. Number of channels supported: 2 (complex tensor).
+     * @param[in] input2 An input tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     * @param[in] output The output tensor info. Data types supported: same as @p input1. Number of channels supported: same as @p input1.
+     */
+    static Status validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output);
 };
 }
 #endif /*__ARM_COMPUTE_NEPIXELWISEMULTIPLICATION_H__ */

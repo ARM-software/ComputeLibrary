@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,20 +106,17 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, 
     Window win = calculate_max_window(*mm_result, Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal mm_result_access(mm_result, 0, num_elems_processed_per_iteration);
-    window_changed = window_changed || update_window_and_padding(win,
-                                                                 mm_result_access);
+    window_changed = window_changed || update_window_and_padding(win, mm_result_access);
 
     if(a_offset != 0)
     {
         AccessWindowHorizontal vector_sum_col_access(vector_sum_col, 0, num_elems_processed_per_iteration);
-        window_changed = window_changed || update_window_and_padding(win,
-                                                                     vector_sum_col_access);
+        window_changed = window_changed || update_window_and_padding(win, vector_sum_col_access);
     }
     if(b_offset != 0)
     {
         AccessWindowStatic vector_sum_row_access(vector_sum_row, 0, 0, vector_sum_row->dimension(0), 0); // NOLINT
-        window_changed = window_changed || update_window_and_padding(win,
-                                                                     vector_sum_row_access);
+        window_changed = window_changed || update_window_and_padding(win, vector_sum_row_access);
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};

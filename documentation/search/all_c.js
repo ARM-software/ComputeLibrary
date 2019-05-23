@@ -9,6 +9,7 @@ var searchData=
   ['kernel_5fevent_5fis_5fset',['kernel_event_is_set',['../classarm__compute_1_1_c_l_tuner.xhtml#ac6fe363cafdd1fcfb6179a7cceac7dad',1,'arm_compute::CLTuner']]],
   ['kernel_5finfo',['kernel_info',['../structarm__compute_1_1test_1_1framework_1_1_scheduler_clock_1_1kernel__info.xhtml',1,'arm_compute::test::framework::SchedulerClock']]],
   ['kernel_5fsize',['kernel_size',['../structarm__compute_1_1_winograd_info.xhtml#aca57076ead1d06c47d3d32f4302b14ac',1,'arm_compute::WinogradInfo::kernel_size()'],['../classarm__compute_1_1_weights_info.xhtml#a1fba899b6ce8e0a8f4091031d75b0241',1,'arm_compute::WeightsInfo::kernel_size()']]],
+  ['kerneldescriptors_2eh',['KernelDescriptors.h',['../_kernel_descriptors_8h.xhtml',1,'']]],
   ['keypoint',['Keypoint',['../struct_keypoint.xhtml',1,'Keypoint'],['../structarm__compute_1_1_key_point.xhtml',1,'KeyPoint'],['../src_2core_2_c_l_2cl__kernels_2_types_8h.xhtml#a29b97e206612aa5366b3bd3d2f7be322',1,'Keypoint():&#160;types.h']]],
   ['keypoint_5fcompare',['keypoint_compare',['../_c_p_p_corner_candidates_kernel_8cpp.xhtml#aef2113e85f78a9814d6bc4253a08fbae',1,'CPPCornerCandidatesKernel.cpp']]],
   ['keypointarray',['KeyPointArray',['../namespacearm__compute.xhtml#a8856eca9a83e16bb0cb5880e9c6c9fe7',1,'arm_compute']]]

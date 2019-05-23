@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -165,12 +165,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a69cb11b5b37f94a6bea9eaad9d13cccf"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a69cb11b5b37f94a6bea9eaad9d13cccf">compute_transposed_shape</a> (const ITensorInfo &amp;input)</td></tr>
 <tr class="memdesc:a69cb11b5b37f94a6bea9eaad9d13cccf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the transposed shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a69cb11b5b37f94a6bea9eaad9d13cccf">More...</a><br /></td></tr>
 <tr class="separator:a69cb11b5b37f94a6bea9eaad9d13cccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab51afcfdb9caea9e8185ae6a42ba4779"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ab51afcfdb9caea9e8185ae6a42ba4779">compute_depthwise_convolution_shape</a> (const ITensorInfo &amp;input, const ITensorInfo &amp;weights, PadStrideInfo conv_info, unsigned int depth_multiplier)</td></tr>
-<tr class="memdesc:ab51afcfdb9caea9e8185ae6a42ba4779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the depthwise convolution output shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ab51afcfdb9caea9e8185ae6a42ba4779">More...</a><br /></td></tr>
-<tr class="separator:ab51afcfdb9caea9e8185ae6a42ba4779"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a928f49376c42cf52fcff1d615034486f"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a928f49376c42cf52fcff1d615034486f">compute_depthwise_convolution_shape</a> (const ITensorInfo &amp;input, int weights_width, int weights_height, PadStrideInfo conv_info, unsigned int depth_multiplier)</td></tr>
-<tr class="memdesc:a928f49376c42cf52fcff1d615034486f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the depthwise convolution output shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a928f49376c42cf52fcff1d615034486f">More...</a><br /></td></tr>
-<tr class="separator:a928f49376c42cf52fcff1d615034486f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7147815227e7ba91814cfdcd38f23ed"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ac7147815227e7ba91814cfdcd38f23ed">compute_depthwise_convolution_shape</a> (const ITensorInfo &amp;input, const ITensorInfo &amp;weights, PadStrideInfo conv_info, unsigned int depth_multiplier, const Size2D &amp;dilation=Size2D(1U, 1U))</td></tr>
+<tr class="memdesc:ac7147815227e7ba91814cfdcd38f23ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the depthwise convolution output shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ac7147815227e7ba91814cfdcd38f23ed">More...</a><br /></td></tr>
+<tr class="separator:ac7147815227e7ba91814cfdcd38f23ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c2e95d65407a26489ea38431ad851f5"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a5c2e95d65407a26489ea38431ad851f5">compute_deconvolution_upsampled_shape</a> (const ITensorInfo &amp;input, const ITensorInfo &amp;weights, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top, std::pair&lt; unsigned int, unsigned int &gt; &amp;out_dims, unsigned int &amp;padx, unsigned int &amp;pady)</td></tr>
 <tr class="memdesc:a5c2e95d65407a26489ea38431ad851f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the upsampled output shape used for deconvolution.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a5c2e95d65407a26489ea38431ad851f5">More...</a><br /></td></tr>
 <tr class="separator:a5c2e95d65407a26489ea38431ad851f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -255,19 +252,19 @@ Functions</h2></td></tr>
 <tr class="separator:acb3f0c947411cfe1d8c5f67af2cad851"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af79493c6c07a3eb2b3a27712221b66b8"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#af79493c6c07a3eb2b3a27712221b66b8">extract_shape</a> (ITensorInfo *data)</td></tr>
 <tr class="separator:af79493c6c07a3eb2b3a27712221b66b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4205a4be15a80494979ec1f19a66b21a"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a4205a4be15a80494979ec1f19a66b21a">extract_shape</a> (const ITensorInfo *data)</td></tr>
+<tr class="separator:a4205a4be15a80494979ec1f19a66b21a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7f0e5491e0f43e371f7db047a03dd4c"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ae7f0e5491e0f43e371f7db047a03dd4c">extract_shape</a> (const TensorShape *data)</td></tr>
 <tr class="separator:ae7f0e5491e0f43e371f7db047a03dd4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29fee5f196a5154a39526b7b88594059"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a29fee5f196a5154a39526b7b88594059">extract_shape</a> (TensorShape *data)</td></tr>
+<tr class="separator:a29fee5f196a5154a39526b7b88594059"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acedb0877d41f2ae0591a2d4e84318140"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#acedb0877d41f2ae0591a2d4e84318140">calculate_unstack_shape</a> (TensorShape input_shape, unsigned int axis)</td></tr>
 <tr class="memdesc:acedb0877d41f2ae0591a2d4e84318140"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the unstack shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#acedb0877d41f2ae0591a2d4e84318140">More...</a><br /></td></tr>
 <tr class="separator:acedb0877d41f2ae0591a2d4e84318140"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4acdd230226c5888e773bbac3be74941"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a4acdd230226c5888e773bbac3be74941"><td class="memTemplItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a4acdd230226c5888e773bbac3be74941">calculate_depth_concatenate_shape</a> (const std::vector&lt; T * &gt; &amp;inputs_vector)</td></tr>
-<tr class="memdesc:a4acdd230226c5888e773bbac3be74941"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the depth concatenate output shape of a vector of tensors.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a4acdd230226c5888e773bbac3be74941">More...</a><br /></td></tr>
-<tr class="separator:a4acdd230226c5888e773bbac3be74941"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a333e4da262f8d985e8f9ab2c39a9c3f3"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a333e4da262f8d985e8f9ab2c39a9c3f3"><td class="memTemplItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">calculate_width_concatenate_shape</a> (const std::vector&lt; T * &gt; &amp;inputs_vector)</td></tr>
-<tr class="memdesc:a333e4da262f8d985e8f9ab2c39a9c3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the width concatenate output shape of a vector of tensors.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a333e4da262f8d985e8f9ab2c39a9c3f3">More...</a><br /></td></tr>
-<tr class="separator:a333e4da262f8d985e8f9ab2c39a9c3f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6100aeb494088632647c3e0d639c99ab"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a6100aeb494088632647c3e0d639c99ab"><td class="memTemplItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a6100aeb494088632647c3e0d639c99ab">calculate_concatenate_shape</a> (const std::vector&lt; T * &gt; &amp;input, size_t axis)</td></tr>
+<tr class="memdesc:a6100aeb494088632647c3e0d639c99ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the concatenate output shape of the concatenate operation along a single axis.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a6100aeb494088632647c3e0d639c99ab">More...</a><br /></td></tr>
+<tr class="separator:a6100aeb494088632647c3e0d639c99ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32c692ab35f40f9ce6e27e1f4016e921"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a32c692ab35f40f9ce6e27e1f4016e921">compute_stack_shape</a> (const ITensorInfo &amp;a, unsigned int axis, unsigned int num_tensors)</td></tr>
 <tr class="memdesc:a32c692ab35f40f9ce6e27e1f4016e921"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the stack output shape of a tensor.  <a href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a32c692ab35f40f9ce6e27e1f4016e921">More...</a><br /></td></tr>
 <tr class="separator:a32c692ab35f40f9ce6e27e1f4016e921"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -280,7 +277,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml">utils</a></li><li class="navelem"><a class="el" href="dir_cab437ca4f6ec1fbc573ae83f91b2654.xhtml">misc</a></li><li class="navelem"><a class="el" href="_shape_calculator_8h.xhtml">ShapeCalculator.h</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:55 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,37 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_pyramid.xhtml" title="Interface for pyramid data&#45;object." alt="" coords="5,31,83,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_pyramid.xhtml" title="Basic implementation of the OpenCL pyramid interface." alt="" coords="131,5,221,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_pyramid.xhtml" title="Basic implementation of the pyramid interface." alt="" coords="139,56,213,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_node.xhtml" title="Node interface." alt="" coords="5,841,64,868"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_activation_layer_node.xhtml" title="Activation Layer node." alt="" coords="182,5,337,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml" title="Batch Normalization Layer node." alt="" coords="151,56,368,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1_bounding_box_transform_layer_node.xhtml" title="Bounding Box Transform Layer node." alt="" coords="140,107,379,133"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1_channel_shuffle_layer_node.xhtml" title="Channel Shuffle Layer node." alt="" coords="166,157,353,184"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1_concatenate_layer_node.xhtml" title="Concatenation Layer node." alt="" coords="173,208,346,235"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1graph_1_1_const_node.xhtml" title="Const node." alt="" coords="213,259,306,285"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml" title="Convolution Layer node." alt="" coords="176,309,343,336"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1graph_1_1_deconvolution_layer_node.xhtml" title="Deconvolution Layer node." alt="" coords="168,360,351,387"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml" title="Depthwise Convolution Layer node." alt="" coords="143,411,375,437"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml" title="DetectionOutput Layer node." alt="" coords="161,461,358,488"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1graph_1_1_dummy_node.xhtml" title="Dummy Layer node." alt="" coords="206,512,313,539"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml" title="Eltwise Layer node." alt="" coords="192,563,327,589"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml" title="Flatten Layer node." alt="" coords="192,613,327,640"/>
+<area shape="rect" id="node15" href="$classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml" title="Fully Connected Layer node." alt="" coords="166,664,353,691"/>
+<area shape="rect" id="node16" href="$classarm__compute_1_1graph_1_1_fused_convolution_batch_normalization_node.xhtml" title="Batch Normalization node." alt="" coords="112,715,407,741"/>
+<area shape="rect" id="node17" href="$classarm__compute_1_1graph_1_1_generate_proposals_layer_node.xhtml" title="Generate Proposals Layer node." alt="" coords="153,765,366,792"/>
+<area shape="rect" id="node18" href="$classarm__compute_1_1graph_1_1_input_node.xhtml" title="Input Layer node." alt="" coords="215,816,303,843"/>
+<area shape="rect" id="node19" href="$classarm__compute_1_1graph_1_1_normalization_layer_node.xhtml" title="Normalization Layer node." alt="" coords="169,867,349,893"/>
+<area shape="rect" id="node20" href="$classarm__compute_1_1graph_1_1_normalize_planar_y_u_v_layer_node.xhtml" title="Batch Normalization Layer node." alt="" coords="148,917,371,944"/>
+<area shape="rect" id="node21" href="$classarm__compute_1_1graph_1_1_output_node.xhtml" title="Output Layer node." alt="" coords="209,968,309,995"/>
+<area shape="rect" id="node22" href="$classarm__compute_1_1graph_1_1_pad_layer_node.xhtml" title="Pad Layer node." alt="" coords="202,1019,317,1045"/>
+<area shape="rect" id="node23" href="$classarm__compute_1_1graph_1_1_permute_layer_node.xhtml" title="Permute Layer node." alt="" coords="186,1069,333,1096"/>
+<area shape="rect" id="node24" href="$classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml" title="Pooling Layer node." alt="" coords="191,1120,328,1147"/>
+<area shape="rect" id="node25" href="$classarm__compute_1_1graph_1_1_prior_box_layer_node.xhtml" title="PriorBox Layer node." alt="" coords="187,1171,331,1197"/>
+<area shape="rect" id="node26" href="$classarm__compute_1_1graph_1_1_reorg_layer_node.xhtml" title="Reorg Layer node." alt="" coords="196,1221,323,1248"/>
+<area shape="rect" id="node27" href="$classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml" title="Reshape Layer node." alt="" coords="187,1272,332,1299"/>
+<area shape="rect" id="node28" href="$classarm__compute_1_1graph_1_1_resize_layer_node.xhtml" title="Resize Layer node." alt="" coords="194,1323,325,1349"/>
+<area shape="rect" id="node29" href="$classarm__compute_1_1graph_1_1_r_o_i_align_layer_node.xhtml" title="ROI Align node." alt="" coords="188,1373,331,1400"/>
+<area shape="rect" id="node30" href="$classarm__compute_1_1graph_1_1_slice_layer_node.xhtml" title="Slice Layer node." alt="" coords="199,1424,320,1451"/>
+<area shape="rect" id="node31" href="$classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml" title="Softmax Layer node." alt="" coords="187,1475,332,1501"/>
+<area shape="rect" id="node32" href="$classarm__compute_1_1graph_1_1_split_layer_node.xhtml" title="Split Layer node." alt="" coords="200,1525,319,1552"/>
+<area shape="rect" id="node33" href="$classarm__compute_1_1graph_1_1_stack_layer_node.xhtml" title="Stack Layer node." alt="" coords="196,1576,323,1603"/>
+<area shape="rect" id="node34" href="$classarm__compute_1_1graph_1_1_upsample_layer_node.xhtml" title="Upsample Layer node." alt="" coords="181,1627,337,1653"/>
+<area shape="rect" id="node35" href="$classarm__compute_1_1graph_1_1_y_o_l_o_layer_node.xhtml" title="YOLO Layer node." alt="" coords="197,1677,321,1704"/>
 </map>

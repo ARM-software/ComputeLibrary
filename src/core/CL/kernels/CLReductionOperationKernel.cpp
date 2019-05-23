@@ -47,7 +47,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    if(input->num_channels() == 1)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 2, DataType::F32);
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(op == ReductionOperation::SUM_SQUARE && input->data_type() == DataType::QASYMM8, "Not supported reduction operation for QASYMM8");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 3, "Unsupported reduction axis");
@@ -55,7 +62,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
 
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         if(op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8, "Not supported operation for QASYMM8");
@@ -78,7 +84,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     output_shape.set(axis, 1);
     const bool is_arg_min_max   = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     DataType   output_data_type = is_arg_min_max ? DataType::U32 : input->data_type();
-    auto_init_if_empty(*output, output_shape, 1, output_data_type, input->quantization_info());
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_data_type(output_data_type).reset_padding().set_is_resizable(true));
 
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -161,6 +167,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MAX, "-DARG_MAX");
     build_opts.add_option_if(op == ReductionOperation::ARG_IDX_MIN, "-DARG_MIN");
     build_opts.add_option_if(op == ReductionOperation::PROD, "-DPROD");
+    build_opts.add_option_if(input->info()->num_channels() == 2, "-DCOMPLEX");
 
     switch(op)
     {

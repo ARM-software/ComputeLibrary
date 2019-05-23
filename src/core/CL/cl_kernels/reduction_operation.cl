@@ -307,6 +307,10 @@ __kernel void reduction_operation_z(
     VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
     res = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
 
+#if defined(COMPLEX)
+    VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
+    res1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, 0)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+#endif // defined(COMPLEX)
 #if defined(SUM_SQUARE)
     res *= res;
 #endif // defined(SUM_SQUARE)
@@ -319,6 +323,11 @@ __kernel void reduction_operation_z(
     {
         VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
         in = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+
+#if defined(COMPLEX)
+        VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16)
+        in1 = CONVERT(vload16(0, (__global DATA_TYPE *)tensor3D_offset(&input, 8, 0, z)), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 16));
+#endif // defined(COMPLEX)
 
 #if defined(ARG_MAX)
         uint16 cond_conv = CONVERT(isgreater(in, res), uint16);
@@ -334,8 +343,11 @@ __kernel void reduction_operation_z(
 #endif // defined(SUM_SQUARE)
 #if defined(PROD)
         res *= in;
-#else  //!defined(PROD)
+#else //!defined(PROD)
         res += in;
+#if defined(COMPLEX)
+        res1 += in1;
+#endif // defined(COMPLEX)
 #endif //defined(PROD)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
     }
@@ -348,6 +360,9 @@ __kernel void reduction_operation_z(
     res /= DEPTH;
 #endif // defined(MEAN)
     vstore16(CONVERT(res, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)output.ptr);
+#if defined(COMPLEX)
+    vstore16(CONVERT(res1, VEC_DATA_TYPE(DATA_TYPE, 16)), 0, (__global DATA_TYPE *)tensor3D_offset(&output, 8, 0, 0));
+#endif // defined(COMPLEX)
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif /* defined(DEPTH) */

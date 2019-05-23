@@ -3,7 +3,7 @@ var classarm__compute_1_1graph_1_1_tensor =
     [ "Tensor", "classarm__compute_1_1graph_1_1_tensor.xhtml#add953d1e94e855a536231a2fde924251", null ],
     [ "accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a761495426edf3b875f67a8f4c3a199b5", null ],
     [ "bind_edge", "classarm__compute_1_1graph_1_1_tensor.xhtml#a37a56fcfb4c6a506d63f11d88e0981c0", null ],
-    [ "bound_edges", "classarm__compute_1_1graph_1_1_tensor.xhtml#a162e0616033f717ba5dbbe9d3a47219b", null ],
+    [ "bound_edges", "classarm__compute_1_1graph_1_1_tensor.xhtml#aa3dc08c2e62f20a8fbfbcc46c6b4cb68", null ],
     [ "call_accessor", "classarm__compute_1_1graph_1_1_tensor.xhtml#a88d65b04d950e6aba147624fcd308b34", null ],
     [ "desc", "classarm__compute_1_1graph_1_1_tensor.xhtml#a0d3608f94078b90ab1ff9e9465d4ed3b", null ],
     [ "desc", "classarm__compute_1_1graph_1_1_tensor.xhtml#ae0a7a8139c09a2e0dbbaeb547fcbe9ea", null ],

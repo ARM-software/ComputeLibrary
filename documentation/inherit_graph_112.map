@@ -1,5 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1utils_1_1_i_image_loader.xhtml" title="Image loader interface." alt="" coords="5,31,115,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1utils_1_1_j_p_e_g_loader.xhtml" title="Class to load the content of a JPEG file into an Image." alt="" coords="163,5,257,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml" title="PPM Image loader concrete implementation." alt="" coords="163,56,257,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1logging_1_1_i_decorator.xhtml" title="Log message decorator interface." alt="" coords="5,81,95,108"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1logging_1_1_date_decorator.xhtml" title="Date Decorator." alt="" coords="155,5,273,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1logging_1_1_log_level_decorator.xhtml" title="Log Level Decorator." alt="" coords="143,56,285,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1logging_1_1_string_decorator.xhtml" title="String Decorator." alt="" coords="152,107,276,133"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml" title="Thread ID Decorator." alt="" coords="143,157,285,184"/>
 </map>

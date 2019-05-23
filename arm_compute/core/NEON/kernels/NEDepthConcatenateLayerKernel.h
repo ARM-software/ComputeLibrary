@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,17 +76,14 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
-    using DepthConcatFunction = void(const ITensor *in, ITensor *out, std::pair<int, int> start_xy, int depth_offset, const Window &window);
+    using DepthConcatFunction = void(const ITensor *in, ITensor *out, int depth_offset, const Window &window);
 
 private:
     DepthConcatFunction *_func;
     const ITensor       *_input;
     ITensor             *_output;
-    int                  _top_bottom;
-    int                  _left_right;
     unsigned int         _depth_offset;
 };
 } // namespace arm_compute

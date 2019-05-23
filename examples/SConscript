@@ -58,13 +58,13 @@ for file in Glob("./graph_*.cpp"):
 
     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
-        prog = install_bin(prog)
         Depends(prog, graph_dependency)
+        prog = install_bin(prog)
     else:
         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
-        prog = install_bin(prog)
         Depends(prog, graph_dependency)
+        prog = install_bin(prog)
     alias = examples_env.Alias(example, prog)
     Default(alias)
 
@@ -72,8 +72,8 @@ if env['opencl'] and env['neon']:
     for file in Glob("./neoncl_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = examples_libs + arm_compute_libs)
-        prog = install_bin(prog)
         Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
@@ -81,8 +81,8 @@ if env['opencl']:
     for file in Glob("./cl_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_CL'], LIBS = examples_libs + arm_compute_libs)
-        prog = install_bin(prog)
         Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
@@ -90,8 +90,8 @@ if env['neon']:
     for file in Glob("./neon_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils], LIBS = examples_libs + arm_compute_libs)
-        prog = install_bin(prog)
         Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
@@ -99,8 +99,8 @@ if env['gles_compute']:
     for file in Glob("./gc_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = examples_libs + arm_compute_libs)
-        prog = install_bin(prog)
         Depends(prog, arm_compute_dependency)
+        prog = install_bin(prog)
         alias = examples_env.Alias(example, prog)
         Default(alias)
 
@@ -111,12 +111,12 @@ for file in Glob("#3rdparty/examples/graph_*.cpp"):
 
     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
         prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
-        prog = install_bin(prog)
         Depends(prog, graph_dependency)
+        prog = install_bin(prog)
     else:
         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
         prog = examples_env.Program(example, [examples_env.Object(source=file, target=example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
-        prog = install_bin(prog)
         Depends(prog, graph_dependency)
+        prog = install_bin(prog)
     alias = examples_env.Alias(example, prog)
     Default(alias)

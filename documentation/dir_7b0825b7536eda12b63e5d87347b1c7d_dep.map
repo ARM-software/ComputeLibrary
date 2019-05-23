@@ -1,14 +1,14 @@
 <map id="arm_compute/core/utils" name="arm_compute/core/utils">
 <area shape="rect" id="node2" href="dir_109374e99be0205441d869eba1a88b2d.xhtml" title="helpers" alt="" coords="163,63,235,111"/>
 <area shape="rect" id="node5" href="dir_cab437ca4f6ec1fbc573ae83f91b2654.xhtml" title="misc" alt="" coords="163,159,235,207"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000031_000024.xhtml" title="1" alt="" coords="193,133,203,147"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000034_000027.xhtml" title="1" alt="" coords="193,133,203,147"/>
 <area shape="rect" id="node3" href="dir_4165fcd8206cc52fde421ae1f1275b40.xhtml" title="io" alt="" coords="259,159,331,207"/>
 <area shape="rect" id="node4" href="dir_e575b855d3e83e3374bc2a6f9bf89d98.xhtml" title="logging" alt="" coords="259,63,331,111"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000011_000032.xhtml" title="1" alt="" coords="298,133,308,148"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000014_000035.xhtml" title="1" alt="" coords="298,133,308,148"/>
 <area shape="rect" id="node7" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="247,255,319,303"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000011_000132.xhtml" title="3" alt="" coords="334,243,343,257"/>
-<area shape="rect" id="edge4-headlabel" href="dir_000024_000031.xhtml" title="1" alt="" coords="195,122,204,137"/>
-<area shape="rect" id="edge5-headlabel" href="dir_000024_000132.xhtml" title="1" alt="" coords="252,228,261,243"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000014_000141.xhtml" title="3" alt="" coords="334,243,343,257"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000027_000034.xhtml" title="1" alt="" coords="195,122,204,137"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000027_000141.xhtml" title="1" alt="" coords="252,228,261,243"/>
 <area shape="rect" id="node6" href="dir_4dbf711d3d3ef9d1292a532e836709c1.xhtml" title="quantization" alt="" coords="37,63,139,111"/>
 <area shape="rect" id="clust2" href="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml" alt="" coords="27,52,437,217"/>
 <area shape="rect" id="clust1" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="16,16,448,228"/>

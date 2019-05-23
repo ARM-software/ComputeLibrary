@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,8 @@ class GCAbsDiffExample : public Example
 public:
     bool do_setup(int argc, char **argv) override
     {
-        PPMLoader ppm1, ppm2;
+        PPMLoader ppm1{};
+        PPMLoader ppm2{};
 
         GCScheduler::get().default_init();
         if(argc < 2)

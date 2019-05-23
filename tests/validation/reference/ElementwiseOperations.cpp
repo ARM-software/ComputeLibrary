@@ -124,7 +124,9 @@ struct BroadcastUnroll<0>
 template <typename T>
 SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy)
 {
-    Coordinates id_src1, id_src2, id_dst;
+    Coordinates id_src1{};
+    Coordinates id_src2{};
+    Coordinates id_dst{};
 
     BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
 
@@ -140,7 +142,9 @@ SimpleTensor<uint8_t> arithmetic_operation(ArithmeticOperation op, const SimpleT
         SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
         SimpleTensor<float> dst_tmp(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst.data_type());
 
-        Coordinates id_src1, id_src2, id_dst;
+        Coordinates id_src1{};
+        Coordinates id_src2{};
+        Coordinates id_dst{};
 
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1_tmp, src2_tmp, dst_tmp, convert_policy, id_src1, id_src2, id_dst);
 
@@ -150,7 +154,9 @@ SimpleTensor<uint8_t> arithmetic_operation(ArithmeticOperation op, const SimpleT
     else
     {
         // DataType::U8
-        Coordinates id_src1, id_src2, id_dst;
+        Coordinates id_src1{};
+        Coordinates id_src2{};
+        Coordinates id_dst{};
 
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
 

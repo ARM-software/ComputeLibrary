@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,8 @@ class ICLTensor;
 
 /** Basic function to execute concatenate tensors along x axis. This function calls the following kernel:
  *
+ * @deprecated This function is deprecated and will be removed in release 19.08
+ *
  * -# @ref CLWidthConcatenateLayerKernel
  * -# @ref CLWidthConcatenate2TensorsKernel (if there are exactly 2 input tensors)
  * -# @ref CLWidthConcatenate4TensorsKernel (if there are exactly 4 input tensors)
@@ -77,10 +79,10 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLWidthConcatenateLayerKernel[]> _concat_kernels_vector;
-    CLWidthConcatenate2TensorsKernel                 _concat_x2_kernel;
-    CLWidthConcatenate4TensorsKernel                 _concat_x4_kernel;
-    unsigned int                                     _num_inputs;
+    std::vector<CLWidthConcatenateLayerKernel> _concat_kernels_vector;
+    CLWidthConcatenate2TensorsKernel           _concat_x2_kernel;
+    CLWidthConcatenate4TensorsKernel           _concat_x4_kernel;
+    unsigned int                               _num_inputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLWIDTHCONCATENATELAYER_H__ */

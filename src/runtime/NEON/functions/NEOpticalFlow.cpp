@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,10 +74,10 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
 
     const float pyr_scale = old_pyramid->info()->scale();
 
-    _func_scharr    = arm_compute::support::cpp14::make_unique<NEScharr3x3[]>(_num_levels);
-    _kernel_tracker = arm_compute::support::cpp14::make_unique<NELKTrackerKernel[]>(_num_levels);
-    _scharr_gx      = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_levels);
-    _scharr_gy      = arm_compute::support::cpp14::make_unique<Tensor[]>(_num_levels);
+    _func_scharr.reserve(_num_levels);
+    _kernel_tracker.reserve(_num_levels);
+    _scharr_gx.reserve(_num_levels);
+    _scharr_gy.reserve(_num_levels);
 
     _old_points_internal = LKInternalKeypointArray(old_points->num_values());
     _new_points_internal = LKInternalKeypointArray(old_points->num_values());
@@ -95,25 +95,34 @@ void NEOpticalFlow::configure(const Pyramid *old_pyramid, const Pyramid *new_pyr
 
         TensorInfo tensor_info(TensorShape(width_ith, height_ith), Format::S16);
 
-        _scharr_gx[i].allocator()->init(tensor_info);
-        _scharr_gy[i].allocator()->init(tensor_info);
+        auto scharr_gx = support::cpp14::make_unique<Tensor>();
+        auto scharr_gy = support::cpp14::make_unique<Tensor>();
+        scharr_gx->allocator()->init(tensor_info);
+        scharr_gy->allocator()->init(tensor_info);
 
         // Manage intermediate buffers
-        _memory_group.manage(_scharr_gx.get() + i);
-        _memory_group.manage(_scharr_gy.get() + i);
+        _memory_group.manage(scharr_gx.get());
+        _memory_group.manage(scharr_gy.get());
 
         // Init Scharr kernel
-        _func_scharr[i].configure(old_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i, border_mode, constant_border_value);
+        auto func_scharr = support::cpp14::make_unique<NEScharr3x3>();
+        func_scharr->configure(old_ith_input, scharr_gx.get(), scharr_gy.get(), border_mode, constant_border_value);
 
         // Init Lucas-Kanade kernel
-        _kernel_tracker[i].configure(old_ith_input, new_ith_input, _scharr_gx.get() + i, _scharr_gy.get() + i,
-                                     old_points, new_points_estimates, new_points,
-                                     &_old_points_internal, &_new_points_internal,
-                                     termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
-                                     i, _num_levels, pyr_scale);
+        auto kernel_tracker = support::cpp14::make_unique<NELKTrackerKernel>();
+        kernel_tracker->configure(old_ith_input, new_ith_input, scharr_gx.get(), scharr_gy.get(),
+                                  old_points, new_points_estimates, new_points,
+                                  &_old_points_internal, &_new_points_internal,
+                                  termination, use_initial_estimate, epsilon, num_iterations, window_dimension,
+                                  i, _num_levels, pyr_scale);
 
-        _scharr_gx[i].allocator()->allocate();
-        _scharr_gy[i].allocator()->allocate();
+        scharr_gx->allocator()->allocate();
+        scharr_gy->allocator()->allocate();
+
+        _func_scharr.emplace_back(std::move(func_scharr));
+        _kernel_tracker.emplace_back(std::move(kernel_tracker));
+        _scharr_gx.emplace_back(std::move(scharr_gx));
+        _scharr_gy.emplace_back(std::move(scharr_gy));
     }
 }
 
@@ -121,16 +130,14 @@ void NEOpticalFlow::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(_num_levels == 0, "Unconfigured function");
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     for(unsigned int level = _num_levels; level > 0; --level)
     {
         // Run Scharr kernel
-        _func_scharr[level - 1].run();
+        _func_scharr[level - 1].get()->run();
 
         // Run Lucas-Kanade kernel
-        NEScheduler::get().schedule(_kernel_tracker.get() + level - 1, Window::DimX);
+        NEScheduler::get().schedule(_kernel_tracker[level - 1].get(), Window::DimX);
     }
-
-    _memory_group.release();
 }

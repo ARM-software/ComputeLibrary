@@ -75,13 +75,13 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                                 _memory_group;
-    std::unique_ptr<CLTensor[]>                   _results_vector{ nullptr };
-    std::unique_ptr<CLReductionOperationKernel[]> _reduction_kernels_vector{ nullptr };
-    std::unique_ptr<CLFillBorderKernel[]>         _border_handlers_vector{ nullptr };
-    unsigned int                                  _num_of_stages;
-    unsigned int                                  _reduction_axis;
-    bool                                          _is_serial;
+    CLMemoryGroup                           _memory_group;
+    std::vector<CLTensor>                   _results_vector;
+    std::vector<CLReductionOperationKernel> _reduction_kernels_vector;
+    std::vector<CLFillBorderKernel>         _border_handlers_vector;
+    unsigned int                            _num_of_stages;
+    unsigned int                            _reduction_axis;
+    bool                                    _is_serial;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLREDUCTIONOPERATION_H__ */

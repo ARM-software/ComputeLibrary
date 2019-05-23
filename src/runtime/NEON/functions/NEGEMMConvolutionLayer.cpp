@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,16 +90,17 @@ void NEConvolutionLayerReshapeWeights::run()
 }
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _activationlayer_function(),
-      _add_bias_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false),
-      _skip_im2col(false), _skip_col2im(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
+    : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _col2im_kernel(), _activationlayer_function(), _add_bias_kernel(),
+      _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _skip_im2col(false),
+      _skip_col2im(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
-void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, int gemm_3d_depth)
+void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const ActivationLayerInfo &act_info, int gemm_3d_depth)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), output->info(), gemm_3d_depth, _skip_im2col));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_mm(input->info(), weights->info(), biases == nullptr ? nullptr : biases->info(), output == nullptr ? nullptr : output->info(), act_info, gemm_3d_depth,
+                                           _skip_im2col));
 
     const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                          gemm_3d_depth, _skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
@@ -114,7 +115,41 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
         input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
-        _mm_gemmlowp.configure(input, weights, nullptr, output, gemm_info);
+        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input_quantization_info : output->info()->quantization_info();
+
+        float multiplier = input_quantization_info.scale * weights->info()->quantization_info().scale / output_quant_info.scale;
+        int   output_multiplier;
+        int   output_shift;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        // Merge activation with output stage
+        int min_activation = 0;
+        int max_activation = 0;
+
+        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                                                                 };
+        if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
+        {
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+
+            _is_activationlayer_enabled = false;
+        }
+
+        GEMMLowpOutputStageInfo output_info;
+        output_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        output_info.gemmlowp_offset     = output_quant_info.offset;
+        output_info.gemmlowp_multiplier = output_multiplier;
+        output_info.gemmlowp_shift      = output_shift;
+        output_info.gemmlowp_min_bound  = min_activation;
+        output_info.gemmlowp_max_bound  = max_activation;
+
+        _mm_gemmlowp.configure(input, weights, biases, output, GEMMInfo(false, false, true, gemm_3d_depth, _skip_im2col, false, output_info));
 
         // Revert back QuantizatioInfo as input and weights could be used in other convolution layers
         input->info()->set_quantization_info(input_quantization_info);
@@ -127,9 +162,11 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     }
 }
 
-Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth, bool skip_im2col)
+Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const ActivationLayerInfo &act_info,
+                                           int gemm_3d_depth, bool skip_im2col)
 {
-    const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+    const bool is_quantized          = is_data_type_quantized_asymmetric(input->data_type());
+    const bool is_activation_enabled = act_info.enabled();
 
     const GEMMInfo &gemm_info = GEMMInfo(false, false, true /* Reshape weights only for the first run */,
                                          gemm_3d_depth, skip_im2col /* Reinterpret the input as 3D if im2col is skipped */);
@@ -145,8 +182,40 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         input_qa->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
         weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
+        const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input_quantization_info : output->quantization_info();
+
+        float multiplier = input_quantization_info.scale * weights->quantization_info().scale / output_quant_info.scale;
+        int   output_multiplier;
+        int   output_shift;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        // Merge activation with output stage
+        int min_activation = 0;
+        int max_activation = 0;
+
+        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
+                                                                                 };
+        if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
+        {
+            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+
+            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
+            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
+        }
+
+        GEMMLowpOutputStageInfo output_info;
+        output_info.type                = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        output_info.gemmlowp_offset     = output_quant_info.offset;
+        output_info.gemmlowp_multiplier = output_multiplier;
+        output_info.gemmlowp_shift      = output_shift;
+        output_info.gemmlowp_min_bound  = min_activation;
+        output_info.gemmlowp_max_bound  = max_activation;
+
         // Perform validation step on GEMMLowp
-        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), nullptr, output, gemm_info);
+        return NEGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), biases, output, GEMMInfo(false, false, true, gemm_3d_depth, skip_im2col, false, output_info));
     }
     else
     {
@@ -155,19 +224,18 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
     }
 }
 
-Status NEGEMMConvolutionLayer::validate_gemm3d(DataType data_type, int gemm_3d_depth, bool skip_im2col)
+Status NEGEMMConvolutionLayer::validate_gemm3d(const ITensorInfo *input_info, const ActivationLayerInfo &act_info, int gemm_3d_depth, bool skip_im2col)
 {
-    const bool         is_quantized          = is_data_type_quantized_asymmetric(data_type);
-    const DataType     output_gemm_data_type = is_quantized ? DataType::S32 : data_type;
-    const unsigned int mult_y                = skip_im2col ? 1U : gemm_3d_depth;
-    const unsigned int mult_z                = skip_im2col ? gemm_3d_depth : 1U;
+    const DataType     data_type = input_info->data_type();
+    const unsigned int mult_y    = skip_im2col ? 1U : gemm_3d_depth;
+    const unsigned int mult_z    = skip_im2col ? gemm_3d_depth : 1U;
 
     // Set dummy tensor shapes for the validation
-    const TensorInfo dummy_input_info(TensorShape(4U, 4U * mult_y, 1U * mult_z), 1, data_type);
+    const TensorInfo dummy_input_info(TensorShape(4U, 4U * mult_y, 1U * mult_z), 1, data_type, input_info->quantization_info());
     const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, data_type);
-    const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, output_gemm_data_type);
+    const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, data_type, input_info->quantization_info());
 
-    return validate_mm(&dummy_input_info, &dummy_weights_info, &dummy_output_info, gemm_3d_depth, skip_im2col);
+    return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, gemm_3d_depth, skip_im2col);
 }
 
 void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
@@ -202,9 +270,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     _append_bias                = (biases != nullptr) && (!_is_quantized);
     _is_activationlayer_enabled = act_info.enabled();
 
-    const ITensor *gemm_input_to_use         = input;
-    ITensor       *gemm_output_to_use        = output;
-    ITensor       *gemm_output_staged_to_use = output;
+    const ITensor *gemm_input_to_use  = input;
+    ITensor       *gemm_output_to_use = output;
 
     // Get convolved dimensions
     unsigned int conv_w = 0;
@@ -219,7 +286,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Check if GEMM3D is supported
     if(data_layout == DataLayout::NHWC)
     {
-        _skip_col2im = bool(validate_gemm3d(input->info()->data_type(), conv_h, true));
+        _skip_col2im = bool(validate_gemm3d(input->info(), act_info, conv_h, true));
         // If not supported, we need to perform im2col and col2im (or reshape layer)
         if(!_skip_col2im)
         {
@@ -262,26 +329,17 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
-    if(!_skip_col2im || _is_quantized)
+    if(!_skip_col2im)
     {
-        // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
-        const DataType gemm_data_type = _is_quantized ? DataType::S32 : data_type;
-        TensorShape    shape_gemm;
+        TensorShape shape_gemm;
 
-        if(_is_quantized && _skip_col2im)
-        {
-            shape_gemm = output->info()->tensor_shape();
-        }
-        else
-        {
-            // Calculate GEMM output shape
-            shape_gemm = _im2col_output.info()->tensor_shape();
-            shape_gemm.set(0, mat_weights_cols);
-            shape_gemm.set(1, conv_w * conv_h);
-        }
+        // Calculate GEMM output shape
+        shape_gemm = _im2col_output.info()->tensor_shape();
+        shape_gemm.set(0, mat_weights_cols);
+        shape_gemm.set(1, conv_w * conv_h);
 
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
-        TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
+        TensorInfo info_gemm(shape_gemm, 1, data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info()).set_data_layout(input->info()->data_layout());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
@@ -293,49 +351,11 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Configure GEMM
     // In case we need to skip col2im, GEMM3D (gemm_3d_depth != 0) must be called in order to avoid reshaping the output matrix
     const unsigned int gemm_3d_depth = _skip_col2im ? conv_h : 0;
-    configure_mm(gemm_input_to_use, &_weights_reshaped, gemm_output_to_use, gemm_3d_depth);
+    configure_mm(gemm_input_to_use, &_weights_reshaped, biases, gemm_output_to_use, act_info, gemm_3d_depth);
 
     if(!_skip_im2col)
     {
         _im2col_output.allocator()->allocate();
-    }
-
-    // Configure output stage for quantized case
-    if(_is_quantized)
-    {
-        const QuantizationInfo input_quant_info  = input->info()->quantization_info();
-        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input_quant_info : output->info()->quantization_info();
-
-        float multiplier = input_quant_info.scale * weights->info()->quantization_info().scale / output_quant_info.scale;
-        int   output_multiplier, output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
-        if(!_skip_col2im)
-        {
-            _memory_group.manage(&_tmp_output);
-            gemm_output_staged_to_use = &_tmp_output;
-        }
-
-        // Merge activation with output stage
-        int min_activation = 0;
-        int max_activation = 0;
-
-        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
-                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
-                                                                                 };
-        if(_is_activationlayer_enabled && supported_acts.count(act_info.activation()) != 0)
-        {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
-
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
-
-            _is_activationlayer_enabled = false;
-        }
-
-        _gemmlowp_output_stage.configure(gemm_output_to_use, biases, gemm_output_staged_to_use, output_multiplier, output_shift, output_quant_info.offset, min_activation, max_activation);
     }
 
     if(!_skip_col2im)
@@ -343,12 +363,12 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         if(_data_layout == DataLayout::NCHW)
         {
             // Configure col2im
-            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h));
+            _col2im_kernel.configure(gemm_output_to_use, output, Size2D(conv_w, conv_h));
         }
         else
         {
             // Configure reshape layer
-            _reshape_layer.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output);
+            _reshape_layer.configure(gemm_output_to_use, output);
         }
     }
 
@@ -394,11 +414,13 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const unsigned int kernel_width  = weights->dimension(idx_width);
     const unsigned int kernel_height = weights->dimension(idx_height);
 
-    TensorInfo         im2col_reshaped_info, info_gemm, tmp_info, weights_reshaped_info;
-    const ITensorInfo *gemm_input_to_use         = input;
-    const ITensorInfo *gemm_output_to_use        = output;
-    const ITensorInfo *gemm_output_staged_to_use = output;
-    const ITensorInfo *weights_to_use            = weights;
+    TensorInfo         im2col_reshaped_info{};
+    TensorInfo         info_gemm{};
+    TensorInfo         tmp_info{};
+    TensorInfo         weights_reshaped_info{};
+    const ITensorInfo *gemm_input_to_use  = input;
+    const ITensorInfo *gemm_output_to_use = output;
+    const ITensorInfo *weights_to_use     = weights;
 
     const bool is_quantized          = is_data_type_quantized_asymmetric(data_type);
     const bool append_bias           = (biases != nullptr) && (!is_quantized);
@@ -420,7 +442,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     bool skip_col2im = false;
     if(data_layout == DataLayout::NHWC)
     {
-        skip_col2im = bool(validate_gemm3d(input->data_type(), conv_h, true));
+        skip_col2im = bool(validate_gemm3d(input, act_info, conv_h, true));
         // If not supported, we need to perform im2col and col2im (or reshape layer)
         if(!skip_col2im)
         {
@@ -431,7 +453,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     if(skip_col2im)
     {
         // If not supported, we need to perform im2col and col2im (or reshape layer)
-        if(!bool(validate_gemm3d(input->data_type(), conv_h, skip_im2col)))
+        if(!bool(validate_gemm3d(input, act_info, conv_h, skip_im2col)))
         {
             skip_im2col = false;
             skip_col2im = false;
@@ -495,68 +517,25 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     // Create temporary GEMM output tensor in case we cannot skip col2im
-    const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
     if(!skip_col2im)
     {
         TensorShape shape_gemm = gemm_input_to_use->tensor_shape();
         shape_gemm.set(0, mat_weights_cols);
         shape_gemm.set(1, conv_w * conv_h);
-        info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type);
+        info_gemm = TensorInfo(shape_gemm, 1, data_type);
     }
     else
     {
-        info_gemm = TensorInfo(output->tensor_shape(), 1, gemm_data_type);
+        info_gemm = TensorInfo(output->tensor_shape(), 1, data_type);
     }
     info_gemm.set_quantization_info(output->quantization_info()).set_data_layout(input->data_layout());
     gemm_output_to_use = &info_gemm;
-
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, gemm_output_to_use, skip_col2im ? conv_h : 0, skip_im2col));
-
-    if(is_quantized)
-    {
-        const QuantizationInfo input_quant_info  = input->quantization_info();
-        const QuantizationInfo output_quant_info = (output->total_size() == 0) ? input_quant_info : output->quantization_info();
-        const float            multiplier        = input_quant_info.scale * weights_to_use->quantization_info().scale / output_quant_info.scale;
-        int                    output_multiplier, output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
-        if(!skip_col2im)
-        {
-            tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
-            tmp_info.set_quantization_info(output->quantization_info()).set_data_layout(data_layout);
-            gemm_output_staged_to_use = &tmp_info;
-        }
-
-        // Merge activation with output stage
-        int min_activation = 0;
-        int max_activation = 0;
-
-        const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
-                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                                   ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU
-                                                                                 };
-
-        if(is_activation_enabled && supported_acts.count(act_info.activation()) != 0)
-        {
-            const int a_const_int = output_quant_info.quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
-            const int b_const_int = output_quant_info.quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
-
-            min_activation = act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU ? output_quant_info.offset : b_const_int;
-            max_activation = act_info.activation() == ActivationLayerInfo::ActivationFunction::RELU ? 255 : a_const_int;
-
-            is_activation_enabled = false;
-        }
-
-        // Validate output stage for quantized case
-        NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(gemm_output_to_use, biases, gemm_output_staged_to_use, min_activation, max_activation);
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(gemm_input_to_use, weights_to_use, biases, gemm_output_to_use, act_info, skip_col2im ? conv_h : 0, skip_im2col));
 
     // Validate Col2Im/ReshapeLayer
     if(!skip_col2im && (data_layout == DataLayout::NCHW))
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
-                                                             output,
-                                                             Size2D(conv_w, conv_h)));
+        ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(gemm_output_to_use, output, Size2D(conv_w, conv_h)));
     }
 
     //Validate Activation Layer
@@ -572,7 +551,7 @@ void NEGEMMConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(!_skip_im2col)
     {
@@ -586,9 +565,6 @@ void NEGEMMConvolutionLayer::run()
     {
         // Run gemmlowp
         _mm_gemmlowp.run();
-
-        // Run output stage
-        _gemmlowp_output_stage.run();
     }
     else
     {
@@ -618,8 +594,6 @@ void NEGEMMConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
-
-    _memory_group.release();
 }
 
 void NEGEMMConvolutionLayer::prepare()

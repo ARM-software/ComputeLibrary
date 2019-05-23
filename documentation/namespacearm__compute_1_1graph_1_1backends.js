@@ -7,6 +7,7 @@ var namespacearm__compute_1_1graph_1_1backends =
     [ "CLNodeValidator", "classarm__compute_1_1graph_1_1backends_1_1_c_l_node_validator.xhtml", null ],
     [ "CLSubTensorHandle", "classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle" ],
     [ "CLTensorHandle", "classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle" ],
+    [ "FusedConvolutionBatchNormalizationFunction", "classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function" ],
     [ "GCDeviceBackend", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_g_c_device_backend" ],
     [ "GCFunctionFactory", "classarm__compute_1_1graph_1_1backends_1_1_g_c_function_factory.xhtml", null ],
     [ "GCNodeValidator", "classarm__compute_1_1graph_1_1backends_1_1_g_c_node_validator.xhtml", null ],

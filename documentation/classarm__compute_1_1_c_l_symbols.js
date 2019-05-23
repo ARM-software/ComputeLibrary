@@ -31,6 +31,7 @@ var classarm__compute_1_1_c_l_symbols =
     [ "clGetPlatformIDs_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aa794227c46c954c6e6684d21af618b00", null ],
     [ "clGetProgramBuildInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a34391377f3991f0a88631cf1b05e3c8b", null ],
     [ "clGetProgramInfo_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a38787d16b9a4ccb79f11c9e807b31f39", null ],
+    [ "clImportMemoryARM_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ac85382870c183f26f792e183ee80e38c", null ],
     [ "clReleaseCommandQueue_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a2cc4ea7d2743d398a26055f062052762", null ],
     [ "clReleaseContext_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aff1103110d2ad3e5fc2a8e0a746059b3", null ],
     [ "clReleaseEvent_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a8f72204edecff30764f23d06c4e4ae20", null ],

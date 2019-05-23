@@ -168,7 +168,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 } // namespace
 
 CLGEMMMatrixMultiplyReshapedKernel::CLGEMMMatrixMultiplyReshapedKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _k(1)
+    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _reinterpret_output_as_3d(false), _k(1), _use_dummy_work_items(false)
 {
 }
 
@@ -184,6 +184,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     _output                   = output;
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
     _k                        = gemm_info.k();
+    _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
 
     // Check if we need to slide the matrix B
     const unsigned int num_dimensions_input0 = _input0->info()->num_dimensions();
@@ -206,6 +207,9 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(lhs_info.interleave, "-DLHS_INTERLEAVE");
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
+    build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
+    build_opts.add_option("-DM=" + support::cpp11::to_string(gemm_info.m()));
+    build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n()));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(lhs_info.k0));
@@ -308,7 +312,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[2]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
-        enqueue(queue, *this, slice, lws_hint());
+        enqueue(queue, *this, slice, lws_hint(), _use_dummy_work_items);
     }
     while(window.slide_window_slice_3D(slice));
 }

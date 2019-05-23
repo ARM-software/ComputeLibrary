@@ -1,6 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_multi_image.xhtml" title="Interface for multi&#45;planar images." alt="" coords="5,31,100,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_image.xhtml" title="Interface for OpenCL multi&#45;planar images." alt="" coords="148,5,259,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_multi_image.xhtml" title="Basic implementation of the multi&#45;planar image interface." alt="" coords="157,56,249,83"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_multi_image.xhtml" title="Basic implementation of the CL multi&#45;planar image interface." alt="" coords="307,5,415,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;." alt="" coords="5,31,107,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_lut_allocator.xhtml" title="Basic implementation of a CL memory LUT allocator." alt="" coords="155,5,269,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_lut_allocator.xhtml" title="Basic implementation of a CPU memory LUT allocator." alt="" coords="163,56,261,83"/>
 </map>

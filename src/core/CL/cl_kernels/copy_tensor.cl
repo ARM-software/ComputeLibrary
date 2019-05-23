@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,7 @@ __kernel void copy_pad_tensor(
 }
 #endif // Compile time constants
 
+#if defined(DATA_TYPE)
 /** Performs a copy of input tensor to the output tensor.
  *
  * @param[in]  in_ptr                            Pointer to the source tensor. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
@@ -103,6 +104,16 @@ __kernel void copy_tensor(
     Tensor3D in  = CONVERT_TO_TENSOR3D_STRUCT(in);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
+#if defined(VEC_SIZE)
+
+#if defined(LAST_ACCESSED_X)
+    // Check if access on width gets out of bounds
+    // If it does then shift access vector to access elements within bounds
+    const int shift = max((int)(get_global_id(0) * VEC_SIZE) - (int)LAST_ACCESSED_X, 0);
+    in.ptr -= shift * in.stride_x;
+    out.ptr -= shift * out.stride_x;
+#endif // defined(LAST_ACCESSED_X)
+
     // Load data
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)in.ptr);
@@ -110,4 +121,8 @@ __kernel void copy_tensor(
     // Store result
     VSTORE(VEC_SIZE)
     (data, 0, (__global DATA_TYPE *)out.ptr);
+#else  // defined(VEC_SIZE)
+    *((__global DATA_TYPE *)(out.ptr)) = *((__global DATA_TYPE *)(in.ptr));
+#endif // defined(VEC_SIZE)
 }
+#endif // defined(DATA_TYPE)

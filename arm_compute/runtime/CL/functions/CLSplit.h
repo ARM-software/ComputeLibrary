@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,9 +68,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ICLTensor *>   _outputs_vector;
-    std::unique_ptr<CLSlice[]> _slice_functions;
-    unsigned int               _num_outputs;
+    std::vector<ICLTensor *> _outputs_vector;
+    std::vector<CLSlice>     _slice_functions;
+    unsigned int             _num_outputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLSPLIT_H__ */

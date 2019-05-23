@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ using namespace utils;
 
 /** Gaussian 3x3 matrix
  */
-const int16_t gaussian3x3[] =
+const std::array<int16_t, 9> gaussian3x3 =
 {
     1, 2, 1,
     2, 4, 2,
@@ -45,7 +45,7 @@ const int16_t gaussian3x3[] =
 
 /** Gaussian 5x5 matrix
  */
-const int16_t gaussian5x5[] =
+const std::array<int16_t, 25> gaussian5x5 =
 {
     1, 4, 6, 4, 1,
     4, 16, 24, 16, 4,
@@ -82,8 +82,8 @@ public:
         dst.allocator()->init(*src.info());
 
         // Apply a Gaussian 3x3 filter to the source image followed by a Gaussian 5x5:
-        conv3x3.configure(&src, &tmp, gaussian3x3, 0 /* Let arm_compute calculate the scale */, BorderMode::UNDEFINED);
-        conv5x5.configure(&tmp, &dst, gaussian5x5, 0 /* Let arm_compute calculate the scale */, BorderMode::UNDEFINED);
+        conv3x3.configure(&src, &tmp, gaussian3x3.data(), 0 /* Let arm_compute calculate the scale */, BorderMode::UNDEFINED);
+        conv5x5.configure(&tmp, &dst, gaussian5x5.data(), 0 /* Let arm_compute calculate the scale */, BorderMode::UNDEFINED);
 
         // Allocate all the images
         src.allocator()->allocate();
@@ -115,7 +115,11 @@ public:
             save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
         }
     }
-    CLImage          src{}, tmp{}, dst{};
+
+private:
+    CLImage          src{};
+    CLImage          tmp{};
+    CLImage          dst{};
     CLConvolution3x3 conv3x3{};
     CLConvolution5x5 conv5x5{};
     std::string      output_filename{};

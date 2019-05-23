@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_UTILS_H__
-#define __ARM_COMPUTE_GRAPH_UTILS_H__
+#ifndef __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__
+#define __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__
 
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
@@ -62,17 +62,17 @@ class CaffePreproccessor : public IPreprocessor
 public:
     /** Default Constructor
      *
-     * @param mean Mean array in RGB ordering
-     * @param scale Scale value
-     * @param bgr  Boolean specifying if the preprocessing should assume BGR format
+     * @param[in] mean  Mean array in RGB ordering
+     * @param[in] bgr   Boolean specifying if the preprocessing should assume BGR format
+     * @param[in] scale Scale value
      */
-    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, float scale = 1.f, bool bgr = true);
+    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, bool bgr = true, float scale = 1.f);
     void preprocess(ITensor &tensor) override;
 
 private:
     std::array<float, 3> _mean;
-    float _scale;
     bool  _bgr;
+    float _scale;
 };
 
 /** TF preproccessor */
@@ -160,7 +160,7 @@ public:
 
 private:
     template <typename T>
-    void access_numpy_tensor(ITensor &tensor);
+    void access_numpy_tensor(ITensor &tensor, T tolerance);
 
     Tensor            _npy_tensor;
     const std::string _filename;
@@ -601,4 +601,4 @@ inline graph::Target set_target_hint(int target)
 } // namespace graph_utils
 } // namespace arm_compute
 
-#endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */
+#endif /* __ARM_COMPUTE_UTILS_GRAPH_UTILS_H__ */

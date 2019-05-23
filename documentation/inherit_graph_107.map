@@ -1,9 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml" title="Graph mutator interface." alt="" coords="5,132,120,159"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml" title="Mutation pass to optimize depth concatenation operations by using sub&#45;tensors." alt="" coords="168,5,391,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1graph_1_1_grouped_convolution_mutator.xhtml" title="Mutation pass to implement/optimize grouped convolutions." alt="" coords="178,56,381,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml" title="Mutation pass to optimize operations that can be performed in&#45;place." alt="" coords="189,107,369,133"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml" title="Mutation pass to fall&#45;back to default execution method." alt="" coords="171,157,387,184"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml" title="Mutation pass to fuss nodes." alt="" coords="206,208,353,235"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml" title="Mutation pass to optimize split operations by using sub&#45;tensors." alt="" coords="179,259,380,285"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1cl__tuner_1_1_i_c_l_l_w_s_list.xhtml" title="Interface for LWS lists." alt="" coords="5,31,95,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list.xhtml" title="Non instantiable base class for LWS combinations that use Index2Cooard mapping." alt="" coords="143,31,229,57"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list_exhaustive.xhtml" title="Exhaustive list of all possible LWS values." alt="" coords="277,5,432,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list_normal.xhtml" title="A subset of LWS values that are either factors of gws when gws[2] &lt; 16 or power of 2." alt="" coords="288,56,421,83"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list_rapid.xhtml" title="A minimal subset of LWS values that only have 1,2 and 4/8." alt="" coords="480,56,601,83"/>
 </map>

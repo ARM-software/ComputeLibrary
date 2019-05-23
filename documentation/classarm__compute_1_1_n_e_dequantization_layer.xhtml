@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -104,28 +104,29 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_dequantizati
 </div><!--header-->
 <div class="contents">
 
-<p>Basic function to simulate a dequantization layer.  
+<p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml">NEDequantizationLayerKernel</a> that dequantizes an input tensor.  
  <a href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_n_e_dequantization_layer_8h_source.xhtml">NEDequantizationLayer.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for NEDequantizationLayer:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_n_e_dequantization_layer__coll__graph.svg" width="183" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classarm__compute_1_1_n_e_dequantization_layer__coll__graph.svg" width="212" height="187"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 <center><span class="legend">[<a target="top" href="graph_legend.xhtml">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3815ed964e16372e0c2769a69e0373de"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#a3815ed964e16372e0c2769a69e0373de">NEDequantizationLayer</a> ()</td></tr>
-<tr class="memdesc:a3815ed964e16372e0c2769a69e0373de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a3815ed964e16372e0c2769a69e0373de">More...</a><br /></td></tr>
-<tr class="separator:a3815ed964e16372e0c2769a69e0373de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a644ff49365300e418f2343f112753b74"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#a644ff49365300e418f2343f112753b74">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *min_max)</td></tr>
-<tr class="memdesc:a644ff49365300e418f2343f112753b74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel.  <a href="#a644ff49365300e418f2343f112753b74">More...</a><br /></td></tr>
-<tr class="separator:a644ff49365300e418f2343f112753b74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
-<tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
-<tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a344e60eb7db895953a942abf16628"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#a83a344e60eb7db895953a942abf16628">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output)</td></tr>
+<tr class="memdesc:a83a344e60eb7db895953a942abf16628"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel.  <a href="#a83a344e60eb7db895953a942abf16628">More...</a><br /></td></tr>
+<tr class="separator:a83a344e60eb7db895953a942abf16628"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml">INESimpleFunctionNoBorder</a></td></tr>
+<tr class="memitem:a0e0883eaf5a047ad7a5eb791dfe3a7f5 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml#a0e0883eaf5a047ad7a5eb791dfe3a7f5">INESimpleFunctionNoBorder</a> ()</td></tr>
+<tr class="memdesc:a0e0883eaf5a047ad7a5eb791dfe3a7f5 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml#a0e0883eaf5a047ad7a5eb791dfe3a7f5">More...</a><br /></td></tr>
+<tr class="separator:a0e0883eaf5a047ad7a5eb791dfe3a7f5 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92fe532c342ae2b07956a65520c05362 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml#a92fe532c342ae2b07956a65520c05362">run</a> () override final</td></tr>
+<tr class="memdesc:a92fe532c342ae2b07956a65520c05362 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="classarm__compute_1_1_i_n_e_simple_function_no_border.xhtml#a92fe532c342ae2b07956a65520c05362">More...</a><br /></td></tr>
+<tr class="separator:a92fe532c342ae2b07956a65520c05362 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function_no_border"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_function.xhtml">IFunction</a></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
@@ -136,44 +137,17 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aebfd4e9a838de3082cdb5894d33e8a04"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#aebfd4e9a838de3082cdb5894d33e8a04">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *min_max)</td></tr>
-<tr class="memdesc:aebfd4e9a838de3082cdb5894d33e8a04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a>.  <a href="#aebfd4e9a838de3082cdb5894d33e8a04">More...</a><br /></td></tr>
-<tr class="separator:aebfd4e9a838de3082cdb5894d33e8a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a968b23a6ef327fcfb5b99d58e3fbe883"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
+<tr class="memdesc:a968b23a6ef327fcfb5b99d58e3fbe883"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a>.  <a href="#a968b23a6ef327fcfb5b99d58e3fbe883">More...</a><br /></td></tr>
+<tr class="separator:a968b23a6ef327fcfb5b99d58e3fbe883"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Basic function to simulate a dequantization layer. </p>
-<p>This function calls the following NEON kernels:</p>
-<dl class="section note"><dt>Note</dt><dd>The implementation supports only 3D input tensors</dd></dl>
-<ol type="1">
-<li><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml">NEDequantizationLayerKernel</a> </li>
-</ol>
+<div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml">NEDequantizationLayerKernel</a> that dequantizes an input tensor. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_n_e_dequantization_layer_8h_source.xhtml">NEDequantizationLayer.h</a>.</p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3815ed964e16372e0c2769a69e0373de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3815ed964e16372e0c2769a69e0373de">&#9670;&nbsp;</a></span>NEDequantizationLayer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Default constructor. </p>
-
-<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00033">33</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    : _dequantize_kernel()</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}</div></div><!-- fragment -->
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="a644ff49365300e418f2343f112753b74"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a644ff49365300e418f2343f112753b74">&#9670;&nbsp;</a></span>configure()</h2>
+<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_n_e_dequantization_layer_8h_source.xhtml">NEDequantizationLayer.h</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a83a344e60eb7db895953a942abf16628"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83a344e60eb7db895953a942abf16628">&#9670;&nbsp;</a></span>configure()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -188,13 +162,7 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
-          <td class="paramname"><em>min_max</em>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -207,73 +175,20 @@ Static Public Member Functions</h2></td></tr>
 <p>Configure the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor with the same dimensions of input. Data type supported: F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">min_max</td><td>Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor. The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: QASYMM8. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor with the same dimensions of input. Data type supported: F16/F32. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00046">46</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <a class="code" href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a>(input, output, min_max);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="comment">// Configure kernel</span></div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    _dequantize_kernel.<a class="code" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a644ff49365300e418f2343f112753b74">configure</a>(input, output, min_max);</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_dequantization_layer_kernel_xhtml_a644ff49365300e418f2343f112753b74"><div class="ttname"><a href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a644ff49365300e418f2343f112753b74">arm_compute::NEDequantizationLayerKernel::configure</a></div><div class="ttdeci">void configure(const ITensor *input, ITensor *output, const ITensor *min_max)</div><div class="ttdoc">Set input, output, min and max.</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00082">NEDequantizationLayerKernel.cpp:82</a></div></div>
-<div class="ttc" id="_validate_8h_xhtml_a921b705e9e3e0fe928928447869e62a5"><div class="ttname"><a href="_validate_8h.xhtml#a921b705e9e3e0fe928928447869e62a5">ARM_COMPUTE_ERROR_ON_NULLPTR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_NULLPTR(...)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00161">Validate.h:161</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="_validate_8h_source.xhtml#l00161">ARM_COMPUTE_ERROR_ON_NULLPTR</a>, and <a class="el" href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00082">NEDequantizationLayerKernel::configure()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="validation_2_n_e_o_n_2_dequantization_layer_8cpp_source.xhtml#l00084">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00032">32</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;NEDequantizationLayerKernel&gt;();</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    k-&gt;configure(input, output);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    _kernel = std::move(k);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;}</div></div><!-- fragment -->
+<p class="reference">Referenced by <a class="el" href="validation_2_n_e_o_n_2_dequantization_layer_8cpp_source.xhtml#l00078">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
-<a id="ad1717410afd0be936c6213a63c8005fb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1717410afd0be936c6213a63c8005fb">&#9670;&nbsp;</a></span>run()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void run </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Run the kernels contained in the function. </p>
-<p>For NEON kernels:</p><ul>
-<li>Multi-threading is used for the kernels which are parallelisable.</li>
-<li>By default std::thread::hardware_concurrency() threads are used.</li>
-</ul>
-<dl class="section note"><dt>Note</dt><dd><a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#ae64eebaa07f4d2da6cc2ba538c3cb095">CPPScheduler::set_num_threads()</a> can be used to manually set the number of threads</dd></dl>
-<p>For OpenCL kernels:</p><ul>
-<li>All the kernels are enqueued on the queue associated with <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue.">CLScheduler</a>.</li>
-<li>The queue is then flushed.</li>
-</ul>
-<dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd>
-<dd>
-Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26" title="Prepare the function for executing.">prepare()</a> on first run if hasn't been done </dd></dl>
-
-<p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00054">54</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;{</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <a class="code" href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">NEScheduler::get</a>().<a class="code" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">schedule</a>(&amp;_dequantize_kernel, <a class="code" href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">Window::DimY</a>);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_window_xhtml_ad2d402364fa822b0b7775081291eeca9"><div class="ttname"><a href="classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9">arm_compute::Window::DimY</a></div><div class="ttdeci">static constexpr size_t DimY</div><div class="ttdoc">Alias for dimension 1 also known as Y dimension.</div><div class="ttdef"><b>Definition:</b> <a href="_window_8h_source.xhtml#l00045">Window.h:45</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_i_scheduler_xhtml_a4e58f95544bd5ac6559a421671bd9842"><div class="ttname"><a href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">arm_compute::IScheduler::schedule</a></div><div class="ttdeci">virtual void schedule(ICPPKernel *kernel, const Hints &amp;hints)=0</div><div class="ttdoc">Runs the kernel in the same thread as the caller synchronously.</div></div>
-<div class="ttc" id="classarm__compute_1_1_scheduler_xhtml_a0d63ca713bab377aabcfb63c192b8429"><div class="ttname"><a href="classarm__compute_1_1_scheduler.xhtml#a0d63ca713bab377aabcfb63c192b8429">arm_compute::Scheduler::get</a></div><div class="ttdeci">static IScheduler &amp; get()</div><div class="ttdoc">Access the scheduler singleton.</div><div class="ttdef"><b>Definition:</b> <a href="_scheduler_8cpp_source.xhtml#l00096">Scheduler.cpp:96</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="_window_8h_source.xhtml#l00045">Window::DimY</a>, <a class="el" href="_scheduler_8cpp_source.xhtml#l00096">Scheduler::get()</a>, and <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a4e58f95544bd5ac6559a421671bd9842">IScheduler::schedule()</a>.</p>
-
-</div>
-</div>
-<a id="aebfd4e9a838de3082cdb5894d33e8a04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aebfd4e9a838de3082cdb5894d33e8a04">&#9670;&nbsp;</a></span>validate()</h2>
+<a id="a968b23a6ef327fcfb5b99d58e3fbe883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a968b23a6ef327fcfb5b99d58e3fbe883">&#9670;&nbsp;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -291,13 +206,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>min_max</em>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -315,21 +224,17 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: U8. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data type supported: F32. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">min_max</td><td>Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor. The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: QASYMM8. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info. Data type supported: F16/F32.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00038">38</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <a class="code" href="_validate_8h.xhtml#aff911654521523937ff24372a870b89f">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>(input, output, min_max);</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <a class="code" href="_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4">ARM_COMPUTE_RETURN_ON_ERROR</a>(<a class="code" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#aebfd4e9a838de3082cdb5894d33e8a04">NEDequantizationLayerKernel::validate</a>(input, output, min_max));</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_status.xhtml">Status</a>{};</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a8a1e1c105f0bdaf37db408c7cfcb77a4"><div class="ttname"><a href="_error_8h.xhtml#a8a1e1c105f0bdaf37db408c7cfcb77a4">ARM_COMPUTE_RETURN_ON_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ON_ERROR(status)</div><div class="ttdoc">Checks if a status contains an error and returns it.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00193">Error.h:193</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_status_xhtml"><div class="ttname"><a href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a></div><div class="ttdoc">Status class.</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00052">Error.h:52</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_n_e_dequantization_layer_kernel_xhtml_aebfd4e9a838de3082cdb5894d33e8a04"><div class="ttname"><a href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#aebfd4e9a838de3082cdb5894d33e8a04">arm_compute::NEDequantizationLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEDequantizationLayerKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00099">NEDequantizationLayerKernel.cpp:99</a></div></div>
-<div class="ttc" id="_validate_8h_xhtml_aff911654521523937ff24372a870b89f"><div class="ttname"><a href="_validate_8h.xhtml#aff911654521523937ff24372a870b89f">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(...)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00163">Validate.h:163</a></div></div>
+<p class="definition">Definition at line <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml#l00039">39</a> of file <a class="el" href="_n_e_dequantization_layer_8cpp_source.xhtml">NEDequantizationLayer.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;{</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">NEDequantizationLayerKernel::validate</a>(input, output);</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1_n_e_dequantization_layer_kernel_xhtml_a968b23a6ef327fcfb5b99d58e3fbe883"><div class="ttname"><a href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a968b23a6ef327fcfb5b99d58e3fbe883">arm_compute::NEDequantizationLayerKernel::validate</a></div><div class="ttdeci">static Status validate(const ITensorInfo *input, const ITensorInfo *output)</div><div class="ttdoc">Static function to check if given info will lead to a valid configuration of NEDequantizationLayerKer...</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00160">NEDequantizationLayerKernel.cpp:160</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_validate_8h_source.xhtml#l00163">ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR</a>, <a class="el" href="_error_8h_source.xhtml#l00193">ARM_COMPUTE_RETURN_ON_ERROR</a>, and <a class="el" href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00099">NEDequantizationLayerKernel::validate()</a>.</p>
+<p class="reference">References <a class="el" href="_n_e_dequantization_layer_kernel_8cpp_source.xhtml#l00160">NEDequantizationLayerKernel::validate()</a>.</p>
 
 </div>
 </div>
@@ -343,7 +248,7 @@ Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:02 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:33 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -168,7 +168,7 @@ void NELocallyConnectedLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
@@ -178,8 +178,6 @@ void NELocallyConnectedLayer::run()
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
-
-    _memory_group.release();
 }
 
 void NELocallyConnectedLayer::prepare()

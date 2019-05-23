@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -145,9 +145,6 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 </li>
 <li>CHECK_CORNER
 : <a class="el" href="fast__corners_8cl.xhtml#a2e2df45f46c673a1a5a1c8f4eb06aa09">fast_corners.cl</a>
-</li>
-<li>CHECK_NODEIDX_PAIR
-: <a class="el" href="_graph_builder_8cpp.xhtml#aecb5b9d224c1c27edf84cfdd4944fa37">GraphBuilder.cpp</a>
 </li>
 <li>check_pixel
 : <a class="el" href="canny_8cl.xhtml#a64ee229d1bcee88c8017356d5d485650">canny.cl</a>
@@ -272,6 +269,9 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <li>clGetProgramInfo()
 : <a class="el" href="_open_c_l_8cpp.xhtml#a9f71d4d10e82daea5e3dd62089dab424">OpenCL.cpp</a>
 </li>
+<li>clImportMemoryARM()
+: <a class="el" href="_open_c_l_8cpp.xhtml#a6ece3384ff9496363d68aeb376041aaf">OpenCL.cpp</a>
+</li>
 <li>clReleaseCommandQueue()
 : <a class="el" href="_open_c_l_8cpp.xhtml#abd209590ef4b1c99e256180ad77faecf">OpenCL.cpp</a>
 </li>
@@ -347,8 +347,8 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="depth__convert_8cl.xhtml#a8816125645c7111abdebc517bb1c8ab3">depth_convert.cl</a>
 </li>
 <li>CONVERT_DOWN
-: <a class="el" href="depth__convert_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d">depth_convert.cl</a>
-, <a class="el" href="elementwise__operation__quantized_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d">elementwise_operation_quantized.cl</a>
+: <a class="el" href="elementwise__operation__quantized_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d">elementwise_operation_quantized.cl</a>
+, <a class="el" href="depth__convert_8cl.xhtml#a5b0d9908c0af31eaa7a31d0b5cf8e56d">depth_convert.cl</a>
 </li>
 <li>CONVERT_OP_FLOAT
 : <a class="el" href="pixelwise__mul__float_8cl.xhtml#ae564a6abd6049a086c7933daa40c8eb8">pixelwise_mul_float.cl</a>
@@ -364,6 +364,13 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 </li>
 <li>CONVERT_RTE
 : <a class="el" href="elementwise__operation__quantized_8cl.xhtml#ab448fef4390583fc4b3832f8c590a2b0">elementwise_operation_quantized.cl</a>
+, <a class="el" href="quantization__layer_8cl.xhtml#ab448fef4390583fc4b3832f8c590a2b0">quantization_layer.cl</a>
+</li>
+<li>CONVERT_RTE_VEC
+: <a class="el" href="quantization__layer_8cl.xhtml#a69f26e0fbc99605b9464b5500d4c461a">quantization_layer.cl</a>
+</li>
+<li>CONVERT_RTE_VEC_STR
+: <a class="el" href="quantization__layer_8cl.xhtml#a85ea2f9c49c7c00d41c25f6d5e0687e1">quantization_layer.cl</a>
 </li>
 <li>CONVERT_SAT
 : <a class="el" href="direct__convolution1x1_8cl.xhtml#a1f15728672380ade7a238f5e783d54d2">direct_convolution1x1.cl</a>
@@ -418,6 +425,18 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <li>convolution1x3()
 : <a class="el" href="convolution3x3_8cl.xhtml#a92702074338198e81a46c3e309d9b04f">convolution3x3.cl</a>
 </li>
+<li>CONVOLUTION1x3_BIFROST2X1_STRIDE1
+: <a class="el" href="depthwise__convolution_8cl.xhtml#ae40b0f25b3985d4853b944151ffddb44">depthwise_convolution.cl</a>
+</li>
+<li>CONVOLUTION1x3_BIFROST2X1_STRIDE2
+: <a class="el" href="depthwise__convolution_8cl.xhtml#a2da35283a28c35fd9f8b0d534e5a5a44">depthwise_convolution.cl</a>
+</li>
+<li>CONVOLUTION1x3_BIFROST4X1_STRIDE1
+: <a class="el" href="depthwise__convolution_8cl.xhtml#a0916b921e5c01cc64afede6dc7bd5caa">depthwise_convolution.cl</a>
+</li>
+<li>CONVOLUTION1x3_BIFROST4X1_STRIDE2
+: <a class="el" href="depthwise__convolution_8cl.xhtml#aa18ba8a4892890c942fea83c5cad8dbc">depthwise_convolution.cl</a>
+</li>
 <li>convolution1x5()
 : <a class="el" href="convolution5x5_8cl.xhtml#abd315efadde56274531a8b2bdb43f688">convolution5x5.cl</a>
 </li>
@@ -464,7 +483,7 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="convolution__rectangle_8cl.xhtml#aef481f37792858a126de9374b10df7ea">convolution_rectangle.cl</a>
 </li>
 <li>CONVOLUTION_RECTANGLE_DATA_TEST_CASE
-: <a class="el" href="benchmark_2_c_l_2_convolution_8cpp.xhtml#ace2ab3eb7f9a254dd1c11ca2dbe3e445">Convolution.cpp</a>
+: <a class="el" href="benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#ace2ab3eb7f9a254dd1c11ca2dbe3e445">Convolution.cpp</a>
 </li>
 <li>convolution_separable1x5_static()
 : <a class="el" href="convolution5x5_8cl.xhtml#a59312d2415e9c4baa221da9394ea4e3c">convolution5x5.cl</a>
@@ -485,10 +504,10 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="convolution9x9_8cl.xhtml#ae1941d028c5183ce9c021a8428dbc494">convolution9x9.cl</a>
 </li>
 <li>CONVOLUTION_SEPARABLE_DATA_TEST_CASE
-: <a class="el" href="benchmark_2_c_l_2_convolution_8cpp.xhtml#ae80afc4074fadd96dd61fd86ea84e7e5">Convolution.cpp</a>
+: <a class="el" href="benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#ae80afc4074fadd96dd61fd86ea84e7e5">Convolution.cpp</a>
 </li>
 <li>CONVOLUTION_SQUARE_DATA_TEST_CASE
-: <a class="el" href="benchmark_2_n_e_o_n_2_convolution_8cpp.xhtml#a8864abaea5755acba3e284f15d85bc54">Convolution.cpp</a>
+: <a class="el" href="benchmark_2_c_l_2_convolution_8cpp.xhtml#a8864abaea5755acba3e284f15d85bc54">Convolution.cpp</a>
 </li>
 <li>Coordinates2D
 : <a class="el" href="src_2core_2_c_l_2cl__kernels_2_types_8h.xhtml#a01e5153f1ee101314312c0885a1dc968">types.h</a>
@@ -498,9 +517,6 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 </li>
 <li>copy_planes_3p()
 : <a class="el" href="channel__combine_8cl.xhtml#a2ecdd5708954da1196aa12856e78a462">channel_combine.cl</a>
-</li>
-<li>copy_tensor()
-: <a class="el" href="copy__tensor_8cl.xhtml#a5f7a81ece3c8141222bfaa46592f0913">copy_tensor.cl</a>
 </li>
 <li>copy_to_keypoint()
 : <a class="el" href="fast__corners_8cl.xhtml#ad1e2ee5ba250337a4e1889423e11aa81">fast_corners.cl</a>
@@ -520,7 +536,7 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:08 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

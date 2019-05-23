@@ -248,7 +248,7 @@ using NEArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantiz
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                shape, policy)
 {
     // Create tensors
@@ -274,7 +274,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEArithmeticAdditionQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQASYMM8Dataset),
-                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE })),
                                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) })))
@@ -282,7 +282,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     // Validate output
 #ifdef __aarch64__
     validate(Accessor(_target), _reference);
-#else //__aarch64__
+#else  //__aarch64__
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 #endif //__aarch64__
 }

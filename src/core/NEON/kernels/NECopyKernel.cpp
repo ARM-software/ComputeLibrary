@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,6 @@ void NECopyKernel::configure(const ITensor *input, ITensor *output)
 Status NECopyKernel::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     return Status{};
 }
@@ -71,7 +70,7 @@ void NECopyKernel::run(const Window &window, const ThreadInfo &info)
         Iterator input_it(_input, out_slice);
         Iterator output_it(_output, out_slice);
 
-        execute_window_loop(out_slice, [&](const Coordinates & id)
+        execute_window_loop(out_slice, [&](const Coordinates &)
         {
             memcpy(output_it.ptr(), input_it.ptr(), _output->info()->dimension(0) * _output->info()->element_size());
         },

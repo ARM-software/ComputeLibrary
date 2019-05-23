@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ public:
      *
      * @param[in] memory Memory to be imported
      */
-    CLMemory(std::shared_ptr<ICLMemoryRegion> memory);
+    CLMemory(const std::shared_ptr<ICLMemoryRegion> &memory);
     /** Default Constructor
      *
      * @note Ownership of the memory is not transferred to this object.

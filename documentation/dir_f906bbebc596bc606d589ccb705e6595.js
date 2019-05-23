@@ -65,8 +65,14 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLCopyKernel.h", "_c_l_copy_kernel_8h.xhtml", [
       [ "CLCopyKernel", "classarm__compute_1_1_c_l_copy_kernel.xhtml", "classarm__compute_1_1_c_l_copy_kernel" ]
     ] ],
+    [ "CLCropKernel.h", "_c_l_crop_kernel_8h.xhtml", [
+      [ "CLCropKernel", "classarm__compute_1_1_c_l_crop_kernel.xhtml", "classarm__compute_1_1_c_l_crop_kernel" ]
+    ] ],
     [ "CLDeconvolutionLayerUpsampleKernel.h", "_c_l_deconvolution_layer_upsample_kernel_8h.xhtml", [
       [ "CLDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel" ]
+    ] ],
+    [ "CLDeconvolutionReshapeOutputKernel.h", "_c_l_deconvolution_reshape_output_kernel_8h.xhtml", [
+      [ "CLDeconvolutionReshapeOutputKernel", "classarm__compute_1_1_c_l_deconvolution_reshape_output_kernel.xhtml", "classarm__compute_1_1_c_l_deconvolution_reshape_output_kernel" ]
     ] ],
     [ "CLDepthConcatenateLayerKernel.h", "_c_l_depth_concatenate_layer_kernel_8h.xhtml", [
       [ "CLDepthConcatenateLayerKernel", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel" ]
@@ -122,6 +128,15 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLFastCornersKernel", "classarm__compute_1_1_c_l_fast_corners_kernel.xhtml", "classarm__compute_1_1_c_l_fast_corners_kernel" ],
       [ "CLCopyToArrayKernel", "classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml", "classarm__compute_1_1_c_l_copy_to_array_kernel" ]
     ] ],
+    [ "CLFFTDigitReverseKernel.h", "_c_l_f_f_t_digit_reverse_kernel_8h.xhtml", [
+      [ "CLFFTDigitReverseKernel", "classarm__compute_1_1_c_l_f_f_t_digit_reverse_kernel.xhtml", "classarm__compute_1_1_c_l_f_f_t_digit_reverse_kernel" ]
+    ] ],
+    [ "CLFFTRadixStageKernel.h", "_c_l_f_f_t_radix_stage_kernel_8h.xhtml", [
+      [ "CLFFTRadixStageKernel", "classarm__compute_1_1_c_l_f_f_t_radix_stage_kernel.xhtml", "classarm__compute_1_1_c_l_f_f_t_radix_stage_kernel" ]
+    ] ],
+    [ "CLFFTScaleKernel.h", "_c_l_f_f_t_scale_kernel_8h.xhtml", [
+      [ "CLFFTScaleKernel", "classarm__compute_1_1_c_l_f_f_t_scale_kernel.xhtml", "classarm__compute_1_1_c_l_f_f_t_scale_kernel" ]
+    ] ],
     [ "CLFillBorderKernel.h", "_c_l_fill_border_kernel_8h.xhtml", [
       [ "CLFillBorderKernel", "classarm__compute_1_1_c_l_fill_border_kernel.xhtml", "classarm__compute_1_1_c_l_fill_border_kernel" ]
     ] ],
@@ -157,6 +172,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLGEMMLowpMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel_8h.xhtml", [
       [ "CLGEMMLowpMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_kernel" ]
     ] ],
+    [ "CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h", "_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_only_r_h_s_kernel_8h.xhtml", [
+      [ "CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_only_r_h_s_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_reshaped_only_r_h_s_kernel" ]
+    ] ],
     [ "CLGEMMLowpOffsetContributionKernel.h", "_c_l_g_e_m_m_lowp_offset_contribution_kernel_8h.xhtml", [
       [ "CLGEMMLowpOffsetContributionKernel", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel" ]
     ] ],
@@ -189,6 +207,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLGEMMMatrixMultiplyReshapedKernel.h", "_c_l_g_e_m_m_matrix_multiply_reshaped_kernel_8h.xhtml", [
       [ "CLGEMMMatrixMultiplyReshapedKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_kernel" ]
     ] ],
+    [ "CLGEMMMatrixMultiplyReshapedOnlyRHSKernel.h", "_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel_8h.xhtml", [
+      [ "CLGEMMMatrixMultiplyReshapedOnlyRHSKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_reshaped_only_r_h_s_kernel" ]
+    ] ],
     [ "CLGEMMMatrixVectorMultiplyKernel.h", "_c_l_g_e_m_m_matrix_vector_multiply_kernel_8h.xhtml", [
       [ "CLGEMMMatrixVectorMultiplyKernel", "classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel" ]
     ] ],
@@ -206,6 +227,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLHarrisCornersKernel.h", "_c_l_harris_corners_kernel_8h.xhtml", [
       [ "CLHarrisScoreKernel", "classarm__compute_1_1_c_l_harris_score_kernel.xhtml", "classarm__compute_1_1_c_l_harris_score_kernel" ]
+    ] ],
+    [ "CLHeightConcatenateLayerKernel.h", "_c_l_height_concatenate_layer_kernel_8h.xhtml", [
+      [ "CLHeightConcatenateLayerKernel", "classarm__compute_1_1_c_l_height_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_height_concatenate_layer_kernel" ]
     ] ],
     [ "CLHistogramKernel.h", "_c_l_histogram_kernel_8h.xhtml", [
       [ "CLHistogramKernel", "classarm__compute_1_1_c_l_histogram_kernel.xhtml", "classarm__compute_1_1_c_l_histogram_kernel" ],
@@ -267,7 +291,8 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLPermuteKernel", "classarm__compute_1_1_c_l_permute_kernel.xhtml", "classarm__compute_1_1_c_l_permute_kernel" ]
     ] ],
     [ "CLPixelWiseMultiplicationKernel.h", "_c_l_pixel_wise_multiplication_kernel_8h.xhtml", [
-      [ "CLPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel" ]
+      [ "CLPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel" ],
+      [ "CLComplexPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_complex_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_c_l_complex_pixel_wise_multiplication_kernel" ]
     ] ],
     [ "CLPoolingLayerKernel.h", "_c_l_pooling_layer_kernel_8h.xhtml", [
       [ "CLPoolingLayerKernel", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml", "classarm__compute_1_1_c_l_pooling_layer_kernel" ]

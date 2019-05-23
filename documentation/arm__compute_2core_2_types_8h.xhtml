@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -313,10 +313,22 @@ Enumerations</h2></td></tr>
 <tr class="separator:a74ce3f7420453d3446218ff3b7453e02"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a683661ae75dcb7aef16b9c9bde31517d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517d">ConvolutionMethod</a> { <a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3">GEMM</a>, 
 <a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da4c5d06b02c97731aaa976179c62dcf76">DIRECT</a>, 
-<a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8">WINOGRAD</a>
+<a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8">WINOGRAD</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da86de502ad3fe05ceedaba87164d54d28">FFT</a>
  }</td></tr>
 <tr class="memdesc:a683661ae75dcb7aef16b9c9bde31517d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available ConvolutionMethod.  <a href="namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517d">More...</a><br /></td></tr>
 <tr class="separator:a683661ae75dcb7aef16b9c9bde31517d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f66ec167e002c7c0549ff6c8a8939ad"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ad">DeconvolutionMethod</a> { <a class="el" href="namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada5174aac3927faa9ee34befb7fc87a9e3">GEMM</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ada4c5d06b02c97731aaa976179c62dcf76">DIRECT</a>
+ }</td></tr>
+<tr class="memdesc:a6f66ec167e002c7c0549ff6c8a8939ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Available DeconvolutionMethod.  <a href="namespacearm__compute.xhtml#a6f66ec167e002c7c0549ff6c8a8939ad">More...</a><br /></td></tr>
+<tr class="separator:a6f66ec167e002c7c0549ff6c8a8939ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14d24d90ab4ba2956e92e27890ba4c91"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91">PaddingMode</a> { <a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a8d6b5cada83510220f59e00ce86d4d92">CONSTANT</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91ae4f6a05f82ed398f984f4bc1a55838df">REFLECT</a>, 
+<a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a161b3d9016563aba9ac190fc02ada9bb">SYMMETRIC</a>
+ }</td></tr>
+<tr class="memdesc:a14d24d90ab4ba2956e92e27890ba4c91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Padding mode to use for PadLayer.  <a href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91">More...</a><br /></td></tr>
+<tr class="separator:a14d24d90ab4ba2956e92e27890ba4c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d299363c9fc33334c571fa29ca4f58c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58c">ComparisonOperation</a> { <br />
 &#160;&#160;<a class="el" href="namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58caf5f286e73bda105e538310b3190f75c5">Equal</a>, 
 <a class="el" href="namespacearm__compute.xhtml#a2d299363c9fc33334c571fa29ca4f58ca19bb0af2c3c530538cb41aff7f235b96">NotEqual</a>, 
@@ -480,7 +492,7 @@ Enumerations</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a3fed059965fe44cbe7ed4091d6b63acf"><td class="memItemLeft" align="right" valign="top">constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3fed059965fe44cbe7ed4091d6b63acf">CONSTANT_BORDER_VALUE</a> = 199</td></tr>
-<tr class="memdesc:a3fed059965fe44cbe7ed4091d6b63acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant value of the border pixels when using <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92" title="Pixels outside the image are assumed to have a constant value.">BorderMode::CONSTANT</a>.  <a href="namespacearm__compute.xhtml#a3fed059965fe44cbe7ed4091d6b63acf">More...</a><br /></td></tr>
+<tr class="memdesc:a3fed059965fe44cbe7ed4091d6b63acf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant value of the border pixels when using <a class="el" href="namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91a8d6b5cada83510220f59e00ce86d4d92">BorderMode::CONSTANT</a>.  <a href="namespacearm__compute.xhtml#a3fed059965fe44cbe7ed4091d6b63acf">More...</a><br /></td></tr>
 <tr class="separator:a3fed059965fe44cbe7ed4091d6b63acf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9876aedd664cac0ddeacddb40cb71cd"><td class="memItemLeft" align="right" valign="top">constexpr float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#af9876aedd664cac0ddeacddb40cb71cd">SCALE_PYRAMID_HALF</a> = 0.5f</td></tr>
 <tr class="memdesc:af9876aedd664cac0ddeacddb40cb71cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant value used to indicate a half-scale pyramid.  <a href="namespacearm__compute.xhtml#af9876aedd664cac0ddeacddb40cb71cd">More...</a><br /></td></tr>
@@ -495,7 +507,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="arm__compute_2core_2_types_8h.xhtml">Types.h</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:55 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,11 +89,12 @@ void force_target_to_graph(Graph &g, Target target);
  * @return A PassManager with default mutating passes
  */
 PassManager create_default_pass_manager(Target target);
-/** Default setups the graph context if not done manually
+/** Setups requested backend context if it exists, is supported and hasn't been initialized already.
  *
- * @param[in,out] ctx Graph Context
+ * @param[in,out] ctx    Graph Context.
+ * @param[in]     target Target to setup the backend for.
  */
-void setup_default_graph_context(GraphContext &ctx);
+void setup_requested_backend_context(GraphContext &ctx, Target target);
 /** Default releases the graph context if not done manually
  *
  * @param[in,out] ctx Graph Context
@@ -109,12 +110,12 @@ void release_default_graph_context(GraphContext &ctx);
 size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
 /** Get index of a tensor's given dimension depending on its layout
  *
- * @param[in] descriptor            Descriptor
+ * @param[in] data_layout           Data layout of the tensor
  * @param[in] data_layout_dimension Tensor data layout dimension
  *
  * @return Idx of given dimension
  */
-size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
+size_t get_dimension_idx(DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 /** Get the list of driving nodes of a given node
  *
  * @param[in] node Node to find the driving node of

@@ -29,11 +29,11 @@
 #include "tests/framework/Fixture.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ArithmeticOperations.h"
+#include "tests/validation/reference/ConcatenateLayer.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/GEMM.h"
 #include "tests/validation/reference/PixelWiseMultiplication.h"
 #include "tests/validation/reference/Transpose.h"
-#include "tests/validation/reference/WidthConcatenateLayer.h"
 
 namespace arm_compute
 {
@@ -415,7 +415,7 @@ protected:
         scratch_inputs.emplace_back(std::move(cell_state_out));
         scratch_inputs.emplace_back(std::move(forget_gate));
         scratch_inputs.emplace_back(std::move(output));
-        scratch            = reference::widthconcatenate_layer(scratch_inputs, scratch);
+        scratch            = reference::concatenate_layer(scratch_inputs, scratch, Window::DimX);
         _reference_scratch = std::move(scratch);
         return output_state_out;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,10 +52,10 @@ public:
     void run() override;
 
 private:
-    NEHistogramKernel           _histogram_kernel;
-    std::unique_ptr<uint32_t[]> _local_hist;
-    std::unique_ptr<uint32_t[]> _window_lut;
-    size_t                      _local_hist_size;
+    NEHistogramKernel     _histogram_kernel;
+    std::vector<uint32_t> _local_hist;
+    std::vector<uint32_t> _window_lut;
+    size_t                _local_hist_size;
     /** 256 possible pixel values as we handle only U8 images */
     static constexpr unsigned int window_lut_default_size = 256;
 };

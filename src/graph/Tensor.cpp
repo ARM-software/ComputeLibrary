@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,7 +108,7 @@ void Tensor::unbind_edge(EdgeID eid)
     _bound_edges.erase(eid);
 }
 
-const std::set<EdgeID> Tensor::bound_edges() const
+std::set<EdgeID> Tensor::bound_edges() const
 {
     return _bound_edges;
 }

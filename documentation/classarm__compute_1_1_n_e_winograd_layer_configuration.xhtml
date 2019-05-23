@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -110,9 +110,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_winograd_lay
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aa2895a99d9a1efae7844264931a0d348"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#aa2895a99d9a1efae7844264931a0d348">WinogradBase</a> = winograd::WinogradGEMM&lt; OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</td></tr>
-<tr class="memdesc:aa2895a99d9a1efae7844264931a0d348"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd base kernel.  <a href="#aa2895a99d9a1efae7844264931a0d348">More...</a><br /></td></tr>
-<tr class="separator:aa2895a99d9a1efae7844264931a0d348"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bc75fe67cfd09e90f240a935da92f54"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#a1bc75fe67cfd09e90f240a935da92f54">WinogradBase</a> = winograd::WinogradGEMM&lt; OutputTileRows, OutputTileCols, KernelRows, KernelCols, winograd::WinogradRoots::Integers &gt;</td></tr>
+<tr class="memdesc:a1bc75fe67cfd09e90f240a935da92f54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd base kernel.  <a href="#a1bc75fe67cfd09e90f240a935da92f54">More...</a><br /></td></tr>
+<tr class="separator:a1bc75fe67cfd09e90f240a935da92f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd8461f7d784d4c09b73447f357e6b1a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#acd8461f7d784d4c09b73447f357e6b1a">WinogradConv</a> = typename WinogradBase::template Convolution&lt; TIn, TOut &gt;</td></tr>
 <tr class="memdesc:acd8461f7d784d4c09b73447f357e6b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd convolution kernel.  <a href="#acd8461f7d784d4c09b73447f357e6b1a">More...</a><br /></td></tr>
 <tr class="separator:acd8461f7d784d4c09b73447f357e6b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -129,7 +129,7 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
 
 <p>NEON kernel to perform Winograd. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00498">498</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00561">561</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="afad7d48b2aacdab4c4d731e1aab98c6f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afad7d48b2aacdab4c4d731e1aab98c6f">&#9670;&nbsp;</a></span>TransformInputKernel</h2>
@@ -143,7 +143,7 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00507">507</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00570">570</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -159,7 +159,7 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00509">509</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00572">572</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -175,25 +175,25 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00508">508</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00571">571</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
-<a id="aa2895a99d9a1efae7844264931a0d348"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa2895a99d9a1efae7844264931a0d348">&#9670;&nbsp;</a></span>WinogradBase</h2>
+<a id="a1bc75fe67cfd09e90f240a935da92f54"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bc75fe67cfd09e90f240a935da92f54">&#9670;&nbsp;</a></span>WinogradBase</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#aa2895a99d9a1efae7844264931a0d348">WinogradBase</a> =  winograd::WinogradGEMM&lt;OutputTileRows, OutputTileCols, KernelRows, KernelCols&gt;</td>
+          <td class="memname">using <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml#a1bc75fe67cfd09e90f240a935da92f54">WinogradBase</a> =  winograd::WinogradGEMM&lt;OutputTileRows, OutputTileCols, KernelRows, KernelCols, winograd::WinogradRoots::Integers&gt;</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Winograd base kernel. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00502">502</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00565">565</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -211,7 +211,7 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
 
 <p>Winograd convolution kernel. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00505">505</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00568">568</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -224,7 +224,7 @@ class arm_compute::NEWinogradLayerConfiguration&lt; TIn, TOut, OutputTileRows, O
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_configuration.xhtml">NEWinogradLayerConfiguration</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:04 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:34 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

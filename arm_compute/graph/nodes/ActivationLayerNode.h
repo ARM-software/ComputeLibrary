@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,11 @@ class ActivationLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] info Activation Layer information
+     * @param[in] info           Activation Layer information
+     * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ActivationLayerNode(ActivationLayerInfo info);
+    ActivationLayerNode(ActivationLayerInfo info,
+                        QuantizationInfo    out_quant_info = QuantizationInfo());
     /** Activation metadata accessor
      *
      * @return The activation info of the layer
@@ -51,8 +53,12 @@ public:
     TensorDescriptor configure_output(size_t idx) const override;
     void accept(INodeVisitor &v) override;
 
+public:
+    static constexpr NodeType node_type = NodeType::ActivationLayer;
+
 private:
     ActivationLayerInfo _info;
+    QuantizationInfo    _out_quant_info;
 };
 } // namespace graph
 } // namespace arm_compute

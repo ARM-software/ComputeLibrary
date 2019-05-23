@@ -12,6 +12,7 @@ var classarm__compute_1_1graph_1_1_i_node_visitor =
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a3a831d8fbe701e51eba638465496244f", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#ae090e4537101ef27e04ff80b0e165939", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#af16210fc560909e8c7b27e3f20f8daa6", null ],
+    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#aa70b89b65105016bdf36fc92e8767559", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#ad1265b49ac3e299a4025cd29987476d3", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a698f59bea216132157f6fb4469e926ba", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#ab87ed681a6ea37686aec7cd27b887527", null ],
@@ -20,5 +21,6 @@ var classarm__compute_1_1graph_1_1_i_node_visitor =
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a6a7d79aed59ab72f3cedcfabf1f7884b", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a3ab3d1a5fedf335e979356b1236af8a9", null ],
     [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a35761aee870b4c937facc4c7f29fd39c", null ],
-    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a879921d1e54b9711d71a8d2938516d11", null ]
+    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a879921d1e54b9711d71a8d2938516d11", null ],
+    [ "visit", "classarm__compute_1_1graph_1_1_i_node_visitor.xhtml#a67b4effc98b71f8fac734f194ae4ef38", null ]
 ];

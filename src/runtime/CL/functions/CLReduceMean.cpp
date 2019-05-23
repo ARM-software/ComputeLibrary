@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLReduceMean.h"
 
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/Types.h"
@@ -40,10 +41,10 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
-    _reduction_ops     = reduction_axis.num_dimensions();
-    _reduction_kernels = arm_compute::support::cpp14::make_unique<CLReductionOperation[]>(_reduction_ops);
-    _reduced_outs      = arm_compute::support::cpp14::make_unique<CLTensor[]>(_reduction_ops - (keep_dims ? 1 : 0));
-    _keep_dims         = keep_dims;
+    _reduction_ops = reduction_axis.num_dimensions();
+    _reduction_kernels.resize(_reduction_ops);
+    _reduced_outs.resize(_reduction_ops - (keep_dims ? 1 : 0));
+    _keep_dims = keep_dims;
 
     Coordinates axis_local = reduction_axis;
     const int   input_dims = input->info()->num_dimensions();
@@ -57,9 +58,9 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
     // Perform reduction for every axis
     for(unsigned int i = 0; i < _reduction_ops; ++i)
     {
-        TensorShape out_shape = i == 0 ? input->info()->tensor_shape() : (_reduced_outs.get() + i - 1)->info()->tensor_shape();
+        TensorShape out_shape = i == 0 ? input->info()->tensor_shape() : (&_reduced_outs[i - 1])->info()->tensor_shape();
         out_shape.set(axis_local[i], 1);
-        auto in = (i == 0) ? input : (_reduced_outs.get() + i - 1);
+        auto in = (i == 0) ? input : (&_reduced_outs[i - 1]);
 
         if(i == _reduction_ops - 1 && keep_dims)
         {
@@ -68,8 +69,8 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
         else
         {
             _reduced_outs[i].allocator()->init(TensorInfo(out_shape, input->info()->num_channels(), input->info()->data_type(), input->info()->quantization_info()));
-            _memory_group.manage(_reduced_outs.get() + i);
-            _reduction_kernels[i].configure(in, _reduced_outs.get() + i, axis_local[i], ReductionOperation::MEAN_SUM);
+            _memory_group.manage(&_reduced_outs[i]);
+            _reduction_kernels[i].configure(in, &_reduced_outs[i], axis_local[i], ReductionOperation::MEAN_SUM);
         }
     }
 
@@ -92,13 +93,15 @@ void CLReduceMean::configure(ICLTensor *input, const Coordinates &reduction_axis
             out_shape.remove_dimension(axis_local[i] - i);
         }
         auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(out_shape));
-        _reshape.configure(_reduced_outs.get() + _reduction_ops - 1, output);
+        _reshape.configure(&_reduced_outs[_reduction_ops - 1], output);
     }
 }
 
 Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduction_axis, bool keep_dims, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(reduction_axis.num_dimensions() > input->num_dimensions());
 
     TensorShape out_shape = input->tensor_shape();
@@ -140,7 +143,7 @@ Status CLReduceMean::validate(const ITensorInfo *input, const Coordinates &reduc
 
 void CLReduceMean::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     for(unsigned int i = 0; i < _reduction_ops; ++i)
     {
@@ -151,6 +154,5 @@ void CLReduceMean::run()
     {
         _reshape.run();
     }
-    _memory_group.release();
 }
 } // namespace arm_compute

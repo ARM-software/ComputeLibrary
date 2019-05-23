@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml" title="Iterator for the dataset." alt="" coords="5,5,156,47"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,31,131,57"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point.xhtml" title=" " alt="" coords="179,5,341,32"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1utils_1_1traits_1_1is__floating__point.xhtml" title=" " alt="" coords="179,56,341,83"/>
 </map>

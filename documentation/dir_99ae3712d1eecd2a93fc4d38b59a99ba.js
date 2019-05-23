@@ -43,6 +43,9 @@ var dir_99ae3712d1eecd2a93fc4d38b59a99ba =
     [ "ITensorHandle.h", "_i_tensor_handle_8h.xhtml", [
       [ "ITensorHandle", "classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml", "classarm__compute_1_1graph_1_1_i_tensor_handle" ]
     ] ],
+    [ "LayerDescriptors.h", "_layer_descriptors_8h.xhtml", [
+      [ "ConcatLayerDescriptor", "structarm__compute_1_1graph_1_1descriptors_1_1_concat_layer_descriptor.xhtml", "structarm__compute_1_1graph_1_1descriptors_1_1_concat_layer_descriptor" ]
+    ] ],
     [ "Logger.h", "graph_2_logger_8h.xhtml", "graph_2_logger_8h" ],
     [ "PassManager.h", "_pass_manager_8h.xhtml", [
       [ "PassManager", "classarm__compute_1_1graph_1_1_pass_manager.xhtml", "classarm__compute_1_1graph_1_1_pass_manager" ]

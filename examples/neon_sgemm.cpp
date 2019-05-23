@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,9 @@ class NESGEMMExample : public Example
 public:
     bool do_setup(int argc, char **argv) override
     {
-        NPYLoader npy0, npy1, npy2;
+        NPYLoader npy0;
+        NPYLoader npy1;
+        NPYLoader npy2;
         alpha = 1.0f;
         beta  = 0.0f;
 

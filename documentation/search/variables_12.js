@@ -1,6 +1,7 @@
 var searchData=
 [
   ['r_5fvalue',['r_value',['../_mali_counter_8cpp.xhtml#a736088bbd41fd7407ac9fc811864db68',1,'MaliCounter.cpp']]],
+  ['radix',['radix',['../structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml#a4cab2bef555152e8653f38257e9fcb5e',1,'arm_compute::FFTRadixStageKernelInfo']]],
   ['raw_5f',['raw_',['../structarm__compute_1_1logging_1_1_log_msg.xhtml#ab564cdace3a0a660c5a04b5f2c637213',1,'arm_compute::logging::LogMsg']]],
   ['real_5fclenqueuendrangekernel',['real_clEnqueueNDRangeKernel',['../classarm__compute_1_1_c_l_tuner.xhtml#a5baba955626e8da33ed5dd829a538974',1,'arm_compute::CLTuner']]],
   ['red_5fcoef_5fbt709',['red_coef_bt709',['../namespacearm__compute_1_1test_1_1colorconvert__helper_1_1detail.xhtml#ac3138daaa2a074986406b22ec6f3d909',1,'arm_compute::test::colorconvert_helper::detail']]],

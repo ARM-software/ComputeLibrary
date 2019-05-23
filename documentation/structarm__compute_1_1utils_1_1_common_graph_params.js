@@ -11,6 +11,7 @@ var structarm__compute_1_1utils_1_1_common_graph_params =
     [ "target", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a29d9bc83bfba2fba21af47e575569dde", null ],
     [ "threads", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a4f987a98d3e1221916748962e45399fe", null ],
     [ "tuner_file", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a5cabfb35cd0014387f7ec2a0c362c20f", null ],
+    [ "tuner_mode", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a3ebea56a33e2632ae2a9b25b160e0705", null ],
     [ "validation_file", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a8795de58b39cf31914df35a032c1a486", null ],
     [ "validation_path", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a91652a4f41fde8020674577dd0e5933d", null ],
     [ "validation_range_end", "structarm__compute_1_1utils_1_1_common_graph_params.xhtml#a1543de48b9546e5e234de4c1196f0d0f", null ],

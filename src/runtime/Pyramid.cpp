@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,8 +45,8 @@ void Pyramid::init_auto_padding(const PyramidInfo &info)
 
 void Pyramid::internal_init(const PyramidInfo &info, bool auto_padding)
 {
-    _info    = info;
-    _pyramid = arm_compute::support::cpp14::make_unique<Tensor[]>(_info.num_levels());
+    _info = info;
+    _pyramid.resize(_info.num_levels());
 
     size_t      w            = _info.width();
     size_t      h            = _info.height();
@@ -56,11 +56,11 @@ void Pyramid::internal_init(const PyramidInfo &info, bool auto_padding)
     TensorShape tensor_shape = _info.tensor_shape();
 
     // Note: Look-up table used by the OpenVX sample implementation
-    const float c_orbscale[4] = { 0.5f,
-                                  SCALE_PYRAMID_ORB,
-                                  SCALE_PYRAMID_ORB * SCALE_PYRAMID_ORB,
-                                  SCALE_PYRAMID_ORB *SCALE_PYRAMID_ORB * SCALE_PYRAMID_ORB
-                                };
+    const std::array<float, 4> c_orbscale = { 0.5f,
+                                              SCALE_PYRAMID_ORB,
+                                              SCALE_PYRAMID_ORB * SCALE_PYRAMID_ORB,
+                                              SCALE_PYRAMID_ORB *SCALE_PYRAMID_ORB * SCALE_PYRAMID_ORB
+                                            };
 
     for(size_t i = 0; i < _info.num_levels(); ++i)
     {
@@ -71,7 +71,7 @@ void Pyramid::internal_init(const PyramidInfo &info, bool auto_padding)
             tensor_info.auto_padding();
         }
 
-        (_pyramid.get() + i)->allocator()->init(tensor_info);
+        _pyramid[i].allocator()->init(tensor_info);
 
         if(is_orb_scale)
         {
@@ -99,11 +99,9 @@ void Pyramid::internal_init(const PyramidInfo &info, bool auto_padding)
 
 void Pyramid::allocate()
 {
-    ARM_COMPUTE_ERROR_ON(_pyramid == nullptr);
-
     for(size_t i = 0; i < _info.num_levels(); ++i)
     {
-        (_pyramid.get() + i)->allocator()->allocate();
+        _pyramid[i].allocator()->allocate();
     }
 }
 
@@ -116,5 +114,5 @@ Tensor *Pyramid::get_pyramid_level(size_t index) const
 {
     ARM_COMPUTE_ERROR_ON(index >= _info.num_levels());
 
-    return (_pyramid.get() + index);
+    return &_pyramid[index];
 }

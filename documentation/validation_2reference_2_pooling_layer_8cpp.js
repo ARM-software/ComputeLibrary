@@ -1,7 +1,7 @@
 var validation_2reference_2_pooling_layer_8cpp =
 [
-    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#a57bfdcadc3ff88426bab0bfb2cc46875", null ],
-    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#a31bb956ae48301f92e1412225463f1fd", null ],
-    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#a1a32517ec4d8355117a9af6097cfc55e", null ],
-    [ "pooling_layer< uint8_t >", "validation_2reference_2_pooling_layer_8cpp.xhtml#ab4bcb7b9d8fde762fc6334655d17d632", null ]
+    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#aa38db3b299b350b91320f4e3a39ee437", null ],
+    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#a0beab02ef175107dcfd9dc3611d3f2ac", null ],
+    [ "pooling_layer", "validation_2reference_2_pooling_layer_8cpp.xhtml#a5ac7877012c2099a41b4d916ddf71505", null ],
+    [ "pooling_layer< uint8_t >", "validation_2reference_2_pooling_layer_8cpp.xhtml#a917e9b0539263f775435cac95a8836a9", null ]
 ];

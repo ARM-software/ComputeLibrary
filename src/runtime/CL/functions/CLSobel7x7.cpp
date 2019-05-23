@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,10 +81,8 @@ void CLSobel7x7::run()
 {
     CLScheduler::get().enqueue(_border_handler, false);
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     CLScheduler::get().enqueue(_sobel_hor, false);
     CLScheduler::get().enqueue(_sobel_vert);
-
-    _memory_group.release();
 }

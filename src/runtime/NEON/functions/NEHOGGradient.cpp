@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,13 +80,11 @@ void NEHOGGradient::configure(ITensor *input, ITensor *output_magnitude, ITensor
 
 void NEHOGGradient::run()
 {
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run derivative
     _derivative.run();
 
     // Run magnitude/phase kernel
     NEScheduler::get().schedule(_mag_phase.get(), Window::DimY);
-
-    _memory_group.release();
 }

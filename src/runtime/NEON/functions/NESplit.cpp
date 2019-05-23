@@ -42,8 +42,8 @@ NESplit::NESplit()
 void NESplit::configure(const ITensor *input, const std::vector<ITensor *> &outputs, unsigned int axis)
 {
     // Create Slice functions
-    _num_outputs     = outputs.size();
-    _slice_functions = arm_compute::support::cpp14::make_unique<NESlice[]>(_num_outputs);
+    _num_outputs = outputs.size();
+    _slice_functions.resize(_num_outputs);
 
     // Get output shape
     const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_split_shape(input->info(), axis, _num_outputs);

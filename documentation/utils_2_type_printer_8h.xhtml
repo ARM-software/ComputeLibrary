@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -113,6 +113,7 @@ $(document).ready(function(){initNavTree('utils_2_type_printer_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_strides_8h_source.xhtml">arm_compute/core/Strides.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_info_8h_source.xhtml">arm_compute/core/TensorInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_c_l_tuner_types_8h_source.xhtml">arm_compute/runtime/CL/CLTunerTypes.h</a>&quot;</code><br />
 <code>#include &lt;ostream&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
@@ -304,6 +305,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a17881750c427aedd95deba46a4366ace"><td class="memItemLeft" align="right" valign="top">inline ::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a17881750c427aedd95deba46a4366ace">operator&lt;&lt;</a> (::std::ostream &amp;os, const Rectangle &amp;rect)</td></tr>
 <tr class="memdesc:a17881750c427aedd95deba46a4366ace"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the <a class="el" href="structarm__compute_1_1_rectangle.xhtml" title="Rectangle type.">Rectangle</a> type.  <a href="namespacearm__compute.xhtml#a17881750c427aedd95deba46a4366ace">More...</a><br /></td></tr>
 <tr class="separator:a17881750c427aedd95deba46a4366ace"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23cde8eb733fe42667cd5b2c79141dba"><td class="memItemLeft" align="right" valign="top">inline ::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a23cde8eb733fe42667cd5b2c79141dba">operator&lt;&lt;</a> (::std::ostream &amp;os, const PaddingMode &amp;mode)</td></tr>
+<tr class="memdesc:a23cde8eb733fe42667cd5b2c79141dba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the PaddingMode type.  <a href="namespacearm__compute.xhtml#a23cde8eb733fe42667cd5b2c79141dba">More...</a><br /></td></tr>
+<tr class="separator:a23cde8eb733fe42667cd5b2c79141dba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58c3c62a56ede81c516f987a263bc95a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a58c3c62a56ede81c516f987a263bc95a">to_string</a> (const PaddingMode &amp;mode)</td></tr>
+<tr class="memdesc:a58c3c62a56ede81c516f987a263bc95a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the PaddingMode type.  <a href="namespacearm__compute.xhtml#a58c3c62a56ede81c516f987a263bc95a">More...</a><br /></td></tr>
+<tr class="separator:a58c3c62a56ede81c516f987a263bc95a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8af36ae3a3613112c3a95e57f606359a"><td class="memItemLeft" align="right" valign="top">inline ::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a8af36ae3a3613112c3a95e57f606359a">operator&lt;&lt;</a> (::std::ostream &amp;os, const PadStrideInfo &amp;pad_stride_info)</td></tr>
 <tr class="memdesc:a8af36ae3a3613112c3a95e57f606359a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml" title="Padding and stride information class.">PadStrideInfo</a> type.  <a href="namespacearm__compute.xhtml#a8af36ae3a3613112c3a95e57f606359a">More...</a><br /></td></tr>
 <tr class="separator:a8af36ae3a3613112c3a95e57f606359a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -464,6 +471,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a1d8c24abe3cf6edd704d126d1d2a5420"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a1d8c24abe3cf6edd704d126d1d2a5420">to_string</a> (const T &amp;val)</td></tr>
 <tr class="memdesc:a1d8c24abe3cf6edd704d126d1d2a5420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fallback method: try to use std::to_string:  <a href="namespacearm__compute.xhtml#a1d8c24abe3cf6edd704d126d1d2a5420">More...</a><br /></td></tr>
 <tr class="separator:a1d8c24abe3cf6edd704d126d1d2a5420"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad87338ac39245d071b66a4f55cb06a16"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ad87338ac39245d071b66a4f55cb06a16">to_string</a> (const CLTunerMode val)</td></tr>
+<tr class="memdesc:ad87338ac39245d071b66a4f55cb06a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a CLTunerMode value to a string.  <a href="namespacearm__compute.xhtml#ad87338ac39245d071b66a4f55cb06a16">More...</a><br /></td></tr>
+<tr class="separator:ad87338ac39245d071b66a4f55cb06a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac470b79f272c53fc4da4910370a69f24"><td class="memItemLeft" align="right" valign="top">inline ::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ac470b79f272c53fc4da4910370a69f24">operator&lt;&lt;</a> (::std::ostream &amp;os, const CLTunerMode &amp;val)</td></tr>
+<tr class="memdesc:ac470b79f272c53fc4da4910370a69f24"><td class="mdescLeft">&#160;</td><td class="mdescRight">[Print CLTunerMode type]  <a href="namespacearm__compute.xhtml#ac470b79f272c53fc4da4910370a69f24">More...</a><br /></td></tr>
+<tr class="separator:ac470b79f272c53fc4da4910370a69f24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -471,7 +484,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml">utils</a></li><li class="navelem"><a class="el" href="utils_2_type_printer_8h.xhtml">TypePrinter.h</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:56 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

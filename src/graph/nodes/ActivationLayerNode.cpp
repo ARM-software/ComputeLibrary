@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,8 @@ namespace arm_compute
 {
 namespace graph
 {
-ActivationLayerNode::ActivationLayerNode(ActivationLayerInfo info)
-    : _info(info)
+ActivationLayerNode::ActivationLayerNode(ActivationLayerInfo info, QuantizationInfo out_quant_info)
+    : _info(info), _out_quant_info(out_quant_info)
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -62,12 +62,18 @@ TensorDescriptor ActivationLayerNode::configure_output(size_t idx) const
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return src->desc();
+    TensorDescriptor output_info = src->desc();
+    if(!_out_quant_info.empty())
+    {
+        output_info.quant_info = _out_quant_info;
+    }
+
+    return output_info;
 }
 
 NodeType ActivationLayerNode::type() const
 {
-    return NodeType::ActivationLayer;
+    return ActivationLayerNode::node_type;
 }
 
 void ActivationLayerNode::accept(INodeVisitor &v)

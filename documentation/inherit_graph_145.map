@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_scheduler_1_1_hints.xhtml" title="Scheduler hints." alt="" coords="5,5,136,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_pool_manager.xhtml" title="Memory pool manager interface." alt="" coords="5,5,113,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_pool_manager.xhtml" title="Memory pool manager." alt="" coords="161,5,267,32"/>
 </map>

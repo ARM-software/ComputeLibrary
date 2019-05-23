@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,7 +98,7 @@ void NEBitwiseXorKernel::run(const Window &window, const ThreadInfo &info)
     Iterator input2(_input2, window);
     Iterator output(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         bitwise_xor_U8_U8_U8(input1.ptr(), input2.ptr(), output.ptr());
     },

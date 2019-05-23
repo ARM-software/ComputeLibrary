@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,54 +33,25 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src)
+template <typename T>
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo quantization_info)
 {
     // Create reference
-    SimpleTensor<uint8_t> dst{ src.shape(), DataType::U8 };
+    SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
 
-    const int width       = src.shape().x();
-    const int height      = src.shape().y();
-    const int depth       = src.shape().z();
-    const int stride_w    = width * height * depth;
-    const int num_batches = src.shape().total_size_upper(3);
-
-    for(int k = 0; k < num_batches; ++k)
+    for(int i = 0; i < src.num_elements(); ++i)
     {
-        // Compute min and max of the 3D tensor
-        float min = src[k * stride_w];
-        float max = src[k * stride_w];
-
-        // Look for min and max values
-        for(int i = 1; i < stride_w; ++i)
-        {
-            float val = src[i + k * stride_w];
-            min       = std::min(min, val);
-            max       = std::max(max, val);
-        }
-
-        // Saturate the result in case min = max
-        if(min == max)
-        {
-            min = 0.0f;
-            max = 1.0f;
-        }
-
-        const float range = max - min;
-
-        for(int i = 0; i < stride_w; ++i)
-        {
-            // map values to range [0.0, 1.0]
-            float       val        = src[i + k * stride_w];
-            const float normalized = (val - min) / range;
-            dst[i + k * stride_w]  = static_cast<uint8_t>(std::min(255.0f, normalized * 256.0f));
-        }
+#ifdef __aarch64__
+        dst[i] = quantization_info.quantize((src[i]), RoundingPolicy::TO_NEAREST_EVEN);
+#else  // __aarch64__
+        dst[i] = quantization_info.quantize((src[i]), RoundingPolicy::TO_ZERO);
+#endif // __aarch64__
     }
-
     return dst;
 }
 
-template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<half> &src, const QuantizationInfo quantization_info);
+template SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<float> &src, const QuantizationInfo quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

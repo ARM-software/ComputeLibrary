@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -214,7 +214,10 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
         WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
-        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5)),
+        WinogradConfiguration(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7)),
+        WinogradConfiguration(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1)),
+        WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7)),
     };
 
     auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),
@@ -254,5 +257,12 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         default:
             return 1;
     }
+}
+
+bool preferred_dummy_work_items_support(const cl::Device &device)
+{
+    ARM_COMPUTE_UNUSED(device);
+    // TODO (COMPMID-2044)
+    return true;
 }
 } // namespace arm_compute

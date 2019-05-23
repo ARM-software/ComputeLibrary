@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ namespace reference
 {
 template <typename T, typename TB>
 SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier);
+                                      unsigned int depth_multiplier, const Size2D &dilation = Size2D(1U, 1U), QuantizationInfo out_quant_info = QuantizationInfo(0.0f, 0));
 } // namespace reference
 } // namespace validation
 } // namespace test

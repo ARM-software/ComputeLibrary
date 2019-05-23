@@ -40,14 +40,15 @@ NEWidthConcatenateLayer::NEWidthConcatenateLayer()
 {
 }
 
-Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+template <typename TensorInfoType, typename>
+inline Status NEWidthConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
 
     // Output auto inizialitation if not yet initialized
     TensorInfo  tmp_output_info = *output->clone();
-    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
     auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
 
     unsigned int width_offset = 0;
@@ -60,8 +61,8 @@ Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &input
 
     return Status{};
 }
-
-void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+template <typename TensorType, typename>
+inline void NEWidthConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ITensor *output)
 {
     _num_inputs = inputs_vector.size();
 
@@ -70,7 +71,7 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
     {
         inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
     }
-    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_concatenate_shape(inputs_vector, Window::DimX);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
@@ -78,7 +79,7 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
 
     unsigned int width_offset = 0;
 
-    _concat_kernels_vector = arm_compute::support::cpp14::make_unique<NEWidthConcatenateLayerKernel[]>(_num_inputs);
+    _concat_kernels_vector.resize(_num_inputs);
 
     for(unsigned int i = 0; i < _num_inputs; ++i)
     {
@@ -87,10 +88,30 @@ void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
     }
 }
 
+void NEWidthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, ITensor *output)
+{
+    configure_internal(std::move(inputs_vector), output);
+}
+
+void NEWidthConcatenateLayer::configure(std::vector<const ITensor *> inputs_vector, ITensor *output)
+{
+    configure_internal(std::move(inputs_vector), output);
+}
+
+Status NEWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+{
+    return validate_internal(inputs_vector, output);
+}
+
+Status NEWidthConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+{
+    return validate_internal(inputs_vector, output);
+}
+
 void NEWidthConcatenateLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; ++i)
     {
-        NEScheduler::get().schedule(_concat_kernels_vector.get() + i, Window::DimY);
+        NEScheduler::get().schedule(&_concat_kernels_vector[i], Window::DimY);
     }
 }

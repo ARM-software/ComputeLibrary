@@ -27,6 +27,8 @@ var arm__compute_2core_2_helpers_8h =
     [ "delta_linear_c1_y", "arm__compute_2core_2_helpers_8h.xhtml#ad5fa8bacf824e9538014bfb0dcdaab52", null ],
     [ "execute_window_loop", "arm__compute_2core_2_helpers_8h.xhtml#a5002bf7ec46d52971f9526e94172cfee", null ],
     [ "get_data_layout_dimension_index", "arm__compute_2core_2_helpers_8h.xhtml#a46e938020a3ac8c926d0590b7fe957db", null ],
+    [ "get_index_data_layout_dimension", "arm__compute_2core_2_helpers_8h.xhtml#ab86b0b430468cbf4a5e6e093088024c9", null ],
+    [ "get_next_power_two", "arm__compute_2core_2_helpers_8h.xhtml#a7c3d8e17b509d0d18cc7c94b7e0a993d", null ],
     [ "get_normalization_dimension_index", "arm__compute_2core_2_helpers_8h.xhtml#ae76431f34048289454a9cb6dc66d7c6b", null ],
     [ "index2coords", "arm__compute_2core_2_helpers_8h.xhtml#ad34f2150f1c9f8a3ecb7298162124e5d", null ],
     [ "intersect_valid_regions", "arm__compute_2core_2_helpers_8h.xhtml#aa7510e92de273e0457ce12218f712ad4", null ],

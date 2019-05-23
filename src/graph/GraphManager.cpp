@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,9 +45,6 @@ GraphManager::GraphManager()
 
 void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target)
 {
-    // Setup graph context if not done manually
-    setup_default_graph_context(ctx);
-
     // Check if graph has been registered
     if(_workloads.find(graph.id()) != std::end(_workloads))
     {
@@ -55,7 +52,7 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     }
 
     // Force target to all graph construct
-    // TODO (geopin01) : Support heterogeneous execution
+    // TODO (COMPMID-2014) : Support heterogeneous execution
     Target forced_target = target;
     if(!is_target_supported(target))
     {
@@ -63,6 +60,10 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
         ARM_COMPUTE_LOG_GRAPH_INFO("Switching target from " << target << " to " << forced_target << std::endl);
     }
     force_target_to_graph(graph, forced_target);
+
+    // Setup backend context
+    // TODO (COMPMID-2014) : Setup all backends needed by the graph
+    setup_requested_backend_context(ctx, forced_target);
 
     // Configure all tensors
     detail::configure_all_tensors(graph);

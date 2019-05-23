@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 {
     std::vector<TensorInfo> outputs_info(splits);
     std::vector<ITensorInfo*> outputs_info_ptr;
+    outputs_info_ptr.reserve(splits);
     for(auto &output_info : outputs_info)
     {
         outputs_info_ptr.emplace_back(&output_info);
@@ -76,6 +77,7 @@ DATA_TEST_CASE(Configuration,
     CLTensor                 src = create_tensor<CLTensor>(shape, data_type);
     std::vector<CLTensor>    dsts(splits);
     std::vector<ICLTensor *> dsts_ptrs;
+    dsts_ptrs.reserve(splits);
     for(auto &dst : dsts)
     {
         dsts_ptrs.emplace_back(&dst);

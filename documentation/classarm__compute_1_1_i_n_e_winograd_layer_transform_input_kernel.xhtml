@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -116,15 +116,18 @@ Collaboration diagram for INEWinogradLayerTransformInputKernel&lt; T &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:adf88b409a140a439b6e5479da2f4cb1f"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#adf88b409a140a439b6e5479da2f4cb1f">get_working_space_size</a> (unsigned int num_threads) const =0</td></tr>
+<tr class="memdesc:adf88b409a140a439b6e5479da2f4cb1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the working space required to perform the transformation.  <a href="#adf88b409a140a439b6e5479da2f4cb1f">More...</a><br /></td></tr>
+<tr class="separator:adf88b409a140a439b6e5479da2f4cb1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1187b798595c88feeb65d15441a4f72f"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a1187b798595c88feeb65d15441a4f72f">get_input_storage_size</a> (int num_batches, int num_channels, int num_rows, int num_cols, bool same_padding) const =0</td></tr>
 <tr class="memdesc:a1187b798595c88feeb65d15441a4f72f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TIn) to allocate for the transformed input.  <a href="#a1187b798595c88feeb65d15441a4f72f">More...</a><br /></td></tr>
 <tr class="separator:a1187b798595c88feeb65d15441a4f72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae25b6ed77179808984b17c39e078ad96"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#ae25b6ed77179808984b17c39e078ad96">get_matrix_stride</a> (const KernelShape &amp;kernel_shape, const Tensor4DShape &amp;input_shape, const PaddingType padding_type) const =0</td></tr>
 <tr class="memdesc:ae25b6ed77179808984b17c39e078ad96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the stride between matrices in the input worspace.  <a href="#ae25b6ed77179808984b17c39e078ad96">More...</a><br /></td></tr>
 <tr class="separator:ae25b6ed77179808984b17c39e078ad96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a75659fbb7d7929b4494bee1969fd4b9e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a75659fbb7d7929b4494bee1969fd4b9e">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels, const PaddingType padding, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const int matrix_stride)=0</td></tr>
-<tr class="memdesc:a75659fbb7d7929b4494bee1969fd4b9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the output transform kernel.  <a href="#a75659fbb7d7929b4494bee1969fd4b9e">More...</a><br /></td></tr>
-<tr class="separator:a75659fbb7d7929b4494bee1969fd4b9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7ca946df6f3f9ab2649e0e328a8cde2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#ae7ca946df6f3f9ab2649e0e328a8cde2">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels, const PaddingType padding, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const int matrix_stride, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *workspace)=0</td></tr>
+<tr class="memdesc:ae7ca946df6f3f9ab2649e0e328a8cde2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the output transform kernel.  <a href="#ae7ca946df6f3f9ab2649e0e328a8cde2">More...</a><br /></td></tr>
+<tr class="separator:ae7ca946df6f3f9ab2649e0e328a8cde2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57db7dcc6716d3a676a422bb2839036f"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a57db7dcc6716d3a676a422bb2839036f">~INEWinogradLayerTransformInputKernel</a> ()</td></tr>
 <tr class="memdesc:a57db7dcc6716d3a676a422bb2839036f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a57db7dcc6716d3a676a422bb2839036f">More...</a><br /></td></tr>
 <tr class="separator:a57db7dcc6716d3a676a422bb2839036f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,7 +164,7 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
 
 <p>Interface for the NEON kernel to perform Winograd input transform. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a57db7dcc6716d3a676a422bb2839036f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a57db7dcc6716d3a676a422bb2839036f">&#9670;&nbsp;</a></span>~INEWinogradLayerTransformInputKernel()</h2>
@@ -188,13 +191,13 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
 
 <p>Destructor. </p>
 
-<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00080">80</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    {</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    {</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a75659fbb7d7929b4494bee1969fd4b9e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a75659fbb7d7929b4494bee1969fd4b9e">&#9670;&nbsp;</a></span>configure()</h2>
+<a id="ae7ca946df6f3f9ab2649e0e328a8cde2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7ca946df6f3f9ab2649e0e328a8cde2">&#9670;&nbsp;</a></span>configure()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -248,7 +251,13 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const int&#160;</td>
-          <td class="paramname"><em>matrix_stride</em>&#160;</td>
+          <td class="paramname"><em>matrix_stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramname"><em>workspace</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -274,11 +283,12 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
     <tr><td class="paramdir">[in]</td><td class="paramname">padding</td><td>Padding type. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Base of output matrices. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">matrix_stride</td><td>Stride between output matrices. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">workspace</td><td><a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface.">Tensor</a> to be used as the working space during the computation. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#a326ad83c687d67a9e7cd36d1d03f7d9b">NEWinogradLayerTransformInputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#a2de2ab5ada4b5a360770b670af19b48d">NEWinogradLayerTransformInputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
 
 </div>
 </div>
@@ -406,6 +416,44 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
 
 </div>
 </div>
+<a id="adf88b409a140a439b6e5479da2f4cb1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf88b409a140a439b6e5479da2f4cb1f">&#9670;&nbsp;</a></span>get_working_space_size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual unsigned int get_working_space_size </td>
+          <td>(</td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>num_threads</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the working space required to perform the transformation. </p>
+<p>Note, the working space is only required when performing the transformation - hence it can be reused whenever the transformation is not running.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">num_threads</td><td>The greatest number of threads that will be used to execute the transform. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Size of working space required in bytes. </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#a8ccc8c221f26d7e2ed0b5cfbe4dc1b83">NEWinogradLayerTransformInputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a></li>
 </ul>
@@ -415,7 +463,7 @@ class arm_compute::INEWinogradLayerTransformInputKernel&lt; T &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml">INEWinogradLayerTransformInputKernel</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:02 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:32 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

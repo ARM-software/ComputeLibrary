@@ -10,6 +10,9 @@ var dir_59b2231210c554f4cc243709030bf1f8 =
       [ "BackendRegistry", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_backend_registry" ]
     ] ],
     [ "FunctionHelpers.h", "_function_helpers_8h.xhtml", "_function_helpers_8h" ],
+    [ "FusedConvolutionBatchNormalizationFunction.h", "_fused_convolution_batch_normalization_function_8h.xhtml", [
+      [ "FusedConvolutionBatchNormalizationFunction", "classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function.xhtml", "classarm__compute_1_1graph_1_1backends_1_1_fused_convolution_batch_normalization_function" ]
+    ] ],
     [ "Utils.h", "arm__compute_2graph_2backends_2_utils_8h.xhtml", "arm__compute_2graph_2backends_2_utils_8h" ],
     [ "ValidateHelpers.h", "_validate_helpers_8h.xhtml", "_validate_helpers_8h" ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,8 @@ Memory::Memory()
 {
 }
 
-Memory::Memory(std::shared_ptr<IMemoryRegion> memory)
-    : _region(nullptr), _region_owned(std::move(memory))
+Memory::Memory(const std::shared_ptr<IMemoryRegion> &memory)
+    : _region(nullptr), _region_owned(memory)
 {
     _region_owned = memory;
     _region       = _region_owned.get();

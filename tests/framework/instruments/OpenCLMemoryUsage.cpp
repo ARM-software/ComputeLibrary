@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,7 +192,7 @@ Instrument::MeasurementsMap OpenCLMemoryUsage::test_measurements() const
 
     size_t num_programs = CLKernelLibrary::get().get_built_programs().size();
     size_t total_size   = 0;
-    for(auto it : CLKernelLibrary::get().get_built_programs())
+    for(auto const &it : CLKernelLibrary::get().get_built_programs())
     {
         std::vector<size_t> binary_sizes = it.second.getInfo<CL_PROGRAM_BINARY_SIZES>();
         total_size                       = std::accumulate(binary_sizes.begin(), binary_sizes.end(), total_size);

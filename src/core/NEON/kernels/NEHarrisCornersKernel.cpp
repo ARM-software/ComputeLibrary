@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -719,7 +719,7 @@ void NEHarrisScoreKernel<block_size>::run(const Window &window, const ThreadInfo
 
     const size_t input_stride = _input1->info()->strides_in_bytes()[1] / element_size_from_data_type(_input1->info()->data_type());
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         (*_func)(input1.ptr(), input2.ptr(), output.ptr(), input_stride, _norm_factor, _sensitivity, _strength_thresh);
     },

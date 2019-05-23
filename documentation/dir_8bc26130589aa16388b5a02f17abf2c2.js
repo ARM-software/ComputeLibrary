@@ -20,6 +20,7 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "Distribution1D.h", "_distribution1_d_8h.xhtml", [
       [ "Distribution1D", "classarm__compute_1_1_distribution1_d.xhtml", "classarm__compute_1_1_distribution1_d" ]
     ] ],
+    [ "FunctionDescriptors.h", "_function_descriptors_8h.xhtml", "_function_descriptors_8h" ],
     [ "HOG.h", "_h_o_g_8h.xhtml", [
       [ "HOG", "classarm__compute_1_1_h_o_g.xhtml", "classarm__compute_1_1_h_o_g" ]
     ] ],
@@ -39,7 +40,8 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
       [ "IMemory", "classarm__compute_1_1_i_memory.xhtml", "classarm__compute_1_1_i_memory" ]
     ] ],
     [ "IMemoryGroup.h", "_i_memory_group_8h.xhtml", [
-      [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", "classarm__compute_1_1_i_memory_group" ]
+      [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", "classarm__compute_1_1_i_memory_group" ],
+      [ "MemoryGroupResourceScope", "classarm__compute_1_1_memory_group_resource_scope.xhtml", "classarm__compute_1_1_memory_group_resource_scope" ]
     ] ],
     [ "IMemoryManager.h", "_i_memory_manager_8h.xhtml", [
       [ "IMemoryManager", "classarm__compute_1_1_i_memory_manager.xhtml", "classarm__compute_1_1_i_memory_manager" ]

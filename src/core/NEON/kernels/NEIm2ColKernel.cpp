@@ -208,32 +208,48 @@ inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
     const int end_x     = start_x + kernel_width * dilation_x;
     const int end_y     = start_y + kernel_height * dilation_y;
     const int pad_quant = kernel_width * input_c;
-
-    for(int y = start_y; y < end_y; y += dilation_y)
+    if((start_y >= 0) && (end_y < input_h) && (start_x >= 0) && (end_x < input_w) && (dilation_x == 1))
     {
-        if(y < 0 || y >= input_h)
+        for(int y = start_y; y < end_y; y += dilation_y)
         {
-            memset(out_ptr, pad_value, pad_quant * sizeof(T));
-            out_ptr += pad_quant;
+            //optimized for no dilation and no boundary pixels
+            memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * sizeof(T));
+            out_ptr += input_c * kernel_width;
         }
-        else
+    }
+    else
+    {
+        for(int y = start_y; y < end_y; y += dilation_y)
         {
-            for(int x = start_x; x < end_x; x += dilation_x)
+            if(y < 0 || y >= input_h)
             {
-                if(x < 0 || x >= input_w)
+                memset(out_ptr, pad_value, pad_quant * sizeof(T));
+                out_ptr += pad_quant;
+            }
+            else if(dilation_x > 1 || start_x < 0 || end_x >= input_w)
+            {
+                for(int x = start_x; x < end_x; x += dilation_x)
                 {
-                    memset(out_ptr, pad_value, input_c * sizeof(T));
-                    out_ptr += input_c;
+                    if(x < 0 || x >= input_w)
+                    {
+                        memset(out_ptr, pad_value, input_c * sizeof(T));
+                        out_ptr += input_c;
+                    }
+                    else
+                    {
+                        memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), input_c * sizeof(T));
+                        out_ptr += input_c;
+                    }
                 }
-                else
-                {
-                    memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), input_c * sizeof(T));
-                    out_ptr += input_c;
-                }
+            }
+            else
+            {
+                //optimized for no dilation and no boundary pixels
+                memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + start_x * input_stride_y)), input_c * kernel_width * sizeof(T));
+                out_ptr += input_c * kernel_width;
             }
         }
     }
-
     // Append 1 if the convolution layer has biases
     if(has_bias)
     {

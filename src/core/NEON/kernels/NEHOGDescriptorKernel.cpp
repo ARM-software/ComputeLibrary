@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -695,7 +695,7 @@ void NEHOGOrientationBinningKernel::run(const Window &window, const ThreadInfo &
     Iterator phase(_input_phase, win_phase);
     Iterator out(_output, window);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const auto mag_row_ptr   = reinterpret_cast<const int16_t *>(mag.ptr());
         const auto phase_row_ptr = reinterpret_cast<const uint8_t *>(phase.ptr());

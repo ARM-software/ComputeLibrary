@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,9 @@ class CLSGEMMExample : public Example
 public:
     bool do_setup(int argc, char **argv) override
     {
-        NPYLoader npy0, npy1, npy2;
+        NPYLoader npy0;
+        NPYLoader npy1;
+        NPYLoader npy2;
         alpha = 1.0f;
         beta  = 0.0f;
 
@@ -184,7 +186,10 @@ public:
     }
 
 private:
-    CLTensor    src0{}, src1{}, src2{}, dst{};
+    CLTensor    src0{};
+    CLTensor    src1{};
+    CLTensor    src2{};
+    CLTensor    dst{};
     CLGEMM      sgemm{};
     CLTuner     tuner{};
     float       alpha{}, beta{};

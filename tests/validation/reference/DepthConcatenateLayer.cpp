@@ -38,7 +38,7 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
 {
     // Create reference
     std::vector<TensorShape> shapes;
-
+    shapes.reserve(srcs.size());
     for(const auto &src : srcs)
     {
         shapes.emplace_back(src.shape());
@@ -66,7 +66,7 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
             {
                 auto       ptr_slice = static_cast<T *>(dst(Coordinates(0, 0, slice, b)));
                 const auto num_elems_in_slice((dst.num_elements() / depth_out) * src.shape().z());
-                std::transform(ptr_slice, ptr_slice + num_elems_in_slice, ptr_slice, [src, dst](T t)
+                std::transform(ptr_slice, ptr_slice + num_elems_in_slice, ptr_slice, [src, dst](T)
                 {
                     return dst.quantization_info().quantize(src.quantization_info().dequantize(0), RoundingPolicy::TO_NEAREST_UP);
                 });

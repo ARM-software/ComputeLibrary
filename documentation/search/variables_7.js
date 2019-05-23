@@ -1,8 +1,8 @@
 var searchData=
 [
   ['gamma_5finfo',['gamma_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a1f276657689eabe34429cb9d767560cb',1,'arm_compute::test::validation']]],
-  ['gaussian3x3',['gaussian3x3',['../cl__convolution_8cpp.xhtml#a741ba5321da40184f8653e0a50ace070',1,'gaussian3x3():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a741ba5321da40184f8653e0a50ace070',1,'gaussian3x3():&#160;neon_convolution.cpp']]],
-  ['gaussian5x5',['gaussian5x5',['../cl__convolution_8cpp.xhtml#a565013cf7e49a591bacd548571951f94',1,'gaussian5x5():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a565013cf7e49a591bacd548571951f94',1,'gaussian5x5():&#160;neon_convolution.cpp']]],
+  ['gaussian3x3',['gaussian3x3',['../cl__convolution_8cpp.xhtml#a282820d9d081a04a78f602de4d41520a',1,'gaussian3x3():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a282820d9d081a04a78f602de4d41520a',1,'gaussian3x3():&#160;neon_convolution.cpp']]],
+  ['gaussian5x5',['gaussian5x5',['../cl__convolution_8cpp.xhtml#a1ff25aea7e858eb83e7af7cefb60bb82',1,'gaussian5x5():&#160;cl_convolution.cpp'],['../neon__convolution_8cpp.xhtml#a1ff25aea7e858eb83e7af7cefb60bb82',1,'gaussian5x5():&#160;neon_convolution.cpp']]],
   ['gemmlowp_5fmax_5fbound',['gemmlowp_max_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a1d5d20b31d410f43a2156fa41daba50a',1,'arm_compute::GEMMLowpOutputStageInfo']]],
   ['gemmlowp_5fmin_5fbound',['gemmlowp_min_bound',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a7d24a8e7bad9b4d51aae3af31072d896',1,'arm_compute::GEMMLowpOutputStageInfo']]],
   ['gemmlowp_5fmultiplier',['gemmlowp_multiplier',['../structarm__compute_1_1_g_e_m_m_lowp_output_stage_info.xhtml#a2aa2f2611c2827e8e44bc6d5c153fbe3',1,'arm_compute::GEMMLowpOutputStageInfo']]],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -308,14 +308,16 @@ private:
  *
  * @note If kernel->kernel() is empty then the function will return without adding anything to the queue.
  *
- * @param[in,out] queue    OpenCL command queue.
- * @param[in]     kernel   Kernel to enqueue
- * @param[in]     window   Window the kernel has to process.
- * @param[in]     lws_hint Local workgroup size requested. Default is based on the device target.
+ * @param[in,out] queue                OpenCL command queue.
+ * @param[in]     kernel               Kernel to enqueue
+ * @param[in]     window               Window the kernel has to process.
+ * @param[in]     lws_hint             (Optional) Local workgroup size requested. Default is based on the device target.
+ * @param[in]     use_dummy_work_items (Optional) Use dummy work items in order to have two dimensional power of two NDRange. Default is false
+ *                                     Note: it is kernel responsibility to check if the work-item is out-of-range
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */
-void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange());
+void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange(), bool use_dummy_work_items = false);
 
 /** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
  *

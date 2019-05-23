@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,9 @@ namespace arm_compute
 {
 namespace graph
 {
-DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, int depth_multiplier, DepthwiseConvolutionMethod method)
-    : _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _fused_activation()
+DepthwiseConvolutionLayerNode::DepthwiseConvolutionLayerNode(PadStrideInfo info, int depth_multiplier, DepthwiseConvolutionMethod method,
+                                                             QuantizationInfo out_quant_info)
+    : _info(std::move(info)), _depth_multiplier(depth_multiplier), _method(method), _out_quant_info(out_quant_info), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -85,10 +86,11 @@ TensorDescriptor DepthwiseConvolutionLayerNode::compute_output_descriptor(const 
 
     std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
+    const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::WIDTH), output_width);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::HEIGHT), output_height);
-    output_descriptor.shape.set(get_dimension_idx(output_descriptor, DataLayoutDimension::CHANNEL), input_channels * depth_multiplier);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::WIDTH), output_width);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::HEIGHT), output_height);
+    output_descriptor.shape.set(get_dimension_idx(data_layout, DataLayoutDimension::CHANNEL), input_channels * depth_multiplier);
 
     return output_descriptor;
 }
@@ -113,7 +115,13 @@ TensorDescriptor DepthwiseConvolutionLayerNode::configure_output(size_t idx) con
 
     ARM_COMPUTE_ERROR_ON(src == nullptr || weights == nullptr);
 
-    return compute_output_descriptor(src->desc(), weights->desc(), _info, _depth_multiplier);
+    TensorDescriptor output_info = compute_output_descriptor(src->desc(), weights->desc(), _info, _depth_multiplier);
+    if(!_out_quant_info.empty())
+    {
+        output_info.quant_info = _out_quant_info;
+    }
+
+    return output_info;
 }
 
 NodeType DepthwiseConvolutionLayerNode::type() const

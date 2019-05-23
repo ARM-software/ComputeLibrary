@@ -9,7 +9,7 @@ var searchData=
   ['batchnormalizationlayer_2eh',['BatchNormalizationLayer.h',['../_batch_normalization_layer_8h.xhtml',1,'']]],
   ['batchnormalizationlayernode_2ecpp',['BatchNormalizationLayerNode.cpp',['../_batch_normalization_layer_node_8cpp.xhtml',1,'']]],
   ['batchnormalizationlayernode_2eh',['BatchNormalizationLayerNode.h',['../_batch_normalization_layer_node_8h.xhtml',1,'']]],
-  ['batchtospacelayer_2ecpp',['BatchToSpaceLayer.cpp',['../_c_l_2_batch_to_space_layer_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_batch_to_space_layer_8cpp.xhtml',1,'(Global Namespace)']]],
+  ['batchtospacelayer_2ecpp',['BatchToSpaceLayer.cpp',['../_c_l_2_batch_to_space_layer_8cpp.xhtml',1,'(Global Namespace)'],['../_n_e_o_n_2_batch_to_space_layer_8cpp.xhtml',1,'(Global Namespace)'],['../reference_2_batch_to_space_layer_8cpp.xhtml',1,'(Global Namespace)']]],
   ['batchtospacelayer_2eh',['BatchToSpaceLayer.h',['../_batch_to_space_layer_8h.xhtml',1,'']]],
   ['bifrosttuner_2ecpp',['BifrostTuner.cpp',['../_bifrost_tuner_8cpp.xhtml',1,'']]],
   ['bifrosttuner_2eh',['BifrostTuner.h',['../_bifrost_tuner_8h.xhtml',1,'']]],

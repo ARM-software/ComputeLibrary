@@ -1,8 +1,9 @@
 <map id="arm_compute/core/CL" name="arm_compute/core/CL">
-<area shape="rect" id="node2" href="dir_f906bbebc596bc606d589ccb705e6595.xhtml" title="kernels" alt="" coords="37,159,109,207"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000002_000005.xhtml" title="123" alt="" coords="69,133,94,148"/>
-<area shape="rect" id="node3" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="141,159,213,207"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000002_000132.xhtml" title="1" alt="" coords="139,133,149,147"/>
-<area shape="rect" id="clust2" href="dir_1633709b037eda5b8477677909f78129.xhtml" alt="" coords="27,52,120,217"/>
-<area shape="rect" id="clust1" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="16,16,131,228"/>
+<area shape="rect" id="node3" href="dir_f906bbebc596bc606d589ccb705e6595.xhtml" title="kernels" alt="" coords="133,159,205,207"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000002_000008.xhtml" title="131" alt="" coords="165,133,190,148"/>
+<area shape="rect" id="node4" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="237,159,309,207"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000002_000141.xhtml" title="1" alt="" coords="235,133,245,147"/>
+<area shape="rect" id="node2" href="dir_2d287d0b1a82c88d991f218c8bb4dd9a.xhtml" title="gemm" alt="" coords="37,63,109,111"/>
+<area shape="rect" id="clust2" href="dir_1633709b037eda5b8477677909f78129.xhtml" alt="" coords="27,52,216,217"/>
+<area shape="rect" id="clust1" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="16,16,227,228"/>
 </map>

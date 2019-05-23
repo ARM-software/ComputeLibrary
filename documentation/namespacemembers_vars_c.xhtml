@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -135,11 +135,29 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 <li>CLCopyFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a853fdc8b5cffca96a145ad303d57ecfb">arm_compute::test::validation</a>
 </li>
+<li>CLCropResizeFixture&lt; int16_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#accec09308249e774d035fc017c30aaae">arm_compute::test::validation</a>
+</li>
+<li>CLCropResizeFixture&lt; int32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a045c17a05b1076fb280107d43ab6a87b">arm_compute::test::validation</a>
+</li>
+<li>CLCropResizeFixture&lt; uint16_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9c5f645acf5c43ba32938abb6463ec7d">arm_compute::test::validation</a>
+</li>
+<li>CLCropResizeFixture&lt; uint32_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a998c9b55e3e176a56ae13f12a5b0a846">arm_compute::test::validation</a>
+</li>
 <li>CLDeconvolutionLayerFixture1x1&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2a2f7e393cc29dbba49d0633ff127c82">arm_compute::test::validation</a>
 </li>
 <li>CLDeconvolutionLayerFixture1x1&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a01aabd69a9c0900af5bdd9d020c74124">arm_compute::test::validation</a>
+</li>
+<li>CLDeconvolutionLayerFixture2x2&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a74fef0372b85ac0556d59f576c9c2578">arm_compute::test::validation</a>
+</li>
+<li>CLDeconvolutionLayerFixture2x2&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a551172970e5469af9cacdacd60783137">arm_compute::test::validation</a>
 </li>
 <li>CLDeconvolutionLayerFixture3x3&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac674933f37800e8d7724ac638be64085">arm_compute::test::validation</a>
@@ -153,8 +171,23 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 <li>CLDeconvolutionLayerQuantizedFixture1x1&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a24a1048f0303246c74278e6387dfeadc">arm_compute::test::validation</a>
 </li>
+<li>CLDeconvolutionLayerQuantizedFixture2x2&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af8e781f7e45f0d687a575d103ed69739">arm_compute::test::validation</a>
+</li>
 <li>CLDeconvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a08f9efc52919f05d30263bf8a0f72642">arm_compute::test::validation</a>
+</li>
+<li>CLDepthwiseConvolutionLayerFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a98594c5ca9886c14365d813714611c79">arm_compute::test::validation</a>
+</li>
+<li>CLDepthwiseConvolutionLayerFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2437c44063526d22feb88404f431c5c8">arm_compute::test::validation</a>
+</li>
+<li>CLDepthwiseConvolutionLayerQuantizedFixture&lt; uint8_t &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a46215efb57d85d73b814e3a5b3f987c2">arm_compute::test::validation</a>
+</li>
+<li>CLDequantizationLayerFixture&lt; float &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a51fc165ac27a83c47e8aa8dbd6830526">arm_compute::test::validation</a>
 </li>
 <li>CLDirectConvolutionLayerFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2088b98fe9b02606cf2c11c631b1a5c8">arm_compute::test::validation</a>
@@ -194,6 +227,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 </li>
 <li>CLGEMMMatrixMultiplyReshapedFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a28fa6d5e29c077ffe9ea832d28db32d6">arm_compute::test::validation</a>
+</li>
+<li>CLGEMMMatrixMultiplyReshapedOnlyRHSFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7f4ef4d4608046d835a2bdf829b45054">arm_compute::test::validation</a>
 </li>
 <li>CLGEMMOutput3DFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1f88e4be563eecf18673c5a3d2022983">arm_compute::test::validation</a>
@@ -240,9 +276,6 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 <li>CLPaddingFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9a76a99dc39bd0f4667e7475688d049a">arm_compute::test::validation</a>
 </li>
-<li>CLPaddingFixture&lt; int8_t &gt;
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a379eed512718766eda22984e9878243e">arm_compute::test::validation</a>
-</li>
 <li>CLPaddingFixture&lt; uint8_t &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad01b9f5c965972a9cf0917cf7abe7a83">arm_compute::test::validation</a>
 </li>
@@ -257,6 +290,9 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 </li>
 <li>CLPoolingLayerFixture&lt; half &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a563e036c5c2976f911c0f33d91f328ec">arm_compute::test::validation</a>
+</li>
+<li>CLQuantizationLayerFixture&lt; half &gt;
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2059305e61bbc7aa4bea5ca0cb463fec">arm_compute::test::validation</a>
 </li>
 <li>CLRangeFixture&lt; float &gt;
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a990f1d5d2348970b3301e3166a404b4f">arm_compute::test::validation</a>
@@ -352,10 +388,13 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 : <a class="el" href="namespacearm__compute.xhtml#a3fed059965fe44cbe7ed4091d6b63acf">arm_compute</a>
 </li>
 <li>conv
-: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adab2e84e4e20f041fdcd075e2864b132">arm_compute::test::validation</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a006546051719c5fb4b20c966a26b9c76">arm_compute::test::validation</a>
 </li>
 <li>conv_bias_info
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0c672a1c9b4e083cfd8112095bac8a79">arm_compute::test::validation</a>
+</li>
+<li>conv_dataset_dft
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a03c574d14dd0623ae30cf069c53a7f25">arm_compute::test::validation</a>
 </li>
 <li>conv_info
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acbf8f8a6dd185de04c1981c57a8963cf">arm_compute::test::validation</a>
@@ -372,7 +411,7 @@ $(document).ready(function(){initNavTree('namespacemembers_vars_c.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:07 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

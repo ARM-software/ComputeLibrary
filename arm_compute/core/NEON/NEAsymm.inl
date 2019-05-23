@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,13 @@ inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
     const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
     const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
     return vrshlq_s32(fixed_up_x, shift_vec);
+}
+
+inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
+{
+    const int32_t mask      = (1 << exponent) - 1;
+    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
+    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
 }
 
 inline qasymm8x16_t vmlaq_qasymm8(qasymm8x16_t vd, float32x4_t vs, float32x4_t vo)

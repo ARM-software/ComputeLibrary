@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -269,10 +269,10 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml#l00035">35</a> of file <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml">DetectionOutputLayerNode.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    : _info(detection_info)</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    _input_edges.resize(3, <a class="code" href="namespacearm__compute_1_1graph.xhtml#a8e0b093eda0649ddbce791bb5076104f">EmptyEdgeID</a>);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _outputs.resize(1, <a class="code" href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">NullTensorID</a>);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1graph_xhtml_a8e0b093eda0649ddbce791bb5076104f"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#a8e0b093eda0649ddbce791bb5076104f">arm_compute::graph::EmptyEdgeID</a></div><div class="ttdeci">constexpr EdgeID EmptyEdgeID</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00070">Types.h:70</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1graph_xhtml_aa94938a3eb11fda4724c362c53c28f24"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph::NullTensorID</a></div><div class="ttdeci">constexpr TensorID NullTensorID</div><div class="ttdoc">Constant NodeID specifying an equivalent of null node.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00066">Types.h:66</a></div></div>
+<div class="fragment"><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    : _info(detection_info)</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    _input_edges.resize(3, <a class="code" href="namespacearm__compute_1_1graph.xhtml#a8e0b093eda0649ddbce791bb5076104f">EmptyEdgeID</a>);</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _outputs.resize(1, <a class="code" href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">NullTensorID</a>);</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1graph_xhtml_a8e0b093eda0649ddbce791bb5076104f"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#a8e0b093eda0649ddbce791bb5076104f">arm_compute::graph::EmptyEdgeID</a></div><div class="ttdeci">constexpr EdgeID EmptyEdgeID</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00072">Types.h:72</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1graph_xhtml_aa94938a3eb11fda4724c362c53c28f24"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph::NullTensorID</a></div><div class="ttdeci">constexpr TensorID NullTensorID</div><div class="ttdoc">Constant NodeID specifying an equivalent of null node.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00068">Types.h:68</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00070">arm_compute::graph::EmptyEdgeID</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00066">arm_compute::graph::NullTensorID</a>.</p>
+<p class="reference">References <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00072">arm_compute::graph::EmptyEdgeID</a>, and <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00068">arm_compute::graph::NullTensorID</a>.</p>
 
 </div>
 </div>
@@ -437,7 +437,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml#l00042">42</a> of file <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml">DetectionOutputLayerNode.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;{</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordflow">return</span> _info;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00502">arm_compute::graph::backends::detail::create_detection_output_layer()</a>, <a class="el" href="_c_l_functions_factory_8cpp_source.xhtml#l00116">arm_compute::graph::backends::detail::create_detection_output_layer&lt; CPPDetectionOutputLayer, CLTargetInfo &gt;()</a>, and <a class="el" href="_validate_helpers_8h_source.xhtml#l00215">arm_compute::graph::backends::detail::validate_detection_output_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00570">arm_compute::graph::backends::detail::create_detection_output_layer()</a>, <a class="el" href="_c_l_functions_factory_8cpp_source.xhtml#l00125">arm_compute::graph::backends::detail::create_detection_output_layer&lt; CPPDetectionOutputLayer, CLTargetInfo &gt;()</a>, and <a class="el" href="_validate_helpers_8h_source.xhtml#l00216">arm_compute::graph::backends::detail::validate_detection_output_layer()</a>.</p>
 
 </div>
 </div>
@@ -476,9 +476,9 @@ Static Public Member Functions</h2></td></tr>
 <div class="ttc" id="classarm__compute_1_1graph_1_1_i_node_xhtml_a6a156d1ea7a01d8b27131f30aacaf40b"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_i_node.xhtml#a6a156d1ea7a01d8b27131f30aacaf40b">arm_compute::graph::INode::input_id</a></div><div class="ttdeci">TensorID input_id(size_t idx) const</div><div class="ttdoc">Returns the tensor ID of a given input of the node.</div><div class="ttdef"><b>Definition:</b> <a href="_i_node_8cpp_source.xhtml#l00137">INode.cpp:137</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_adbf67dcee294e673cf796f1ed8aeb6a4"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">arm_compute::test::validation::dst</a></div><div class="ttdeci">CLTensor dst</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_absolute_difference_8cpp_source.xhtml#l00102">AbsoluteDifference.cpp:102</a></div></div>
 <div class="ttc" id="classarm__compute_1_1graph_1_1_i_node_xhtml_a339f9817d95cb065b7670d35c03f4d88"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_i_node.xhtml#a339f9817d95cb065b7670d35c03f4d88">arm_compute::graph::INode::output_id</a></div><div class="ttdeci">TensorID output_id(size_t idx) const</div><div class="ttdoc">Returns the tensor ID of a given output of the node.</div><div class="ttdef"><b>Definition:</b> <a href="_i_node_8cpp_source.xhtml#l00144">INode.cpp:144</a></div></div>
-<div class="ttc" id="namespacearm__compute_1_1graph_xhtml_aa94938a3eb11fda4724c362c53c28f24"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph::NullTensorID</a></div><div class="ttdeci">constexpr TensorID NullTensorID</div><div class="ttdoc">Constant NodeID specifying an equivalent of null node.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00066">Types.h:66</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1graph_xhtml_aa94938a3eb11fda4724c362c53c28f24"><div class="ttname"><a href="namespacearm__compute_1_1graph.xhtml#aa94938a3eb11fda4724c362c53c28f24">arm_compute::graph::NullTensorID</a></div><div class="ttdeci">constexpr TensorID NullTensorID</div><div class="ttdoc">Constant NodeID specifying an equivalent of null node.</div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2graph_2_types_8h_source.xhtml#l00068">Types.h:68</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml#l00071">DetectionOutputLayerNode::configure_output()</a>, <a class="el" href="_c_l_2_absolute_difference_8cpp_source.xhtml#l00102">arm_compute::test::validation::dst</a>, <a class="el" href="_i_node_8cpp_source.xhtml#l00137">INode::input_id()</a>, <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00066">arm_compute::graph::NullTensorID</a>, <a class="el" href="_i_node_8cpp_source.xhtml#l00158">INode::output()</a>, and <a class="el" href="_i_node_8cpp_source.xhtml#l00144">INode::output_id()</a>.</p>
+<p class="reference">References <a class="el" href="_error_8h_source.xhtml#l00337">ARM_COMPUTE_ERROR_ON</a>, <a class="el" href="_detection_output_layer_node_8cpp_source.xhtml#l00071">DetectionOutputLayerNode::configure_output()</a>, <a class="el" href="_c_l_2_absolute_difference_8cpp_source.xhtml#l00102">arm_compute::test::validation::dst</a>, <a class="el" href="_i_node_8cpp_source.xhtml#l00137">INode::input_id()</a>, <a class="el" href="arm__compute_2graph_2_types_8h_source.xhtml#l00068">arm_compute::graph::NullTensorID</a>, <a class="el" href="_i_node_8cpp_source.xhtml#l00158">INode::output()</a>, and <a class="el" href="_i_node_8cpp_source.xhtml#l00144">INode::output_id()</a>.</p>
 
 </div>
 </div>
@@ -515,7 +515,7 @@ Static Public Member Functions</h2></td></tr>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16ae1b0b91c003f871664a4e289977ef02e">arm_compute::graph::DetectionOutputLayer</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00502">arm_compute::graph::backends::detail::create_detection_output_layer()</a>, and <a class="el" href="_c_l_functions_factory_8cpp_source.xhtml#l00116">arm_compute::graph::backends::detail::create_detection_output_layer&lt; CPPDetectionOutputLayer, CLTargetInfo &gt;()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_function_helpers_8h_source.xhtml#l00570">arm_compute::graph::backends::detail::create_detection_output_layer()</a>, and <a class="el" href="_c_l_functions_factory_8cpp_source.xhtml#l00125">arm_compute::graph::backends::detail::create_detection_output_layer&lt; CPPDetectionOutputLayer, CLTargetInfo &gt;()</a>.</p>
 
 </div>
 </div>
@@ -529,7 +529,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_detection_output_layer_node.xhtml">DetectionOutputLayerNode</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:04 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:35 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

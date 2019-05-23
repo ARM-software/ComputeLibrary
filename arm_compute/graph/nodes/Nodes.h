@@ -38,6 +38,7 @@
 #include "arm_compute/graph/nodes/EltwiseLayerNode.h"
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
+#include "arm_compute/graph/nodes/FusedConvolutionBatchNormalizationNode.h"
 #include "arm_compute/graph/nodes/GenerateProposalsLayerNode.h"
 #include "arm_compute/graph/nodes/InputNode.h"
 #include "arm_compute/graph/nodes/NormalizationLayerNode.h"
@@ -54,6 +55,7 @@
 #include "arm_compute/graph/nodes/SliceLayerNode.h"
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
+#include "arm_compute/graph/nodes/StackLayerNode.h"
 #include "arm_compute/graph/nodes/UpsampleLayerNode.h"
 #include "arm_compute/graph/nodes/YOLOLayerNode.h"
 

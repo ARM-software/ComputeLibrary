@@ -44,6 +44,7 @@ class DummyNode;
 class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
+class FusedConvolutionBatchNormalizationNode;
 class GenerateProposalsLayerNode;
 class InputNode;
 class NormalizationLayerNode;
@@ -60,6 +61,7 @@ class ROIAlignLayerNode;
 class SoftmaxLayerNode;
 class SliceLayerNode;
 class SplitLayerNode;
+class StackLayerNode;
 class UpsampleLayerNode;
 class YOLOLayerNode;
 } // namespace graph

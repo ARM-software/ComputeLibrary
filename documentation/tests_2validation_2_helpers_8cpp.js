@@ -1,7 +1,5 @@
 var tests_2validation_2_helpers_8cpp =
 [
-    [ "calculate_depth_concatenate_shape", "tests_2validation_2_helpers_8cpp.xhtml#adb95f9d6a10468f65e49ee944ce727d7", null ],
-    [ "calculate_width_concatenate_shape", "tests_2validation_2_helpers_8cpp.xhtml#a8699515548dd02392dce1e359767408c", null ],
     [ "canny_edge_parameters", "tests_2validation_2_helpers_8cpp.xhtml#abd7b375e25d1b41ff9da321024c829ce", null ],
     [ "convert_from_asymmetric", "tests_2validation_2_helpers_8cpp.xhtml#ab24849be91cfb00a72f7a61a7e00fdb7", null ],
     [ "convert_to_asymmetric", "tests_2validation_2_helpers_8cpp.xhtml#a291a16e64b05bdf4d08e1240d5bb286a", null ],

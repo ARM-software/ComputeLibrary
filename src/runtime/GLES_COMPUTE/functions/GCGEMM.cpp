@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -162,7 +162,7 @@ void GCGEMM::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     if(_is_interleaved_transposed)
     {
@@ -187,8 +187,6 @@ void GCGEMM::run()
         GCScheduler::get().memory_barrier();
         GCScheduler::get().dispatch(_ma_kernel);
     }
-
-    _memory_group.release();
 }
 
 void GCGEMM::prepare()

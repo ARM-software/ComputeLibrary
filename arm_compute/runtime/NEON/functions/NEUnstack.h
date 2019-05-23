@@ -68,8 +68,8 @@ public:
     void run() override;
 
 private:
-    unsigned int                      _num_slices;
-    std::unique_ptr<NEStridedSlice[]> _strided_slice_vector;
+    unsigned int                _num_slices;
+    std::vector<NEStridedSlice> _strided_slice_vector;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEUNSTACK_H__ */

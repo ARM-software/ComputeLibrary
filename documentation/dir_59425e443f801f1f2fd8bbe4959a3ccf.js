@@ -33,6 +33,9 @@ var dir_59425e443f801f1f2fd8bbe4959a3ccf =
       [ "RawTensor", "classarm__compute_1_1test_1_1_raw_tensor.xhtml", "classarm__compute_1_1test_1_1_raw_tensor" ]
     ] ],
     [ "SimpleTensor.h", "_simple_tensor_8h.xhtml", "_simple_tensor_8h" ],
+    [ "SimpleTensorAccessor.h", "_simple_tensor_accessor_8h.xhtml", [
+      [ "SimpleTensorAccessor", "classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml", "classarm__compute_1_1test_1_1_simple_tensor_accessor" ]
+    ] ],
     [ "SimpleTensorPrinter.h", "_simple_tensor_printer_8h.xhtml", null ],
     [ "TensorCache.h", "_tensor_cache_8h.xhtml", [
       [ "TensorCache", "classarm__compute_1_1test_1_1_tensor_cache.xhtml", "classarm__compute_1_1test_1_1_tensor_cache" ]

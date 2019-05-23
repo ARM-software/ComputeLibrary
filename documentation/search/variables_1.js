@@ -14,5 +14,6 @@ var searchData=
   ['alpha',['alpha',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3161c2c93c655dd30953372064ec627b',1,'arm_compute::test::validation']]],
   ['anchor',['anchor',['../structarm__compute_1_1_valid_region.xhtml#a55a69b397082accd94221dd10b722cf7',1,'arm_compute::ValidRegion']]],
   ['are_5fweights_5freshaped',['are_weights_reshaped',['../structarm__compute_1_1_fully_connected_layer_info.xhtml#a146a7be9d813ad80abb72a0bf6566cbc',1,'arm_compute::FullyConnectedLayerInfo']]],
-  ['axis',['axis',['../namespacearm__compute_1_1test_1_1validation.xhtml#accc088009d44c521706aa98d6387ee21',1,'arm_compute::test::validation']]]
+  ['axes',['axes',['../structarm__compute_1_1_f_f_t2_d_info.xhtml#acb160c2584aaa6bc7ff57c20dcfdc309',1,'arm_compute::FFT2DInfo']]],
+  ['axis',['axis',['../structarm__compute_1_1_f_f_t_digit_reverse_kernel_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFTDigitReverseKernelInfo::axis()'],['../structarm__compute_1_1_f_f_t_radix_stage_kernel_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFTRadixStageKernelInfo::axis()'],['../structarm__compute_1_1graph_1_1descriptors_1_1_concat_layer_descriptor.xhtml#a96ae1e009deb669b33e5683acd5345ca',1,'arm_compute::graph::descriptors::ConcatLayerDescriptor::axis()'],['../structarm__compute_1_1_f_f_t1_d_info.xhtml#a6f637817d19a0cca1f1d984f26958c79',1,'arm_compute::FFT1DInfo::axis()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#accc088009d44c521706aa98d6387ee21',1,'arm_compute::test::validation::axis()']]]
 ];

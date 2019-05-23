@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,8 +35,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src);
+template <typename T>
+SimpleTensor<uint8_t> quantization_layer(const SimpleTensor<T> &src, const QuantizationInfo quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

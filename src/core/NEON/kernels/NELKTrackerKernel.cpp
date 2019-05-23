@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -405,9 +405,9 @@ void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
 
     init_keypoints(list_start, list_end);
 
-    const int buffer_size = _window_dimension * _window_dimension;
-    int32_t   bilinear_ix[buffer_size];
-    int32_t   bilinear_iy[buffer_size];
+    const int            buffer_size = _window_dimension * _window_dimension;
+    std::vector<int32_t> bilinear_ix(buffer_size);
+    std::vector<int32_t> bilinear_iy(buffer_size);
 
     const int half_window = _window_dimension / 2;
 
@@ -444,7 +444,7 @@ void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
         int iA12 = 0;
         int iA22 = 0;
 
-        std::tie(iA11, iA12, iA22) = compute_spatial_gradient_matrix(old_keypoint, bilinear_ix, bilinear_iy);
+        std::tie(iA11, iA12, iA22) = compute_spatial_gradient_matrix(old_keypoint, bilinear_ix.data(), bilinear_iy.data());
 
         const float A11 = iA11 * FLT_SCALE;
         const float A12 = iA12 * FLT_SCALE;
@@ -490,7 +490,7 @@ void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
             int ib1 = 0;
             int ib2 = 0;
 
-            std::tie(ib1, ib2) = compute_image_mismatch_vector(old_keypoint, new_keypoint, bilinear_ix, bilinear_iy);
+            std::tie(ib1, ib2) = compute_image_mismatch_vector(old_keypoint, new_keypoint, bilinear_ix.data(), bilinear_iy.data());
 
             double b1 = ib1 * FLT_SCALE;
             double b2 = ib2 * FLT_SCALE;

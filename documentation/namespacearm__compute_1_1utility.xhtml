@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -195,7 +195,7 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_utility_8h_source.xhtml#l00177">177</a> of file <a class="el" href="_utility_8h_source.xhtml">Utility.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;{</div><div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <span class="keywordflow">return</span> (reinterpret_cast&lt;std::uintptr_t&gt;(ptr) % alignment) == 0;</div><div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00085">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="src_2runtime_2_tensor_allocator_8cpp_source.xhtml#l00152">TensorAllocator::import_memory()</a>, and <a class="el" href="tests_2validation_2_n_e_o_n_2_u_n_i_t_2_tensor_allocator_8cpp_source.xhtml#l00144">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -441,7 +441,7 @@ Functions</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="_utility_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_utility_8h_source.xhtml">Utility.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;{</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;}</div></div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_tensor_shape_8h_source.xhtml#l00210">TensorShape::broadcast_shape()</a>, <a class="el" href="_i_tensor_info_8h_source.xhtml#l00247">ITensorInfo::broadcast_shape_and_valid_region()</a>, <a class="el" href="_execution_helpers_8cpp_source.xhtml#l00252">arm_compute::graph::detail::call_all_output_node_accessors()</a>, <a class="el" href="_layers_8h_source.xhtml#l00227">ConcatLayer::ConcatLayer()</a>, <a class="el" href="_utility_8h_source.xhtml#l00104">for_each()</a>, <a class="el" href="_grouped_convolution_mutator_8cpp_source.xhtml#l00106">GroupedConvolutionMutator::mutate()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00402">arm_compute::update_window_and_padding()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_tensor_shape_8h_source.xhtml#l00210">TensorShape::broadcast_shape()</a>, <a class="el" href="_i_tensor_info_8h_source.xhtml#l00247">ITensorInfo::broadcast_shape_and_valid_region()</a>, <a class="el" href="_execution_helpers_8cpp_source.xhtml#l00205">arm_compute::graph::detail::call_all_input_node_accessors()</a>, <a class="el" href="_execution_helpers_8cpp_source.xhtml#l00255">arm_compute::graph::detail::call_all_output_node_accessors()</a>, <a class="el" href="_layers_8h_source.xhtml#l00233">ConcatLayer::ConcatLayer()</a>, <a class="el" href="_utility_8h_source.xhtml#l00104">for_each()</a>, <a class="el" href="_grouped_convolution_mutator_8cpp_source.xhtml#l00106">GroupedConvolutionMutator::mutate()</a>, <a class="el" href="_layers_8h_source.xhtml#l01052">StackLayer::StackLayer()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00402">arm_compute::update_window_and_padding()</a>.</p>
 
 </div>
 </div>
@@ -600,7 +600,7 @@ Functions</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="_utility_8h_source.xhtml#l00188">188</a> of file <a class="el" href="_utility_8h_source.xhtml">Utility.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;{</div><div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    std::transform(<span class="keywordtype">string</span>.begin(), <span class="keywordtype">string</span>.end(), <span class="keywordtype">string</span>.begin(), [](<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> c)</div><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    {</div><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute_1_1utility.xhtml#abb96ad5c7071ec3a47ea5f07e817a636">std::tolower</a>(c);</div><div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    });</div><div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    <span class="keywordflow">return</span> string;</div><div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1utility_xhtml_abb96ad5c7071ec3a47ea5f07e817a636"><div class="ttname"><a href="namespacearm__compute_1_1utility.xhtml#abb96ad5c7071ec3a47ea5f07e817a636">arm_compute::utility::tolower</a></div><div class="ttdeci">std::string tolower(std::string string)</div><div class="ttdoc">Convert string to lower case.</div><div class="ttdef"><b>Definition:</b> <a href="_utility_8h_source.xhtml#l00188">Utility.h:188</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="_c_l_warp_perspective_kernel_8cpp_source.xhtml#l00061">CLWarpPerspectiveKernel::configure()</a>, <a class="el" href="_c_l_warp_affine_kernel_8cpp_source.xhtml#l00061">CLWarpAffineKernel::configure()</a>, <a class="el" href="_c_l_scale_kernel_8cpp_source.xhtml#l00161">CLScaleKernel::configure()</a>, <a class="el" href="_g_c_scale_kernel_8cpp_source.xhtml#l00047">GCScaleKernel::configure()</a>, <a class="el" href="_c_l_non_linear_filter_kernel_8cpp_source.xhtml#l00056">CLNonLinearFilterKernel::configure()</a>, <a class="el" href="_c_l_remap_kernel_8cpp_source.xhtml#l00050">CLRemapKernel::configure()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00056">arm_compute::data_layout_from_name()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00032">arm_compute::data_type_from_name()</a>, <a class="el" href="src_2core_2_utils_8cpp_source.xhtml#l00322">arm_compute::lower_string()</a>, and <a class="el" href="_type_loader_8cpp_source.xhtml#l00080">arm_compute::graph::target_from_name()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="_c_l_warp_perspective_kernel_8cpp_source.xhtml#l00061">CLWarpPerspectiveKernel::configure()</a>, <a class="el" href="_c_l_warp_affine_kernel_8cpp_source.xhtml#l00061">CLWarpAffineKernel::configure()</a>, <a class="el" href="_c_l_scale_kernel_8cpp_source.xhtml#l00161">CLScaleKernel::configure()</a>, <a class="el" href="_g_c_scale_kernel_8cpp_source.xhtml#l00047">GCScaleKernel::configure()</a>, <a class="el" href="_c_l_non_linear_filter_kernel_8cpp_source.xhtml#l00056">CLNonLinearFilterKernel::configure()</a>, <a class="el" href="_c_l_remap_kernel_8cpp_source.xhtml#l00050">CLRemapKernel::configure()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00104">arm_compute::graph::Convolution_method_from_name()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00056">arm_compute::data_layout_from_name()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00032">arm_compute::data_type_from_name()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00129">arm_compute::graph::depthwise_convolution_method_from_name()</a>, <a class="el" href="src_2core_2_utils_8cpp_source.xhtml#l00322">arm_compute::lower_string()</a>, <a class="el" href="_type_loader_8cpp_source.xhtml#l00080">arm_compute::graph::target_from_name()</a>, and <a class="el" href="_c_l_tuner_types_8h_source.xhtml#l00047">arm_compute::tuner_mode_from_name()</a>.</p>
 
 </div>
 </div>
@@ -610,7 +610,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1utility.xhtml">utility</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:07 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:37 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

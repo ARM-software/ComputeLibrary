@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -141,7 +141,7 @@ CLSobel7x7VertKernel::CLSobel7x7VertKernel()
 
 BorderSize CLSobel7x7VertKernel::border_size() const
 {
-    return BorderSize(3, 0);
+    return BorderSize{ 3, 0 };
 }
 
 void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *input_y, ICLTensor *output_x, ICLTensor *output_y, bool border_undefined)

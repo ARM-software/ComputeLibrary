@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,23 +28,23 @@
 using namespace arm_compute;
 
 LutAllocator::LutAllocator()
-    : _buffer(nullptr)
+    : _buffer()
 {
 }
 
 uint8_t *LutAllocator::data() const
 {
-    return _buffer.get();
+    return _buffer.data();
 }
 
 void LutAllocator::allocate()
 {
-    _buffer = arm_compute::support::cpp14::make_unique<uint8_t[]>(size());
+    _buffer.resize(size());
 }
 
 uint8_t *LutAllocator::lock()
 {
-    return _buffer.get();
+    return _buffer.data();
 }
 
 void LutAllocator::unlock()

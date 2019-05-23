@@ -2,6 +2,8 @@ var searchData=
 [
   ['r',['R',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aae1e1d3d40573127e9ee0480caf1283d6',1,'arm_compute']]],
   ['range',['RANGE',['../namespacearm__compute.xhtml#a3e6b23e675649b83240691abbc42a649a01036ddcc971d02f6c32c3da31a119f2',1,'arm_compute']]],
+  ['rapid',['RAPID',['../namespacearm__compute.xhtml#ae76ef5bd3ad69f7380ebb3ac6033ec5caba44d3559b36fc1c14e5752bccce1eef',1,'arm_compute']]],
+  ['reflect',['REFLECT',['../namespacearm__compute.xhtml#a14d24d90ab4ba2956e92e27890ba4c91ae4f6a05f82ed398f984f4bc1a55838df',1,'arm_compute']]],
   ['relu',['RELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaad346bb4679d29be241279f15d7795c1c',1,'arm_compute::ActivationLayerInfo']]],
   ['reorglayer',['ReorgLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16af119c4b7a889a65e39ef53786dce0c84',1,'arm_compute::graph']]],
   ['replicate',['REPLICATE',['../namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a4ef59320fbe90fe47d40f1f71e4c5daa',1,'arm_compute']]],

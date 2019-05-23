@@ -128,9 +128,25 @@ enum class DataLayoutDimension
 /** Available ConvolutionMethod*/
 enum class ConvolutionMethod
 {
-    GEMM,    /**< Convolution using GEMM */
-    DIRECT,  /**< Direct convolution */
-    WINOGRAD /**< Convolution using Winograd */
+    GEMM,     /**< Convolution using GEMM */
+    DIRECT,   /**< Direct convolution */
+    WINOGRAD, /**< Convolution using Winograd */
+    FFT       /**< Convolution using FFT */
+};
+
+/** Available DeconvolutionMethod*/
+enum class DeconvolutionMethod
+{
+    GEMM,   /**< Deconvolution using GEMM */
+    DIRECT, /**< Direct deconvolution */
+};
+
+/** Padding mode to use for PadLayer */
+enum class PaddingMode
+{
+    CONSTANT,
+    REFLECT,
+    SYMMETRIC
 };
 
 /** Supported comparison operations */

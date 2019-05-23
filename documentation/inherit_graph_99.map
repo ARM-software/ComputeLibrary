@@ -1,6 +1,10 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title=" " alt="" coords="5,31,191,57"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata." alt="" coords="239,31,328,57"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_sub_tensor_info.xhtml" title="Store the sub tensor&#39;s metadata." alt="" coords="376,5,487,32"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_tensor_info.xhtml" title="Store the tensor&#39;s metadata." alt="" coords="388,56,475,83"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1_i_accessor.xhtml" title="Common interface to provide information and access to tensor like structures." alt="" coords="5,132,88,159"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_accessor.xhtml" title="Accessor implementation for Tensor objects." alt="" coords="197,5,277,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_c_l_accessor.xhtml" title="Accessor implementation for CLTensor objects." alt="" coords="189,56,285,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1_g_c_accessor.xhtml" title="Accessor implementation for GCTensor objects." alt="" coords="188,107,287,133"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1_simple_tensor.xhtml" title="Simple tensor object that stores elements in a consecutive chunk of memory." alt="" coords="165,157,309,184"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1_simple_tensor_accessor.xhtml" title="Accessor implementation for SimpleTensor objects." alt="" coords="136,208,339,235"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1_simple_tensor.xhtml" title=" " alt="" coords="147,259,328,285"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1test_1_1_raw_tensor.xhtml" title="Subclass of SimpleTensor using uint8_t as value type." alt="" coords="387,259,475,285"/>
 </map>

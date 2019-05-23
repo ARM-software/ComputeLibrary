@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,9 +67,47 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
 }
 } // namespace
 
-template <typename T>
-void NEReorgLayerKernel::run_reorg(const Window &window)
+NEReorgLayerKernel::NEReorgLayerKernel()
+    : _input(nullptr), _output(nullptr), _stride(1)
 {
+}
+
+void NEReorgLayerKernel::configure(const ITensor *input, ITensor *output, int32_t stride)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = misc::shape_calculator::compute_reorg_output_shape(*input->info(), stride);
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), stride));
+
+    _input  = input;
+    _output = output;
+    _stride = stride;
+
+    // The NEReorgLayerKernel doesn't need padding so update_window_and_padding() can be skipped
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    // Configure kernel window
+    Window win = calculate_max_window(*output->info(), Steps());
+
+    ICPPKernel::configure(win);
+}
+
+Status NEReorgLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t stride)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, stride));
+    return Status{};
+}
+
+void NEReorgLayerKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
+
     const DataLayout data_layout = _input->info()->data_layout();
     const size_t     idx_w       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
@@ -101,72 +139,8 @@ void NEReorgLayerKernel::run_reorg(const Window &window)
         map_coords.set(idx_c, c % out_c);
 
         // Perform mapping
-        *(reinterpret_cast<T *>(out.ptr())) = *(reinterpret_cast<const T *>(in_ptr + _input->info()->offset_element_in_bytes(map_coords)));
+        std::memcpy(out.ptr(), in_ptr + _input->info()->offset_element_in_bytes(map_coords), _input->info()->element_size());
     },
     out);
-}
-
-NEReorgLayerKernel::NEReorgLayerKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _stride(1)
-{
-}
-
-void NEReorgLayerKernel::configure(const ITensor *input, ITensor *output, int32_t stride)
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Output auto inizialitation if not yet initialized
-    const TensorShape output_shape = misc::shape_calculator::compute_reorg_output_shape(*input->info(), stride);
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
-
-    // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), stride));
-
-    _func   = nullptr;
-    _input  = input;
-    _output = output;
-    _stride = stride;
-
-    switch(input->info()->element_size())
-    {
-        case 1:
-            _func = &NEReorgLayerKernel::run_reorg<uint8_t>;
-            break;
-        case 2:
-            _func = &NEReorgLayerKernel::run_reorg<uint16_t>;
-            break;
-        case 4:
-            _func = &NEReorgLayerKernel::run_reorg<uint32_t>;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Element size not supported");
-            break;
-    }
-
-    // The NEReorgLayerKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps());
-
-    ICPPKernel::configure(win);
-}
-
-Status NEReorgLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int32_t stride)
-{
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, stride));
-    return Status{};
-}
-
-void NEReorgLayerKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICPPKernel::window(), window);
-
-    if(_func != nullptr)
-    {
-        (this->*_func)(window);
-    }
 }
 } // namespace arm_compute

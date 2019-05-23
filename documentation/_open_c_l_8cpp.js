@@ -30,6 +30,7 @@ var _open_c_l_8cpp =
     [ "clGetPlatformIDs", "_open_c_l_8cpp.xhtml#a16acb36fde338eaff889484b213c953d", null ],
     [ "clGetProgramBuildInfo", "_open_c_l_8cpp.xhtml#a42eb427f73ef3e670fb570734341fd49", null ],
     [ "clGetProgramInfo", "_open_c_l_8cpp.xhtml#a9f71d4d10e82daea5e3dd62089dab424", null ],
+    [ "clImportMemoryARM", "_open_c_l_8cpp.xhtml#a6ece3384ff9496363d68aeb376041aaf", null ],
     [ "clReleaseCommandQueue", "_open_c_l_8cpp.xhtml#abd209590ef4b1c99e256180ad77faecf", null ],
     [ "clReleaseContext", "_open_c_l_8cpp.xhtml#a424af1d00f0ad1421da1bc0c2ccc9abe", null ],
     [ "clReleaseEvent", "_open_c_l_8cpp.xhtml#a41eb8d025116f85cf2175e51c98d9fb6", null ],

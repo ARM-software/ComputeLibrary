@@ -13,6 +13,7 @@ var dir_4da487531dc5bdc76b523c9e82b781b1 =
     [ "DirectConvolutionLayer.cpp", "benchmark_2_c_l_2_direct_convolution_layer_8cpp.xhtml", "benchmark_2_c_l_2_direct_convolution_layer_8cpp" ],
     [ "EqualizeHistogram.cpp", "benchmark_2_c_l_2_equalize_histogram_8cpp.xhtml", "benchmark_2_c_l_2_equalize_histogram_8cpp" ],
     [ "FastCorners.cpp", "benchmark_2_c_l_2_fast_corners_8cpp.xhtml", "benchmark_2_c_l_2_fast_corners_8cpp" ],
+    [ "FFT.cpp", "tests_2benchmark_2_c_l_2fft_8cpp.xhtml", "tests_2benchmark_2_c_l_2fft_8cpp" ],
     [ "FlattenLayer.cpp", "benchmark_2_c_l_2_flatten_layer_8cpp.xhtml", "benchmark_2_c_l_2_flatten_layer_8cpp" ],
     [ "Floor.cpp", "benchmark_2_c_l_2_floor_8cpp.xhtml", "benchmark_2_c_l_2_floor_8cpp" ],
     [ "FullyConnectedLayer.cpp", "tests_2benchmark_2_c_l_2_fully_connected_layer_8cpp.xhtml", "tests_2benchmark_2_c_l_2_fully_connected_layer_8cpp" ],

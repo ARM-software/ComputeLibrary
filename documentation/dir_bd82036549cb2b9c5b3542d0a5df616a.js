@@ -13,7 +13,9 @@ var dir_bd82036549cb2b9c5b3542d0a5df616a =
     [ "NodeExecutionMethodMutator.h", "_node_execution_method_mutator_8h.xhtml", [
       [ "NodeExecutionMethodMutator", "classarm__compute_1_1graph_1_1_node_execution_method_mutator.xhtml", "classarm__compute_1_1graph_1_1_node_execution_method_mutator" ]
     ] ],
-    [ "NodeFusionMutator.h", "_node_fusion_mutator_8h.xhtml", "_node_fusion_mutator_8h" ],
+    [ "NodeFusionMutator.h", "_node_fusion_mutator_8h.xhtml", [
+      [ "NodeFusionMutator", "classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml", "classarm__compute_1_1graph_1_1_node_fusion_mutator" ]
+    ] ],
     [ "SplitLayerSubTensorMutator.h", "_split_layer_sub_tensor_mutator_8h.xhtml", [
       [ "SplitLayerSubTensorMutator", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml", "classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator" ]
     ] ]

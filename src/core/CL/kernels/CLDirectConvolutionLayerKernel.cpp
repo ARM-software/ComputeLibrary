@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -284,7 +284,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
 
     // Output auto inizialitation if not yet initialized
-    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
+    // TODO(COMPMID-2078): input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
@@ -363,7 +363,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
 
     // Output auto inizialitation if not yet initialized
-    // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
+    // TODO(COMPMID-2078): input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,

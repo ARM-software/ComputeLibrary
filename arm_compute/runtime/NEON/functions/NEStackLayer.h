@@ -73,9 +73,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ITensor *>                _input;
-    std::unique_ptr<NEStackLayerKernel[]> _stack_kernels;
-    unsigned int                          _num_inputs;
+    std::vector<ITensor *>          _input;
+    std::vector<NEStackLayerKernel> _stack_kernels;
+    unsigned int                    _num_inputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NESTACKLAYER_H__ */

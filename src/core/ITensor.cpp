@@ -64,7 +64,7 @@ void ITensor::copy_from(const ITensor &src)
 
     const size_t line_size = src_info->element_size() * src_info->dimension(0);
 
-    execute_window_loop(win_src, [&](const Coordinates & id)
+    execute_window_loop(win_src, [&](const Coordinates &)
     {
         memcpy(dst_it.ptr(), src_it.ptr(), line_size);
     },

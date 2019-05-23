@@ -8,6 +8,7 @@ var searchData=
   ['memorygroupbase_3c_20cltensor_20_3e',['MemoryGroupBase&lt; CLTensor &gt;',['../classarm__compute_1_1_memory_group_base.xhtml',1,'arm_compute']]],
   ['memorygroupbase_3c_20gctensor_20_3e',['MemoryGroupBase&lt; GCTensor &gt;',['../classarm__compute_1_1_memory_group_base.xhtml',1,'arm_compute']]],
   ['memorygroupbase_3c_20tensor_20_3e',['MemoryGroupBase&lt; Tensor &gt;',['../classarm__compute_1_1_memory_group_base.xhtml',1,'arm_compute']]],
+  ['memorygroupresourcescope',['MemoryGroupResourceScope',['../classarm__compute_1_1_memory_group_resource_scope.xhtml',1,'arm_compute']]],
   ['memoryimagefeeder',['MemoryImageFeeder',['../classarm__compute_1_1utils_1_1_memory_image_feeder.xhtml',1,'arm_compute::utils']]],
   ['memorymanagercontext',['MemoryManagerContext',['../structarm__compute_1_1graph_1_1_memory_manager_context.xhtml',1,'arm_compute::graph']]],
   ['memorymanagerondemand',['MemoryManagerOnDemand',['../classarm__compute_1_1_memory_manager_on_demand.xhtml',1,'arm_compute']]],

@@ -201,7 +201,7 @@ void GCConvolutionLayer::run()
 {
     prepare();
 
-    _memory_group.acquire();
+    MemoryGroupResourceScope scope_mg(_memory_group);
 
     // Run im2col
     GCScheduler::get().dispatch(_fill_border);
@@ -215,8 +215,6 @@ void GCConvolutionLayer::run()
     // Reshape output matrix
     GCScheduler::get().dispatch(_output_col2im_kernel, false);
     GCScheduler::get().memory_barrier();
-
-    _memory_group.release();
 
     // Run Activation Layer
     if(_is_activationlayer_enabled)

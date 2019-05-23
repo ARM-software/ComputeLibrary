@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ public:
         Window window;
         window.use_tensor_dimensions(src_shape);
         Iterator it(&src, window);
-        execute_window_loop(window, [&](const Coordinates & id)
+        execute_window_loop(window, [&](const Coordinates &)
         {
             *reinterpret_cast<half_float::half *>(it.ptr()) = half_float::half(1.f);
         });

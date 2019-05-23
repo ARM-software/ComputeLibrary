@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,10 +47,10 @@ class QuantizationValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type)
+    void setup(TensorShape shape, DataType data_type, QuantizationInfo quant_info)
     {
-        _target    = compute_target(shape, data_type);
-        _reference = compute_reference(shape, data_type);
+        _target    = compute_target(shape, data_type, quant_info);
+        _reference = compute_reference(shape, data_type, quant_info);
     }
 
 protected:
@@ -60,11 +60,11 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type)
+    TensorType compute_target(const TensorShape &shape, DataType data_type, QuantizationInfo quant_info)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type);
-        TensorType dst = create_tensor<TensorType>(shape, DataType::U8);
+        TensorType dst = create_tensor<TensorType>(shape, DataType::QASYMM8, 1, quant_info);
 
         // Create and configure function
         FunctionType quantization_layer;
@@ -89,7 +89,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<uint8_t> compute_reference(const TensorShape &shape, DataType data_type)
+    SimpleTensor<uint8_t> compute_reference(const TensorShape &shape, DataType data_type, QuantizationInfo quant_info)
     {
         // Create reference
         SimpleTensor<T> src{ shape, data_type };
@@ -97,12 +97,13 @@ protected:
         // Fill reference
         fill(src);
 
-        return reference::quantization_layer<T>(src);
+        return reference::quantization_layer<T>(src, quant_info);
     }
 
     TensorType            _target{};
     SimpleTensor<uint8_t> _reference{};
 };
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

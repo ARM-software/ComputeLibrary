@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,125 @@ inline int32x4x3_t load_matrix_row(const uint8_t *ptr, int weights_offset = 0)
         }
     };
     return r;
+}
+
+/** Perform a 3x3 convolution for 4 consecutive elements on float32 when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset (Optional) Input quantization offset.
+ *
+ */
+inline float32x4_t single_convolve_3x3_dilation(const float *in_top, const float *in_mid, const float *in_low,
+                                                const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                                                const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+
+    const float32x4x3_t vtop =
+    {
+        {
+            vld1q_f32(in_top),
+            vld1q_f32(in_top + dilation_x),
+            vld1q_f32(in_top + 2 * dilation_x)
+        }
+    };
+    const float32x4x3_t vmid =
+    {
+        {
+            vld1q_f32(in_mid),
+            vld1q_f32(in_mid + dilation_x),
+            vld1q_f32(in_mid + 2 * dilation_x)
+        }
+    };
+    const float32x4x3_t vlow =
+    {
+        {
+            vld1q_f32(in_low),
+            vld1q_f32(in_low + dilation_x),
+            vld1q_f32(in_low + 2 * dilation_x)
+        }
+    };
+    float32x4_t out = vmulq_f32(vtop.val[0], m0.val[0]);
+    out             = vmlaq_f32(out, vtop.val[1], m0.val[1]);
+    out             = vmlaq_f32(out, vtop.val[2], m0.val[2]);
+
+    out = vmlaq_f32(out, vmid.val[0], m1.val[0]);
+    out = vmlaq_f32(out, vmid.val[1], m1.val[1]);
+    out = vmlaq_f32(out, vmid.val[2], m1.val[2]);
+
+    out = vmlaq_f32(out, vlow.val[0], m2.val[0]);
+    out = vmlaq_f32(out, vlow.val[1], m2.val[1]);
+    out = vmlaq_f32(out, vlow.val[2], m2.val[2]);
+
+    return out;
+}
+
+/** Perform a 3x3 convolution for 8 consecutive elements on float32 when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset (Optional) Input quantization offset.
+ *
+ */
+template <unsigned int stridex>
+float32x4x2_t convolve_3x3_dilation(const float *in_top, const float *in_mid, const float *in_low,
+                                    const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                                    const size_t dilation_x, int input_offset = 0);
+
+template <>
+inline float32x4x2_t convolve_3x3_dilation<1>(const float *in_top, const float *in_mid, const float *in_low,
+                                              const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+
+    const float32x4x2_t out =
+    {
+        {
+            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+            single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)
+        }
+    };
+
+    return out;
+}
+
+template <>
+inline float32x4x2_t convolve_3x3_dilation<2>(const float *in_top, const float *in_mid, const float *in_low,
+                                              const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+
+    float32x4x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 2), out.val[0], 1);
+    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 0), out.val[0], 2);
+    out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 2), out.val[0], 3);
+    return out;
+}
+
+template <>
+inline float32x4x2_t convolve_3x3_dilation<3>(const float *in_top, const float *in_mid, const float *in_low,
+                                              const float32x4x3_t &m0, const float32x4x3_t &m1, const float32x4x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+
+    float32x4x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+    ;
+    out.val[0] = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
+    return out;
 }
 
 /** Perform a convolve3x3 on float32.
@@ -180,6 +299,143 @@ inline float32x4x2_t convolve_3x3<3>(const float *in_top, const float *in_mid, c
 
     float32x4x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2, input_offset);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
+    return out;
+}
+
+/** Perform a 3x3 convolution for 4 consecutive elements on uint8_t when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset Input quantization offset.
+ *
+ */
+inline int32x4_t single_convolve_3x3_dilation(const uint8_t *in_top, const uint8_t *in_mid, const uint8_t *in_low,
+                                              const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                                              size_t dilation_x, int input_offset)
+{
+    const int32x4_t v_input_offset = vdupq_n_s32(input_offset);
+
+    const uint8x8x3_t vtop =
+    {
+        {
+            vld1_u8(in_top),
+            vld1_u8(in_top + dilation_x),
+            vld1_u8(in_top + 2 * dilation_x)
+        }
+    };
+    const uint8x8x3_t vmid =
+    {
+        {
+            vld1_u8(in_mid),
+            vld1_u8(in_mid + dilation_x),
+            vld1_u8(in_mid + 2 * dilation_x)
+        }
+    };
+    const uint8x8x3_t vlow =
+    {
+        {
+            vld1_u8(in_low),
+            vld1_u8(in_low + dilation_x),
+            vld1_u8(in_low + 2 * dilation_x)
+        }
+    };
+
+    const int32x4x3_t vtop_s32 =
+    {
+        {
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vtop.val[0])))), //convert from uint8x8 to uint16x8, to uint16x4(lower or bottom half) to int16x4 to int32x4
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vtop.val[1])))),
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vtop.val[2])))),
+        }
+    };
+    const int32x4x3_t vmid_s32 =
+    {
+        {
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vmid.val[0])))),
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vmid.val[1])))),
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vmid.val[2])))),
+        }
+    };
+    const int32x4x3_t vlow_s32 =
+    {
+        {
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vlow.val[0])))),
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vlow.val[1])))),
+            vaddw_s16(v_input_offset, vreinterpret_s16_u16(vget_low_u16(vmovl_u8(vlow.val[2])))),
+        }
+    };
+
+    int32x4_t out = vmulq_s32(vtop_s32.val[0], m0.val[0]);
+    out           = vmlaq_s32(out, vtop_s32.val[1], m0.val[1]);
+    out           = vmlaq_s32(out, vtop_s32.val[2], m0.val[2]);
+
+    out = vmlaq_s32(out, vmid_s32.val[0], m1.val[0]);
+    out = vmlaq_s32(out, vmid_s32.val[1], m1.val[1]);
+    out = vmlaq_s32(out, vmid_s32.val[2], m1.val[2]);
+
+    out = vmlaq_s32(out, vlow_s32.val[0], m2.val[0]);
+    out = vmlaq_s32(out, vlow_s32.val[1], m2.val[1]);
+    out = vmlaq_s32(out, vlow_s32.val[2], m2.val[2]);
+
+    return out;
+}
+
+/** Perform a 3x3 convolution for 4 consecutive elements on uint8_t when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset Input quantization offset.
+ *
+ */
+template <unsigned int stridex>
+int32x4x2_t convolve_3x3_dilation(const uint8_t *in_top, const uint8_t *in_mid, const uint8_t *in_low,
+                                  const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                                  const size_t dilation_x, int input_offset);
+
+template <>
+inline int32x4x2_t convolve_3x3_dilation<1>(const uint8_t *in_top, const uint8_t *in_mid, const uint8_t *in_low, const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                                            const size_t dilation_x, int input_offset)
+{
+    const int32x4x2_t out =
+    {
+        {
+            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+            single_convolve_3x3_dilation(in_top + 4, in_mid + 4, in_low + 4, m0, m1, m2, dilation_x, input_offset)
+        }
+    };
+    return out;
+}
+
+template <>
+inline int32x4x2_t convolve_3x3_dilation<2>(const uint8_t *in_top, const uint8_t *in_mid, const uint8_t *in_low,
+                                            const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                                            const size_t dilation_x, int input_offset)
+{
+    int32x4x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+
+    out.val[0] = vsetq_lane_s32(vgetq_lane_s32(out.val[0], 2), out.val[0], 1);
+    out.val[0] = vsetq_lane_s32(vgetq_lane_s32(out.val[1], 0), out.val[0], 2);
+    out.val[0] = vsetq_lane_s32(vgetq_lane_s32(out.val[1], 2), out.val[0], 3);
+    return out;
+}
+
+template <>
+inline int32x4x2_t convolve_3x3_dilation<3>(const uint8_t *in_top, const uint8_t *in_mid, const uint8_t *in_low,
+                                            const int32x4x3_t &m0, const int32x4x3_t &m1, const int32x4x3_t &m2,
+                                            const size_t dilation_x, int input_offset)
+{
+    int32x4x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+    out.val[0]      = vsetq_lane_s32(vgetq_lane_s32(out.val[0], 3), out.val[0], 1);
     return out;
 }
 
@@ -388,6 +644,124 @@ inline float16x8x3_t load_matrix_row(const float16_t *ptr, int weights_offset = 
         }
     };
     return r;
+}
+
+/** Perform a 3x3 convolution for 8 consecutive elements on float16 when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset (Optional)Input quantization offset.
+ *
+ */
+inline float16x8_t single_convolve_3x3_dilation(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                                const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                                const size_t dilation_x, int input_offset = 0)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+    const float16x8x3_t vtop =
+    {
+        {
+            vld1q_f16(in_top),
+            vld1q_f16(in_top + dilation_x),
+            vld1q_f16(in_top + 2 * dilation_x)
+        }
+    };
+    const float16x8x3_t vmid =
+    {
+        {
+            vld1q_f16(in_mid),
+            vld1q_f16(in_mid + dilation_x),
+            vld1q_f16(in_mid + 2 * dilation_x)
+        }
+    };
+    const float16x8x3_t vlow =
+    {
+        {
+            vld1q_f16(in_low),
+            vld1q_f16(in_low + dilation_x),
+            vld1q_f16(in_low + 2 * dilation_x)
+        }
+    };
+    float16x8_t out = vmulq_f16(vtop.val[0], m0.val[0]);
+    out             = vaddq_f16(out, vmulq_f16(vtop.val[1], m0.val[1]));
+    out             = vaddq_f16(out, vmulq_f16(vtop.val[2], m0.val[2]));
+
+    out = vaddq_f16(out, vmulq_f16(vmid.val[0], m1.val[0]));
+    out = vaddq_f16(out, vmulq_f16(vmid.val[1], m1.val[1]));
+    out = vaddq_f16(out, vmulq_f16(vmid.val[2], m1.val[2]));
+
+    out = vaddq_f16(out, vmulq_f16(vlow.val[0], m2.val[0]));
+    out = vaddq_f16(out, vmulq_f16(vlow.val[1], m2.val[1]));
+    out = vaddq_f16(out, vmulq_f16(vlow.val[2], m2.val[2]));
+
+    return out;
+}
+
+/** Perform a 3x3 convolution for 16 consecutive elements on float16 when dilation.x() or dilation.y() is not 1.
+ *
+ * @param[in] in_top       Pointer to the first row of the input.
+ * @param[in] in_mid       Pointer to the second row of the input.
+ * @param[in] in_low       Pointer to the third row of the input.
+ * @param[in] m0           First row of the filter.
+ * @param[in] m1           Second row of the filter.
+ * @param[in] m2           Third row of the filter.
+ * @param[in] dilation_x   Dilation, in elements across x.
+ * @param[in] input_offset (Optional)Input quantization offset.
+ *
+ */
+template <unsigned int stridex>
+float16x8x2_t convolve_3x3_dilation(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                    const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                    const size_t dilation_x, int input_offset = 0);
+
+template <>
+inline float16x8x2_t convolve_3x3_dilation<1>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                              const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    const float16x8x2_t out =
+    {
+        {
+            single_convolve_3x3_dilation(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset),
+            single_convolve_3x3_dilation(in_top + 8, in_mid + 8, in_low + 8, m0, m1, m2, dilation_x, input_offset)
+        }
+    };
+    return out;
+}
+
+template <>
+inline float16x8x2_t convolve_3x3_dilation<2>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                              const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+    float16x8x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 2), out.val[0], 1);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 4), out.val[0], 2);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 3);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 0), out.val[0], 4);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 2), out.val[0], 5);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 4), out.val[0], 6);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 6), out.val[0], 7);
+    return out;
+}
+
+template <>
+inline float16x8x2_t convolve_3x3_dilation<3>(const float16_t *in_top, const float16_t *in_mid, const float16_t *in_low,
+                                              const float16x8x3_t &m0, const float16x8x3_t &m1, const float16x8x3_t &m2,
+                                              const size_t dilation_x, int input_offset)
+{
+    ARM_COMPUTE_UNUSED(input_offset);
+    float16x8x2_t out = convolve_3x3_dilation<1>(in_top, in_mid, in_low, m0, m1, m2, dilation_x, input_offset);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 1), out.val[0], 3);
+    return out;
 }
 
 /** Perform a convolve3x3 on float16.

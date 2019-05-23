@@ -1,7 +1,9 @@
 var benchmark_2_c_l_2_convolution_layer_8cpp =
 [
+    [ "CLFFTConvolutionLayerFixture", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a22fb86f77a20d298ea600a2d24713c5e", null ],
     [ "CLGEMMConvolutionLayerFixture", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a834ff3152a662fff46917ed60519aaae", null ],
     [ "CLWinogradLayerFixture", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a5d95b818519b5889e077646206bf30f8", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a8dab429067a52460b5ccf7e8b6446049", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a9417b987aac4f6d77fe0108abd72995f", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a973ba17f360be01d2e090f8170198171", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_c_l_2_convolution_layer_8cpp.xhtml#a01fb0312846c8e57522e1541901b7c0c", null ],

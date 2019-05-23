@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,11 +62,12 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
 
     const double beta_multiplier = std::min(
                                        1.0 * beta * input_scale * (1 << (31 - scaled_diff_int_bits)),
-                                       (1ll << 31) - 1.0);
-    int input_beta_multiplier, input_beta_left_shift;
+                                       (1LL << 31) - 1.0);
+    int input_beta_multiplier;
+    int input_beta_left_shift;
     quantization::calculate_quantized_multiplier_greater_than_one(beta_multiplier, &input_beta_multiplier, &input_beta_left_shift);
 
-    const double max_input_rescaled = 1.0 * ((1 << scaled_diff_int_bits) - 1) * (1ll << (31 - scaled_diff_int_bits)) / (1ll << input_beta_left_shift);
+    const double max_input_rescaled = 1.0 * ((1 << scaled_diff_int_bits) - 1) * (1LL << (31 - scaled_diff_int_bits)) / (1LL << input_beta_left_shift);
     const int    diff_min           = -1.f * std::floor(max_input_rescaled);
 
     CLBuildOptions build_opts;
@@ -337,7 +338,7 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
 
     // Note: output should always have a scale of 1/256 and offset 0
-    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
+    const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.F / 256, 0);
     const bool             is_quantized_asymmetric   = (input->info()->data_type() == DataType::S32);
     const DataType         output_data_type          = is_quantized_asymmetric ? DataType::QASYMM8 : input->info()->data_type();
 

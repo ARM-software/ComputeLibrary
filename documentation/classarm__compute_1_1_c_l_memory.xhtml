@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -119,9 +119,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a591dac78f4c0e06908f0a3e577605f50"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml#a591dac78f4c0e06908f0a3e577605f50">CLMemory</a> ()</td></tr>
 <tr class="memdesc:a591dac78f4c0e06908f0a3e577605f50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a591dac78f4c0e06908f0a3e577605f50">More...</a><br /></td></tr>
 <tr class="separator:a591dac78f4c0e06908f0a3e577605f50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff1318098c76de3218ae43f126ba7f7c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml#aff1318098c76de3218ae43f126ba7f7c">CLMemory</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a> &gt; memory)</td></tr>
-<tr class="memdesc:aff1318098c76de3218ae43f126ba7f7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#aff1318098c76de3218ae43f126ba7f7c">More...</a><br /></td></tr>
-<tr class="separator:aff1318098c76de3218ae43f126ba7f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97857d1e38440e51daf04bb9797909a8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml#a97857d1e38440e51daf04bb9797909a8">CLMemory</a> (const std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a> &gt; &amp;memory)</td></tr>
+<tr class="memdesc:a97857d1e38440e51daf04bb9797909a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a97857d1e38440e51daf04bb9797909a8">More...</a><br /></td></tr>
+<tr class="separator:a97857d1e38440e51daf04bb9797909a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77238852bb5e113a9ec5ee47fd293d7d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml#a77238852bb5e113a9ec5ee47fd293d7d">CLMemory</a> (<a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a> *memory)</td></tr>
 <tr class="memdesc:a77238852bb5e113a9ec5ee47fd293d7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a77238852bb5e113a9ec5ee47fd293d7d">More...</a><br /></td></tr>
 <tr class="separator:a77238852bb5e113a9ec5ee47fd293d7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,8 +186,8 @@ Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    : _region(<span class="keyword">nullptr</span>), _region_owned(<span class="keyword">nullptr</span>)</div><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
-<a id="aff1318098c76de3218ae43f126ba7f7c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff1318098c76de3218ae43f126ba7f7c">&#9670;&nbsp;</a></span>CLMemory() <span class="overload">[2/5]</span></h2>
+<a id="a97857d1e38440e51daf04bb9797909a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97857d1e38440e51daf04bb9797909a8">&#9670;&nbsp;</a></span>CLMemory() <span class="overload">[2/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -195,7 +195,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml">CLMemory</a> </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a> &gt;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml">ICLMemoryRegion</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>memory</em></td><td>)</td>
           <td></td>
         </tr>
@@ -211,7 +211,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="_c_l_memory_8cpp_source.xhtml#l00036">36</a> of file <a class="el" href="_c_l_memory_8cpp_source.xhtml">CLMemory.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    : _region(<span class="keyword">nullptr</span>), _region_owned(std::move(memory))</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _region_owned = memory;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    _region       = _region_owned.get();</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    : _region(<span class="keyword">nullptr</span>), _region_owned(memory)</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    _region_owned = memory;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    _region       = _region_owned.get();</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a id="a77238852bb5e113a9ec5ee47fd293d7d"></a>
@@ -567,7 +567,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_memory.xhtml">CLMemory</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:25:00 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:30 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

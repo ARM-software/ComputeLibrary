@@ -126,7 +126,7 @@ void gemm_interleave_16bit_elements(const ITensor *input, ITensor *output, const
     win_out.set_dimension_step(Window::DimX, 16);
     Iterator out(output, win_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint16x4x4_t data =
         {
@@ -154,7 +154,7 @@ void gemm_interleave_32bit_elements(const ITensor *input, ITensor *output, const
     win_out.set_dimension_step(Window::DimX, 16);
     Iterator out(output, win_out);
 
-    execute_window_loop(window, [&](const Coordinates & id)
+    execute_window_loop(window, [&](const Coordinates &)
     {
         const uint32x4x4_t data =
         {

@@ -98,6 +98,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::FullyConnectedLayer:
             os << "FullyConnectedLayer";
             break;
+        case NodeType::FusedConvolutionBatchNormalizationLayer:
+            os << "FusedConvolutionBatchNormalizationLayer";
+            break;
         case NodeType::GenerateProposalsLayer:
             os << "GenerateProposalsLayer";
             break;
@@ -139,6 +142,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::SplitLayer:
             os << "SplitLayer";
+            break;
+        case NodeType::StackLayer:
+            os << "StackLayer";
             break;
         case NodeType::UpsampleLayer:
             os << "UpsampleLayer";

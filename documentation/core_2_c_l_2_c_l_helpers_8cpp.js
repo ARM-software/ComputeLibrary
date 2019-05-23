@@ -12,5 +12,6 @@ var core_2_c_l_2_c_l_helpers_8cpp =
     [ "get_data_size_from_data_type", "core_2_c_l_2_c_l_helpers_8cpp.xhtml#ab631f49c436b1f18beff3248c4b1a19e", null ],
     [ "get_target_from_device", "core_2_c_l_2_c_l_helpers_8cpp.xhtml#a281384aa081efe5819eedd6a7c2a429b", null ],
     [ "get_underlying_cl_type_from_data_type", "core_2_c_l_2_c_l_helpers_8cpp.xhtml#aa9ed41c417478e5b1e346de1899137b1", null ],
+    [ "preferred_dummy_work_items_support", "core_2_c_l_2_c_l_helpers_8cpp.xhtml#a0c0eeab3eb098f019ae72268636dcc59", null ],
     [ "preferred_vector_width", "core_2_c_l_2_c_l_helpers_8cpp.xhtml#a1bd532ddb5d86290e40c0b482eb476f2", null ]
 ];

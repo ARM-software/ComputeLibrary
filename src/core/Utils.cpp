@@ -326,24 +326,30 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
-PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout)
+PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout, const Size2D &dilation)
 {
     const unsigned int width_idx       = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const unsigned int height_idx      = arm_compute::get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const auto        &strides         = conv_info.stride();
     const int          out_width       = std::ceil(float(input_shape[width_idx]) / float(strides.first));
     const int          out_height      = std::ceil(float(input_shape[height_idx]) / float(strides.second));
-    const int          pad_width       = ((out_width - 1) * strides.first + weights_shape[width_idx] - input_shape[width_idx]);
-    const int          pad_height      = ((out_height - 1) * strides.second + weights_shape[height_idx] - input_shape[height_idx]);
+    const int          pad_width       = (out_width - 1) * strides.first + (weights_shape[width_idx] + (dilation.x() - 1) * (weights_shape[width_idx] - 1) - input_shape[width_idx]);
+    const int          pad_height      = (out_height - 1) * strides.second + (weights_shape[height_idx] + (dilation.y() - 1) * (weights_shape[height_idx] - 1) - input_shape[height_idx]);
     const int          same_pad_left   = pad_width / 2;
     const int          same_pad_top    = pad_height / 2;
     const int          same_pad_right  = pad_width - same_pad_left;
     const int          same_pad_bottom = pad_height - same_pad_top;
 
-    return PadStrideInfo(strides.first, strides.second, same_pad_left, same_pad_right, same_pad_top, same_pad_bottom, DimensionRoundingType::CEIL);
+    return { static_cast<unsigned int>(strides.first),
+             static_cast<unsigned int>(strides.second),
+             static_cast<unsigned int>(same_pad_left),
+             static_cast<unsigned int>(same_pad_right),
+             static_cast<unsigned int>(same_pad_top),
+             static_cast<unsigned int>(same_pad_bottom),
+             DimensionRoundingType::CEIL };
 }
 
-const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
+std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
     unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
     unsigned int stride_x, unsigned int stride_y)
 {
@@ -356,10 +362,10 @@ const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_di
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 
-const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
-                                                                           unsigned int kernel_width, unsigned int kernel_height,
-                                                                           const PadStrideInfo &pad_stride_info,
-                                                                           const Size2D        &dilation)
+std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsigned int width, unsigned int height,
+                                                                     unsigned int kernel_width, unsigned int kernel_height,
+                                                                     const PadStrideInfo &pad_stride_info,
+                                                                     const Size2D        &dilation)
 {
     const unsigned int pad_left   = pad_stride_info.pad_left();
     const unsigned int pad_top    = pad_stride_info.pad_top();
@@ -382,18 +388,6 @@ const std::pair<unsigned int, unsigned int> arm_compute::scaled_dimensions(unsig
         default:
             ARM_COMPUTE_ERROR("Unsupported rounding type");
     }
-
-    // Make sure that border operations will start from inside the input and not the padded area
-    if(((w - 1) * stride_x) >= (width + pad_left))
-    {
-        --w;
-    }
-    if(((h - 1) * stride_y) >= (height + pad_top))
-    {
-        --h;
-    }
-    ARM_COMPUTE_ERROR_ON(((w - 1) * stride_x) >= (width + pad_left));
-    ARM_COMPUTE_ERROR_ON(((h - 1) * stride_y) >= (height + pad_top));
 
     return std::make_pair(w, h);
 }

@@ -73,9 +73,9 @@ public:
     void run() override;
 
 private:
-    std::vector<ICLTensor *>              _input;
-    std::unique_ptr<CLStackLayerKernel[]> _stack_kernels;
-    unsigned int                          _num_inputs;
+    std::vector<ICLTensor *>        _input;
+    std::vector<CLStackLayerKernel> _stack_kernels;
+    unsigned int                    _num_inputs;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLSTACKLAYER_H__ */

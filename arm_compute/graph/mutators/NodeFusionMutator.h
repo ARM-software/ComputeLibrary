@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,21 +24,13 @@
 #ifndef __ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H__
 #define __ARM_COMPUTE_GRAPH_NODE_FUSION_MUTATOR_H__
 
+#include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/IGraphMutator.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-namespace detail
-{
-/** Fused batch normalization with activation
- *
- * @param[in] g Graph to perform operation fusion on
- */
-void fuse_batch_norm_with_activation(Graph &g);
-} // namespace detail
-
 /** Mutation pass to fuss nodes */
 class NodeFusionMutator final : public IGraphMutator
 {

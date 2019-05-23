@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,10 +39,12 @@ public:
      * @param[in] info             Convolution layer attributes
      * @param[in] depth_multiplier (Optional) Depth multiplier parameter.
      * @param[in] method           (Optional) Depthwise convolution method to use
+     * @param[in] out_quant_info   (Optional) Output quantization info
      */
     DepthwiseConvolutionLayerNode(PadStrideInfo              info,
                                   int                        depth_multiplier = 1,
-                                  DepthwiseConvolutionMethod method           = DepthwiseConvolutionMethod::Default);
+                                  DepthwiseConvolutionMethod method           = DepthwiseConvolutionMethod::Default,
+                                  QuantizationInfo           out_quant_info   = QuantizationInfo());
     /** Sets the depthwise convolution method to use
      *
      * @param[in] method Depthwise convolution method to use
@@ -103,6 +105,7 @@ private:
     PadStrideInfo              _info;
     int                        _depth_multiplier;
     DepthwiseConvolutionMethod _method;
+    QuantizationInfo           _out_quant_info;
     ActivationLayerInfo        _fused_activation;
 };
 } // namespace graph

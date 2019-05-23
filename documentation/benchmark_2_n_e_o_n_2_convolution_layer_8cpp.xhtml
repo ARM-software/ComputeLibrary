@@ -40,7 +40,7 @@
   <img alt="Compute Library" src="https://raw.githubusercontent.com/ARM-software/ComputeLibrary/gh-pages/ACL_logo.png" style="max-width: 100%;margin-top: 15px;margin-left: 10px"/>
   <td style="padding-left: 0.5em;">
    <div id="projectname">
-   &#160;<span id="projectnumber">19.02</span>
+   &#160;<span id="projectnumber">19.05</span>
    </div>
   </td>
  </tr>
@@ -107,17 +107,21 @@ $(document).ready(function(){initNavTree('benchmark_2_n_e_o_n_2_convolution_laye
 <div class="textblock"><code>#include &quot;<a class="el" href="_tensor_shape_8h_source.xhtml">arm_compute/core/TensorShape.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_convolution_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEConvolutionLayer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_f_f_t_convolution_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_winograd_convolution_layer_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
 <code>#include &quot;tests/benchmark/fixtures/ConvolutionLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/FFTConvolutionLayerFixture.h&quot;</code><br />
 <code>#include &quot;tests/benchmark/fixtures/WinogradConvolutionLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/SmallConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/lenet5/LeNet5ConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/mobilenet/MobileNetConvolutionLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/resnet12/ResNet12ConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/squeezenet/SqueezeNetConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/vgg/vgg16/VGG16ConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;tests/datasets/system_tests/yolo/v2/YOLOV2ConvolutionLayerDataset.h&quot;</code><br />
@@ -141,9 +145,13 @@ Namespaces</h2></td></tr>
 Typedefs</h2></td></tr>
 <tr class="memitem:a0e36e58a8ee401995f556ef9d4a5ce80"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a0e36e58a8ee401995f556ef9d4a5ce80">NEGEMMConvolutionLayerFixture</a> = ConvolutionLayerFixture&lt; Tensor, NEGEMMConvolutionLayer, Accessor &gt;</td></tr>
 <tr class="separator:a0e36e58a8ee401995f556ef9d4a5ce80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71ea1274166c92b1914398cf4a369802"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a71ea1274166c92b1914398cf4a369802">NEFFTConvolutionLayerFixture</a> = FFTConvolutionLayerFixture&lt; Tensor, NEFFTConvolutionLayer, Accessor &gt;</td></tr>
+<tr class="separator:a71ea1274166c92b1914398cf4a369802"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a505b7c1500ac3452e7326207a00c9dc2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a505b7c1500ac3452e7326207a00c9dc2">REGISTER_FIXTURE_DATA_TEST_CASE</a> (ResNet12FFTLayer, NEFFTConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::ResNet12FFTConvolutionLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))), framework::dataset::make(&quot;DataType&quot;, { DataType::F32 })), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
+<tr class="separator:a505b7c1500ac3452e7326207a00c9dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae64ea047f5fecc53c38f44edfc2f9e2f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#ae64ea047f5fecc53c38f44edfc2f9e2f">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetConvolutionLayer, NEGEMMConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
 <tr class="separator:ae64ea047f5fecc53c38f44edfc2f9e2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4289ff786f50f37426620089776e4e51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a4289ff786f50f37426620089776e4e51">REGISTER_FIXTURE_DATA_TEST_CASE</a> (LeNet5ConvolutionLayer, NEGEMMConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(), framework::dataset::make(&quot;ActivationInfo&quot;, ActivationLayerInfo())), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
@@ -177,7 +185,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_ec05701f68bea22653d08da5856c9ffc.xhtml">NEON</a></li><li class="navelem"><a class="el" href="benchmark_2_n_e_o_n_2_convolution_layer_8cpp.xhtml">ConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Feb 28 2019 12:24:57 for Compute Library by
+    <li class="footer">Generated on Thu May 23 2019 17:11:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.15 </li>
   </ul>

@@ -461,7 +461,7 @@ However, there is no universal rule regarding which LWS is best for a given kern
 
 When the @ref CLTuner is enabled ( Target = 2 for the graph examples), the first time an OpenCL kernel is executed the Compute Library will try to run it with a variety of LWS values and will remember which one performed best for subsequent runs. At the end of the run the @ref graph::Graph will try to save these tuning parameters to a file.
 
-However this process takes quite a lot of time, which is why it cannot be enabled all the time.
+However this process takes quite a lot of time, which is why it cannot be enabled all the time. @ref CLTuner supports three modes of tuning with different trade-offs between the time taken to tune and the kernel execution time achieved using the best LWS found. In the Exhaustive mode, it searches all the supported values of LWS. This mode takes the longest time to tune and is the most likely to find the optimal LWS. Normal mode searches a subset of LWS values to yield a good approximation of the optimal LWS. It takes less time to tune than Exhaustive mode. Rapid mode takes the shortest time to tune and finds an LWS value that is at least as good or better than the default LWS value. The mode affects only the search for the optimal LWS and has no effect when the LWS value is imported from a file.
 
 But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
 

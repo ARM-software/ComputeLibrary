@@ -86,37 +86,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 namespace arm_compute
 {
 class Coordinates;
-
-/* Function used by the left-over for loop to perform the quantization */
-template <bool is_bounded_relu>
-inline uint8_t finalize_quantization(int32x4_t in_s32, int result_fixedpoint_multiplier, int32_t result_shift, int32x4_t result_offset_after_shift_s32, uint8_t min_u8, uint8_t max_u8)
-{
-    const static int32x4_t zero_s32      = vdupq_n_s32(0);
-    const static int32x4_t sat_value_s32 = vdupq_n_s32(255);
-
-    // Fixed point multiplication with vector saturating rounding doubling multiply high with scalar
-    in_s32 = vqrdmulhq_n_s32(in_s32, result_fixedpoint_multiplier);
-
-    // Round to the nearest division by a power-of-two using result_shift_s32
-    in_s32 = rounding_divide_by_pow2(in_s32, result_shift);
-
-    // Add the offset terms
-    in_s32 = vaddq_s32(in_s32, result_offset_after_shift_s32);
-
-    // Saturate negative values
-    in_s32 = vmaxq_s32(in_s32, zero_s32);
-    in_s32 = vminq_s32(in_s32, sat_value_s32);
-
-    auto out_u8 = static_cast<uint8_t>(vgetq_lane_s32(in_s32, 0));
-
-    if(is_bounded_relu)
-    {
-        out_u8 = std::max(out_u8, min_u8);
-        out_u8 = std::min(out_u8, max_u8);
-    }
-
-    return out_u8;
-}
 } // namespace arm_compute
 
 template <bool is_bounded_relu>
@@ -145,7 +114,7 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
         win_biases.set(Window::DimY, Window::Dimension(0, 1, 1));
 
         Iterator bias(_bias, win_biases);
-        execute_window_loop(win_collapsed, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -188,17 +157,15 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
 
                 // Add bias
                 in_value += bias_value;
-
                 // Finalize and store the result
-                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(vdupq_n_s32(in_value), _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min),
-                                                                          static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
             }
         },
         in, out, bias);
     }
     else
     {
-        execute_window_loop(win_collapsed, [&](const Coordinates & id)
+        execute_window_loop(win_collapsed, [&](const Coordinates &)
         {
             // Compute 16 elements per iteration
             int x = window_start_x;
@@ -220,10 +187,10 @@ void NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel::run(const Window
             // Compute left-over elements
             for(; x < window_end_x; ++x)
             {
-                const int32x4_t in_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(in.ptr()) + x);
+                const int32_t in_value = *(reinterpret_cast<const int32_t *>(in.ptr()) + x);
 
                 // Finalize and store the result
-                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_s32, _result_fixedpoint_multiplier, _result_shift, result_offset_after_shift_s32, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
+                *(out.ptr() + x) = finalize_quantization<is_bounded_relu>(in_value, _result_fixedpoint_multiplier, _result_shift, _result_offset_after_shift, static_cast<uint8_t>(_min), static_cast<uint8_t>(_max));
             }
         },
         in, out);

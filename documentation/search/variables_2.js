@@ -1,6 +1,8 @@
 var searchData=
 [
+  ['b',['b',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa76b4a6e74940dabc5b7fc6b2dab3545',1,'arm_compute::test::validation']]],
   ['b_5fvalue',['b_value',['../namespacearm__compute_1_1test_1_1validation.xhtml#a22cfc6948997672855a2ee16e45cef71',1,'arm_compute::test::validation']]],
+  ['backward',['backward',['../namespacearm__compute_1_1test_1_1validation.xhtml#a7c5b54128c108267837e7e999259e0e9',1,'arm_compute::test::validation']]],
   ['batch_5fnorm_5fepsilon',['batch_norm_epsilon',['../graph__inception__resnet__v1_8cpp.xhtml#ae89536b490f3ad0e9070bd2dd0a6df5d',1,'graph_inception_resnet_v1.cpp']]],
   ['beta_5finfo',['beta_info',['../namespacearm__compute_1_1test_1_1validation.xhtml#a4117a6db63ae46d644756cbfff7fe74b',1,'arm_compute::test::validation']]],
   ['bias',['bias',['../namespacearm__compute_1_1test_1_1validation.xhtml#a3a77be8aebd8e00522b32061d46ccdbd',1,'arm_compute::test::validation']]],
