@@ -30,6 +30,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEAsymm.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
+#include "arm_compute/core/NEON/NEMath.h"
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
@@ -61,6 +62,8 @@ inline ScalarType elementwise_op_scalar(const ScalarType &a)
             return std::log(a);
         case ElementWiseUnary::ABS:
             return std::abs(a);
+        case ElementWiseUnary::ROUND:
+            return std::nearbyint(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -82,6 +85,8 @@ inline VectorType elementwise_op(const VectorType &a)
             return wrapper::vlog(a);
         case ElementWiseUnary::ABS:
             return wrapper::vabs(a);
+        case ElementWiseUnary::ROUND:
+            return wrapper::vround(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -206,6 +211,9 @@ void NEElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensor *inp
         case ElementWiseUnary::ABS:
             _function = configure_func<ElementWiseUnary::ABS>(input, output);
             break;
+        case ElementWiseUnary::ROUND:
+            _function = configure_func<ElementWiseUnary::ROUND>(input, output);
+            break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
@@ -219,6 +227,7 @@ Status NEElementwiseUnaryKernel::validate_arguments(ElementWiseUnary op, const I
         case ElementWiseUnary::EXP:
         case ElementWiseUnary::RSQRT:
         case ElementWiseUnary::LOG:
+        case ElementWiseUnary::ROUND:
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::F16, DataType::F32);
             break;
         case ElementWiseUnary::NEG:

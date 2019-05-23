@@ -129,5 +129,25 @@ public:
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
+
+/** Basic function to compute the round value elementwise of an input tensor. */
+class NERoundLayer : public INESimpleFunction
+{
+public:
+    /** Initialize the function
+     *
+     * @param[in]  input  Input tensor. Data types supported: F16/F32.
+     * @param[out] output Output tensor. Data types supported: same as @p input.
+     */
+    void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NERoundLayer
+     *
+     * @param[in] input  First tensor input info. Data types supported: F16/F32.
+     * @param[in] output Output tensor info. Data types supported: Same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEELEMENTWISEUNARYLAYER_H__ */

@@ -180,6 +180,7 @@ inline uint8x8_t calculate_max(uint8x16_t in)
     return wrapper::vpmax(pmax, pmax);
 }
 
+template <>
 uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, uint8x16_t vec_res_value, ReductionOperation op)
 {
     uint32x4x4_t res_idx_mask{ { 0 } };
@@ -272,6 +273,7 @@ inline float16x4_t calculate_max(float16x8_t in)
     return wrapper::vpmax(pmax, pmax);
 }
 
+template <>
 uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, float16x8_t vec_res_value, ReductionOperation op)
 {
     uint32x4x2_t res_idx_mask{ 0 };

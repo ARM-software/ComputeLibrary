@@ -65,6 +65,26 @@ inline float32x4_t vfloorq_f32(float32x4_t val)
     return vbslq_f32(vcgtq_f32(r, val), vsubq_f32(r, CONST_1), r);
 }
 
+inline float32x4_t vroundq_rte_f32(float32x4_t val)
+{
+#ifdef __aarch64__
+    return vrndnq_f32(val);
+#else // __aarch64__
+    static const float32x4_t CONST_HALF_FLOAT = vdupq_n_f32(0.5f);
+    static const float32x4_t CONST_1_FLOAT = vdupq_n_f32(1.f);
+    static const int32x4_t CONST_1_INT = vdupq_n_s32(1);
+    const float32x4_t floor_val = vfloorq_f32(val);
+    const float32x4_t diff = vsubq_f32(val, floor_val);
+
+    /*
+    * Select the floor value when (diff<0.5 || (diff==0.5 && floor_val%2==0).
+    * This condition is checked by vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT) ,vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT) , vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT),CONST_1_INT))))
+    */
+
+    return vbslq_f32(vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT) ,vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT) , vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT),CONST_1_INT)))), floor_val, vaddq_f32(floor_val, CONST_1_FLOAT));
+#endif // __aarch64__
+}
+
 inline float32x2_t vinvsqrt_f32(float32x2_t x)
 {
     float32x2_t sqrt_reciprocal = vrsqrte_f32(x);
@@ -184,6 +204,12 @@ inline float16x8_t vfloorq_f16(float16x8_t val)
 
     return vbslq_f16(vcgtq_f16(r, val), vsubq_f16(r, CONST_1), r);
 }
+
+inline float16x8_t vroundq_rte_f16(float16x8_t val)
+{
+    return vrndnq_f16(val);
+}
+
 inline float16x4_t vinvsqrt_f16(float16x4_t x)
 {
     float16x4_t sqrt_reciprocal = vrsqrte_f16(x);

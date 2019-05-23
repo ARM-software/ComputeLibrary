@@ -58,6 +58,9 @@ SimpleTensor<T> elementwise_unary(const SimpleTensor<T> &src, ElementWiseUnary o
             case ElementWiseUnary::SIN:
                 dst[i] = std::sin(src[i]);
                 break;
+            case ElementWiseUnary::ROUND:
+                dst[i] = std::nearbyint(src[i]);
+                break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
         }

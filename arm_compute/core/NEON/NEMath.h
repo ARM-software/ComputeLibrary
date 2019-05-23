@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,14 @@ namespace arm_compute
  * @return The calculated floor vector.
  */
 float32x4_t vfloorq_f32(float32x4_t val);
+
+/** Calculate round value of a vector to nearest with ties to even.
+ *
+ * @param[in] val Input vector value in F32 format.
+ *
+ * @return The calculated round vector.
+ */
+float32x4_t vroundq_rte_f32(float32x4_t val);
 
 /** Calculate inverse square root.
  *
@@ -123,11 +131,19 @@ float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
  *
  * @note We clamp x to [-5,5] to avoid overflowing issues.
  *
- * @param[in] val Input vector value in F32 format.
+ * @param[in] val Input vector value in F16 format.
  *
  * @return The calculated Hyperbolic Tangent.
  */
 float16x8_t vtanhq_f16(float16x8_t val);
+
+/** Calculate round value of a vector to nearest with ties to even.
+ *
+ * @param[in] val Input vector value in F16 format.
+ *
+ * @return The calculated round vector.
+ */
+float16x8_t vroundq_rte_f16(float16x8_t val);
 
 /** Calculate reciprocal.
  *

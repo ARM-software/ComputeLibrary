@@ -586,6 +586,7 @@ enum class ElementWiseUnary
     LOG,   /**< Natural Logarithm */
     ABS,   /**< Absolute value */
     SIN,   /**< Sine */
+    ROUND, /**< Round */
 };
 
 /** The normalization type used for the normalization layer */
