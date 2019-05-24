@@ -33,9 +33,6 @@ def filter_clang_tidy_lines( lines ):
     for i in range(0, len(lines)):
         line = lines[i]
 
-        if "/assembly/" in line:
-            continue
-
         if "/arm_gemm/" in line:
             continue
 

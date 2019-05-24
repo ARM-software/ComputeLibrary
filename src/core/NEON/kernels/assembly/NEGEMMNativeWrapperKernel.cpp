@@ -58,6 +58,7 @@ struct Kernel<float, float>
 template <typename To, typename Tr>
 Window NEGEMMNativeWrapperKernel<To, Tr>::configure_internal(float alpha, float beta)
 {
+    ARM_COMPUTE_UNUSED(alpha);
     using strategy = typename Kernel<To, Tr>::strategy;
 
     _beta = beta;
@@ -107,6 +108,7 @@ void NEGEMMNativeWrapperKernel<To, Tr>::run_internal(const Window &window, const
 
     auto on_new_row_size = [&](unsigned int start, unsigned int end)
     {
+        ARM_COMPUTE_UNUSED(start);
         m_end = std::min(end, _params.M);
     };
 
