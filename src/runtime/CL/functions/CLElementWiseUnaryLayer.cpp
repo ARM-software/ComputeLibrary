@@ -95,4 +95,15 @@ Status CLLogLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
     return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::LOG);
 }
 
+void CLRoundLayer::configure(const ICLTensor *input, ICLTensor *output)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CLElementWiseUnaryLayerKernel>();
+    k->configure(input, output, ElementWiseUnary::ROUND);
+    _kernel = std::move(k);
+}
+Status CLRoundLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLElementWiseUnaryLayerKernel::validate(input, output, ElementWiseUnary::ROUND);
+}
+
 } // namespace arm_compute

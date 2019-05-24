@@ -38,6 +38,12 @@
 #define fabs_op(input) fabs(input)
 // Calculate natural_log
 #define natural_log_op(input) log(input)
+// Calculate round (Cannot use round function as it rounds halfway cases away from zero).
+#if defined(VEC_SIZE)
+#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, VEC_DATA_TYPE(int, VEC_SIZE), rte), VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE))
+#else // defined(VEC_SIZE
+#define round_op(input) CONVERT(CONVERT_SAT_ROUND(input, int, rte), DATA_TYPE)
+#endif // defined(VEC_SIZE
 
 /** Applies element wise unary operator in a tensor.
  *

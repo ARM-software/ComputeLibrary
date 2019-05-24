@@ -96,6 +96,9 @@ void CLElementWiseUnaryLayerKernel::configure(const ICLTensor *input, ICLTensor 
         case ElementWiseUnary::LOG:
             build_opts.add_option("-DOPERATION=natural_log_op");
             break;
+        case ElementWiseUnary::ROUND:
+            build_opts.add_option("-DOPERATION=round_op");
+            break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
     }
