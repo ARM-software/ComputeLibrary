@@ -649,9 +649,8 @@ void NEDepthConvertLayerKernel::run(const Window &window, const ThreadInfo &info
                                     vqshlq_s32(vld1q_s32(reinterpret_cast<int32_t *>(input.ptr()) + 12), b)
                                 }
                             };
-
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vmovn_u16(vcombine_u16(vqmovun_s32(texels.val[0]), vqmovun_s32(texels.val[1]))));
-                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr())+8, vmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
+                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr()), vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[0]), vqmovun_s32(texels.val[1]))));
+                            vst1_u8(reinterpret_cast<uint8_t *>(output.ptr())+8, vqmovn_u16(vcombine_u16(vqmovun_s32(texels.val[2]), vqmovun_s32(texels.val[3]))));
                         },
                         input, output);
                     }
