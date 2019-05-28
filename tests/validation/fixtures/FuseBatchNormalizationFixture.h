@@ -90,9 +90,12 @@ protected:
         auto w_fused_to_use = in_place_w ? nullptr : &w_fused;
         auto b_fused_to_use = in_place_b ? nullptr : &b_fused;
 
+        const FuseBatchNormalizationType fuse_bn_type = dims_weights == 3 ?
+                                                        FuseBatchNormalizationType::DEPTHWISECONVOLUTION :
+                                                        FuseBatchNormalizationType::CONVOLUTION;
         // Create and configure function
         FunctionType fuse_batch_normalization;
-        fuse_batch_normalization.configure(&w, &mean, &var, w_fused_to_use, b_fused_to_use, b_to_use, beta_to_use, gamma_to_use, _epsilon);
+        fuse_batch_normalization.configure(&w, &mean, &var, w_fused_to_use, b_fused_to_use, b_to_use, beta_to_use, gamma_to_use, _epsilon, fuse_bn_type);
 
         ARM_COMPUTE_EXPECT(w.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

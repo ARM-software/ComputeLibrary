@@ -44,6 +44,8 @@ AbsoluteTolerance<float> absolute_tolerance_f16(0.2f);
 
 template <typename T>
 using CLFuseBatchNormalizationConvFixture = FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 4, T>;
+template <typename T>
+using CLFuseBatchNormalizationDWCFixture = FuseBatchNormalizationFixture<CLTensor, CLAccessor, CLFuseBatchNormalization, 3, T>;
 
 // *INDENT-OFF*
 // clang-format off
@@ -140,6 +142,77 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationConvFixture<half>, fram
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // Convolution
+
+TEST_SUITE(DepthwiseConvolution)
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::PRECOMMIT,
+                                        combine(combine(combine(combine(combine(combine(
+                                                        datasets::Small3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                        data_layout_values),
+                                                        in_place_values),
+                                                        with_bias_values),
+                                                        with_gamma_values),
+                                                        with_beta_values))
+{
+    // Validate outputs
+    validate(CLAccessor(_target_w), _reference_w, absolute_tolerance_f32);
+    validate(CLAccessor(_target_b), _reference_b, absolute_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationDWCFixture<float>, framework::DatasetMode::NIGHTLY,
+                                        combine(combine(combine(combine(combine(combine(
+                                                        datasets::Large3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F32 })),
+                                                        data_layout_values),
+                                                        in_place_values),
+                                                        with_bias_values),
+                                                        with_gamma_values),
+                                                        with_beta_values))
+{
+    // Validate outputs
+    validate(CLAccessor(_target_w), _reference_w, absolute_tolerance_f32);
+    validate(CLAccessor(_target_b), _reference_b, absolute_tolerance_f32);
+}
+
+TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::PRECOMMIT,
+                                        combine(combine(combine(combine(combine(combine(
+                                                        datasets::Small3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F16 })),
+                                                        data_layout_values),
+                                                        in_place_values),
+                                                        with_bias_values),
+                                                        with_gamma_values),
+                                                        with_beta_values))
+{
+    // Validate outputs
+    validate(CLAccessor(_target_w), _reference_w, absolute_tolerance_f16);
+    validate(CLAccessor(_target_b), _reference_b, absolute_tolerance_f16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFuseBatchNormalizationDWCFixture<half>, framework::DatasetMode::NIGHTLY,
+                                        combine(combine(combine(combine(combine(combine(
+                                                        datasets::Large3DShapes(),
+                                                        framework::dataset::make("DataType", { DataType::F16 })),
+                                                        data_layout_values),
+                                                        in_place_values),
+                                                        with_bias_values),
+                                                        with_gamma_values),
+                                                        with_beta_values))
+{
+    // Validate outputs
+    validate(CLAccessor(_target_w), _reference_w, absolute_tolerance_f16);
+    validate(CLAccessor(_target_b), _reference_b, absolute_tolerance_f16);
+}
+
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
+TEST_SUITE_END() // DepthwiseConvolution
+
 TEST_SUITE_END() // FuseBatchNormalization
 TEST_SUITE_END() // CL
 } // namespace validation

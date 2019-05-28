@@ -259,12 +259,14 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
 }
 #endif /* defined(VEC_SIZE) && defined(DATA_TYPE) && defined(DATA_TYPE)*/
 
-#if defined(DIM2) && defined(DATA_TYPE) && defined(EPSILON)
-/** OpenCL kernel to fuse the weights of convolution layer with batch normalization when the data layout is either NCHW or NHWC
+#if defined(DATA_TYPE) && defined(EPSILON)
+/** OpenCL kernel to fuse the weights of convolution or depthwise convolution layer with batch normalization when the data layout is either NCHW or NHWC
  *
  * @note The input weights tensor is assumed 4D with the OFMs in the fourth dimension
  * @note Data type should be passed at compile time using the -DDATA_TYPE, e.g. -DDATA_TYPE=float
- * @note The third dimension of the input tensor should be passed at compile time using -DNUM_CHANNELS=size. e.g. -DNUM_CHANNELS=16
+ * @note The third dimension of the input tensor should be passed at compile time when weights belong to a convolution layer using -DDIM2=size. e.g. -DDIM2=16.
+ *       For depthwise convolution weight do not pass DIM2
+ * @note Data layout NHWC should be passed at compile time with -DNHWC. For data layout NCHW it is not required to pass any parameter
  * @note Batch normalization epsilon parameter should be passed at compile time using -DEPSILON=value. e.g. -DEPSILON=0.001f
  *
  * @param[in]  w_ptr                                 Pointer to the weights tensor. Supported data types: F16/F32
@@ -312,35 +314,45 @@ __kernel void batchnormalization_layer_nhwc(TENSOR3D_DECLARATION(input),
  * @param[in]  gamma_step_x                          (Optional) gamma_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  gamma_offset_first_element_in_bytes   (Optional) The offset of the first element in the gamma source tensor
  */
-__kernel void fuse_batchnormalization_conv_layer(TENSOR3D_DECLARATION(w),
+__kernel void fuse_batchnormalization_layer(TENSOR3D_DECLARATION(w),
 #if defined(BIAS)
-                                                 VECTOR_DECLARATION(b),
+                                            VECTOR_DECLARATION(b),
 #endif // defined(BIAS)
-                                                 VECTOR_DECLARATION(mean),
-                                                 VECTOR_DECLARATION(var)
+                                            VECTOR_DECLARATION(mean),
+                                            VECTOR_DECLARATION(var)
 #ifndef IN_PLACE_W
-                                                 ,
-                                                 TENSOR3D_DECLARATION(w_fused)
+                                            ,
+                                            TENSOR3D_DECLARATION(w_fused)
 #endif // ifndef IN_PLACE_W
 #ifndef IN_PLACE_B
-                                                 ,
-                                                 VECTOR_DECLARATION(b_fused)
+                                            ,
+                                            VECTOR_DECLARATION(b_fused)
 #endif // ifndef IN_PLACE_B
 #if defined(BETA)
-                                                 ,
-                                                 VECTOR_DECLARATION(beta)
+                                            ,
+                                            VECTOR_DECLARATION(beta)
 #endif // defined(BETA)
 #if defined(GAMMA)
-                                                 ,
-                                                 VECTOR_DECLARATION(gamma)
+                                            ,
+                                            VECTOR_DECLARATION(gamma)
 #endif // defined(GAMMA)
-                                                )
+                                           )
 {
-    int x  = get_global_id(0);
-    int y  = get_global_id(1);
-    int z  = get_global_id(2);
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
+#if defined(DIM2)
     int c0 = z % DIM2;
     int c1 = z / DIM2;
+#else // ! defined(DIM2)
+    int c0 = 0;
+#if defined(NHWC)
+    int c1 = x;
+#else  // defined(NHWC)
+    int c1 = z;
+#endif // defined(NHWC)
+#endif // defined(DIM2)
 
     int w_offset = x * sizeof(DATA_TYPE) + y * w_stride_y + z * w_stride_z;
     int v_offset = c1 * sizeof(DATA_TYPE);
@@ -368,11 +380,15 @@ __kernel void fuse_batchnormalization_conv_layer(TENSOR3D_DECLARATION(w),
 #if defined(IN_PLACE_W)
     *((__global DATA_TYPE *)(w_ptr + w_offset + w_offset_first_element_in_bytes)) = w_new;
 #else  // defined(IN_PLACE_W)
-    *((__global DATA_TYPE *)(w_fused_ptr + w_offset + w_fused_offset_first_element_in_bytes))     = w_new;
+    *((__global DATA_TYPE *)(w_fused_ptr + w_offset + w_fused_offset_first_element_in_bytes)) = w_new;
 #endif // defined(IN_PLACE_W)
 
     // Compute bias
+#if !defined(DIM2) && defined(NHWC)
+    if(z == 0 && y == 0)
+#else !defined(DIM2) && defined(NHWC)
     if(x == 0 && y == 0 && c0 == 0)
+#endif // !defined(DIM2) && defined(NHWC)
     {
 #if defined(BIAS)
         b_old = *((__global DATA_TYPE *)(b_ptr + v_offset + b_offset_first_element_in_bytes));
@@ -400,4 +416,4 @@ __kernel void fuse_batchnormalization_conv_layer(TENSOR3D_DECLARATION(w),
 #endif // defined(BIAS)
     }
 }
-#endif // defined(DIM2) && defined(DATA_TYPE) && defined(EPSILON)
+#endif // defined(DATA_TYPE) && defined(EPSILON)

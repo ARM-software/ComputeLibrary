@@ -142,6 +142,13 @@ enum class DeconvolutionMethod
     DIRECT, /**< Direct deconvolution */
 };
 
+/** Available FuseBatchNormalizationType*/
+enum class FuseBatchNormalizationType
+{
+    CONVOLUTION,         /**< For Convolution weights */
+    DEPTHWISECONVOLUTION /**< For Depthwise Convolution weights*/
+};
+
 /** Padding mode to use for PadLayer */
 enum class PaddingMode
 {
