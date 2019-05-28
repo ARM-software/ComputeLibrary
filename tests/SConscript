@@ -110,6 +110,9 @@ if env['opencl']:
 
     files_validation += Glob('validation/CL/*/' + filter_pattern)
     files_validation += Glob('validation/CL/' + filter_pattern)
+    #FIXME Delete before release
+    if env['internal_only']:
+        files_validation += Glob('../3rdparty/tests/validation/CL/' + filter_pattern)
 
 if env['neon']:
     filter_pattern = test_env['test_filter']
