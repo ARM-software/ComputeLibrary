@@ -95,6 +95,7 @@
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
+#include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
 #include "arm_compute/runtime/NEON/functions/NELaplacianPyramid.h"
 #include "arm_compute/runtime/NEON/functions/NELaplacianReconstruct.h"
 #include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"

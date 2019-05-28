@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -565,7 +565,7 @@ inline arm_compute::Status error_on_mismatching_quantization_info(const char *fu
     DataType             &&first_data_type         = tensor_info_1->data_type();
     const QuantizationInfo first_quantization_info = tensor_info_1->quantization_info();
 
-    if(!is_data_type_quantized_asymmetric(first_data_type))
+    if(!is_data_type_quantized(first_data_type))
     {
         return arm_compute::Status{};
     }
