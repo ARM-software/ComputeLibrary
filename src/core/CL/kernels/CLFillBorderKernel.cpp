@@ -149,6 +149,17 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     win.set(Window::DimY, Window::Dimension(0, 1, 1));
     win.use_tensor_dimensions(tensor->info()->tensor_shape(), Window::DimZ);
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(dt));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(tensor->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(tensor->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_border_mode(border_mode));
 }
 
 void CLFillBorderKernel::run(const Window &window, cl::CommandQueue &queue)

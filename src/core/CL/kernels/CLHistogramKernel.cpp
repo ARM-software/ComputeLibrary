@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,9 +81,9 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     unsigned int buffer_size = bin_size + 1; // We need one extra place for pixels that don't meet the conditions
 
     // Create kernel
-    bool        is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
-    std::string kernel_name   = is_fixed_size ? "hist_local_kernel_fixed" : "hist_local_kernel";
-    _kernel                   = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    bool              is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
+    const std::string kernel_name   = is_fixed_size ? "hist_local_kernel_fixed" : "hist_local_kernel";
+    _kernel                         = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -108,6 +108,15 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, pixels_per_item));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLHistogramKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -178,9 +187,9 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     unsigned int offrange    = offset + range;
 
     // Create kernel
-    bool        is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
-    std::string kernel_name   = is_fixed_size ? "hist_border_kernel_fixed" : "hist_border_kernel";
-    _kernel                   = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    bool              is_fixed_size = (256 == num_bins) && (1 == window_size) && (0 == offset) && (256 == offrange);
+    const std::string kernel_name   = is_fixed_size ? "hist_border_kernel_fixed" : "hist_border_kernel";
+    _kernel                         = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -199,6 +208,15 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, 1));
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
 }
 
 void CLHistogramBorderKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,8 +75,8 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     // Create kernel
     std::string interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
-    std::string kernel_name = "warp_affine_" + interpolation_name;
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
+    const std::string kernel_name = "warp_affine_" + interpolation_name;
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, options));
 
     // Set static kernel arguments
     unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
@@ -99,4 +99,27 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(3));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(3));
+    _config_id += "_";
+    _config_id += lower_string(string_from_interpolation_policy(policy));
 }

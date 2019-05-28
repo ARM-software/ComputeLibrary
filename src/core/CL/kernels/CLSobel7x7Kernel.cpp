@@ -71,7 +71,7 @@ void CLSobel7x7HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     _border_size = BorderSize(border_undefined ? 0 : 3, 3);
 
     // Construct kernel name
-    std::string kernel_name = "sobel_separable1x7";
+    const std::string kernel_name = "sobel_separable1x7";
 
     // Set build options
     std::set<std::string> build_opts;
@@ -106,6 +106,17 @@ void CLSobel7x7HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLSobel7x7HorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -182,7 +193,8 @@ void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("sobel_separable7x1", build_opts));
+    const std::string kernel_name = std::string("sobel_separable7x1");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     const ICLTensor *input = _run_sobel_x ? _input_x : _input_y;
 
@@ -205,6 +217,17 @@ void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLSobel7x7VertKernel::run(const Window &window, cl::CommandQueue &queue)

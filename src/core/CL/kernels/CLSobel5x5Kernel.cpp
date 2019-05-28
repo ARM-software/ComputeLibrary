@@ -84,7 +84,8 @@ void CLSobel5x5HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("sobel_separable1x5", build_opts));
+    const std::string kernel_name = std::string("sobel_separable1x5");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -103,6 +104,17 @@ void CLSobel5x5HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLSobel5x5HorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -179,7 +191,8 @@ void CLSobel5x5VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     }
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("sobel_separable5x1", build_opts));
+    const std::string kernel_name = std::string("sobel_separable5x1");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     const ICLTensor *input = _run_sobel_x ? _input_x : _input_y;
 
@@ -202,6 +215,17 @@ void CLSobel5x5VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(border_undefined);
 }
 
 void CLSobel5x5VertKernel::run(const Window &window, cl::CommandQueue &queue)

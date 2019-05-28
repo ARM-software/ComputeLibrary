@@ -56,7 +56,8 @@ void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *ou
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gaussian1x5_sub_x"));
+    const std::string kernel_name = std::string("gaussian1x5_sub_x");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 16;
@@ -96,6 +97,19 @@ void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *ou
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLGaussianPyramidHorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -148,7 +162,8 @@ void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *o
     _output = output;
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gaussian5x1_sub_y"));
+    const std::string kernel_name = std::string("gaussian5x1_sub_y");
+    _kernel                       = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gaussian5x1_sub_y"));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;
@@ -178,6 +193,19 @@ void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *o
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure_internal(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLGaussianPyramidVertKernel::run(const Window &window, cl::CommandQueue &queue)
