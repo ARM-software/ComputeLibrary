@@ -23,6 +23,7 @@ Related projects:
 
 Documentation available here:
 
+- [v19.05](https://arm-software.github.io/ComputeLibrary/v19.05/)
 - [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/)
 - [v18.11](https://arm-software.github.io/ComputeLibrary/v18.11/index.xhtml)
 - [v18.08](https://arm-software.github.io/ComputeLibrary/v18.08/)
@@ -40,6 +41,8 @@ Documentation available here:
 
 Binaries available here:
 
+- [v19.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-linux.tar.gz)
+- [v19.05-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-android.tar.gz)
 - [v19.02-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.02/arm_compute-v19.02-bin-linux.tar.gz)
 - [v19.02-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.02/arm_compute-v19.02-bin-android.tar.gz)
 - [v18.11-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v18.11/arm_compute-v18.11-bin-linux.tar.gz)
