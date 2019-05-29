@@ -133,6 +133,7 @@
 #include "arm_compute/runtime/CL/functions/CLSobel7x7.h"
 #include "arm_compute/runtime/CL/functions/CLSoftmaxLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSpaceToBatchLayer.h"
+#include "arm_compute/runtime/CL/functions/CLSpaceToDepthLayer.h"
 #include "arm_compute/runtime/CL/functions/CLSplit.h"
 #include "arm_compute/runtime/CL/functions/CLStackLayer.h"
 #include "arm_compute/runtime/CL/functions/CLStridedSlice.h"

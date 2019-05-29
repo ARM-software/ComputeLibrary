@@ -470,6 +470,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "space_to_batch_static_nchw", "space_to_batch.cl" },
     { "space_to_batch_nhwc", "space_to_batch.cl" },
     { "space_to_batch_static_nhwc", "space_to_batch.cl" },
+    { "space_to_depth_nchw", "space_to_depth.cl" },
+    { "space_to_depth_nhwc", "space_to_depth.cl" },
     { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
     { "stack_layer", "stack_layer.cl" },
     { "strided_slice", "slice_ops.cl" },
@@ -957,6 +959,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "space_to_batch.cl",
 #include "./cl_kernels/space_to_batch.clembed"
+    },
+    {
+        "space_to_depth.cl",
+#include "./cl_kernels/space_to_depth.clembed"
     },
     {
         "stack_layer.cl",

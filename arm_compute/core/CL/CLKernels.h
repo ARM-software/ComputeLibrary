@@ -138,6 +138,7 @@
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLSpaceToBatchLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLSpaceToDepthLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLStackLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
