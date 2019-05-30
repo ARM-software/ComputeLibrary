@@ -126,7 +126,7 @@ public:
     LargeSpaceToDepthLayerDataset()
     {
         add_config(TensorShape(128U, 64U, 2U, 1U), TensorShape(64U, 32U, 8U, 1U), 2);
-        add_config(TensorShape(512U, 64U, 2U, 1U), TensorShape(128U, 16U, 8U, 4U), 2);
+        add_config(TensorShape(512U, 64U, 2U, 4U), TensorShape(256U, 32U, 8U, 4U), 2);
     }
 };
 } // namespace datasets
