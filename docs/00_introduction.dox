@@ -250,9 +250,13 @@ v19.05 Public major release
     - @ref NEGEMMLowpOffsetContributionOutputStageKernel
     - @ref NEHeightConcatenateLayerKernel
     - @ref NESpaceToBatchLayerKernel / @ref NESpaceToBatchLayer
+    - @ref NEFFT1D
+    - @ref NEFFT2D
+    - @ref NEFFTConvolutionLayer
  - New OpenCL kernels / functions:
     - @ref CLComplexPixelWiseMultiplicationKernel / @ref CLComplexPixelWiseMultiplication
     - @ref CLCropKernel / @ref CLCropResize
+    - @ref CLDeconvolutionReshapeOutputKernel
     - @ref CLFFTDigitReverseKernel
     - @ref CLFFTRadixStageKernel
     - @ref CLFFTScaleKernel
