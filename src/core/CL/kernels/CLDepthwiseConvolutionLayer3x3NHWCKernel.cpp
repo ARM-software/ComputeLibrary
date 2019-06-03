@@ -109,12 +109,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape(
                                          *input, TensorInfo(TensorShape(weights_width, weights_height), 1, weights->data_type()).set_data_layout(DataLayout::NCHW), conv_info, depth_multiplier, dilation);
 
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output,
-                       output_shape,
-                       1,
-                       input->data_type(),
-                       input->quantization_info());
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
     const bool is_qasymm              = is_data_type_quantized_asymmetric(input->data_type());
     const bool is_stride_1_dilation_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1) && dilation.x() == 1 && dilation.y() == 1);

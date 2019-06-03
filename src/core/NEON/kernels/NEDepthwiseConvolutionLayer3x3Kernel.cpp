@@ -195,7 +195,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const DataType    output_dt    = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt));
+    auto_init_if_empty(*output, input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt).set_quantization_info(output->quantization_info()));
 
     // Configure kernel window (generic)
     const unsigned int conv_stride_x = conv_info.stride().first;

@@ -88,7 +88,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     // Output auto inizialitation if not yet initialized
     const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape).set_quantization_info(output->quantization_info()));
 
     const unsigned int conv_stride_x = conv_info.stride().first;
     const unsigned int conv_stride_y = conv_info.stride().second;

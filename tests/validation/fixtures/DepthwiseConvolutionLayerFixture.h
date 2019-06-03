@@ -56,10 +56,12 @@ public:
 
 public:
     template <typename...>
-    void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type, QuantizationInfo quantization_info,
-               DataLayout data_layout, ActivationLayerInfo act_info)
+    void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type,
+               QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, ActivationLayerInfo act_info)
     {
-        _quantization_info            = quantization_info;
+        _input_quantization_info  = input_quantization_info;
+        _output_quantization_info = output_quantization_info;
+
         _data_type                    = data_type;
         const DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
@@ -72,8 +74,10 @@ public:
         weights_shape.set(2, out_shape.z());
         const TensorShape biases_shape(weights_shape[2]);
 
-        _target    = compute_target(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier, data_type, bias_data_type, quantization_info, data_layout, act_info);
-        _reference = compute_reference(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier, data_type, bias_data_type, quantization_info, act_info);
+        _target = compute_target(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier,
+                                 data_type, bias_data_type, input_quantization_info, output_quantization_info, data_layout, act_info);
+        _reference = compute_reference(in_shape, weights_shape, biases_shape, out_shape, pad_stride_info, dilation, depth_multiplier,
+                                       data_type, bias_data_type, input_quantization_info, output_quantization_info, act_info);
     }
 
 protected:
@@ -108,7 +112,9 @@ protected:
 
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape output_shape, PadStrideInfo &pad_stride_info, Size2D dilation,
                               unsigned int   depth_multiplier,
-                              const DataType data_type, const DataType bias_data_type, const QuantizationInfo quantization_info, const DataLayout data_layout, ActivationLayerInfo act_info)
+                              const DataType data_type, const DataType bias_data_type,
+                              const QuantizationInfo input_quantization_info, const QuantizationInfo output_quantization_info,
+                              const DataLayout data_layout, ActivationLayerInfo act_info)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -118,10 +124,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, quantization_info, data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, quantization_info, data_layout);
-        TensorType biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, quantization_info, data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, quantization_info, data_layout);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, input_quantization_info, data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, input_quantization_info, data_layout);
+        TensorType biases  = create_tensor<TensorType>(biases_shape, bias_data_type, 1, input_quantization_info, data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, output_quantization_info, data_layout);
 
         // Create Depthwise Convolution configure function
         FunctionType dwc;
@@ -154,26 +160,30 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &in_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const TensorShape &out_shape, const PadStrideInfo &pad_stride_info,
+    SimpleTensor<T> compute_reference(const TensorShape &in_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const TensorShape &out_shape,
+                                      const PadStrideInfo &pad_stride_info,
                                       const Size2D &dilation, unsigned int depth_multiplier,
-                                      const DataType data_type, const DataType bias_data_type, const QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+                                      const DataType data_type, const DataType bias_data_type,
+                                      const QuantizationInfo input_quantization_info, const QuantizationInfo output_quantization_info,
+                                      ActivationLayerInfo act_info)
     {
-        SimpleTensor<T>     src{ in_shape, data_type, 1, quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, data_type, 1, quantization_info };
-        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, quantization_info };
+        SimpleTensor<T>     src{ in_shape, data_type, 1, input_quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, data_type, 1, input_quantization_info };
+        SimpleTensor<TBias> biases{ biases_shape, bias_data_type, 1, input_quantization_info };
 
         fill(src, 0);
         fill(weights, 1);
         fill(biases, 2);
 
-        SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, out_shape, pad_stride_info, depth_multiplier, dilation);
+        SimpleTensor<T> depth_out = reference::depthwise_convolution(src, weights, biases, out_shape, pad_stride_info, depth_multiplier, dilation, output_quantization_info);
         return (act_info.enabled()) ? reference::activation_layer<T>(depth_out, act_info) : depth_out;
     }
 
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
     DataType         _data_type{};
-    QuantizationInfo _quantization_info{};
+    QuantizationInfo _input_quantization_info{};
+    QuantizationInfo _output_quantization_info{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -185,7 +195,7 @@ public:
                ActivationLayerInfo act_info)
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier,
-                                                                                                            data_type, QuantizationInfo(), data_layout, act_info);
+                                                                                                            data_type, QuantizationInfo(), QuantizationInfo(), data_layout, act_info);
     }
 };
 
@@ -194,11 +204,11 @@ class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConv
 {
 public:
     template <typename...>
-    void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type, QuantizationInfo quantization_info,
-               DataLayout data_layout, ActivationLayerInfo act_info)
+    void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type,
+               QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, ActivationLayerInfo act_info)
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, kernel_size, pad_stride_info, dilation, depth_multiplier,
-                                                                                                            data_type, quantization_info, data_layout, act_info);
+                                                                                                            data_type, input_quantization_info, output_quantization_info, data_layout, act_info);
     }
 };
 } // namespace validation

@@ -87,6 +87,7 @@ void NEDepthwiseConvolutionLayer3x3::configure_generic(ITensor                  
         // Configure the function to transform the weights tensor from HWI -> IHW
         _permute_weights.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
+        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
         // Configure depthwise
         _dwc_kernel.configure(&_permuted_input, &_permuted_weights, (_is_quantized) ? &_accumulator : &_permuted_output, conv_info, depth_multiplier, dilation);
@@ -163,6 +164,9 @@ void NEDepthwiseConvolutionLayer3x3::configure_optimized(const ITensor          
         // Configure the function to transform the weights tensor from IHW -> HWI
         _permute_weights.configure(weights, &_permuted_weights, PermutationVector(2U, 0U, 1U));
         _permuted_weights.info()->set_data_layout(DataLayout::NHWC);
+
+        _permuted_output.info()->set_data_layout(DataLayout::NHWC);
+        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
         // Configure optimized depthwise
         _dwc_optimized_func.configure(&_permuted_input, &_permuted_weights, biases, &_permuted_output, conv_info, depth_multiplier, act_info_to_use);
@@ -423,6 +427,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
         permute(output_shape, PermutationVector(1U, 2U, 0U));
         _permuted_output.allocator()->init(output->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
         _permuted_output.info()->set_data_layout(DataLayout::NCHW);
+        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
         output_to_use = &_permuted_output;
     }
 

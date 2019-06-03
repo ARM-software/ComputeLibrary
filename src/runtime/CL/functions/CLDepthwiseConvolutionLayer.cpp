@@ -90,6 +90,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
         // Configure the function to transform the weights tensor from HWI -> IHW
         _permute_weights_to_nchw.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
         _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
+        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
 
         input_to_use   = &_permuted_input;
         weights_to_use = &_permuted_weights;

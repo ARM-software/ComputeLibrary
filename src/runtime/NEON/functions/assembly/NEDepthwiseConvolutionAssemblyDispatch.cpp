@@ -176,7 +176,7 @@ void NEDepthwiseConvolutionAssemblyDispatch::configure(const ITensor            
 
     // Output auto inizialitation if not yet initialized
     const TensorShape output_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_quantization_info(output->info()->quantization_info()));
 
     _input       = input;
     _weights     = weights;
