@@ -430,18 +430,18 @@
 #define SCALE_BLOCK(N, DATA_TYPE, BASENAME, SCALE) SCALE_BLOCK_STR(N, DATA_TYPE, BASENAME, SCALE)
 
 /** Given a set of vectors of size K0, these macros create a new vector to contain the values at index IDX_COL (with IDX_COL < N0) for all input vectors */
-#define COLUMN_VECTOR1(IDX_COL, BASENAME, B) \
-    uchar BASENAME##IDX_COL = (uchar)((B##0).s##IDX_COL);
-#define COLUMN_VECTOR2(IDX_COL, BASENAME, B) \
-    uchar2 BASENAME##IDX_COL = (uchar2)((B##0).s##IDX_COL, (B##1).s##IDX_COL);
-#define COLUMN_VECTOR3(IDX_COL, BASENAME, B) \
-    uchar3 BASENAME##IDX_COL = (uchar3)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL);
-#define COLUMN_VECTOR4(IDX_COL, BASENAME, B) \
-    uchar4 BASENAME##IDX_COL = (uchar4)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL);
-#define COLUMN_VECTOR8(IDX_COL, BASENAME, B) \
-    uchar8 BASENAME##IDX_COL = (uchar8)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL, (B##4).s##IDX_COL, (B##5).s##IDX_COL, (B##6).s##IDX_COL, (B##7).s##IDX_COL);
-#define COLUMN_VECTOR16(IDX_COL, BASENAME, B) \
-    uchar16 BASENAME##N0 = (uchar16)((B##0).s##IDX_COL, (B##1).s##IDX_COL, (B##2).s##IDX_COL, (B##3).s##IDX_COL, (B##4).s##IDX_COL, (B##5).s##IDX_COL, (B##6).s##IDX_COL, (B##7).s##IDX_COL, (B##8).s##IDX_COL, (B##9).s##IDX_COL, (B##A).s##IDX_COL, (B##B).s##IDX_COL, (B##C).s##IDX_COL, (B##D).s##IDX_COL, (B##E).s##IDX_COL, (B##F).s##IDX_COL);
+#define COLUMN_VECTOR1(IDX_COL, BASENAME, X) \
+    uchar BASENAME##IDX_COL = (uchar)((X##0).s##IDX_COL);
+#define COLUMN_VECTOR2(IDX_COL, BASENAME, X) \
+    uchar2 BASENAME##IDX_COL = (uchar2)((X##0).s##IDX_COL, (X##1).s##IDX_COL);
+#define COLUMN_VECTOR3(IDX_COL, BASENAME, X) \
+    uchar3 BASENAME##IDX_COL = (uchar3)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL);
+#define COLUMN_VECTOR4(IDX_COL, BASENAME, X) \
+    uchar4 BASENAME##IDX_COL = (uchar4)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL);
+#define COLUMN_VECTOR8(IDX_COL, BASENAME, X) \
+    uchar8 BASENAME##IDX_COL = (uchar8)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL);
+#define COLUMN_VECTOR16(IDX_COL, BASENAME, X) \
+    uchar16 BASENAME##IDX_COL = (uchar16)((X##0).s##IDX_COL, (X##1).s##IDX_COL, (X##2).s##IDX_COL, (X##3).s##IDX_COL, (X##4).s##IDX_COL, (X##5).s##IDX_COL, (X##6).s##IDX_COL, (X##7).s##IDX_COL, (X##8).s##IDX_COL, (X##9).s##IDX_COL, (X##A).s##IDX_COL, (X##B).s##IDX_COL, (X##C).s##IDX_COL, (X##D).s##IDX_COL, (X##E).s##IDX_COL, (X##F).s##IDX_COL);
 
 /** Given N0 vectors of size K0, these macros create K0 vectors of size N0 which are the result of a transposition */
 #define TRANSPOSE_K0X1(K0, BASENAME, B) \

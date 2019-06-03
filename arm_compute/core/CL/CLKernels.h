@@ -75,6 +75,7 @@
 #include "arm_compute/core/CL/kernels/CLFloorKernel.h"
 #include "arm_compute/core/CL/kernels/CLFuseBatchNormalizationKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyKernel.h"
+#include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyNativeKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMLowpOffsetContributionKernel.h"

@@ -1843,6 +1843,178 @@ __kernel void gemmlowp_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 }
 #endif // defined(M0) && defined(N0) && defined(K0) && defined(H0) && defined(DATA_TYPE) && defined(K)
 
+#if defined(M0) && defined(N0) && defined(K0) && defined(K)
+
+/** This OpenCL kernel computes the matrix multiplication between 2 matrices.
+ *  The LHS matrix is NOT reshaped
+ *  The RHS matrix is NOT reshaped
+ *
+ * @note The number of columns of LHS matrix must be passed at compile time using -DK (i.e. -DK=64)
+ * @note The number of M0 rows to process must be passed at compile time using -DM0 (i.e. -DM0=2)
+ * @note The number of N0 columns to process must be passed at compile time using -DN0 (i.e. -DN0=2)
+ * @note The number of K0 partial accumulations must be passed at compile time using -DK0 (i.e., -DK0=2)
+ * @note Only the following configurations of M0, N0 and K0 are currently supported:
+ *  - M0 = 1, 2, 3, 4, 5, 6, 7, 8
+ *  - N0 = 2, 3, 4, 8, 16
+ *  - K0 = 2, 3, 4, 8, 16
+ *
+ * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
+ *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
+ *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
+ *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
+ *       -# DEPTH_GEMM3D: The depth of the output in case it has to be reinterpreted as a 3D tensor
+ *          (HEIGHT_GEMM3D * DEPTH_GEMM3D) = columns LHS matrix
+ *
+ * @param[in]  lhs_ptr                           Pointer to the LHS reshaped matrix. Supported data type: F16/F32
+ * @param[in]  lhs_stride_x                      Stride of the LHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  lhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  lhs_stride_y                      Stride of the LHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  lhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  lhs_offset_first_element_in_bytes The offset of the first element in the LHS reshaped matrix
+ * @param[in]  rhs_ptr                           Pointer to the RHS reshaped matrix. Supported data type: same as @p lhs_ptr
+ * @param[in]  rhs_stride_x                      Stride of the RHS reshaped matrix in X dimension (in bytes)
+ * @param[in]  rhs_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  rhs_stride_y                      Stride of the RHS reshaped matrix in Y dimension (in bytes)
+ * @param[in]  rhs_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  rhs_offset_first_element_in_bytes The offset of the first element in the RHS reshaped matrix
+ * @param[out] dst_ptr                           Pointer to the destination matrix Supported data type: same as @p lhs_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination matrix
+ * @param[in]  lhs_stride_z                      Stride of the LHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  rhs_stride_z                      Stride of the RHS reshaped matrix in Z dimension (in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  lhs_cross_plane_pad               (Optional) Bottom paddings for LHS matrix in unit of elements (only if defined REINTERPRET_INPUT_AS_3D)
+ * @param[in]  dst_cross_plane_pad               (Optional) Bottom paddings for the output matrix in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ */
+__kernel void gemmlowp_mm_native(IMAGE_DECLARATION(lhs),
+                                 IMAGE_DECLARATION(rhs),
+                                 IMAGE_DECLARATION(dst),
+                                 uint lhs_stride_z,
+                                 uint rhs_stride_z,
+                                 uint dst_stride_z
+#if defined(REINTERPRET_INPUT_AS_3D)
+                                 ,
+                                 uint lhs_cross_plane_pad
+#endif // REINTERPRET_INPUT_AS_3D
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+                                 ,
+                                 uint dst_cross_plane_pad
+#endif // REINTERPRET_OUTPUT_AS_3D
+                                )
+{
+    uint x = get_global_id(0);
+    uint y = get_global_id(1);
+    uint z = get_global_id(2);
+
+#if defined(DUMMY_WORK_ITEMS)
+    if((x * N0 >= N) || (y * M0 >= M))
+    {
+        return;
+    }
+#endif // defined(DUMMY_WORK_ITEMS)
+
+    // Compute LHS matrix address
+    uint lhs_offset = lhs_offset_first_element_in_bytes + y * M0 * (uint)lhs_stride_y;
+
+    // Compute RHS matrix address
+    uint rhs_offset = rhs_offset_first_element_in_bytes + x * N0;
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    rhs_offset += (z % MATRIX_B_DEPTH) * rhs_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    rhs_offset += z * rhs_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
+
+    REPEAT_VAR_INIT_TO_CONST(8, uint, zlhs, 0);
+    REPEAT_VAR_INIT_TO_CONST(16, uint, zrhs, 0);
+
+#if defined(REINTERPRET_INPUT_AS_3D)
+    // The plane (zlhs) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
+    CALCULATE_Z_OFFSET(M0, uint, zlhs, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, lhs_cross_plane_pad, lhs_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply lhs_stride_z by DEPTH_GEMM3D
+    lhs_offset += z * lhs_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    lhs_offset += z * lhs_stride_z;
+
+#endif // defined(REINTERPRET_INPUT_AS_3D)
+
+    // Initialize the accumulators
+    REPEAT_VAR_INIT_TO_CONST(M0, VEC_DATA_TYPE(uint, N0), c, 0); //VEC_DATA_TYPE(uint, N0)    c0=0,c1=0,c2=0,... c(M0-1)=0;
+
+    int i = 0;
+
+    for(; i <= (K - K0); i += K0)
+    {
+        // Load values from LHS matrix
+        LOAD_BLOCK(M0, K0, uchar, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+
+        // Load values from RHS matrix
+        LOAD_BLOCK(K0, N0, uchar, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
+
+        // Transpose the values from RHS matrix
+        TRANSPOSE_K0XN0(K0, N0, b_t, b);
+
+        // Partial matrix multiplication M0,N0,K0
+        ARM_MM_K0XN0XM0(M0, N0, K0, a, b_t, c);
+
+        // Update the offset
+        lhs_offset += K0;
+        rhs_offset += K0 * rhs_stride_y;
+    }
+
+    // Left-over for loop
+    for(; i < K; ++i)
+    {
+        // Load values from LHS matrix
+        LOAD_BLOCK(M0, 1, uchar, a, lhs_ptr, lhs_offset, lhs_stride_y, zlhs);
+
+        // Load values from RHS matrix
+        LOAD_BLOCK(1, N0, uchar, b, rhs_ptr, rhs_offset, rhs_stride_y, zrhs);
+
+        // Transpose the values from RHS matrix
+        TRANSPOSE_K0XN0(1, N0, b_t, b);
+
+        // Partial matrix multiplication M0,N0,1
+        ARM_MM_K0XN0XM0(M0, N0, 1, a, b_t, c);
+
+        // Update the offset
+        lhs_offset += 1;
+        rhs_offset += rhs_stride_y;
+    }
+
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + (x * (uint)N0) * sizeof(int) + (y * (uint)M0 * dst_stride_y);
+
+    REPEAT_VAR_INIT_TO_CONST(M0, uint, zout, 0); //uint zout0=0,zout1=0,zout2=0,... zout7=0;
+
+#if defined(REINTERPRET_OUTPUT_AS_3D)
+    // The plane (zout) is calculated dividing M (y * M0) by HEIGHT_GEMM3D
+    CALCULATE_Z_OFFSET(M0, uint, zout, y, HEIGHT_GEMM3D, DEPTH_GEMM3D, dst_cross_plane_pad, dst_stride_y);
+
+    // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
+    // multiply dst_stride_z by DEPTH_GEMM3D
+    dst_addr += z * dst_stride_z * DEPTH_GEMM3D;
+
+#else // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Add offset for batched GEMM
+    dst_addr += z * dst_stride_z;
+
+#endif // defined(REINTERPRET_OUTPUT_AS_3D)
+
+    // Convert and store output block
+    CONVERT_STORE_BLOCK(M0, N0, int, c, dst_addr, dst_stride_y, zout);
+}
+#endif // defined(M0) && defined(N0) && defined(K0) && defined(K)
+
 #if defined(COLS_A)
 /** OpenCL kernel used to compute the row-vectors of sums of all the entries in each row of Matrix A.
  *
