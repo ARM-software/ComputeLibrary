@@ -133,7 +133,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 
     // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
     // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const int m          = gemm_info.m();
+    const int m          = reinterpret_output_as_3d ? gemm_info.m() : input0->dimension(1);
     const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
