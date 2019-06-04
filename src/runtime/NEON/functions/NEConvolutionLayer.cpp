@@ -165,6 +165,12 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
     }
     else
     {
+        // SRGAN
+        if((input->dimension(idx_h) > 720U) && (output->dimension(idx_h) > 720U) && (weights->dimension(idx_h) == 9)
+           && (NEDirectConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
+        {
+            return ConvolutionMethod::DIRECT;
+        }
         if((weights->dimension(idx_h) > 7) && (input->dimension(idx_c) > output->dimension(idx_c)) && (NEFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info)))
         {
             return ConvolutionMethod::FFT;
