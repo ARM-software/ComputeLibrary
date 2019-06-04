@@ -55,7 +55,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
 
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(std::max(conv_info.pad_top(), conv_info.pad_bottom()) > 4);
 
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
