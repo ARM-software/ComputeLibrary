@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -87,7 +87,7 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
 }
 
 template <typename T>
-SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info);
+SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test

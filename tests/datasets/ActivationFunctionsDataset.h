@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,10 +64,11 @@ public:
     ActivationFunctionsQuantized()
         : ContainerDataset("ActivationFunctionQuantized",
     {
-        ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                            ActivationLayerInfo::ActivationFunction::RELU,
+        ActivationLayerInfo::ActivationFunction::RELU,
+                            ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                            ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
                             ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                            ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+                            ActivationLayerInfo::ActivationFunction::TANH,
     })
     {
     }

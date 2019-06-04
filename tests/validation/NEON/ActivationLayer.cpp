@@ -223,7 +223,8 @@ using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<T
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
                                                                                                   ActivationLayerInfo::ActivationFunction::RELU,
                                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC
+                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                                                                                                  ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
 
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), QuantizedActivationFunctionsDataset),
