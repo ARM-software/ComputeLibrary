@@ -379,6 +379,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "lktracker_stage1", "optical_flow_pyramid_lk.cl" },
     { "magnitude_phase", "magnitude_phase.cl" },
     { "mean_stddev_accumulate", "mean_stddev.cl" },
+    { "mean_stddev_normalization", "mean_stddev_normalization.cl" },
     { "memset", "memset.cl" },
     { "minmax", "minmaxloc.cl" },
     { "minmax_border", "minmaxloc.cl" },
@@ -816,6 +817,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "mean_stddev.cl",
 #include "./cl_kernels/mean_stddev.clembed"
+    },
+    {
+        "mean_stddev_normalization.cl",
+#include "./cl_kernels/mean_stddev_normalization.clembed"
     },
     {
         "memset.cl",

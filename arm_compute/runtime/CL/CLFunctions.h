@@ -99,6 +99,7 @@
 #include "arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h"
 #include "arm_compute/runtime/CL/functions/CLMagnitude.h"
 #include "arm_compute/runtime/CL/functions/CLMeanStdDev.h"
+#include "arm_compute/runtime/CL/functions/CLMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLMedian3x3.h"
 #include "arm_compute/runtime/CL/functions/CLMinMaxLocation.h"
 #include "arm_compute/runtime/CL/functions/CLNonLinearFilter.h"
