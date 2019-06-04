@@ -87,11 +87,12 @@ void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const
     clear_quantization_arrays(scale, offset);
 
     // Create scale array
-    const size_t num_elements = qinfo.scale.size();
-    const size_t element_size = sizeof(decltype(qinfo.scale)::value_type);
-    scale                     = CLFloatArray(num_elements + pad_size);
+    const std::vector<float> &qscale       = qinfo.scale();
+    const size_t              num_elements = qscale.size();
+    const size_t              element_size = sizeof(std::remove_reference<decltype(qscale)>::type::value_type);
+    scale                                  = CLFloatArray(num_elements + pad_size);
     scale.resize(num_elements);
-    CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size, qinfo.scale.data());
+    CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size, qinfo.scale().data());
 }
 } // namespace
 

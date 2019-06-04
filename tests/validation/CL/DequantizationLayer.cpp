@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/DatatypeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -96,16 +97,14 @@ template <typename T>
 using CLDequantizationLayerFixture = DequantizationValidationFixture<CLTensor, CLAccessor, CLDequantizationLayer, T>;
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDequantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDequantizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
+                                                                                                                framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
-                                                                                                              framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
+                                                                                                              framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -113,16 +112,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<half>, framework::
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(),
-                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                 framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
+                                                                                                                 framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(),
-                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
-                                                                                                               framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
+                                                                                                               framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

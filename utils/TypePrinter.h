@@ -322,14 +322,9 @@ inline std::string to_string(const GenerateProposalsInfo &proposals_info)
  */
 inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &qinfo)
 {
-    if(!qinfo.scale.empty())
-    {
-        os << "Scale:" << qinfo.scale[0] << "~";
-    }
-    if(!qinfo.empty())
-    {
-        os << "Offset:" << qinfo.offset[0];
-    }
+    const UniformQuantizationInfo uqinfo = qinfo.uniform();
+    os << "Scale:" << uqinfo.scale << "~";
+    os << "Offset:" << uqinfo.offset;
     return os;
 }
 

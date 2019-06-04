@@ -63,12 +63,13 @@ struct UniformQuantizationInfo
 };
 
 /** Quantization information */
-struct QuantizationInfo
+class QuantizationInfo
 {
+public:
     /** Default constructor */
     QuantizationInfo() noexcept
-        : scale(),
-          offset()
+        : _scale(),
+          _offset()
     {
     }
     /** Construct quantization info.
@@ -78,7 +79,7 @@ struct QuantizationInfo
      * @param[in] scale Scale.
      */
     QuantizationInfo(float scale)
-        : scale(1, scale), offset()
+        : _scale(1, scale), _offset()
     {
     }
     /** Construct quantization info.
@@ -89,7 +90,7 @@ struct QuantizationInfo
      * @param[in] offset Offset.
      */
     QuantizationInfo(float scale, int offset)
-        : scale(1, scale), offset(1, offset)
+        : _scale(1, scale), _offset(1, offset)
     {
     }
     /** Construct quantization info.
@@ -99,8 +100,24 @@ struct QuantizationInfo
      * @param[in] scale Scale.
      */
     QuantizationInfo(std::vector<float> scale)
-        : scale(scale), offset()
+        : _scale(scale), _offset()
     {
+    }
+    /** Scale vector accessor
+     *
+     * @return A reference to quantization scale metadata
+     */
+    const std::vector<float> &scale() const
+    {
+        return _scale;
+    }
+    /** Offset vector accessor
+     *
+     * @return A reference to quantization offset metadata
+     */
+    const std::vector<int32_t> &offset() const
+    {
+        return _offset;
     }
     /** Indicates whether this QuantizationInfo has valid settings or not
      *
@@ -108,7 +125,7 @@ struct QuantizationInfo
      */
     bool empty() const
     {
-        return scale.empty() && offset.empty();
+        return _scale.empty() && _offset.empty();
     }
     /** Return per layer quantization info
      *
@@ -117,14 +134,15 @@ struct QuantizationInfo
     UniformQuantizationInfo uniform() const
     {
         UniformQuantizationInfo uqinfo;
-        uqinfo.scale  = scale.empty() ? 0 : scale[0];
-        uqinfo.offset = offset.empty() ? 0 : offset[0];
+        uqinfo.scale  = _scale.empty() ? 0 : _scale[0];
+        uqinfo.offset = _offset.empty() ? 0 : _offset[0];
 
         return uqinfo;
     }
 
-    std::vector<float>   scale;  /**< Vector containing scaling factors */
-    std::vector<int32_t> offset; /**< Vector containing zero offsets */
+private:
+    std::vector<float>   _scale;  /**< Vector containing scaling factors */
+    std::vector<int32_t> _offset; /**< Vector containing zero offsets */
 };
 
 /** Check whether two quantization info are equal.
@@ -136,7 +154,7 @@ struct QuantizationInfo
  */
 inline bool operator==(const QuantizationInfo &lhs, const QuantizationInfo &rhs)
 {
-    return (lhs.scale == rhs.scale) && (lhs.offset == rhs.offset);
+    return (lhs.scale() == rhs.scale()) && (lhs.offset() == rhs.offset());
 }
 
 /** Check whether two quantization info are not equal.
@@ -245,6 +263,19 @@ inline float dequantize_qasymm8(uint8_t value, const QuantizationInfo &qinfo)
     return (static_cast<int>(value) - uqinfo.offset) * uqinfo.scale;
 }
 
+/** Dequantize a value given an asymmetric quantization scheme
+ *
+ * @param[in] value  Value to dequantize
+ * @param[in] scale  Scale to use for dequantization
+ * @param[in] offset Zero-offset to use for dequantization
+ *
+ * @return Dequantized value
+ */
+inline float dequantize(uint8_t value, float scale, int32_t offset)
+{
+    return (static_cast<int>(value) - offset) * scale;
+}
+
 /** Dequantize a value given a symmetric quantization scheme
  *
  * @param[in] value Value to dequantize
@@ -252,9 +283,21 @@ inline float dequantize_qasymm8(uint8_t value, const QuantizationInfo &qinfo)
  *
  * @return Dequantized value
  */
-inline float dequantize_qsymm8(int8_t value, const QuantizationInfo &qinfo)
+inline float dequantize_qsymm8(int8_t value, const UniformQuantizationInfo &qinfo)
 {
-    return value * qinfo.uniform().scale;
+    return value * qinfo.scale;
+}
+
+/** Dequantize a value given a symmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] scale Scale to use for dequantization
+ *
+ * @return Dequantized value
+ */
+inline float dequantize(int8_t value, float scale)
+{
+    return value * scale;
 }
 
 /** Quantize a value given a 16-bit symmetric quantization scheme

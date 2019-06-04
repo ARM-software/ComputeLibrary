@@ -141,9 +141,9 @@ TEST_CASE(SymmQuantizationInfo, framework::DatasetMode::ALL)
 
     // Check quantization information
     ARM_COMPUTE_EXPECT(!info.quantization_info().empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!info.quantization_info().scale.empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().scale.size() == 1, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().offset.empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!info.quantization_info().scale().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().scale().size() == 1, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().offset().empty(), framework::LogLevel::ERRORS);
 
     UniformQuantizationInfo qinfo = info.quantization_info().uniform();
     ARM_COMPUTE_EXPECT(qinfo.scale == scale, framework::LogLevel::ERRORS);
@@ -160,10 +160,10 @@ TEST_CASE(AsymmQuantizationInfo, framework::DatasetMode::ALL)
 
     // Check quantization information
     ARM_COMPUTE_EXPECT(!info.quantization_info().empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!info.quantization_info().scale.empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().scale.size() == 1, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!info.quantization_info().offset.empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().offset.size() == 1, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!info.quantization_info().scale().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().scale().size() == 1, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!info.quantization_info().offset().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().offset().size() == 1, framework::LogLevel::ERRORS);
 
     UniformQuantizationInfo qinfo = info.quantization_info().uniform();
     ARM_COMPUTE_EXPECT(qinfo.scale == scale, framework::LogLevel::ERRORS);
@@ -179,9 +179,9 @@ TEST_CASE(SymmPerChannelQuantizationInfo, framework::DatasetMode::ALL)
 
     // Check quantization information
     ARM_COMPUTE_EXPECT(!info.quantization_info().empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!info.quantization_info().scale.empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().scale.size() == scale.size(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(info.quantization_info().offset.empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!info.quantization_info().scale().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().scale().size() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(info.quantization_info().offset().empty(), framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END() // TensorInfoValidation

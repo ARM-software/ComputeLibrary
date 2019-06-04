@@ -158,6 +158,8 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::F32, "F32" },
         { DataType::F64, "F64" },
         { DataType::SIZET, "SIZET" },
+        { DataType::QSYMM8, "QSYMM8" },
+        { DataType::QSYMM8_PER_CHANNEL, "QSYMM8_PER_CHANNEL" },
         { DataType::QASYMM8, "QASYMM8" },
         { DataType::QSYMM16, "QSYMM16" },
     };

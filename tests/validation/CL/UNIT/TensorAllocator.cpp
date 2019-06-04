@@ -249,9 +249,9 @@ TEST_CASE(Symm8PerChannelQuantizationInfo, framework::DatasetMode::ALL)
 
     // Check quantization information
     ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().scale.empty(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().scale.size() == scale.size(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().offset.empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!tensor.info()->quantization_info().scale().empty(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().scale().size() == scale.size(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(tensor.info()->quantization_info().offset().empty(), framework::LogLevel::ERRORS);
 
     CLQuantization quantization = tensor.quantization();
     ARM_COMPUTE_ASSERT(quantization.scale != nullptr);

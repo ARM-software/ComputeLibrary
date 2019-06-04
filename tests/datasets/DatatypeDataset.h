@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,36 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__
-#define __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__
-
-#include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
+#ifndef __ARM_COMPUTE_TEST_DATATYPE_DATASET_H__
+#define __ARM_COMPUTE_TEST_DATATYPE_DATASET_H__
 
 #include "arm_compute/core/Types.h"
+#include "tests/framework/datasets/ContainerDataset.h"
+
+#include <vector>
 
 namespace arm_compute
 {
-// Forward declarations
-class ITensor;
-
-/** Basic function to run @ref NEDequantizationLayerKernel that dequantizes an input tensor */
-class NEDequantizationLayer : public INESimpleFunctionNoBorder
+namespace test
+{
+namespace datasets
+{
+class QuantizedTypes final : public framework::dataset::ContainerDataset<std::vector<DataType>>
 {
 public:
-    /** Configure the kernel.
-     *
-     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QSYMM8.
-     * @param[out] output Destination tensor with the same dimensions of input. Data type supported: F16/F32.
-     */
-    void configure(const ITensor *input, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NEDequantizationLayer
-     *
-     * @param[in] input  Input tensor info. Data types supported: QASYMM8/QSYMM8.
-     * @param[in] output Output tensor info. Data type supported: F16/F32.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    QuantizedTypes()
+        : ContainerDataset("QuantizedTypes",
+    {
+        DataType::QSYMM8,
+                 DataType::QASYMM8,
+    })
+    {
+    }
 };
+} // namespace datasets
+} // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEQUANTIZATIONLAYER_H__ */
+#endif /* __ARM_COMPUTE_TEST_DATATYPE_DATASET_H__ */
