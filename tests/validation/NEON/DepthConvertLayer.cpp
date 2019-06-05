@@ -76,7 +76,9 @@ const auto DepthConvertLayerZeroShiftDataset      = framework::dataset::make("Sh
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 constexpr AbsoluteTolerance<int32_t> tolerance_one_int32(1);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<uint8_t> tolerance_one_uint8(1);
+#endif /*  __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
 TEST_SUITE(NEON)
