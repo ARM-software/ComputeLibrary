@@ -147,7 +147,7 @@ if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in 
 if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
 else:
-    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-implicit-fallthrough'])
+    env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel','-Wno-implicit-fallthrough', '-Wno-redundant-move'])
 
 if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])

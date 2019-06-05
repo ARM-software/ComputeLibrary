@@ -33,7 +33,8 @@
 
 using namespace arm_compute;
 
-int16x8_t calculate_kernel( const uint8x16_t &top_data, const uint8x16_t &mid_data, const uint8x16_t &bot_data){
+int16x8_t calculate_kernel(const uint8x16_t &top_data, const uint8x16_t &mid_data, const uint8x16_t &bot_data)
+{
     const int16x8x2_t top_s16 =
     {
         {
@@ -101,8 +102,8 @@ void NEBox3x3FP16Kernel::run(const Window &window, const ThreadInfo &info)
 
         int16x8_t out = calculate_kernel(top_data, mid_data, bot_data);
 
-        float16x8_t outfloat = vcvtq_f16_u16(out);
-        outfloat = vmulq_f16(outfloat, oneovernine);
+        float16x8_t outfloat = vcvtq_f16_s16(out);
+        outfloat             = vmulq_f16(outfloat, oneovernine);
 
         vst1_u8(output.ptr(), vqmovun_s16(vcvtq_s16_f16(outfloat)));
     },
@@ -182,7 +183,7 @@ void NEBox3x3Kernel::run(const Window &window, const ThreadInfo &info)
         outfloathigh = vshrq_n_s32(outfloathigh, shift);
         outfloatlow  = vshrq_n_s32(outfloatlow, shift);
         out          = vcombine_s16(vqmovn_s32((outfloatlow)),
-                           vqmovn_s32((outfloathigh)));
+                                    vqmovn_s32((outfloathigh)));
 
         vst1_u8(output.ptr(), vqmovun_s16(out));
     },

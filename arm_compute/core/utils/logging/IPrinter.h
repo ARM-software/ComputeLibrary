@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@ class Printer
 {
 public:
     /** Default Constructor */
-    Printer()
+    Printer() noexcept
         : _mtx()
     {
     }

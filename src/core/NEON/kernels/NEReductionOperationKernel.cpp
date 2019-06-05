@@ -64,6 +64,7 @@ uint32x4x4_t calculate_index(uint32_t idx, T a, T b, uint32x4x4_t c, ReductionOp
     return res;
 }
 
+template <>
 uint32x4x4_t calculate_index(uint32_t idx, uint8x16_t a, uint8x16_t b, uint32x4x4_t c, ReductionOperation op, int axis)
 {
     uint32x4x4_t mask{ { 0 } };
@@ -227,6 +228,7 @@ uint32_t calculate_vector_index(uint32x4x4_t vec_res_idx, uint8x16_t vec_res_val
     return (res - 0xFFFFFFFF);
 }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
 uint32x4x4_t calculate_index(uint32_t idx, float16x8_t a, float16x8_t b, uint32x4x4_t c, ReductionOperation op, int axis)
 {
     uint32x4x2_t mask{ 0 };
