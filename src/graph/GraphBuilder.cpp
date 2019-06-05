@@ -134,7 +134,7 @@ NodeID GraphBuilder::add_output_node(Graph &g, NodeParams params, NodeIdxPair in
 }
 
 NodeID GraphBuilder::add_activation_node(Graph &g, NodeParams params, NodeIdxPair input, ActivationLayerInfo act_info,
-                                         const QuantizationInfo out_quant_info)
+                                         const QuantizationInfo &out_quant_info)
 {
     return create_simple_single_input_output_node<ActivationLayerNode>(g, params, input, act_info, out_quant_info);
 }
@@ -214,8 +214,8 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
                                           Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
                                           unsigned int num_groups, ConvolutionMethod method, FastMathHint fast_math_hint,
                                           ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
-                                          const QuantizationInfo weights_quant_info,
-                                          const QuantizationInfo out_quant_info)
+                                          const QuantizationInfo &weights_quant_info,
+                                          const QuantizationInfo &out_quant_info)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(depth == 0);
@@ -318,14 +318,14 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     return deconv_nid;
 }
 
-NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, descriptors::ConcatLayerDescriptor concat_descriptor)
+NodeID GraphBuilder::add_concatenate_node(Graph &g, NodeParams params, const std::vector<NodeIdxPair> &inputs, const descriptors::ConcatLayerDescriptor &concat_descriptor)
 {
     return create_simple_multiple_input_single_output_node<ConcatenateLayerNode>(g, params, inputs, inputs.size(), concat_descriptor);
 }
 
 NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D kernel_spatial_extend,
                                                     PadStrideInfo conv_info, int depth_multiplier, DepthwiseConvolutionMethod method,
-                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo quant_info, const QuantizationInfo out_quant_info)
+                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo &quant_info, const QuantizationInfo &out_quant_info)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON((kernel_spatial_extend.width == 0) || (kernel_spatial_extend.height == 0));
@@ -420,7 +420,7 @@ NodeID GraphBuilder::add_flatten_node(Graph &g, NodeParams params, NodeIdxPair i
 
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                                NodeID weights_nid, NodeID bias_nid,
-                                               const FullyConnectedLayerInfo fc_info, const QuantizationInfo out_quant_info)
+                                               const FullyConnectedLayerInfo fc_info, const QuantizationInfo &out_quant_info)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -448,7 +448,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                                ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
                                                const FullyConnectedLayerInfo fc_info,
-                                               const QuantizationInfo weights_quant_info, const QuantizationInfo out_quant_info)
+                                               const QuantizationInfo &weights_quant_info, const QuantizationInfo &out_quant_info)
 {
     check_nodeidx_pair(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -566,7 +566,7 @@ NodeID GraphBuilder::add_priorbox_node(Graph &g, NodeParams params, NodeIdxPair 
     return prior_nid;
 }
 
-NodeID GraphBuilder::add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, QuantizationInfo out_quant_info)
+NodeID GraphBuilder::add_quantization_node(Graph &g, NodeParams params, NodeIdxPair input, const QuantizationInfo &out_quant_info)
 {
     return create_simple_single_input_output_node<QuantizationLayerNode>(g, params, input, out_quant_info);
 }
