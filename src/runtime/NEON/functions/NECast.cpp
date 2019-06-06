@@ -24,8 +24,8 @@
 #include "arm_compute/runtime/NEON/functions/NECast.h"
 
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "support/ToolchainSupport.h"
 
 #include <utility>

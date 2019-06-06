@@ -31,7 +31,7 @@ namespace arm_compute
 namespace graph
 {
 QuantizationLayerNode::QuantizationLayerNode(QuantizationInfo out_quant_info)
-    : _out_quant_info(out_quant_info)
+    : _out_quant_info(std::move(out_quant_info))
 {
     _input_edges.resize(1, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);

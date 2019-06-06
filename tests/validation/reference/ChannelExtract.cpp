@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ SimpleTensor<uint8_t> channel_extract(const TensorShape &shape, const std::vecto
             const auto *src_pixel = reinterpret_cast<const T *>(src(src_coord));
             auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
 
-            dst_pixel[0] = src_pixel[channel_idx];
+            dst_pixel[0] = src_pixel[channel_idx]; // NOLINT
         }
     }
 

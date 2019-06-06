@@ -37,7 +37,7 @@ ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo     info,
                                            ConvolutionMethod method,
                                            FastMathHint      fast_math_hint,
                                            QuantizationInfo  out_quant_info)
-    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info), _fused_activation()
+    : _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(std::move(out_quant_info)), _fused_activation()
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);

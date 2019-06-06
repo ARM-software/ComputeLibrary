@@ -37,7 +37,7 @@ FusedConvolutionBatchNormalizationNode::FusedConvolutionBatchNormalizationNode(f
                                                                                ConvolutionMethod method,
                                                                                FastMathHint      fast_math_hint,
                                                                                QuantizationInfo out_quant_info, ActivationLayerInfo fused_activation)
-    : _epsilon(epsilon), _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info), _fused_activation(fused_activation)
+    : _epsilon(epsilon), _info(std::move(info)), _num_groups(num_groups), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(std::move(out_quant_info)), _fused_activation(fused_activation)
 {
     _input_edges.resize(7, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);

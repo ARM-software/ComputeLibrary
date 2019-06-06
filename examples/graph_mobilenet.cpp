@@ -328,14 +328,14 @@ private:
                3U, 3U,
                get_weights_accessor(data_path, total_path + "depthwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_bias.npy"),
-               dwc_pad_stride_info, 1, depth_weights_quant_info)
+               dwc_pad_stride_info, 1, std::move(depth_weights_quant_info))
            .set_name(total_path + "depthwise/depthwise")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_bias.npy"),
-               conv_pad_stride_info, 1, point_weights_quant_info)
+               conv_pad_stride_info, 1, std::move(point_weights_quant_info))
            .set_name(total_path + "pointwise/Conv2D")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
 
