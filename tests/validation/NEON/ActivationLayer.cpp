@@ -97,6 +97,13 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
     }
 }
 
+/** Tolerance for quantized asymmetric operations */
+#if defined(__aarch64__)
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
+#else  // defined(__aarch64__)
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
+#endif // defined(__aarch64__)
+
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
@@ -227,7 +234,7 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
                                                                                                   ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
 
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), QuantizedActivationFunctionsDataset),
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), QuantizedActivationFunctionsDataset),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)
@@ -238,7 +245,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                         framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
                                                                                                                       framework::dataset::make("DataType",
@@ -246,7 +253,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized

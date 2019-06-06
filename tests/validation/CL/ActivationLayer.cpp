@@ -206,7 +206,7 @@ TEST_SUITE_END() // Float
 template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
-const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false, true }), datasets::ActivationFunctionsQuantized()),
+const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), datasets::ActivationFunctionsQuantized()),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
 TEST_SUITE(Quantized)
