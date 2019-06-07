@@ -137,6 +137,68 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<uint8_t>, framework::DatasetMod
 }
 TEST_SUITE_END() // QASYMM8
 
+TEST_SUITE(SpecialCases)
+TEST_CASE(PaddedChannelNHWC, framework::DatasetMode::PRECOMMIT)
+{
+    // Const data
+    const TensorShape      src_shape   = TensorShape(7U, 27U, 13U);
+    const DataType         data_type   = DataType::F32;
+    const DataLayout       data_layout = DataLayout::NHWC;
+    const bool             has_bias    = false;
+    const unsigned int     num_groups  = 1;
+    const Size2D           spatial_kernel(3, 3);
+    const QuantizationInfo qinfo{};
+    const PadStrideInfo    conv_info(1U, 1U, 0U, 0U);
+
+    // Calculate destination shape
+    TensorInfo src_info(src_shape, 1, data_type);
+    src_info.set_data_layout(data_layout);
+    const TensorShape dst_shape = compute_im2col_conv_shape(&src_info, spatial_kernel, conv_info, has_bias, Size2D(1U, 1U), false, num_groups);
+
+    // Compute target
+    Tensor src_target = create_tensor<Tensor>(src_shape, data_type, 1, qinfo, data_layout);
+    Tensor dst_target = create_tensor<Tensor>(dst_shape, data_type, 1, qinfo);
+
+    // Configure target function
+    NEIm2Col im2col_func;
+    im2col_func.configure(&src_target, &dst_target, spatial_kernel, conv_info, has_bias);
+
+    // Extend padding
+    src_target.info()->extend_padding(PaddingSize(3, 5, 9, 1));
+    dst_target.info()->extend_padding(PaddingSize(8, 1, 1, 3));
+
+    // Validate and allocate tensors
+    ARM_COMPUTE_EXPECT(src_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    src_target.allocator()->allocate();
+    dst_target.allocator()->allocate();
+
+    ARM_COMPUTE_EXPECT(!src_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!dst_target.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Fill target source
+    library->fill_tensor_uniform(Accessor(src_target), 0);
+
+    // Run target function
+    im2col_func.run();
+
+    // Calculate Reference
+    SimpleTensor<float> src_ref{ src_shape, data_type, 1, qinfo, data_layout };
+    SimpleTensor<float> dst_ref{ dst_shape, data_type, 1, qinfo, DataLayout::NCHW };
+
+    // Fill reference source
+    library->fill_tensor_uniform(src_ref, 0);
+
+#ifndef DOXYGEN_SKIP_THIS
+    // Run reference function
+    reference::im2col(src_ref, dst_ref, spatial_kernel, conv_info, has_bias, num_groups);
+#endif // DOXYGEN_SKIP_THIS
+
+    // Validate
+    validate(Accessor(dst_target), dst_ref);
+}
+TEST_SUITE_END() // Special Cases
 TEST_SUITE_END() // Im2Col
 TEST_SUITE_END() // NEON
 } // namespace validation
