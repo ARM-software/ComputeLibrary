@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,6 +117,21 @@ inline std::string to_string(T && value)
     return stream.str();
 }
 
+/** Rounds the floating-point argument arg to an integer value in floating-point format, using the current rounding mode.
+ *
+ * @note This function acts as a convenience wrapper around std::nearbyint. The
+ *       latter is missing in some Android toolchains.
+ *
+ * @param[in] value Value to be rounded.
+ *
+ * @return The rounded value.
+ */
+template <typename T>
+inline T nearbyint(T value)
+{
+    return ::nearbyint(value);
+}
+
 /** Convert string values to float.
  *
  * @note This function implements the same behaviour as std::stof. The latter
@@ -210,6 +225,21 @@ template <typename T>
 inline std::string to_string(T &&value)
 {
     return ::std::to_string(std::forward<T>(value));
+}
+
+/** Rounds the floating-point argument arg to an integer value in floating-point format, using the current rounding mode.
+ *
+ * @note This function acts as a convenience wrapper around std::nearbyint. The
+ *       latter is missing in some Android toolchains.
+ *
+ * @param[in] value Value to be rounded.
+ *
+ * @return The rounded value.
+ */
+template <typename T>
+inline T nearbyint(T value)
+{
+    return std::nearbyint(value);
 }
 
 /** Convert string values to float.

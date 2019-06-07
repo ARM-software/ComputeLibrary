@@ -34,6 +34,7 @@
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
+#include "support/ToolchainSupport.h"
 
 #include <algorithm>
 #include <arm_neon.h>
@@ -63,7 +64,7 @@ inline ScalarType elementwise_op_scalar(const ScalarType &a)
         case ElementWiseUnary::ABS:
             return std::abs(a);
         case ElementWiseUnary::ROUND:
-            return std::nearbyint(a);
+            return support::cpp11::nearbyint(a);
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
     }
