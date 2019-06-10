@@ -298,7 +298,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "finalize", "optical_flow_pyramid_lk.cl" },
     { "flatten", "flatten.cl" },
     { "floor_layer", "floor.cl" },
-    { "fuse_batchnormalization_layer", "batchnormalization_layer.cl" },
+    { "fuse_batchnormalization_conv_layer", "batchnormalization_layer.cl" },
     { "gather", "gather.cl" },
     { "gaussian1x5_sub_x", "gaussian_pyramid.cl" },
     { "gaussian5x1_sub_y", "gaussian_pyramid.cl" },

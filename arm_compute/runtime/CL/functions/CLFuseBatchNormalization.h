@@ -54,11 +54,13 @@ public:
      * @param[in]  conv_weights  Convolution layer weights tensor. Data type supported: F16/F32
      * @param[in]  bn_mean       Batch normalization layer mean tensor. Same as @p conv_weights
      * @param[in]  bn_var        Batch normalization layer variance tensor. Same as @p conv_weights
-     * @param[out] fused_weights Output fused weights tensor. Same as @p conv_weights
-     * @param[out] fused_bias    Output fused bias tensor. Same as @p conv_weights
-     * @param[in]  conv_bias     (Optional) Convolution layer bias tensor. Same as @p conv_weights
-     * @param[in]  bn_beta       (Optional) Batch normalization layer beta tensor. Same as @p conv_weights
-     * @param[in]  bn_gamma      (Optional) Batch normalization layer gamma tensor. Same as @p conv_weights
+     * @param[out] fused_weights Output fused weights tensor. It can be a nullptr in case of in-place computation. Same as @p conv_weights
+     * @param[out] fused_bias    Output fused bias tensor. It can be a nullptr in case of in-place computation and conv_bias != nullptr. Same as @p conv_weights
+     * @param[in]  conv_bias     (Optional) Convolution layer bias tensor. It can be a nullptr in case the bias tensor is not required. Same as @p conv_weights
+     * @param[in]  bn_beta       (Optional) Batch normalization layer beta tensor. It can be a nullptr in case the beta tensor is not required. Same as @p conv_weights
+     *                           @note if nullptr, bn_beta is set to 0.0
+     * @param[in]  bn_gamma      (Optional) Batch normalization layer gamma tensor. It can be a nullptr in case the gamma tensor is not required. Same as @p conv_weights
+     *                           @note if nullptr, bn_gamma is set to 1.0
      * @param[in]  epsilon       (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      */
     void configure(const ICLTensor *conv_weights, const ICLTensor *bn_mean, const ICLTensor *bn_var, ICLTensor *fused_weights, ICLTensor *fused_bias,
@@ -66,15 +68,17 @@ public:
                    float epsilon = 0.001f);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFuseBatchNormalization
      *
-     * @param[in] conv_weights  Convolution layer weights tensor. Data type supported: F16/F32
-     * @param[in] bn_mean       Batch normalization layer mean tensor. Same as @p conv_weights
-     * @param[in] bn_var        Batch normalization layer variance tensor. Same as @p conv_weights
-     * @param[in] fused_weights Output fused weights tensor. Same as @p conv_weights
-     * @param[in] fused_bias    Output fused bias tensor. Same as @p conv_weights
-     * @param[in] conv_bias     (Optional) Convolution layer bias tensor. Same as @p conv_weights
-     * @param[in] bn_beta       (Optional) Batch normalization layer beta tensor. Same as @p conv_weights
-     * @param[in] bn_gamma      (Optional) Batch normalization layer gamma tensor. Same as @p conv_weights
-     * @param[in] epsilon       (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
+     * @param[in]  conv_weights  Convolution layer weights tensor info. Data type supported: F16/F32
+     * @param[in]  bn_mean       Batch normalization layer mean tensor info. Same as @p conv_weights
+     * @param[in]  bn_var        Batch normalization layer variance tensor info. Same as @p conv_weights
+     * @param[out] fused_weights Output fused weights tensor info. It can be a nullptr in case of in-place computation. Same as @p conv_weights
+     * @param[out] fused_bias    Output fused bias tensor info. It can be a nullptr in case of in-place computation and conv_bias != nullptr. Same as @p conv_weights
+     * @param[in]  conv_bias     (Optional) Convolution layer bias tensor info. It can be a nullptr in case the bias tensor is not required. Same as @p conv_weights
+     * @param[in]  bn_beta       (Optional) Batch normalization layer beta tensor info. It can be a nullptr in case the beta tensor is not required. Same as @p conv_weights
+     *                           @note if nullptr, bn_beta is set to 0.0
+     * @param[in]  bn_gamma      (Optional) Batch normalization layer gamma tensor info. It can be a nullptr in case the gamma tensor is not required. Same as @p conv_weights
+     *                           @note if nullptr, bn_gamma is set to 1.0
+     * @param[in]  epsilon       (Optional) Batch normalization layer epsilon parameter. Defaults to 0.001f.
      *
      * @return a status
      */
