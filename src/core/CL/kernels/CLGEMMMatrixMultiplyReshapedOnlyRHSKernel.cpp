@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
@@ -73,7 +74,7 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     tensor_shape1.set(0, n);
     tensor_shape1.set(1, k);
 
-    if(input2 != nullptr && std::abs(0.0f - beta) > 0.00001f)
+    if(input2 != nullptr && !(helpers::float_ops::is_zero(beta)))
     {
         const int input2_dim0 = static_cast<int>(input2->dimension(0));
         const int input2_dim1 = static_cast<int>(input2->dimension(1));
@@ -218,7 +219,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
 
     _input0                   = input0;
     _input1                   = input1;
-    _input2                   = std::abs(0.0f - beta) > 0.00001f ? input2 : nullptr;
+    _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
     _output                   = output;
     _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
     _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
@@ -248,9 +249,9 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
-    build_opts.add_option_if(std::abs(1.0f - alpha) > 0.00001f, "-DALPHA=" + float_to_string_with_full_precision(alpha));
-    build_opts.add_option_if(std::abs(0.0f - beta) > 0.00001f && _input2 != nullptr, "-DBETA=" + float_to_string_with_full_precision(beta));
-    build_opts.add_option_if(std::abs(1.0f - beta) < 0.00001f, "-DUNIT_BETA");
+    build_opts.add_option_if(!(helpers::float_ops::is_one(alpha)), "-DALPHA=" + float_to_string_with_full_precision(alpha));
+    build_opts.add_option_if(!(helpers::float_ops::is_zero(beta)) && _input2 != nullptr, "-DBETA=" + float_to_string_with_full_precision(beta));
+    build_opts.add_option_if(helpers::float_ops::is_one(beta), "-DUNIT_BETA");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
     build_opts.add_option_if(gemm_info.broadcast_bias(), "-DBROADCAST_BIAS");

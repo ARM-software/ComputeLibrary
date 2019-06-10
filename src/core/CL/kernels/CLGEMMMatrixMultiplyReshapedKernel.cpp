@@ -36,6 +36,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
@@ -200,7 +201,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
-    build_opts.add_option_if(std::abs(1.0f - alpha) > 0.00001f, "-DALPHA=" + float_to_string_with_full_precision(alpha));
+    build_opts.add_option_if(!(helpers::float_ops::is_one(alpha)), "-DALPHA=" + float_to_string_with_full_precision(alpha));
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));

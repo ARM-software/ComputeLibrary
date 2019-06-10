@@ -35,6 +35,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <set>
@@ -306,7 +307,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     CLBuildOptions build_opts;
 
     // Only define ALPHA when alpha is not 1.0f. This avoids performing unnecessary multiplications.
-    if(std::abs(1.0f - alpha) > 0.00001f)
+    if(!(helpers::float_ops::is_one(alpha)))
     {
         build_opts.add_option("-DALPHA=" + float_to_string_with_full_precision(alpha));
     }

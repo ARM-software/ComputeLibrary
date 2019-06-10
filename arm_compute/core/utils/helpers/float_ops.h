@@ -73,24 +73,42 @@ union RawFloat
  *
  * @param[in] a                First number to compare
  * @param[in] b                Second number to compare
- * @param[in] max_allowed_ulps Number of allowed ULPs
+ * @param[in] max_allowed_ulps (Optional) Number of allowed ULPs
  *
  * @return True if number is close else false
  */
-bool is_equal_ulps(float a, float b, int max_allowed_ulps = 0)
+inline bool is_equal_ulps(float a, float b, int max_allowed_ulps = 0)
 {
     RawFloat ra(a);
     RawFloat rb(b);
 
-    // Early check for sign
-    if(ra.sign() != rb.sign())
-    {
-        return (a == b);
-    }
-
     // Check ULP distance
     const int ulps = std::abs(ra.i32 - rb.i32);
     return ulps <= max_allowed_ulps;
+}
+
+/** Checks if the input floating point number is 1.0f checking if the difference is within a range defined with epsilon
+ *
+ * @param[in] a       Input floating point number
+ * @param[in] epsilon (Optional) Epsilon used to define the error bounds
+ *
+ * @return True if number is close to 1.0f
+ */
+inline bool is_one(float a, float epsilon = 0.00001f)
+{
+    return std::abs(1.0f - a) <= epsilon;
+}
+
+/** Checks if the input floating point number is 0.0f checking if the difference is within a range defined with epsilon
+ *
+ * @param[in] a       Input floating point number
+ * @param[in] epsilon (Optional) Epsilon used to define the error bounds
+ *
+ * @return True if number is close to 0.0f
+ */
+inline bool is_zero(float a, float epsilon = 0.00001f)
+{
+    return std::abs(0.0f - a) <= epsilon;
 }
 } // namespace float_ops
 } // namespace helpers

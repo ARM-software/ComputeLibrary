@@ -35,7 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-
+#include "arm_compute/core/utils/helpers/float_ops.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <arm_neon.h>
@@ -998,7 +998,7 @@ void NEGEMMMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &inf
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    bool multiply_alpha = std::abs(1.0f - _alpha) > 0.00001f;
+    const bool multiply_alpha = !(helpers::float_ops::is_one(_alpha));
 
     // Check if the output tensor is a vector. If so,the kernel runs the vector-matrix multiplication
     if((_output->info()->dimension(1) == 1))
