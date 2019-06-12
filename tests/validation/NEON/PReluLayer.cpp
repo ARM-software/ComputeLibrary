@@ -44,7 +44,6 @@ namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 
-constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
 const auto PReluLayerQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                               framework::dataset::make("DataType",
