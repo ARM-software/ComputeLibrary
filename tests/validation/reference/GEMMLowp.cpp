@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,6 +93,34 @@ void quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<T> *in,
         }
 
         (*dst)[i] = static_cast<uint8_t>(std::max(0, std::min(255, result)));
+    }
+}
+
+template <typename T>
+void quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> *in, const SimpleTensor<T> *bias, SimpleTensor<int16_t> *dst, int32_t result_fixedpoint_multiplier, int32_t result_shift,
+                                                      int32_t min, int32_t max)
+{
+    const int cols_in = in->shape().x();
+
+    for(int i = 0; i < in->num_elements(); ++i)
+    {
+        int32_t result = (*in)[i];
+
+        if(bias != nullptr)
+        {
+            result += (*bias)[i % cols_in];
+        }
+
+        // Fixed point multiplication
+        result = asymm_rounding_divide_by_pow2(asymm_int_mult(result, result_fixedpoint_multiplier), result_shift);
+
+        // Bounded ReLu
+        if(min != max)
+        {
+            result = std::max(min, std::min(max, result));
+        }
+
+        (*dst)[i] = static_cast<int16_t>(std::max(-32768, std::min(32767, result)));
     }
 }
 } // namespace
@@ -201,10 +229,36 @@ SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(
     return dst;
 }
 
+template <typename T>
+SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> &in, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min,
+                                                                                int32_t max)
+{
+    SimpleTensor<int16_t> dst(in.shape(), DataType::QSYMM16);
+
+    quantize_down_int32_to_int16_scale_by_fixedpoint<T>(&in, nullptr, &dst, result_fixedpoint_multiplier, result_shift, min, max);
+
+    return dst;
+}
+
+template <typename T>
+SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<T> &in, const SimpleTensor<T> &bias, int32_t result_fixedpoint_multiplier, int32_t result_shift,
+                                                                                int32_t min, int32_t max)
+{
+    SimpleTensor<int16_t> dst(in.shape(), DataType::QSYMM16);
+
+    quantize_down_int32_to_int16_scale_by_fixedpoint<T>(&in, &bias, &dst, result_fixedpoint_multiplier, result_shift, min, max);
+
+    return dst;
+}
+
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, int32_t result_fixedpoint_multiplier, int32_t result_shift,
                                                                                          int32_t result_offset_after_shift, int32_t min, int32_t max);
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_fixedpoint_multiplier,
                                                                                          int32_t result_shift, int32_t result_offset_after_shift, int32_t min, int32_t max);
+template SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, int32_t result_fixedpoint_multiplier, int32_t result_shift,
+                                                                                         int32_t min, int32_t max);
+template SimpleTensor<int16_t> gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_fixedpoint_multiplier,
+                                                                                         int32_t result_shift, int32_t min, int32_t max);
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, int32_t result_offset, int32_t result_mult_int, int32_t result_shift, int32_t min,
                                                                            int32_t max);
 template SimpleTensor<uint8_t> gemmlowp_quantize_down_int32_to_uint8_scale(const SimpleTensor<int32_t> &a, const SimpleTensor<int32_t> &b, int32_t result_offset, int32_t result_mult_int,

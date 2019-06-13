@@ -385,6 +385,98 @@ protected:
     SimpleTensor<uint8_t> _reference{};
 };
 
+template <typename TensorType, typename AccessorType, typename FunctionType>
+class GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(TensorShape shape, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
+    {
+        _target    = compute_target(shape, result_fixedpoint_multiplier, result_shift, min, max, add_bias);
+        _reference = compute_reference(shape, result_fixedpoint_multiplier, result_shift, min, max, add_bias);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        std::uniform_int_distribution<> distribution(-6000, 6000);
+        library->fill(tensor, distribution, i);
+    }
+
+    TensorType compute_target(const TensorShape &shape, int32_t result_fixedpoint_multiplier, int32_t result_shift, int32_t min, int32_t max, bool add_bias)
+    {
+        TensorShape shape_bias(shape[0]);
+
+        // Create tensors
+        TensorType a = create_tensor<TensorType>(shape, DataType::S32, 1);
+        TensorType b = create_tensor<TensorType>(shape_bias, DataType::S32, 1);
+        TensorType c = create_tensor<TensorType>(shape, DataType::QSYMM16, 1);
+
+        // Create and configure function
+        FunctionType output_stage;
+        output_stage.configure(&a, add_bias ? &b : nullptr, &c, result_fixedpoint_multiplier, result_shift, min, max);
+
+        ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        a.allocator()->allocate();
+        c.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!a.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!c.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensor
+        fill(AccessorType(a), 0);
+
+        if(add_bias)
+        {
+            ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Allocate bias tensor
+            b.allocator()->allocate();
+
+            ARM_COMPUTE_EXPECT(!b.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+            // Fill tensor
+            fill(AccessorType(b), 1);
+        }
+
+        // Compute GEMM function
+        output_stage.run();
+        return c;
+    }
+
+    SimpleTensor<int16_t> compute_reference(const TensorShape &shape, int32_t result_fixed_point_multiplier, int32_t result_shift, int32_t min, int32_t max,
+                                            bool add_bias)
+    {
+        // Create reference
+        TensorShape shape_bias(shape[0]);
+
+        SimpleTensor<int32_t> a{ shape, DataType::S32, 1 };
+        SimpleTensor<int32_t> b{ shape_bias, DataType::S32, 1 };
+
+        // Fill reference
+        fill(a, 0);
+
+        if(add_bias)
+        {
+            // Fill bias
+            fill(b, 1);
+
+            return reference::gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint<int32_t>(a, b, result_fixed_point_multiplier, result_shift, min, max);
+        }
+        else
+        {
+            return reference::gemmlowp_quantize_down_int32_to_int16_scale_by_fixedpoint<int32_t>(a, result_fixed_point_multiplier, result_shift, min, max);
+        }
+    }
+
+    TensorType            _target{};
+    SimpleTensor<int16_t> _reference{};
+};
+
 template <typename TensorType, typename AccessorType, typename ReshapeLHSFunctionType, typename ReshapeRHSFunctionType, typename GEMMFunctionType>
 class GEMMLowpMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 {
