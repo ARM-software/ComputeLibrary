@@ -157,7 +157,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<float>, framework::DatasetMo
                                                                                                                  DataType::F32)),
                                                                                                                  framework::dataset::make("ProjectionOpt", { true, false })),
                                                                                                          framework::dataset::make("PeepholeOpt", { true, false })),
-                                                                                                 framework::dataset::make("UseLayerNorm", { false })))
+                                                                                                 framework::dataset::make("UseLayerNorm", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -171,7 +171,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMod
                                                                                                                         DataType::F16)),
                                                                                                                 framework::dataset::make("ProjectionOpt", { true, false })),
                                                                                                         framework::dataset::make("PeepholeOpt", { true, false })),
-                                                                                                framework::dataset::make("UseLayerNorm", { false })))
+                                                                                                framework::dataset::make("UseLayerNorm", { true, false })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
