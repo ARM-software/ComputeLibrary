@@ -206,13 +206,13 @@ inline float32x4_t elementwise_arithm_op<ArithmeticOperation::POWER, typename wr
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <>
-inline float16x8_t elementwise_arithm_op<ArithmeticOperation::DIV, typename wrapper::traits::neon_vector_t<float16_t, 4>>(const float16x8_t &a, const float16x8_t &b)
+inline float16x8_t elementwise_arithm_op<ArithmeticOperation::DIV, typename wrapper::traits::neon_vector<float16_t, 8>>(const float16x8_t &a, const float16x8_t &b)
 {
     return wrapper::vdiv(a, b);
 }
 
 template <>
-inline float16x8_t elementwise_arithm_op<ArithmeticOperation::POWER, typename wrapper::traits::neon_vector_t<float16_t, 4>>(const float16x8_t &a, const float16x8_t &b)
+inline float16x8_t elementwise_arithm_op<ArithmeticOperation::POWER, typename wrapper::traits::neon_vector<float16_t, 8>>(const float16x8_t &a, const float16x8_t &b)
 {
     return wrapper::vpow(a, b);
 }
