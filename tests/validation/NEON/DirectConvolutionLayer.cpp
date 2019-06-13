@@ -85,14 +85,25 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                   combine(framework::dataset::make("PadY", { 1 }),
                                                           framework::dataset::make("KernelSize", 3))))));
 
+const auto data9x9 = combine(datasets::SmallDirectConvolutionShapes(),
+                             combine(framework::dataset::make("StrideX", { 1 }),
+                                     combine(framework::dataset::make("StrideY", { 1 }),
+                                             combine(framework::dataset::make("PadX", { 0, 2 }),
+                                                     combine(framework::dataset::make("PadY", { 0, 3 }),
+                                                             framework::dataset::make("KernelSize", 9))))));
+
 const auto data_f32_nightly = combine(data_f32, framework::dataset::make("NumKernels", { 1, 4 }));
 const auto data_f16_nightly = combine(data_f16, framework::dataset::make("NumKernels", { 1, 4 }));
 
-const auto data_precommit = combine(data, framework::dataset::make("NumKernels", { 1 }));
+const auto data_precommit    = combine(data, framework::dataset::make("NumKernels", { 1 }));
+const auto data_precommit9x9 = combine(data9x9, framework::dataset::make("NumKernels", { 4 }));
 
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
-{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
+});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -196,6 +207,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDirectConvolutionLayerFixture<float>, framewo
                                                                                                                     DataType::F32)),
                                                                                                                     ActivationFunctionsDataset),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall9x9, NEDirectConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data_precommit9x9, framework::dataset::make("DataType",
+                                                                                                                       DataType::F32)),
+                                                                                                                       ActivationFunctionsDataset),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
