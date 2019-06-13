@@ -100,6 +100,7 @@
 #include "arm_compute/runtime/NEON/functions/NELocallyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMagnitude.h"
 #include "arm_compute/runtime/NEON/functions/NEMeanStdDev.h"
+#include "arm_compute/runtime/NEON/functions/NEMeanStdDevNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEMedian3x3.h"
 #include "arm_compute/runtime/NEON/functions/NEMinMaxLocation.h"
 #include "arm_compute/runtime/NEON/functions/NENonLinearFilter.h"
