@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_QUANTIZATION_INFO_H__
 
 #include "arm_compute/core/Rounding.h"
+#include "utils/misc/Utility.h"
 
 #include <cstddef>
 #include <vector>
@@ -255,5 +256,57 @@ inline float dequantize_qsymm8(int8_t value, const QuantizationInfo &qinfo)
 {
     return value * qinfo.uniform().scale;
 }
+
+/** Quantize a value given a 16-bit symmetric quantization scheme
+ *
+ * @param[in] value           Value to quantize
+ * @param[in] qinfo           Quantization information to use for quantizing
+ * @param[in] rounding_policy (Optional) Rounding policy to use. Default: nearest up
+ *
+ * @return Quantized value
+ */
+inline int16_t quantize_qsymm16(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+{
+    int quantized = arm_compute::round(value / qinfo.scale, rounding_policy);
+    quantized     = arm_compute::utility::clamp<int, int16_t>(quantized);
+    return quantized;
+}
+
+/** Dequantize a value given a 16-bit symmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+inline float dequantize_qsymm16(int16_t value, const UniformQuantizationInfo &qinfo)
+{
+    return value * qinfo.scale;
+}
+
+/** Quantize a value given a 16-bit symmetric quantization scheme
+ *
+ * @param[in] value Value to quantize
+ * @param[in] qinfo Quantization information to use for quantizing
+ *
+ * @return Quantized value
+ */
+inline int16_t quantize_qsymm16(float value, const QuantizationInfo &qinfo)
+{
+    return quantize_qsymm16(value, qinfo.uniform());
+}
+
+/** Dequantize a value given a 16-bit symmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+inline float dequantize_qsymm16(int16_t value, const QuantizationInfo &qinfo)
+{
+    return dequantize_qsymm16(value, qinfo.uniform());
+}
+
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_QUANTIZATION_INFO_H__ */

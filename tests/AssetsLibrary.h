@@ -646,6 +646,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S16:
+        case DataType::QSYMM16:
         {
             std::uniform_int_distribution<int16_t> distribution_s16(std::numeric_limits<int16_t>::lowest(), std::numeric_limits<int16_t>::max());
             fill(tensor, distribution_s16, seed_offset);
@@ -745,6 +746,7 @@ void AssetsLibrary::fill_tensor_uniform_ranged(T                                
             break;
         }
         case DataType::S16:
+        case DataType::QSYMM16:
         {
             const auto                         converted_pairs = detail::convert_range_pair<int16_t>(excluded_range_pairs);
             RangedUniformDistribution<int16_t> distribution_s16(std::numeric_limits<int16_t>::lowest(),
@@ -820,6 +822,7 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S16:
+        case DataType::QSYMM16:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int16_t, D>::value));
             std::uniform_int_distribution<int16_t> distribution_s16(low, high);

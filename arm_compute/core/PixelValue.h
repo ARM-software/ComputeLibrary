@@ -68,6 +68,9 @@ public:
             case DataType::S16:
                 value.s16 = static_cast<int16_t>(v);
                 break;
+            case DataType::QSYMM16:
+                value.s16 = quantize_qsymm16(static_cast<int16_t>(v), qinfo);
+                break;
             case DataType::U32:
                 value.u32 = static_cast<uint32_t>(v);
                 break;

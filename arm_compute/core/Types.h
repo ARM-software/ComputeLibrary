@@ -80,6 +80,7 @@ enum class DataType
     QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
     U16,                /**< unsigned 16-bit number */
     S16,                /**< signed 16-bit number */
+    QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
     U32,                /**< unsigned 32-bit number */
     S32,                /**< signed 32-bit number */
     U64,                /**< unsigned 64-bit number */

@@ -132,6 +132,32 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
     return dst;
 }
 
+template <>
+SimpleTensor<int16_t> convert_to_symmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<int16_t>          dst{ src.shape(), DataType::QSYMM16, 1, quantization_info };
+    const UniformQuantizationInfo &qinfo = quantization_info.uniform();
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = quantize_qsymm16(src[i], qinfo);
+    }
+    return dst;
+}
+
+template <>
+SimpleTensor<float> convert_from_symmetric(const SimpleTensor<int16_t> &src)
+{
+    const UniformQuantizationInfo &quantization_info = src.quantization_info().uniform();
+    SimpleTensor<float>            dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = dequantize_qsymm16(src[i], quantization_info);
+    }
+    return dst;
+}
+
 template <typename T>
 void matrix_multiply(const SimpleTensor<T> &a, const SimpleTensor<T> &b, SimpleTensor<T> &out)
 {

@@ -174,6 +174,7 @@ inline std::string get_typestring(DataType data_type)
         case DataType::U16:
             return endianness + "u" + support::cpp11::to_string(sizeof(uint16_t));
         case DataType::S16:
+        case DataType::QSYMM16:
             return endianness + "i" + support::cpp11::to_string(sizeof(int16_t));
         case DataType::U32:
             return endianness + "u" + support::cpp11::to_string(sizeof(uint32_t));
