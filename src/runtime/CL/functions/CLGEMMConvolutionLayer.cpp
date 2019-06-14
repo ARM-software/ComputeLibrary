@@ -202,8 +202,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     _skip_col2im                = data_layout == DataLayout::NHWC;
     _append_bias                = (biases != nullptr) && (!_is_quantized);
     _is_activationlayer_enabled = act_info.enabled();
-    // In case of F16, fused bias will be used in GEMM
-    _run_addition = (_skip_im2col) && (_append_bias) && (data_type != DataType::F16);
+    _run_addition               = (_skip_im2col) && (_append_bias);
 
     // Set the GPU target for im2col and col2im
     _im2col_kernel.set_target(CLScheduler::get().target());
@@ -388,8 +387,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const bool skip_im2col                = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
     const bool skip_col2im                = data_layout == DataLayout::NHWC;
     bool       is_activationlayer_enabled = act_info.enabled();
-    // In case of F16, fused bias will be used in GEMM
-    const bool run_addition = (skip_im2col) && (append_bias) && (data_type != DataType::F16);
+    const bool run_addition               = (skip_im2col) && (append_bias);
 
     const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
     const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
