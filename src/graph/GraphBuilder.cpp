@@ -269,7 +269,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
 
 NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                             Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info,
-                                            Size2D inner_border, ITensorAccessorUPtr weights_accessor,
+                                            ITensorAccessorUPtr weights_accessor,
                                             ITensorAccessorUPtr bias_accessor)
 {
     check_nodeidx_pair(input, g);
@@ -306,7 +306,7 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     }
 
     // Create convolution node and connect
-    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(deconv_info, inner_border);
+    NodeID deconv_nid = g.add_node<DeconvolutionLayerNode>(deconv_info);
     g.add_connection(input.node_id, input.index, deconv_nid, 0);
     g.add_connection(w_nid, 0, deconv_nid, 1);
     if(has_bias)

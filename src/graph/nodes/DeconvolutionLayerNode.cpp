@@ -32,8 +32,8 @@ namespace arm_compute
 {
 namespace graph
 {
-DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info, Size2D inner_border)
-    : _info(std::move(info)), _inner_border(inner_border)
+DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info)
+    : _info(std::move(info))
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -42,11 +42,6 @@ DeconvolutionLayerNode::DeconvolutionLayerNode(PadStrideInfo info, Size2D inner_
 PadStrideInfo DeconvolutionLayerNode::deconvolution_info() const
 {
     return _info;
-}
-
-Size2D DeconvolutionLayerNode::inner_border() const
-{
-    return _inner_border;
 }
 
 TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,

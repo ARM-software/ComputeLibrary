@@ -155,14 +155,13 @@ public:
      * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
      * @param[in] depth                 Number of convolution kernels
      * @param[in] deconv_info           Convolution layer information
-     * @param[in] inner_border          Inner border (right, top)
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,
-                                         Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info, Size2D inner_border,
+                                         Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info,
                                          ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
     /** Adds a depth concatenate node to the graph
      *

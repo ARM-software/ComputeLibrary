@@ -438,20 +438,17 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
 
 /** Calculate the upsampled output shape used for deconvolution
  *
- * @param[in] input              Input tensor info
- * @param[in] weights            Weights tensor shape
- * @param[in] sx                 Stride on x axis
- * @param[in] sy                 Stride on y axis
- * @param[in] inner_border_right The number of zeros added to right edge of the input.
- * @param[in] inner_border_top   The number of zeros added to top edge of the input.
- * @param[in] out_dims           Output shape dimensions
- * @param[in] padx               Padding on x axis
- * @param[in] pady               Padding on y axis
+ * @param[in] input    Input tensor info
+ * @param[in] weights  Weights tensor shape
+ * @param[in] sx       Stride on x axis
+ * @param[in] sy       Stride on y axis
+ * @param[in] out_dims Output shape dimensions
+ * @param[in] padx     Padding on x axis
+ * @param[in] pady     Padding on y axis
  *
  * @return the calculated shape
  */
-inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy, unsigned int inner_border_right,
-                                                         unsigned int inner_border_top,
+inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo &input, const ITensorInfo &weights, unsigned int sx, unsigned int sy,
                                                          std::pair<unsigned int, unsigned int> &out_dims, unsigned int &padx, unsigned int &pady)
 {
     const DataLayout data_layout = input.data_layout();
@@ -459,8 +456,8 @@ inline TensorShape compute_deconvolution_upsampled_shape(const ITensorInfo &inpu
     const size_t     idx_h       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Find the upsampled dimensions
-    unsigned int out_x = (input.dimension(idx_w) - 1) * sx + inner_border_right + 1;
-    unsigned int out_y = (input.dimension(idx_h) - 1) * sy + inner_border_top + 1;
+    unsigned int out_x = (input.dimension(idx_w) - 1) * sx + 1;
+    unsigned int out_y = (input.dimension(idx_h) - 1) * sy + 1;
 
     // Find the padding needed for the convolution with stride 1 in order to match output shape
     padx = out_dims.first - (out_x - weights.dimension(idx_w) + 1);

@@ -242,6 +242,8 @@ v19.08 Public major release
  - Deprecated functions/interfaces
     - Altered @ref QuantizationInfo interface to support per-channel quantization.
     - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
+    - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
+    - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
 
 v19.05 Public major release
  - Various bug fixes.

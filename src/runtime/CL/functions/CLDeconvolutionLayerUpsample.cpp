@@ -36,20 +36,18 @@ CLDeconvolutionLayerUpsample::CLDeconvolutionLayerUpsample() // NOLINT
 {
 }
 
-Status CLDeconvolutionLayerUpsample::validate(const ITensorInfo *input, const ITensorInfo *output, const BorderSize &inner_border,
-                                              const PadStrideInfo &info)
+Status CLDeconvolutionLayerUpsample::validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &info)
 {
-    return CLDeconvolutionLayerUpsampleKernel::validate(input, output, inner_border, info);
+    return CLDeconvolutionLayerUpsampleKernel::validate(input, output, info);
 }
 
-void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output, const BorderSize &inner_border,
-                                             const PadStrideInfo &info)
+void CLDeconvolutionLayerUpsample::configure(ICLTensor *input, ICLTensor *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     _output = output;
     _memset.configure(_output, PixelValue(0, _output->info()->data_type(), _output->info()->quantization_info()));
-    _upsample.configure(input, _output, inner_border, info);
+    _upsample.configure(input, _output, info);
 }
 
 void CLDeconvolutionLayerUpsample::run()

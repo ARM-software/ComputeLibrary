@@ -72,60 +72,46 @@ TEST_SUITE(DeconvolutionLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),   // Non supported data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),  // Invalid bias shape
                                             TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32), // Window shrink
-                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32), // Inner border different from 0
                                             TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                           }),
     framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                               TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(25U, 11U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(4U), 1, DataType::S32),
-                                            TensorInfo(TensorShape(4U), 1, DataType::S32),
                                           })),
     framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32),
                                             TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32),
-                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),
+                                                PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 1, 1),
                                                 PadStrideInfo(1, 1, 0, 0),
-                                                PadStrideInfo(1, 1, 0, 0),
                                            })),
-    framework::dataset::make("ax",          {   0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                            })),
-   framework::dataset::make("ay",           {   0U,
-                                                0U,
-                                                0U,
-                                                0U,
-                                                1U,
-                                                0U,
-                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, true, true })),
-    input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)
+    framework::dataset::make("Expected", { false, false, false, false, false, true })),
+    input_info, weights_info, bias_info, output_info, pad_info, expected)
 {
-    bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info, ax, ay));
+    bool is_valid = bool(CLDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

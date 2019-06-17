@@ -42,10 +42,9 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 }
 
 void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
-                                     unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
+                                     const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_UNUSED(inner_border_right, inner_border_top);
 
     switch(CLDeconvolutionLayer::get_deconvolution_method(input->info(), weights->info(), nullptr, output->info(), deconv_info, weights_info))
     {
@@ -70,11 +69,9 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const
 }
 
 Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                                      unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
+                                      const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_UNUSED(inner_border_right, inner_border_top);
-
     switch(CLDeconvolutionLayer::get_deconvolution_method(input, weights, bias, output, deconv_info, weights_info))
     {
         case DeconvolutionMethod::DIRECT:
@@ -113,18 +110,6 @@ DeconvolutionMethod CLDeconvolutionLayer::get_deconvolution_method(const ITensor
     }
 
     return DeconvolutionMethod::GEMM;
-}
-
-void CLDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &deconv_info,
-                                     const WeightsInfo &weights_info)
-{
-    configure(input, weights, bias, output, deconv_info, 0, 0, weights_info);
-}
-
-Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &deconv_info,
-                                      const WeightsInfo &weights_info)
-{
-    return CLDeconvolutionLayer::validate(input, weights, bias, output, deconv_info, 0, 0, weights_info);
 }
 
 void CLDeconvolutionLayer::run()

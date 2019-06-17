@@ -43,13 +43,11 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
       _original_weights(nullptr),
       _input(nullptr),
       _info(),
-      _inner_border(),
       _is_prepared(false)
 {
 }
 
-Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info,
-                                      unsigned int inner_border_right, unsigned int inner_border_top)
+Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
@@ -60,9 +58,6 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(inner_border_right > stride_x - 1, "inner_border_right must be smaller than stride_x");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(inner_border_top > stride_y - 1, "inner_border_top must be smaller than stride_y");
 
     auto out_dims = deconvolution_output_dimensions(input->dimension(0), input->dimension(1), weights->dimension(0), weights->dimension(1),
                                                     info.pad().first, info.pad().second, stride_x, stride_y);
@@ -91,7 +86,7 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
     unsigned int        padx            = 0;
     unsigned int        pady            = 0;
-    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, inner_border_right, inner_border_top, out_dims, padx, pady);
+    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, padx, pady);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
@@ -105,15 +100,13 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     return Status{};
 }
 
-void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info,
-                                     unsigned int inner_border_right, unsigned int inner_border_top)
+void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     _input            = input;
     _original_weights = weights;
     _info             = info;
-    _inner_border     = std::make_pair(inner_border_right, inner_border_top);
     _is_prepared      = false;
 
     const DataLayout   data_layout = input->info()->data_layout();
@@ -131,34 +124,25 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info, inner_border_right, inner_border_top));
+    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info));
 
     _memory_group.manage(&_scaled_output);
 
     // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int      padx            = 0;
     unsigned int      pady            = 0;
-    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, inner_border_right, inner_border_top, out_dims, padx, pady);
+    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, out_dims, padx, pady);
 
     TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
     _scaled_output.allocator()->init(scale_out_info);
 
     const PadStrideInfo upsample_info(stride_x, stride_y, padx / 2, pady / 2);
-    _upsample_f.configure(input, &_scaled_output, upsample_info, inner_border_right, inner_border_top);
+    _upsample_f.configure(input, &_scaled_output, upsample_info);
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     _conv_f.configure(&_scaled_output, &_weights_flipped, bias, output, conv_info);
     _scaled_output.allocator()->allocate();
-}
-Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info)
-{
-    return NEDeconvolutionLayer::validate(input, weights, bias, output, info, 0, 0);
-}
-
-void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info)
-{
-    configure(input, weights, bias, output, info, 0, 0);
 }
 
 void NEDeconvolutionLayer::run()

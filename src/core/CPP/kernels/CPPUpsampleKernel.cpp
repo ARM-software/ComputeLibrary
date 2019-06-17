@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 CPPUpsampleKernel::CPPUpsampleKernel()
-    : _input(nullptr), _output(nullptr), _info(), _inner_border()
+    : _input(nullptr), _output(nullptr), _info()
 {
 }
 
@@ -46,14 +46,13 @@ bool CPPUpsampleKernel::is_parallelisable() const
     return false;
 }
 
-void CPPUpsampleKernel::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info, unsigned int inner_border_right, unsigned int inner_border_top)
+void CPPUpsampleKernel::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    _input        = input;
-    _output       = output;
-    _info         = info;
-    _inner_border = std::make_pair(inner_border_right, inner_border_top);
+    _input  = input;
+    _output = output;
+    _info   = info;
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -78,9 +77,9 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     const int    stride_x      = _info.stride().first;
     const int    stride_y      = _info.stride().second;
     const int    start_x       = _info.pad().first;
-    const int    start_y       = _inner_border.second + _info.pad().second;
+    const int    start_y       = _info.pad().second;
     const int    end_y         = height_scaled - _info.pad().second;
-    const int    end_x         = width_scaled - _inner_border.first - _info.pad().first;
+    const int    end_x         = width_scaled - _info.pad().first;
     const size_t element_size  = _input->info()->element_size();
 
     std::fill_n(_output->buffer(), _output->info()->total_size(), 0);

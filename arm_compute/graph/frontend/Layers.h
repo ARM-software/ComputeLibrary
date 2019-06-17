@@ -370,26 +370,23 @@ class DeconvolutionLayer final : public ILayer
 public:
     /** Construct a convolution layer.
      *
-     * @param[in] conv_width   Convolution width.
-     * @param[in] conv_height  Convolution height.
-     * @param[in] ofm          Output feature map.
-     * @param[in] weights      Accessor to get kernel weights from.
-     * @param[in] bias         Accessor to get kernel bias from.
-     * @param[in] deconv_info  Padding and stride information.
-     * @param[in] inner_border Inner border padding (right, top)
+     * @param[in] conv_width  Convolution width.
+     * @param[in] conv_height Convolution height.
+     * @param[in] ofm         Output feature map.
+     * @param[in] weights     Accessor to get kernel weights from.
+     * @param[in] bias        Accessor to get kernel bias from.
+     * @param[in] deconv_info Padding and stride information.
      */
     DeconvolutionLayer(unsigned int        conv_width,
                        unsigned int        conv_height,
                        unsigned int        ofm,
                        ITensorAccessorUPtr weights,
                        ITensorAccessorUPtr bias,
-                       PadStrideInfo       deconv_info,
-                       Size2D              inner_border)
+                       PadStrideInfo       deconv_info)
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _ofm(ofm),
           _deconv_info(std::move(deconv_info)),
-          _inner_border(inner_border),
           _weights(std::move(weights)),
           _bias(std::move(bias))
     {
@@ -400,7 +397,7 @@ public:
         NodeIdxPair input         = { s.tail_node(), 0 };
         NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_deconvolution_node(s.graph(), common_params, input,
-                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info, _inner_border,
+                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info,
                                                     std::move(_weights), std::move(_bias));
     }
 
@@ -409,7 +406,6 @@ private:
     unsigned int        _conv_height;
     unsigned int        _ofm;
     const PadStrideInfo _deconv_info;
-    Size2D              _inner_border;
     ITensorAccessorUPtr _weights;
     ITensorAccessorUPtr _bias;
 };

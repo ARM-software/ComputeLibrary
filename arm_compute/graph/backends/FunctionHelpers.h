@@ -462,8 +462,7 @@ std::unique_ptr<IFunction> create_deconvolution_layer(DeconvolutionLayerNode &no
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
 
-    const PadStrideInfo deconv_info  = node.deconvolution_info();
-    const Size2D        inner_border = node.inner_border();
+    const PadStrideInfo deconv_info = node.deconvolution_info();
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, TargetInfo::TargetType);
@@ -471,7 +470,7 @@ std::unique_ptr<IFunction> create_deconvolution_layer(DeconvolutionLayerNode &no
 
     std::tie(func, std::ignore) = create_named_memory_managed_function<DeconvolutionLayerFunction>(
                                       std::string(), mm,
-                                      input, weights, biases, output, deconv_info, inner_border.x(), inner_border.y());
+                                      input, weights, biases, output, deconv_info);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "

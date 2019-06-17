@@ -55,7 +55,6 @@ Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITen
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-
     const DataLayout data_layout = input->data_layout();
 
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -95,11 +94,11 @@ Status CLDirectDeconvolutionLayer::validate(const ITensorInfo *input, const ITen
 
     unsigned int        padx            = 0;
     unsigned int        pady            = 0;
-    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, 0, 0, out_dims, padx, pady);
+    const TensorShape   scale_out_shape = compute_deconvolution_upsampled_shape(*input, *weights, stride_x, stride_y, out_dims, padx, pady);
     TensorInfo          scale_out_info(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(scale_out_shape).set_data_layout(data_layout));
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(), info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, weights_info));
 
     return Status{};
@@ -141,7 +140,7 @@ void CLDirectDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights,
     // Find the upsampled dimensions and the padding needed for the convolution with stride 1 in order to match output shape
     unsigned int      padx            = 0;
     unsigned int      pady            = 0;
-    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, 0, 0, out_dims, padx, pady);
+    const TensorShape scale_out_shape = compute_deconvolution_upsampled_shape(*input->info(), *weights->info(), stride_x, stride_y, out_dims, padx, pady);
 
     TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
     scale_out_info.set_data_layout(data_layout);
@@ -149,7 +148,7 @@ void CLDirectDeconvolutionLayer::configure(ICLTensor *input, ICLTensor *weights,
 
     // configure scale function
     const PadStrideInfo upsample_info(stride_x, stride_y, padx / 2, pady / 2);
-    _scale_f.configure(input, &_scaled_output, BorderSize(), upsample_info);
+    _scale_f.configure(input, &_scaled_output, upsample_info);
 
     // Setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);

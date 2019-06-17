@@ -46,9 +46,9 @@ namespace
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const RelativeTolerance<half_float::half> tolerance_fp16(half_float::half(0.2f));    /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
-constexpr float tolerance_num = 0.07f;  /**< Tolerance number */
+const RelativeTolerance<half_float::half> tolerance_fp16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+#endif                                                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
+constexpr float tolerance_num = 0.07f;                                            /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
                      * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("NumKernels", { 3 });
@@ -93,7 +93,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
 
     // Create and configure function
     NEDeconvolutionLayer deconv;
-    deconv.configure(&src, &weights, &bias, &dst, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), 0, 0);
+    deconv.configure(&src, &weights, &bias, &dst, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
 
     // Validate valid region
     const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
@@ -109,7 +109,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),   // Non supported data type
@@ -145,24 +145,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                 PadStrideInfo(1, 1, 1, 1),
                                                 PadStrideInfo(1, 1, 0, 0),
                                            })),
-    framework::dataset::make("ax",          {   1U,
-                                                1U,
-                                                1U,
-                                                1U,
-                                                0U,
-                                                0U,
-                                            })),
-   framework::dataset::make("ay",           {   1U,
-                                                1U,
-                                                1U,
-                                                1U,
-                                                0U,
-                                                0U,
-                                            })),
     framework::dataset::make("Expected", { false, false, false, false, false, true })),
-    input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)
+    input_info, weights_info, bias_info, output_info, pad_info, expected)
 {
-    bool is_valid = bool(NEDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info, ax, ay));
+    bool is_valid = bool(NEDeconvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pad_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -215,7 +201,7 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture4x4<half>, framework::DatasetMode::NIGHTLY, combine(combine(data4x4, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                            data_layouts_dataset))
+                                                                                                           data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp16);
@@ -223,13 +209,13 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture4x4<half>, framework::Dat
 TEST_SUITE_END() // W4x4
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::PRECOMMIT, combine(combine(data3x3_precommit, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                   data_layouts_dataset))
+                                                                                                                  data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(data3x3, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                 data_layouts_dataset))
+                                                                                                                data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp16);
@@ -237,7 +223,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerFixture3x3<half>, framework
 TEST_SUITE_END() // W3x3
 TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<half>, framework::DatasetMode::NIGHTLY, combine(combine(data1x1, framework::dataset::make("DataType", DataType::F16)),
-                                                                                                            data_layouts_dataset))
+                                                                                                           data_layouts_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp16);
@@ -245,7 +231,6 @@ FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerFixture1x1<half>, framework::Dat
 TEST_SUITE_END() // W1x1
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
 
 TEST_SUITE_END() // Float
 
