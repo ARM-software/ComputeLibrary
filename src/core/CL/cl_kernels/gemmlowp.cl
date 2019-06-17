@@ -66,13 +66,13 @@
 #else // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 /** Specialized macros to perform the dot product instruction between two vectors of size K0 [1,16] without using the dot8 instruction. */
-#define ARM_DOT1(a, b, c)       \
-    ({                          \
-        c += (uint)a.s0 * b.s0; \
+#define ARM_DOT1(a, b, c) \
+    ({                    \
+        c += (uint)a * b; \
     })
 #define ARM_DOT2(a, b, c)       \
     ({                          \
-        ARM_DOT1(a, b, c);      \
+        c += (uint)a.s0 * b.s0; \
         c += (uint)a.s1 * b.s1; \
     })
 #define ARM_DOT3(a, b, c)       \
@@ -134,7 +134,7 @@
         ARM_DOT_K0(k0, (a), (b##F), (c.sF)); \
     })
 
-/** Specialized macros to perform a a partial matrix multiplication with dimensions M0,N0,K0*/
+/** Specialized macros to perform a a partial matrix multiplication with dimensions M0,N0,K0 */
 #define ARM_MM_K0XN0X1(n0, k0, a, b, c)           \
     ({                                            \
         ARM_DOT_K0XN0(n0, k0, (a##0), b, (c##0)); \
