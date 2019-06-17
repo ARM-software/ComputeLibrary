@@ -449,7 +449,29 @@ conv1.run();
 conv2.run();
 @endcode
 
-@section S4_8_opencl_tuner OpenCL Tuner
+@section S4_8_import_memory Import Memory Interface
+
+The implemented @ref TensorAllocator and @ref CLTensorAllocator objects provide an interface capable of importing existing memory to a tensor as backing memory.
+
+A simple NEON example can be the following:
+@code{.cpp}
+// External backing memory
+void* external_ptr = ...;
+
+// Create and initialize tensor
+Tensor tensor;
+tensor.allocator()->init(tensor_info);
+
+// Import existing pointer as backing memory
+tensor.allocator()->import_memory(external_ptr);
+@endcode
+
+It is important to note the following:
+- Ownership of the backing memory is not transferred to the tensor itself.
+- The tensor mustn't be memory managed.
+- Padding requirements should be accounted by the client code. In other words, if padding is required by the tensor after the function configuration step, then the imported backing memory should account for it. Padding can be checked through the @ref TensorInfo::padding() interface.
+
+@section S4_9_opencl_tuner OpenCL Tuner
 
 OpenCL kernels when dispatched to the GPU take two arguments:
 - The Global Workgroup Size (GWS): That's the number of times to run an OpenCL kernel to process all the elements we want to process.

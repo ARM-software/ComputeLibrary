@@ -142,6 +142,59 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
 }
 
+TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
+{
+    // Create tensor
+    Tensor tensor;
+    tensor.allocator()->init(TensorInfo(TensorShape(24U, 16U, 3U), 1, DataType::F32));
+
+    // Enforce tensor padding and validate that meta-data were updated
+    // Note: Padding might be updated after the function configuration in case of increased padding requirements
+    const PaddingSize enforced_padding(3U, 5U, 2U, 4U);
+    tensor.info()->extend_padding(enforced_padding);
+    validate(tensor.info()->padding(), enforced_padding);
+
+    // Create and configure activation function
+    NEActivationLayer act_func;
+    act_func.configure(&tensor, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+
+    // Allocate and import tensor
+    const size_t total_size_in_bytes = tensor.info()->total_size();
+    auto         raw_data            = support::cpp14::make_unique<uint8_t[]>(total_size_in_bytes);
+
+    ARM_COMPUTE_EXPECT(bool(tensor.allocator()->import_memory(raw_data.get())), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Fill tensor while accounting padding
+    std::uniform_real_distribution<float> distribution(-5.f, 5.f);
+    std::mt19937                          gen(library->seed());
+
+    Window tensor_window;
+    tensor_window.use_tensor_dimensions(tensor.info()->tensor_shape());
+    Iterator tensor_it(&tensor, tensor_window);
+
+    execute_window_loop(tensor_window, [&](const Coordinates &)
+    {
+        *reinterpret_cast<float *>(tensor_it.ptr()) = distribution(gen);
+    },
+    tensor_it);
+
+    // Execute function and sync
+    act_func.run();
+
+    // Validate result by checking that the input has no negative values
+    execute_window_loop(tensor_window, [&](const Coordinates &)
+    {
+        const float val = *reinterpret_cast<float *>(tensor_it.ptr());
+        ARM_COMPUTE_EXPECT(val >= 0, framework::LogLevel::ERRORS);
+    },
+    tensor_it);
+
+    // Release resources
+    tensor.allocator()->free();
+    ARM_COMPUTE_EXPECT(tensor.info()->is_resizable(), framework::LogLevel::ERRORS);
+}
+
 #if !defined(BARE_METAL)
 TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 {

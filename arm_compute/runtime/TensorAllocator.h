@@ -98,6 +98,7 @@ public:
      * @warning size is expected to be compliant with total_size reported by ITensorInfo.
      * @warning ownership of memory is not transferred.
      * @warning tensor shouldn't be memory managed.
+     * @warning padding should be accounted by the client code.
      * @note buffer alignment will be checked to be compliant with alignment reported by ITensorInfo.
      *
      * @param[in] memory Raw memory pointer to be used as backing memory

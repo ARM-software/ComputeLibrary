@@ -114,6 +114,7 @@ public:
      * @warning memory is expected to be aligned with the device requirements.
      * @warning tensor shouldn't be memory managed.
      * @warning ownership of memory is not transferred.
+     * @warning padding should be accounted by the client code.
      * @note buffer size will be checked to be compliant with total_size reported by ITensorInfo.
      *
      * @param[in] buffer Buffer to be used as backing memory
