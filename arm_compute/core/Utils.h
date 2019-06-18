@@ -1022,13 +1022,32 @@ inline bool is_data_type_quantized(DataType dt)
  *
  * @param[in] dt Input data type.
  *
- * @return True if data type is of symmetric quantized type, else false.
+ * @return True if data type is of asymmetric quantized type, else false.
  */
 inline bool is_data_type_quantized_asymmetric(DataType dt)
 {
     switch(dt)
     {
         case DataType::QASYMM8:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of symmetric quantized type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of symmetric quantized type, else false.
+ */
+inline bool is_data_type_quantized_symmetric(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QSYMM8:
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QSYMM16:
             return true;
         default:
             return false;

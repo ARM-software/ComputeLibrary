@@ -184,9 +184,38 @@ SimpleTensor<uint8_t> arithmetic_operation(ArithmeticOperation op, const SimpleT
     }
 }
 
+template <>
+SimpleTensor<int16_t> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, SimpleTensor<int16_t> &dst, ConvertPolicy convert_policy)
+{
+    if(dst.data_type() == DataType::QSYMM16)
+    {
+        SimpleTensor<float> src1_tmp = convert_from_symmetric<int16_t>(src1);
+        SimpleTensor<float> src2_tmp = convert_from_symmetric<int16_t>(src2);
+        SimpleTensor<float> dst_tmp(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst.data_type());
+
+        Coordinates id_src1{};
+        Coordinates id_src2{};
+        Coordinates id_dst{};
+
+        BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1_tmp, src2_tmp, dst_tmp, convert_policy, id_src1, id_src2, id_dst);
+
+        dst = convert_to_symmetric<int16_t>(dst_tmp, dst.quantization_info());
+        return dst;
+    }
+    else
+    {
+        // DataType::S16
+        Coordinates id_src1{};
+        Coordinates id_src2{};
+        Coordinates id_dst{};
+
+        BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(op, src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
+
+        return dst;
+    }
+}
+
 template SimpleTensor<int32_t> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<int32_t> &src1, const SimpleTensor<int32_t> &src2, SimpleTensor<int32_t> &dst,
-                                                    ConvertPolicy convert_policy);
-template SimpleTensor<int16_t> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, SimpleTensor<int16_t> &dst,
                                                     ConvertPolicy convert_policy);
 template SimpleTensor<int8_t> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, SimpleTensor<int8_t> &dst,
                                                    ConvertPolicy convert_policy);
@@ -196,7 +225,7 @@ template SimpleTensor<float> arithmetic_operation(ArithmeticOperation op, const 
 template <typename T>
 SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(dst_data_type == DataType::QASYMM8, "For QASYMM8, the quantized output tensor should be passed directly.");
+    ARM_COMPUTE_ERROR_ON_MSG(is_data_type_quantized(dst_data_type), "For quantized data types, the quantized output tensor should be passed directly.");
 
     SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
     arithmetic_operation<T>(op, src1, src2, dst, convert_policy);

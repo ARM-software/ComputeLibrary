@@ -92,14 +92,22 @@ Status validate_arguments_with_float_only_supported_rules(const ITensorInfo &inp
 Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
 
-    const bool is_qasymm = is_data_type_quantized_asymmetric(input1.data_type()) || is_data_type_quantized_asymmetric(input2.data_type());
-    if(is_qasymm)
+    const bool is_quantized = is_data_type_quantized(input1.data_type()) || is_data_type_quantized(input2.data_type());
+    if(is_quantized)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
+
+        if(is_data_type_quantized_symmetric(input1.data_type()))
+        {
+            const int32_t in1_offset = input1.quantization_info().uniform().offset;
+            const int32_t in2_offset = input2.quantization_info().uniform().offset;
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in1_offset != 0, "For quantized symmetric, offset must be zero");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(in2_offset != 0, "For quantized symmetric, offset must be zero");
+        }
     }
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
@@ -110,14 +118,21 @@ Status validate_arguments_with_arithmetic_rules(const ITensorInfo &input1, const
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QASYMM8, DataType::S16, DataType::QSYMM16, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((output.data_type() == DataType::U8) && ((input1.data_type() != DataType::U8) || (input2.data_type() != DataType::U8)),
                                         "Output can only be U8 if both inputs are U8");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
                                         "Wrong shape for output");
-        if(is_qasymm)
+
+        if(is_quantized)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &output);
+
+            if(is_data_type_quantized_symmetric(output.data_type()))
+            {
+                const int32_t offset = output.quantization_info().uniform().offset;
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(offset != 0, "For quantized symmetric, offset must be zero");
+            }
         }
     }
     return Status{};
@@ -132,7 +147,7 @@ CLBuildOptions generate_build_options_with_arithmetic_rules(const ITensorInfo &i
     build_opts.add_option("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output.data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DOP=" + operation_string);
-    if(is_data_type_quantized_asymmetric(input1.data_type()))
+    if(is_data_type_quantized(input1.data_type()))
     {
         const UniformQuantizationInfo iq1info = input1.quantization_info().uniform();
         const UniformQuantizationInfo iq2info = input2.quantization_info().uniform();
@@ -188,6 +203,14 @@ std::pair<Status, Window> validate_and_configure_window_for_arithmetic_operators
     {
         set_format_if_unknown(output, Format::F32);
     }
+    else if(input1.data_type() == DataType::QASYMM8 || input2.data_type() == DataType::QASYMM8)
+    {
+        set_data_type_if_unknown(output, DataType::QASYMM8);
+    }
+    else if(input1.data_type() == DataType::QSYMM16 || input2.data_type() == DataType::QSYMM16)
+    {
+        set_data_type_if_unknown(output, DataType::QSYMM16);
+    }
 
     return configure_window_arithmetic_common(valid_region, input1, input2, output);
 }
@@ -221,7 +244,7 @@ void CLElementwiseOperationKernel::configure_common(const ICLTensor *input1, con
     _output = output;
 
     std::string kernel_name = "elementwise_operation_" + name();
-    if(is_data_type_quantized_asymmetric(input1->info()->data_type()))
+    if(is_data_type_quantized(input1->info()->data_type()))
     {
         kernel_name += "_quantized";
     }

@@ -115,7 +115,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      * @param[in] policy Policy to use to handle overflow.
@@ -125,7 +125,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLSaturatedArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      * @param[in] policy Policy to use to handle overflow.
@@ -158,7 +158,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input. Data types supported: Same as @p input1.
      * @param[in] output Output tensor. Data types supported: Same as @p input1.
      */
@@ -167,7 +167,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticOperationKernel
      *
      * @param[in] op     Arithmetic operation to be executed.
-     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/S8/QASYMM8/U16/S16/QSYMM16/F16/U32/S32/F32.
      * @param[in] input2 Second tensor input info. Data types supported: Same as @p input1.
      * @param[in] output Output tensor info. Data types supported: Same as @p input1.
      *

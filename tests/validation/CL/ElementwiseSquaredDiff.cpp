@@ -45,6 +45,7 @@ namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
 RelativeTolerance<float> tolerance_fp16(0.001f);
+AbsoluteTolerance<float> tolerance_qsymm16(1);
 
 constexpr unsigned int num_elems_processed_per_iteration = 16;
 /** Input data sets **/
@@ -54,6 +55,9 @@ const auto ElementwiseSquaredDiffU8Dataset = combine(combine(framework::dataset:
 const auto ElementwiseSquaredDiffQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                           framework::dataset::make("DataType",
                                                                                    DataType::QASYMM8));
+const auto ElementwiseSquaredDiffQSYMM16Dataset = combine(combine(framework::dataset::make("DataType", DataType::QSYMM16), framework::dataset::make("DataType", DataType::QSYMM16)),
+                                                          framework::dataset::make("DataType",
+                                                                                   DataType::QSYMM16));
 const auto ElementwiseSquaredDiffS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
                                                       framework::dataset::make("DataType", DataType::S16));
 const auto ElementwiseSquaredDiffFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
@@ -97,6 +101,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 template <typename T>
 using CLElementwiseSquaredDiffFixture = ElementwiseSquaredDiffValidationFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
 
+TEST_SUITE(Integer)
 TEST_SUITE(U8)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
                shape)
@@ -107,8 +112,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create and Configure function
-    CLElementwiseSquaredDiff add;
-    add.configure(&ref_src1, &ref_src2, &dst);
+    CLElementwiseSquaredDiff sqdiff;
+    sqdiff.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -128,48 +133,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<uint8_t>, frame
 }
 TEST_SUITE_END()
 
-template <typename T>
-using CLElementwiseSquaredDiffQuantizedFixture = ElementwiseSquaredDiffValidationQuantizedFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
-
-TEST_SUITE(Quantized)
-TEST_SUITE(QASYMM8)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
-               shape)
-{
-    // Create tensors
-    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
-
-    // Create and Configure function
-    CLElementwiseSquaredDiff add;
-    add.configure(&ref_src1, &ref_src2, &dst);
-
-    // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape);
-    validate(dst.info()->valid_region(), valid_region);
-
-    // Validate padding
-    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
-    validate(ref_src1.info()->padding(), padding);
-    validate(ref_src2.info()->padding(), padding);
-    validate(dst.info()->padding(), padding);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
-                       ElementwiseSquaredDiffQASYMM8Dataset),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
-
-                      )
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
 TEST_SUITE(S16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                shape, data_type)
@@ -180,8 +143,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Sma
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::S16);
 
     // Create and Configure function
-    CLElementwiseSquaredDiff add;
-    add.configure(&ref_src1, &ref_src2, &dst);
+    CLElementwiseSquaredDiff sqdiff;
+    sqdiff.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -199,6 +162,81 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffFixture<int16_t>, frame
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END()
+TEST_SUITE_END()
+
+template <typename T>
+using CLElementwiseSquaredDiffQuantizedFixture = ElementwiseSquaredDiffValidationQuantizedFixture<CLTensor, CLAccessor, CLElementwiseSquaredDiff, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
+               shape)
+{
+    // Create tensors
+    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+
+    // Create and Configure function
+    CLElementwiseSquaredDiff sqdiff;
+    sqdiff.configure(&ref_src1, &ref_src2, &dst);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                       ElementwiseSquaredDiffQASYMM8Dataset),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(5.f / 255.f, 20) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 255.f, 10) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(1.f / 255.f, 5) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
+}
+TEST_SUITE_END()
+TEST_SUITE(QSYMM16)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes(),
+               shape)
+{
+    // Create tensors
+    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
+    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QSYMM16);
+    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QSYMM16);
+
+    // Create and Configure function
+    CLElementwiseSquaredDiff sqdiff;
+    sqdiff.configure(&ref_src1, &ref_src2, &dst);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), num_elems_processed_per_iteration).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLElementwiseSquaredDiffQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(),
+                       ElementwiseSquaredDiffQSYMM16Dataset),
+                       framework::dataset::make("Src0QInfo", { QuantizationInfo(1.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
+                       framework::dataset::make("Src1QInfo", { QuantizationInfo(2.f / 32768.f, 0), QuantizationInfo(5.f / 32768.f, 0) })),
+                       framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(Float)
@@ -220,8 +258,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, datasets::SmallShapes
     CLTensor dst      = create_tensor<CLTensor>(shape, DataType::F32);
 
     // Create and Configure function
-    CLElementwiseSquaredDiff add;
-    add.configure(&ref_src1, &ref_src2, &dst);
+    CLElementwiseSquaredDiff sqdiff;
+    sqdiff.configure(&ref_src1, &ref_src2, &dst);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);
@@ -251,8 +289,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLElementwiseSquaredDiffBroadcastFixtu
 TEST_SUITE_END()
 TEST_SUITE_END()
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // ElementwiseSquaredDiff
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
