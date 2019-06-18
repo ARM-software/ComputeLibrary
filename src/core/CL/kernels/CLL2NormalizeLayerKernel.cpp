@@ -100,11 +100,11 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
 
-    _input   = input;
-    _sum     = sum;
-    _output  = output;
-    _actual_axis    = wrap_around(axis, max_input_tensor_dim);
-    _epsilon = epsilon;
+    _input       = input;
+    _sum         = sum;
+    _output      = output;
+    _actual_axis = wrap_around(axis, max_input_tensor_dim);
+    _epsilon     = epsilon;
 
     const unsigned int num_elems_processed_per_iteration = 16;
 
@@ -138,11 +138,11 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     // Set epsilon argument
     if(input->info()->data_type() == DataType::F32)
     {
-        _kernel.setArg<cl_uint>(idx, _epsilon);
+        _kernel.setArg<cl_float>(idx, _epsilon);
     }
     else
     {
-        _kernel.setArg<cl_ushort>(idx, _epsilon);
+        _kernel.setArg<cl_half>(idx, _epsilon);
     }
 
     // Configure kernel window
