@@ -38,8 +38,8 @@
 #include <sstream>
 #include <string>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 namespace
 {
 void options_add_matrix(std::set<std::string> &options, const std::array<float, 9> &matrix)
@@ -84,7 +84,7 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     _kernel.setArg<cl_int>(idx++, input->info()->dimension(1));
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 4;
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
@@ -123,3 +123,4 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
     _config_id += "_";
     _config_id += lower_string(string_from_interpolation_policy(policy));
 }
+} // namespace arm_compute

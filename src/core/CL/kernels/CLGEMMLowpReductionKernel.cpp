@@ -38,12 +38,9 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
 namespace arm_compute
 {
 class Coordinates;
-} // namespace arm_compute
 
 namespace
 {
@@ -56,7 +53,7 @@ Status validate_arguments_matrix_a_reduction(const ITensorInfo *input, const ITe
 }
 std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITensorInfo *input, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 1;
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
@@ -221,3 +218,4 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }
+} // namespace arm_compute

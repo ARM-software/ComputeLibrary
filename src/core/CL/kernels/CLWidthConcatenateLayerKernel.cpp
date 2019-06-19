@@ -40,13 +40,14 @@
 
 #include <map>
 
-using namespace arm_compute;
+namespace arm_compute
+{
 namespace
 {
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int width_offset, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     // The window needs to be based on input as we copy all the widths of input
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
@@ -98,8 +99,6 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     _output       = output;
     _width_offset = width_offset;
 
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     // Add build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
@@ -137,3 +136,4 @@ void CLWidthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &
     add_4D_tensor_argument(idx, _output, window);
     enqueue(queue, *this, window);
 }
+} // namespace arm_compute

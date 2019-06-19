@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,12 @@
 #include <set>
 #include <string>
 
-using namespace arm_compute;
+namespace arm_compute
+{
+namespace
+{
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+} // namespace
 
 CLChannelCombineKernel::CLChannelCombineKernel()
     : _planes{ { nullptr } }, _output(nullptr), _output_multi(nullptr), _x_subsampling{ { 1, 1, 1 } }, _y_subsampling{ { 1, 1, 1 } }
@@ -107,8 +112,6 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
 
     AccessWindowHorizontal plane0_access(plane0->info(), 0, num_elems_processed_per_iteration);
@@ -211,8 +214,6 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Configure window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     Window win = calculate_max_window(*plane0->info(), Steps(num_elems_processed_per_iteration));
 
     AccessWindowRectangle input_plane0_access(plane0->info(), 0, 0, num_elems_processed_per_iteration, 1.f);
@@ -292,3 +293,4 @@ void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)
     }
     while(window.slide_window_slice_2D(slice));
 }
+} // namespace arm_compute

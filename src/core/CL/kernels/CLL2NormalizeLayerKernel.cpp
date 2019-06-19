@@ -37,14 +37,11 @@
 
 namespace arm_compute
 {
-CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
-    : _input(nullptr), _sum(nullptr), _output(nullptr), _actual_axis(0), _epsilon(1e-12)
-{
-}
-
 namespace
 {
 constexpr int max_input_tensor_dim = 3;
+
+constexpr unsigned int num_elems_processed_per_iteration = 16;
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, int axis, float epsilon)
 {
@@ -76,8 +73,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, cons
 
 std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
-    const unsigned int num_elems_processed_per_iteration = 16;
-
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
     // Output tensor auto initialization if not yet initialized
@@ -95,6 +90,11 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
 }
 } // namespace
 
+CLL2NormalizeLayerKernel::CLL2NormalizeLayerKernel()
+    : _input(nullptr), _sum(nullptr), _output(nullptr), _actual_axis(0), _epsilon(1e-12)
+{
+}
+
 void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor *sum, ICLTensor *output, int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
@@ -105,8 +105,6 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     _output      = output;
     _actual_axis = wrap_around(axis, max_input_tensor_dim);
     _epsilon     = epsilon;
-
-    const unsigned int num_elems_processed_per_iteration = 16;
 
     // Set build options
     std::set<std::string> build_opts;

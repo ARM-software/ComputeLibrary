@@ -89,9 +89,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
 
     // Create window
-    const unsigned int num_elems_processed_per_iteration = 1;
-
-    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*output, Steps());
     output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     return std::make_pair(Status{}, win);

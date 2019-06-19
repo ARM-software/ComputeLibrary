@@ -84,7 +84,7 @@ void CLDepthConvertLayerKernel::configure(const ICLTensor *input, ICLTensor *out
     const size_t output_size = data_size_from_type(output->info()->data_type());
 
     // Get number of elements to process per iterations
-    const unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Set build options
     CLBuildOptions build_opts;

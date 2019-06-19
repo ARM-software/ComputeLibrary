@@ -36,6 +36,8 @@ namespace arm_compute
 {
 namespace
 {
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float beta)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
@@ -134,7 +136,6 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
     }
 
     // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
     INESimpleKernel::configure(input, output, num_elems_processed_per_iteration);
 
     _beta = beta;
@@ -142,7 +143,6 @@ void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output
 
 Status NEGEMMMatrixAdditionKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float beta)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, beta));
     ARM_COMPUTE_RETURN_ON_ERROR(INESimpleKernel::validate(input->clone().get(), output->clone().get(), num_elems_processed_per_iteration));
     return Status{};
