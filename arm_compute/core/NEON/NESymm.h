@@ -102,5 +102,52 @@ inline int16_t finalize_quantization_int16(int32_t in_value, int result_fixedpoi
 
     return out_s16;
 }
+
+/** Dequantize a neon vector holding 8 16-bit quantized values.
+ *
+ * @param[in] qv    Input values to be dequantized.
+ * @param[in] scale Quantization scale
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x2_t vdequantize_int16(const int16x8_t &qv, float scale)
+{
+    const float32x4_t   vscale = vdupq_n_f32(scale);
+    const float32x4x2_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv))), vscale),
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv))), vscale)
+        }
+    };
+    return vdequantized_input;
+}
+
+/** Quantize a neon vector holding 8 floating point values.
+ *
+ * @param[in] qv    Input values to be quantized.
+ * @param[in] scale Quantization scale
+ *
+ * @return A neon vector holding the quantized values
+ */
+inline int16x8_t vquantize_int16(const float32x4x2_t &qv, float scale)
+{
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+
+    const int32x4x2_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
+#else  //__aarch64__
+            vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale))
+#endif //__aarch64__
+        }
+    };
+    return vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1]));
+}
+
 } // namespace arm_compute
 #endif // __ARM_COMPUTE_NESYMM_H__

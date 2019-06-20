@@ -65,6 +65,17 @@ SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src
     return dst;
 }
 
+template <>
+SimpleTensor<int16_t> activation_layer<int16_t>(const SimpleTensor<int16_t> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info)
+{
+    const QuantizationInfo dst_qinfo = oq_info.empty() ? src.quantization_info() : oq_info;
+
+    SimpleTensor<float>   src_tmp = convert_from_symmetric(src);
+    SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
+    SimpleTensor<int16_t> dst     = convert_to_symmetric<int16_t>(dst_tmp, dst_qinfo);
+    return dst;
+}
+
 template SimpleTensor<float> activation_layer(const SimpleTensor<float> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 template SimpleTensor<half> activation_layer(const SimpleTensor<half> &src, ActivationLayerInfo info, const QuantizationInfo &oq_info);
 } // namespace reference

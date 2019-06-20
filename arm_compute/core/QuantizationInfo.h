@@ -34,6 +34,7 @@ namespace arm_compute
 {
 using qasymm8_t = uint8_t; /**< 8 bit quantized asymmetric scalar value */
 using qsymm8_t  = int8_t;  /**< 8 bit quantized symmetric scalar value */
+using qsymm16_t = int16_t; /**< 16 bit quantized symmetric scalar value */
 
 /** Quantization info when assuming per layer quantization */
 struct UniformQuantizationInfo
@@ -350,6 +351,5 @@ inline float dequantize_qsymm16(int16_t value, const QuantizationInfo &qinfo)
 {
     return dequantize_qsymm16(value, qinfo.uniform());
 }
-
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_QUANTIZATION_INFO_H__ */

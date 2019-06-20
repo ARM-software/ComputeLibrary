@@ -52,11 +52,11 @@ public:
         ActivationLayerInfo info(function, alpha_beta, alpha_beta);
 
         _in_place                 = in_place;
-        _output_quantization_info = calculate_output_quantization_info(info, quantization_info);
-        _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
         _data_type                = data_type;
-        _function                 = function;
+        _output_quantization_info = calculate_output_quantization_info(_data_type, info, quantization_info);
+        _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
 
+        _function  = function;
         _target    = compute_target(shape, info);
         _reference = compute_reference(shape, info);
     }
@@ -73,7 +73,7 @@ protected:
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        else if(is_data_type_quantized_asymmetric(tensor.data_type()) || (is_data_type_quantized_symmetric(tensor.data_type())))
         {
             library->fill_tensor_uniform(tensor, 0);
         }
@@ -141,14 +141,39 @@ protected:
     }
 
 private:
-    QuantizationInfo calculate_output_quantization_info(const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo)
+    QuantizationInfo calculate_output_quantization_info(DataType dt, const ActivationLayerInfo &act_info, const QuantizationInfo &default_qinfo)
     {
+        auto qasymm8_max = float(std::numeric_limits<uint8_t>::max()) + 1.f;
+        auto qsymm16_max = float(std::numeric_limits<int16_t>::max()) + 1.f;
+
         switch(act_info.activation())
         {
             case ActivationLayerInfo::ActivationFunction::TANH:
-                return QuantizationInfo(1.f / 128.f, 128);
+                if(dt == DataType::QSYMM16)
+                {
+                    return QuantizationInfo(1.f / qsymm16_max, 0);
+                }
+                else if(dt == DataType::QASYMM8)
+                {
+                    return QuantizationInfo(1.f / (0.5 * qasymm8_max), int(0.5 * qasymm8_max));
+                }
+                else
+                {
+                    return default_qinfo;
+                }
             case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                return QuantizationInfo(1.f / 256.f, 0);
+                if(dt == DataType::QSYMM16)
+                {
+                    return QuantizationInfo(1.f / qsymm16_max, 0);
+                }
+                else if(dt == DataType::QASYMM8)
+                {
+                    return QuantizationInfo(1.f / qasymm8_max, 0);
+                }
+                else
+                {
+                    return default_qinfo;
+                }
             default:
                 return default_qinfo;
         }

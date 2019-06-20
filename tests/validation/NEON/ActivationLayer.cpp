@@ -104,6 +104,8 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 #endif // defined(__aarch64__)
 
+constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
+
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
@@ -233,7 +235,6 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
                                                                                                   ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                   ActivationLayerInfo::ActivationFunction::TANH
                                                                                                 });
-
 const auto QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), QuantizedActivationFunctionsDataset),
                                                 framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
 
@@ -256,6 +257,32 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
+
+/** Input data sets. */
+const auto Int16QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                                                                                                       ActivationLayerInfo::ActivationFunction::TANH
+                                                                                                     });
+const auto Int16QuantizedActivationDataset = combine(combine(framework::dataset::make("InPlace", { false }), Int16QuantizedActivationFunctionsDataset),
+                                                     framework::dataset::make("AlphaBeta", { 0.5f, 1.f }));
+
+TEST_SUITE(QSYMM16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), Int16QuantizedActivationDataset),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QSYMM16)),
+                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), Int16QuantizedActivationDataset),
+                                                                                                                      framework::dataset::make("DataType",
+                                                                                                                              DataType::QSYMM16)),
+                                                                                                                      framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 32768.f, 0.f) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
+}
+TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // ActivationLayer
