@@ -141,6 +141,7 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     FusedConvolutionBatchNormalizationLayer,
+    FusedDepthwiseConvolutionBatchNormalizationLayer,
     GenerateProposalsLayer,
     NormalizationLayer,
     NormalizePlanarYUVLayer,

@@ -80,8 +80,9 @@ struct NEEltwiseFunctions
 /** Function and tensor types to be used inside a NEON fused convolution/batch normalization layer */
 struct NEFusedLayerTypes
 {
-    using ConvolutionLayer       = NEConvolutionLayer;
-    using FuseBatchNormalization = NEFuseBatchNormalization;
+    using ConvolutionLayer          = NEConvolutionLayer;
+    using DepthwiseConvolutionLayer = NEDepthwiseConvolutionLayer;
+    using FuseBatchNormalization    = NEFuseBatchNormalization;
 };
 
 namespace detail

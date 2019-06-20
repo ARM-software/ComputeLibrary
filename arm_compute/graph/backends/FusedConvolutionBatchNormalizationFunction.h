@@ -54,7 +54,7 @@ public:
      *                        Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights    Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  bias       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                        Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
+     *                        Data type supported: Should match @p input data type.
      * @param[out] output     Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                        Data types supported: Same as @p input.
      * @param[in]  mean       Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input

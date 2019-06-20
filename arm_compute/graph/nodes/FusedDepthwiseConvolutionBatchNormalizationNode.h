@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
-#define __ARM_COMPUTE_GRAPH_FUSED_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
+#ifndef __ARM_COMPUTE_GRAPH_FUSED_DEPTHWISE_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
+#define __ARM_COMPUTE_GRAPH_FUSED_DEPTHWISE_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__
 
 #include "arm_compute/graph/INode.h"
 
@@ -30,24 +30,38 @@ namespace arm_compute
 {
 namespace graph
 {
-/** Batch Normalization node */
-class FusedConvolutionBatchNormalizationNode final : public INode
+/** Fused Depthwise Convolution Batch Normalization node */
+class FusedDepthwiseConvolutionBatchNormalizationNode final : public INode
 {
 public:
     /** Constructor
      *
      * @param[in] epsilon          Epsilon parameter.
      * @param[in] info             Convolution layer attributes.
-     * @param[in] num_groups       (Optional) Number of groups (Defaults to 1)
+     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      * @param[in] method           (Optional) Convolution method to use
-     * @param[in] fast_math_hint   (Optional) Fast math hint
      * @param[in] fused_activation (Optional) Fused activation layer. Disabled if not specified
      */
-    FusedConvolutionBatchNormalizationNode(float epsilon, PadStrideInfo info,
-                                           unsigned int      num_groups     = 1,
-                                           ConvolutionMethod method         = ConvolutionMethod::Default,
-                                           FastMathHint      fast_math_hint = FastMathHint::Disabled,
-                                           ActivationLayerInfo fused_activation = ActivationLayerInfo());
+    FusedDepthwiseConvolutionBatchNormalizationNode(float                      epsilon,
+                                                    PadStrideInfo              info,
+                                                    unsigned int               depth_multiplier,
+                                                    DepthwiseConvolutionMethod method,
+                                                    ActivationLayerInfo        fused_activation = ActivationLayerInfo());
+
+    /** Sets the depthwise convolution layer method to use
+     *
+     * @param[in] method Method to use for depthwise convolution
+     */
+    void set_depthwise_convolution_method(DepthwiseConvolutionMethod method);
+
+    /** Depthwise convolution layer method accessor
+     *
+     * @note This is an indication on which depthwise convolution layer implementation to use,
+     *       if it fails to be created the library's heuristic approach will be used
+     *
+     * @return Depthwise convolution layer method to be used by the node
+     */
+    DepthwiseConvolutionMethod depthwise_convolution_method() const;
 
     /** Epsilon parameter accessor
      *
@@ -72,12 +86,14 @@ public:
      * @param[in] input_descriptor   Input descriptor
      * @param[in] weights_descriptor Weights descriptor
      * @param[in] info               Convolution operation attributes
+     * @param[in] depth_multiplier   Depth multiplier
      *
      * @return Output descriptor
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
                                                       const TensorDescriptor &weights_descriptor,
-                                                      const PadStrideInfo    &info);
+                                                      const PadStrideInfo    &info,
+                                                      int                     depth_multiplier);
 
     /** Sets the convolution layer method to use
      *
@@ -85,32 +101,11 @@ public:
      */
     void set_convolution_method(ConvolutionMethod method);
 
-    /** Number of groups in convolution accessor
+    /** Depth multiplier accessor
      *
-     * @return Number of groups in convolution
+     * @return Depth multiplier
      */
-    unsigned int num_groups() const;
-
-    /** Convolution layer method accessor
-     *
-     * @note This is an indication on which convolution layer implementation to use,
-     *       if it fails to be created the library's heuristic approach will be used
-     *
-     * @return Convolution layer method to be used by the node
-     */
-    ConvolutionMethod convolution_method() const;
-
-    /** Sets the fast math fast hint
-     *
-     * @param[in] hint Hint to use for convolution
-     */
-    void set_fast_math_hint(FastMathHint hint);
-
-    /** Fast math hint accessor
-     *
-     * @return Fast math hint to be used by the node
-     */
-    FastMathHint fast_math_hint() const;
+    unsigned int depth_multiplier() const;
 
     /** Convolution metadata accessor
      *
@@ -125,18 +120,17 @@ public:
     void accept(INodeVisitor &v) override;
 
 public:
-    static constexpr NodeType node_type = NodeType::FusedConvolutionBatchNormalizationLayer;
+    static constexpr NodeType node_type = NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer;
 
 private:
     float _epsilon;
 
-    PadStrideInfo       _info;
-    unsigned int        _num_groups;
-    ConvolutionMethod   _method;
-    FastMathHint        _fast_math_hint;
-    ActivationLayerInfo _fused_activation;
+    PadStrideInfo              _info;
+    unsigned int               _depth_multiplier;
+    DepthwiseConvolutionMethod _method;
+    ActivationLayerInfo        _fused_activation;
 };
 
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_BATCH_NORMALIZATION_LAYER_NODE_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_FUSED_DEPTHWISE_CONVOLUTION_BATCH_NORMALIZATION_NODE_H__ */

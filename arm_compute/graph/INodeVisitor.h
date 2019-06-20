@@ -96,6 +96,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) = 0;
+    /** Visit FusedDepthwiseConvolutionBatchNormalizationNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) = 0;
     /** Visit InputNode.
      *
      * @param[in] n Node to visit.
@@ -211,6 +216,10 @@ public:
         default_visit();
     }
     virtual void visit(FusedConvolutionBatchNormalizationNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(FusedDepthwiseConvolutionBatchNormalizationNode &n) override
     {
         default_visit();
     }

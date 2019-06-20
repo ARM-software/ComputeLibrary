@@ -30,6 +30,7 @@
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/backends/FusedConvolutionBatchNormalizationFunction.h"
+#include "arm_compute/graph/backends/FusedDepthwiseConvolutionBatchNormalizationFunction.h"
 #include "arm_compute/graph/backends/Utils.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
@@ -197,12 +198,6 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
     const ActivationLayerInfo fused_act  = node.fused_activation();
     const float               epsilon    = node.epsilon();
 
-    const bool is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
-    if(is_quantized && biases != nullptr)
-    {
-        biases->info()->set_data_type(DataType::S32);
-    }
-
     // Create and configure function
     auto func = support::cpp14::make_unique<FusedConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>>();
     func->configure(input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, num_groups, fast_math, fused_act);
@@ -210,7 +205,55 @@ std::unique_ptr<IFunction> create_fused_convolution_batch_normalization_layer(Fu
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
                                << node.name()
-                               << " Type: " << node.name()
+                               << " Type: " << node.type()
+                               << " Target: " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Weights shape: " << weights->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << (fused_act.enabled() ? " " + to_string(fused_act.activation()) : "")
+                               << std::endl);
+    return std::move(func);
+}
+
+/** Create a backend fused depthwise convolution batch normalization layer function
+ *
+ * @tparam FusedLayerTypes             Fused layer types
+ * @tparam TargetInfo                  Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend fused depthwise convolution batch normalization layer function
+ */
+template <typename FusedLayerTypes, typename TargetInfo>
+std::unique_ptr<IFunction> create_fused_depthwise_convolution_batch_normalization_layer(FusedDepthwiseConvolutionBatchNormalizationNode &node)
+{
+    validate_node<TargetInfo>(node, 7 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input   = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
+    typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
+    typename TargetInfo::TensorType *mean    = get_backing_tensor<TargetInfo>(node.input(3));
+    typename TargetInfo::TensorType *var     = get_backing_tensor<TargetInfo>(node.input(4));
+    typename TargetInfo::TensorType *beta    = get_backing_tensor<TargetInfo>(node.input(5));
+    typename TargetInfo::TensorType *gamma   = get_backing_tensor<TargetInfo>(node.input(6));
+
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+
+    const PadStrideInfo       conv_info        = node.convolution_info();
+    const unsigned int        depth_multiplier = node.depth_multiplier();
+    const ActivationLayerInfo fused_act        = node.fused_activation();
+    const float               epsilon          = node.epsilon();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<FusedDepthwiseConvolutionBatchNormalizationFunction<TargetInfo, FusedLayerTypes>>();
+    func->configure(input, weights, biases, output, mean, var, beta, gamma, epsilon, conv_info, depth_multiplier, fused_act);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated "
+                               << node.name()
+                               << " Type: " << node.type()
                                << " Target: " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()

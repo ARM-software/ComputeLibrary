@@ -45,6 +45,7 @@ class EltwiseLayerNode;
 class FlattenLayerNode;
 class FullyConnectedLayerNode;
 class FusedConvolutionBatchNormalizationNode;
+class FusedDepthwiseConvolutionBatchNormalizationNode;
 class GenerateProposalsLayerNode;
 class InputNode;
 class NormalizationLayerNode;

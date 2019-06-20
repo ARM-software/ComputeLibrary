@@ -74,8 +74,9 @@ struct CLEltwiseFunctions
 /** Function and tensor types to be used inside a CL fused convolution/batch normalization layer */
 struct CLFusedLayerTypes
 {
-    using ConvolutionLayer       = CLConvolutionLayer;
-    using FuseBatchNormalization = CLFuseBatchNormalization;
+    using ConvolutionLayer          = CLConvolutionLayer;
+    using DepthwiseConvolutionLayer = CLDepthwiseConvolutionLayer;
+    using FuseBatchNormalization    = CLFuseBatchNormalization;
 };
 
 // TODO (isagot01): Remove once we support heterogeneous scheduling at function level
@@ -203,6 +204,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<CLFullyConnectedLayer, CLTargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             return detail::create_fused_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node));
+        case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
+            return detail::create_fused_depthwise_convolution_batch_normalization_layer<CLFusedLayerTypes, CLTargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node));
         case NodeType::GenerateProposalsLayer:
             return detail::create_generate_proposals_layer<CLGenerateProposalsLayer, CLTargetInfo>(*polymorphic_downcast<GenerateProposalsLayerNode *>(node), ctx);
         case NodeType::NormalizationLayer:
