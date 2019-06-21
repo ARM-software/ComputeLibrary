@@ -339,19 +339,19 @@ void NEGEMMInterleavedWrapper::prepare()
     }
 }
 
-void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, bool pretranspose_b)
+void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITensor *c, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    _params         = INEGEMMWrapperKernel::extract_parameters(a, b, c);
+    _params         = INEGEMMWrapperKernel::extract_parameters(a, b, c, gemm_info);
     _a              = a;
     _b              = b;
     _c              = c;
-    _pretranspose_b = pretranspose_b;
+    _pretranspose_b = gemm_info.pretranpose_B();
 
     const DataType     input_type  = a->info()->data_type();
     const CPUInfo     &ci          = NEScheduler::get().cpu_info();
     const unsigned int num_threads = NEScheduler::get().num_threads();
 
-    const arm_gemm::KernelDescription gemm_kernel_info = get_gemm_info(input_type, ci, num_threads, _params, alpha, beta, pretranspose_b);
+    const arm_gemm::KernelDescription gemm_kernel_info = get_gemm_info(input_type, ci, num_threads, _params, alpha, beta, _pretranspose_b);
     ARM_COMPUTE_ERROR_ON(gemm_kernel_info.method != arm_gemm::GemmMethod::GEMM_INTERLEAVED);
 
     // Forcing 128-byte alignment (required by 32-bit kernels)
@@ -411,8 +411,8 @@ void NEGEMMInterleavedWrapper::configure(const ITensor *a, const ITensor *b, ITe
     _memory_group.manage(&_transformed_a);
     _memory_group.manage(&_tmp_c);
 
-    _transform_a     = strategy->instantiate_transformA(_a, &_transformed_a, _block_walker, _params);
-    _matrix_multiply = strategy->instantiate_matrix_multiply(&_transformed_a, &_transformed_b, &_tmp_c, c, _block_walker, _block_sizes, _params, alpha, beta, pretranspose_b, num_threads);
+    _transform_a     = strategy->instantiate_transformA(_a, &_transformed_a, _block_walker, _params, gemm_info);
+    _matrix_multiply = strategy->instantiate_matrix_multiply(&_transformed_a, &_transformed_b, &_tmp_c, c, _block_walker, _block_sizes, _params, alpha, beta, gemm_info, num_threads);
     ARM_COMPUTE_ERROR_ON(_transform_a == nullptr);
     ARM_COMPUTE_ERROR_ON(_matrix_multiply == nullptr);
 

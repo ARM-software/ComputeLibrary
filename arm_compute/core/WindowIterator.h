@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,6 +84,15 @@ public:
     void set_stride(size_t dim, size_t size)
     {
         _strides[dim] = size;
+    }
+
+    /** Manually set the strides
+     *
+     * @param[in] strides Strides to set
+     */
+    void set_strides(const Strides &strides)
+    {
+        _strides = strides;
     }
 
     /** Returns a pointer to the element at coordinates (x,y,z,w)

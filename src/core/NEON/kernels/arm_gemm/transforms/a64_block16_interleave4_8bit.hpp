@@ -57,8 +57,10 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
                     /* Everything falls through in here */
                     case 2:
                         inptr1 = zerobuff;
+                        // fall through
                     case 1:
                         inptr2 = zerobuff;
+                        // fall through
                     case 0:
                         inptr3 = zerobuff;
                         break;
@@ -93,8 +95,10 @@ void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, in
                     /* Everything falls through in here */
                     case 2:
                         inptr1 = zerobuff;
+                        // fall through
                     case 1:
                         inptr2 = zerobuff;
+                        // fall through
                     case 0:
                         inptr3 = zerobuff;
                         break;

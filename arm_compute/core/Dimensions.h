@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -164,6 +164,27 @@ public:
         ARM_COMPUTE_ERROR_ON(start > num_dimensions());
 
         collapse(num_dimensions() - start, start);
+    }
+
+    /** Remove dimension of a given index
+     *
+     * @note If index is greater than the number of dimensions no operation is performed
+     *
+     * @param[in] idx Dimension index to remove
+     */
+    void remove(size_t idx)
+    {
+        ARM_COMPUTE_ERROR_ON(_num_dimensions < 1);
+        if(idx >= _num_dimensions)
+        {
+            return;
+        }
+
+        std::copy(_id.begin() + idx + 1, _id.end(), _id.begin() + idx);
+        _num_dimensions--;
+
+        // Make sure all empty dimensions are filled with 0
+        std::fill(_id.begin() + _num_dimensions, _id.end(), 0);
     }
 
     /** Returns a read/write iterator that points to the first element in the dimension array.

@@ -63,16 +63,22 @@ inline void MergeResults<12, 8, false>(int32_t *out, const int32_t *in, const in
                 switch ((y + 7) - ymax) {
                     case 6:
                         outptr1 = dummyres;
+                        // fall through
                     case 5:
                         outptr2 = dummyres;
+                        // fall through
                     case 4:
                         outptr3 = dummyres;
+                        // fall through
                     case 3:
                         outptr4 = dummyres;
+                        // fall through
                     case 2:
                         outptr5 = dummyres;
+                        // fall through
                     case 1:
                         outptr6 = dummyres;
+                        // fall through
                     case 0:
                         outptr7 = dummyres;
                         break;

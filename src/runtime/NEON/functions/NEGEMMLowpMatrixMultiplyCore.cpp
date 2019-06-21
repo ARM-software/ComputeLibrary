@@ -87,7 +87,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         case DataType::U8:
         case DataType::S8:
         {
-            _asm_glue.configure(a, b, _fuse_output_stage ? &_mm_result_s32 : output, 1.f, 0.f, _reshape_b_only_on_first_run);
+            _asm_glue.configure(a, b, _fuse_output_stage ? &_mm_result_s32 : output, 1.f, 0.f, gemm_info);
             _dot_product_path = _asm_glue.is_configured();
             break;
         }
@@ -224,9 +224,8 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     TensorInfo tmp_b_info{};
     TensorInfo mm_result_s32_info{};
 
-    int32_t    a_offset                    = a->quantization_info().uniform().offset;
-    int32_t    b_offset                    = b->quantization_info().uniform().offset;
-    const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
+    int32_t a_offset = a->quantization_info().uniform().offset;
+    int32_t b_offset = b->quantization_info().uniform().offset;
 
     bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if(fuse_output_stage)
@@ -235,7 +234,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     }
 
     // Check if we need to run the optimized assembly kernel
-    const bool run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, fuse_output_stage ? &mm_result_s32_info : output, 1.f, 0.f, reshape_b_only_on_first_run));
+    const bool run_optimised = bool(NEGEMMAssemblyDispatch::validate(a, b, fuse_output_stage ? &mm_result_s32_info : output, 1.f, 0.f, gemm_info));
 
     if(run_optimised)
     {

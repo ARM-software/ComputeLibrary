@@ -187,18 +187,15 @@ elif env['arch'] == 'arm64-v8a':
         env.Append(CXXFLAGS = ['-no-integrated-as'])
 elif 'arm64-v8.2-a' in env['arch']:
     if env['arch'] == 'arm64-v8.2-a-sve':
-        if env['os'] != 'bare_metal':
-            print("Only bare metal SVE is supported at the moment")
-            Exit(1)
         env.Append(CXXFLAGS = ['-march=armv8.2-a+sve+fp16+dotprod'])
     else:
         env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-        if env['os'] == 'linux':
-            prefix = "aarch64-linux-gnu-"
-        elif env['os'] == 'bare_metal':
-            prefix = "aarch64-elf-"
-        elif env['os'] == 'android':
-            prefix = "aarch64-linux-android-"
+    if env['os'] == 'linux':
+        prefix = "aarch64-linux-gnu-"
+    elif env['os'] == 'bare_metal':
+        prefix = "aarch64-elf-"
+    elif env['os'] == 'android':
+        prefix = "aarch64-linux-android-"
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-no-integrated-as'])
