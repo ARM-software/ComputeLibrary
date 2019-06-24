@@ -68,6 +68,9 @@ constexpr float         tolerance_num_f16 = 0.02f;
 /** Alpha values to test - Precommit */
 const auto a_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
+/** Beta values to test - Precommit */
+const auto beta_values = framework::dataset::make("beta", {-0.75f, 0.0f} );
+
 /** M values to test */
 const auto m_values = framework::dataset::make("M", 37);
 
@@ -107,8 +110,11 @@ const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
 /** K0 values to test - Nightly */
 const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8 });
 
+/** Broadcast bias from vector to matrix */
+const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", {false, true} );
+
 /** Configuration test */
-void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, DataType data_type)
+void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned int k_value, unsigned int b_value, unsigned int m0_value, unsigned int n0_value, unsigned int k0_value, bool broadcast_bias, DataType data_type)
 {
     const unsigned int M = m_value;
     const unsigned int N = n_value;
@@ -122,27 +128,30 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
     rhs_info.n0         = n0_value;
     rhs_info.k0         = k0_value;
 
-    GEMMReshapeInfo gemm_info(M, N, K);
+    GEMMReshapeInfo gemm_info(M, N, K, false, false, 0, false, broadcast_bias);
 
     const TensorShape lhs_shape(K, M, b_value);
     const TensorShape rhs_shape(N, K, b_value);
-
+    const TensorShape bias_shape(N,
+                                 broadcast_bias? 1 : M,
+                                 broadcast_bias? 1 : b_value);
     const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape, 1, data_type),
                                                    TensorInfo(rhs_shape, 1, data_type),
                                                    gemm_info);
-
     // Create tensors
-    CLTensor lhs          = create_tensor<CLTensor>(lhs_shape, data_type);
+    CLTensor lhs  = create_tensor<CLTensor>(lhs_shape, data_type);
     CLTensor rhs  = create_tensor<CLTensor>(rhs_shape, data_type);
-    CLTensor dst          = create_tensor<CLTensor>(dst_shape, data_type);
+    CLTensor bias = create_tensor<CLTensor>(bias_shape, data_type);
+    CLTensor dst  = create_tensor<CLTensor>(dst_shape, data_type);
 
     ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     CLGEMMMatrixMultiplyNative gemm;
-    gemm.configure(&lhs, &rhs, &dst, 1.0f, lhs_info, rhs_info, gemm_info);
+    gemm.configure(&lhs, &rhs, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, gemm_info);
 }
 } // namespace
 
@@ -150,7 +159,7 @@ TEST_SUITE(CL)
 TEST_SUITE(GEMMMatrixMultiplyNative)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -158,13 +167,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                    m0_values_precommit),
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
-m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value)
+                                                                   broadcast_bias_values),
+m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, broadcast_bias)
 {
-    validate_configuration(m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, DataType::F32);
+    validate_configuration(m_value, n_value, k_value, b_value, m0_value, n0_value, k0_value, broadcast_bias, DataType::F32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -173,14 +183,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<float>, frame
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -189,14 +201,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<float>, frame
                                                                    n0_values_nightly),
                                                                    k0_values_nightly),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -206,14 +220,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<float>, f
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -223,7 +238,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<float>, f
                                                                    n0_values_nightly),
                                                                    k0_values_nightly),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
@@ -232,7 +248,7 @@ TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -241,14 +257,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyNativeFixture<half>, framew
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_values,
                                                                    n_values),
                                                                    k_values),
@@ -257,14 +275,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyNativeFixture<half>, framew
                                                                    n0_values_nightly),
                                                                    k0_values_nightly),
                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values),
+                                                                   broadcast_bias_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -274,14 +294,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyNative3DFixture<half>, fr
                                                                    n0_values_precommit),
                                                                    k0_values_precommit),
                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
                                                                    m_w_values,
                                                                    m_h_values),
                                                                    n_values),
@@ -291,7 +312,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyNative3DFixture<half>, fr
                                                                    n0_values_nightly),
                                                                    k0_values_nightly),
                                                                    framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values))
+                                                                   a_values),
+                                                                   beta_values))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
