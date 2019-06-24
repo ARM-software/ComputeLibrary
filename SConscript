@@ -188,6 +188,7 @@ if env['opencl']:
     core_files += Glob('src/core/CL/*.cpp')
     core_files += Glob('src/core/CL/kernels/*.cpp')
     core_files += Glob('src/core/CL/gemm/*.cpp')
+    core_files += Glob('src/core/CL/gemm/native/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped/*.cpp')
     core_files += Glob('src/core/CL/gemm/reshaped_only_rhs/*.cpp')
 
