@@ -44,8 +44,8 @@ namespace validation
 namespace
 {
 #ifndef __aarch64__
-constexpr AbsoluteTolerance<float> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-#endif                                                   //__aarch64__
+constexpr AbsoluteTolerance<float> tolerance_quant(1); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+#endif                                                 //__aarch64__
 
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
@@ -285,7 +285,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 #ifdef __aarch64__
     validate(Accessor(_target), _reference);
 #else  //__aarch64__
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_quant);
 #endif //__aarch64__
 }
 TEST_SUITE_END() // QASYMM8
@@ -322,7 +322,11 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                framework::dataset::make("OutQInfo", { QuantizationInfo(5.f / 32768.f, 0) })))
 {
     // Validate output
+#ifdef __aarch64__
     validate(Accessor(_target), _reference);
+#else  //__aarch64__
+    validate(Accessor(_target), _reference, tolerance_quant);
+#endif //__aarch64__
 }
 TEST_SUITE_END() // QSYMM16
 TEST_SUITE_END() // Quantized
