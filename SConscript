@@ -205,10 +205,13 @@ if env['neon']:
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
 
-    # build winograd sources for either v7a / v8a
+    # build winograd/depthwise sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
-    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/winograd/","arm_compute/core/NEON/kernels/convolution/common/" , "arm_compute/core/NEON/kernels/assembly/"])
+    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/convolution/common/",
+                                      "arm_compute/core/NEON/kernels/convolution/winograd/",
+                                      "arm_compute/core/NEON/kernels/convolution/depthwise/",
+                                      "arm_compute/core/NEON/kernels/assembly/"])
 
     graph_files += Glob('src/graph/backends/NEON/*.cpp')
 

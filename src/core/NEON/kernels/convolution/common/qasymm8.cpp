@@ -28,7 +28,7 @@
 #include <cmath>
 #include <limits>
 
-#include "arm_compute/core/NEON/kernels/convolution/common/qasymm8.hpp"
+#include "qasymm8.hpp"
 
 namespace qasymm8
 {

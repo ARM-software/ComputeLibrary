@@ -32,9 +32,9 @@
 
 #include <algorithm>
 #include <cstdint>
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/depthwise.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/padding.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
+#include "depthwise.hpp"
+#include "padding.hpp"
+#include "utils.hpp"
 
 #pragma once
 
@@ -95,6 +95,28 @@ MEMBERFN()::DepthwiseConvolutionBase(
   const unsigned int padding_left,
   const unsigned int padding_bottom,
   const unsigned int padding_right
+) : DepthwiseConvolutionBase(
+      n_batches, n_input_rows, n_input_cols, n_channels,
+      get_output_size(n_input_rows, padding_top, padding_bottom),
+      get_output_size(n_input_cols, padding_left, padding_right),
+      activation,
+      padding_top, padding_left, padding_bottom, padding_right
+    )
+{
+}
+
+MEMBERFN()::DepthwiseConvolutionBase(
+  const int n_batches,
+  const int n_input_rows,
+  const int n_input_cols,
+  const int n_channels,
+  const int n_output_rows,
+  const int n_output_cols,
+  ActivationFunction activation,
+  const unsigned int padding_top,
+  const unsigned int padding_left,
+  const unsigned int padding_bottom,
+  const unsigned int padding_right
 ) : _input(nullptr), _output(nullptr),
     _packed_parameters(nullptr),
     _working_space(nullptr),
@@ -102,8 +124,8 @@ MEMBERFN()::DepthwiseConvolutionBase(
     _n_input_rows(n_input_rows),
     _n_input_cols(n_input_cols),
     _n_channels(n_channels),
-    _n_output_rows(get_output_size(n_input_rows, padding_top, padding_bottom)),
-    _n_output_cols(get_output_size(n_input_cols, padding_left, padding_right)),
+    _n_output_rows(n_output_rows),
+    _n_output_cols(n_output_cols),
     _n_tile_rows(iceildiv(_n_output_rows, output_tile_rows)),
     _n_tile_cols(iceildiv(_n_output_cols, output_tile_cols)),
     _padding_top(padding_top),

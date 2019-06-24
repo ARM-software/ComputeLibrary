@@ -59,8 +59,8 @@ struct CLConvolutionLayerFunctions
 /** Collection of CL depthwise convolution functions */
 struct CLDepthwiseConvolutionLayerFunctions
 {
-    using GenericDepthwiseConvolutionLayer = CLDepthwiseConvolutionLayer;
-    using DepthwiseConvolutionLayer3x3     = CLDepthwiseConvolutionLayer3x3;
+    using GenericDepthwiseConvolutionLayer   = CLDepthwiseConvolutionLayer;
+    using OptimizedDepthwiseConvolutionLayer = CLDepthwiseConvolutionLayer3x3;
 };
 
 /** Collection of CL element-wise functions */

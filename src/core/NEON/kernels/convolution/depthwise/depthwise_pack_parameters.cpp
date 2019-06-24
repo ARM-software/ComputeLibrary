@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/impl_base.hpp"
+#include "impl_base.hpp"
 
 // TODO Move to common utilities somewhere
 template <size_t Size> struct DType { };

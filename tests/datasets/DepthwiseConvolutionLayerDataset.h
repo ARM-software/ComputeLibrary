@@ -215,6 +215,7 @@ public:
         // Stride 2
         add_config(TensorShape(7U, 7U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(7U, 7U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL), Size2D(2U, 2U));
     }
 };
 /** Dataset containing optimized, 3x3 depthwise convolution shapes. */

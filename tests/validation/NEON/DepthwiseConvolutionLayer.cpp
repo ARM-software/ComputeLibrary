@@ -156,7 +156,7 @@ DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip
                framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, false, true })),
                input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier,dilation, expected)
 {
-    bool is_valid = bool(NEDepthwiseConvolutionLayer3x3::validate(&input_info.clone()->set_is_resizable(false),
+    bool is_valid = bool(NEDepthwiseConvolutionLayerOptimized::validate(&input_info.clone()->set_is_resizable(false),
      &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier, ActivationLayerInfo(), dilation));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
@@ -296,7 +296,7 @@ TEST_SUITE_END() // Generic
 
 TEST_SUITE(W3x3)
 template <typename T>
-using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                     depth_multipliers),
                                                                                                                     framework::dataset::make("DataType",
@@ -409,7 +409,7 @@ TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // Generic
 TEST_SUITE(W3x3)
 template <typename T>
-using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                    depth_multipliers),
                                                                                                                    framework::dataset::make("DataType",
@@ -480,7 +480,7 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 template <typename T>
-using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
 template <typename T>
 using NEDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer, T>;
 

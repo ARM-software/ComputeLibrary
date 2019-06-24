@@ -25,8 +25,8 @@
 #pragma once
 
 #include <arm_neon.h>
-#include "arm_compute/core/NEON/kernels/convolution/common/activation.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/padding.hpp"
+#include "activation.hpp"
+#include "padding.hpp"
 
 namespace depthwise
 {
@@ -120,6 +120,23 @@ class DepthwiseConvolutionBase : public IDepthwiseConvolution
      */
     DepthwiseConvolutionBase(
       int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      nck::ActivationFunction activation,
+      unsigned int padding_top,
+      unsigned int padding_left,
+      unsigned int padding_bottom,
+      unsigned int padding_right
+    );
+
+    /** Create a new depthwise convolution engine.
+     *
+     * @param[in] n_batches Number of batches tensors.
+     * @param[in] n_input_rows Number of rows in input tensor.
+     * @param[in] n_input_cols Number of columns in input tensor.
+     * @param[in] n_channels Number of channels in input and output tensors.
+     */
+    DepthwiseConvolutionBase(
+      int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      int n_output_rows, int n_output_cols,
       nck::ActivationFunction activation,
       unsigned int padding_top,
       unsigned int padding_left,
@@ -417,6 +434,16 @@ class DepthwiseConvolution<
       unsigned int padding_right
     );
 
+    DepthwiseConvolution(
+      int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      int n_output_rows, int n_output_cols,
+      nck::ActivationFunction activation,
+      unsigned int padding_top,
+      unsigned int padding_left,
+      unsigned int padding_bottom,
+      unsigned int padding_right
+    );
+
   protected:
     template <nck::ActivationFunction Activation>
     void execute_tile(
@@ -481,6 +508,16 @@ class DepthwiseConvolution<
   public:
     DepthwiseConvolution(
       int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      nck::ActivationFunction activation,
+      unsigned int padding_top,
+      unsigned int padding_left,
+      unsigned int padding_bottom,
+      unsigned int padding_right
+    );
+
+    DepthwiseConvolution(
+      int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+      int n_output_rows, int n_output_cols,
       nck::ActivationFunction activation,
       unsigned int padding_top,
       unsigned int padding_left,

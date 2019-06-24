@@ -523,7 +523,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     std::string                func_name;
     if(dwc_algorithm == DepthwiseConvolutionMethod::Optimized3x3)
     {
-        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::DepthwiseConvolutionLayer3x3>(
+        std::tie(func, func_name) = create_named_function<typename DepthwiseConvolutionLayerFunctions::OptimizedDepthwiseConvolutionLayer>(
                                         std::string("DepthwiseConvolutionLayer3x3"),
                                         input, weights, biases, output, conv_info, depth_multiplier, fused_act);
     }

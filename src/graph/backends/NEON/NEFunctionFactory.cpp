@@ -65,8 +65,8 @@ struct NEConvolutionLayerFunctions
 /** Collection of CL depthwise convolution functions */
 struct NEDepthwiseConvolutionLayerFunctions
 {
-    using GenericDepthwiseConvolutionLayer = NEDepthwiseConvolutionLayer;
-    using DepthwiseConvolutionLayer3x3     = NEDepthwiseConvolutionLayer3x3;
+    using GenericDepthwiseConvolutionLayer   = NEDepthwiseConvolutionLayer;
+    using OptimizedDepthwiseConvolutionLayer = NEDepthwiseConvolutionLayerOptimized;
 };
 
 /** Collection of CL element-wise functions */

@@ -30,8 +30,8 @@
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-#include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/depthwise/impl_base.hpp"
+#include "arm.hpp"
+#include "impl_base.hpp"
 
 #pragma once
 
@@ -58,6 +58,31 @@ DepthwiseConvolution<
   unsigned int padding_right
 ) : Base(
       n_batches, n_input_rows, n_input_cols, n_channels, activation,
+      padding_top, padding_left, padding_bottom, padding_right
+    )
+{
+}
+
+template <
+  unsigned int OutputTileRows, unsigned int OutputTileCols,
+  unsigned int KernelRows, unsigned int KernelCols,
+  unsigned int StrideRows, unsigned int StrideCols
+>
+DepthwiseConvolution<
+  OutputTileRows, OutputTileCols,
+  KernelRows, KernelCols, StrideRows, StrideCols,
+  float16_t, float16_t, float16_t
+>::DepthwiseConvolution(
+  int n_batches, int n_input_rows, int n_input_cols, int n_channels,
+  int n_output_rows, int n_output_cols,
+  ActivationFunction activation,
+  unsigned int padding_top,
+  unsigned int padding_left,
+  unsigned int padding_bottom,
+  unsigned int padding_right
+) : Base(
+      n_batches, n_input_rows, n_input_cols, n_channels,
+      n_output_rows, n_output_cols, activation,
       padding_top, padding_left, padding_bottom, padding_right
     )
 {
