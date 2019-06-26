@@ -73,7 +73,7 @@ protected:
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()) || (is_data_type_quantized_symmetric(tensor.data_type())))
+        else if(is_data_type_quantized(tensor.data_type()))
         {
             library->fill_tensor_uniform(tensor, 0);
         }
@@ -96,7 +96,7 @@ protected:
         // Create and configure function
         FunctionType act_layer;
 
-        TensorType *dst_ptr = _in_place ? &src : &dst;
+        TensorType *dst_ptr = _in_place ? nullptr : &dst;
 
         act_layer.configure(&src, dst_ptr, info);
 

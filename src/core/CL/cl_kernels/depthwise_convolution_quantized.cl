@@ -31,8 +31,8 @@
 #ifndef VEC_SIZE
 #define VEC_SIZE 8
 #endif /* VEC_SIZE */
-#include "activation_layer_qa8.cl"
-#define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QA8(ACTIVATION_TYPE, x)
+#include "activation_layer_quant.cl"
+#define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QUANT(ACTIVATION_TYPE, x)
 #else /* defined(ACTIVATION_TYPE) && defined(CONST_0) */
 #define ACTIVATION_FUNC(x) (x)
 #endif /* defined(ACTIVATION_TYPE) && defined(CONST_0) */

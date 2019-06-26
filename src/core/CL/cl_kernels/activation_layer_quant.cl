@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "helpers.h"
+#include "activation_quant_helpers.h"
 
-#define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
 #define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
 
 #if defined(FLOAT_DOMAIN)
@@ -31,15 +30,7 @@
 
 #include "activation_float_helpers.h"
 
-#if defined(O2_VAL) && defined(S2_VAL)
-#define OFFSET_OUT O2_VAL
-#define SCALE_OUT S2_VAL
-#else // defined(O2_VAL) && defined(S2_VAL)
-#define OFFSET_OUT O1_VAL
-#define SCALE_OUT S1_VAL
-#endif // defined(O2_VAL) && defined(S2_VAL)
-
-/** This performs an activation function on QASYMM8 inputs with float transformations.
+/** This performs an activation function on quantized inputs with float transformations.
  *
  * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -47,10 +38,10 @@
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size. e.g. -DVEC_SIZE=16
  * @note A, B variables required by some activation functions are set using -DA_VAL= and -DB_VAL= respectively.
  * @note Quantization scales of the input/output tensors are passed in with -DS1_VAL= and -DS2_VAL= respectively.
- * @note Quantization offsets of the input/output tensors are passed in with -DO1_VAL= and -DO2_VAL= respectively.
+ * @note Quantization offsets of the input/output tensors are passed in only if asymmetric with -DO1_VAL= and -DO2_VAL= respectively.
  * @note Quantized value of constant zero should be given as a preprocessor argument using -DCONST_0=value. e.g. -DCONST_0=128.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QSYMM16
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -67,7 +58,7 @@
  * @param[in]  output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
-__kernel void activation_layer_qa8_f32(
+__kernel void activation_layer_quant_f32(
     TENSOR3D_DECLARATION(input)
 #ifndef IN_PLACE
     ,
@@ -87,10 +78,18 @@ __kernel void activation_layer_qa8_f32(
     TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
 
     VEC_FLOAT data_flt = CONVERT(data, VEC_FLOAT);
-    data_flt           = round(data_flt - (float)O1_VAL) * ((float)S1_VAL);
-    data_flt           = ACTIVATION(ACT, float, data_flt, A_VAL, B_VAL);
+#if defined(O1_VAL)
+    data_flt = round(data_flt - (float)O1_VAL) * ((float)S1_VAL);
+#else  // defined(O1_VAL)
+    data_flt        = round(data_flt) * ((float)S1_VAL);
+#endif // defined(O1_VAL)
+    data_flt = ACTIVATION(ACT, float, data_flt, A_VAL, B_VAL);
 
-    data = CONVERT_SAT(round(data_flt / ((float)SCALE_OUT)) + (float)OFFSET_OUT, TYPE);
+#if defined(O2_VAL)
+    data = CONVERT_SAT(round(data_flt / ((float)S2_VAL)) + (float)O2_VAL, TYPE);
+#else  // defined(O2_VAL)
+    data            = CONVERT_SAT(round(data_flt / ((float)S2_VAL)), TYPE);
+#endif // defined(O2_VAL)
 
     // Store result
     VSTORE(VEC_SIZE)
@@ -100,45 +99,8 @@ __kernel void activation_layer_qa8_f32(
 #else // defined(FLOAT_DOMAIN)
 // Activations performed in the quantized domain
 
-// RELU Activation
-inline TYPE relu_op(TYPE x)
-{
-    return max((TYPE)CONST_0, x);
-}
-// Bounded RELU Activation
-inline TYPE brelu_op(TYPE x)
-{
-    return min((TYPE)A_VAL, max(CONST_0, x));
-}
-// Lower Upper Bounded RELU Activation
-inline TYPE lu_brelu_op(TYPE x)
-{
-    return min(max(x, (TYPE)B_VAL), (TYPE)A_VAL);
-}
-
-#define ACTIVATION_OP2(op, x) op##_op(x)
-#define ACTIVATION_OP(op, x) ACTIVATION_OP2(op, x)
-
-#if defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
-#define PERFORM_ACTIVATION_QA8(act, data)                                                         \
-    ({                                                                                            \
-        data = ACTIVATION_OP(act, data);                                                          \
-        \
-        VEC_DATA_TYPE(float, VEC_SIZE)                                                            \
-        fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));                                    \
-        \
-        fdata = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL); \
-        data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(uchar, VEC_SIZE));                               \
-    })
-#else /* defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL) */
-#define PERFORM_ACTIVATION_QA8(act, data) \
-    ({                                    \
-        data = ACTIVATION_OP(act, data);  \
-    })
-#endif /* defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL) */
-
 #if defined(ACT)
-/** This performs an activation function on QASYMM8 inputs.
+/** This performs an activation function on quantized inputs.
  *
  * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
  *
@@ -150,7 +112,7 @@ inline TYPE lu_brelu_op(TYPE x)
  * @note Quantization offsets of the input/output tensors are passed in with -DO1_VAL= and -DO2_VAL= respectively.
  * @note Quantized value of constant zero should be given as a preprocessor argument using -DCONST_0=value. e.g. -DCONST_0=128.
  *
- * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: QASYMM8/QSYMM16
  * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -167,7 +129,7 @@ inline TYPE lu_brelu_op(TYPE x)
  * @param[in]  output_step_z                        (Optional) output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes (Optional) The offset of the first element in the destination image
  */
-__kernel void activation_layer_qa8(
+__kernel void activation_layer_quant(
     TENSOR3D_DECLARATION(input)
 #ifndef IN_PLACE
     ,
@@ -186,7 +148,7 @@ __kernel void activation_layer_qa8(
     // Load data
     TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
 
-    data = PERFORM_ACTIVATION_QA8(ACT, data);
+    data = PERFORM_ACTIVATION_QUANT(ACT, data);
 
     // Store result
     VSTORE(VEC_SIZE)
