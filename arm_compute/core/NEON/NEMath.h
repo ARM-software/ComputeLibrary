@@ -124,6 +124,28 @@ float32x4_t vtanhq_f32(float32x4_t val);
  */
 float32x4_t vpowq_f32(float32x4_t val, float32x4_t n);
 
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Vector of 4 elements
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
+
+/** Round to the nearest division by a power-of-two using exponent
+ *
+ * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
+ *
+ * @param[in] x        Element to divide.
+ * @param[in] exponent Integer value used to round to nearest division by a power-of-two
+ *
+ * @return the nearest division by a power-of-two using exponent
+ */
+int32_t rounding_divide_by_pow2(int32_t x, int exponent);
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Calculate hyperbolic tangent.
  *

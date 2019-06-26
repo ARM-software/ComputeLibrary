@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEASYMM_H__
 #define __ARM_COMPUTE_NEASYMM_H__
 
+#include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -33,28 +34,6 @@ using qasymm8x8x2_t = uint8x8x2_t; /**< 8 bit quantized asymmetric vector with 1
 using qasymm8x8x3_t = uint8x8x3_t; /**< 8 bit quantized asymmetric vector with 24 elements */
 using qasymm8x8x4_t = uint8x8x4_t; /**< 8 bit quantized asymmetric vector with 32 elements */
 using qasymm8x16_t  = uint8x16_t;  /**< 8 bit quantized asymmetric vector with 16 elements */
-
-/** Round to the nearest division by a power-of-two using exponent
- *
- * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
- *
- * @param[in] x        Vector of 4 elements
- * @param[in] exponent Integer value used to round to nearest division by a power-of-two
- *
- * @return the nearest division by a power-of-two using exponent
- */
-int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent);
-
-/** Round to the nearest division by a power-of-two using exponent
- *
- * @note This function calculates the following expression: (x + 2^n -1 ) / 2^n where n = exponent
- *
- * @param[in] x        Element to divide.
- * @param[in] exponent Integer value used to round to nearest division by a power-of-two
- *
- * @return the nearest division by a power-of-two using exponent
- */
-int32_t rounding_divide_by_pow2(int32_t x, int exponent);
 
 /** Perform a multiply-accumulate on all 16 components of a QASYMM8 vector
  *

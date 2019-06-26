@@ -69,19 +69,20 @@ inline float32x4_t vroundq_rte_f32(float32x4_t val)
 {
 #ifdef __aarch64__
     return vrndnq_f32(val);
-#else // __aarch64__
+#else  // __aarch64__
     static const float32x4_t CONST_HALF_FLOAT = vdupq_n_f32(0.5f);
-    static const float32x4_t CONST_1_FLOAT = vdupq_n_f32(1.f);
-    static const int32x4_t CONST_1_INT = vdupq_n_s32(1);
-    const float32x4_t floor_val = vfloorq_f32(val);
-    const float32x4_t diff = vsubq_f32(val, floor_val);
+    static const float32x4_t CONST_1_FLOAT    = vdupq_n_f32(1.f);
+    static const int32x4_t   CONST_1_INT      = vdupq_n_s32(1);
+    const float32x4_t        floor_val        = vfloorq_f32(val);
+    const float32x4_t        diff             = vsubq_f32(val, floor_val);
 
     /*
     * Select the floor value when (diff<0.5 || (diff==0.5 && floor_val%2==0).
     * This condition is checked by vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT) ,vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT) , vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT),CONST_1_INT))))
     */
 
-    return vbslq_f32(vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT) ,vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT) , vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT),CONST_1_INT)))), floor_val, vaddq_f32(floor_val, CONST_1_FLOAT));
+    return vbslq_f32(vorrq_u32(vcltq_f32(diff, CONST_HALF_FLOAT), vandq_u32(vceqq_f32(diff, CONST_HALF_FLOAT), vmvnq_u32(vtstq_s32(vandq_s32(vcvtq_s32_f32(floor_val), CONST_1_INT), CONST_1_INT)))),
+                     floor_val, vaddq_f32(floor_val, CONST_1_FLOAT));
 #endif // __aarch64__
 }
 
@@ -190,6 +191,21 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
 #endif /* DOXYGEN_SKIP_THIS */
+
+inline int32x4_t rounding_divide_by_pow2(int32x4_t x, int exponent)
+{
+    const int32x4_t shift_vec  = vdupq_n_s32(-exponent);
+    const int32x4_t fixup      = vshrq_n_s32(vandq_s32(x, shift_vec), 31);
+    const int32x4_t fixed_up_x = vqaddq_s32(x, fixup);
+    return vrshlq_s32(fixed_up_x, shift_vec);
+}
+
+inline int32_t rounding_divide_by_pow2(int32_t x, int exponent)
+{
+    const int32_t mask      = (1 << exponent) - 1;
+    const int32_t threshold = (mask >> 1) + (x < 0 ? 1 : 0);
+    return (x >> exponent) + ((x & mask) > threshold ? 1 : 0);
+}
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 /** Exponent polynomial coefficients */

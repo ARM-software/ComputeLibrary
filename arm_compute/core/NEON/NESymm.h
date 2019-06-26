@@ -24,11 +24,17 @@
 #ifndef __ARM_COMPUTE_NESYMM_H__
 #define __ARM_COMPUTE_NESYMM_H__
 
-#include "NEAsymm.h"
+#include "arm_compute/core/NEON/NEMath.h"
 #include <arm_neon.h>
 
 namespace arm_compute
 {
+using qsymm8_t  = int8_t;  /**< 8 bit quantized symmetric scalar value */
+using qsymm16_t = int16_t; /**< 16 bit quantized symmetric scalar value */
+
+using qsymm16x8_t   = int16x8_t;   /**< 16 bit quantized symmetric vector with 8 elements */
+using qsymm16x8x2_t = int16x8x2_t; /**< 16 bit quantized symmetric vector with 16 elements */
+
 /** Performs final quantization step on 8 signed 16-bit elements
  *
  * @tparam is_bounded_relu Specified if a fused bounded relu should be applied
@@ -147,6 +153,66 @@ inline int16x8_t vquantize_int16(const float32x4x2_t &qv, float scale)
         }
     };
     return vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1]));
+}
+
+/** Dequantize a neon vector holding 16 16-bit quantized values.
+ *
+ * @param[in] qv Input values to be dequantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return Dequantized values in a neon vector
+ */
+inline float32x4x4_t vdequantize(const int16x8x2_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float         scale  = qi.scale;
+    const float32x4_t   vscale = vdupq_n_f32(scale);
+    const float32x4x4_t vdequantized_input =
+    {
+        {
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[0]))), vscale),
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[0]))), vscale),
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_low_s16(qv.val[1]))), vscale),
+            vmulq_f32(vcvtq_f32_s32(vmovl_s16(vget_high_s16(qv.val[1]))), vscale),
+        }
+    };
+    return vdequantized_input;
+}
+
+/** Quantize a neon vector holding 16 floating point values.
+ *
+ * @param[in] qv Input values to be quantized.
+ * @param[in] qi Quantization information to be used in the computation.
+ *
+ * @return A neon vector holding the quantized values
+ */
+inline qsymm16x8x2_t vquantize_qsymm16(const float32x4x4_t &qv, const UniformQuantizationInfo &qi)
+{
+    const float scale = qi.scale;
+    ARM_COMPUTE_ERROR_ON(scale == 0.f);
+    const float32x4_t vinvscale = vdupq_n_f32(1.f / scale);
+    const int32x4x4_t rf =
+    {
+        {
+#ifdef __aarch64__
+            vcvtnq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+            vcvtnq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
+            vcvtnq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
+            vcvtnq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
+#else  //__aarch64__
+            vcvtq_s32_f32(vmulq_f32(qv.val[0], vinvscale)),
+            vcvtq_s32_f32(vmulq_f32(qv.val[1], vinvscale)),
+            vcvtq_s32_f32(vmulq_f32(qv.val[2], vinvscale)),
+            vcvtq_s32_f32(vmulq_f32(qv.val[3], vinvscale)),
+#endif //__aarch64__
+        }
+    };
+    const qsymm16x8x2_t res =
+    {
+        vcombine_s16(vqmovn_s32(rf.val[0]), vqmovn_s32(rf.val[1])),
+        vcombine_s16(vqmovn_s32(rf.val[2]), vqmovn_s32(rf.val[3])),
+    };
+
+    return res;
 }
 
 } // namespace arm_compute
