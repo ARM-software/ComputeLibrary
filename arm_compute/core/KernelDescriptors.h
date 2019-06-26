@@ -48,5 +48,16 @@ struct FFTRadixStageKernelInfo
     unsigned int Nx{ 0 };                 /**< Nx coefficient. */
     bool         is_first_stage{ false }; /**< Flags if the FFT kernels is the first stage of a decomposed FFT. */
 };
+
+/** Descriptor used by the GEMM kernels */
+struct GEMMKernelInfo
+{
+    unsigned int m{ 0 };
+    unsigned int n{ 0 };
+    unsigned int k{ 0 };
+    unsigned int depth_output_gemm3d{ 0 };
+    bool         reinterpret_input_as_3d{ false };
+    bool         broadcast_bias{ false };
+};
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CORE_KERNEL_DESCRIPTORS_H__ */

@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_GEMM_FIXTURE
 #define ARM_COMPUTE_TEST_GEMM_FIXTURE
 
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "tests/AssetsLibrary.h"
@@ -210,6 +211,13 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
 
         // The output tensor will be auto-initialized within the function
 
@@ -219,7 +227,7 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, 0, false, broadcast_bias));
+        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -346,6 +354,13 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
 
         // The output tensor will be auto-initialized within the function
 
@@ -355,7 +370,7 @@ protected:
         GEMMFunctionType       gemm;
         reshape_lhs.configure(&lhs, &lhs_reshaped, lhs_info);
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h, false, true));
+        gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -479,6 +494,13 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
 
         // The output tensor will be auto-initialized within the function
 
@@ -486,7 +508,7 @@ protected:
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, 0, false, broadcast_bias));
+        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -606,6 +628,13 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
 
         // The output tensor will be auto-initialized within the function
 
@@ -613,7 +642,7 @@ protected:
         ReshapeRHSFunctionType reshape_rhs;
         GEMMFunctionType       gemm;
         reshape_rhs.configure(&rhs, &rhs_reshaped, rhs_info);
-        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h, false, true));
+        gemm.configure(&lhs, &rhs_reshaped, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -729,10 +758,17 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = 0;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = broadcast_bias;
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, 0, false, broadcast_bias));
+        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -843,12 +879,19 @@ protected:
         const unsigned int M = lhs_shape[1];
         const unsigned int N = rhs_shape[0];
         const unsigned int K = lhs_shape[0];
+        GEMMKernelInfo     kernel_info;
+        kernel_info.m                       = M;
+        kernel_info.n                       = N;
+        kernel_info.k                       = K;
+        kernel_info.depth_output_gemm3d     = m_h;
+        kernel_info.reinterpret_input_as_3d = false;
+        kernel_info.broadcast_bias          = true;
 
         // The output tensor will be auto-initialized within the function
 
         // Create and configure function
         GEMMFunctionType gemm;
-        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, GEMMReshapeInfo(M, N, K, 1, 1, m_h, false, true));
+        gemm.configure(&lhs, &rhs, &bias, &dst, alpha, beta, lhs_info, rhs_info, kernel_info);
 
         ARM_COMPUTE_EXPECT(lhs.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(rhs.info()->is_resizable(), framework::LogLevel::ERRORS);

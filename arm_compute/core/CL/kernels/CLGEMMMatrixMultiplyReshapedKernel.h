@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 
+#include "arm_compute/core/KernelDescriptors.h"
+
 namespace arm_compute
 {
 class ICLTensor;
@@ -69,7 +71,7 @@ public:
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
                    const GEMMRHSMatrixInfo &rhs_info,
-                   const GEMMReshapeInfo   &gemm_info);
+                   const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyReshapedKernel
      *
      * @param[in] input0    Input tensor containing the LHS reshaped matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4
@@ -94,7 +96,7 @@ public:
      */
     static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
                            const GEMMRHSMatrixInfo &rhs_info,
-                           const GEMMReshapeInfo   &gemm_info);
+                           const GEMMKernelInfo    &gemm_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -53,7 +53,7 @@ using ElementsProcessed = Steps;
 
 Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta, const GEMMLHSMatrixInfo &lhs_info,
                           const GEMMRHSMatrixInfo &rhs_info,
-                          const GEMMReshapeInfo   &gemm_info)
+                          const GEMMKernelInfo    &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
@@ -66,9 +66,9 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 1 || lhs_info.m0 > 8);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((rhs_info.n0 & (rhs_info.n0 - 1)) && rhs_info.n0 != 3), "Only 2,3,4,8,16 are supported for n0");
 
-    const int m = gemm_info.m();
-    const int n = gemm_info.n();
-    const int k = gemm_info.k();
+    const unsigned int m = gemm_info.m;
+    const unsigned int n = gemm_info.n;
+    const unsigned int k = gemm_info.k;
 
     TensorShape tensor_shape1{ input1->tensor_shape() };
     tensor_shape1.set(0, n);
@@ -76,11 +76,11 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
     if(input2 != nullptr && !(helpers::float_ops::is_zero(beta)))
     {
-        const int input2_dim0 = static_cast<int>(input2->dimension(0));
-        const int input2_dim1 = static_cast<int>(input2->dimension(1));
+        const unsigned int input2_dim0 = input2->dimension(0);
+        const unsigned int input2_dim1 = input2->dimension(1);
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input2, input1);
-        if(gemm_info.broadcast_bias())
+        if(gemm_info.broadcast_bias)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG((input2_dim1 != 1 || input2_dim0 != n), "Incorrect dimension of bias matrix which is to be broadcasted");
         }
@@ -94,14 +94,14 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
     const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_rhs_reshaped_shape(tensor_info1, rhs_info));
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != static_cast<unsigned int>(k));
-    if(gemm_info.reinterpret_input_as_3d())
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != k);
+    if(gemm_info.reinterpret_input_as_3d)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) * input0->dimension(2) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) * input0->dimension(2) != m);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != static_cast<unsigned int>(m));
+        ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != m);
     }
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
 
@@ -117,12 +117,12 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output, const GEMMLHSMatrixInfo &lhs_info,
                                                         const GEMMRHSMatrixInfo &rhs_info,
-                                                        const GEMMReshapeInfo &gemm_info, ElementsProcessed &num_elements_processed)
+                                                        const GEMMKernelInfo &gemm_info, ElementsProcessed &num_elements_processed)
 {
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
-    bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d();
-    bool          reinterpret_output_as_3d            = (gemm_info.depth_output_gemm3d() != 0);
+    bool          reinterpret_input_as_3d             = gemm_info.reinterpret_input_as_3d;
+    bool          reinterpret_output_as_3d            = gemm_info.depth_output_gemm3d != 0;
 
     Window win{};
     Window win_out{};
@@ -155,8 +155,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
 
     // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
     // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-    const int m          = reinterpret_output_as_3d ? gemm_info.m() : input0->dimension(1);
-    const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
+    const unsigned int m          = reinterpret_output_as_3d ? gemm_info.m : input0->dimension(1);
+    const unsigned int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
     win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
@@ -175,7 +175,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITe
     {
         const int bias_processed_per_iteration_x = num_elems_processed_per_iteration_x;
 
-        const int bias_processed_per_iteration_y = gemm_info.broadcast_bias() ? 1 : num_elems_processed_per_iteration_y;
+        const int bias_processed_per_iteration_y = gemm_info.broadcast_bias ? 1 : num_elems_processed_per_iteration_y;
 
         AccessWindowStatic input2_access(input2, 0, 0,
                                          ceil_to_multiple(input2->dimension(0), bias_processed_per_iteration_x),
@@ -211,7 +211,7 @@ CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::CLGEMMMatrixMultiplyReshapedOnlyRHSKe
 
 void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input0, const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, float alpha, float beta,
                                                           const GEMMLHSMatrixInfo &lhs_info,
-                                                          const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info)
+                                                          const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
@@ -221,11 +221,11 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     _input1                   = input1;
     _input2                   = helpers::float_ops::is_zero(beta) ? nullptr : input2;
     _output                   = output;
-    _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d();
-    _reinterpret_output_as_3d = (gemm_info.depth_output_gemm3d() != 0);
+    _reinterpret_input_as_3d  = gemm_info.reinterpret_input_as_3d;
+    _reinterpret_output_as_3d = gemm_info.depth_output_gemm3d != 0;
     _use_dummy_work_items     = preferred_dummy_work_items_support(CLKernelLibrary::get().get_device());
     _add_bias                 = _input2 != nullptr;
-    _broadcast_bias           = gemm_info.broadcast_bias();
+    _broadcast_bias           = gemm_info.broadcast_bias;
 
     // In case both input and output have to be reinterpreted as 3D tensors,
     // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
@@ -254,15 +254,15 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     build_opts.add_option_if(helpers::float_ops::is_one(beta), "-DUNIT_BETA");
     build_opts.add_option_if(_reinterpret_input_as_3d, "-DREINTERPRET_INPUT_AS_3D");
     build_opts.add_option_if(_reinterpret_output_as_3d, "-DREINTERPRET_OUTPUT_AS_3D");
-    build_opts.add_option_if(gemm_info.broadcast_bias(), "-DBROADCAST_BIAS");
+    build_opts.add_option_if(gemm_info.broadcast_bias, "-DBROADCAST_BIAS");
     build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
     build_opts.add_option_if(_reinterpret_input_as_3d || _reinterpret_output_as_3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
     build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
     build_opts.add_option("-DM=" + support::cpp11::to_string(input0->info()->dimension(1)));
-    build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n()));
-    build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k()));
+    build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
+    build_opts.add_option("-DK=" + support::cpp11::to_string(gemm_info.k));
     build_opts.add_option("-DM0=" + support::cpp11::to_string(lhs_info.m0));
     build_opts.add_option("-DN0=" + support::cpp11::to_string(rhs_info.n0));
     build_opts.add_option("-DK0=" + support::cpp11::to_string(rhs_info.k0));
@@ -287,7 +287,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
-    _config_id += support::cpp11::to_string(gemm_info.k());
+    _config_id += support::cpp11::to_string(gemm_info.k);
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(2));
     _config_id += "_";
@@ -304,7 +304,7 @@ void CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::configure(const ICLTensor *input
 
 Status CLGEMMMatrixMultiplyReshapedOnlyRHSKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float alpha, float beta,
                                                            const GEMMLHSMatrixInfo &lhs_info,
-                                                           const GEMMRHSMatrixInfo &rhs_info, const GEMMReshapeInfo &gemm_info)
+                                                           const GEMMRHSMatrixInfo &rhs_info, const GEMMKernelInfo &gemm_info)
 {
     ElementsProcessed num_elements_processed{};
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, input2, output, alpha, beta, lhs_info, rhs_info, gemm_info));

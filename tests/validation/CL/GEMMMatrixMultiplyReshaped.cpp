@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyReshapedKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeLHSMatrixKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMReshapeRHSMatrixKernel.h"
+#include "arm_compute/core/KernelDescriptors.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -157,7 +158,13 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
     rhs_info.interleave = i_value_rhs;
     rhs_info.transpose  = true;
 
-    GEMMReshapeInfo gemm_info(M, N, K, false, false, 0, false, broadcast_bias);
+    GEMMKernelInfo kernel_info;
+    kernel_info.m                       = M;
+    kernel_info.n                       = N;
+    kernel_info.k                       = K;
+    kernel_info.depth_output_gemm3d     = 0;
+    kernel_info.reinterpret_input_as_3d = false;
+    kernel_info.broadcast_bias          = broadcast_bias;
 
     const TensorShape lhs_shape(K, M, b_value);
     const TensorShape lhs_shape_reshaped = compute_lhs_reshaped_shape(TensorInfo(lhs_shape, 1, data_type),
@@ -170,7 +177,7 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
     const TensorShape dst_shape = compute_mm_shape(TensorInfo(lhs_shape_reshaped, 1, data_type),
                                                    TensorInfo(rhs_shape_reshaped, 1, data_type),
-                                                   gemm_info);
+                                                   kernel_info);
 
     const TensorShape bias_shape(N,
                                  broadcast_bias? 1 : M,
@@ -189,7 +196,7 @@ void validate_configuration(unsigned int m_value, unsigned int n_value, unsigned
 
     // Create and configure function
     CLGEMMMatrixMultiplyReshaped gemm;
-    gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, gemm_info);
+    gemm.configure(&lhs_reshaped, &rhs_reshaped, &bias, &dst, 1.0f, 1.0f, lhs_info, rhs_info, kernel_info);
 }
 } // namespace
 
