@@ -104,6 +104,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::DIRECT:
             //Validate Gemm-based Convolution
             ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
+            break;
         case ConvolutionMethod::FFT:
             // Validate FFT-based convolution layer
             ARM_COMPUTE_RETURN_ON_ERROR(NEFFTConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info));
