@@ -658,7 +658,6 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     {
         ARM_COMPUTE_RETURN_ERROR_MSG("Kernel shape not supported");
     }
-    return Status{};
 }
 
 void NEWinogradConvolutionLayer::prepare()
