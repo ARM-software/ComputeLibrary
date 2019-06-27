@@ -134,8 +134,7 @@ std::pair<Status, Window> validate_and_configure_window_nhwc(ITensorInfo *input,
 
     if(use_padding)
     {
-        AccessWindowStatic input_access(input, 0, -border_size.top, use_padding ? ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration) : num_elems_processed_per_iteration,
-                                        input->tensor_shape()[1]);
+        AccessWindowStatic     input_access(input, 0, -border_size.top, ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration), input->tensor_shape()[1]);
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
         window_changed = update_window_and_padding(win, input_access, output_access);
         output->set_valid_region(calculate_valid_region_scale(*input, output->tensor_shape(), policy, sampling_policy, border_undefined));
