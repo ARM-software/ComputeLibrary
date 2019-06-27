@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ void a64_gemm_u16_asimd_12x8(const uint16_t *Apanel, const uint16_t *Bpanel, uin
 
         "1:\n"  // Main loop
           // First unroll
-          "smlal v5.4s, %[b0].4h, %[aa].h[0]\n"
+          "umlal v5.4s, %[b0].4h, %[aa].h[0]\n"
           "ldr x20, [%x[b_ptr]]\n"  // Load B[1].upper
           "umlal v6.4s, %[b0].4h, %[aa].h[1]\n"
           "umlal v7.4s, %[b0].4h, %[aa].h[2]\n"
@@ -312,7 +312,7 @@ void a64_gemm_u16_asimd_12x8(const uint16_t *Apanel, const uint16_t *Bpanel, uin
         : [a_ptr] "+r" (a_ptr), [b_ptr] "+r" (b_ptr), [c_ptr] "+r" (c_ptr), [k] "+r" (k),
           [aa] "+w" (aa), [ab] "+w" (ab), [b0] "+w" (b0), [b1] "+w" (b1), [b2] "+w" (b2)
         : [odd_k] "r" (odd_k)
-        : "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "x20", "cc"
+        : "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "x20", "cc", "memory"
       );
     }
   }

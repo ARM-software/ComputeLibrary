@@ -31,6 +31,4 @@
 #include "a64_transpose_interleave_12way_half_to_float.hpp"
 #include "a64_transpose_interleave_24way_16bit.hpp"
 #include "sve_interleave_8way_32bit.hpp"
-#include "sve_interleave_8way_block2_32bit.hpp"
 #include "sve_interleave_8way_block4_8bit.hpp"
-#include "transpose_interleave_common.hpp"

@@ -58,7 +58,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _original_b                       = b;
 
-    bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a->info(), b->info(), d->info(), alpha, beta, gemm_info));
+    bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, d->info(), alpha, beta, gemm_info));
 
     if(run_optimised)
     {
@@ -66,11 +66,11 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
         {
             GEMMInfo gemm_info_ntb = gemm_info;
             gemm_info_ntb.set_pretranpose_B(false);
-            _asm_glue.configure(a, b, d, alpha, beta, gemm_info_ntb);
+            _asm_glue.configure(a, b, c, d, alpha, beta, gemm_info_ntb);
         }
         else
         {
-            _asm_glue.configure(a, b, d, alpha, beta, gemm_info);
+            _asm_glue.configure(a, b, c, d, alpha, beta, gemm_info);
         }
         ARM_COMPUTE_ERROR_ON(!_asm_glue.is_configured());
     }
@@ -178,7 +178,7 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Check if we need to run the optimized assembly kernel
-    const bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a, b, output, alpha, beta, gemm_info));
+    const bool run_optimised = c == nullptr && bool(NEGEMMAssemblyDispatch::validate(a, b, c, output, alpha, beta, gemm_info));
 
     if(!run_optimised)
     {

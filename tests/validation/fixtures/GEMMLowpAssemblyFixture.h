@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,7 +75,7 @@ protected:
 
         // Create and configure function
         FunctionType gemmlowp;
-        gemmlowp.configure(&a, &b, &c);
+        gemmlowp.configure(&a, &b, nullptr, &c);
 
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

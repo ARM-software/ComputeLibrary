@@ -124,7 +124,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
 
         // Merge activation with output stage
         int min_activation = 0;
-        int max_activation = 0;
+        int max_activation = 255;
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
@@ -191,7 +191,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 
         // Merge activation with output stage
         int min_activation = 0;
-        int max_activation = 0;
+        int max_activation = 255;
 
         const std::set<ActivationLayerInfo::ActivationFunction> supported_acts = { ActivationLayerInfo::ActivationFunction::RELU,
                                                                                    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,

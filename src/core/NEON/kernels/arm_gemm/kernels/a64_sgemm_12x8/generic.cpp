@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@
 
 namespace arm_gemm {
 
-void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float *Cpanel, int ablocks, int bblocks, int K, long int row_jump=0, long int block_jump=0) {
+void a64_sgemm_asimd_12x8(const float *Apanel, const float *Bpanel, float *Cpanel, int ablocks, int bblocks, int K) {
     const float *a_ptr = Apanel;
     float *c_ptr = Cpanel;
 
@@ -112,7 +112,6 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
                 "fmla  	v9.4s , %[b0].4s, %[a0].s[1]\n"
                 "ldr	%q[b2], [%[b_ptr], #32]\n"
                 "fmla	v10.4s, %[b0].4s, %[a0].s[2]\n"
-                "add	%[b_ptr], %[b_ptr], %[row_jump]\n"
                 "fmla	v11.4s, %[b0].4s, %[a0].s[3]\n"
                 "ldr	%q[a0a], [%[a_ptr], #32]\n"
                 "fmla 	v12.4s, %[b0].4s, %[a1].s[0]\n"
@@ -148,7 +147,6 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
                 "fmla	v9.4s , %[b0].4s, %[a0a].s[1]\n"
                 "ldr	%q[a0], [%[a_ptr], #64]\n"
                 "fmla	v10.4s, %[b0].4s, %[a0a].s[2]\n"
-                "add	%[b_ptr], %[b_ptr], %[row_jump]\n"
                 "fmla	v11.4s, %[b0].4s, %[a0a].s[3]\n"
                 "fmla 	v12.4s, %[b0].4s, %[a1a].s[0]\n"
                 "ldr	%q[a1], [%[a_ptr], #80]\n"
@@ -192,7 +190,6 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
                 "fmla   v9.4s , %[b0].4s, %[a0].s[1]\n"
                 "ldr	%q[b2], [%[b_ptr], #32]\n"
                 "fmla	v10.4s, %[b0].4s, %[a0].s[2]\n"
-                "add	%[b_ptr], %[b_ptr], %[row_jump]\n"
                 "fmla	v11.4s, %[b0].4s, %[a0].s[3]\n"
                 "ldr	%q[a0a], [%[a_ptr], #32]\n"
                 "fmla 	v12.4s, %[b0].4s, %[a1].s[0]\n"
@@ -224,11 +221,9 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
                 "ldr	%q[b2], [%[b_ptr], #80]\n"
 
                 "fmla 	v8.4s , %[b0].4s, %[a0a].s[0]\n"
-                "add	%[b_ptr], %[b_ptr], %[block_jump]\n"
                 "fmla	v16.4s, %[b1].4s, %[a0a].s[0]\n"
                 "add	%[b_ptr], %[b_ptr], #96\n"
                 "fmla   v9.4s , %[b0].4s, %[a0a].s[1]\n"
-                "add	%[b_ptr], %[b_ptr], %[row_jump]\n"
                 "str	q8, [%[c_ptr], #0]\n"
                 "fmla	v17.4s, %[b1].4s, %[a0a].s[1]\n"
                 "str	q16, [%[c_ptr], #16]\n"
@@ -286,7 +281,6 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
                 "fmla 	v8.4s , %[b0].4s, %[a0].s[0]\n"
                 "ldr	%q[b2], [%[b_ptr], #32]\n"
                 "fmla	v16.4s, %[b1].4s, %[a0].s[0]\n"
-                "add	%[b_ptr], %[b_ptr], %[row_jump]\n"
                 "fmla   v9.4s , %[b0].4s, %[a0].s[1]\n"
                 "str	q8, [%[c_ptr], #0]\n"
                 "fmla	v17.4s, %[b1].4s, %[a0].s[1]\n"
@@ -349,16 +343,12 @@ void a64_sgemm_asimd_12x8_jumps(const float *Apanel, const float *Bpanel, float 
               [a_ptr] "+r" (a_ptr), [b_ptr] "+r" (b_ptr), [c_ptr] "+r" (c_ptr),
               [a0] "+w" (a0), [a1] "+w" (a1), [a0a] "+w" (a0a), [a1a] "+w" (a1a),
               [b0] "+w" (b0), [b1] "+w" (b1), [b2] "+w" (b2), [k] "+r" (k)
-            : [oddk] "r" (oddk), [row_jump] "r" (row_jump), [block_jump] "r" (block_jump)
+            : [oddk] "r" (oddk)
             : "x20", "x21", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18",
               "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "cc"
             );
         }
     }
-}
-
-void a64_sgemm_asimd_12x8(const float *Apanel, const float *Bpanel, float *Cpanel, int ablocks, int bblocks, int K) {
-    a64_sgemm_asimd_12x8_jumps(Apanel, Bpanel, Cpanel, ablocks, bblocks, K, 0, 0);
 }
 
 } // namespace arm_gemm

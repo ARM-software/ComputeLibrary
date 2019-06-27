@@ -35,11 +35,10 @@
 
 namespace arm_compute
 {
+// Forward declarations
 class ITensor;
 
-/** Basic function to execute matrix multiply assembly kernels.
- *
-*/
+/** Basic function to execute matrix multiply assembly kernels. */
 class NEGEMMLowpAssemblyMatrixMultiplyCore : public IFunction
 {
 public:
@@ -49,9 +48,10 @@ public:
      *
      * @param[in]  a      First input tensor  (Matrix A). Data type supported: U8, S8.
      * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in]  c      Third input tensor (Matrix C). Data type supported: same as @p a
      * @param[out] output Output tensor. Data type supported: Data type supported: U32, S32
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *output);
+    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *output);
 
     // Inherited methods overridden:
     void run() override;
@@ -65,5 +65,5 @@ private:
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H__ */

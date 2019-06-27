@@ -67,6 +67,7 @@ private:
      * @param[in]  method    GemmMethod to use to perform the matrix multiplication.
      * @param[in]  a         Input tensor (Matrix A).
      * @param[in]  b         Input tensor (Matrix B).
+     * @param[in]  c         Input tensor (Matrix C) used to pass the bias for quantized calculations
      * @param[out] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
      * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
      * @param[in]  beta      Scalar multiplier to apply to input D matrix before adding product.
@@ -74,7 +75,7 @@ private:
      *
      * @return True if the method is supported and the function was successfully created, false otherwise.
      */
-    bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
+    bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
 
     /** Interface for the arm_gemm fallback */
     std::unique_ptr<IFallback>      _arm_gemm;
@@ -85,17 +86,19 @@ public:
      *
      * @param[in]  a         Input tensor (Matrix A)
      * @param[in]  b         Input tensor (Matrix B)
+     * @param[in]  c         Input tensor (Matrix C) used to pass the bias for quantized calculations
      * @param[out] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
      * @param[in]  alpha     Scalar multiplier to apply to AB matrix product.
      * @param[in]  beta      Scalar multiplier to apply to input D matrix before adding product.
      * @param[in]  gemm_info GEMM meta-data
      */
-    void configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
+    void configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info);
 
     /** Indicates whether or not this function can be used to process the given parameters.
      *
-     * @param[in] a         Input tensor (Matrix A)
-     * @param[in] b         Input tensor (Matrix B)
+     * @param[in] a         Input tensor info (Matrix A)
+     * @param[in] b         Input tensor info (Matrix B)
+     * @param[in] c         Input tensor info (Matrix C) used to pass the bias for quantized calculations
      * @param[in] d         Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
      * @param[in] alpha     Scalar multiplier to apply to AB matrix product.
      * @param[in] beta      Scalar multiplier to apply to input D matrix before adding product.
@@ -103,7 +106,7 @@ public:
      *
      * @return a status.
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *d, float alpha, float beta, const GEMMInfo &gemm_info);
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *d, float alpha, float beta, const GEMMInfo &gemm_info);
     /** Was the function successfully configured ?
      *
      * @return True if the function is configured and ready to run

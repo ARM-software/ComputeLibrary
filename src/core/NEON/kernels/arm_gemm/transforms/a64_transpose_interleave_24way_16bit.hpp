@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ inline void TransformImpl<12, 1, true, 4, 4, false>::Transform(
   // Redirect to a 24 x uint16_t specialisation
   TransformImpl<24, 1, true, 2, 2, false>::Transform(
     reinterpret_cast<uint16_t *>(out),
-    reinterpret_cast<const uint16_t *>(in),
+    reinterpret_cast<const uint16_t * const>(in),
     stride*2, x0*2, xmax*2, k0, kmax
   );
 }
@@ -52,7 +52,7 @@ inline void TransformImpl<24, 1, true, 2, 2, false>::Transform(
   // Redirect to a uint16_t specialisation
   Transform(
     reinterpret_cast<uint16_t *>(out),
-    reinterpret_cast<const uint16_t *>(in),
+    reinterpret_cast<const uint16_t * const>(in),
     stride, x0, xmax, k0, kmax
   );
 }
