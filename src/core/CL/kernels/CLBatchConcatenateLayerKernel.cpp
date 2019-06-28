@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -43,15 +43,16 @@ using namespace arm_compute;
 
 namespace
 {
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int batch_offset, ITensorInfo *output)
 {
-    ARM_COMPUTE_UNUSED(depth_offset);
+    ARM_COMPUTE_UNUSED(batch_offset);
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
 
-    // The window needs to be based on input as we copy all the depths of input
+    // The window needs to be based on output, except for the batch size
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
-    win.set(Window::DimZ, Window::Dimension(0, input->tensor_shape().z(), 1));
+    // The total batch size is the concatenation of the batch size of the inputs
+    win.set(3, Window::Dimension(0, input->tensor_shape()[3], 1));
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
@@ -61,35 +62,39 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsi
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
 }
-Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, unsigned int batch_offset, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16,
+                                                         DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimX) != output->dimension(Window::DimX));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimY) != output->dimension(Window::DimY));
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) + depth_offset > output->dimension(2));
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(3, input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(Window::DimZ) != output->dimension(Window::DimZ));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(3) + batch_offset > output->dimension(3));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(4, input, output);
 
     return Status{};
 }
 } // namespace
 
-CLDepthConcatenateLayerKernel::CLDepthConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _depth_offset(0)
+CLBatchConcatenateLayerKernel::CLBatchConcatenateLayerKernel()
+    : _input(nullptr), _output(nullptr), _batch_offset(0)
 {
 }
 
-void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int depth_offset, ICLTensor *output)
+void CLBatchConcatenateLayerKernel::configure(const ICLTensor *input, unsigned int batch_offset, ICLTensor *output)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), depth_offset, output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), batch_offset, output->info()));
 
     _input        = input;
     _output       = output;
-    _depth_offset = depth_offset;
+    _batch_offset = batch_offset;
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
 
@@ -112,29 +117,42 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate", build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), depth_offset, output->info());
+    auto win_config = validate_and_configure_window(input->info(), batch_offset, output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
+    // Set config_id for enabling LWS tuning
+    _config_id = "concatenate_";
+    _config_id += support::cpp11::to_string(3);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(batch_offset);
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(3));
 }
 
-Status CLDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
-                                               unsigned int                    depth_offset,
+Status CLBatchConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
+                                               unsigned int                    batch_offset,
                                                const arm_compute::ITensorInfo *output)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, depth_offset, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), depth_offset, output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, batch_offset, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), batch_offset, output->clone().get()).first);
     return Status{};
 }
 
-void CLDepthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)
+void CLBatchConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
     Window slice = window.first_slice_window_3D();
 
-    const int offset_to_first_elements_in_bytes = _depth_offset * _output->info()->strides_in_bytes()[2];
+    const int offset_to_first_elements_in_bytes = _batch_offset * _output->info()->strides_in_bytes()[3];
 
     unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
     _kernel.setArg<cl_int>(idx, offset_to_first_elements_in_bytes);
@@ -144,7 +162,7 @@ void CLDepthConcatenateLayerKernel::run(const Window &window, cl::CommandQueue &
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }

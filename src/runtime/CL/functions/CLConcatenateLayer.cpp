@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
 
+#include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLHeightConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLWidthConcatenate2TensorsKernel.h"
@@ -124,6 +125,17 @@ void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector
             }
             break;
         }
+        case 3:
+        {
+            for(unsigned int i = 0; i < _num_inputs; ++i)
+            {
+                auto kernel = support::cpp14::make_unique<CLBatchConcatenateLayerKernel>();
+                kernel->configure(inputs_vector.at(i), offset, output);
+                offset += inputs_vector.at(i)->info()->dimension(_axis);
+                _concat_kernels.emplace_back(std::move(kernel));
+            }
+            break;
+        }
         default:
             ARM_COMPUTE_ERROR("Axis not supported");
     }
@@ -180,6 +192,15 @@ Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vec
             for(const auto &input : inputs_vector)
             {
                 ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayerKernel::validate(input, offset, output));
+                offset += input->dimension(axis);
+            }
+            break;
+        }
+        case 3:
+        {
+            for(const auto &input : inputs_vector)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR(CLBatchConcatenateLayerKernel::validate(input, offset, output));
                 offset += input->dimension(axis);
             }
             break;

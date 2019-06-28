@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/kernels/CLAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLBatchConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchToSpaceLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseAndKernel.h"

@@ -45,6 +45,7 @@ class Status;
  * -# @ref NEWidthConcatenateLayerKernel (if underlying concatenation axis is 0).
  * -# @ref NEHeightConcatenateLayerKernel (if underlying concatenation axis is 1).
  * -# @ref NEDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
+ * -# @ref NEBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
 class NEConcatenateLayer : public IFunction
 {
@@ -58,7 +59,7 @@ public:
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
-     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
     void configure(std::vector<ITensor *> inputs_vector, ITensor *output, size_t axis);
     void configure(std::vector<const ITensor *> inputs_vector, ITensor *output, size_t axis);
@@ -69,7 +70,7 @@ public:
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
-     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *
      * @return a status
      */

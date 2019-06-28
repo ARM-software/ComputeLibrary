@@ -44,6 +44,7 @@ class Status;
  * -# @ref CLWidthConcatenateLayerKernel (if underlying concatenation axis is 0).
  * -# @ref CLHeightConcatenateLayerKernel (if underlying concatenation axis is 1).
  * -# @ref CLDepthConcatenateLayerKernel (if underlying concatenation axis is 2).
+ * -# @ref CLBatchConcatenateLayerKernel (if underlying concatenation axis is 3).
  */
 class CLConcatenateLayer : public IFunction
 {
@@ -57,7 +58,7 @@ public:
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
-     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      */
     void configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis);
     /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
@@ -67,7 +68,7 @@ public:
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
-     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1 and 2.
+     * @param[in] axis          Concatenation axis. Supported underlying concatenation axis are 0, 1, 2 and 3.
      *
      * @return a status
      */
