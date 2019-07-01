@@ -81,6 +81,8 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
     const Strides     strides      = this->info()->strides_in_bytes();
     const PaddingSize padding      = this->info()->padding();
     const size_t      num_channels = this->info()->num_channels();
+    std::ios          stream_status(nullptr);
+    stream_status.copyfmt(s);
 
     // Set precision
     if(is_data_type_float(dt) && (io_fmt.precision_type != IOFormatInfo::PrecisionType::Default))
@@ -151,6 +153,9 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
             s << io_fmt.row_delim;
         }
     }
+
+    // Restore output stream flags
+    s.copyfmt(stream_status);
 }
 #endif /* ARM_COMPUTE_ASSERTS_ENABLED */
 

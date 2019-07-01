@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstdlib>
+#include <iomanip>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -1150,6 +1151,8 @@ template <typename T>
 void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int n, int stream_width = 0, const std::string &element_delim = " ")
 {
     using print_type = typename std::conditional<std::is_floating_point<T>::value, T, int>::type;
+    std::ios stream_status(nullptr);
+    stream_status.copyfmt(s);
 
     for(unsigned int i = 0; i < n; ++i)
     {
@@ -1169,6 +1172,9 @@ void print_consecutive_elements_impl(std::ostream &s, const T *ptr, unsigned int
             s << std::right << static_cast<print_type>(ptr[i]) << element_delim;
         }
     }
+
+    // Restore output stream flags
+    s.copyfmt(stream_status);
 }
 
 /** Identify the maximum width of n consecutive elements.

@@ -72,7 +72,7 @@ public:
      * @param[in] coords    The starting coordinates of the new tensor inside the parent tensor.
      * @param[in] sub_info  The new tensor information (e.g. shape etc)
      */
-    void init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo sub_info);
+    void init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo &sub_info);
 
     /** Returns the pointer to the allocated data.
      *
