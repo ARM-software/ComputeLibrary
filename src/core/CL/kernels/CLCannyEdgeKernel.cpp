@@ -102,7 +102,7 @@ void CLGradientKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _gy, slice);
         add_2D_tensor_argument(idx, _magnitude, slice);
         add_2D_tensor_argument(idx, _phase, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -181,7 +181,7 @@ void CLEdgeNonMaxSuppressionKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _magnitude, slice);
         add_2D_tensor_argument(idx, _phase, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -286,7 +286,7 @@ void CLEdgeTraceKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _l1_stack, slice);
         add_2D_tensor_argument(idx, _l1_stack_counter, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

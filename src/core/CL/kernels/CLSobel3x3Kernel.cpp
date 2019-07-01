@@ -139,7 +139,7 @@ void CLSobel3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
             add_2D_tensor_argument(idx, _output_y, slice);
         }
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

@@ -138,7 +138,7 @@ void CLSobel5x5HorKernel::run(const Window &window, cl::CommandQueue &queue)
             add_2D_tensor_argument(idx, _output_y, slice);
         }
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -252,7 +252,7 @@ void CLSobel5x5VertKernel::run(const Window &window, cl::CommandQueue &queue)
 
         _kernel.setArg(idx++, 0 /*dummy*/);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

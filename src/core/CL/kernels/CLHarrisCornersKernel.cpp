@@ -136,7 +136,7 @@ void CLHarrisScoreKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _input1, slice);
         add_2D_tensor_argument(idx, _input2, slice);
         add_2D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

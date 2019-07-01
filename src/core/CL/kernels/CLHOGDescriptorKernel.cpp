@@ -126,7 +126,7 @@ void CLHOGOrientationBinningKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _input_phase, slice_mag_phase);
         add_2D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }
@@ -222,7 +222,7 @@ void CLHOGBlockNormalizationKernel::run(const Window &window, cl::CommandQueue &
         add_2D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

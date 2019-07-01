@@ -130,7 +130,7 @@ void CLIntegralImageVertKernel::run(const Window &window, cl::CommandQueue &queu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _in_out, slice);
         _kernel.setArg<cl_uint>(idx++, height);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

@@ -132,7 +132,7 @@ void CLGaussianPyramidHorKernel::run(const Window &window, cl::CommandQueue &que
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(win_in.slide_window_slice_2D(slice_in) && win_out.slide_window_slice_2D(slice_out));
 }
@@ -229,7 +229,7 @@ void CLGaussianPyramidVertKernel::run(const Window &window, cl::CommandQueue &qu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(win_in.slide_window_slice_2D(slice_in) && win_out.slide_window_slice_2D(slice_out));
 }
