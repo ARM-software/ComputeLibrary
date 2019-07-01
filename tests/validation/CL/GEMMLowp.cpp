@@ -295,7 +295,70 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedP
 }
 TEST_SUITE_END() // BoundedReLu
 TEST_SUITE_END() // QuantizeDownInt32ToUint8ScaleByFixedPoint
+TEST_SUITE(QuantizeDownInt32ToInt16ScaleByFixedPoint)
 
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
+                                                                    2)
+                                                                    * framework::dataset::make("min", 0) * framework::dataset::make("max", 0) * framework::dataset::make("addBias", { false, true });
+
+const auto quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases = framework::dataset::make("result_fixedpoint_multiplier", 254601600, 254601602) * framework::dataset::make("result_shift", 1,
+                                                                         2)
+                                                                         * framework::dataset::make("min", -2, 0) * framework::dataset::make("max", 1, 3) * framework::dataset::make("addBias", { false, true });
+
+using CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture =
+    GEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointValidationFixture<CLTensor, CLAccessor, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint>;
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+    framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::S32),
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Invalid min and max
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32), // Wrong output data type
+                                          }),
+    framework::dataset::make("InputBInfo",{ TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                            TensorInfo(TensorShape(21U), 1, DataType::S32),
+                                          })),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U, 13U), 1, DataType::QSYMM16),
+                                            TensorInfo(TensorShape(21U, 13U), 1, DataType::QSYMM16),
+                                            TensorInfo(TensorShape(20U, 13U), 1, DataType::S32),
+                                           })),
+    framework::dataset::make("Min",{        -205,
+                                            -60000,
+                                            -180,
+                                           })),
+    framework::dataset::make("Max",{        205,
+                                            60000,
+                                            180,
+                                           })),
+    framework::dataset::make("Expected", { true, false, false })),
+    a_info, b_info, output_info, min, max, expected)
+{
+    // Lock tensors
+    Status status =  CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(&a_info.clone()->set_is_resizable(true),
+                                                                                 &b_info.clone()->set_is_resizable(true),
+                                                                                 &output_info.clone()->set_is_resizable(true),
+                                                                                 min,
+                                                                                 max);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE(BoundedReLu)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointFixture, framework::DatasetMode::ALL, combine(datasets::SmallShapes(),
+                       quantize_down_int32_to_int16_scale_by_fixedpoint_relu_cases))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END() // BoundedReLu
+TEST_SUITE_END() // QuantizeDownInt32ToInt16ScaleByFixedPoint
 TEST_SUITE_END() // OutputStage
 TEST_SUITE_END() // GEMMLowp
 TEST_SUITE_END() // CL

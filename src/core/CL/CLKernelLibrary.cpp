@@ -342,6 +342,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemmlowp_offset_contribution_quantize_down_fixedpoint", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down_fixedpoint", "gemmlowp.cl" },
+    { "gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16", "gemmlowp.cl" },
     { "gemmlowp_output_stage_quantize_down_float", "gemmlowp.cl" },
     { "generate_proposals_compute_all_anchors", "generate_proposals.cl" },
     { "harris_score_3x3", "harris_corners.cl" },

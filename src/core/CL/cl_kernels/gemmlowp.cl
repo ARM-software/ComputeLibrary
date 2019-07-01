@@ -2861,6 +2861,89 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
 }
 #endif // defined(RESULT_OFFSET_AFTER_SHIFT) && defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
+#if defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
+
+/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM16
+ *
+ * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QSYMM16 value.
+ * The following computations will be performed by the kernel:
+ *
+ *  -# Compute fixed point multiplication between each entry of input by result_fixedpoint_multiplier
+ *  -# Add bias to final result if bias tensor is not a nullptr
+ *  -# Round to nearest division by a power-of-two using result_shift
+ *  -# Add offset to each result
+ *  -# Clamp the value between the specified min and max bounds
+ *  -# Clamp the resulting int32 values to the [-32768..32767] range and cast to QSYMM16.
+ *
+ * @attention The offset, scalar scale factor and number of bits to shift right of output tensor must be passed at compile time using -DRESULT_FIXEDPOINT_MULTIPLIER and -DRESULT_SHIFT
+ *
+ * @note In case the addition of int32 biases is required, -DADD_BIAS should be passed at compile time
+ * @note In case the clamping of the result is required, the min and max bounds can be passed at compile time using -DMIN_BOUND and -DMAX_BOUND.
+ *       These values can be used to implement "rectified linear unit" activation functions
+ *
+ * @param[in]  src_ptr                              Pointer to the source tensor. Supported data type: S32
+ * @param[in]  src_stride_x                         Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                           src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                         Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                           src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                         Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes    The offset of the first element in the source tensor
+ * @param[in]  biases_ptr                           (Optional) Pointer to the biases tensor. Supported data type: same as @p src_ptr
+ * @param[in]  biases_stride_x                      (Optional) Stride of the biases tensor in X dimension (in bytes)
+ * @param[in]  biases_step_x                        (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  biases_offset_first_element_in_bytes (Optional) The offset of the first element in the biases tensor
+ * @param[out] dst_ptr                              Pointer to the destination tensor Supported data type: QASYMM8
+ * @param[in]  dst_stride_x                         Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                           dst_gx_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                         Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                           dst_gx_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                         Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                           src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes    The offset of the first element in the destination tensor
+ */
+__kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DECLARATION(src),
+#if defined(ADD_BIAS)
+                                                                     VECTOR_DECLARATION(biases),
+#endif // defined(ADD_BIAS)
+                                                                     TENSOR3D_DECLARATION(dst))
+{
+    // Compute source and destination addresses
+    int x = get_global_id(0) * 4;
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
+    __global short *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
+
+    __global short *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * 2 + y * dst_stride_y + z * dst_stride_z;
+
+    int4 input_values = vload4(0, (__global int *)src_addr);
+
+#if defined(ADD_BIAS)
+    // Add bias
+    __global short *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
+
+    int4 biases_values = vload4(0, (__global int *)bias_addr);
+    input_values += (int4)biases_values;
+#endif // defined(ADD_BIAS)
+
+    // Multiply by result_mult_int and shift
+    input_values = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(input_values, RESULT_FIXEDPOINT_MULTIPLIER, RESULT_SHIFT, 4);
+
+    short4 res = convert_short4_sat(input_values);
+
+#if defined(MIN_BOUND)
+    res = max(res, (short4)MIN_BOUND);
+#endif // defined(MIN_BOUND)
+#if defined(MAX_BOUND)
+    res = min(res, (short4)MAX_BOUND);
+#endif // defined(MAX_BOUND)
+
+    // Store the result
+    vstore4(res, 0, dst_addr);
+}
+#endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
+
 #if defined(REAL_MULTIPLIER) && defined(OUTPUT_OFFSET)
 /** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM8
  *
