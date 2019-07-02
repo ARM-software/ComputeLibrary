@@ -58,7 +58,7 @@ __kernel void dequantization_layer(
     Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
     Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
 
-#if defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#if defined(LAST_ACCESSED_X)
     // Check if access on width gets out of bounds
     // If it does shift access vector to access elements within bounds
     const int xi = (int)(get_global_id(0) * VEC_SIZE);
@@ -83,9 +83,9 @@ __kernel void dequantization_layer(
     // Store result
     VSTORE(VEC_SIZE)
     (CONVERT(res, VEC_DATA_TYPE(DATA_TYPE_DST, VEC_SIZE)), 0, (__global DATA_TYPE_DST *)output.ptr);
-#else  // !defined(VEC_SIZE) || !defined(LAST_ACCESSED_X)
-    *((__global DATA_TYPE_DST *)(output.ptr)) = (DATA_TYPE)((float)((int)(*((__global DATA_TYPE_SRC *)(input.ptr))) - (int)(OFFSET)) * (float)(SCALE));
-#endif // defined(VEC_SIZE) && defined(LAST_ACCESSED_X)
+#else  // !defined(LAST_ACCESSED_X)
+    *((__global DATA_TYPE_DST *)(output.ptr)) = (DATA_TYPE_DST)((float)((int)(*((__global DATA_TYPE_SRC *)(input.ptr))) - (int)(OFFSET)) * (float)(SCALE));
+#endif // defined(LAST_ACCESSED_X)
 }
 
 #endif // defined(VEC_SIZE) && defined(DATA_TYPE_SRC) && defined(DATA_TYPE_DST) && defined(SCALE) && defined(OFFSET)
