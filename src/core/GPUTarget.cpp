@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,26 @@
 
 namespace
 {
+arm_compute::GPUTarget get_valhall_target(const std::string &version)
+{
+    if(version == "G77")
+    {
+        return arm_compute::GPUTarget::G77;
+    }
+    else if(version == "TBOX")
+    {
+        return arm_compute::GPUTarget::TBOX;
+    }
+    else if(version == "TODX")
+    {
+        return arm_compute::GPUTarget::TODX;
+    }
+    else
+    {
+        return arm_compute::GPUTarget::VALHALL;
+    }
+}
+
 arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 {
     if(version == "G71")
@@ -63,17 +83,9 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
     {
         return arm_compute::GPUTarget::G76;
     }
-    else if(version == "TTRX")
-    {
-        return arm_compute::GPUTarget::TTRX;
-    }
-    else if(version == "TBOX")
-    {
-        return arm_compute::GPUTarget::TBOX;
-    }
     else
     {
-        return arm_compute::GPUTarget::BIFROST;
+        return arm_compute::GPUTarget::UNKNOWN;
     }
 }
 
@@ -106,6 +118,7 @@ const std::string &string_from_target(GPUTarget target)
     {
         { GPUTarget::MIDGARD, "midgard" },
         { GPUTarget::BIFROST, "bifrost" },
+        { GPUTarget::VALHALL, "valhall" },
         { GPUTarget::T600, "t600" },
         { GPUTarget::T700, "t700" },
         { GPUTarget::T800, "t800" },
@@ -117,8 +130,9 @@ const std::string &string_from_target(GPUTarget target)
         { GPUTarget::G52, "g52" },
         { GPUTarget::G52LIT, "g52lit" },
         { GPUTarget::G76, "g76" },
-        { GPUTarget::TTRX, "ttrx" },
-        { GPUTarget::TBOX, "tbox" }
+        { GPUTarget::G77, "g77" },
+        { GPUTarget::TBOX, "tbox" },
+        { GPUTarget::TODX, "todx" }
     };
 
     return gpu_target_map[target];
@@ -140,21 +154,36 @@ GPUTarget get_target_from_name(const std::string &device_name)
     const std::string &version = name_parts.str(1);
 
     std::regex future_regex(R"(.*X)");
-    const bool is_future_bifrost = std::regex_search(version, future_regex);
+    const bool is_future_gpu = std::regex_search(version, future_regex);
 
-    if(target == 'G' || is_future_bifrost)
+    // Work-out gpu target
+    GPUTarget gpu_target;
+    if(target == 'G' || is_future_gpu)
     {
-        return get_bifrost_target(version);
+        // Check for Bifrost or Valhall
+        gpu_target = get_bifrost_target(version);
+        if(gpu_target == GPUTarget::UNKNOWN)
+        {
+            gpu_target = get_valhall_target(version);
+        }
     }
     else if(target == 'T')
     {
-        return get_midgard_target(version);
+        gpu_target = get_midgard_target(version);
     }
     else
+    {
+        gpu_target = GPUTarget::UNKNOWN;
+    }
+
+    // Report in case of unknown target
+    if(gpu_target == GPUTarget::UNKNOWN)
     {
         ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one. (BIFROST)");
         return GPUTarget::BIFROST;
     }
+
+    return gpu_target;
 }
 
 GPUTarget get_arch_from_target(GPUTarget target)

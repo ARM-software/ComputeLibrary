@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@ enum class GPUTarget
     GPU_ARCH_MASK = 0xF00,
     MIDGARD       = 0x100,
     BIFROST       = 0x200,
+    VALHALL       = 0x300,
     T600          = 0x110,
     T700          = 0x120,
     T800          = 0x130,
@@ -48,8 +49,9 @@ enum class GPUTarget
     G52           = 0x240,
     G52LIT        = 0x241,
     G76           = 0x250,
-    TTRX          = 0x260,
-    TBOX          = 0x270
+    G77           = 0x310,
+    TBOX          = 0x320,
+    TODX          = 0x330,
 };
 
 /** Enable bitwise operations on GPUTarget enumerations */

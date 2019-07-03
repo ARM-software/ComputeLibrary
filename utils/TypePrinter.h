@@ -1902,6 +1902,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::BIFROST:
             os << "BIFROST";
             break;
+        case GPUTarget::VALHALL:
+            os << "VALHALL";
+            break;
         case GPUTarget::T600:
             os << "T600";
             break;
@@ -1929,11 +1932,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::G76:
             os << "G76";
             break;
-        case GPUTarget::TTRX:
-            os << "TTRX";
+        case GPUTarget::G77:
+            os << "G77";
             break;
         case GPUTarget::TBOX:
             os << "TBOX";
+            break;
+        case GPUTarget::TODX:
+            os << "TODX";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
