@@ -256,7 +256,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                      PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QSYMM16)),
@@ -265,7 +265,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                    PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 TEST_SUITE_END() // Scale255
 TEST_SUITE(ScaleUnity)
@@ -276,7 +276,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                      PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QSYMM16)),
@@ -285,7 +285,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                    PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 TEST_SUITE_END() // ScaleUnity
 TEST_SUITE(ScaleOther)
@@ -296,7 +296,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                      PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(),
                                                                                                                    framework::dataset::make("DataType", DataType::QSYMM16)),
@@ -305,7 +305,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPixelWiseMultiplicationQSYMM16Fixture, framew
                                                                                                                    PixelWiseMultiplicationQSYMM16QuantDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
+    validate(Accessor(_target), _reference, tolerance_qsymm16);
 }
 TEST_SUITE_END() // ScaleOther
 TEST_SUITE_END() // QSYMM16
