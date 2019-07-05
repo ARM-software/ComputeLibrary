@@ -64,6 +64,17 @@ private:
     void load_symbols(void *handle);
 
 public:
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLSymbols(const CLSymbols &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLSymbols &operator=(const CLSymbols &) = delete;
+    /** Allow instances of this class to be move constructed */
+    CLSymbols(CLSymbols &&) = default;
+    /** Allow instances of this class to be moved */
+    CLSymbols &operator=(CLSymbols &&) = default;
+    /** Destructor */
+    ~CLSymbols();
+
     /** Get the static instance of CLSymbols.
      *
      * @return The static instance of CLSymbols.
@@ -138,6 +149,7 @@ public:
 
 private:
     std::pair<bool, bool> _loaded{ false, false };
+    void *handle{ nullptr };
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_OPENCL_H__ */
