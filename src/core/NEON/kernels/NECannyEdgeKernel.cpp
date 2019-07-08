@@ -931,7 +931,7 @@ void NEGradientKernel::configure(const ITensor *gx, const ITensor *gy, ITensor *
     AccessWindowHorizontal mag_access(_magnitude->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal phase_access(_phase->info(), 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win, gx_access, gy_access, mag_access, phase_access);
+    ARM_COMPUTE_UNUSED(update_window_and_padding(win, gx_access, gy_access, mag_access, phase_access));
 
     mag_access.set_valid_region(win, _gx->info()->valid_region());
     phase_access.set_valid_region(win, _gx->info()->valid_region());

@@ -124,7 +124,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 
     // Auto initialize output if not initialized
     {
-        set_shape_if_empty(*output, input1->tensor_shape());
+        ARM_COMPUTE_UNUSED(set_shape_if_empty(*output, input1->tensor_shape()));
 
         if(input1->data_type() == DataType::S16 || input2->data_type() == DataType::S16)
         {
@@ -711,8 +711,8 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
         {
             (*_func_quantized)(input1.ptr(), input2.ptr(), output.ptr(), _scale,
                                _input1->info()->quantization_info().uniform(), _input2->info()->quantization_info().uniform(), _output->info()->quantization_info().uniform());
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
         },
         input1, input2, output);
     }
@@ -721,8 +721,8 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
         execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_int)(input1.ptr(), input2.ptr(), output.ptr(), _scale_exponent);
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
         },
         input1, input2, output);
     }
@@ -732,8 +732,8 @@ void NEPixelWiseMultiplicationKernel::run(const Window &window, const ThreadInfo
         execute_window_loop(collapsed, [&](const Coordinates &)
         {
             (*_func_float)(input1.ptr(), input2.ptr(), output.ptr(), _scale);
-            collapsed.slide_window_slice_3D(slice_input1);
-            collapsed.slide_window_slice_3D(slice_input2);
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+            ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
         },
         input1, input2, output);
     }

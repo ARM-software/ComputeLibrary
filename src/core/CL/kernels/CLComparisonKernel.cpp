@@ -210,8 +210,8 @@ void CLComparisonKernel::run(const Window &window, cl::CommandQueue &queue)
 
         enqueue(queue, *this, slice, lws_hint());
 
-        collapsed.slide_window_slice_3D(slice_input1);
-        collapsed.slide_window_slice_3D(slice_input2);
+        ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input1));
+        ARM_COMPUTE_UNUSED(collapsed.slide_window_slice_3D(slice_input2));
     }
     while(collapsed.slide_window_slice_3D(slice));
 }

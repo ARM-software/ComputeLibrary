@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -152,7 +152,7 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
         if(_biases != nullptr)
         {
             add_1D_tensor_argument(idx, _biases, biases_slice);
-            biases_window.slide_window_slice_1D(biases_slice);
+            ARM_COMPUTE_UNUSED(biases_window.slide_window_slice_1D(biases_slice));
         }
 
         // Run kernel
