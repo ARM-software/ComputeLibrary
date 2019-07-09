@@ -284,7 +284,9 @@ __kernel void direct_convolution9x9_nhwc(
     const int id2 = get_global_id(2);
 
     __global uchar *weights_addr = (__global uchar *)tensor3D_offset(&weights, 0, 0, 0);
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) + ((id2 * STRIDE_Y) - PAD_TOP) * (int)src_stride_z;
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) - src_stride_x * id0 + ((id2 * STRIDE_Y) - PAD_TOP) * (int)src_stride_z;
+
+    weights_addr += id0 * weights_stride_w;
 
 #if(PAD_TOP == 1)
     const int coordy = id2 - PAD_TOP;

@@ -239,6 +239,10 @@ inline void setup_num_elems(unsigned int &num_elems_read_per_iteration_x, unsign
         {
             num_elems_read_per_iteration_x = 4;
         }
+        else
+        {
+            num_elems_read_per_iteration_x = 1;
+        }
 
         switch(kernel_size)
         {
@@ -346,7 +350,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     if(data_layout == DataLayout::NHWC)
     {
         AccessWindowStatic input_access(input, 0, -conv_pad_left,
-                                        num_elems_read_per_iteration_x,
+                                        ceil_to_multiple(input->dimension(0), num_elems_read_per_iteration_x),
                                         ceil_to_multiple(input->dimension(1) + conv_info.pad_right(), num_elems_read_per_iteration_y));
         AccessWindowStatic    weights_access(weights, 0, 0, weights->dimension(0), weights->dimension(1));
         AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
