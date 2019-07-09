@@ -30,3 +30,9 @@ template class depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float, f
 template class depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float, float>;
 template class depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float, float>;
 template class depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 2, 2, float, float, float>;
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template class depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>;
+template class depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>;
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
