@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,6 +80,14 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
 
     build_opts.emplace("#define DATA_TYPE_FP16");
     build_opts.emplace("#define BORDER_SIZE " + support::cpp11::to_string(border.right));
+    if(sampling_policy == SamplingPolicy::TOP_LEFT)
+    {
+        build_opts.emplace("#define SAMPLING_POLICY_TOP_LEFT");
+    }
+    else
+    {
+        build_opts.emplace("#define SAMPLING_POLICY_CENTER");
+    }
 
     // Configure kernel window
     unsigned int num_elems_processed_per_iteration = 4;

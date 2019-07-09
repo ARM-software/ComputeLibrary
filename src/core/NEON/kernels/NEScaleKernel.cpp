@@ -169,7 +169,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
 template <typename T>
 inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets, ITensor *output,
-                                    float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c)
+                                    float hr, Window window, const Window &win_in, size_t stride_w, size_t stride_h, size_t stride_c, float sampling_offset)
 {
     const int  window_step_x  = 16 / sizeof(T);
     const auto window_start_x = static_cast<int32_t>(window.x().start());
@@ -185,7 +185,7 @@ inline void scale_nearest_nhwc_core(const ITensor *input, const ITensor *offsets
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const int32_t offset     = *reinterpret_cast<const int32_t *>(offsets->ptr_to_element(Coordinates(id.y(), id.z())));
-        const int     in_yi      = (id.z() + 0.5f) * hr;
+        const int     in_yi      = std::floor((id.z() + sampling_offset) * hr);
         const int     offset_row = in_yi * stride_h;
         int32_t       x          = window_start_x;
         for(; x < window_end_x - window_step_x; x += window_step_x)
@@ -459,7 +459,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
                 const auto           offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
                 const uint8_t *const in_ptr      = in.ptr();
 
-                const int in_yi         = std::floor((id.y() + 0.5f) * hr);
+                const int in_yi         = std::floor((id.y() + _sampling_offset) * hr);
                 const int in_yi_clamped = std::min(static_cast<int>(_input->info()->dimension(1)), std::max(in_yi, -1));
                 ARM_COMPUTE_ERROR_ON(in_yi_clamped < -1 || in_yi_clamped > static_cast<int>(_input->info()->dimension(1)));
                 const int offset_row = in_yi_clamped * input_stride;
@@ -500,7 +500,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_s16(*reinterpret_cast<const int16_t *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -541,7 +541,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_f16(*reinterpret_cast<const __fp16 *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -584,7 +584,7 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
             {
                 const auto offsets_ptr = reinterpret_cast<const int32_t *>(offsets.ptr());
 
-                const int in_yi      = (id.y() + 0.5f) * hr;
+                const int in_yi      = std::floor((id.y() + _sampling_offset) * hr);
                 const int offset_row = in_yi * input_stride;
 
                 tmp.val[0] = vsetq_lane_f32(*reinterpret_cast<const float *>(in.ptr() + offsets_ptr[0] + offset_row), tmp.val[0], 0);
@@ -614,7 +614,6 @@ void NEScaleKernel::scale_nearest_nchw(const Window &window)
         }
         default:
             ARM_COMPUTE_ERROR("Not supported");
-            break;
     }
 }
 
@@ -936,7 +935,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<uint8_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<uint8_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -949,7 +948,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<int16_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<int16_t>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -964,7 +963,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
                 scale_nearest_nhwc_core<float16_t>(_input, _offsets, _output, hr,
-                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                                                   window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {
@@ -978,7 +977,7 @@ void NEScaleKernel::scale_nhwc(const Window &window)
         {
             if(_policy == InterpolationPolicy::NEAREST_NEIGHBOR)
             {
-                scale_nearest_nhwc_core<float>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c);
+                scale_nearest_nhwc_core<float>(_input, _offsets, _output, hr, window, win_in, input_stride_w, input_stride_h, input_stride_c, _sampling_offset);
             }
             else
             {

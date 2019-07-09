@@ -83,7 +83,7 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
 
         execute_window_loop(win, [&](const Coordinates & id)
         {
-            const size_t in_xi = (id.x() + 0.5f) * wr;
+            const size_t in_xi = std::floor((id.x() + sampling_offset) * wr);
 
             *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
         },
