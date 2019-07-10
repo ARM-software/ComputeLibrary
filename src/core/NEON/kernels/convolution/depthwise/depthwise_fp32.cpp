@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "impl_fp16_fp16.hpp"
+#include "impl_fp32_fp32.hpp"
 
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 namespace depthwise
 {
-template class DepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>;
+template class DepthwiseConvolution<4, 4, 3, 3, 2, 2, float, float, float>;
+template class DepthwiseConvolution<4, 4, 5, 5, 1, 1, float, float, float>;
+template class DepthwiseConvolution<3, 3, 5, 5, 2, 2, float, float, float>;
 }  // namespace depthwise
-#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

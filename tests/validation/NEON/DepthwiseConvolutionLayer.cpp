@@ -294,38 +294,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<float>, fram
 TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // Generic
 
-TEST_SUITE(W3x3)
 template <typename T>
-using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                    depth_multipliers),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::F32)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                    ActivationFunctionsDataset))
+using NEDepthwiseConvolutionLayerFixtureOptimized = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
+
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                       depth_multipliers),
+                       framework::dataset::make("DataType",
+                                                DataType::F32)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                        depth_multipliers),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::F32)),
-                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                        ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                       depth_multipliers),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE(Dilation)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
-                                                                                                                    depth_multipliers),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::F32)),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                    ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
+                                                       depth_multipliers),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                        depth_multipliers),
                                                framework::dataset::make("DataType",
@@ -337,8 +340,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, f
 }
 
 TEST_SUITE_END() // Dilation
+TEST_SUITE_END() // W3x3
 
-FIXTURE_DATA_TEST_CASE(RunOptimizedSmall, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::PRECOMMIT,
+TEST_SUITE(Optimized)
+FIXTURE_DATA_TEST_CASE(RunSmall3x3, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset3x3(),
                                                        framework::dataset::make("DepthMultiplier", 1)),
                                                framework::dataset::make("DataType",
@@ -348,7 +353,17 @@ FIXTURE_DATA_TEST_CASE(RunOptimizedSmall, NEDepthwiseConvolutionLayerFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunOptimizedLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunSmall5x5, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset5x5(),
+                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F32)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge3x3, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
                                                        framework::dataset::make("DepthMultiplier", 1)),
                                                framework::dataset::make("DataType",
@@ -358,7 +373,7 @@ FIXTURE_DATA_TEST_CASE(RunOptimizedLarge, NEDepthwiseConvolutionLayerFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END() // W3x3
+TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // F32
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -407,40 +422,42 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, frame
 TEST_SUITE_END() // Dilation
 
 TEST_SUITE_END() // Generic
-TEST_SUITE(W3x3)
 template <typename T>
-using NEDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                   depth_multipliers),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                   ActivationFunctionsDataset))
+using NEDepthwiseConvolutionLayerFixtureOptimized = DepthwiseConvolutionLayerValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                       depth_multipliers),
+                       framework::dataset::make("DataType",
+                                                DataType::F16)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                       ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                       depth_multipliers),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::F16)),
-                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                       ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                       depth_multipliers),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F16)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f16);
 }
 
 TEST_SUITE(Dilation)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
-                                                                                                                   depth_multipliers),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                                                                                                   ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(),
+                                                       depth_multipliers),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F16)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
 {
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                        depth_multipliers),
                                                framework::dataset::make("DataType",
@@ -452,8 +469,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<half>, fr
 }
 
 TEST_SUITE_END() // Dilation
+TEST_SUITE_END() // W3x3
 
-FIXTURE_DATA_TEST_CASE(RunOptimizedSmall, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::PRECOMMIT,
+TEST_SUITE(Optimized)
+FIXTURE_DATA_TEST_CASE(RunSmallW3x3, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset3x3(),
                                                        framework::dataset::make("DepthMultiplier", 1)),
                                                framework::dataset::make("DataType",
@@ -463,7 +482,17 @@ FIXTURE_DATA_TEST_CASE(RunOptimizedSmall, NEDepthwiseConvolutionLayerFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunOptimizedLarge, NEDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunSmallW5x5, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset5x5(),
+                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                               framework::dataset::make("DataType",
+                                                                        DataType::F16)),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLargeW3x3, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
                                                        framework::dataset::make("DepthMultiplier", 1)),
                                                framework::dataset::make("DataType",
@@ -473,14 +502,14 @@ FIXTURE_DATA_TEST_CASE(RunOptimizedLarge, NEDepthwiseConvolutionLayerFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-TEST_SUITE_END() // W3x3
+TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // FP16
 #endif           // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE_END() // Float
 
 template <typename T>
-using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
+using NEDepthwiseConvolutionLayerQuantizedFixtureOptimized = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerOptimized, T>;
 template <typename T>
 using NEDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer, T>;
 
@@ -522,10 +551,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture<uin
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END() //Dilation
+TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // Generic
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(), depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                                        framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
@@ -535,31 +564,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunOptimizedSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset3x3(),
-                                                                       framework::dataset::make("DepthMultiplier", 1)),
-                                                               framework::dataset::make("DataType",
-                                                                                        DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
-                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               ActivationFunctionsDataset))
-{
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunOptimizedLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
-                                                                       framework::dataset::make("DepthMultiplier", 1)),
-                                                               framework::dataset::make("DataType",
-                                                                                        DataType::QASYMM8)),
-                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
-                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               ActivationFunctionsDataset))
-{
-    validate(Accessor(_target), _reference, tolerance_qasymm8);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
@@ -573,7 +578,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<
 
 TEST_SUITE(Dilation)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(combine(combine(datasets::SmallDepthwiseDilatedConvolutionLayerDataset3x3(), depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                                        framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
@@ -583,7 +588,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<
 {
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
                                                                        depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
@@ -596,6 +601,45 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3<
 }
 TEST_SUITE_END() // Dilation
 TEST_SUITE_END() // W3x3
+
+TEST_SUITE(Optimized)
+FIXTURE_DATA_TEST_CASE(RunSmall3x3, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                               framework::dataset::make("DataType",
+                                                                                        DataType::QASYMM8)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunSmall5x5, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::SmallOptimizedDepthwiseConvolutionLayerDataset5x5(),
+                                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                               framework::dataset::make("DataType",
+                                                                                        DataType::QASYMM8)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge3x3, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(combine(combine(combine(datasets::LargeOptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                       framework::dataset::make("DepthMultiplier", 1)),
+                                                               framework::dataset::make("DataType",
+                                                                                        DataType::QASYMM8)),
+                                                       framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                               framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                               ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // Optimized
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 

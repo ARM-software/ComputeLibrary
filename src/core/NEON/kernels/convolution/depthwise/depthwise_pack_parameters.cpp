@@ -97,4 +97,6 @@ void PackParameters<KernelRows, KernelColumns, WeightSize, BiasSize>::execute(
 
 template struct PackParameters<3, 3, 2ul, 2ul>;
 template struct PackParameters<3, 3, 4ul, 4ul>;
+template struct PackParameters<5, 5, 2ul, 2ul>;
+template struct PackParameters<5, 5, 4ul, 4ul>;
 }  // namespace

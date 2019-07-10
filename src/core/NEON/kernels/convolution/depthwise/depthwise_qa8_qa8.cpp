@@ -27,4 +27,6 @@ namespace depthwise
 {
 template class QAsymm8DepthwiseConvolution<2, 2, 3, 3, 1, 1>;
 template class QAsymm8DepthwiseConvolution<2, 2, 3, 3, 2, 2>;
+template class QAsymm8DepthwiseConvolution<2, 2, 5, 5, 1, 1>;
+template class QAsymm8DepthwiseConvolution<2, 2, 5, 5, 2, 2>;
 }  // namespace depthwise

@@ -140,3 +140,5 @@ QAsymm8DilatedDepthwiseConvolution<OutputTileRows, OutputTileCols, KernelRows,
 
 template class depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 1, 1>;
 template class depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 2, 2>;
+template class depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 1, 1>;
+template class depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 2, 2>;

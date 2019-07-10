@@ -26,6 +26,9 @@
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 namespace depthwise
 {
+template class DepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>;
 template class DepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>;
+template class DepthwiseConvolution<3, 3, 5, 5, 1, 1, float16_t, float16_t, float16_t>;
+template class DepthwiseConvolution<3, 3, 5, 5, 2, 2, float16_t, float16_t, float16_t>;
 }  // namespace depthwise
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC

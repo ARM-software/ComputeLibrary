@@ -36,10 +36,136 @@
 
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
+#include <set>
+
 namespace arm_compute
 {
 namespace
 {
+std::unique_ptr<depthwise::IDepthwiseConvolution> get_qasymm8_convolver(int kernel_size, int stride_x,
+                                                                        int n_batches, int in_rows, int in_cols, int n_channels,
+                                                                        int dilation_factor, neon_convolution_kernels::ActivationFunction activation,
+                                                                        const qasymm8::QAsymm8Params &wqinfo, const qasymm8::QAsymm8Params &iqinfo, const qasymm8::QAsymm8Params &oqinfo,
+                                                                        const qasymm8::QAsymm8RescaleParams &rescale_params,
+                                                                        int padding_top, int padding_left, int padding_bottom, int padding_right)
+{
+    switch(kernel_size)
+    {
+        case 3:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        case 5:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 1, 1>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 5, 5, 2, 2>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        default:
+            return nullptr;
+    }
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp16_convolver(int kernel_size, int stride_x,
+                                                                     int n_batches, int in_rows, int in_cols, int n_channels,
+                                                                     int dilation_factor, neon_convolution_kernels::ActivationFunction activation,
+                                                                     int padding_top, int padding_left, int padding_bottom, int padding_right)
+{
+    switch(kernel_size)
+    {
+        case 3:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        case 5:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 1, 1, float16_t, float16_t, float16_t>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float16_t, float16_t, float16_t>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        default:
+            return nullptr;
+    }
+}
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+
+std::unique_ptr<depthwise::IDepthwiseConvolution> get_fp32_convolver(int kernel_size, int stride_x,
+                                                                     int n_batches, int in_rows, int in_cols, int n_channels,
+                                                                     int dilation_factor, neon_convolution_kernels::ActivationFunction activation,
+                                                                     int padding_top, int padding_left, int padding_bottom, int padding_right)
+{
+    switch(kernel_size)
+    {
+        case 3:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float, float>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float, float>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        case 5:
+        {
+            switch(stride_x)
+            {
+                case 1:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 5, 5, 1, 1, float, float, float>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                case 2:
+                    return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 5, 5, 2, 2, float, float, float>>(
+                               n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
+                default:
+                    return nullptr;
+            }
+        }
+        default:
+            return nullptr;
+    }
+}
+
 std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor      *input,
                                                                    const ITensor      *weights,
                                                                    ITensor            *output,
@@ -61,7 +187,8 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
     const int padding_bottom  = conv_info.pad_bottom();
     const int padding_right   = conv_info.pad_right();
 
-    const unsigned int stride_x = conv_info.stride().first;
+    const unsigned int stride_x    = conv_info.stride().first;
+    const unsigned int kernel_size = weights->info()->tensor_shape().y();
 
     // Map activation function
     neon_convolution_kernels::ActivationFunction activation = neon_convolution_kernels::ActivationFunction::None;
@@ -96,18 +223,8 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
         quantization::calculate_quantized_multiplier_less_than_one(fmultipler, &qmultiplier, &qshift);
         qasymm8::QAsymm8RescaleParams rescale_params(qshift, qmultiplier, fmultipler);
 
-        // Create convolver
-        switch(stride_x)
-        {
-            case 1:
-                return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 1, 1>>(
-                           n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
-            case 2:
-                return arm_compute::support::cpp14::make_unique<depthwise::QAsymm8DilatedDepthwiseConvolution<2, 2, 3, 3, 2, 2>>(
-                           n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
-            default:
-                return nullptr;
-        }
+        return get_qasymm8_convolver(kernel_size, stride_x, n_batches, in_rows, in_cols, n_channels, dilation_factor, activation,
+                                     wqinfo, iqinfo, oqinfo, rescale_params, padding_top, padding_left, padding_bottom, padding_right);
     }
     else
     {
@@ -117,34 +234,12 @@ std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver(const ITensor
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F16:
             {
-                switch(stride_x)
-                {
-                    case 1:
-                        return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 1, 1, float16_t, float16_t, float16_t>>(
-                                   n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
-                    case 2:
-                        return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float16_t, float16_t, float16_t>>(
-                                   n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
-                    default:
-                        return nullptr;
-                }
-                break;
+                return get_fp16_convolver(kernel_size, stride_x, n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
             }
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             case DataType::F32:
             {
-                switch(stride_x)
-                {
-                    case 1:
-                        return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float, float>>(
-                                   n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
-                    case 2:
-                        return arm_compute::support::cpp14::make_unique<depthwise::DilatedDepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float, float>>(
-                                   n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
-                    default:
-                        return nullptr;
-                }
-                break;
+                return get_fp32_convolver(kernel_size, stride_x, n_batches, in_rows, in_cols, n_channels, dilation_factor, activation, padding_top, padding_left, padding_bottom, padding_right);
             }
             default:
                 return nullptr;
@@ -236,15 +331,10 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
 
-    const auto       strides     = conv_info.stride();
-    const DataLayout data_layout = input->data_layout();
-    unsigned int     width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    unsigned int     height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != 3 || weights->dimension(height_idx) != 3);
-    ARM_COMPUTE_RETURN_ERROR_ON(!((strides.first == strides.second) && ((strides.first == 1) || (strides.first == 2))));
-    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier != 1);
-    ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() != dilation.y());
+    // Validate convolver
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation));
 
+    // Validate activation
     const bool is_relu  = arm_compute::utils::info_helpers::is_relu(act_info);
     const bool is_relu6 = arm_compute::utils::info_helpers::is_relu6(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON(act_info.enabled() && !(is_relu || is_relu6));
@@ -252,7 +342,7 @@ Status NEDepthwiseConvolutionAssemblyDispatch::validate(const ITensorInfo       
     // Check bias
     if(bias != nullptr)
     {
-        unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+        unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != weights->dimension(channel_idx));
     }
@@ -291,24 +381,28 @@ bool NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(const ITenso
     bool           is_data_type_valid = is_data_type_float(data_type) || is_data_type_quantized_asymmetric(data_type);
 
     // Check weighs size
-    const unsigned int width_idx         = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    bool               weights_supported = (weights->dimension(width_idx) == 3) && (weights->dimension(height_idx) == 3);
+    std::set<unsigned int> supported_kernel_sizes = { 3, 5 };
+    const unsigned int     width_idx              = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int     height_idx             = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int     kernel_w               = weights->dimension(width_idx);
+    const unsigned int     kernel_h               = weights->dimension(height_idx);
+    bool                   weights_supported      = (kernel_w == kernel_h) && (supported_kernel_sizes.count(kernel_w) != 0);
 
     // Check for supported strides
     const auto &strides           = conv_info.stride();
     bool        supported_strides = (strides.first == strides.second) && ((strides.first == 1) || (strides.first == 2));
 
     // Check for supported padding
-    const auto    pad_top               = conv_info.pad_top();
-    const auto    pad_right             = conv_info.pad_right();
-    const auto    pad_bottom            = conv_info.pad_bottom();
-    const auto    pad_left              = conv_info.pad_left();
-    PadStrideInfo same_pad              = calculate_same_pad(in_shape, TensorShape(3U, 3U), conv_info);
-    bool          is_same_padding       = (pad_top == same_pad.pad_top()) && (pad_right == same_pad.pad_right()) && (pad_bottom == same_pad.pad_bottom()) && (pad_left == same_pad.pad_left());
-    bool          is_valid_padding      = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
-    bool          supported_padding     = is_same_padding || is_valid_padding;
-    bool          is_dilation_supported = (dilation.x() == dilation.y()) || (dilation == Size2D(1U, 1U));
+    const auto    pad_top           = conv_info.pad_top();
+    const auto    pad_right         = conv_info.pad_right();
+    const auto    pad_bottom        = conv_info.pad_bottom();
+    const auto    pad_left          = conv_info.pad_left();
+    PadStrideInfo same_pad          = calculate_same_pad(in_shape, TensorShape(kernel_w, kernel_h), conv_info, DataLayout::NCHW, dilation);
+    bool          is_same_padding   = (pad_top == same_pad.pad_top()) && (pad_right == same_pad.pad_right()) && (pad_bottom == same_pad.pad_bottom()) && (pad_left == same_pad.pad_left());
+    bool          is_valid_padding  = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
+    bool          supported_padding = is_same_padding || is_valid_padding;
+    // TODO(COMPMID-2464): Enable once dilated conv with stride 2 is supported
+    bool is_dilation_supported = (dilation == Size2D(1U, 1U)) || ((dilation.x() == dilation.y()) && strides.first == 1);
 
     return is_data_type_valid && weights_supported && supported_strides && supported_padding && (depth_multiplier == 1) && is_dilation_supported;
 }
