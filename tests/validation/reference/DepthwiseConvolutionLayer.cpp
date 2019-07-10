@@ -137,12 +137,12 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
     const float input_scale    = src.quantization_info().uniform().scale;
     const int   weights_offset = -weights.quantization_info().uniform().offset;
     const float weights_scale  = weights.quantization_info().uniform().scale;
-    const int   output_offset  = dst.quantization_info().uniform().offset;
-    const float output_scale   = dst.quantization_info().uniform().scale;
+    const int   output_offset  = dst_qinfo.uniform().offset;
+    const float output_scale   = dst_qinfo.uniform().scale;
 
-    int         output_multiplier;
-    int         output_shift;
-    const float multiplier = input_scale * weights_scale / output_scale;
+    int         output_multiplier = 0;
+    int         output_shift      = 0;
+    const float multiplier        = input_scale * weights_scale / output_scale;
     arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
     // Compute reference

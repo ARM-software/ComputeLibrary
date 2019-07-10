@@ -326,9 +326,9 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
         {
             const UniformQuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? iq_info : oq_info;
 
-            float multiplier = iq_info.scale * wq_info.scale / output_quant_info.scale;
-            int   output_multiplier;
-            int   output_shift;
+            int         output_multiplier = 0;
+            int         output_shift      = 0;
+            const float multiplier        = iq_info.scale * wq_info.scale / output_quant_info.scale;
             quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
             _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output_quant_info.offset);
             _output_reshaped.allocator()->allocate();

@@ -59,10 +59,6 @@ public:
     void setup(TensorShape in_shape, Size2D kernel_size, PadStrideInfo pad_stride_info, Size2D dilation, unsigned int depth_multiplier, DataType data_type,
                QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, ActivationLayerInfo act_info)
     {
-        _input_quantization_info  = input_quantization_info;
-        _output_quantization_info = output_quantization_info;
-
-        _data_type                    = data_type;
         const DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
         TensorShape weights_shape(kernel_size.width, kernel_size.height);
@@ -113,8 +109,8 @@ protected:
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape output_shape, PadStrideInfo &pad_stride_info, Size2D dilation,
                               unsigned int   depth_multiplier,
                               const DataType data_type, const DataType bias_data_type,
-                              const QuantizationInfo input_quantization_info, const QuantizationInfo output_quantization_info,
-                              const DataLayout data_layout, ActivationLayerInfo act_info)
+                              const QuantizationInfo &input_quantization_info, const QuantizationInfo &output_quantization_info,
+                              const DataLayout data_layout, const ActivationLayerInfo &act_info)
     {
         if(data_layout == DataLayout::NHWC)
         {
@@ -164,8 +160,8 @@ protected:
                                       const PadStrideInfo &pad_stride_info,
                                       const Size2D &dilation, unsigned int depth_multiplier,
                                       const DataType data_type, const DataType bias_data_type,
-                                      const QuantizationInfo input_quantization_info, const QuantizationInfo output_quantization_info,
-                                      ActivationLayerInfo act_info)
+                                      const QuantizationInfo &input_quantization_info, const QuantizationInfo &output_quantization_info,
+                                      const ActivationLayerInfo &act_info)
     {
         SimpleTensor<T>     src{ in_shape, data_type, 1, input_quantization_info };
         SimpleTensor<T>     weights{ weights_shape, data_type, 1, input_quantization_info };
@@ -179,11 +175,8 @@ protected:
         return (act_info.enabled()) ? reference::activation_layer<T>(depth_out, act_info) : depth_out;
     }
 
-    TensorType       _target{};
-    SimpleTensor<T>  _reference{};
-    DataType         _data_type{};
-    QuantizationInfo _input_quantization_info{};
-    QuantizationInfo _output_quantization_info{};
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
