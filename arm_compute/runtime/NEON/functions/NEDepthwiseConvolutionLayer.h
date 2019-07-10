@@ -32,6 +32,7 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/Macros.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -76,6 +77,7 @@ public:
      * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation.
      * @param[in]      dilation         (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
+    ARM_COMPUTE_DEPRECATED_REL_REPLACE(19.08, NEDepthwiseConvolutionLayerOptimized)
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                    unsigned int depth_multiplier = 1, const ActivationLayerInfo &act_info = ActivationLayerInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
