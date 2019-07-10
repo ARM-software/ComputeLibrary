@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,37 +40,51 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class UpsampleLayerFixture : public framework::Fixture
+class UpsampleLayerFixtureBase : public framework::Fixture
 {
 public:
     template <typename...>
     void setup(TensorShape input_shape, DataType data_type, DataLayout data_layout,
-               Size2D info, const InterpolationPolicy &policy)
+               Size2D info, const InterpolationPolicy &policy, QuantizationInfo quantization_info)
     {
         _data_type = data_type;
 
-        _target    = compute_target(input_shape, info, policy, data_type, data_layout);
-        _reference = compute_reference(input_shape, info, policy, data_type);
+        _target    = compute_target(input_shape, info, policy, data_type, data_layout, quantization_info);
+        _reference = compute_reference(input_shape, info, policy, data_type, quantization_info);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, i);
+        if(_data_type == DataType::QASYMM8)
+        {
+            const auto                             bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::uniform_int_distribution<uint8_t> distribution(bounds.first, bounds.second);
+            library->fill(tensor, distribution, i);
+        }
+        else
+        {
+            library->fill_tensor_uniform(tensor, i);
+        }
     }
 
-    TensorType compute_target(TensorShape   input_shape,
-                              const Size2D &info, const InterpolationPolicy &policy, DataType data_type, DataLayout data_layout)
+    TensorType compute_target(TensorShape input_shape, const Size2D &info, const InterpolationPolicy &policy,
+                              DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
     {
+        TensorShape output_shape(input_shape);
+        output_shape.set(0, info.x() * input_shape[0]);
+        output_shape.set(1, info.y() * input_shape[1]);
+
         if(data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
         }
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
-        TensorType dst;
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, quantization_info, data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, quantization_info, data_layout);
 
         // Create and configure function
         FunctionType upsample;
@@ -95,11 +109,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
-                                      const Size2D &info, const InterpolationPolicy &policy, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const Size2D &info, const InterpolationPolicy &policy,
+                                      DataType data_type, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type };
+        SimpleTensor<T> src{ input_shape, data_type, 1, quantization_info };
 
         // Fill reference
         fill(src, 0);
@@ -111,6 +125,33 @@ protected:
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class UpsampleLayerFixture : public UpsampleLayerFixtureBase<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, DataType data_type, DataLayout data_layout,
+               Size2D info, const InterpolationPolicy &policy)
+    {
+        UpsampleLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, data_type, data_layout,
+                                                                                   info, policy, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class UpsampleLayerQuantizedFixture : public UpsampleLayerFixtureBase<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, DataType data_type, DataLayout data_layout,
+               Size2D info, const InterpolationPolicy &policy, QuantizationInfo quantization_info)
+    {
+        UpsampleLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, data_type, data_layout,
+                                                                                   info, policy, quantization_info);
+    }
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

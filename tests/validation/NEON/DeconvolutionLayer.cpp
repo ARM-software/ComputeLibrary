@@ -62,7 +62,7 @@ const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework:
 const auto data1x1 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 1)
                      * framework::dataset::make("PadY", 0, 1) * framework::dataset::make("NumKernels", { 3 });
 
-const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW });
+const auto data_layouts_dataset = framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -250,7 +250,7 @@ TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data4x4, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -261,7 +261,7 @@ TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(data3x3_precommit, framework::dataset::make("DataType",
                        DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -269,7 +269,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3, framework::dataset::make("DataType",
                        DataType::QASYMM8)),
                        data_layouts_dataset),
-                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -280,7 +280,7 @@ TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, NEDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data1x1, framework::dataset::make("DataType",
                                                                                                                        DataType::QASYMM8)),
                                                                                                                        data_layouts_dataset),
-                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
+                                                                                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 10))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8, tolerance_num);

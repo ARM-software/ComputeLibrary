@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,9 +33,10 @@ namespace validation
 {
 namespace reference
 {
+namespace
+{
 template <typename T>
-SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src,
-                               const Size2D &info, const InterpolationPolicy policy)
+SimpleTensor<T> upsample_function(const SimpleTensor<T> &src, const Size2D &info, const InterpolationPolicy policy)
 {
     ARM_COMPUTE_ERROR_ON(policy != InterpolationPolicy::NEAREST_NEIGHBOR);
     ARM_COMPUTE_UNUSED(policy);
@@ -72,16 +73,39 @@ SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src,
             }
         }
     }
-
     return out;
+}
+
+} // namespace
+
+template <typename T>
+SimpleTensor<T> upsample_layer(const SimpleTensor<T> &src, const Size2D &info, const InterpolationPolicy policy)
+{
+    return upsample_function<T>(src, info, policy);
+}
+
+template <>
+SimpleTensor<uint8_t> upsample_layer(const SimpleTensor<uint8_t> &src, const Size2D &info, const InterpolationPolicy policy)
+{
+    SimpleTensor<uint8_t> dst(src.shape(), src.data_type(), 1, src.quantization_info());
+
+    if(is_data_type_quantized_asymmetric(src.data_type()))
+    {
+        SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
+        SimpleTensor<float> dst_tmp = upsample_function<float>(src_tmp, info, policy);
+        dst                         = convert_to_asymmetric(dst_tmp, src.quantization_info());
+    }
+    else
+    {
+        dst = upsample_function<uint8_t>(src, info, policy);
+    }
+    return dst;
 }
 
 template SimpleTensor<float> upsample_layer(const SimpleTensor<float> &src,
                                             const Size2D &info, const InterpolationPolicy policy);
 template SimpleTensor<half> upsample_layer(const SimpleTensor<half> &src,
                                            const Size2D &info, const InterpolationPolicy policy);
-template SimpleTensor<uint8_t> upsample_layer(const SimpleTensor<uint8_t> &src,
-                                              const Size2D &info, const InterpolationPolicy policy);
 } // namespace reference
 } // namespace validation
 } // namespace test

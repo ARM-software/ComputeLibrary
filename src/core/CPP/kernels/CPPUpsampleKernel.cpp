@@ -34,8 +34,8 @@
 #include <cstddef>
 #include <cstdint>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 CPPUpsampleKernel::CPPUpsampleKernel()
     : _input(nullptr), _output(nullptr), _info()
 {
@@ -82,7 +82,10 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     const int    end_x         = width_scaled - _info.pad().first;
     const size_t element_size  = _input->info()->element_size();
 
-    std::fill_n(_output->buffer(), _output->info()->total_size(), 0);
+    //The fill value is normally 0, but for QASYMM8 the '0' corresponds to the offset
+    const uint8_t fill_value = _output->info()->data_type() == DataType::QASYMM8 ? utility::clamp<uint8_t>(_output->info()->quantization_info().uniform().offset) : 0;
+    //Filling a value different than 0 works only for QASYMM8 datatype since we are filling 1byte values in a buffer of uint8_ts
+    std::fill_n(_output->buffer(), _output->info()->total_size(), fill_value);
 
     // Create window
     Window window_out(window);
@@ -99,3 +102,4 @@ void CPPUpsampleKernel::run(const Window &window, const ThreadInfo &info)
     },
     in, out);
 }
+} // namespace arm_compute
