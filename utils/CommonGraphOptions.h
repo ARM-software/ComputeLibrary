@@ -44,6 +44,7 @@ namespace utils
  * --type             : Data type to be used by the examples. Supported data type options: QASYMM8, F16, F32.
  * --layout           : Data layout to be used by the examples. Supported data layout options : NCHW, NHWC.
  * --enable-tuner     : Toggle option to enable the OpenCL dynamic tuner.
+ * --enable-cl-cache  : Toggle option to load the prebuilt opencl kernels from a cache file.
  * --fast-math        : Toggle option to enable the fast math option.
  * --data             : Path that contains the trainable parameter files of graph layers.
  * --image            : Image to load and operate on. Image types supported: PPM, JPEG, NPY.
@@ -94,6 +95,7 @@ struct CommonGraphParams
     arm_compute::DataType            data_type{ DataType::F32 };
     arm_compute::DataLayout          data_layout{ DataLayout::NHWC };
     bool                             enable_tuner{ false };
+    bool                             enable_cl_cache{ false };
     arm_compute::CLTunerMode         tuner_mode{ CLTunerMode::NORMAL };
     arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::Disabled };
     std::string                      data_path{};
@@ -149,6 +151,7 @@ public:
     EnumOption<arm_compute::DataType>      *data_type;        /**< Graph data type */
     EnumOption<arm_compute::DataLayout>    *data_layout;      /**< Graph data layout */
     ToggleOption                           *enable_tuner;     /**< Enable tuner */
+    ToggleOption                           *enable_cl_cache;  /**< Enable opencl kernels cache */
     SimpleOption<arm_compute::CLTunerMode> *tuner_mode;       /**< Tuner mode */
     ToggleOption                           *fast_math_hint;   /**< Fast math hint */
     SimpleOption<std::string>              *data_path;        /**< Trainable parameters path */

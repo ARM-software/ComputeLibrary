@@ -823,6 +823,18 @@ int compare_tensor(ITensor &tensor1, ITensor &tensor2, T tolerance)
 
     return num_mismatches;
 }
+
+/** This function saves opencl kernels library to a file
+ *
+ * @param[in] filename Name of the file to be used to save the library
+ */
+void save_program_cache_to_file(const std::string &filename = "cache.bin");
+
+/** This function loads prebuilt opencl kernels from a file
+ *
+ * @param[in] filename Name of the file to be used to load the kernels
+ */
+void restore_program_cache_from_file(const std::string &filename = "cache.bin");
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

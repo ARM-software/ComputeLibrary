@@ -27,6 +27,8 @@
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
 
+#include <chrono>
+
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
@@ -148,12 +150,33 @@ public:
 
         // Finalize graph
         GraphConfig config;
+
         config.num_threads = common_params.threads;
         config.use_tuner   = common_params.enable_tuner;
         config.tuner_mode  = common_params.tuner_mode;
         config.tuner_file  = common_params.tuner_file;
 
+        const auto config_start_time = std::chrono::high_resolution_clock::now();
+
+        // Load the precompiled kernels from a file into the kernel library, in this way the next time they are needed
+        // compilation won't be required.
+        if(common_params.enable_cl_cache)
+        {
+            restore_program_cache_from_file();
+        }
+
         graph.finalize(common_params.target, config);
+
+        const auto config_end_time = std::chrono::high_resolution_clock::now();
+        const auto time_elapsed    = config_end_time - config_start_time;
+        const auto time_elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_elapsed).count();
+        std::cout << "Configuration time " << time_elapsed_ms << " ms " << std::endl;
+
+        // Save the opencl kernels to a file
+        if(common_opts.enable_cl_cache)
+        {
+            save_program_cache_to_file();
+        }
 
         return true;
     }
