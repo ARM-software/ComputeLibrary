@@ -129,16 +129,8 @@ void CLSobel7x7HorKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
-
-        if(_run_sobel_x)
-        {
-            add_2D_tensor_argument(idx, _output_x, slice);
-        }
-
-        if(_run_sobel_y)
-        {
-            add_2D_tensor_argument(idx, _output_y, slice);
-        }
+        add_2D_tensor_argument_if((_run_sobel_x), idx, _output_x, slice);
+        add_2D_tensor_argument_if((_run_sobel_y), idx, _output_y, slice);
 
         enqueue(queue, *this, slice, lws_hint());
     }
@@ -241,17 +233,10 @@ void CLSobel7x7VertKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
 
-        if(_run_sobel_x)
-        {
-            add_2D_tensor_argument(idx, _input_x, slice);
-            add_2D_tensor_argument(idx, _output_x, slice);
-        }
-
-        if(_run_sobel_y)
-        {
-            add_2D_tensor_argument(idx, _input_y, slice);
-            add_2D_tensor_argument(idx, _output_y, slice);
-        }
+        add_2D_tensor_argument_if((_run_sobel_x), idx, _input_x, slice);
+        add_2D_tensor_argument_if((_run_sobel_x), idx, _output_x, slice);
+        add_2D_tensor_argument_if((_run_sobel_y), idx, _input_y, slice);
+        add_2D_tensor_argument_if((_run_sobel_y), idx, _output_y, slice);
 
         _kernel.setArg(idx++, 0 /*dummy*/);
 

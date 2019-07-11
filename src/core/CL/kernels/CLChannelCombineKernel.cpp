@@ -262,11 +262,7 @@ void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _planes[0], slice);
         add_2D_tensor_argument(idx, _planes[1], win_sub_plane1);
         add_2D_tensor_argument(idx, _planes[2], win_sub_plane2);
-
-        if(nullptr != _planes[3])
-        {
-            add_2D_tensor_argument(idx, _planes[3], slice);
-        }
+        add_2D_tensor_argument_if((nullptr != _planes[3]), idx, _planes[3], slice);
 
         // Set outputs
         if(nullptr != _output) // Single planar output
@@ -280,11 +276,7 @@ void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)
 
             add_2D_tensor_argument(idx, _output_multi->cl_plane(0), slice);
             add_2D_tensor_argument(idx, _output_multi->cl_plane(1), win_sub_plane1);
-
-            if(3 == num_planes_from_format(_output_multi->info()->format()))
-            {
-                add_2D_tensor_argument(idx, _output_multi->cl_plane(2), win_sub_plane2);
-            }
+            add_2D_tensor_argument_if((3 == num_planes_from_format(_output_multi->info()->format())), idx, _output_multi->cl_plane(2), win_sub_plane2);
 
             _kernel.setArg(idx++, slice.y().end());
         }

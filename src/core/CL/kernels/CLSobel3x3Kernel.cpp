@@ -128,16 +128,8 @@ void CLSobel3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
-
-        if(_run_sobel_x)
-        {
-            add_2D_tensor_argument(idx, _output_x, slice);
-        }
-
-        if(_run_sobel_y)
-        {
-            add_2D_tensor_argument(idx, _output_y, slice);
-        }
+        add_2D_tensor_argument_if((_run_sobel_x), idx, _output_x, slice);
+        add_2D_tensor_argument_if((_run_sobel_y), idx, _output_y, slice);
 
         enqueue(queue, *this, slice, lws_hint());
     }

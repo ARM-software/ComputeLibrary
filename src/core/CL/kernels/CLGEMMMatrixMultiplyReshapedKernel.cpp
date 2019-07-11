@@ -362,10 +362,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::run(const Window &window, cl::CommandQu
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input0, slice);
         add_2D_tensor_argument(idx, _input1, slice_b);
-        if(_add_bias)
-        {
-            add_2D_tensor_argument(idx, _input2, slice);
-        }
+        add_2D_tensor_argument_if((_add_bias), idx, _input2, slice);
         add_2D_tensor_argument(idx, _output, slice);
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_k));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[2]));

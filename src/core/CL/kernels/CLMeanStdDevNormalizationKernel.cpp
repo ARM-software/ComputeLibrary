@@ -140,10 +140,8 @@ void CLMeanStdDevNormalizationKernel::run(const Window &window, cl::CommandQueue
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
-        if(!_run_in_place)
-        {
-            add_2D_tensor_argument(idx, _output, slice);
-        }
+        add_2D_tensor_argument_if((!_run_in_place), idx, _output, slice);
+
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));

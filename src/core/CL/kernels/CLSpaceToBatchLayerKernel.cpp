@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -192,13 +192,12 @@ void CLSpaceToBatchLayerKernel::run(const Window &window, cl::CommandQueue &queu
     int batch_id = 0;
     do
     {
-        unsigned int idx = 0;
+        unsigned int idx  = 0;
+        const bool   cond = (_paddings != nullptr && _block_shape != nullptr);
         add_4D_tensor_argument(idx, _input, slice_in);
-        if(_paddings != nullptr && _block_shape != nullptr)
-        {
-            add_2D_tensor_argument(idx, _paddings, padding_slice);
-            add_1D_tensor_argument(idx, _block_shape, vector_slice);
-        }
+        add_2D_tensor_argument_if(cond, idx, _paddings, padding_slice);
+        add_1D_tensor_argument_if(cond, idx, _block_shape, vector_slice);
+
         add_argument(idx, batch_id);
         add_3D_tensor_argument(idx, _output, slice_out);
         enqueue(queue, *this, slice_out);

@@ -161,16 +161,8 @@ void CLMagnitudePhaseKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _gx, slice);
         add_2D_tensor_argument(idx, _gy, slice);
-
-        if(_run_mag)
-        {
-            add_2D_tensor_argument(idx, _magnitude, slice);
-        }
-
-        if(_run_phase)
-        {
-            add_2D_tensor_argument(idx, _phase, slice);
-        }
+        add_2D_tensor_argument_if((_run_mag), idx, _magnitude, slice);
+        add_2D_tensor_argument_if((_run_phase), idx, _phase, slice);
 
         enqueue(queue, *this, slice, lws_hint());
     }

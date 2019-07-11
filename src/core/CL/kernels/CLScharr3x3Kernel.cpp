@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,16 +115,8 @@ void CLScharr3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
-
-        if(_run_scharr_x)
-        {
-            add_2D_tensor_argument(idx, _output_x, slice);
-        }
-
-        if(_run_scharr_y)
-        {
-            add_2D_tensor_argument(idx, _output_y, slice);
-        }
+        add_2D_tensor_argument_if((_run_scharr_x), idx, _output_x, slice);
+        add_2D_tensor_argument_if((_run_scharr_y), idx, _output_y, slice);
 
         enqueue(queue, *this, slice);
     }
