@@ -35,14 +35,6 @@ CLSymbols &CLSymbols::get()
     return symbols;
 }
 
-CLSymbols::~CLSymbols()
-{
-    if(handle)
-    {
-        dlclose(handle);
-    }
-}
-
 bool CLSymbols::load_default()
 {
     static const std::vector<std::string> libraries{ "libOpenCL.so", "libGLES_mali.so", "libmali.so" };
@@ -69,7 +61,7 @@ bool CLSymbols::load_default()
 
 bool CLSymbols::load(const std::string &library)
 {
-    handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
+    void *handle = dlopen(library.c_str(), RTLD_LAZY | RTLD_LOCAL);
 
     if(handle == nullptr)
     {
