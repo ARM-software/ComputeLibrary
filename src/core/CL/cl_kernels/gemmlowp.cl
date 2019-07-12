@@ -2863,7 +2863,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint(TENSOR3D_DECLARATIO
 
 #if defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
-/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QASYMM16
+/** This OpenCL kernel is used to quantize down the int32 accumulator values of GEMMLowp to QSYMM16
  *
  * This kernel takes a final int32 accumulator value (the output of @ref CLGEMMLowpMatrixMultiplyKernel), and processes it to obtain the final QSYMM16 value.
  * The following computations will be performed by the kernel:
@@ -2913,15 +2913,15 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
     int y = get_global_id(1);
     int z = get_global_id(2);
 
-    __global short *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(int) + y * src_stride_y + z * src_stride_z;
 
-    __global short *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * 2 + y * dst_stride_y + z * dst_stride_z;
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * 2 + y * dst_stride_y + z * dst_stride_z;
 
     int4 input_values = vload4(0, (__global int *)src_addr);
 
 #if defined(ADD_BIAS)
     // Add bias
-    __global short *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
+    __global uchar *bias_addr = biases_ptr + biases_offset_first_element_in_bytes + x * sizeof(int);
 
     int4 biases_values = vload4(0, (__global int *)bias_addr);
     input_values += (int4)biases_values;
@@ -2940,7 +2940,7 @@ __kernel void gemmlowp_output_stage_quantize_down_fixedpoint_qsymm16(TENSOR3D_DE
 #endif // defined(MAX_BOUND)
 
     // Store the result
-    vstore4(res, 0, dst_addr);
+    vstore4(res, 0, (__global short *)dst_addr);
 }
 #endif // defined(RESULT_FIXEDPOINT_MULTIPLIER) && defined(RESULT_SHIFT)
 
