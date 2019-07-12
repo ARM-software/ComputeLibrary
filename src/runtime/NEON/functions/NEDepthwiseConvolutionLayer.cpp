@@ -689,9 +689,10 @@ void NEDepthwiseConvolutionLayerOptimized::prepare()
 }
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
-    : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _permute_input(),
-      _permute_weights(), _permute_output(), _activationlayer_function(), _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(), _permuted_input(), _permuted_weights(),
-      _permuted_output(), _is_prepared(false), _is_quantized(false), _is_nhwc(false), _is_activationlayer_enabled(false), _original_weights(nullptr)
+    : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _depthwise_conv_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _fill_border(), _v2mm_input_fill_border(),
+      _v2mm_weights_fill_border(), _permute_input(), _permute_weights(), _permute_output(), _activationlayer_function(), _input_reshaped(), _weights_reshaped(), _v2mm_output(), _output_reshaped(),
+      _permuted_input(), _permuted_weights(), _permuted_output(), _is_prepared(false), _is_quantized(false), _is_nhwc(false), _is_activationlayer_enabled(false), _is_optimized(false),
+      _original_weights(nullptr)
 {
 }
 
@@ -703,123 +704,135 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayer::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
                                                                      output->info(), conv_info, depth_multiplier, act_info, dilation));
 
-    _is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
+    _is_nhwc      = input->info()->data_layout() == DataLayout::NHWC;
+    _is_optimized = _is_nhwc && input->info()->data_type() == DataType::F32;
 
-    ITensor       *input_to_use   = input;
-    const ITensor *weights_to_use = weights;
-    ITensor       *output_to_use  = output;
-
-    if(_is_nhwc)
+    if(!_is_optimized)
     {
-        _permute_input.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
-        _permuted_input.info()->set_data_layout(DataLayout::NCHW);
-        input_to_use = &_permuted_input;
+        ITensor       *input_to_use   = input;
+        const ITensor *weights_to_use = weights;
+        ITensor       *output_to_use  = output;
 
-        _permute_weights.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
-        _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
-        weights_to_use = &_permuted_weights;
+        if(_is_nhwc)
+        {
+            _permute_input.configure(input, &_permuted_input, PermutationVector(1U, 2U, 0U));
+            _permuted_input.info()->set_data_layout(DataLayout::NCHW);
+            input_to_use = &_permuted_input;
+
+            _permute_weights.configure(weights, &_permuted_weights, PermutationVector(1U, 2U, 0U));
+            _permuted_weights.info()->set_data_layout(DataLayout::NCHW);
+            weights_to_use = &_permuted_weights;
+        }
+
+        const size_t weights_w = weights_to_use->info()->dimension(0);
+        const size_t weights_h = weights_to_use->info()->dimension(1);
+        const size_t weights_z = weights_to_use->info()->dimension(2);
+
+        _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
+        _is_prepared      = false;
+        _original_weights = weights_to_use;
+
+        // Should bias be appended ?
+        bool append_bias = (biases != nullptr) && !_is_quantized;
+
+        // Calculate output shape
+        TensorShape output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
+
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+
+        if(_is_nhwc)
+        {
+            permute(output_shape, PermutationVector(1U, 2U, 0U));
+            _permuted_output.allocator()->init(output->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+            _permuted_output.info()->set_data_layout(DataLayout::NCHW);
+            _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
+            output_to_use = &_permuted_output;
+        }
+
+        // Output width and height
+        const unsigned int conv_w = output_shape.x();
+        const unsigned int conv_h = output_shape.y();
+
+        // Set up intermediate tensors
+        const size_t patch_size = weights_w * weights_h + (append_bias ? 1 : 0);
+        const size_t conv_size  = conv_w * conv_h;
+
+        // Im2Col configuration
+        TensorShape shape_im2col = input_to_use->info()->tensor_shape();
+        shape_im2col.set(0, patch_size);
+        shape_im2col.set(1, conv_size);
+        shape_im2col.set(2, weights_z);
+        _input_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
+        _im2col_kernel.configure(input_to_use, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation);
+
+        // Weights reshape configuration
+        const TensorShape shape_weights_reshape(patch_size, weights_z);
+        _weights_reshaped.allocator()->init(weights->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape).set_data_layout(DataLayout::NCHW));
+        _weights_reshape_kernel.configure(weights_to_use, &_weights_reshaped, append_bias ? biases : nullptr);
+
+        // GEMV configuration
+        DataType    v2mm_dt        = (input->info()->data_type() == DataType::QASYMM8) ? DataType::S32 : input->info()->data_type();
+        TensorShape shape_v2mm_out = input_to_use->info()->tensor_shape();
+        shape_v2mm_out.set(0, conv_size * weights_z);
+        shape_v2mm_out.set(1, 1);
+        shape_v2mm_out.set(2, 1);
+        _v2mm_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out).set_data_layout(DataLayout::NCHW));
+        _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
+        _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+        _vector_to_tensor_kernel.configure(&_v2mm_output, (_is_quantized) ? &_output_reshaped : output_to_use, conv_w, conv_h);
+
+        // Output staged configuration
+        if(_is_quantized)
+        {
+            const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
+            const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
+
+            float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+            int   output_multiplier;
+            int   output_shift;
+            quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+            _output_stage_kernel.configure(&_output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset);
+            _output_reshaped.allocator()->allocate();
+        }
+
+        if(_is_nhwc)
+        {
+            _permute_output.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
+
+            _permuted_input.allocator()->allocate();
+            _permuted_weights.allocator()->allocate();
+            _permuted_output.allocator()->allocate();
+        }
+
+        // Fill borders on inputs
+        PixelValue zero_in(static_cast<int32_t>(0));
+        PixelValue zero_w(static_cast<int32_t>(0));
+        if(_is_quantized)
+        {
+            zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().uniform().offset));
+            zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().uniform().offset));
+        }
+        BorderSize border_size = _v2mm_kernel.border_size();
+        _v2mm_input_fill_border.configure(&_input_reshaped, border_size, BorderMode::CONSTANT, zero_in);
+
+        border_size.bottom = 0;
+        _v2mm_weights_fill_border.configure(&_weights_reshaped, border_size, BorderMode::CONSTANT, zero_w);
+
+        // Allocate intermediate tensors
+        _input_reshaped.allocator()->allocate();
+        _v2mm_output.allocator()->allocate();
     }
-
-    const size_t weights_w = weights_to_use->info()->dimension(0);
-    const size_t weights_h = weights_to_use->info()->dimension(1);
-    const size_t weights_z = weights_to_use->info()->dimension(2);
-
-    _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _is_prepared      = false;
-    _original_weights = weights_to_use;
-
-    // Should bias be appended ?
-    bool append_bias = (biases != nullptr) && !_is_quantized;
-
-    // Calculate output shape
-    TensorShape output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier, dilation);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-
-    if(_is_nhwc)
+    else
     {
-        permute(output_shape, PermutationVector(1U, 2U, 0U));
-        _permuted_output.allocator()->init(output->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
-        _permuted_output.info()->set_data_layout(DataLayout::NCHW);
-        _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
-        output_to_use = &_permuted_output;
+        // Configure kernel
+        _depthwise_conv_kernel.configure(input, weights, biases, output, conv_info, depth_multiplier, dilation);
+
+        // Fill input borders
+        _fill_border.configure(input, _depthwise_conv_kernel.border_size(), BorderMode::CONSTANT, PixelValue(static_cast<uint64_t>(0), input->info()->data_type()));
     }
-
-    // Output width and height
-    const unsigned int conv_w = output_shape.x();
-    const unsigned int conv_h = output_shape.y();
-
-    // Set up intermediate tensors
-    const size_t patch_size = weights_w * weights_h + (append_bias ? 1 : 0);
-    const size_t conv_size  = conv_w * conv_h;
-
-    // Im2Col configuration
-    TensorShape shape_im2col = input_to_use->info()->tensor_shape();
-    shape_im2col.set(0, patch_size);
-    shape_im2col.set(1, conv_size);
-    shape_im2col.set(2, weights_z);
-    _input_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
-    _im2col_kernel.configure(input_to_use, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation);
-
-    // Weights reshape configuration
-    const TensorShape shape_weights_reshape(patch_size, weights_z);
-    _weights_reshaped.allocator()->init(weights->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape).set_data_layout(DataLayout::NCHW));
-    _weights_reshape_kernel.configure(weights_to_use, &_weights_reshaped, append_bias ? biases : nullptr);
-
-    // GEMV configuration
-    DataType    v2mm_dt        = (input->info()->data_type() == DataType::QASYMM8) ? DataType::S32 : input->info()->data_type();
-    TensorShape shape_v2mm_out = input_to_use->info()->tensor_shape();
-    shape_v2mm_out.set(0, conv_size * weights_z);
-    shape_v2mm_out.set(1, 1);
-    shape_v2mm_out.set(2, 1);
-    _v2mm_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out).set_data_layout(DataLayout::NCHW));
-    _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
-    _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
-    _vector_to_tensor_kernel.configure(&_v2mm_output, (_is_quantized) ? &_output_reshaped : output_to_use, conv_w, conv_h);
-
-    // Output staged configuration
-    if(_is_quantized)
-    {
-        const UniformQuantizationInfo iq_info = input->info()->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->info()->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->info()->quantization_info().uniform();
-
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset);
-        _output_reshaped.allocator()->allocate();
-    }
-
-    if(_is_nhwc)
-    {
-        _permute_output.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
-
-        _permuted_input.allocator()->allocate();
-        _permuted_weights.allocator()->allocate();
-        _permuted_output.allocator()->allocate();
-    }
-
-    // Fill borders on inputs
-    PixelValue zero_in(static_cast<int32_t>(0));
-    PixelValue zero_w(static_cast<int32_t>(0));
-    if(_is_quantized)
-    {
-        zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().uniform().offset));
-        zero_w  = PixelValue(static_cast<int32_t>(weights->info()->quantization_info().uniform().offset));
-    }
-    BorderSize border_size = _v2mm_kernel.border_size();
-    _v2mm_input_fill_border.configure(&_input_reshaped, border_size, BorderMode::CONSTANT, zero_in);
-
-    border_size.bottom = 0;
-    _v2mm_weights_fill_border.configure(&_weights_reshaped, border_size, BorderMode::CONSTANT, zero_w);
-
-    // Allocate intermediate tensors
-    _input_reshaped.allocator()->allocate();
-    _v2mm_output.allocator()->allocate();
 
     //Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
@@ -845,89 +858,96 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(height_idx) + (weights->dimension(height_idx) - 1) * (dilation.y() - 1) > input->dimension(height_idx) + conv_info.pad_top() + conv_info.pad_bottom());
     ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(channel_idx) * depth_multiplier) != weights->dimension(channel_idx));
 
-    // Clone output to use auto init
-    auto output_clone = output->clone();
-
-    const ITensorInfo *input_to_use   = input;
-    const ITensorInfo *weights_to_use = weights;
-    const ITensorInfo *output_to_use  = output_clone.get();
-
-    TensorShape permuted_input_shape   = input->tensor_shape();
-    TensorShape permuted_weights_shape = weights->tensor_shape();
-    TensorInfo  permuted_input;
-    TensorInfo  permuted_weights;
-
-    if(input->data_layout() == DataLayout::NHWC)
+    if(input->data_layout() != DataLayout::NHWC || input->data_type() != DataType::F32)
     {
-        permute(permuted_input_shape, PermutationVector(1U, 2U, 0U));
-        permute(permuted_weights_shape, PermutationVector(1U, 2U, 0U));
+        // Clone output to use auto init
+        auto output_clone = output->clone();
 
-        permuted_input   = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_input_shape).set_data_layout(DataLayout::NCHW));
-        permuted_weights = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_weights_shape).set_data_layout(DataLayout::NCHW));
+        const ITensorInfo *input_to_use   = input;
+        const ITensorInfo *weights_to_use = weights;
+        const ITensorInfo *output_to_use  = output_clone.get();
 
-        input_to_use   = &permuted_input;
-        weights_to_use = &permuted_weights;
+        TensorShape permuted_input_shape   = input->tensor_shape();
+        TensorShape permuted_weights_shape = weights->tensor_shape();
+        TensorInfo  permuted_input;
+        TensorInfo  permuted_weights;
+
+        if(input->data_layout() == DataLayout::NHWC)
+        {
+            permute(permuted_input_shape, PermutationVector(1U, 2U, 0U));
+            permute(permuted_weights_shape, PermutationVector(1U, 2U, 0U));
+
+            permuted_input   = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_input_shape).set_data_layout(DataLayout::NCHW));
+            permuted_weights = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(permuted_weights_shape).set_data_layout(DataLayout::NCHW));
+
+            input_to_use   = &permuted_input;
+            weights_to_use = &permuted_weights;
+        }
+
+        const bool         is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+        const bool         append_bias  = (biases != nullptr) && !is_quantized;
+        TensorShape        output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
+        const size_t       weights_w    = weights_to_use->dimension(0);
+        const size_t       weights_h    = weights_to_use->dimension(1);
+        const size_t       weights_z    = weights_to_use->dimension(2);
+        const unsigned int conv_w       = output_shape[width_idx];
+        const unsigned int conv_h       = output_shape[height_idx];
+        const size_t       patch_size   = weights_w * weights_h + (append_bias ? 1 : 0);
+        const size_t       conv_size    = conv_w * conv_h;
+
+        // Output auto inizialitation if not yet initialized
+        auto_init_if_empty(*output_clone, input->clone()->set_tensor_shape(output_shape));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+
+        TensorInfo permuted_output;
+        if(input->data_layout() == DataLayout::NHWC)
+        {
+            permute(output_shape, PermutationVector(1U, 2U, 0U));
+            permuted_output = TensorInfo(output_clone->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_layout(DataLayout::NCHW));
+            output_to_use   = &permuted_output;
+        }
+
+        // Im2Col configuration
+        TensorShape shape_im2col = input_to_use->tensor_shape();
+        shape_im2col.set(0, patch_size);
+        shape_im2col.set(1, conv_size);
+        shape_im2col.set(2, weights_z);
+        TensorInfo input_reshaped(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseIm2ColKernel::validate(input_to_use, &input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation));
+
+        // Weights reshape configuration
+        const TensorShape shape_weights_reshape(patch_size, weights_z);
+        TensorInfo        weights_reshaped(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape).set_data_layout(DataLayout::NCHW));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseWeightsReshapeKernel::validate(weights_to_use, &weights_reshaped, append_bias ? biases : nullptr));
+
+        // GEMV configuration
+        DataType    v2mm_dt        = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
+        TensorShape shape_v2mm_out = input_to_use->tensor_shape();
+        shape_v2mm_out.set(0, conv_size * weights_z);
+        shape_v2mm_out.set(1, 1);
+        shape_v2mm_out.set(2, 1);
+        TensorInfo v2mm_output(input->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out).set_data_layout(DataLayout::NCHW));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixVectorMultiplyKernel::validate(&input_reshaped, &weights_reshaped, &v2mm_output));
+
+        TensorInfo output_reshaped(v2mm_output.clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_to_use->tensor_shape()));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseVectorToTensorKernel::validate(&v2mm_output, (is_quantized) ? &output_reshaped : output_to_use, conv_w, conv_h));
+
+        if(is_quantized)
+        {
+            const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+            const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+            float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+            int   output_multiplier;
+            int   output_shift;
+            ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset));
+        }
     }
-
-    const bool         is_quantized = is_data_type_quantized_asymmetric(input->data_type());
-    const bool         append_bias  = (biases != nullptr) && !is_quantized;
-    TensorShape        output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier, dilation);
-    const size_t       weights_w    = weights_to_use->dimension(0);
-    const size_t       weights_h    = weights_to_use->dimension(1);
-    const size_t       weights_z    = weights_to_use->dimension(2);
-    const unsigned int conv_w       = output_shape[width_idx];
-    const unsigned int conv_h       = output_shape[height_idx];
-    const size_t       patch_size   = weights_w * weights_h + (append_bias ? 1 : 0);
-    const size_t       conv_size    = conv_w * conv_h;
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output_clone, input->clone()->set_tensor_shape(output_shape));
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
-
-    TensorInfo permuted_output;
-    if(input->data_layout() == DataLayout::NHWC)
+    else
     {
-        permute(output_shape, PermutationVector(1U, 2U, 0U));
-        permuted_output = TensorInfo(output_clone->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_layout(DataLayout::NCHW));
-        output_to_use   = &permuted_output;
-    }
-
-    // Im2Col configuration
-    TensorShape shape_im2col = input_to_use->tensor_shape();
-    shape_im2col.set(0, patch_size);
-    shape_im2col.set(1, conv_size);
-    shape_im2col.set(2, weights_z);
-    TensorInfo input_reshaped(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseIm2ColKernel::validate(input_to_use, &input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier, dilation));
-
-    // Weights reshape configuration
-    const TensorShape shape_weights_reshape(patch_size, weights_z);
-    TensorInfo        weights_reshaped(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape).set_data_layout(DataLayout::NCHW));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseWeightsReshapeKernel::validate(weights_to_use, &weights_reshaped, append_bias ? biases : nullptr));
-
-    // GEMV configuration
-    DataType    v2mm_dt        = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
-    TensorShape shape_v2mm_out = input_to_use->tensor_shape();
-    shape_v2mm_out.set(0, conv_size * weights_z);
-    shape_v2mm_out.set(1, 1);
-    shape_v2mm_out.set(2, 1);
-    TensorInfo v2mm_output(input->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out).set_data_layout(DataLayout::NCHW));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixVectorMultiplyKernel::validate(&input_reshaped, &weights_reshaped, &v2mm_output));
-
-    TensorInfo output_reshaped(v2mm_output.clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_to_use->tensor_shape()));
-    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseVectorToTensorKernel::validate(&v2mm_output, (is_quantized) ? &output_reshaped : output_to_use, conv_w, conv_h));
-
-    if(is_quantized)
-    {
-        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
-        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
-        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
-
-        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
-        int   output_multiplier;
-        int   output_shift;
-        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
-        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, dilation));
     }
 
     // Validate Activation Layer
@@ -941,25 +961,33 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
 void NEDepthwiseConvolutionLayer::run()
 {
-    prepare();
-
-    if(_is_nhwc)
+    if(!_is_optimized)
     {
-        _permute_input.run();
+        prepare();
+
+        if(_is_nhwc)
+        {
+            _permute_input.run();
+        }
+
+        NEScheduler::get().schedule(&_im2col_kernel, Window::DimX);
+        NEScheduler::get().schedule(&_v2mm_input_fill_border, Window::DimX);
+        NEScheduler::get().schedule(&_v2mm_kernel, Window::DimX);
+        NEScheduler::get().schedule(&_vector_to_tensor_kernel, Window::DimX);
+        if(_is_quantized)
+        {
+            NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);
+        }
+
+        if(_is_nhwc)
+        {
+            _permute_output.run();
+        }
     }
-
-    NEScheduler::get().schedule(&_im2col_kernel, Window::DimX);
-    NEScheduler::get().schedule(&_v2mm_input_fill_border, Window::DimX);
-    NEScheduler::get().schedule(&_v2mm_kernel, Window::DimX);
-    NEScheduler::get().schedule(&_vector_to_tensor_kernel, Window::DimX);
-    if(_is_quantized)
+    else
     {
-        NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);
-    }
-
-    if(_is_nhwc)
-    {
-        _permute_output.run();
+        NEScheduler::get().schedule(&_fill_border, Window::DimX);
+        NEScheduler::get().schedule(&_depthwise_conv_kernel, Window::DimY);
     }
 
     if(_is_activationlayer_enabled)
@@ -970,7 +998,7 @@ void NEDepthwiseConvolutionLayer::run()
 
 void NEDepthwiseConvolutionLayer::prepare()
 {
-    if(!_is_prepared)
+    if(!_is_prepared && !_is_optimized)
     {
         ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
 

@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__
 
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
@@ -280,6 +281,10 @@ private:
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
  *
+ * If data type is F32 and data layout is NHWC:
+ * -# @ref NEDepthwiseConvolutionLayerKernel
+ *
+ * Otherwise:
  * -# @ref NEDepthwiseIm2ColKernel
  * -# @ref NEDepthwiseWeightsReshapeKernel
  * -# @ref NEGEMMMatrixVectorMultiplyKernel
@@ -339,8 +344,10 @@ private:
     NEDepthwiseIm2ColKernel                   _im2col_kernel;
     NEDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
     NEGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
+    NEDepthwiseConvolutionLayerKernel         _depthwise_conv_kernel;
     NEDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
     NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _fill_border;
     NEFillBorderKernel                        _v2mm_input_fill_border;
     NEFillBorderKernel                        _v2mm_weights_fill_border;
     NEPermute                                 _permute_input;
@@ -358,6 +365,7 @@ private:
     bool                                      _is_quantized;
     bool                                      _is_nhwc;
     bool                                      _is_activationlayer_enabled;
+    bool                                      _is_optimized;
     const ITensor                            *_original_weights;
 };
 } // namespace arm_compute

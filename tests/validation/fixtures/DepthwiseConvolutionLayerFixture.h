@@ -193,6 +193,115 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class DepthwiseConvolutionLayerKernelValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(size_t width, size_t height, size_t channel, size_t batch, Size2D kernel_size, size_t depth_multiplier, Size2D dilation, Size2D stride, bool padding_valid, DataType data_type,
+               DataLayout data_layout)
+    {
+        const TensorShape src_shape(width, height, channel, batch);
+        const TensorShape weights_shape(kernel_size.width, kernel_size.height, channel * depth_multiplier);
+        const TensorShape biases_shape(weights_shape.z());
+
+        PadStrideInfo conv_info;
+        if(padding_valid)
+        {
+            conv_info = PadStrideInfo();
+        }
+        else
+        {
+            conv_info = calculate_same_pad(src_shape, weights_shape, PadStrideInfo(stride.width, stride.height), DataLayout::NCHW, dilation);
+        }
+
+        _target    = compute_target(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type, data_layout);
+        _reference = compute_reference(src_shape, weights_shape, biases_shape, conv_info, dilation, depth_multiplier, data_type);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            default:
+                library->fill_tensor_uniform(tensor, i);
+        }
+    }
+
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape biases_shape, PadStrideInfo &conv_info, Size2D dilation,
+                              unsigned int depth_multiplier, const DataType data_type, const DataLayout data_layout)
+    {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        // Create tensors
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType biases  = create_tensor<TensorType>(biases_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst     = create_tensor<TensorType>(TensorShape(), data_type, 1, QuantizationInfo(), data_layout);
+
+        // Create Depthwise Convolution configure function
+        FunctionType dwc;
+        dwc.configure(&src, &weights, &biases, &dst, conv_info, depth_multiplier, dilation);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        weights.allocator()->allocate();
+        biases.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!biases.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(src), 0);
+        fill(AccessorType(weights), 1);
+        fill(AccessorType(biases), 2);
+
+        // Compute function
+        dwc.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &biases_shape, const PadStrideInfo &conv_info,
+                                      const Size2D &dilation, unsigned int depth_multiplier, const DataType data_type)
+    {
+        SimpleTensor<T> src{ input_shape, data_type };
+        SimpleTensor<T> weights{ weights_shape, data_type };
+        SimpleTensor<T> biases{ biases_shape, data_type };
+
+        fill(src, 0);
+        fill(weights, 1);
+        fill(biases, 2);
+
+        const TensorShape dst_shape = compute_depthwise_convolution_shape(TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type), conv_info,
+                                                                          depth_multiplier, dilation);
+        return reference::depthwise_convolution(src, weights, biases, dst_shape, conv_info, depth_multiplier, dilation);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:

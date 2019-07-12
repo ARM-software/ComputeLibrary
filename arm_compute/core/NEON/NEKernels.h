@@ -53,6 +53,7 @@
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthToSpaceLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
