@@ -66,7 +66,7 @@ vec4[2] transform_nearest(vec2 coord, vec2 scale)
     t[1] = vec4(coord.y) * scale.y;
 #else                                   /* Unsupported sampling policy */
 #error Unsupported sampling policy
-#endif
+#endif /* SAMPLING_POLICY */
 
     return t;
 }
