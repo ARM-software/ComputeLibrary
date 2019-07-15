@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
-#define __ARM_COMPUTE_CPPFUNCTIONS_H__
-
-/* Header regrouping all the CPP functions */
-#include "arm_compute/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.h"
-#include "arm_compute/runtime/CPP/functions/CPPDetectionOutputLayer.h"
 #include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
-#include "arm_compute/runtime/CPP/functions/CPPTopKV.h"
-#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 
-#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */
+#include "arm_compute/core/CPP/kernels/CPPNonMaximumSuppressionKernel.h"
+#include "support/ToolchainSupport.h"
+
+namespace arm_compute
+{
+void CPPNonMaximumSuppression::configure(
+    const ITensor *bboxes, const ITensor *scores, ITensor *indices, unsigned int max_output_size,
+    const float score_threshold, const float nms_threshold)
+{
+    auto k = arm_compute::support::cpp14::make_unique<CPPNonMaximumSuppressionKernel>();
+    k->configure(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold);
+    _kernel = std::move(k);
+}
+
+Status CPPNonMaximumSuppression::validate(
+    const ITensorInfo *bboxes, const ITensorInfo *scores, const ITensorInfo *indices, unsigned int max_output_size,
+    const float score_threshold, const float nms_threshold)
+{
+    return CPPNonMaximumSuppressionKernel::validate(bboxes, scores, indices, max_output_size, score_threshold, nms_threshold);
+}
+} // namespace arm_compute

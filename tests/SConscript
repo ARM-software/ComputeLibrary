@@ -32,7 +32,7 @@ SConscript('./framework/SConscript', duplicate=0)
 variables = [
     #FIXME: Remove before release!
     BoolVariable("benchmark_examples", "Build benchmark examples programs", True),
-    BoolVariable("validate_examples", "Build benchmark examples programs", True),
+    BoolVariable("validate_examples", "Build validate examples programs", True),
     #FIXME Switch the following two options to False before releasing
     BoolVariable("validation_tests", "Build validation test programs", True),
     BoolVariable("benchmark_tests", "Build benchmark test programs", True),

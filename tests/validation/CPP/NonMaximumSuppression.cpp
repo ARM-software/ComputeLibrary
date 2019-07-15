@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CPP/functions/CPPDetectionOutputLayer.h"
+#include "arm_compute/runtime/CPP/functions/CPPNonMaximumSuppression.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -42,11 +42,11 @@ namespace validation
 {
 namespace
 {
-const auto max_output_boxes_dataset = framework::dataset::make("MaxOutputBoxes", 1, 10);
-const auto score_threshold_dataset  = framework::dataset::make("ScoreThreshold", { 0.1f, 0.5f, 0.f, 1.f });
-const auto nms_threshold_dataset    = framework::dataset::make("NMSThreshold", { 0.1f, 0.5f, 0.f, 1.f });
-const auto NMSParametersSmall       = datasets::Small2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * nms_threshold_dataset;
-const auto NMSParametersBig         = datasets::Large2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * nms_threshold_dataset;
+const auto max_output_boxes_dataset  = framework::dataset::make("MaxOutputBoxes", 1, 10);
+const auto score_threshold_dataset   = framework::dataset::make("ScoreThreshold", { 0.1f, 0.5f, 0.f, 1.f });
+const auto iou_nms_threshold_dataset = framework::dataset::make("NMSThreshold", { 0.1f, 0.5f, 0.f, 1.f });
+const auto NMSParametersSmall        = datasets::Small2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
+const auto NMSParametersBig          = datasets::Large2DNonMaxSuppressionShapes() * max_output_boxes_dataset * score_threshold_dataset * iou_nms_threshold_dataset;
 
 } // namespace
 
@@ -137,8 +137,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CPPNonMaxSuppressionFixture, framework::Dataset
     validate(Accessor(_target), _reference);
 }
 
-TEST_SUITE_END() // CPP
 TEST_SUITE_END() // NMS
+TEST_SUITE_END() // CPP
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
