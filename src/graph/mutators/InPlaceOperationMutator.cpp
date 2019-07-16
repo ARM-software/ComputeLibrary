@@ -57,7 +57,11 @@ void InPlaceOperationMutator::mutate(Graph &g)
                 ARM_COMPUTE_ERROR_ON(current_output_tensor == nullptr || new_output_tensor == nullptr);
 
                 // Prevent in-place operation if there is an accessor bound to the in-place tensor or quantization info are different
-                if(new_output_tensor->accessor() == nullptr || current_output_tensor->desc().quant_info == new_output_tensor->desc().quant_info)
+                if(new_output_tensor->accessor() != nullptr || current_output_tensor->desc().quant_info != new_output_tensor->desc().quant_info)
+                {
+                    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor or the quantization info are different.\n");
+                }
+                else
                 {
                     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Switching to in-place computation for the node with ID : "
                                                   << node->id() << " and name : " << node->name() << std::endl);
@@ -65,10 +69,6 @@ void InPlaceOperationMutator::mutate(Graph &g)
                     new_output_tensor->set_accessor(current_output_tensor->extract_accessor());
                     // Update output
                     node->set_output_tensor(new_output_tensor->id(), 0);
-                }
-                else
-                {
-                    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Prevented in-place operation as there is an accessor bound to the input tensor\n");
                 }
             }
         }

@@ -167,6 +167,31 @@ private:
     std::ostream     &_output_stream;
 };
 
+/** SaveNumPy accessor class */
+class SaveNumPyAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] npy_name   Npy file name.
+     * @param[in] is_fortran (Optional) If true, save tensor in fortran order.
+     */
+    SaveNumPyAccessor(const std::string npy_name, const bool is_fortran = false);
+    /** Allow instances of this class to be move constructed */
+    SaveNumPyAccessor(SaveNumPyAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    SaveNumPyAccessor(const SaveNumPyAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    SaveNumPyAccessor &operator=(const SaveNumPyAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    const std::string _npy_name;
+    const bool        _is_fortran;
+};
+
 /** Image accessor class */
 class ImageAccessor final : public graph::ITensorAccessor
 {
@@ -555,6 +580,27 @@ inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std
     else
     {
         return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, output_stream);
+    }
+}
+
+/** Generates appropriate npy output accessor according to the specified npy_path
+ *
+ * @note If npy_path is empty will generate a DummyAccessor else will generate a SaveNpyAccessor
+ *
+ * @param[in] npy_name   Npy filename.
+ * @param[in] is_fortran (Optional) If true, save tensor in fortran order.
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_save_npy_output_accessor(const std::string &npy_name, const bool is_fortran = false)
+{
+    if(npy_name.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<SaveNumPyAccessor>(npy_name, is_fortran);
     }
 }
 

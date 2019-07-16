@@ -184,6 +184,20 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
     return false;
 }
 
+SaveNumPyAccessor::SaveNumPyAccessor(std::string npy_name, const bool is_fortran)
+    : _npy_name(std::move(npy_name)), _is_fortran(is_fortran)
+{
+}
+
+bool SaveNumPyAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+
+    utils::save_to_npy(tensor, _npy_name, _is_fortran);
+
+    return false;
+}
+
 ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
     : _already_loaded(false), _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
