@@ -1022,6 +1022,8 @@ __kernel void gemm_reshape_rhs_matrix_t(TENSOR3D_DECLARATION(src),
  *  - K0 = 2, 3, 4, 8, 16
  *  - H0 >= 1
  *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (i.e. -DACTIVATION_TYPE=RELU), A, B variables required by some activation functions and should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
@@ -1280,6 +1282,10 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
 
+#if defined(ACTIVATION_TYPE)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(ACTIVATION_TYPE)
+
     // Store output block
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
 
@@ -1397,6 +1403,8 @@ __kernel void gemm_mm_reshaped_only_rhs_t(IMAGE_DECLARATION(lhs),
  *  - K0 = 2, 3, 4, 8, 16
  *  - H0 >= 1
  *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (i.e. -DACTIVATION_TYPE=RELU), A, B variables required by some activation functions and should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
@@ -1656,6 +1664,10 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
 
+#if defined(ACTIVATION_TYPE)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(ACTIVATION_TYPE)
+
     // Store output block
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
 
@@ -1799,6 +1811,8 @@ __kernel void gemm_mm_reshaped_only_rhs_nt(IMAGE_DECLARATION(lhs),
  *  - V0 >= 1
  *  - H0 >= 1
  *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (i.e. -DACTIVATION_TYPE=RELU), A, B variables required by some activation functions and should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
  * @note In case the output has to be reinterpreted as a 3D tensor (i.e. output of convolution layer), the following information must be passed at compile time:
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
  *       -# HEIGHT_GEMM3D: The height of the output in case it has to be reinterpreted as a 3D tensor.
@@ -2008,6 +2022,10 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
 
+#if defined(ACTIVATION_TYPE)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(ACTIVATION_TYPE)
+
     // Store output block
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);
 
@@ -2115,6 +2133,8 @@ __kernel void gemm_mm_reshaped_lhs_nt_rhs_t(IMAGE_DECLARATION(lhs),
  *  - N0 = 2, 3, 4, 8, 16
  *  - K0 = 2, 3, 4, 8, 16
  *
+ * @note If the activation type were passed at compile time through -DACTIVATION_TYPE (i.e. -DACTIVATION_TYPE=RELU), A, B variables required by some activation functions and should be passed at compile time as well using -DA_VAL= and -DB_VAL= respectively.
+ *       The activation function is performed after the bias addition
  * @note In case the input or output have to be reinterpreted as a 3D tensor, the following information must be passed at compile time:
  *       -# REINTERPRET_INPUT_AS_3D: To reinterpret the input as 3D
  *       -# REINTERPRET_OUTPUT_AS_3D: To reinterpret the output as 3D
@@ -2370,6 +2390,10 @@ __kernel void gemm_mm_native(IMAGE_DECLARATION(lhs),
 
 #endif // defined(BROADCAST_BIAS)
 #endif // defined(BETA)
+
+#if defined(ACTIVATION_TYPE)
+    ACTIVATION_BLOCK(M0, ACTIVATION_TYPE, DATA_TYPE, c, A_VAL, B_VAL);
+#endif // defined(ACTIVATION_TYPE)
 
     // Store output block
     STORE_BLOCK(M0, N0, DATA_TYPE, c, dst_addr, dst_stride_y, zout);

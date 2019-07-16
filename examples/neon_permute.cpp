@@ -75,7 +75,7 @@ public:
         tensor_nchw.print(std::cout);
         std::cout << "Tensor NHWC" << std::endl;
         tensor_nhwc.print(std::cout);
-#endif
+#endif // ARM_COMPUTE_DEBUG_ENABLED
     }
 
 private:

@@ -33,6 +33,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/GEMM.h"
 
 #include <random>
@@ -158,7 +159,7 @@ class GEMMMatrixMultiplyReshapedValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0, bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias)
+               bool interleave_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -181,8 +182,8 @@ public:
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -198,7 +199,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                              DataType data_type, float alpha, float beta, bool broadcast_bias)
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -218,6 +219,7 @@ protected:
         kernel_info.depth_output_gemm3d     = 0;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -261,7 +263,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape[0]          = rhs_shape[0];
@@ -290,7 +293,7 @@ protected:
             }
         }
 
-        return reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -304,7 +307,7 @@ public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int v0, unsigned int h0,
                bool interleave_lhs,
-               bool interleave_rhs, DataType data_type, float alpha, float beta)
+               bool interleave_rhs, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -328,8 +331,8 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -341,7 +344,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                              DataType data_type, float alpha, float beta, unsigned int m_h)
+                              DataType data_type, float alpha, float beta, unsigned int m_h, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -361,6 +364,7 @@ protected:
         kernel_info.depth_output_gemm3d     = m_h;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -404,7 +408,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape.set(0, rhs_shape[0]);
@@ -432,7 +437,7 @@ protected:
             memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
         }
 
-        return reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -445,7 +450,7 @@ class GEMMMatrixMultiplyReshapedOnlyRHSValidationFixture : public framework::Fix
 public:
     template <typename...>
     void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
-               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias)
+               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -465,8 +470,8 @@ public:
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -482,7 +487,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                              DataType data_type, float alpha, float beta, bool broadcast_bias)
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -501,6 +506,7 @@ protected:
         kernel_info.depth_output_gemm3d     = 0;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -539,7 +545,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape[0]          = rhs_shape[0];
@@ -568,7 +575,7 @@ protected:
             }
         }
 
-        return (reference::gemm<T>(lhs, rhs, bias, alpha, beta));
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -581,7 +588,7 @@ class GEMMMatrixMultiplyReshapedOnlyRHS3DValidationFixture : public framework::F
 public:
     template <typename...>
     void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, unsigned int h0,
-               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta)
+               bool interleave_rhs, bool transpose_rhs, DataType data_type, float alpha, float beta, const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -602,8 +609,8 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -616,7 +623,7 @@ protected:
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
                               DataType data_type, float alpha, float beta,
-                              unsigned int m_h)
+                              unsigned int m_h, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -635,6 +642,7 @@ protected:
         kernel_info.depth_output_gemm3d     = m_h;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -673,7 +681,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape.set(0, rhs_shape[0]);
@@ -701,7 +710,7 @@ protected:
             memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
         }
 
-        return reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -713,7 +722,8 @@ class GEMMMatrixMultiplyNativeValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias)
+    void setup(unsigned int m, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta, bool broadcast_bias,
+               const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -730,8 +740,8 @@ public:
                                      broadcast_bias ? 1 : m,
                                      broadcast_bias ? 1 : batch_size);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, broadcast_bias, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, broadcast_bias, act_info);
     }
 
 protected:
@@ -747,7 +757,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                              DataType data_type, float alpha, float beta, bool broadcast_bias)
+                              DataType data_type, float alpha, float beta, bool broadcast_bias, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -765,6 +775,7 @@ protected:
         kernel_info.depth_output_gemm3d     = 0;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = broadcast_bias;
+        kernel_info.activation_info         = act_info;
 
         // Create and configure function
         GEMMFunctionType gemm;
@@ -796,7 +807,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, bool broadcast_bias,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape[0]          = rhs_shape[0];
@@ -825,7 +837,7 @@ protected:
             }
         }
 
-        return reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
@@ -837,7 +849,8 @@ class GEMMMatrixMultiplyNative3DValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta)
+    void setup(unsigned int m_w, unsigned int m_h, unsigned int n, unsigned int k, unsigned int batch_size, unsigned int m0, unsigned int n0, unsigned int k0, DataType data_type, float alpha, float beta,
+               const ActivationLayerInfo &act_info)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0 = m0;
@@ -855,8 +868,8 @@ public:
         const TensorShape rhs_shape(n, k, batch_size);
         const TensorShape bias_shape(n, 1, 1);
 
-        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h);
-        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h);
+        _target    = compute_target(lhs_shape, rhs_shape, bias_shape, lhs_info, rhs_info, data_type, alpha, beta, m_h, act_info);
+        _reference = compute_reference(lhs_shape, rhs_shape, bias_shape, data_type, alpha, beta, m_h, act_info);
     }
 
 protected:
@@ -868,7 +881,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, const GEMMLHSMatrixInfo &lhs_info, const GEMMRHSMatrixInfo &rhs_info,
-                              DataType data_type, float alpha, float beta, unsigned int m_h)
+                              DataType data_type, float alpha, float beta, unsigned int m_h, const ActivationLayerInfo &act_info)
     {
         // Create tensors
         TensorType lhs  = create_tensor<TensorType>(lhs_shape, data_type, 1);
@@ -886,6 +899,7 @@ protected:
         kernel_info.depth_output_gemm3d     = m_h;
         kernel_info.reinterpret_input_as_3d = false;
         kernel_info.broadcast_bias          = true;
+        kernel_info.activation_info         = act_info;
 
         // The output tensor will be auto-initialized within the function
 
@@ -919,7 +933,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h)
+    SimpleTensor<T> compute_reference(const TensorShape &lhs_shape, const TensorShape &rhs_shape, const TensorShape &bias_shape, DataType data_type, float alpha, float beta, unsigned int m_h,
+                                      const ActivationLayerInfo &act_info)
     {
         TensorShape dst_shape = lhs_shape;
         dst_shape.set(0, rhs_shape[0]);
@@ -947,7 +962,7 @@ protected:
             memcpy(bias.data() + i * n, bias.data(), n * sizeof(T));
         }
 
-        return reference::gemm<T>(lhs, rhs, bias, alpha, beta);
+        return reference::activation_layer(reference::gemm<T>(lhs, rhs, bias, alpha, beta), act_info);
     }
 
     TensorType      _target{};
