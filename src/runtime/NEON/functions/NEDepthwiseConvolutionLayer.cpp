@@ -193,17 +193,10 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor       *input,
                                                const ActivationLayerInfo &act_info,
                                                const Size2D              &dilation)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-
-    // idx_w and idx_h only used for validation
-    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_UNUSED(idx_w);
-    ARM_COMPUTE_UNUSED(idx_h);
-
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayer3x3::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
+                                                                        output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -244,6 +237,8 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo         *input
                                                 const Size2D              &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -266,7 +261,15 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo         *input
 
         if(is_quantized)
         {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output));
+            const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+            const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+            const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+            float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+            int   output_multiplier;
+            int   output_shift;
+            ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&accumulator, biases, output, output_multiplier, output_shift, oq_info.offset));
         }
     }
     else
@@ -519,17 +522,10 @@ void NEDepthwiseConvolutionLayerOptimized::configure(ITensor       *input,
                                                      const ActivationLayerInfo &act_info,
                                                      const Size2D              &dilation)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-
-    // idx_w and idx_h only used for validation
-    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_UNUSED(idx_w);
-    ARM_COMPUTE_UNUSED(idx_h);
-
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayerOptimized::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
+                                                                              output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
@@ -571,6 +567,8 @@ Status NEDepthwiseConvolutionLayerOptimized::validate(const ITensorInfo         
                                                       const Size2D              &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
@@ -700,19 +698,10 @@ NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
 void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info,
                                             unsigned int depth_multiplier, const ActivationLayerInfo &act_info, const Size2D &dilation)
 {
-    const unsigned int channel_idx = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
-    ARM_COMPUTE_UNUSED(channel_idx);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_ERROR_ON((input->info()->dimension(channel_idx) * depth_multiplier) != weights->info()->dimension(channel_idx));
-    // idx_w and idx_h only used for validation
-    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
-    ARM_COMPUTE_UNUSED(idx_w);
-    ARM_COMPUTE_UNUSED(idx_h);
-
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_w) + (weights->info()->dimension(idx_w) - 1) * (dilation.x() - 1) > input->info()->dimension(idx_w) + conv_info.pad_left() + conv_info.pad_right());
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(idx_h) + (weights->info()->dimension(idx_h) - 1) * (dilation.y() - 1) > input->info()->dimension(idx_h) + conv_info.pad_top() + conv_info.pad_bottom());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(NEDepthwiseConvolutionLayer::validate(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(),
+                                                                     output->info(), conv_info, depth_multiplier, act_info, dilation));
 
     _is_nhwc = input->info()->data_layout() == DataLayout::NHWC;
 
@@ -848,11 +837,14 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(dilation.x() < 1 || dilation.y() < 1);
 
-    const unsigned int width_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const unsigned int height_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const unsigned int width_idx   = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) + (weights->dimension(width_idx) - 1) * (dilation.x() - 1) > input->dimension(width_idx) + conv_info.pad_left() + conv_info.pad_right());
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(height_idx) + (weights->dimension(height_idx) - 1) * (dilation.y() - 1) > input->dimension(height_idx) + conv_info.pad_top() + conv_info.pad_bottom());
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(channel_idx) * depth_multiplier) != weights->dimension(channel_idx));
+
     // Clone output to use auto init
     auto output_clone = output->clone();
 
@@ -927,7 +919,15 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
 
     if(is_quantized)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output_to_use));
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        int   output_multiplier;
+        int   output_shift;
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output_to_use, output_multiplier, output_shift, oq_info.offset));
     }
 
     // Validate Activation Layer
