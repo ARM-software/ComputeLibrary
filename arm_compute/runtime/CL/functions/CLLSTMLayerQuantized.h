@@ -21,58 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NELSTMLAYERQUANTIZED_H__
-#define __ARM_COMPUTE_NELSTMLAYERQUANTIZED_H__
+#ifndef __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__
+#define __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__
 
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
-#include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEElementwiseOperations.h"
-#include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
-#include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
-#include "arm_compute/runtime/NEON/functions/NEPixelWiseMultiplication.h"
-#include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
-#include "arm_compute/runtime/NEON/functions/NESlice.h"
-#include "arm_compute/runtime/NEON/functions/NETranspose.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+#include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLElementwiseOperations.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
+#include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
+#include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLSlice.h"
+#include "arm_compute/runtime/CL/functions/CLTranspose.h"
 
 #include "arm_compute/runtime/common/LSTMParams.h"
 
 namespace arm_compute
 {
 // Forward declarations
-class ITensor;
+class ICLTensor;
 
-/** Basic function to run @ref NELSTMLayerQuantized
+/** Basic function to run @ref CLLSTMLayerQuantized
  *
- * This function calls the following NEON functions/kernels:
+ * This function calls the following CL functions/kernels:
  *
- * -# @ref NEGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
- * -# @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
- * -# @ref NETranspose                                           Matrix transpose
- * -# @ref NEConcatenateLayer                                    Tensor concatenation
- * -# @ref NEActivationLayer                                     Activation functions (tanh and logistic)
- * -# @ref NEArithmeticAddition                                  Elementwise addition
- * -# @ref NEPixelWiseMultiplication                             Elementwise multiplication
- * -# @ref NESlice                                               Tensor slicing
- * -# @ref NEDequantizationLayer                                 Dequantize into float
- * -# @ref NEQuantizationLayer                                   Quantize from float
+ * -# @ref CLGEMMLowpMatrixMultiplyCore                          Quantized matrix multiplication core. Accumulators are 32-bit integers
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint   Convert 32-bit integers into QSYMM16
+ * -# @ref CLTranspose                                           Matrix transpose
+ * -# @ref CLConcatenateLayer                                    Tensor concatenation
+ * -# @ref CLActivationLayer                                     Activation functions (tanh and logistic)
+ * -# @ref CLArithmeticAddition                                  Elementwise addition
+ * -# @ref CLPixelWiseMultiplication                             Elementwise multiplication
+ * -# @ref CLSlice                                               Tensor slicing
+ * -# @ref CLDequantizationLayer                                 Dequantize into float
+ * -# @ref CLQuantizationLayer                                   Quantize from float
  * */
-class NELSTMLayerQuantized : public IFunction
+class CLLSTMLayerQuantized : public IFunction
 {
 public:
     /** Default constructor */
-    NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLLSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELSTMLayerQuantized(const NELSTMLayerQuantized &) = delete;
+    CLLSTMLayerQuantized(const CLLSTMLayerQuantized &) = delete;
     /** Default move constructor */
-    NELSTMLayerQuantized(NELSTMLayerQuantized &&) = default;
+    CLLSTMLayerQuantized(CLLSTMLayerQuantized &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELSTMLayerQuantized &operator=(const NELSTMLayerQuantized &) = delete;
+    CLLSTMLayerQuantized &operator=(const CLLSTMLayerQuantized &) = delete;
     /** Default move assignment operator */
-    NELSTMLayerQuantized &operator=(NELSTMLayerQuantized &&) = default;
+    CLLSTMLayerQuantized &operator=(CLLSTMLayerQuantized &&) = default;
     /** Initialize function's tensors.
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: QASYMM8.
@@ -93,14 +91,14 @@ public:
      * @param[out] cell_state_out              Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size]. Data type supported:  QSYMM16.
      * @param[out] output_state_out            Destination tensor. Output is a 2D tensor with dimensions [output_size, batch_size].Data types supported: Same as @p input.
      */
-    void configure(const ITensor *input,
-                   const ITensor *input_to_input_weights, const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
-                   const ITensor *recurrent_to_input_weights, const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
-                   const ITensor *input_gate_bias, const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                   ITensor *cell_state_in, const ITensor *output_state_in,
-                   ITensor *cell_state_out, ITensor *output_state_out);
+    void configure(const ICLTensor *input,
+                   const ICLTensor *input_to_input_weights, const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                   const ICLTensor *recurrent_to_input_weights, const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                   const ICLTensor *input_gate_bias, const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                   ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                   ICLTensor *cell_state_out, ICLTensor *output_state_out);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref NELSTMLayer
+    /** Static function to check if given info will lead to a valid configuration of @ref CLLSTMLayerQuantized
      *
      * @param[in]  input                       Source tensor info. Input is a 2D tensor info with dimensions [input_size, batch_size]. Data types supported: QASYMM8.
      * @param[in]  input_to_input_weights      2D weights tensor info with dimensions [input_size, output_size]. Data type supported: Same as @p input.
@@ -134,72 +132,72 @@ public:
     void prepare() override;
 
 private:
-    MemoryGroup _memory_group;
+    CLMemoryGroup _memory_group;
 
     // Functions used
-    NEGEMMLowpMatrixMultiplyCore                        _gemmlowp;
-    NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint _output_stage;
-    NETranspose                                         _transpose_weights;
-    NEConcatenateLayer                                  _concat_input_weights;
-    NEConcatenateLayer                                  _concat_recurrent_weights;
-    NEConcatenateLayer                                  _concat_weights;
-    NEConcatenateLayer                                  _concat_inputs;
-    NEConcatenateLayer                                  _concat_bias;
-    NEActivationLayer                                   _sigmoid_forget_gate;
-    NEActivationLayer                                   _sigmoid_input_gate;
-    NEActivationLayer                                   _sigmoid_output_gate;
-    NEActivationLayer                                   _tanh_modulation_gate;
-    NEActivationLayer                                   _tanh_output_state;
-    NEArithmeticAddition                                _add1;
-    NEArithmeticAddition                                _add2;
-    NEPixelWiseMultiplication                           _mul1;
-    NEPixelWiseMultiplication                           _mul2;
-    NEPixelWiseMultiplication                           _mul3;
-    NESlice                                             _slice_input_tensor;
-    NESlice                                             _slice_forget_tensor;
-    NESlice                                             _slice_cell_tensor;
-    NESlice                                             _slice_output_tensor;
-    NEDequantizationLayer                               _dequantize;
-    NEQuantizationLayer                                 _quantize;
+    CLGEMMLowpMatrixMultiplyCore                        _gemmlowp;
+    CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint _output_stage;
+    CLTranspose                                         _transpose_weights;
+    CLConcatenateLayer                                  _concat_input_weights;
+    CLConcatenateLayer                                  _concat_recurrent_weights;
+    CLConcatenateLayer                                  _concat_weights;
+    CLConcatenateLayer                                  _concat_inputs;
+    CLConcatenateLayer                                  _concat_bias;
+    CLActivationLayer                                   _sigmoid_forget_gate;
+    CLActivationLayer                                   _sigmoid_input_gate;
+    CLActivationLayer                                   _sigmoid_output_gate;
+    CLActivationLayer                                   _tanh_modulation_gate;
+    CLActivationLayer                                   _tanh_output_state;
+    CLArithmeticAddition                                _add_cell_state_tmps;
+    CLArithmeticAddition                                _add2;
+    CLPixelWiseMultiplication                           _mul_forget_gate_cell_state;
+    CLPixelWiseMultiplication                           _mul_input_gate_input_mod_gate;
+    CLPixelWiseMultiplication                           _mul_output_state_tmp_output_gate;
+    CLSlice                                             _slice_input_tensor;
+    CLSlice                                             _slice_forget_tensor;
+    CLSlice                                             _slice_cell_tensor;
+    CLSlice                                             _slice_output_tensor;
+    CLDequantizationLayer                               _dequantize;
+    CLQuantizationLayer                                 _quantize;
 
     // Tensor pointers
-    const ITensor *_input_to_input_weights;
-    const ITensor *_input_to_forget_weights;
-    const ITensor *_input_to_cell_weights;
-    const ITensor *_input_to_output_weights;
-    const ITensor *_recurrent_to_input_weights;
-    const ITensor *_recurrent_to_forget_weights;
-    const ITensor *_recurrent_to_cell_weights;
-    const ITensor *_recurrent_to_output_weights;
-    const ITensor *_input_gate_bias;
-    const ITensor *_forget_gate_bias;
-    const ITensor *_cell_bias;
-    const ITensor *_output_gate_bias;
+    const ICLTensor *_input_to_input_weights;
+    const ICLTensor *_input_to_forget_weights;
+    const ICLTensor *_input_to_cell_weights;
+    const ICLTensor *_input_to_output_weights;
+    const ICLTensor *_recurrent_to_input_weights;
+    const ICLTensor *_recurrent_to_forget_weights;
+    const ICLTensor *_recurrent_to_cell_weights;
+    const ICLTensor *_recurrent_to_output_weights;
+    const ICLTensor *_input_gate_bias;
+    const ICLTensor *_forget_gate_bias;
+    const ICLTensor *_cell_bias;
+    const ICLTensor *_output_gate_bias;
 
     // Temporary tensors
-    Tensor _recurrent_weights;
-    Tensor _input_weights;
-    Tensor _weights;
-    Tensor _input;
-    Tensor _weights_transposed;
-    Tensor _output_highp;
-    Tensor _output_lowp;
-    Tensor _bias;
-    Tensor _forget_gate_input;
-    Tensor _input_gate_input;
-    Tensor _output_gate_input;
-    Tensor _input_modulation_gate_input;
-    Tensor _forget_gate_output;
-    Tensor _input_gate_output;
-    Tensor _output_gate_output;
-    Tensor _input_modulation_gate_output;
-    Tensor _cell_state1;
-    Tensor _cell_state2;
-    Tensor _output_state_tmp;
-    Tensor _output_state_out_symm;
-    Tensor _output_state_out_f32;
+    CLTensor _recurrent_weights;
+    CLTensor _input_weights;
+    CLTensor _weights;
+    CLTensor _input;
+    CLTensor _weights_transposed;
+    CLTensor _output_highp;
+    CLTensor _output_lowp;
+    CLTensor _bias;
+    CLTensor _forget_gate_input;
+    CLTensor _input_gate_input;
+    CLTensor _output_gate_input;
+    CLTensor _input_modulation_gate_input;
+    CLTensor _forget_gate_output;
+    CLTensor _input_gate_output;
+    CLTensor _output_gate_output;
+    CLTensor _input_modulation_gate_output;
+    CLTensor _cell_state_tmp1;
+    CLTensor _cell_state_tmp2;
+    CLTensor _output_state_tmp;
+    CLTensor _output_state_out_symm;
+    CLTensor _output_state_out_f32;
 
     bool _is_prepared;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NELSTMLAYERQUANTIZED_H__ */
+#endif /* __ARM_COMPUTE_CLLSTMLAYERQUANTIZED_H__ */

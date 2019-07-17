@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
+#include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 
-#include "tests/NEON/Accessor.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/Utils.h"
 #include "tests/datasets/LSTMLayerDataset.h"
@@ -43,8 +43,9 @@ namespace validation
 namespace
 {
 template <typename T>
-inline void fill_tensor(Tensor &tensor, const std::vector<T> &v)
+inline void fill_tensor(CLTensor &tensor, const std::vector<T> &v)
 {
+    tensor.map(true);
     // Import memory accounting for padding
     TensorShape t_shape = tensor.info()->tensor_shape();
     Window      window;
@@ -55,6 +56,7 @@ inline void fill_tensor(Tensor &tensor, const std::vector<T> &v)
         *reinterpret_cast<T *>(out.ptr()) = v[coord2index(t_shape, id)];
     },
     out);
+    tensor.unmap();
 }
 
 template <typename T>
@@ -65,7 +67,7 @@ inline void fill_tensor(SimpleTensor<T> &tensor, const std::vector<T> &v)
 
 } // namespace
 
-TEST_SUITE(NEON)
+TEST_SUITE(CL)
 TEST_SUITE(LSTMLayerQuantized)
 
 // *INDENT-OFF*
@@ -88,29 +90,29 @@ TEST_CASE(IntegrationTestCaseSmall, framework::DatasetMode::PRECOMMIT)
     TensorShape output_shape{ output_size, batch_size};
     TensorShape bias_shape{ output_size };
 
-    auto input_to_input_weights      = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_forget_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_cell_weights       = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_output_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_input_weights  = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_forget_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_cell_weights   = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_output_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_gate_bias             = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto forget_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto cell_gate_bias              = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto output_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
+    auto input_to_input_weights      = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_forget_weights     = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_cell_weights       = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_output_weights     = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_input_weights  = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_forget_weights = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_cell_weights   = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_output_weights = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_gate_bias             = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto forget_gate_bias            = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto cell_gate_bias              = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto output_gate_bias            = create_tensor<CLTensor>(bias_shape, DataType::S32);
 
     // LSTM input
-    auto input = create_tensor<Tensor>(input_shape, DataType::QASYMM8, 1, qasymm);
+    auto input = create_tensor<CLTensor>(input_shape, DataType::QASYMM8, 1, qasymm);
 
     // LSTM output state
-    auto output_state = create_tensor<Tensor>(output_shape, DataType::QASYMM8, 1, qasymm);
+    auto output_state = create_tensor<CLTensor>(output_shape, DataType::QASYMM8, 1, qasymm);
 
     // LSTM cell state
-    auto cell_state = create_tensor<Tensor>(output_shape, DataType::QSYMM16, 1, qsymm_4);
+    auto cell_state = create_tensor<CLTensor>(output_shape, DataType::QSYMM16, 1, qsymm_4);
 
-    NELSTMLayerQuantized lstmq;
+    CLLSTMLayerQuantized lstmq;
 
     lstmq.configure(&input, &input_to_input_weights, &input_to_forget_weights, &input_to_cell_weights, &input_to_output_weights,
                     &recurrent_to_input_weights, &recurrent_to_forget_weights, &recurrent_to_cell_weights, &recurrent_to_output_weights,
@@ -194,19 +196,19 @@ TEST_CASE(IntegrationTestCaseSmall, framework::DatasetMode::PRECOMMIT)
                                                         128, 131,  35, 133 });
 
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(CLAccessor(output_state), expected_output);
 
     // Second input
     fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 12, 137,
                                                         128, 131, 10, 136 });
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(CLAccessor(output_state), expected_output);
 
     // Third input
     fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 8, 140,
                                                         128, 130, 6, 138 });
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(CLAccessor(output_state), expected_output);
 }
 
 TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
@@ -227,29 +229,29 @@ TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
     TensorShape output_shape{ output_size, batch_size};
     TensorShape bias_shape{ output_size };
 
-    auto input_to_input_weights      = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_forget_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_cell_weights       = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_to_output_weights     = create_tensor<Tensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_input_weights  = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_forget_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_cell_weights   = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto recurrent_to_output_weights = create_tensor<Tensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
-    auto input_gate_bias             = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto forget_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto cell_gate_bias              = create_tensor<Tensor>(bias_shape, DataType::S32);
-    auto output_gate_bias            = create_tensor<Tensor>(bias_shape, DataType::S32);
+    auto input_to_input_weights      = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_forget_weights     = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_cell_weights       = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_to_output_weights     = create_tensor<CLTensor>(input_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_input_weights  = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_forget_weights = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_cell_weights   = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto recurrent_to_output_weights = create_tensor<CLTensor>(recurrent_weights_shape, DataType::QASYMM8, 1, qweights);
+    auto input_gate_bias             = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto forget_gate_bias            = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto cell_gate_bias              = create_tensor<CLTensor>(bias_shape, DataType::S32);
+    auto output_gate_bias            = create_tensor<CLTensor>(bias_shape, DataType::S32);
 
     // LSTM input
-    auto input = create_tensor<Tensor>(input_shape, DataType::QASYMM8, 1, qasymm);
+    auto input = create_tensor<CLTensor>(input_shape, DataType::QASYMM8, 1, qasymm);
 
     // LSTM output state
-    auto output_state = create_tensor<Tensor>(output_shape, DataType::QASYMM8, 1, qasymm);
+    auto output_state = create_tensor<CLTensor>(output_shape, DataType::QASYMM8, 1, qasymm);
 
     // LSTM cell state
-    auto cell_state = create_tensor<Tensor>(output_shape, DataType::QSYMM16, 1, qsymm_4);
+    auto cell_state = create_tensor<CLTensor>(output_shape, DataType::QSYMM16, 1, qsymm_4);
 
-    NELSTMLayerQuantized lstmq;
+    CLLSTMLayerQuantized lstmq;
 
     lstmq.configure(&input, &input_to_input_weights, &input_to_forget_weights, &input_to_cell_weights, &input_to_output_weights,
                     &recurrent_to_input_weights, &recurrent_to_forget_weights, &recurrent_to_cell_weights, &recurrent_to_output_weights,
@@ -424,7 +426,7 @@ TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
                                                        140, 128,  128,  128,  128,  133,  132,  128 });
 
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(CLAccessor(output_state), expected_output);
 
     // Second input
     fill_tensor(expected_output, std::vector<uint8_t> { 130,   128,   128,   128,   128,   205,   129,   137,
@@ -444,13 +446,13 @@ TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
                                                         129,   128,   128,   128,   128,   171,   134,   129,
                                                         140,   128,   128,   128,   128,   135,   132,   129});
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(CLAccessor(output_state), expected_output);
 }
 // clang-format on
 // *INDENT-ON*
 
 TEST_SUITE_END() // LSTMLayerQuantized
-TEST_SUITE_END() // CL
+TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

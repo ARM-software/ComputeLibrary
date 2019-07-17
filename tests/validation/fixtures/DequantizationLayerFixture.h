@@ -92,32 +92,46 @@ protected:
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType src_data_type)
     {
-        if(is_data_type_quantized_asymmetric(src_data_type))
+        if(src_data_type == DataType::QASYMM8)
         {
             SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
             fill(src);
             return reference::dequantization_layer<T>(src);
         }
-        else
+        else if(src_data_type == DataType::QSYMM8)
         {
             SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
             fill(src);
             return reference::dequantization_layer<T>(src);
+        }
+        else if(src_data_type == DataType::QSYMM16)
+        {
+            SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
+            fill(src);
+            return reference::dequantization_layer<T>(src);
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("Unsupported data type");
         }
     }
 
 protected:
     QuantizationInfo generate_quantization_info(DataType data_type)
     {
-        std::uniform_int_distribution<> distribution(1, 127);
         std::mt19937                    gen(library.get()->seed());
+        std::uniform_int_distribution<> distribution_scale_q8(1, 255);
+        std::uniform_int_distribution<> distribution_offset_q8(1, 127);
+        std::uniform_int_distribution<> distribution_scale_q16(1, 32768);
 
         switch(data_type)
         {
+            case DataType::QSYMM16:
+                return QuantizationInfo(1.f / distribution_scale_q16(gen));
             case DataType::QSYMM8:
-                return QuantizationInfo(1.f / distribution(gen));
+                return QuantizationInfo(1.f / distribution_scale_q8(gen));
             case DataType::QASYMM8:
-                return QuantizationInfo(1.f / distribution(gen), distribution(gen));
+                return QuantizationInfo(1.f / distribution_scale_q8(gen), distribution_offset_q8(gen));
             default:
                 ARM_COMPUTE_ERROR("Unsupported data type");
         }

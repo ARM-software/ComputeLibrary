@@ -94,6 +94,7 @@
 #include "arm_compute/runtime/CL/functions/CLIntegralImage.h"
 #include "arm_compute/runtime/CL/functions/CLL2NormalizeLayer.h"
 #include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"
+#include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianPyramid.h"
 #include "arm_compute/runtime/CL/functions/CLLaplacianReconstruct.h"
 #include "arm_compute/runtime/CL/functions/CLLocallyConnectedLayer.h"

@@ -45,6 +45,11 @@ TOut dequantize(uint8_t val, const UniformQuantizationInfo qinfo)
 {
     return static_cast<TOut>(dequantize_qasymm8(val, qinfo));
 }
+template <typename TOut>
+TOut dequantize(int16_t val, const UniformQuantizationInfo qinfo)
+{
+    return static_cast<TOut>(dequantize_qsymm16(val, qinfo));
+}
 
 template <typename TOut, typename TIn>
 SimpleTensor<TOut> dequantization_layer_nchw(const SimpleTensor<TIn> &src)
@@ -72,7 +77,7 @@ SimpleTensor<TOut> dequantization_layer_nchw(const SimpleTensor<TIn> &src)
                 // Dequantize slice
                 for(int s = 0; s < WH; ++s)
                 {
-                    dst[idx + s] = dequantize<TOut>(src[idx + s], channel_qinfo);
+                    dst[idx + s] = dequantize<TOut>(static_cast<TIn>(src[idx + s]), channel_qinfo);
                 }
             }
         }
@@ -84,7 +89,7 @@ SimpleTensor<TOut> dequantization_layer_nchw(const SimpleTensor<TIn> &src)
 
         for(int i = 0; i < src.num_elements(); ++i)
         {
-            dst[i] = static_cast<TOut>(dequantize<TOut>(src[i], quantization_info));
+            dst[i] = static_cast<TOut>(dequantize<TOut>(static_cast<TIn>(src[i]), quantization_info));
         }
     }
 
@@ -109,6 +114,8 @@ template SimpleTensor<half> dequantization_layer(const SimpleTensor<uint8_t> &sr
 template SimpleTensor<float> dequantization_layer(const SimpleTensor<uint8_t> &src);
 template SimpleTensor<half> dequantization_layer(const SimpleTensor<int8_t> &src);
 template SimpleTensor<float> dequantization_layer(const SimpleTensor<int8_t> &src);
+template SimpleTensor<half> dequantization_layer(const SimpleTensor<int16_t> &src);
+template SimpleTensor<float> dequantization_layer(const SimpleTensor<int16_t> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

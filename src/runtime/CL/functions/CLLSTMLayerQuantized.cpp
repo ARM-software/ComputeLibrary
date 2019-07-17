@@ -21,7 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NELSTMLayerQuantized.h"
+
+#include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
 
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
@@ -42,30 +43,30 @@ const QuantizationInfo qsymm_4(16.f / 32768.f, 0); // qsymm16 with 4 integer bit
 const QuantizationInfo qsymm_0(1.f / 32768.f, 0);  // qsymm16 with 0 integer bit
 } // namespace
 
-NELSTMLayerQuantized::NELSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager)
+CLLSTMLayerQuantized::CLLSTMLayerQuantized(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _gemmlowp(), _output_stage(), _transpose_weights(), _concat_input_weights(), _concat_recurrent_weights(), _concat_weights(), _concat_inputs(),
-      _concat_bias(), _sigmoid_forget_gate(), _sigmoid_input_gate(), _sigmoid_output_gate(), _tanh_modulation_gate(), _tanh_output_state(), _add1(), _add2(), _mul1(), _mul2(), _mul3(),
-      _slice_input_tensor(), _slice_forget_tensor(), _slice_cell_tensor(), _slice_output_tensor(), _dequantize(), _quantize(), _input_to_input_weights(nullptr), _input_to_forget_weights(nullptr),
-      _input_to_cell_weights(nullptr), _input_to_output_weights(nullptr), _recurrent_to_input_weights(nullptr), _recurrent_to_forget_weights(nullptr), _recurrent_to_cell_weights(nullptr),
-      _recurrent_to_output_weights(nullptr), _input_gate_bias(nullptr), _forget_gate_bias(nullptr), _cell_bias(nullptr), _output_gate_bias(nullptr), _recurrent_weights(), _input_weights(), _weights(),
-      _input(), _weights_transposed(), _output_highp(), _output_lowp(), _bias(), _forget_gate_input(), _input_gate_input(), _output_gate_input(), _input_modulation_gate_input(), _forget_gate_output(),
-      _input_gate_output(), _output_gate_output(), _input_modulation_gate_output(), _cell_state1(), _cell_state2(), _output_state_tmp(), _output_state_out_symm(), _output_state_out_f32(),
-      _is_prepared(false)
+      _concat_bias(), _sigmoid_forget_gate(), _sigmoid_input_gate(), _sigmoid_output_gate(), _tanh_modulation_gate(), _tanh_output_state(), _add_cell_state_tmps(), _add2(), _mul_forget_gate_cell_state(),
+      _mul_input_gate_input_mod_gate(), _mul_output_state_tmp_output_gate(), _slice_input_tensor(), _slice_forget_tensor(), _slice_cell_tensor(), _slice_output_tensor(), _dequantize(), _quantize(),
+      _input_to_input_weights(nullptr), _input_to_forget_weights(nullptr), _input_to_cell_weights(nullptr), _input_to_output_weights(nullptr), _recurrent_to_input_weights(nullptr),
+      _recurrent_to_forget_weights(nullptr), _recurrent_to_cell_weights(nullptr), _recurrent_to_output_weights(nullptr), _input_gate_bias(nullptr), _forget_gate_bias(nullptr), _cell_bias(nullptr),
+      _output_gate_bias(nullptr), _recurrent_weights(), _input_weights(), _weights(), _input(), _weights_transposed(), _output_highp(), _output_lowp(), _bias(), _forget_gate_input(), _input_gate_input(),
+      _output_gate_input(), _input_modulation_gate_input(), _forget_gate_output(), _input_gate_output(), _output_gate_output(), _input_modulation_gate_output(), _cell_state_tmp1(), _cell_state_tmp2(),
+      _output_state_tmp(), _output_state_out_symm(), _output_state_out_f32(), _is_prepared(false)
 {
 }
 
-void NELSTMLayerQuantized::configure(const ITensor *input,
-                                     const ITensor *input_to_input_weights, const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
-                                     const ITensor *recurrent_to_input_weights, const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
-                                     const ITensor *input_gate_bias, const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
-                                     ITensor *cell_state_in, const ITensor *output_state_in,
-                                     ITensor *cell_state_out, ITensor *output_state_out)
+void CLLSTMLayerQuantized::configure(const ICLTensor *input,
+                                     const ICLTensor *input_to_input_weights, const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
+                                     const ICLTensor *recurrent_to_input_weights, const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
+                                     const ICLTensor *input_gate_bias, const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
+                                     ICLTensor *cell_state_in, const ICLTensor *output_state_in,
+                                     ICLTensor *cell_state_out, ICLTensor *output_state_out)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights,
                                  recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights,
                                  input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias, cell_state_in, output_state_in, cell_state_out, output_state_out);
 
-    ARM_COMPUTE_ERROR_THROW_ON(NELSTMLayerQuantized::validate(input->info(), input_to_input_weights->info(), input_to_forget_weights->info(), input_to_cell_weights->info(),
+    ARM_COMPUTE_ERROR_THROW_ON(CLLSTMLayerQuantized::validate(input->info(), input_to_input_weights->info(), input_to_forget_weights->info(), input_to_cell_weights->info(),
                                                               input_to_output_weights->info(),
                                                               recurrent_to_input_weights->info(), recurrent_to_forget_weights->info(), recurrent_to_cell_weights->info(), recurrent_to_output_weights->info(),
                                                               input_gate_bias->info(), forget_gate_bias->info(), cell_bias->info(), output_gate_bias->info(), cell_state_in->info(), output_state_in->info(), cell_state_out->info(), output_state_out->info()));
@@ -93,8 +94,17 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _output_gate_bias            = output_gate_bias;
 
     // Weights concatenation
-    std::vector<const ITensor *> inputs_weights_vector{ input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights };
-    std::vector<const ITensor *> recurrent_weights_vector{ recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights };
+    std::vector<const ICLTensor *> inputs_weights_vector;
+    inputs_weights_vector.emplace_back(input_to_input_weights);
+    inputs_weights_vector.emplace_back(input_to_forget_weights);
+    inputs_weights_vector.emplace_back(input_to_cell_weights);
+    inputs_weights_vector.emplace_back(input_to_output_weights);
+
+    std::vector<const ICLTensor *> recurrent_weights_vector;
+    recurrent_weights_vector.emplace_back(recurrent_to_input_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_forget_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_cell_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_output_weights);
 
     _input_weights.allocator()->init(TensorInfo(TensorShape(input_size, 4 * output_size), 1, DataType::QASYMM8, qweights));
     _concat_input_weights.configure(inputs_weights_vector, &_input_weights, Window::DimY);
@@ -102,19 +112,30 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _recurrent_weights.allocator()->init(TensorInfo(TensorShape(output_size, 4 * output_size), 1, DataType::QASYMM8, qweights));
     _concat_recurrent_weights.configure(recurrent_weights_vector, &_recurrent_weights, Window::DimY);
 
-    std::vector<const ITensor *> weights_vector{ &_recurrent_weights, &_input_weights };
+    std::vector<const ICLTensor *> weights_vector;
+    weights_vector.emplace_back(&_recurrent_weights);
+    weights_vector.emplace_back(&_input_weights);
+
     _weights.allocator()->init(TensorInfo(TensorShape(output_size + input_size, 4 * output_size), 1, DataType::QASYMM8, qweights));
     _concat_weights.configure(weights_vector, &_weights, Window::DimX);
     _transpose_weights.configure(&_weights, &_weights_transposed);
 
     // Input concatenation
-    std::vector<const ITensor *> input_vector{ input, output_state_in };
+    std::vector<const ICLTensor *> input_vector;
+    input_vector.emplace_back(input);
+    input_vector.emplace_back(output_state_in);
+
     _memory_group.manage(&_input);
     _input.allocator()->init(TensorInfo(TensorShape(output_size + input_size, batch_size), 1, DataType::QASYMM8, qasymm));
     _concat_inputs.configure(input_vector, &_input, Window::DimX);
 
     // Bias concatenation
-    std::vector<const ITensor *> bias_vector{ input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias };
+    std::vector<const ICLTensor *> bias_vector;
+    bias_vector.emplace_back(input_gate_bias);
+    bias_vector.emplace_back(forget_gate_bias);
+    bias_vector.emplace_back(cell_bias);
+    bias_vector.emplace_back(output_gate_bias);
+
     _bias.allocator()->init(TensorInfo(TensorShape(4 * output_size), 1, DataType::S32));
     _concat_bias.configure(bias_vector, &_bias, Window::DimX);
 
@@ -182,20 +203,20 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _output_gate_input.allocator()->allocate();
 
     // Long term memory
-    _memory_group.manage(&_cell_state1);
-    _cell_state1.allocator()->init(TensorInfo(_forget_gate_output.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_4));
-    _mul1.configure(&_forget_gate_output, cell_state_in, &_cell_state1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _memory_group.manage(&_cell_state_tmp1);
+    _cell_state_tmp1.allocator()->init(TensorInfo(_forget_gate_output.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_4));
+    _mul_forget_gate_cell_state.configure(&_forget_gate_output, cell_state_in, &_cell_state_tmp1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _forget_gate_output.allocator()->allocate();
 
-    _memory_group.manage(&_cell_state2);
-    _cell_state2.allocator()->init(TensorInfo(_input_gate_output.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_4));
-    _mul2.configure(&_input_gate_output, &_input_modulation_gate_output, &_cell_state2, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _memory_group.manage(&_cell_state_tmp2);
+    _cell_state_tmp2.allocator()->init(TensorInfo(_input_gate_output.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_4));
+    _mul_input_gate_input_mod_gate.configure(&_input_gate_output, &_input_modulation_gate_output, &_cell_state_tmp2, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _input_modulation_gate_output.allocator()->allocate();
     _input_gate_output.allocator()->allocate();
 
-    _add1.configure(&_cell_state1, &_cell_state2, cell_state_out, ConvertPolicy::SATURATE);
-    _cell_state1.allocator()->allocate();
-    _cell_state2.allocator()->allocate();
+    _add_cell_state_tmps.configure(&_cell_state_tmp1, &_cell_state_tmp2, cell_state_out, ConvertPolicy::SATURATE);
+    _cell_state_tmp1.allocator()->allocate();
+    _cell_state_tmp2.allocator()->allocate();
 
     // Short term memory
     _memory_group.manage(&_output_state_tmp);
@@ -204,7 +225,7 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
 
     _memory_group.manage(&_output_state_out_symm);
     _output_state_out_symm.allocator()->init(TensorInfo(_output_gate_output.info()->tensor_shape(), 1, DataType::QSYMM16, qsymm_0));
-    _mul3.configure(&_output_state_tmp, &_output_gate_output, &_output_state_out_symm, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
+    _mul_output_state_tmp_output_gate.configure(&_output_state_tmp, &_output_gate_output, &_output_state_out_symm, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO);
     _output_gate_output.allocator()->allocate();
     _output_state_tmp.allocator()->allocate();
 
@@ -218,7 +239,7 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _output_state_out_f32.allocator()->allocate();
 }
 
-Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
+Status CLLSTMLayerQuantized::validate(const ITensorInfo *input,
                                       const ITensorInfo *input_to_input_weights, const ITensorInfo *input_to_forget_weights, const ITensorInfo *input_to_cell_weights, const ITensorInfo *input_to_output_weights,
                                       const ITensorInfo *recurrent_to_input_weights, const ITensorInfo *recurrent_to_forget_weights, const ITensorInfo *recurrent_to_cell_weights, const ITensorInfo *recurrent_to_output_weights,
                                       const ITensorInfo *input_gate_bias, const ITensorInfo *forget_gate_bias, const ITensorInfo *cell_bias, const ITensorInfo *output_gate_bias,
@@ -254,13 +275,13 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
 
     // Data type checks
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input_weights_info, input, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&recurrent_weights_info, recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&bias_info, input_gate_bias, forget_gate_bias, cell_bias, output_gate_bias);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&cell_state_info, cell_state_in);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&output_state_info, output_state_in);
 
     // Quantization checks
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&input_weights_info, input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input_to_input_weights, input_to_forget_weights, input_to_cell_weights, input_to_output_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&cell_state_info, cell_state_in);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&output_state_info, output_state_in);
@@ -282,7 +303,7 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
     return Status{};
 }
 
-void NELSTMLayerQuantized::run()
+void CLLSTMLayerQuantized::run()
 {
     prepare();
 
@@ -316,20 +337,20 @@ void NELSTMLayerQuantized::run()
     _sigmoid_output_gate.run();
 
     // Cell state (long term memory)
-    _mul1.run();
-    _mul2.run();
-    _add1.run();
+    _mul_forget_gate_cell_state.run();
+    _mul_input_gate_input_mod_gate.run();
+    _add_cell_state_tmps.run();
 
     // Output state (short term memory)
     _tanh_output_state.run();
-    _mul3.run();
+    _mul_output_state_tmp_output_gate.run();
 
     // Requantize output state from QSYMM16 to QASYMM16
     _dequantize.run();
     _quantize.run();
 }
 
-void NELSTMLayerQuantized::prepare()
+void CLLSTMLayerQuantized::prepare()
 {
     if(!_is_prepared)
     {

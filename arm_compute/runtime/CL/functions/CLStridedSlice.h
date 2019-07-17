@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,7 +39,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in]  input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in]  input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/QSYMM16/U32/S32/F16/F32
      * @param[out] output           Destination tensor. Data type supported: Same as @p input
      * @param[in]  starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in]  ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).
@@ -57,7 +57,7 @@ public:
      *
      * @note Supported tensor rank: up to 4
      *
-     * @param[in] input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] input            Source tensor. Data type supported: U8/S8/QASYMM8/U16/S16/QSYMM16/U32/S32/F16/F32
      * @param[in] output           Destination tensor. Data type supported: Same as @p input
      * @param[in] starts           The starts of the dimensions of the input tensor to be sliced. The length must be of rank(input).
      * @param[in] ends             The ends of the dimensions of the input tensor to be sliced. The length must be of rank(input).

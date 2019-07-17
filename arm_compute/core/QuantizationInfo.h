@@ -300,6 +300,18 @@ inline float dequantize(int8_t value, float scale)
     return value * scale;
 }
 
+/** Dequantize a value given a symmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] scale Scale to use for dequantization
+ *
+ * @return Dequantized value
+ */
+inline float dequantize(int16_t value, float scale)
+{
+    return value * scale;
+}
+
 /** Quantize a value given a 16-bit symmetric quantization scheme
  *
  * @param[in] value           Value to quantize

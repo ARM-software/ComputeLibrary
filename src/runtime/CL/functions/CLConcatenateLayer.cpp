@@ -47,14 +47,35 @@ CLConcatenateLayer::CLConcatenateLayer()
 {
 }
 
-void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+void CLConcatenateLayer::configure(std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+void CLConcatenateLayer::configure(std::vector<const ICLTensor *> &inputs_vector, ICLTensor *output, size_t axis)
+{
+    configure_internal(std::move(inputs_vector), output, axis);
+}
+
+Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+Status CLConcatenateLayer::validate(const std::vector<const ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+{
+    return validate_internal(inputs_vector, output, axis);
+}
+
+template <typename TensorType>
+void CLConcatenateLayer::configure_internal(std::vector<TensorType *> &&inputs_vector, ICLTensor *output, size_t axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
     _axis       = axis;
     _num_inputs = inputs_vector.size();
 
     std::vector<ITensorInfo *> inputs_vector_info(inputs_vector.size());
-    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](ICLTensor * t)
+    std::transform(inputs_vector.begin(), inputs_vector.end(), inputs_vector_info.begin(), [](TensorType * t)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(t);
         return t->info();
@@ -141,7 +162,8 @@ void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector
     }
 }
 
-Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, size_t axis)
+template <typename TensorInfoType>
+Status CLConcatenateLayer::validate_internal(const std::vector<TensorInfoType *> &inputs_vector, const ITensorInfo *output, size_t axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
     const unsigned int num_inputs = inputs_vector.size();

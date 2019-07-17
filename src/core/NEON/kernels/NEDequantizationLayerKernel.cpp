@@ -194,7 +194,7 @@ void run_dequantization_qsymm8(const ITensor *input, ITensor *output, const Wind
         // Compute left-over elements
         for(; x < window_end_x; ++x)
         {
-            uint8_t val    = *(in_ptr + x);
+            int8_t val     = *(in_ptr + x);
             *(out_ptr + x) = static_cast<T>(dequantize(val, scale));
         }
     },

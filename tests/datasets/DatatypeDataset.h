@@ -43,6 +43,7 @@ public:
     {
         DataType::QSYMM8,
                  DataType::QASYMM8,
+                 DataType::QSYMM16,
     })
     {
     }
