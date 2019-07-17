@@ -31,15 +31,15 @@ namespace
 {
 arm_compute::GPUTarget get_valhall_target(const std::string &version)
 {
-    if(version == "G77")
+    if(version.find("G77") != std::string::npos)
     {
         return arm_compute::GPUTarget::G77;
     }
-    else if(version == "TBOX")
+    else if(version.find("TBOX") != std::string::npos)
     {
         return arm_compute::GPUTarget::TBOX;
     }
-    else if(version == "TODX")
+    else if(version.find("TODX") != std::string::npos)
     {
         return arm_compute::GPUTarget::TODX;
     }
@@ -51,35 +51,35 @@ arm_compute::GPUTarget get_valhall_target(const std::string &version)
 
 arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 {
-    if(version == "G71")
+    if(version.find("G71") != std::string::npos)
     {
         return arm_compute::GPUTarget::G71;
     }
-    else if(version == "G72")
+    else if(version.find("G72") != std::string::npos)
     {
         return arm_compute::GPUTarget::G72;
     }
-    else if(version == "G51")
-    {
-        return arm_compute::GPUTarget::G51;
-    }
-    else if(version == "G51BIG")
+    else if(version.find("G51BIG") != std::string::npos)
     {
         return arm_compute::GPUTarget::G51BIG;
     }
-    else if(version == "G51LIT")
+    else if(version.find("G51LIT") != std::string::npos)
     {
         return arm_compute::GPUTarget::G51LIT;
     }
-    else if(version == "G52")
+    else if(version.find("G51") != std::string::npos)
     {
-        return arm_compute::GPUTarget::G52;
+        return arm_compute::GPUTarget::G51;
     }
-    else if(version == "G52LIT")
+    else if(version.find("G52LIT") != std::string::npos)
     {
         return arm_compute::GPUTarget::G52LIT;
     }
-    else if(version == "G76")
+    else if(version.find("G52") != std::string::npos)
+    {
+        return arm_compute::GPUTarget::G52;
+    }
+    else if(version.find("G76") != std::string::npos)
     {
         return arm_compute::GPUTarget::G76;
     }
@@ -91,15 +91,15 @@ arm_compute::GPUTarget get_bifrost_target(const std::string &version)
 
 arm_compute::GPUTarget get_midgard_target(const std::string &version)
 {
-    if(version == "T600")
+    if(version.find("T600") != std::string::npos)
     {
         return arm_compute::GPUTarget::T600;
     }
-    else if(version == "T700")
+    else if(version.find("T700") != std::string::npos)
     {
         return arm_compute::GPUTarget::T700;
     }
-    else if(version == "T800")
+    else if(version.find("T800") != std::string::npos)
     {
         return arm_compute::GPUTarget::T800;
     }
