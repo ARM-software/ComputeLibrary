@@ -53,6 +53,19 @@ public:
         k->configure(std::forward<Args>(args)...);
         _kernel = std::move(k);
     }
+    /** Configure the kernel setting the GPU target as well
+     *
+     * @param[in] gpu_target GPUTarget to set
+     * @param[in] args       Configuration arguments.
+     */
+    template <typename... Args>
+    void configure(GPUTarget gpu_target, Args &&... args)
+    {
+        auto k = arm_compute::support::cpp14::make_unique<K>();
+        k->set_target(gpu_target);
+        k->configure(std::forward<Args>(args)...);
+        _kernel = std::move(k);
+    }
     /** Validate input arguments
      *
      * @param[in] args Configuration arguments.

@@ -418,7 +418,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
 }
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
-TEST_SUITE_END() // GEMMMatrixMulipltyReshaped
+TEST_SUITE_END() // GEMMMatrixMultiplyReshaped
 TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
