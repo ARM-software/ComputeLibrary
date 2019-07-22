@@ -40,8 +40,9 @@ namespace arm_compute
 {
 namespace
 {
-// OpenCL kernel requires input width to be a power of 2 for x-axis.
-constexpr unsigned int border_val = 64;
+// OpenCL kernel requires input width to be a multiple of 16 for x-axis in order to use vector operations.
+// And also to use a power of 2 to
+constexpr unsigned int border_val = 16;
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op, unsigned int width)
 {
@@ -89,8 +90,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = (is_data_type_quantized(input->data_type()) && (axis == 0)) ? 1 : 16;
     Window             win                               = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool               window_changed                    = false;
-    const bool         is_serial_op                      = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN
-                                                            || op == ReductionOperation::MAX || is_data_type_quantized(input->data_type()));
+    const bool         is_serial_op                      = (op == ReductionOperation::MIN || op == ReductionOperation::MAX || is_data_type_quantized(input->data_type()));
 
     switch(axis)
     {
@@ -105,7 +105,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
             }
             else
             {
-                const unsigned int     border_width = ((input->dimension(0) % border_val) != 0) ? border_val - input->dimension(0) % border_val : 0;
+                const unsigned int     border_width = ((input->dimension(0) % border_val) != 0 && !is_arg_min_max) ? border_val - input->dimension(0) % border_val : 0;
                 AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
                 AccessWindowHorizontal output_access(output, 0, 1);
                 window_changed = update_window_and_padding(win, input_access, output_access);
@@ -148,6 +148,8 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op, width));
+    auto win_config = validate_and_configure_window(input->info(), output->info(), axis, op);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     _input          = input;
     _output         = output;
@@ -184,7 +186,11 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
             build_opts.add_option(("-DOPERATION=sum"));
             break;
         case ReductionOperation::ARG_IDX_MAX:
+            build_opts.add_option(("-DOPERATION=arg_idx_max"));
+            break;
         case ReductionOperation::ARG_IDX_MIN:
+            build_opts.add_option(("-DOPERATION=arg_idx_min"));
+            break;
         case ReductionOperation::MIN:
         case ReductionOperation::MAX:
             break;
@@ -198,30 +204,56 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     // Create kernel
     cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange();
     std::string kernel_axis_name;
-    const bool  is_serial_op = (op == ReductionOperation::ARG_IDX_MAX || op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::MIN || op == ReductionOperation::MAX
+    const bool  is_serial_op = (op == ReductionOperation::MIN || op == ReductionOperation::MAX
                                 || is_data_type_quantized(input->info()->data_type()));
+
+    const bool is_arg_min_max = (op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX);
     switch(axis)
     {
         case 0:
         {
+            build_opts.add_option("-DDATA_TYPE_OUTPUT=" + get_cl_type_from_data_type(output->info()->data_type()));
+            build_opts.add_option("-DCOND_DATA_TYPE=" + get_cl_select_type_from_data_type(input->info()->data_type()));
             if(is_serial_op)
             {
                 build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-                build_opts.add_option_if_else(_input->info()->data_type() == DataType::F16, "-DCOND_DATA_TYPE=short", "-DCOND_DATA_TYPE=int");
                 kernel_axis_name = "non_parallel_x";
             }
             else
             {
-                build_opts.add_option_if(op == ReductionOperation::MEAN_SUM, "-DWIDTH=" + support::cpp11::to_string(width));
-                const unsigned int width_leftover = input->info()->dimension(0) % border_val;
-                const unsigned int border_width   = (width_leftover != 0) ? border_val - width_leftover : 0;
-                const unsigned int num_of_threads = ((input->info()->dimension(0) + border_width) / 16);
-                kernel_axis_name                  = "x";
+                if(op == ReductionOperation::MEAN_SUM)
+                {
+                    build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(width));
+                }
+                else
+                {
+                    build_opts.add_option("-DWIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+                }
+                kernel_axis_name = "x";
+                if(is_arg_min_max)
+                {
+                    const bool multi_access_x = (_input->info()->tensor_shape().x() > 16);
+                    build_opts.add_option_if(multi_access_x, "-DMULTI_ACCESS_X");
 
-                // Set the number of WG based on the input size. If input width is < 128
-                // we can use fewer threads than 8.
-                lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
-                _border_size = BorderSize(0, border_width, 0, 0);
+                    const unsigned int width_leftover = input->info()->dimension(0) % 16;
+                    const unsigned int border_width   = (width_leftover != 0) ? 16 - width_leftover : 0;
+                    const unsigned int num_of_threads = ((input->info()->dimension(0) + border_width) / 16);
+
+                    // Set the number of WG based on the input size. If input width is < 128
+                    // we can use fewer threads than 8  per workgroup
+                    lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
+                    _border_size = BorderSize(0, 0, 0, 0);
+                }
+                else
+                {
+                    const unsigned int width_leftover = input->info()->dimension(0) % border_val;
+                    const unsigned int border_width   = (width_leftover != 0) ? border_val - width_leftover : 0;
+                    const unsigned int num_of_threads = ((input->info()->dimension(0) + border_width) / 16);
+                    // Set the number of WG based on the input size. If input width is < 128
+                    // we can use fewer threads than 8 per workgroup
+                    lws_hint     = cl::NDRange(std::min(8U, num_of_threads));
+                    _border_size = BorderSize(0, border_width, 0, 0);
+                }
             }
         }
         break;
@@ -244,10 +276,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reduction_operation_" + kernel_axis_name, build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis, op);
-
-    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-
     ICLKernel::configure_internal(std::get<1>(win_config), lws_hint);
 }
 
@@ -263,9 +291,8 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
-
-    const bool is_serial_op = (_op == ReductionOperation::ARG_IDX_MAX || _op == ReductionOperation::ARG_IDX_MIN || _op == ReductionOperation::MIN || _op == ReductionOperation::MAX
-                               || is_data_type_quantized(_input->info()->data_type()));
+    const bool is_arg_min_max = (_op == ReductionOperation::ARG_IDX_MIN || _op == ReductionOperation::ARG_IDX_MAX);
+    const bool is_serial_op   = (_op == ReductionOperation::MIN || _op == ReductionOperation::MAX || is_data_type_quantized(_input->info()->data_type()));
     switch(_reduction_axis)
     {
         case 0:
@@ -300,11 +327,11 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
                 Window out_slice = out_window.first_slice_window_2D();
 
                 // Reshape window
-                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
+                const unsigned int border_width = ((in_slice.x().end() % border_val) != 0 && !is_arg_min_max) ? border_val - in_slice.x().end() % border_val : 0;
                 in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
 
                 // Set local sums buffer
-                unsigned int local_res_size = lws_hint()[0] * _input->info()->element_size();
+                unsigned int local_res_size = lws_hint()[0] * _output->info()->element_size();
                 _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_res_size, nullptr);
 
                 do

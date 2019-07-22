@@ -36,6 +36,10 @@
 #endif // defined(WIDTH)
 #endif // FLOAT_DATA_TYPE
 
+#if defined(DATA_TYPE)
+
+#if defined(OPERATION) && defined(WIDTH)
+
 /** Calculate square sum of a vector
  *
  * @param[in] input Pointer to the first pixel.
@@ -91,10 +95,112 @@ inline DATA_TYPE product(__global const DATA_TYPE *input)
 
     return (in.s0 * in.s1);
 }
-#if defined(OPERATION)
+
+#if defined(DATA_TYPE_OUTPUT)
+
+#if defined(ARG_MAX)
+/** Find index maximum value of a vector
+ *
+ * @param[in] input Pointer to the first value.
+ *
+ * @return index of the vector.
+ */
+inline DATA_TYPE_OUTPUT arg_idx_max(__global const DATA_TYPE *input, const int x_idx)
+{
+#if defined(MULTI_ACCESS_X)
+
+    int       x_elem   = x_idx * 16;
+    const int x_goback = select(0, 16 - WIDTH % 16, x_elem + 16 > WIDTH);
+    x_elem -= x_goback;
+
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    in = vload16(0, input - x_goback);
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
+    res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+    VEC_DATA_TYPE(COND_DATA_TYPE, 8)
+    idx_sel       = (in.s01234567 > in.s89abcdef) || (in.s01234567 == in.s89abcdef && CONVERT((res.s01234567 < res.s89abcdef), VEC_DATA_TYPE(COND_DATA_TYPE, 8)));
+    in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
+    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
+
+    idx_sel.s0123 = (in.s0123 > in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), VEC_DATA_TYPE(COND_DATA_TYPE, 4)));
+    in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
+
+    idx_sel.s01 = (in.s01 > in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
+    in.s01      = select(in.s23, in.s01, idx_sel.s01);
+    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+
+    idx_sel.s0 = (in.s0 > in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
+    res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+
+    return res.s0 + x_elem;
+#else  // defined(MULTI_ACCESS_X)
+
+    DATA_TYPE_OUTPUT res = 0;
+    for(DATA_TYPE_OUTPUT x_v = res + 1; x_v < WIDTH; ++x_v)
+    {
+        res = select(res, x_v, *(input + x_v) > *(input + res));
+    }
+
+    return res;
+#endif // defined(MULTI_ACCESS_X)
+}
+#endif // defined(ARG_MAX)
+
+#if defined(ARG_MIN)
+/** Find index minimum value of a vector
+ *
+ * @param[in] input Pointer to the first value.
+ *
+ * @return index of the vector.
+ */
+inline DATA_TYPE_OUTPUT arg_idx_min(__global const DATA_TYPE *input, const int x_idx)
+{
+#if defined(MULTI_ACCESS_X)
+
+    int       x_elem   = x_idx * 16;
+    const int x_goback = select(0, 16 - WIDTH % 16, x_elem + 16 > WIDTH);
+    x_elem -= x_goback;
+
+    VEC_DATA_TYPE(DATA_TYPE, 16)
+    in = vload16(0, input - x_goback);
+    VEC_DATA_TYPE(DATA_TYPE_OUTPUT, 16)
+    res = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+    VEC_DATA_TYPE(COND_DATA_TYPE, 8)
+    idx_sel       = (in.s01234567 < in.s89abcdef) || (in.s01234567 == in.s89abcdef && CONVERT((res.s01234567 < res.s89abcdef), VEC_DATA_TYPE(COND_DATA_TYPE, 8)));
+    in.s01234567  = select(in.s89abcdef, in.s01234567, idx_sel);
+    res.s01234567 = select(res.s89abcdef, res.s01234567, CONVERT(idx_sel, int8));
+
+    idx_sel.s0123 = (in.s0123 < in.s4567) || (in.s0123 == in.s4567 && CONVERT((res.s0123 < res.s4567), VEC_DATA_TYPE(COND_DATA_TYPE, 4)));
+    in.s0123      = select(in.s4567, in.s0123, idx_sel.s0123);
+    res.s0123     = select(res.s4567, res.s0123, CONVERT(idx_sel.s0123, int4));
+
+    idx_sel.s01 = (in.s01 < in.s23) || (in.s01 == in.s23 && CONVERT((res.s01 < res.s23), VEC_DATA_TYPE(COND_DATA_TYPE, 2)));
+    in.s01      = select(in.s23, in.s01, idx_sel.s01);
+    res.s01     = select(res.s23, res.s01, CONVERT(idx_sel.s01, int2));
+
+    idx_sel.s0 = (in.s0 < in.s1) || (in.s0 == in.s1 && CONVERT((res.s0 < res.s1), COND_DATA_TYPE));
+    res.s0     = select(res.s1, res.s0, CONVERT(idx_sel.s0, int));
+
+    return res.s0 + x_elem;
+#else  // defined(MULTI_ACCESS_X)
+
+    DATA_TYPE_OUTPUT res = 0;
+    for(DATA_TYPE_OUTPUT x_v = res + 1; x_v < WIDTH; ++x_v)
+    {
+        res = select(res, x_v, *(input + x_v) < * (input + res));
+    }
+    return res;
+#endif // defined(MULTI_ACCESS_X)
+}
+#endif // defined(ARG_MIN)
+
 /** This kernel performs parallel reduction given an operation on x-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data type of the output must be passed at compile time using -DDATA_TYPE_OUTPUT: e.g. -DDATA_TYPE_OUTPUT=uint
  * @note The operation we want to perform must be passed at compile time using -DOPERATION e.g. -DOPERATION=square_sum
  * @note The mean flag must be passed at compile time using -DMEAN if we want to compute the mean value
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
@@ -117,7 +223,7 @@ inline DATA_TYPE product(__global const DATA_TYPE *input)
 __kernel void reduction_operation_x(
     IMAGE_DECLARATION(src),
     IMAGE_DECLARATION(partial_res),
-    __local DATA_TYPE *local_results)
+    __local DATA_TYPE_OUTPUT *local_results)
 {
     Image src         = CONVERT_TO_IMAGE_STRUCT(src);
     Image partial_res = CONVERT_TO_IMAGE_STRUCT(partial_res);
@@ -125,9 +231,17 @@ __kernel void reduction_operation_x(
     unsigned int lsize = get_local_size(0);
     unsigned int lid   = get_local_id(0);
 
+    const uint x_idx = get_global_id(0);
+    const uint y_idx = get_global_id(1);
+
     for(unsigned int y = 0; y < get_local_size(1); ++y)
     {
-        local_results[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
+#if defined(ARG_MAX) || defined(ARG_MIN)
+        local_results[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y), x_idx);
+#else  // defined(ARG_MAX) || defined(ARG_MIN)
+        local_results[lid]                     = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
+#endif // defined(ARG_MAX) || defined(ARG_MIN)
+
         barrier(CLK_LOCAL_MEM_FENCE);
 
         // Perform parallel reduction
@@ -137,9 +251,26 @@ __kernel void reduction_operation_x(
             {
 #if defined(PROD)
                 local_results[lid] *= local_results[lid + i];
-#else  // !defined(PROD)
+#elif defined(ARG_MAX)
+                __global DATA_TYPE *src_in_row = src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y;
+                DATA_TYPE           tmp0       = *(src_in_row + local_results[lid]);
+                DATA_TYPE           tmp1       = *(src_in_row + local_results[lid + i]);
+                local_results[lid]             = select(
+                                                     local_results[lid],
+                                                     local_results[lid + i],
+                                                     ((tmp0 == tmp1) && (local_results[lid + i] < local_results[lid])) || (tmp0 < tmp1));
+
+#elif defined(ARG_MIN)
+                __global DATA_TYPE *src_in_row = src_ptr + src_offset_first_element_in_bytes + y_idx * src_step_y;
+                DATA_TYPE           tmp0       = *(src_in_row + local_results[lid]);
+                DATA_TYPE           tmp1       = *(src_in_row + local_results[lid + i]);
+                local_results[lid]             = select(
+                                                     local_results[lid],
+                                                     local_results[lid + i],
+                                                     ((tmp0 == tmp1) && (local_results[lid + i] < local_results[lid])) || (tmp0 > tmp1));
+#else  // !defined(PROD) && !defined(ARG_MAX) && !defined(ARG_MIN)
                 local_results[lid] += local_results[lid + i];
-#endif // defined(PROD)
+#endif // !defined(PROD) && !defined(ARG_MAX) && !defined(ARG_MIN)
             }
             barrier(CLK_LOCAL_MEM_FENCE);
         }
@@ -152,16 +283,22 @@ __kernel void reduction_operation_x(
                 local_results[0] /= WIDTH;
             }
 #endif // defined(MEAN) && defined(WIDTH)
-            ((__global DATA_TYPE *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
+            ((__global DATA_TYPE_OUTPUT *)offset(&partial_res, get_group_id(0), y))[0] = local_results[0];
         }
     }
 }
-#endif // defined(OPERATION)
+
+#endif // defined(DATA_TYPE_OUTPUT)
+
+#endif // defined(OPERATION) && defined(WIDTH)
+
+#if defined(DATA_TYPE_PROMOTED)
 
 #if defined(WIDTH)
 /** This kernel performs reduction on x-axis. (Non parallel)
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data type of the intermediate results must be passed at compile time using -DDATA_TYPE_PROMOTED: e.g. -DDATA_TYPE_PROMOTED=uint
  * @note The width size must be passed at compile time using -DWIDTH e.g. -DWIDTH=128
  * @note The product flag must be passed at compile time using -DPROD if we want to compute the product, otherwise sum will be used
  * @note In case of ARG_MIN and ARG_MAX the condition data type must be passed at compile time using -DCOND_DATA_TYPE e.g. -DCOND_DATA_TYPE=short
@@ -191,13 +328,7 @@ __kernel void reduction_operation_non_parallel_x(
     for(unsigned int x = 1; x < WIDTH; ++x)
     {
         DATA_TYPE_PROMOTED in = *((__global DATA_TYPE *)vector_offset(&src, x));
-#if defined(ARG_MAX)
-        indx = select(indx, x, ISGREATER(in, res));
-        res  = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
-#elif defined(ARG_MIN)
-        indx = select(indx, x, ISLESS(in, res));
-        res  = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
-#elif defined(MIN)
+#if defined(MIN)
         res = select(res, in, CONVERT(ISLESS(in, res), COND_DATA_TYPE));
 #elif defined(MAX)
         res = select(res, in, CONVERT(ISGREATER(in, res), COND_DATA_TYPE));
@@ -226,6 +357,7 @@ __kernel void reduction_operation_non_parallel_x(
 /** This kernel performs reduction on y-axis.
  *
  * @note The input data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data type of the intermediate results must be passed at compile time using -DDATA_TYPE_PROMOTED: e.g. -DDATA_TYPE_PROMOTED=uint
  * @note The height size must be passed at compile time using -DHEIGHT e.g. -DHEIGHT=128
  *
  * @param[in] src_ptr                              Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
@@ -303,6 +435,7 @@ __kernel void reduction_operation_y(
 /** This kernel performs reduction on z-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data type of the intermediate results must be passed at compile time using -DDATA_TYPE_PROMOTED: e.g. -DDATA_TYPE_PROMOTED=uint
  * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
@@ -400,8 +533,9 @@ __kernel void reduction_operation_z(
 /** This kernel performs reduction on w-axis.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
+ * @note The data type of the intermediate results must be passed at compile time using -DDATA_TYPE_PROMOTED: e.g. -DDATA_TYPE_PROMOTED=uint
  * @note The batch size must be passed at compile time using -DBATCH e.g. -DBATCH=128
- * @note The depth size must be passed at compile time using -DBATCH e.g. -DDEPTH=128
+ * @note The depth size must be passed at compile time using -DDEPTH e.g. -DDEPTH=128
  *
  * @param[in] input_ptr                            Pointer to the source tensor. Supported data types: QASYMM8/S32/F16/F32
  * @param[in] input_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -482,3 +616,7 @@ __kernel void reduction_operation_w(
 #endif // defined(ARG_MAX) || defined(ARG_MIN)
 }
 #endif /* defined(BATCH) && defined(DEPTH) */
+
+#endif /* defined(DATA_TYPE_PROMOTED) */
+
+#endif /* defined(DATA_TYPE) */
