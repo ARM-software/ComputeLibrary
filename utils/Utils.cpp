@@ -23,7 +23,9 @@
  */
 #include "Utils.h"
 
+#ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#endif /* ARM_COMPUTE_CL */
 
 #include <cctype>
 #include <cerrno>
@@ -276,6 +278,7 @@ uint64_t get_mem_free_from_meminfo()
  */
 void restore_program_cache_from_file(const std::string &filename)
 {
+#ifdef ARM_COMPUTE_CL
     std::ifstream cache_file(filename, std::ios::binary);
     if(cache_file.is_open())
     {
@@ -310,6 +313,7 @@ void restore_program_cache_from_file(const std::string &filename)
         }
         cache_file.close();
     }
+#endif /* ARM_COMPUTE_CL */
 }
 
 /** This function saves opencl kernels library to a file
@@ -318,6 +322,7 @@ void restore_program_cache_from_file(const std::string &filename)
  */
 void save_program_cache_to_file(const std::string &filename)
 {
+#ifdef ARM_COMPUTE_CL
     if(CLScheduler::get().is_initialised())
     {
         std::ofstream cache_file(filename, std::ios::binary);
@@ -342,6 +347,7 @@ void save_program_cache_to_file(const std::string &filename)
             ARM_COMPUTE_ERROR("Cannot open cache file");
         }
     }
+#endif /* ARM_COMPUTE_CL */
 }
 } // namespace utils
 } // namespace arm_compute
