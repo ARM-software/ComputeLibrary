@@ -171,6 +171,8 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
         if(enable_tuner->is_set())
         {
+            cl_tuner.set_tune_new_kernels(enable_tuner->value());
+
             //set tuner mode
             cl_tuner.set_tuner_mode(tuner_mode->value());
 
