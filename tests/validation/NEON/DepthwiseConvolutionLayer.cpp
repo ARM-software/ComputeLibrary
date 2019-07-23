@@ -53,7 +53,8 @@ RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.01)); /**< 
 constexpr float                     tolerance_num = 0.05f;                 /**< Tolerance number */
 #endif                                                                     // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
-const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 3 });
+const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
+const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
 
 //Activation Functions
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -263,7 +264,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture<float>, fram
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
-                                                                                                                     depth_multipliers),
+                                                                                                                     large_depth_multipliers),
                                                                                                                      framework::dataset::make("DataType",
                                                                                                                              DataType::F32)),
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -283,7 +284,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture<float>, fram
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
-                                                                                                                     depth_multipliers),
+                                                                                                                     large_depth_multipliers),
                                                                                                                      framework::dataset::make("DataType",
                                                                                                                              DataType::F32)),
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -309,7 +310,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<flo
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                       depth_multipliers),
+                                                       large_depth_multipliers),
                                                framework::dataset::make("DataType",
                                                                         DataType::F32)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -330,7 +331,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<flo
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<float>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
-                                                       depth_multipliers),
+                                                       large_depth_multipliers),
                                                framework::dataset::make("DataType",
                                                                         DataType::F32)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -391,7 +392,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, frame
     validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
-                                                                                                                    depth_multipliers),
+                                                                                                                    large_depth_multipliers),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::F16)),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -411,7 +412,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixture<half>, frame
     validate(Accessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
-                                                                                                                    depth_multipliers),
+                                                                                                                    large_depth_multipliers),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::F16)),
                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -436,7 +437,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<hal
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                       depth_multipliers),
+                                                       large_depth_multipliers),
                                                framework::dataset::make("DataType",
                                                                         DataType::F16)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -459,7 +460,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerFixtureOptimized<hal
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixtureOptimized<half>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
-                                                       depth_multipliers),
+                                                       large_depth_multipliers),
                                                framework::dataset::make("DataType",
                                                                         DataType::F16)),
                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
@@ -542,7 +543,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture<uin
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset(),
-                                                                       depth_multipliers),
+                                                                       large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                                        framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.9f, 11) })),
@@ -566,7 +567,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixtureOpti
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
-                                                                       depth_multipliers),
+                                                                       large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                                        framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
@@ -590,7 +591,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixtureOpti
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerQuantizedFixtureOptimized<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(combine(datasets::LargeDepthwiseDilatedConvolutionLayerDataset3x3(),
-                                                                       depth_multipliers),
+                                                                       large_depth_multipliers),
                                                                framework::dataset::make("DataType", DataType::QASYMM8)),
                                                        framework::dataset::make("SrcQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
                                                framework::dataset::make("DstQuantizationInfo", { QuantizationInfo(0.5f, 10) })),
