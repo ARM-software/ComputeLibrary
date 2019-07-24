@@ -99,6 +99,7 @@ public:
      * @warning ownership of memory is not transferred.
      * @warning tensor shouldn't be memory managed.
      * @warning padding should be accounted by the client code.
+     * @warning memory must be writable in case of in-place operations
      * @note buffer alignment will be checked to be compliant with alignment reported by ITensorInfo.
      *
      * @param[in] memory Raw memory pointer to be used as backing memory
