@@ -307,11 +307,11 @@ void NodeFusionMutator::mutate(Graph &g)
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
 
-    // TODO (COMPMID-2055): re-enable once we fuse bias and activations to convolution
-    // detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
+    // TODO (COMPMID-2524): Fuse batch normalization with convolution and depthwise convolution at graph level for NEON
     if(target == Target::CL)
     {
         //Depthwise Convolution and Batch Normalization Fusion active only for CL
+        detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
         detail::fuse_layer<DepthwiseConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_depthwise_convolution_with_batch_normalization);
     }
 }
