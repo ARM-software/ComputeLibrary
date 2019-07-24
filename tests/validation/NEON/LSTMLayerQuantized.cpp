@@ -63,6 +63,13 @@ inline void fill_tensor(SimpleTensor<T> &tensor, const std::vector<T> &v)
     std::memcpy(tensor.data(), v.data(), sizeof(T) * v.size());
 }
 
+/** Tolerance for quantized asymmetric operations */
+#if defined(__aarch64__)
+constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(0);
+#else  // defined(__aarch64__)
+constexpr AbsoluteTolerance<int16_t> tolerance_qsymm16(1);
+#endif // defined(__aarch64__)
+
 } // namespace
 
 TEST_SUITE(NEON)
@@ -194,19 +201,19 @@ TEST_CASE(IntegrationTestCaseSmall, framework::DatasetMode::PRECOMMIT)
                                                         128, 131,  35, 133 });
 
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
 
     // Second input
     fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 12, 137,
                                                         128, 131, 10, 136 });
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
 
     // Third input
     fill_tensor(expected_output, std::vector<uint8_t> { 128, 129, 8, 140,
                                                         128, 130, 6, 138 });
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
 }
 
 TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
@@ -424,7 +431,7 @@ TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
                                                        140, 128,  128,  128,  128,  133,  132,  128 });
 
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
 
     // Second input
     fill_tensor(expected_output, std::vector<uint8_t> { 130,   128,   128,   128,   128,   205,   129,   137,
@@ -444,7 +451,7 @@ TEST_CASE(IntegrationTestCaseLarge, framework::DatasetMode::PRECOMMIT)
                                                         129,   128,   128,   128,   128,   171,   134,   129,
                                                         140,   128,   128,   128,   128,   135,   132,   129});
     lstmq.run();
-    validate(Accessor(output_state), expected_output);
+    validate(Accessor(output_state), expected_output, tolerance_qsymm16);
 }
 // clang-format on
 // *INDENT-ON*
