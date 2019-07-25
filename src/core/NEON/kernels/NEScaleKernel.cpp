@@ -377,7 +377,7 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     // Add constant border only on top in case of NHWC layout
     if(data_layout == DataLayout::NHWC)
     {
-        _border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR && use_padding) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
+        _border_size = (border_mode != BorderMode::REPLICATE && policy == InterpolationPolicy::BILINEAR && use_padding) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
     }
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling

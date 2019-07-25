@@ -183,7 +183,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     if(data_layout == DataLayout::NHWC)
     {
         read_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
-        if(border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR)
+        if(border_mode != BorderMode::REPLICATE && policy == InterpolationPolicy::BILINEAR)
         {
             read_padding.top = 1;
         }
