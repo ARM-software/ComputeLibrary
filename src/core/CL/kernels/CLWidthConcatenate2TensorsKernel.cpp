@@ -137,6 +137,9 @@ void CLWidthConcatenate2TensorsKernel::configure(const ICLTensor *input1, const 
 
     ICLKernel::configure_internal(std::get<1>(win_config));
 
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
     // Pass paddings as arguments to the kernel
     const unsigned int input1_width         = input1->info()->dimension(0);
     const unsigned int input1_right_padding = ceil_to_multiple(input1_width, num_elems_processed_per_iteration) - input1_width;

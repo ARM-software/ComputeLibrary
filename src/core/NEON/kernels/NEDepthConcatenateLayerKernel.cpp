@@ -149,6 +149,9 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     INEKernel::configure(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,

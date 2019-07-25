@@ -116,6 +116,9 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
     ICLKernel::configure_internal(std::get<1>(win_config));
+
+    // Set output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 }
 
 Status CLDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
