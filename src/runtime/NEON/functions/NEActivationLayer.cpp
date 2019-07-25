@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,15 @@
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
+#include "arm_compute/runtime/IRuntimeContext.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
+NEActivationLayer::NEActivationLayer(IRuntimeContext *ctx) // NOLINT
+    : INESimpleFunctionNoBorder(ctx)
+{
+}
 void NEActivationLayer::configure(ITensor *input, ITensor *output, ActivationLayerInfo activation_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEActivationLayerKernel>();
@@ -39,3 +44,4 @@ Status NEActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *
 {
     return NEActivationLayerKernel::validate(input, output, act_info);
 }
+} // namespace arm_compute

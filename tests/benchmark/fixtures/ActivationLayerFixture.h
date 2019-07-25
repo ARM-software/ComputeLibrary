@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,11 @@ template <typename TensorType, typename Function, typename Accessor>
 class ActivationLayerFixture : public framework::Fixture
 {
 public:
+    ActivationLayerFixture()
+        : src(), dst(), act_layer(parameters->get_ctx<TensorType>())
+    {
+    }
+
     template <typename...>
     void setup(TensorShape shape, ActivationLayerInfo info, DataType data_type, int batches)
     {
@@ -78,9 +83,9 @@ public:
     }
 
 private:
-    TensorType src{};
-    TensorType dst{};
-    Function   act_layer{};
+    TensorType src;
+    TensorType dst;
+    Function   act_layer;
 };
 } // namespace benchmark
 } // namespace test

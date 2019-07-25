@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,8 @@ namespace test
 {
 namespace framework
 {
+std::unique_ptr<InstrumentsInfo> instruments_info;
+
 Framework::Framework()
 {
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMESTAMPS, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimestamps, ScaleFactor::NONE>);
@@ -83,6 +85,8 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::SCALE_1M),
                                    Instrument::make_instrument<OpenCLMemoryUsage, ScaleFactor::SCALE_1M>);
 #endif /* ARM_COMPUTE_CL */
+
+    instruments_info = support::cpp14::make_unique<InstrumentsInfo>();
 }
 
 std::set<InstrumentsDescription> Framework::available_instruments() const
@@ -678,6 +682,12 @@ std::vector<TestInfo> Framework::test_infos() const
 LogLevel Framework::log_level() const
 {
     return _log_level;
+}
+
+void Framework::set_instruments_info(InstrumentsInfo instr_info)
+{
+    ARM_COMPUTE_ERROR_ON(instruments_info == nullptr);
+    *instruments_info = instr_info;
 }
 } // namespace framework
 } // namespace test

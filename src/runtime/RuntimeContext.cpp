@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
+#include "arm_compute/runtime/RuntimeContext.h"
 
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/SchedulerFactory.h"
 
 namespace arm_compute
 {
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
+RuntimeContext::RuntimeContext()
+    : _owned_scheduler(SchedulerFactory::create()), _scheduler(_owned_scheduler.get()), _device_props()
 {
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
 }
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+void RuntimeContext::set_scheduler(IScheduler *scheduler)
 {
-    ARM_COMPUTE_UNUSED(hints);
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    kernel->run(kernel->window(), info);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(scheduler);
+    _scheduler = scheduler;
 }
 
-void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
+IScheduler *RuntimeContext::scheduler()
 {
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    for(auto &wl : workloads)
-    {
-        wl(info);
-    }
+    return _scheduler;
 }
-unsigned int SingleThreadScheduler::num_threads() const
+
+IAssetManager *RuntimeContext::asset_manager()
 {
-    return 1;
+    return nullptr;
+}
+
+const DeviceProperties &RuntimeContext::properties()
+{
+    return _device_props;
 }
 } // namespace arm_compute

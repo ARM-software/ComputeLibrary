@@ -29,6 +29,7 @@
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
+#include "tests/ParametersLibrary.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/validation/Helpers.h"
@@ -94,7 +95,7 @@ protected:
         TensorType dst = create_tensor<TensorType>(shape, _data_type, 1, _output_quantization_info);
 
         // Create and configure function
-        FunctionType act_layer;
+        FunctionType act_layer(parameters->get_ctx<TensorType>());
 
         TensorType *dst_ptr = _in_place ? nullptr : &dst;
 

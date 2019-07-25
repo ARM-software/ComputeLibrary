@@ -23,6 +23,7 @@
  */
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
+#include "tests/ParametersLibrary.h"
 #include "tests/framework/DatasetModes.h"
 #include "tests/framework/Exceptions.h"
 #include "tests/framework/Framework.h"
@@ -31,6 +32,7 @@
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/printers/Printers.h"
+#include "tests/instruments/Helpers.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
 
@@ -72,7 +74,8 @@ namespace arm_compute
 {
 namespace test
 {
-std::unique_ptr<AssetsLibrary> library;
+std::unique_ptr<AssetsLibrary>     library;
+std::unique_ptr<ParametersLibrary> parameters;
 } // namespace test
 } // namespace arm_compute
 
@@ -167,7 +170,20 @@ int main(int argc, char **argv)
 
         std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
 
+        // Setup CPU Scheduler
         Scheduler::get().set_num_threads(threads->value());
+
+        // Create CPU context
+        auto cpu_ctx = support::cpp14::make_unique<RuntimeContext>();
+        cpu_ctx->set_scheduler(&Scheduler::get());
+
+        // Track CPU context
+        auto cpu_ctx_track = support::cpp14::make_unique<ContextSchedulerUser>(cpu_ctx.get());
+
+        // Create parameters
+        parameters = support::cpp14::make_unique<ParametersLibrary>();
+        parameters->set_cpu_ctx(std::move(cpu_ctx));
+
 #ifdef ARM_COMPUTE_CL
         if(enable_tuner->is_set())
         {
@@ -232,7 +248,19 @@ int main(int argc, char **argv)
             }
         }
 
-        framework.init(options.instruments->value(), options.iterations->value(), dataset_mode->value(), filter->value(), filter_id->value(), options.log_level->value());
+        // Setup instruments meta-data
+        framework::InstrumentsInfo instruments_info;
+        instruments_info._scheduler_users.push_back(cpu_ctx_track.get());
+        framework.set_instruments_info(instruments_info);
+
+        // Initialize framework
+        framework.init(options.instruments->value(),
+                       options.iterations->value(),
+                       dataset_mode->value(),
+                       filter->value(),
+                       filter_id->value(),
+                       options.log_level->value());
+
         for(auto &p : printers)
         {
             framework.add_printer(p.get());

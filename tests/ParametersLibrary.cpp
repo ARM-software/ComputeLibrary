@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
-
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#include "tests/ParametersLibrary.h"
 
 namespace arm_compute
 {
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
+namespace test
 {
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
+void ParametersLibrary::set_cpu_ctx(std::unique_ptr<IRuntimeContext> cpu_ctx)
+{
+    _cpu_ctx = std::move(cpu_ctx);
 }
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+template <>
+typename ContextType<Tensor>::type *ParametersLibrary::get_ctx<Tensor>()
 {
-    ARM_COMPUTE_UNUSED(hints);
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    kernel->run(kernel->window(), info);
+    return _cpu_ctx.get();
 }
-
-void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
-{
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    for(auto &wl : workloads)
-    {
-        wl(info);
-    }
-}
-unsigned int SingleThreadScheduler::num_threads() const
-{
-    return 1;
-}
+} // namespace test
 } // namespace arm_compute

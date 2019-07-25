@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/RuntimeContext.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -133,8 +134,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datas
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+    // Create context
+    RuntimeContext ctx;
+
     // Create and configure function
-    NEActivationLayer act_layer;
+    NEActivationLayer act_layer(&ctx);
 
     if(in_place)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
+#include "arm_compute/runtime/DeviceProperties.h"
 
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/CPUUtils.h"
 
 namespace arm_compute
 {
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
+DeviceProperties::DeviceProperties()
 {
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
-}
-
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
-{
-    ARM_COMPUTE_UNUSED(hints);
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    kernel->run(kernel->window(), info);
-}
-
-void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
-{
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    for(auto &wl : workloads)
-    {
-        wl(info);
-    }
-}
-unsigned int SingleThreadScheduler::num_threads() const
-{
-    return 1;
+    get_cpu_configuration(cpu_info);
 }
 } // namespace arm_compute

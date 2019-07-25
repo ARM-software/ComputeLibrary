@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,12 @@
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+CLActivationLayer::CLActivationLayer(void *ctx)
+{
+    ARM_COMPUTE_UNUSED(ctx);
+}
 
 void CLActivationLayer::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
@@ -40,3 +45,4 @@ Status CLActivationLayer::validate(const ITensorInfo *input, const ITensorInfo *
 {
     return CLActivationLayerKernel::validate(input, output, act_info);
 }
+} // namespace arm_compute

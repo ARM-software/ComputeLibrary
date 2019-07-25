@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -293,6 +293,13 @@ public:
      * @return The current logging level.
      */
     LogLevel log_level() const;
+    /** Sets instruments info
+     *
+     * @note TODO(COMPMID-2638) : Remove once instruments are transferred outside the framework.
+     *
+     * @param[in] instr_info Instruments info to set
+     */
+    void set_instruments_info(InstrumentsInfo instr_info);
 
 private:
     Framework();

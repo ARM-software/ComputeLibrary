@@ -54,6 +54,9 @@
 #include <type_traits>
 #include <vector>
 
+#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/RuntimeContext.h"
+
 namespace arm_compute
 {
 #ifdef ARM_COMPUTE_CL

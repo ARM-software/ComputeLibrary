@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,14 +31,8 @@
 
 #include <omp.h>
 
-using namespace arm_compute;
-
-OMPScheduler &OMPScheduler::get()
+namespace arm_compute
 {
-    static OMPScheduler scheduler;
-    return scheduler;
-}
-
 OMPScheduler::OMPScheduler() // NOLINT
     : _num_threads(omp_get_max_threads())
 {
@@ -109,3 +103,4 @@ void OMPScheduler::run_workloads(std::vector<arm_compute::IScheduler::Workload> 
     }
 }
 #endif /* DOXYGEN_SKIP_THIS */
+} // namespace arm_compute

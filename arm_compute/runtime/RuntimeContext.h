@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,41 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__
-#define __ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__
+#ifndef __ARM_COMPUTE_RUNTIME_CONTEXT_H__
+#define __ARM_COMPUTE_RUNTIME_CONTEXT_H__
 
-#include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/DeviceProperties.h"
 #include "arm_compute/runtime/IRuntimeContext.h"
 
 #include <memory>
 
 namespace arm_compute
 {
-/** Basic interface for functions which have a single NEON kernel and no border */
-class INESimpleFunctionNoBorder : public IFunction
+/** Runtime context */
+class RuntimeContext : public IRuntimeContext
 {
 public:
-    /** Constructor
-     *
-     * @param[in] ctx Runtime context to be used by the function
-     */
-    INESimpleFunctionNoBorder(IRuntimeContext *ctx = nullptr);
+    /** Default Constructor */
+    RuntimeContext();
+    /** Destructor */
+    ~RuntimeContext() = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INESimpleFunctionNoBorder(const INESimpleFunctionNoBorder &) = delete;
+    RuntimeContext(const RuntimeContext &) = delete;
     /** Default move constructor */
-    INESimpleFunctionNoBorder(INESimpleFunctionNoBorder &&) = default;
+    RuntimeContext(RuntimeContext &&) = default;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INESimpleFunctionNoBorder &operator=(const INESimpleFunctionNoBorder &) = delete;
+    RuntimeContext &operator=(const RuntimeContext &) = delete;
     /** Default move assignment operator */
-    INESimpleFunctionNoBorder &operator=(INESimpleFunctionNoBorder &&) = default;
+    RuntimeContext &operator=(RuntimeContext &&) = default;
+    /** CPU Scheduler setter */
+    void set_scheduler(IScheduler *scheduler);
 
-    // Inherited methods overridden:
-    void run() override final;
+    // Inherited overridden methods
+    IScheduler             *scheduler() override;
+    IAssetManager          *asset_manager() override;
+    const DeviceProperties &properties() override;
 
-protected:
-    std::unique_ptr<INEKernel> _kernel; /**< Kernel to run */
-    IRuntimeContext           *_ctx;    /**< Context to use */
+private:
+    std::unique_ptr<IScheduler> _owned_scheduler{ nullptr };
+    IScheduler                 *_scheduler{ nullptr };
+    DeviceProperties            _device_props{};
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_INESIMPLEFUNCTIONNOBORDER_H__ */
+#endif /*__ARM_COMPUTE_RUNTIME_CONTEXT_H__ */

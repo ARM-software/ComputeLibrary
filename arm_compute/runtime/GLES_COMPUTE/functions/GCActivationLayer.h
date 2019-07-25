@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,19 @@ class IGCTensor;
 class GCActivationLayer : public IGCSimpleFunction
 {
 public:
+    /** Constructor
+     *
+     * @param[in] ctx Runtime context to be used by the function
+     */
+    GCActivationLayer(void *ctx = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCActivationLayer(const GCActivationLayer &) = delete;
+    /** Default move constructor */
+    GCActivationLayer(GCActivationLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCActivationLayer &operator=(const GCActivationLayer &) = delete;
+    /** Default move assignment operator */
+    GCActivationLayer &operator=(GCActivationLayer &&) = default;
     /** Set the input and output tensor.
      *
      * @note If the output tensor is a nullptr, the activation function will be performed in-place
@@ -49,5 +62,5 @@ public:
      */
     void configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info);
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCACTIVATIONLAYER_H__ */

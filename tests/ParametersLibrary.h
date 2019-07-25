@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
+#ifndef __ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H__
+#define __ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H__
 
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/IRuntimeContext.h"
+#include "arm_compute/runtime/Tensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
+namespace test
 {
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
-}
+// Return type trait helper
+template <class T>
+struct ContextType
+{
+    using type = void;
+};
+template <>
+struct ContextType<Tensor>
+{
+    using type = IRuntimeContext;
+};
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+/** Class that contains all the global parameters used by the tests */
+class ParametersLibrary final
 {
-    ARM_COMPUTE_UNUSED(hints);
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    kernel->run(kernel->window(), info);
-}
-
-void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
-{
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    for(auto &wl : workloads)
+public:
+    /** Default constructor */
+    ParametersLibrary() = default;
+    /** Set cpu context to be used by the tests
+     *
+     * @param[in] cpu_ctx CPU context to use
+     */
+    void set_cpu_ctx(std::unique_ptr<IRuntimeContext> cpu_ctx);
+    /** Get context given a tensor type
+     *
+     * @tparam TensorType
+     *
+     * @return Pointer to the context
+     */
+    template <typename TensorType>
+    typename ContextType<TensorType>::type *get_ctx()
     {
-        wl(info);
+        return nullptr;
     }
-}
-unsigned int SingleThreadScheduler::num_threads() const
-{
-    return 1;
-}
+
+private:
+    std::unique_ptr<IRuntimeContext> _cpu_ctx{ nullptr };
+};
+} // namespace test
 } // namespace arm_compute
+#endif //__ARM_COMPUTE_TEST_PARAMETERS_LIBRARY_H__

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <iostream>
+#include <list>
 #include <mutex>
 #include <system_error>
 #include <thread>
@@ -90,7 +91,31 @@ void process_workloads(std::vector<IScheduler::Workload> &workloads, ThreadFeede
 
 } //namespace
 
-class CPPScheduler::Thread
+struct CPPScheduler::Impl
+{
+    Impl(unsigned int thread_hint)
+        : _num_threads(thread_hint), _threads(_num_threads - 1)
+    {
+    }
+    void set_num_threads(unsigned int num_threads, unsigned int thead_hint)
+    {
+        _num_threads = num_threads == 0 ? thead_hint : num_threads;
+        _threads.resize(_num_threads - 1);
+    }
+    unsigned int num_threads() const
+    {
+        return _num_threads;
+    }
+
+    void run_workloads(std::vector<IScheduler::Workload> &workloads);
+
+    class Thread;
+
+    unsigned int      _num_threads;
+    std::list<Thread> _threads;
+};
+
+class CPPScheduler::Impl::Thread
 {
 public:
     /** Start a new thread. */
@@ -132,12 +157,12 @@ private:
     std::exception_ptr                 _current_exception{ nullptr };
 };
 
-CPPScheduler::Thread::Thread()
+CPPScheduler::Impl::Thread::Thread()
 {
     _thread = std::thread(&Thread::worker_thread, this);
 }
 
-CPPScheduler::Thread::~Thread()
+CPPScheduler::Impl::Thread::~Thread()
 {
     // Make sure worker thread has ended
     if(_thread.joinable())
@@ -148,7 +173,7 @@ CPPScheduler::Thread::~Thread()
     }
 }
 
-void CPPScheduler::Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info)
+void CPPScheduler::Impl::Thread::start(std::vector<IScheduler::Workload> *workloads, ThreadFeeder &feeder, const ThreadInfo &info)
 {
     _workloads = workloads;
     _feeder    = &feeder;
@@ -161,7 +186,7 @@ void CPPScheduler::Thread::start(std::vector<IScheduler::Workload> *workloads, T
     _cv.notify_one();
 }
 
-void CPPScheduler::Thread::wait()
+void CPPScheduler::Impl::Thread::wait()
 {
     {
         std::unique_lock<std::mutex> lock(_m);
@@ -174,7 +199,7 @@ void CPPScheduler::Thread::wait()
     }
 }
 
-void CPPScheduler::Thread::worker_thread()
+void CPPScheduler::Impl::Thread::worker_thread()
 {
     while(true)
     {
@@ -209,6 +234,9 @@ void CPPScheduler::Thread::worker_thread()
     }
 }
 
+/*
+ * This singleton has been deprecated and will be removed in the next release
+ */
 CPPScheduler &CPPScheduler::get()
 {
     static CPPScheduler scheduler;
@@ -216,26 +244,26 @@ CPPScheduler &CPPScheduler::get()
 }
 
 CPPScheduler::CPPScheduler()
-    : _num_threads(num_threads_hint()),
-      _threads(_num_threads - 1)
+    : _impl(support::cpp14::make_unique<Impl>(num_threads_hint()))
 {
 }
 
+CPPScheduler::~CPPScheduler() = default;
+
 void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
-    _num_threads = num_threads == 0 ? num_threads_hint() : num_threads;
-    _threads.resize(_num_threads - 1);
+    _impl->set_num_threads(num_threads, num_threads_hint());
 }
 
 unsigned int CPPScheduler::num_threads() const
 {
-    return _num_threads;
+    return _impl->num_threads();
 }
 
 #ifndef DOXYGEN_SKIP_THIS
 void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
 {
-    const unsigned int num_threads = std::min(_num_threads, static_cast<unsigned int>(workloads.size()));
+    const unsigned int num_threads = std::min(_impl->num_threads(), static_cast<unsigned int>(workloads.size()));
     if(num_threads < 1)
     {
         return;
@@ -245,7 +273,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
     info.cpu_info          = &_cpu_info;
     info.num_threads       = num_threads;
     unsigned int t         = 0;
-    auto         thread_it = _threads.begin();
+    auto         thread_it = _impl->_threads.begin();
     for(; t < num_threads - 1; ++t, ++thread_it)
     {
         info.thread_id = t;
@@ -258,7 +286,7 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
     try
     {
 #endif /* ARM_COMPUTE_EXCEPTIONS_DISABLED */
-        for(auto &thread : _threads)
+        for(auto &thread : _impl->_threads)
         {
             thread.wait();
         }
@@ -278,7 +306,7 @@ void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
-    const unsigned int num_threads    = std::min(num_iterations, _num_threads);
+    const unsigned int num_threads    = std::min(num_iterations, _impl->_num_threads);
 
     if(num_iterations == 0)
     {
@@ -302,7 +330,7 @@ void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
             case StrategyHint::DYNAMIC:
             {
                 // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
-                const unsigned int max_iterations = static_cast<unsigned int>(_num_threads) * 3;
+                const unsigned int max_iterations = static_cast<unsigned int>(_impl->_num_threads) * 3;
                 num_windows                       = num_iterations > max_iterations ? max_iterations : num_iterations;
                 break;
             }

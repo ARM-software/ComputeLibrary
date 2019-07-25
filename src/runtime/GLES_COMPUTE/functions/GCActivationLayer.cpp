@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,12 @@
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
 
-using namespace arm_compute;
+namespace arm_compute
+{
+GCActivationLayer::GCActivationLayer(void *ctx)
+{
+    ARM_COMPUTE_UNUSED(ctx);
+}
 
 void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, ActivationLayerInfo act_info)
 {
@@ -35,3 +40,4 @@ void GCActivationLayer::configure(IGCTensor *input, IGCTensor *output, Activatio
     k->configure(input, output, act_info);
     _kernel = std::move(k);
 }
+} // namespace arm_compute

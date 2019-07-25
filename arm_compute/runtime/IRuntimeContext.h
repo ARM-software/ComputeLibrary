@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,39 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/SingleThreadScheduler.h"
-
-#include "arm_compute/core/CPP/ICPPKernel.h"
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Utils.h"
+#ifndef __ARM_COMPUTE_IRUNTIME_CONTEXT_H__
+#define __ARM_COMPUTE_IRUNTIME_CONTEXT_H__
 
 namespace arm_compute
 {
-void SingleThreadScheduler::set_num_threads(unsigned int num_threads)
-{
-    ARM_COMPUTE_UNUSED(num_threads);
-    ARM_COMPUTE_ERROR_ON(num_threads != 1);
-}
+// Forward declarations
+class IScheduler;
+class IAssetManager;
+class DeviceProperties;
 
-void SingleThreadScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
+/** Context interface */
+class IRuntimeContext
 {
-    ARM_COMPUTE_UNUSED(hints);
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    kernel->run(kernel->window(), info);
-}
-
-void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
-{
-    ThreadInfo info;
-    info.cpu_info = &_cpu_info;
-    for(auto &wl : workloads)
-    {
-        wl(info);
-    }
-}
-unsigned int SingleThreadScheduler::num_threads() const
-{
-    return 1;
-}
+public:
+    /** Destructor */
+    virtual ~IRuntimeContext() = default;
+    /** Scheduler accessor
+      *
+      * @note Scheduler is used to schedule workloads
+      *
+      * @return The scheduler registered to the context
+      */
+    virtual IScheduler *scheduler() = 0;
+    /** Asset manager accessor
+     *
+     * @note Asset manager is used to manage objects/tensors within functions
+     *
+     * @return The asset manager registered to the context
+     */
+    virtual IAssetManager *asset_manager() = 0;
+    /** Device propertied accessor
+     *
+     * @return Device properties
+     */
+    virtual const DeviceProperties &properties() = 0;
+};
 } // namespace arm_compute
+#endif /*__ARM_COMPUTE_IRUNTIME_CONTEXT_H__ */
