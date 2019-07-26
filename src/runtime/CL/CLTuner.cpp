@@ -76,11 +76,11 @@ void CLTuner::tune_kernel_static(ICLKernel &kernel)
 
 void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
-    // Get the configuration ID from the kernel
-    const std::string &config_id = kernel.config_id();
+    // Get the configuration ID from the kernel and append GPU target name and number of available compute units
+    const std::string config_id = kernel.config_id() + "_" + string_from_target(kernel.get_target()) + "_MP" + support::cpp11::to_string(CLKernelLibrary::get().get_num_compute_units());
 
-    // Check if we need to find the Optimal LWS. If config_id is equal to default_config_id, the kernel does not require to be tuned
-    if(config_id != arm_compute::default_config_id)
+    // Check if we need to find the Optimal LWS. If the kernel's config_id is equal to default_config_id, the kernel does not require to be tuned
+    if(kernel.config_id() != arm_compute::default_config_id)
     {
         auto p = _lws_table.find(config_id);
 

@@ -1242,3 +1242,8 @@ std::string CLKernelLibrary::get_device_version()
 {
     return _device.getInfo<CL_DEVICE_VERSION>();
 }
+
+cl_uint CLKernelLibrary::get_num_compute_units()
+{
+    return _device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
+}

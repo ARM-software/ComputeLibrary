@@ -297,6 +297,11 @@ public:
      * @return The content of CL_DEVICE_VERSION
      */
     std::string get_device_version();
+    /** Return the maximum number of compute units in the device
+     *
+     * @return The content of CL_DEVICE_MAX_COMPUTE_UNITS
+     */
+    cl_uint get_num_compute_units();
     /** Creates a kernel from the kernel library.
      *
      * @param[in] kernel_name       Kernel name.
