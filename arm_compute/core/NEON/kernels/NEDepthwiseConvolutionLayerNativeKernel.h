@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL_H__
-#define __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL_H__
+#ifndef __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H__
+#define __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
 
@@ -31,24 +31,24 @@ namespace arm_compute
 // Forward declarations
 class ITensor;
 
-/** Interface for the kernel to run a depthwise convolution on a tensor. */
-class NEDepthwiseConvolutionLayerKernel : public INEKernel
+/** Interface for the kernel to run a depthwise convolution native on a tensor. */
+class NEDepthwiseConvolutionLayerNativeKernel : public INEKernel
 {
 public:
     const char *name() const override
     {
-        return "NEDepthwiseConvolutionLayerKernel";
+        return "NEDepthwiseConvolutionLayerNativeKernel";
     }
     /** Default constructor */
-    NEDepthwiseConvolutionLayerKernel();
+    NEDepthwiseConvolutionLayerNativeKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDepthwiseConvolutionLayerKernel(const NEDepthwiseConvolutionLayerKernel &) = delete;
+    NEDepthwiseConvolutionLayerNativeKernel(const NEDepthwiseConvolutionLayerNativeKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDepthwiseConvolutionLayerKernel &operator=(const NEDepthwiseConvolutionLayerKernel &) = delete;
+    NEDepthwiseConvolutionLayerNativeKernel &operator=(const NEDepthwiseConvolutionLayerNativeKernel &) = delete;
     /** Default Move Constructor. */
-    NEDepthwiseConvolutionLayerKernel(NEDepthwiseConvolutionLayerKernel &&) = default;
+    NEDepthwiseConvolutionLayerNativeKernel(NEDepthwiseConvolutionLayerNativeKernel &&) = default;
     /** Default move assignment operator */
-    NEDepthwiseConvolutionLayerKernel &operator=(NEDepthwiseConvolutionLayerKernel &&) = default;
+    NEDepthwiseConvolutionLayerNativeKernel &operator=(NEDepthwiseConvolutionLayerNativeKernel &&) = default;
     /** Initialize the function's source, destination and parameters.
      *
      * @note Supported data layouts: NHWC
@@ -64,7 +64,7 @@ public:
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
                    const Size2D &dilation = Size2D(1U, 1U));
-    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayerKernel
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseConvolutionLayerNativeKernel
      *
      * @note Supported data layouts: NHWC
      *
@@ -89,11 +89,11 @@ private:
     template <typename T, int S, bool has_biases>
     void run_depthwise(const Window &window);
 
-    /** Common signature for all the specialised depthwise convolution functions
+    /** Common signature for all the specialised depthwise convolution native functions
      *
      * @param[in] window Region on which to execute the kernel.
      */
-    using DepthwiseFunctionPtr = void (NEDepthwiseConvolutionLayerKernel::*)(const Window &window);
+    using DepthwiseFunctionPtr = void (NEDepthwiseConvolutionLayerNativeKernel::*)(const Window &window);
 
     DepthwiseFunctionPtr _func;
     BorderSize           _border_size;
@@ -106,4 +106,4 @@ private:
     Size2D               _dilation;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL_H__ */
+#endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONLAYERNATIVEKERNEL_H__ */

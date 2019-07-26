@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/NEON/wrapper/traits.h"
@@ -252,18 +252,18 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     return std::make_pair(err, win);
 }
 
-NEDepthwiseConvolutionLayerKernel::NEDepthwiseConvolutionLayerKernel()
+NEDepthwiseConvolutionLayerNativeKernel::NEDepthwiseConvolutionLayerNativeKernel()
     : _func(), _border_size(0), _input(), _weights(), _biases(), _output(), _conv_info(), _depth_multiplier(1), _dilation()
 {
 }
 
-BorderSize NEDepthwiseConvolutionLayerKernel::border_size() const
+BorderSize NEDepthwiseConvolutionLayerNativeKernel::border_size() const
 {
     return _border_size;
 }
 
-void NEDepthwiseConvolutionLayerKernel::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
-                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
+void NEDepthwiseConvolutionLayerNativeKernel::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
+                                                        const PadStrideInfo &conv_info, unsigned int depth_multiplier, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, dilation));
@@ -280,7 +280,7 @@ void NEDepthwiseConvolutionLayerKernel::configure(const ITensor *input, const IT
     switch(_input->info()->data_type())
     {
         case DataType::F32:
-            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerKernel::run_depthwise<float, 2, true> : &NEDepthwiseConvolutionLayerKernel::run_depthwise<float, 2, false>;
+            _func = (biases != nullptr) ? &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, 2, true> : &NEDepthwiseConvolutionLayerNativeKernel::run_depthwise<float, 2, false>;
             break;
         default:
             ARM_COMPUTE_ERROR("Data type not supported");
@@ -292,9 +292,9 @@ void NEDepthwiseConvolutionLayerKernel::configure(const ITensor *input, const IT
     INEKernel::configure(win_config.second);
 }
 
-Status NEDepthwiseConvolutionLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                   unsigned int  depth_multiplier,
-                                                   const Size2D &dilation)
+Status NEDepthwiseConvolutionLayerNativeKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                         unsigned int  depth_multiplier,
+                                                         const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, dilation));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), (biases != nullptr) ? biases->clone().get() : nullptr, output->clone().get(), conv_info,
@@ -303,7 +303,7 @@ Status NEDepthwiseConvolutionLayerKernel::validate(const ITensorInfo *input, con
     return Status{};
 }
 
-void NEDepthwiseConvolutionLayerKernel::run(const Window &window, const ThreadInfo &info)
+void NEDepthwiseConvolutionLayerNativeKernel::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -313,7 +313,7 @@ void NEDepthwiseConvolutionLayerKernel::run(const Window &window, const ThreadIn
 }
 
 template <typename T, int S, bool has_biases>
-void NEDepthwiseConvolutionLayerKernel::run_depthwise(const Window &window)
+void NEDepthwiseConvolutionLayerNativeKernel::run_depthwise(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);

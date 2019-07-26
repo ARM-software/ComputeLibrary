@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayerNativeKernel.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 #include "tests/framework/Macros.h"
@@ -38,11 +38,11 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for NEDepthwiseConvolutionLayerKernel
-using NEDepthwiseConvolutionLayer = NESynthetizeFunctionWithZeroConstantKernelBorder<NEDepthwiseConvolutionLayerKernel>;
+using NEDepthwiseConvolutionLayerNative = NESynthetizeFunctionWithZeroConstantKernelBorder<NEDepthwiseConvolutionLayerNativeKernel>;
 
 // Fixture for NEDepthwiseConvolutionLayerKernel
 template <typename T>
-using NEDepthwiseConvolutionLayerKernelFixture = DepthwiseConvolutionLayerKernelValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer, T>;
+using NEDepthwiseConvolutionLayerNativeFixture = DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, NEDepthwiseConvolutionLayerNative, T>;
 
 namespace
 {
@@ -52,24 +52,36 @@ RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
 /** Width values to test - Precommit */
-const auto width_values = framework::dataset::make("width", { 17U, 47U } );
+const auto width_values_precommit = framework::dataset::make("width", { 17U } );
+
+/** Width values to test - Nightly */
+const auto width_values_nightly = framework::dataset::make("width", { 53U, 47U } );
 
 /** Height values to test - Precommit */
-const auto height_values = framework::dataset::make("height", { 19U, 43U } );
+const auto height_values_precommit = framework::dataset::make("height", { 19U } );
+
+/** Height values to test - Nightly */
+const auto height_values_nightly = framework::dataset::make("height", { 39U, 43U } );
 
 /** Channel values to test - Precommit */
-const auto channel_values = framework::dataset::make("channels", { 32U, 128U });
+const auto channel_values_precommit = framework::dataset::make("channels", { 15U });
+
+/** Channel values to test - Nightly */
+const auto channel_values_nightly = framework::dataset::make("channels", { 33U, 19U });
 
 /** Batch values to test - Precommit */
-const auto batch_values = framework::dataset::make("batch", { 1U, 3U });
+const auto batch_values_precommit = framework::dataset::make("batch", { 1U, 2U });
 
-/** Kernel size values to test - Precommit */
+/** Batch values to test - Nightly */
+const auto batch_values_nightly = framework::dataset::make("batch", { 1U, 3U });
+
+/** Kernel size values to test - All */
 const auto kernel_sz_values = framework::dataset::make("kernel_size", { Size2D(3U, 5U), Size2D(5U, 3U) });
 
-/** Depth multiplier values to test - Precommit */
+/** Depth multiplier values to test - All */
 const auto depth_multiplier_values = framework::dataset::make("depth_multiplier", { 1U, 3U });
 
-/** Dilation values to test - Precommit */
+/** Dilation values to test - All */
 const auto dilation_values = framework::dataset::make("dilation", { Size2D(1U, 1U), Size2D(3U, 3U) });
 
 /** Stride values to test - All */
@@ -129,19 +141,19 @@ void validate_configuration(size_t width_value, size_t height_value, size_t chan
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    NEDepthwiseConvolutionLayer dwc;
+    NEDepthwiseConvolutionLayerNative dwc;
     dwc.configure(&src, &weights, &biases, &dst, conv_info, depth_multiplier_value, dilation_value);
 }
 } // namespace
 
 TEST_SUITE(NEON)
-TEST_SUITE(DepthwiseConvolutionLayer)
+TEST_SUITE(DepthwiseConvolutionLayerNative)
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values,
-                                                                                                                                           height_values),
-                                                                                                                                           channel_values),
-                                                                                                                                           batch_values),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_precommit,
+                                                                                                                                           height_values_precommit),
+                                                                                                                                           channel_values_precommit),
+                                                                                                                                           batch_values_precommit),
                                                                                                                                            kernel_sz_values),
                                                                                                                                            depth_multiplier_values),
                                                                                                                                            dilation_values),
@@ -154,11 +166,28 @@ width_value, height_value, channel_value, batch_value, kernel_sz_value, depth_mu
     validate_configuration(width_value, height_value, channel_value, batch_value, kernel_sz_value, depth_multiplier_value, dilation_value, stride_value, padding_valid_value, data_type_value, data_layout_value);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerKernelFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values,
-                                                                                                height_values),
-                                                                                                channel_values),
-                                                                                                batch_values),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::ALL,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_precommit,
+                                                                                                height_values_precommit),
+                                                                                                channel_values_precommit),
+                                                                                                batch_values_precommit),
+                                                                                                kernel_sz_values),
+                                                                                                depth_multiplier_values),
+                                                                                                dilation_values),
+                                                                                                stride_values),
+                                                                                                padding_valid_values),
+                                                                                                data_type_values),
+                                                                                                data_layout_values))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerNativeFixture<float>, framework::DatasetMode::NIGHTLY,
+                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_nightly,
+                                                                                                height_values_nightly),
+                                                                                                channel_values_nightly),
+                                                                                                batch_values_nightly),
                                                                                                 kernel_sz_values),
                                                                                                 depth_multiplier_values),
                                                                                                 dilation_values),
@@ -173,7 +202,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerKernelFixture<float>
 
 TEST_SUITE_END() // FP32
 TEST_SUITE_END() // Float
-TEST_SUITE_END() // DepthwiseConvolutionLayer
+TEST_SUITE_END() // DepthwiseConvolutionLayerNative
 TEST_SUITE_END() // NEON
 } // namespace validation
 } // namespace test

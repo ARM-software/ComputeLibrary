@@ -193,7 +193,7 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DepthwiseConvolutionLayerKernelValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class DepthwiseConvolutionLayerNativeValidationFixture : public DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>

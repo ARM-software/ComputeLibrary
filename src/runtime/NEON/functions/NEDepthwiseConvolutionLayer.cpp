@@ -947,7 +947,7 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseConvolutionLayerNativeKernel::validate(input, weights, biases, output, conv_info, depth_multiplier, dilation));
     }
 
     // Validate Activation Layer
