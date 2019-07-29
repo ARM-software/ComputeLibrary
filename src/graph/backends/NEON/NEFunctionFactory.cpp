@@ -223,6 +223,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_fully_connected_layer<NEFullyConnectedLayer, NETargetInfo>(*polymorphic_downcast<FullyConnectedLayerNode *>(node), ctx);
         case NodeType::FusedConvolutionBatchNormalizationLayer:
             return detail::create_fused_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedConvolutionBatchNormalizationNode *>(node));
+        case NodeType::FusedDepthwiseConvolutionBatchNormalizationLayer:
+            return detail::create_fused_depthwise_convolution_batch_normalization_layer<NEFusedLayerTypes, NETargetInfo>(*polymorphic_downcast<FusedDepthwiseConvolutionBatchNormalizationNode *>(node));
         case NodeType::NormalizationLayer:
             return detail::create_normalization_layer<NENormalizationLayer, NETargetInfo>(*polymorphic_downcast<NormalizationLayerNode *>(node), ctx);
         case NodeType::PermuteLayer:
