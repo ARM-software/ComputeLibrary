@@ -4,5 +4,5 @@
 	branch = master
 [submodule "3rdparty"]
 	path = 3rdparty
-	url = http://eu-gerrit-1.euhpc.arm.com/p/VisualCompute/3rdparty
+	url = https://eu-gerrit-1.euhpc.arm.com/VisualCompute/3rdparty
 	branch = master
