@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifdef __aarch64__
+
 #include "arm_gemm.hpp"
 
 #include "kernels/a64_hybrid_u8u32_dot_16x4.hpp"
@@ -99,3 +101,5 @@ template KernelDescription get_gemm_method<uint8_t, uint8_t, ARequantizeLayer32>
 template std::vector<KernelDescription> get_compatible_kernels<uint8_t, uint8_t, ARequantizeLayer32>(const GemmArgs<uint8_t> &args, const ARequantizeLayer32 &os);
 
 } // namespace arm_gemm
+
+#endif // __aarch64__

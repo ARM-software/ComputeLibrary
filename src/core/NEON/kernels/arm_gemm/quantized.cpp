@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifdef __aarch64__
 
 #include "arm_gemm.hpp"
 
@@ -767,3 +768,5 @@ template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width,
 template void compute_col_sums(const ARequantizeLayer32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int first_col);
 
 } // namespace arm_gemm
+
+#endif // __aarch64__
