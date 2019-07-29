@@ -109,11 +109,6 @@ class QAsymm8DepthwiseConvolution : public DepthwiseConvolutionBase<
     );
 
   protected:
-    static nck::ActivationFunction get_activation_fn(
-      nck::ActivationFunction activation,
-      const qasymm8::QAsymm8Params& output_quantisation
-    );
-
     uint8_t _input_padding_value(void) const;
 
     void _pack_params(
