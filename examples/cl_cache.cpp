@@ -28,8 +28,6 @@
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "utils/Utils.h"
 
-#include <chrono>
-
 using namespace arm_compute;
 using namespace utils;
 
@@ -46,7 +44,7 @@ public:
     {
         std::cout << "Once the program has run and created the file cache.bin, rerun with --restore_cache." << std::endl;
         CLScheduler::get().default_init();
-        auto start_time = std::chrono::high_resolution_clock::now();
+
         if(argc > 1)
         {
             std::string argv1 = argv[1];
@@ -88,10 +86,6 @@ public:
         permute_nchw.configure(&tensor_nhwc, &tensor_nchw_result, vector_nhwc_to_nchw);
         tensor_nchw_result.allocator()->allocate();
 
-        auto end_time        = std::chrono::high_resolution_clock::now();
-        auto time_elapsed    = end_time - start_time;
-        auto time_elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_elapsed).count();
-        std::cout << "Configuration time " << time_elapsed_ms << " ms " << std::endl;
         // Save the opencl kernels to a file
         save_program_cache_to_file();
 

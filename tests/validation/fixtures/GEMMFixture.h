@@ -44,7 +44,7 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_ouput_as_3d = false>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool disable_c = false, bool reinterpret_input_as_3d = false, bool reinterpret_output_as_3d = false>
 class GEMMValidationFixture : public framework::Fixture
 {
 public:
@@ -87,7 +87,13 @@ protected:
         // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
         // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 0),
         // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
-        gemm.configure(&a, &b, (disable_c) ? nullptr : &c, &dst, alpha, beta, GEMMInfo(false, false, false, (reinterpret_ouput_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d));
+        gemm.configure(&a,
+                       &b,
+                       (disable_c) ? nullptr : &c,
+                       &dst,
+                       alpha, beta,
+                       GEMMInfo(false, false, false, (reinterpret_output_as_3d ? output_shape[2] : 0), reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, (reinterpret_input_as_3d
+                                || reinterpret_output_as_3d)));
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(c.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -122,6 +128,7 @@ protected:
                                       DataType data_type)
     {
         TensorShape shape_a_to_use = shape_a;
+
         if(reinterpret_input_as_3d)
         {
             // Collapse the second and third dimension if the input is 3D
@@ -131,22 +138,29 @@ protected:
         // Create reference
         SimpleTensor<T> a{ shape_a_to_use, data_type, 1 };
         SimpleTensor<T> b{ shape_b, data_type, 1 };
-        SimpleTensor<T> c{ shape_c, data_type, 1 };
+        SimpleTensor<T> c{ output_shape, data_type, 1 };
 
         // Fill reference
         fill(a, 0);
         fill(b, 1);
-        if(!disable_c)
+        fill(c, 2);
+
+        if(reinterpret_input_as_3d || reinterpret_output_as_3d)
         {
-            fill(c, 2);
-            return reference::gemm<T>(a, b, c, alpha, beta);
+            const int n          = shape_b[0];
+            const int m          = reinterpret_output_as_3d ? output_shape[1] * output_shape[2] : output_shape[1];
+            const int batch_size = reinterpret_output_as_3d ? output_shape[3] : output_shape[2];
+
+            // In case of broadcast, we need simply copy the first into the following "M" ones
+            for(int i = 1; i < m * batch_size; i++)
+            {
+                memcpy(c.data() + i * n, c.data(), n * sizeof(T));
+            }
         }
-        else
-        {
-            // Setting beta to 0 will effectively disable C for the
-            // computation of the reference: alpha * A * B + 0 * C
-            return reference::gemm<T>(a, b, c, alpha, 0.f);
-        }
+
+        // Setting beta to 0 will effectively disable C for the
+        // computation of the reference: alpha * A * B + 0 * C
+        return reference::gemm<T>(a, b, c, alpha, disable_c ? 0.f : beta);
     }
 
     TensorType      _target{};

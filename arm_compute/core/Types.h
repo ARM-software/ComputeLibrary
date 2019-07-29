@@ -1775,7 +1775,8 @@ public:
           _gemmlowp_output_stage(),
           _fp_mixed_precision(false),
           _broadcast_bias(false),
-          _pretranpose_B(true)
+          _pretranpose_B(true),
+          _activation_info()
     {
     }
     /** Constructor
@@ -1791,9 +1792,11 @@ public:
      * @param[in] gemmlowp_output_stage       (Optional) GEMMLowp Output stage info
      * @param[in] fp_mixed_precision          (Optional) Use wider accumulators (32 bit instead of 16 for FP16) to improve accuracy.
      * @param[in] broadcast_bias              (Optional) Broadcast the shape of the bias tensor from a vector to a matrix.
+     * @param[in] activation_info             (Optional) Activation to apply after the matrix multiplication
      */
     GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, int depth_output_gemm3d = 0, bool reinterpret_input_as_3d = false, bool retain_internal_weights = false,
-             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false) noexcept
+             GEMMLowpOutputStageInfo gemmlowp_output_stage = GEMMLowpOutputStageInfo(), bool fp_mixed_precision = false, bool broadcast_bias = false,
+             const ActivationLayerInfo &activation_info = ActivationLayerInfo()) noexcept
         : _is_a_reshaped(is_a_reshaped),
           _is_b_reshaped(is_b_reshaped),
           _reshape_b_only_on_first_run(reshape_b_only_on_first_run),
@@ -1803,7 +1806,8 @@ public:
           _gemmlowp_output_stage(gemmlowp_output_stage),
           _fp_mixed_precision(fp_mixed_precision),
           _broadcast_bias(broadcast_bias),
-          _pretranpose_B(reshape_b_only_on_first_run)
+          _pretranpose_B(reshape_b_only_on_first_run),
+          _activation_info(activation_info)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -1896,6 +1900,14 @@ public:
     {
         _pretranpose_B = flag;
     }
+    /** Activation layer to apply after the matrix multiplication
+     *
+     * @return ActivationLayerInfo object
+     */
+    ActivationLayerInfo activation_info() const
+    {
+        return _activation_info;
+    }
 
 private:
     bool                    _is_a_reshaped;
@@ -1908,6 +1920,7 @@ private:
     bool                    _fp_mixed_precision;
     bool                    _broadcast_bias;
     bool                    _pretranpose_B;
+    ActivationLayerInfo     _activation_info;
 };
 
 /** Winograd information */

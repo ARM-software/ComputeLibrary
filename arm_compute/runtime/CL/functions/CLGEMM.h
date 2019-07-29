@@ -127,7 +127,6 @@ private:
 
     CLMemoryGroup                             _memory_group;
     CLGEMMMatrixMultiplyKernel                _mm_kernel;
-    CLGEMMMatrixAdditionKernel                _ma_kernel;
     CLGEMMReshapeLHSMatrixKernel              _reshape_lhs_kernel;
     CLGEMMReshapeRHSMatrixKernel              _reshape_rhs_kernel;
     CLGEMMMatrixMultiplyReshapedKernel        _mm_reshaped_kernel;
@@ -135,7 +134,6 @@ private:
     CLTensor                                  _tmp_a;
     CLTensor                                  _tmp_b;
     const ICLTensor                          *_original_b;
-    bool                                      _run_addition;
     bool                                      _reshape_b_only_on_first_run;
     bool                                      _is_prepared;
     GEMMType                                  _gemm_type;

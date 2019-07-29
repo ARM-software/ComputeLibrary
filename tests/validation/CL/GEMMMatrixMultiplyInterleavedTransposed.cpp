@@ -77,7 +77,7 @@ RelativeTolerance<half> rel_tolerance_f16(half(0.2));
 constexpr float         tolerance_num_f16 = 0.02f;
 
 /** Alpha values to test - Precommit */
-const auto alpha_values = framework::dataset::make("alpha", {0.0f, 1.0f, -0.75f} );
+const auto alpha_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
 /** Beta values to test - Precommit */
 const auto beta_values = framework::dataset::make("beta", {-0.75f, 0.0f} );
