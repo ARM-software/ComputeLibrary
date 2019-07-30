@@ -187,7 +187,7 @@ Status NEGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         float multiplier = iqinfo.scale * wqinfo.scale / oqinfo.scale;
         int   output_multiplier;
         int   output_shift;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        ARM_COMPUTE_RETURN_ON_ERROR(quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift));
 
         // Merge activation with output stage
         int min_activation = 0;
@@ -492,6 +492,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // Output tensor auto inizialization if not yet initialized
     ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayerReshapeWeights::validate(weights, biases_to_use, nullptr));
     weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, (append_bias && !skip_im2col)), 1, data_type);
+    weights_reshaped_info.set_quantization_info(weights->quantization_info());
     weights_to_use        = &weights_reshaped_info;
 
     if(!skip_im2col)
