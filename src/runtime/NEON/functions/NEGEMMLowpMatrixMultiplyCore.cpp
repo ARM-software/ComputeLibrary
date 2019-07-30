@@ -242,7 +242,7 @@ Status NEGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     int32_t a_offset = a->quantization_info().uniform().offset;
     int32_t b_offset = b->quantization_info().uniform().offset;
 
-    bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE && a->data_type() != DataType::QASYMM8;
+    bool fuse_output_stage = gemm_info.gemmlowp_output_stage().type != GEMMLowpOutputStageType::NONE;
     if(fuse_output_stage)
     {
         auto_init_if_empty(mm_result_s32_info, a->clone()->set_tensor_shape(output->tensor_shape()).set_data_type(DataType::S32));
