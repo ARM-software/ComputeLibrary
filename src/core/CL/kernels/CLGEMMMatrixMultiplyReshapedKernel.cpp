@@ -67,9 +67,8 @@ Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the LHS matrix must be <= 4");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the RHS matrix must be <= 3");
-    ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.transpose);
-    ARM_COMPUTE_RETURN_ERROR_ON(!rhs_info.transpose);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 != rhs_info.k0);
+    ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.transpose == rhs_info.transpose);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(((lhs_info.k0 & (lhs_info.k0 - 1)) && lhs_info.k0 != 3), "Only 2,3,4,8,16 are supported for k0");
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.k0 > 16);
     ARM_COMPUTE_RETURN_ERROR_ON(lhs_info.m0 < 2 || lhs_info.m0 > 8);
@@ -253,6 +252,7 @@ void CLGEMMMatrixMultiplyReshapedKernel::configure(const ICLTensor *input0, cons
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
     build_opts.add_option_if(lhs_info.interleave, "-DLHS_INTERLEAVE");
     build_opts.add_option_if(rhs_info.interleave, "-DRHS_INTERLEAVE");
+    build_opts.add_option_if(lhs_info.transpose, "-DLHS_TRANSPOSE");
     build_opts.add_option_if(_use_dummy_work_items, "-DDUMMY_WORK_ITEMS");
     build_opts.add_option("-DM=" + support::cpp11::to_string(gemm_info.m));
     build_opts.add_option("-DN=" + support::cpp11::to_string(gemm_info.n));
