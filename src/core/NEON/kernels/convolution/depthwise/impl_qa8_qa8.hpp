@@ -373,12 +373,23 @@ static inline void tilefn(
           final_accs[i] = vminq_s32(final_accs[i], vdupq_n_s32(clamp_max));
         }
 
+#ifndef __aarch64__
+        const int16x8x2_t zelems = vuzpq_s16(vreinterpretq_s16_s32(final_accs[0]),
+                                             vreinterpretq_s16_s32(final_accs[1]));
+        const int8x16_t elems = vreinterpretq_s8_s16(zelems.val[0]);
+
+        const int8x16x2_t zoutput = vuzpq_s8(elems, elems);
+        const uint8x8_t output =
+                vget_low_u8(vreinterpretq_u8_s8(zoutput.val[0]));
+        vst1_u8(get_output_ptr(oi, oj, channel), output);
+#else
         const int8x16_t elems = vreinterpretq_s8_s16(
             vuzp1q_s16(vreinterpretq_s16_s32(final_accs[0]),
                        vreinterpretq_s16_s32(final_accs[1])));
         const uint8x8_t output =
             vget_low_u8(vreinterpretq_u8_s8(vuzp1q_s8(elems, elems)));
         vst1_u8(get_output_ptr(oi, oj, channel), output);
+#endif // __aarch64__
       }
     }
   }

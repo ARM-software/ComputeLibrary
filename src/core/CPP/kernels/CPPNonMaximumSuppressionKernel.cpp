@@ -116,7 +116,7 @@ void CPPNonMaximumSuppressionKernel::run(const Window &window, const ThreadInfo 
             _scores_above_thd_vector.emplace_back(score_i);
             // Initialize respective index and visited
             _sorted_indices.emplace_back(num_above_thd);
-            _visited.emplace_back(false);
+            _visited.push_back(false);
             ++num_above_thd;
         }
     }

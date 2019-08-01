@@ -28,6 +28,8 @@
 #include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "support/ToolchainSupport.h"
+
 namespace arm_compute
 {
 namespace
@@ -160,7 +162,7 @@ void depthwise_loop_generic(const ITensor *input, const ITensor *weights, const 
                 for(size_t m = 0; m < depth_multiplier; ++m)
                 {
                     const auto weights_val = *(reinterpret_cast<T *>(weights_ptr + m * sizeof(T) + w * weights_stride_y));
-                    acc.at(m)              = std::fma(weights_val, input_val, acc.at(m));
+                    acc.at(m)              = support::cpp11::fma(weights_val, input_val, acc.at(m));
                 }
 
                 offs += dilation.x() * input_stride_y;
