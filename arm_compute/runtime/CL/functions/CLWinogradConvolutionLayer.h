@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 #include "arm_compute/runtime/IFunction.h"

@@ -189,13 +189,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
                                                                                                                      GEMMLowpOutputStageInfo(), (input->data_type() == DataType::F16))));
 
     // Configure output transform
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info));
-
-    // Validate Activation Layer
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info, act_info));
 
     return Status{};
 }
