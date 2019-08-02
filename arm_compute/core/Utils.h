@@ -839,10 +839,12 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
  * @param[in] conv_info     Convolution information (containing strides)
  * @param[in] data_layout   (Optional) Data layout of the input and weights tensor
  * @param[in] dilation      (Optional) Dilation factor used in the convolution.
+ * @param[in] rounding_type (Optional) Dimension rounding type when down-scaling.
  *
  * @return PadStrideInfo for SAME padding
  */
-PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u));
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info, DataLayout data_layout = DataLayout::NCHW, const Size2D &dilation = Size2D(1u, 1u),
+                                 const DimensionRoundingType &rounding_type = DimensionRoundingType::FLOOR);
 
 /** Returns expected width and height of the deconvolution's output tensor.
  *

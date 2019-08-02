@@ -75,8 +75,11 @@ const auto batch_values_precommit = framework::dataset::make("batch", { 1U, 2U }
 /** Batch values to test - Nightly */
 const auto batch_values_nightly = framework::dataset::make("batch", { 1U, 3U });
 
-/** Kernel size values to test - All */
-const auto kernel_sz_values = framework::dataset::make("kernel_size", { Size2D(3U, 5U), Size2D(5U, 3U) });
+/** Kernel size values to test - Precommit */
+const auto kernel_sz_values_precommit = framework::dataset::make("kernel_size", { Size2D(1U, 1U), Size2D(1U, 3U) });
+
+/** Kernel size values to test - Nightly */
+const auto kernel_sz_values_nightly = framework::dataset::make("kernel_size", { Size2D(3U, 5U), Size2D(5U, 1U), Size2D(1U, 7U), Size2D(9U, 7U) });
 
 /** Depth multiplier values to test - All */
 const auto depth_multiplier_values = framework::dataset::make("depth_multiplier", { 1U, 3U });
@@ -154,7 +157,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                                                                                            height_values_precommit),
                                                                                                                                            channel_values_precommit),
                                                                                                                                            batch_values_precommit),
-                                                                                                                                           kernel_sz_values),
+                                                                                                                                           kernel_sz_values_precommit),
                                                                                                                                            depth_multiplier_values),
                                                                                                                                            dilation_values),
                                                                                                                                            stride_values),
@@ -171,7 +174,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerNativeFixture<float>
                                                                                                 height_values_precommit),
                                                                                                 channel_values_precommit),
                                                                                                 batch_values_precommit),
-                                                                                                kernel_sz_values),
+                                                                                                kernel_sz_values_precommit),
                                                                                                 depth_multiplier_values),
                                                                                                 dilation_values),
                                                                                                 stride_values),
@@ -188,7 +191,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerNativeFixture<float>
                                                                                                 height_values_nightly),
                                                                                                 channel_values_nightly),
                                                                                                 batch_values_nightly),
-                                                                                                kernel_sz_values),
+                                                                                                kernel_sz_values_nightly),
                                                                                                 depth_multiplier_values),
                                                                                                 dilation_values),
                                                                                                 stride_values),
