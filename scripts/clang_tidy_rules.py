@@ -4,7 +4,13 @@ import re
 import sys
 
 def get_list_includes():
-    return "arm_compute/core/NEON/kernels/assembly arm_compute/core/NEON/kernels/convolution/common include/linux include . 3rdparty/include kernels".split()
+    return "arm_compute/core/NEON/kernels/assembly " \
+           "arm_compute/core/NEON/kernels/convolution/common " \
+           "arm_compute/core/NEON/kernels/convolution/depthwise " \
+           "arm_compute/core/NEON/kernels/convolution/winograd " \
+           "include/linux include " \
+           ". " \
+           "3rdparty/include kernels".split()
 
 def get_list_flags( filename, arch):
     assert arch in ["armv7", "aarch64"]
@@ -43,7 +49,7 @@ def filter_clang_tidy_lines( lines ):
             continue
 
         if "error:" in line:
-            if (("Utils.cpp" in line and "'arm_compute_version.embed' file not found" in line) or
+            if (("Utils.cpp" in line and "arm_compute_version.embed" in line and "file not found" in line) or
                 ("arm_fp16.h" in line) or
                 ("omp.h" in line) or
                 ("cast from pointer to smaller type 'uintptr_t' (aka 'unsigned int') loses information" in line) or
