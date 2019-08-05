@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,8 @@ class ICLTensor;
  *
  * -# @ref CLDepthwiseConvolutionLayer
  * -# @ref CLDirectConvolutionLayer
+ *
+ * @deprecated This function is deprecated and will be removed in release 19.11
  *
  */
 class CLDepthwiseSeparableConvolutionLayer : public IFunction
