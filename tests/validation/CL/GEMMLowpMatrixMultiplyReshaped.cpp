@@ -84,10 +84,10 @@ const auto b_values = framework::dataset::make("batch_size", 1, 3);
 const auto m0_values_precommit = framework::dataset::make("M0", {4, 6});
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 2, 4 });
+const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 4 });
+const auto k0_values_precommit = framework::dataset::make("K0", { 16 });
 
 /** V0 values to test - Precommit */
 const auto v0_values_precommit = framework::dataset::make("V0", 1, 3);
@@ -102,7 +102,7 @@ const auto m0_values_nightly = framework::dataset::make("M0", 2, 7);
 const auto n0_values_nightly = framework::dataset::make("N0", { 2, 3, 4, 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8 });
+const auto k0_values_nightly = framework::dataset::make("K0", { 2, 3, 4, 8, 16 });
 
 /** V0 values to test - Nightly */
 const auto v0_values_nightly = framework::dataset::make("V0", 1, 4);

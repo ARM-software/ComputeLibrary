@@ -80,7 +80,7 @@ constexpr float         tolerance_num_f16 = 0.02f;
 const auto alpha_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values = framework::dataset::make("beta", {-0.75f, 0.0f} );
+const auto beta_values = framework::dataset::make("beta", {-0.35f, 0.0f} );
 
 /** M values to test - Precommit */
 const auto m_values_precommit = framework::dataset::make("M", 37);

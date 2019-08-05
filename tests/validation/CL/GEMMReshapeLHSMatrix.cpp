@@ -66,7 +66,7 @@ const auto data_types = framework::dataset::make("DataType", { DataType::QASYMM8
 const auto b_values = framework::dataset::make("batchsize", 1, 3);
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", { 2, 4, 5 });
+const auto m0_values_precommit = framework::dataset::make("M0", { 4, 5 });
 
 /** K0 values to test - Precommit */
 const auto k0_values_precommit = framework::dataset::make("K0", { 2, 4 });

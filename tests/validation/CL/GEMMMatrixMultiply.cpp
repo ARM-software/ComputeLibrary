@@ -70,7 +70,7 @@ constexpr float         tolerance_num_f16 = 0.02f;
 const auto alpha_values = framework::dataset::make("alpha", {1.0f, -0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values = framework::dataset::make("beta", {-0.75f, 0.0f} );
+const auto beta_values = framework::dataset::make("beta", {-0.35f, 0.0f} );
 
 /** M values to test - Precommit */
 const auto m_values_precommit = framework::dataset::make("M", {37, 1});
@@ -113,7 +113,7 @@ const auto act_values = framework::dataset::make("Activation",
 });
 
 /** Broadcast bias from vector to matrix */
-const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", {false, true} );
+const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
 
 /** GPU architectures values to test */
 const auto gpu_arch_values = framework::dataset::make("GPUArch",

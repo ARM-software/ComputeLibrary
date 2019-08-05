@@ -48,7 +48,7 @@ public:
     CLGEMMMatrixMultiplyNativeKernel &operator=(CLGEMMMatrixMultiplyNativeKernel &&) = default;
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input0    Input tensor for the LHS matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @param[in]  input0    Input tensor for the LHS matrix. Data type supported: F32. The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in]  input1    Input tensor for the RHS matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in]  input2    Input tensor containing the bias matrix. Data type supported: same as @p input0.
      * @param[out] output    Output tensor info. Data type supported: same as @p input0
@@ -67,7 +67,7 @@ public:
                    const GEMMKernelInfo    &gemm_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixMultiplyNativeKernel
      *
-     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: F32/F16. The number of dimensions for the LHS matrix must be less or equal than 4.
+     * @param[in] input0    Input tensor info for the LHS matrix. Data type supported: F32. The number of dimensions for the LHS matrix must be less or equal than 4.
      * @param[in] input1    Input tensor info for the RHS matrix. Data type supported: same as @p input0. The number of dimensions for the RHS matrix must be less or equal than 3.
      * @param[in] input2    Input tensor info containing the bias matrix. Data type supported: same as @p input0.
      * @param[in] output    Output tensor info. Data type supported: same as @p input0
