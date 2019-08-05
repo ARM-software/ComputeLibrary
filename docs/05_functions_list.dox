@@ -115,7 +115,6 @@ namespace arm_compute
     - @ref NEDepthwiseConvolutionAssemblyDispatch
     - @ref NEDepthwiseConvolutionLayer
     - @ref NEDepthwiseConvolutionLayer3x3
-    - @ref NEDepthwiseSeparableConvolutionLayer
     - @ref NEDequantizationLayer
     - @ref NEDerivative
     - @ref NEDirectConvolutionLayer
@@ -188,7 +187,6 @@ namespace arm_compute
     - @ref CLDeconvolutionLayerUpsample
     - @ref CLDepthwiseConvolutionLayer
     - @ref CLDepthwiseConvolutionLayer3x3
-    - @ref CLDepthwiseSeparableConvolutionLayer
     - @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayer
     - @ref CLDirectDeconvolutionLayer

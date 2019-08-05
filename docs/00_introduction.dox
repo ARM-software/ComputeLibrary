@@ -696,7 +696,7 @@ v17.09 Public major release
     - @ref NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer CLDepthwiseSeparableConvolutionLayer
     - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - @ref CLFlattenLayer
