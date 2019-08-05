@@ -107,6 +107,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         window_changed = update_window_and_padding(win, input_access);
     }
 
+    // Mean, var, gamma and beta get parallelized for the NHWC case as they follow the channel dimension, which is along the first axis
     if(input->data_layout() == DataLayout::NHWC)
     {
         AccessWindowHorizontal mean_access(mean, 0, num_elems_processed_per_iteration);
