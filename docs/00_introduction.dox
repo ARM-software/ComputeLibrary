@@ -1254,8 +1254,8 @@ Ubuntu on Windows* shell and following the general guidelines given above.
 @subsubsection S3_5_2_cygwin Cygwin
 
 If the Windows subsystem for Linux is not available <a href="https://www.cygwin.com/">Cygwin</a>
-can be used to install and run `scons`. In addition to the default packages
-installed by Cygwin `scons` has to be selected in the installer. (`git` might
+can be used to install and run `scons`, the minimum Cygwin version must be 3.0.7 or later. In addition
+to the default packages installed by Cygwin `scons` has to be selected in the installer. (`git` might
 also be useful but is not strictly required if you already have got the source
 code of the library.) Linaro provides pre-built versions of
 <a href="http://releases.linaro.org/components/toolchain/binaries/">GCC cross-compilers</a>
