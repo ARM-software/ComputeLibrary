@@ -53,7 +53,7 @@ public:
     /** Constructor
      */
     NEGEMMAssemblyWrapperKernel()
-        : _kernel(nullptr), _kernel_name_tag()
+        : _kernel(nullptr), _name("NEGEMMAssemblyWrapperKernel")
     {
     }
 
@@ -63,12 +63,7 @@ public:
 
     const char *name() const override
     {
-        std::string name = "NEGEMMAssemblyWrapperKernel";
-        if(!_kernel_name_tag.empty())
-        {
-            name += "/" + _kernel_name_tag;
-        }
-        return name.c_str();
+        return _name.c_str();
     }
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override
@@ -88,16 +83,20 @@ public:
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void *>(kernel)));
         _kernel          = kernel;
-        _kernel_name_tag = kernel_name_tag;
         auto   win_last  = _kernel->get_window_size();
         Window win;
         win.set(Window::DimX, Window::Dimension(0, win_last, 1));
         INEKernel::configure(win);
+
+        if(!kernel_name_tag.empty())
+        {
+            _name += "/" + kernel_name_tag;
+        }
     }
 
 private:
     arm_gemm::GemmCommon<TypeInput, TypeOutput> *_kernel;
-    std::string _kernel_name_tag;
+    std::string _name;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__ */
