@@ -109,7 +109,6 @@ protected:
 
         // Compute function
         padding.run();
-
         return dst;
     }
 

@@ -114,6 +114,7 @@
 #include "arm_compute/core/NEON/kernels/NENonLinearFilterKernel.h"
 #include "arm_compute/core/NEON/kernels/NENonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NENormalizationLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEPadLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPermuteKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
