@@ -75,6 +75,7 @@ Status validate_arguments_static(const ITensorInfo *input, const int block_shape
         ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] != output->tensor_shape()[idx_channel]);
         ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
     return Status{};
@@ -123,7 +124,7 @@ void CLSpaceToBatchLayerKernel::configure(const ICLTensor *input, const int bloc
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     TensorShape output_shape = misc::shape_calculator::compute_space_to_batch_shape(input->info(), block_shape_x, block_shape_y, padding_left, padding_right);
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_static(input->info(), block_shape_x, block_shape_y, padding_left, padding_right, output->info()));
 
