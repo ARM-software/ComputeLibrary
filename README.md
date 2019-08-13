@@ -12,17 +12,26 @@ Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
 News:
 
+- [Gian Marco's talk on Performance Analysis for Optimizing Embedded Deep Learning Inference Software](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2019-embedded-vision-summit)
 - [Gian Marco's talk on optimizing CNNs with Winograd algorithms at the EVS](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2018-embedded-vision-summit-iodice)
 - [Gian Marco's talk on using SGEMM and FFTs to Accelerate Deep Learning](https://www.embedded-vision.com/platinum-members/arm/embedded-vision-training/videos/pages/may-2016-embedded-vision-summit-iodice)
 
 Related projects:
 
 - [Arm NN SDK](https://github.com/arm-software/armnn)
+
+Tutorials:
+
 - [Tutorial: Cartoonifying Images on Raspberry Pi with the Compute Library](https://community.arm.com/graphics/b/blog/posts/cartoonifying-images-on-raspberry-pi-with-the-compute-library)
 - [Tutorial: Running AlexNet on Raspberry Pi with Compute Library](https://community.arm.com/processors/b/blog/posts/running-alexnet-on-raspberry-pi-with-compute-library)
 
+Blogs:
+
+- [Happy Birthday ACL!](https://community.arm.com/developer/tools-software/graphics/b/blog/posts/arm-compute-library-19-05-is-coming)
+
 Documentation available here:
 
+- [v19.08](https://arm-software.github.io/ComputeLibrary/v19.08/)
 - [v19.05](https://arm-software.github.io/ComputeLibrary/v19.05/)
 - [v19.02](https://arm-software.github.io/ComputeLibrary/v19.02/)
 - [v18.11](https://arm-software.github.io/ComputeLibrary/v18.11/index.xhtml)
@@ -41,6 +50,8 @@ Documentation available here:
 
 Binaries available here:
 
+- [v19.08-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-linux.tar.gz)
+- [v19.08-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.08/arm_compute-v19.08-bin-android.tar.gz)
 - [v19.05-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-linux.tar.gz)
 - [v19.05-android](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.05/arm_compute-v19.05-bin-android.tar.gz)
 - [v19.02-linux](https://github.com/ARM-software/ComputeLibrary/releases/download/v19.02/arm_compute-v19.02-bin-linux.tar.gz)
