@@ -179,7 +179,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
         num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y == 1 && dilation.y() == 1) ? 2 : 1;
-        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
+        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x + (conv_stride_x > 1 ? 1 : 0);
         num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
     num_elems_read_per_iteration_x += (num_elems_read_per_iteration_x - 1) * (dilation.x() - 1);
