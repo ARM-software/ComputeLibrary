@@ -23,7 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
 
-#include "arm_compute/core/AccessWindowTranspose.h"
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
@@ -73,24 +73,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
     const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
-    const int          scale_x                           = num_elems_processed_per_iteration;
-    bool               window_changed                    = false;
 
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
-    ARM_COMPUTE_ERROR_ON_MSG((win.x().end() / scale_x) == 0, "Transposed shape would be 0 in the second dimension");
-
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    window_changed = window_changed || update_window_and_padding(win, input_access);
 
     // Configure window in case of configured output
     if(output->total_size() != 0)
     {
-        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), input->tensor_shape()));
+        AccessWindowStatic output_access(output, 0, 0, output->dimension(0), output->dimension(1));
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
+
+    const bool window_changed = update_window_and_padding(win, input_access);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
