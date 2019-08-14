@@ -42,8 +42,9 @@ namespace
 {
 const auto PaddingSizesDataset = framework::dataset::make("PaddingSize", { PaddingList{ { 0, 0 } },
     PaddingList{ { 1, 1 } },
-    PaddingList{ { 1, 1 }, { 2, 2 } },
-    PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 } },
+    PaddingList{ { 33, 33 } },
+    PaddingList{ { 1, 1 }, { 5, 5 } },
+    PaddingList{ { 1, 1 }, { 1, 1 }, { 5, 5 } },
     PaddingList{ { 0, 0 }, { 1, 0 }, { 0, 1 } },
     PaddingList{ { 0, 0 }, { 0, 0 }, { 0, 0 } }
 });
@@ -106,6 +107,13 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPaddingFixture<float>, framework::DatasetMode::ALL,
                        combine(combine(combine(datasets::Small3DShapes(), framework::dataset::make("DataType", { DataType::F32 })), PaddingSizesDataset),
+                               framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLPaddingFixture<float>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::Large3DShapes(), framework::dataset::make("DataType", { DataType::F32 })), PaddingSizesDataset),
                                framework::dataset::make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
 {
     // Validate output

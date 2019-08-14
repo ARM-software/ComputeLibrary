@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 ARM Limited.
+ * Copyright (c) 2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,40 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLPADLAYER_H__
-#define __ARM_COMPUTE_CLPADLAYER_H__
+#ifndef __ARM_COMPUTE_CLPADLAYERKERNEL_H__
+#define __ARM_COMPUTE_CLPADLAYERKERNEL_H__
 
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
-#include "arm_compute/runtime/CL/functions/CLStridedSlice.h"
+#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/CL/ICLTensor.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to pad a tensor. This function calls the following OpenCL kernels:
- *
- *  -# @ref CLMemsetKernel
- *  -# @ref CLFillBorderKernel
- *  -# @ref CLCopyKernel
- */
-class CLPadLayer : public IFunction
+/** Interface for the PadLayer function. Only CONSTANT PaddingMode is currently supported*/
+class CLPadLayerKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLPadLayer();
+    CLPadLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPadLayer(const CLPadLayer &) = delete;
-    /** Default move constructor */
-    CLPadLayer(CLPadLayer &&) = default;
+    CLPadLayerKernel(const CLPadLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLPadLayer &operator=(const CLPadLayer &) = delete;
-    /** Default move assignment operator */
-    CLPadLayer &operator=(CLPadLayer &&) = default;
-
-    /** Initialize the function
+    CLPadLayerKernel &operator=(const CLPadLayerKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLPadLayerKernel(CLPadLayerKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLPadLayerKernel &operator=(CLPadLayerKernel &&) = default;
+    /** Default destructor */
+    ~CLPadLayerKernel() = default;
+    /** Set the input and output tensor.
      *
      * @param[in]  input          Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
      * @param[out] output         Output tensor. Data type supported: same as @p input
@@ -62,40 +55,31 @@ public:
      *                            specifies the front and the end padding in the i-th dimension.
      * @param[in]  constant_value (Optional) Constant value to be used for the padding.
      * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
-     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
-     *                              is currently supported.
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
+     *                            Only CONSTANT mode is currently supported.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
-
-    /**  Static function to check if given info will lead to a valid configuration of @ref CLPadLayer.
+    void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLPadLayerKernel
      *
      * @param[in] input          Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
      * @param[in] output         Output tensor info. Data type supported: same as @p input
      * @param[in] padding        The padding for each spatial dimension of the input tensor. The pair padding[i]
      *                           specifies the front and the end padding in the i-th dimension.
-     * @param[in] constant_value (Optional) Constant value to be used for the padding
+     * @param[in] constant_value (Optional) Constant value to be used for the padding.
      * @param[in] mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
-     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT). Only CONSTANT
-     *                              is currently supported.
+     *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
+     *                            Only CONSTANT mode is currently supported.
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
     // Inherited methods overridden:
-    void run() override;
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    void configure_constant_mode(ICLTensor *input, ICLTensor *output, const PaddingList &padding, const PixelValue constant_value);
-    void configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *output);
-
-    CLPadLayerKernel                _pad_kernel;
-    CLCopyKernel                    _copy_kernel;
-    PaddingMode                     _mode;
-    PaddingList                     _padding;
-    size_t                          _num_dimensions;
-    std::vector<CLStridedSlice>     _slice_functions;
-    std::vector<CLConcatenateLayer> _concat_functions;
-    std::vector<CLTensor>           _slice_results;
-    std::vector<CLTensor>           _concat_results;
+    const ICLTensor *_input;
+    ICLTensor       *_output;
+    int              _input_start_x;
+    int              _input_start_y;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_PADLAYER_H__ */
+#endif /*__ARM_COMPUTE_CLPADLAYERKERNEL_H__ */

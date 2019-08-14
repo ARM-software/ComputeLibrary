@@ -121,6 +121,7 @@
 #include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLNormalizePlanarYUVLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLPadLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"

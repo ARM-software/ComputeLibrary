@@ -23,40 +23,14 @@
  */
 #include "arm_compute/runtime/CL/functions/CLPadLayer.h"
 
-#include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
 CLPadLayer::CLPadLayer()
-    : _copy_kernel(), _mode(), _padding(), _memset_kernel(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
+    : _pad_kernel(), _copy_kernel(), _mode(), _padding(), _num_dimensions(0), _slice_functions(), _concat_functions(), _slice_results(), _concat_results()
 {
 }
-
-void CLPadLayer::configure_constant_mode(ICLTensor *input, ICLTensor *output, const PaddingList &padding, const PixelValue constant_value)
-{
-    // Set the pages of the output to the constant_value.
-    _memset_kernel.configure(output, constant_value);
-
-    // Fill out padding list with zeroes.
-    PaddingList padding_extended = padding;
-    for(size_t i = padding.size(); i < TensorShape::num_max_dimensions; i++)
-    {
-        padding_extended.emplace_back(PaddingInfo{ 0, 0 });
-    }
-
-    // Create a window within the output tensor where the input will be copied.
-    Window copy_window = Window();
-    for(uint32_t i = 0; i < output->info()->num_dimensions(); ++i)
-    {
-        copy_window.set(i, Window::Dimension(padding_extended[i].first, padding_extended[i].first + input->info()->dimension(i), 1));
-    }
-    // Copy the input to the output, leaving the padding filled with the constant_value.
-    _copy_kernel.configure(input, output, PaddingList(), &copy_window);
-}
-
 void CLPadLayer::configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *output)
 {
     int64_t last_padding_dimension = _padding.size() - 1;
@@ -163,14 +137,12 @@ void CLPadLayer::configure_reflect_symmetric_mode(ICLTensor *input, ICLTensor *o
 
 void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
-    ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
-
     _padding = padding;
     _mode    = mode;
 
     TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->info()->tensor_shape(), _padding);
-
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(padded_shape));
+    ARM_COMPUTE_ERROR_THROW_ON(validate(input->info(), output->info(), padding, constant_value, mode));
 
     // Find the last dimension requiring padding so that it is known when to write to output and whether any padding is applied.
     int64_t last_padding_dimension = _padding.size() - 1;
@@ -188,7 +160,7 @@ void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingLis
         {
             case PaddingMode::CONSTANT:
             {
-                configure_constant_mode(input, output, padding, constant_value);
+                _pad_kernel.configure(input, output, padding, constant_value, mode);
                 break;
             }
             case PaddingMode::REFLECT:
@@ -231,18 +203,17 @@ Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), padded_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(output, input);
         ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, output, PaddingList(), &copy_window));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(output, constant_value));
     }
     else
     {
         ARM_COMPUTE_RETURN_ON_ERROR(CLCopyKernel::validate(input, &input->clone()->set_tensor_shape(padded_shape), PaddingList(), &copy_window));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLMemsetKernel::validate(&input->clone()->set_tensor_shape(padded_shape), constant_value));
     }
 
     switch(mode)
     {
         case PaddingMode::CONSTANT:
         {
+            ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(input, output, padding, constant_value, mode));
             break;
         }
         case PaddingMode::REFLECT:
@@ -279,8 +250,7 @@ void CLPadLayer::run()
         {
             case PaddingMode::CONSTANT:
             {
-                CLScheduler::get().enqueue(_memset_kernel, false);
-                CLScheduler::get().enqueue(_copy_kernel, true);
+                CLScheduler::get().enqueue(_pad_kernel, false);
                 break;
             }
             case PaddingMode::REFLECT:

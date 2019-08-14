@@ -407,6 +407,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "NV21_to_RGBA8888_bt709", "color_convert.cl" },
     { "NV21_to_YUV444_bt709", "color_convert.cl" },
     { "output_stage_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
+    { "pad_layer", "pad_layer.cl" },
     { "permute", "permute.cl" },
     { "pixelwise_mul_complex", "pixelwise_mul_float.cl" },
     { "pixelwise_mul_float", "pixelwise_mul_float.cl" },
@@ -872,6 +873,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "optical_flow_pyramid_lk.cl",
 #include "./cl_kernels/optical_flow_pyramid_lk.clembed"
+    },
+    {
+        "pad_layer.cl",
+#include "./cl_kernels/pad_layer.clembed"
     },
     {
         "permute.cl",
