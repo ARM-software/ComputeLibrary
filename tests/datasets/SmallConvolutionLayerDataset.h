@@ -49,6 +49,7 @@ public:
         // Batch size 4
         add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(21U, 25U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(3U, 9U), TensorShape(3U, 3U), TensorShape(1), TensorShape(3U, 9U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 
