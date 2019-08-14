@@ -307,8 +307,10 @@ void NodeFusionMutator::mutate(Graph &g)
     detail::fuse_layer<ConvolutionLayerNode, ActivationLayerNode>(g, empty_prec, detail::fuse_node_with_activation<ConvolutionLayerNode>, supported_fused_activations);
     detail::fuse_layer<DepthwiseConvolutionLayerNode, ActivationLayerNode>(g, qs8_prec, detail::fuse_node_with_activation<DepthwiseConvolutionLayerNode>, supported_fused_activations);
 
-    // TODO (COMPMID-2524): Fuse batch normalization with convolution and depthwise convolution at graph level for NEON
-    if(target == Target::CL)
+    // Currently fuse batch normalization brings performance uplift only on OpenCL with FP32 data type
+    // TODO (COMPMID-2524): Fuse batch normalization with convolution and depthwise convolution at graph level for NEON - FP32
+    // TODO (COMPMID-2581): Fuse batch normalization with convolution and depthwise convolution at graph level for OpenCL - FP16
+    if(target == Target::CL && (g.nodes()[0].get()->output(0)->desc().data_type == DataType::F32))
     {
         //Depthwise Convolution and Batch Normalization Fusion active only for CL
         detail::fuse_layer<ConvolutionLayerNode, BatchNormalizationLayerNode>(g, empty_prec, detail::fuse_convolution_with_batch_normalization);
