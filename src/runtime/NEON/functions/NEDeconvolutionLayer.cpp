@@ -111,8 +111,9 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
 void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info)
 {
+    // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), bias->info(), output->info(), info));
+    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), (bias == nullptr) ? nullptr : bias->info(), output->info(), info));
 
     const DataLayout data_layout = input->info()->data_layout();
 
@@ -134,9 +135,6 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     const TensorShape output_shape = compute_deconvolution_output_shape(out_dims, *input->info(), *weights->info());
     // Output auto initialization if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
-
-    // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(NEDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info));
 
     _memory_group.manage(&_scaled_output);
 
