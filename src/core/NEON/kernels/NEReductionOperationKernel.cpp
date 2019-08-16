@@ -809,6 +809,12 @@ struct RedOpYZW
             if(op == ReductionOperation::ARG_IDX_MIN || op == ReductionOperation::ARG_IDX_MAX)
             {
                 wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()), vec_res_idx.val[0]);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+                if(std::is_same<T, float16_t>::value)
+                {
+                    wrapper::vstore(reinterpret_cast<uint32_t *>(output.ptr()) + 4, vec_res_idx.val[1]);
+                }
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
             }
             else
             {
