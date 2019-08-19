@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -237,9 +237,9 @@ protected:
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src), 0, -1.f, 1.f);
-        fill(AccessorType(weights), 1, -1.f, 1.f);
-        fill(AccessorType(bias), 2, -1.f, 1.f);
+        fill(AccessorType(src), 0, -0.5f, 0.5f);
+        fill(AccessorType(weights), 1, -0.5f, 0.5f);
+        fill(AccessorType(bias), 2, -0.5f, 0.5f);
 
         // Compute Winograd Convolution function
         conv.run();
@@ -256,14 +256,14 @@ protected:
         SimpleTensor<T> bias_t{ bias_shape, data_type, 1 };
 
         // Fill reference
-        fill(src_t, 0, -1.f, 1.f);
+        fill(src_t, 0, -0.5f, 0.5f);
         SimpleTensor<T1> src_t1(copy_tensor<T1, T>(src_t));
 
-        fill(weights_t, 1, -1.f, 1.f);
+        fill(weights_t, 1, -0.5f, 0.5f);
         SimpleTensor<T1> weights_t1(copy_tensor<T1, T>(weights_t));
         if(use_bias)
         {
-            fill(bias_t, 2, -1.f, 1.f);
+            fill(bias_t, 2, -0.5f, 0.5f);
         }
         else
         {
