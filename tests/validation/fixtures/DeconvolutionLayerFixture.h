@@ -51,15 +51,15 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
-               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info, bool add_bias)
     {
         _data_type         = data_type;
         _bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
         _data_layout       = data_layout;
         _quantization_info = quantization_info;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, add_bias);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, add_bias);
     }
 
 protected:
@@ -93,8 +93,30 @@ protected:
         }
     }
 
+    template <typename U>
+    void fill_zeros(U &&tensor)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::S32:
+            {
+                const int32_t value = static_cast<int32_t>(tensor.quantization_info().uniform().offset);
+                library->fill_tensor_value(tensor, value);
+                break;
+            }
+            case DataType::F16:
+                library->fill_tensor_value(tensor, static_cast<half>(0.0f));
+                break;
+            case DataType::F32:
+                library->fill_tensor_value(tensor, static_cast<float>(0.0f));
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Not supported");
+        }
+    }
+
     TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape bias_shape, TensorShape output_shape,
-                              const PadStrideInfo &info)
+                              const PadStrideInfo &info, bool add_bias)
     {
         if(_data_layout == DataLayout::NHWC)
         {
@@ -111,28 +133,40 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info);
+        conv.configure(&src, &weights, add_bias ? &bias : nullptr, &dst, info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        if(add_bias)
+        {
+            ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        }
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
-        bias.allocator()->allocate();
+        if(add_bias)
+        {
+            bias.allocator()->allocate();
+        }
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        if(add_bias)
+        {
+            ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+        }
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
         fill(AccessorType(weights), 1);
-        fill(AccessorType(bias), 2);
+        if(add_bias)
+        {
+            fill(AccessorType(bias), 2);
+        }
 
         // Compute DeconvolutionLayer function
         conv.run();
@@ -141,7 +175,7 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                      const PadStrideInfo &info)
+                                      const PadStrideInfo &info, bool add_bias)
     {
         // Create reference
         SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };
@@ -151,7 +185,15 @@ protected:
         // Fill reference
         fill(src, 0);
         fill(weights, 1);
-        fill(bias, 2);
+
+        if(add_bias)
+        {
+            fill(bias, 2);
+        }
+        else
+        {
+            fill_zeros(bias);
+        }
 
         return reference::deconvolution_layer<T>(src, weights, bias, output_shape, info);
     }
@@ -170,7 +212,7 @@ class DeconvolutionValidationFixture : public DeconvolutionLayerFixtureBase<Tens
 public:
     template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int num_kernels, DataType data_type, DataLayout data_layout)
+               unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
     {
         ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
@@ -180,7 +222,7 @@ public:
         TensorInfo          input_info(input_shape, 1, data_type);
         TensorInfo          weights_info(weights_shape, 1, data_type);
         TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, QuantizationInfo());
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, QuantizationInfo(), add_bias);
     }
 };
 
@@ -190,7 +232,7 @@ class DeconvolutionValidationQuantizedFixture : public DeconvolutionLayerFixture
 public:
     template <typename...>
     void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+               unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info, bool add_bias)
     {
         ARM_COMPUTE_ERROR_ON_MSG(kernel_size_x != kernel_size_y, "Only square kernels supported");
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
@@ -200,7 +242,7 @@ public:
         TensorInfo          input_info(input_shape, 1, data_type, quantization_info);
         TensorInfo          weights_info(weights_shape, 1, data_type, quantization_info);
         TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, quantization_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_layout, quantization_info, add_bias);
     }
 };
 

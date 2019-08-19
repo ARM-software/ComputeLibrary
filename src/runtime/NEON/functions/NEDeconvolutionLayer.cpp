@@ -73,13 +73,16 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                                     info.pad().first, info.pad().second, stride_x, stride_y);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    if(is_data_type_quantized_asymmetric(input->data_type()))
+    if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
-    }
-    else
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        if(is_data_type_quantized_asymmetric(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        }
     }
 
     if(output->tensor_shape().total_size() > 0)
