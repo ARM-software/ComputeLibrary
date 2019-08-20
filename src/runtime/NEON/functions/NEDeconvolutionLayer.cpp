@@ -144,7 +144,6 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     if(!_is_nchw)
     {
         _memory_group.manage(&_permuted_input);
-        _memory_group.manage(&_permuted_weights);
         _memory_group.manage(&_permuted_output);
 
         // Configure the function to transform the input tensor from NHWC -> NCHW
@@ -179,13 +178,12 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
         _permuted_output.info()->set_quantization_info(output->info()->quantization_info());
         _conv_f.configure(&_scaled_output, &_weights_flipped, bias, &_permuted_output, conv_info);
-        _permuted_output.info()->set_data_layout(DataLayout::NCHW);
 
         // Configure the function to transform the convoluted output to NHWC
         _permute_output.configure(&_permuted_output, output, PermutationVector(2U, 0U, 1U));
+        _permuted_output.info()->set_data_layout(DataLayout::NCHW);
 
         _permuted_input.allocator()->allocate();
-        _permuted_weights.allocator()->allocate();
         _permuted_output.allocator()->allocate();
     }
     else
@@ -238,14 +236,16 @@ void NEDeconvolutionLayer::prepare()
     if(!_is_prepared)
     {
         ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        // Run weights flipping and mark original weights tensor as unused
-        _weights_flipped.allocator()->allocate();
         // Permute weights
         if(!_is_nchw)
         {
+            // Manually manage _permuted_weights
+            _permuted_weights.allocator()->allocate();
             _permute_weights.run();
         }
+
+        // Run weights flipping and mark original weights tensor as unused
+        _weights_flipped.allocator()->allocate();
         NEScheduler::get().schedule(&_flip_weights, Window::DimZ);
         _original_weights->mark_as_unused();
 
@@ -255,6 +255,13 @@ void NEDeconvolutionLayer::prepare()
         if(!_weights_flipped.is_used())
         {
             _weights_flipped.allocator()->free();
+        }
+
+        if(!_is_nchw)
+        {
+            // Manually manage _permuted_weights
+            // Free _permuted_weights as it not used after this method (prepare)
+            _permuted_weights.allocator()->free();
         }
 
         _is_prepared = true;
