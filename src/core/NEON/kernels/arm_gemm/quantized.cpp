@@ -435,8 +435,17 @@ template void requantize_block_32(const ARequantizeLayer32 &qp, unsigned int wid
  * However, beyond this point we always use signed values in both cases.
  * The instructions that need to be different are therefore wrapped in
  * helper functions below.
+ *
+ * The general strategy used is to load vectors of 16 bytes and accumulate
+ * (using uadalp/sadalp or AArch32 equivalents) into 8x16-bit accumulators.
+ * These are then reduced (using uadalp/sadalp again) into 4x32-bit
+ * accumulators.  The 4 accumulators for up to 4 rows being processed are
+ * then added together into a single output vector using pairwise adds.
+ *
+ * This reduction from the 8x16-bit into the 4x32-bit accumulators needs to
+ * occur before the 16-bit accumulators can overflow - which is every 32
+ * iterations (512 total bytes processed).  This is explained more below.
  */
-
 namespace {
     struct row_sum_helpers {
         const ARequantizeLayer32 &qp;
@@ -463,11 +472,33 @@ namespace {
             int32x4_t finalsums[rows];
 
             for (unsigned int i=0; i<rows; i++) {
-                sums[i] = vdupq_n_s16(0);
+                sums[i]      = vdupq_n_s16(0);
+                finalsums[i] = vdupq_n_s32(0);
             }
 
             for (unsigned int i=0; i<blocks; i++) {
                 for (unsigned int r=0; r<rows; r++) {
+                    /* If we add too many blocks together, we run the risk
+                     * of overflowing the intermediate 16-bit accumulators,
+                     * especially in the unsigned case where we later treat
+                     * the accumulator as signed.
+                     *
+                     * In that case, the maximum (signed) value is 16383,
+                     * which is safe for 64 (unsigned) accumulations (255*64
+                     * = 16,320).
+                     *
+                     * Each invocation of pairwise add adds 2 values to the
+                     * accumulator - so in the unsigned case we can do 32
+                     * adds before we need to reset the 16-bit accumulator
+                     * by adding into the 32-bit 'finalsums'.
+                     *
+                     * We could do 64 adds in the signed case, but that
+                     * optimization is not worth the complexity.
+                     */
+                     if (i > 0 && ((i & 31) == 0)) {
+                         finalsums[r] = vpadalq_s16(finalsums[r], sums[r]);
+                         sums[r] = vdupq_n_s16(0);
+                     }
                     sums[r] = accumulate_16(input + (r * in_stride) + (i * 16), sums[r]);
                 }
             }
@@ -484,7 +515,7 @@ namespace {
             }
 
             for (unsigned int i=0; i<rows; i++) {
-                finalsums[i] = vpaddlq_s16(sums[i]);
+                finalsums[i] = vpadalq_s16(finalsums[i], sums[i]);
             }
 
             int32x4_t t0, t1;
