@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,7 +82,7 @@ void GCGEMMInterleave4x4Kernel::configure(const IGCTensor *input, IGCTensor *out
 
     update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, input->info()->valid_region());
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     IGCKernel::configure(win);
 }

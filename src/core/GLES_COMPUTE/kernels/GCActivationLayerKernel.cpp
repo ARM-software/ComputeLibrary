@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,7 @@ void GCActivationLayerKernel::configure(IGCTensor *input, IGCTensor *output, Act
                                   AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration),
                                   output_access);
 
-        output_access.set_valid_region(win, input->info()->valid_region());
+        output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     }
     else
     {
