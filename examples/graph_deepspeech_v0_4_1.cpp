@@ -45,6 +45,7 @@ public:
     {
         // Parse arguments
         cmd_parser.parse(argc, argv);
+        cmd_parser.validate();
 
         // Consume common parameters
         common_params = consume_common_graph_parameters(common_opts);
