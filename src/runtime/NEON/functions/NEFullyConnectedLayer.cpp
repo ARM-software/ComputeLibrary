@@ -328,6 +328,13 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     // Validate output stage for asymmetric quantized types
     if(is_quantized)
     {
+        const UniformQuantizationInfo iq_info    = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info    = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info    = output->quantization_info().uniform();
+        const float                   multiplier = iq_info.scale * wq_info.scale / oq_info.scale;
+
+        ARM_COMPUTE_UNUSED(multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
     }
 
