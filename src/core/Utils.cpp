@@ -374,15 +374,22 @@ PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorSha
     return same_info;
 }
 
-std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
-    unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
-    unsigned int stride_x, unsigned int stride_y)
+std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(unsigned int in_width, unsigned int in_height,
+                                                                                   unsigned int kernel_width, unsigned int kernel_height,
+                                                                                   const PadStrideInfo &pad_stride_info)
 {
+    const unsigned int pad_left   = pad_stride_info.pad_left();
+    const unsigned int pad_top    = pad_stride_info.pad_top();
+    const unsigned int pad_right  = pad_stride_info.pad_right();
+    const unsigned int pad_bottom = pad_stride_info.pad_bottom();
+    const unsigned int stride_x   = pad_stride_info.stride().first;
+    const unsigned int stride_y   = pad_stride_info.stride().second;
+
     ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
-    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width) < 2 * padx);
-    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height) < 2 * pady);
-    const int w = stride_x * (in_width - 1) + kernel_width - 2 * padx;
-    const int h = stride_y * (in_height - 1) + kernel_height - 2 * pady;
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width) < (pad_left + pad_right));
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height) < (pad_top + pad_bottom));
+    const int w = stride_x * (in_width - 1) + kernel_width - (pad_left + pad_right);
+    const int h = stride_y * (in_height - 1) + kernel_height - (pad_top + pad_bottom);
 
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }

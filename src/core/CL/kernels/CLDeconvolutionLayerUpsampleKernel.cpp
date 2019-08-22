@@ -56,7 +56,6 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
 
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_w) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(idx_h) == 0);
-    ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(idx_c));
     for(size_t i = 3; i < Coordinates::num_max_dimensions; ++i)
@@ -104,12 +103,12 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
-    const int out_start_x = _info.pad().first;
-    const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad().first + _info.stride().first - 1;
+    const int out_start_x = _info.pad_left();
+    const int out_end_x   = _output->info()->dimension(idx_w) - _info.pad_right() + _info.stride().first - 1;
     const int out_step_x  = _info.stride().first;
 
-    const int out_start_y = _info.pad().second;
-    const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad().second + _info.stride().second - 1;
+    const int out_start_y = _info.pad_top();
+    const int out_end_y   = _output->info()->dimension(idx_h) - _info.pad_bottom() + _info.stride().second - 1;
     const int out_step_y  = _info.stride().second;
 
     switch(data_layout)

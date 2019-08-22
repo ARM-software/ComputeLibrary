@@ -56,10 +56,7 @@ TensorDescriptor DeconvolutionLayerNode::compute_output_descriptor(const TensorD
     const unsigned int kernel_width  = get_dimension_size(weights_descriptor, DataLayoutDimension::WIDTH);
     const unsigned int kernel_height = get_dimension_size(weights_descriptor, DataLayoutDimension::HEIGHT);
 
-    std::tie(output_width, output_height) = deconvolution_output_dimensions(input_width, input_height,
-                                                                            kernel_width, kernel_height,
-                                                                            info.pad().first, info.pad().second,
-                                                                            info.stride().first, info.stride().second);
+    std::tie(output_width, output_height) = deconvolution_output_dimensions(input_width, input_height, kernel_width, kernel_height, info);
 
     const DataLayout data_layout       = input_descriptor.layout;
     TensorDescriptor output_descriptor = input_descriptor;

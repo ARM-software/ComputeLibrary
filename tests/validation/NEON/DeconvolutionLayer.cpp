@@ -56,6 +56,9 @@ const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
                      * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
+const auto data3x3_asymm = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadLeft", 0, 1)
+                           * framework::dataset::make("PadRight", 0, 1) * framework::dataset::make("PadTop", 0, 1) * framework::dataset::make("PadBottom", 0, 1) * framework::dataset::make("NumKernels", { 3 });
+
 const auto data3x3_precommit = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 2) * framework::dataset::make("StrideY", 1, 2) * framework::dataset::make("PadX", 0, 2)
                                * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("NumKernels", { 3 });
 
@@ -74,13 +77,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
                input_shape, data_type)
 {
     // Create shapes
-    const unsigned int kernel_size_x = 3;
-    const unsigned int kernel_size_y = 3;
-    const unsigned int num_kernels   = 1;
-    const TensorShape  weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
-    const TensorShape  bias_shape(num_kernels);
-    auto               out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, 1, 1, 1, 1);
-    TensorShape        output_shape = compute_deconvolution_output_shape(out_dim, TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type));
+    const unsigned int  kernel_size_x = 3;
+    const unsigned int  kernel_size_y = 3;
+    const unsigned int  num_kernels   = 1;
+    const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
+    const TensorShape   bias_shape(num_kernels);
+    const PadStrideInfo info(1, 1, 1, 1);
+    auto                out_dim      = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
+    TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, TensorInfo(input_shape, 1, data_type), TensorInfo(weights_shape, 1, data_type));
 
     // Create tensors
     Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1);
@@ -157,13 +161,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEDeconvolutionLayerFixture4x4 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 4, 4>;
+using NEDeconvolutionLayerFixture4x4      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 4, 4>;
 
 template <typename T>
-using NEDeconvolutionLayerFixture3x3 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
+using NEDeconvolutionLayerFixture3x3      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
-using NEDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
+using NEDeconvolutionLayerAsymmFixture3x3 = DeconvolutionValidationAsymmFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 3, 3>;
+
+template <typename T>
+using NEDeconvolutionLayerFixture1x1      = DeconvolutionValidationFixture<Tensor, Accessor, NEDeconvolutionLayer, T, 1, 1>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
@@ -181,6 +188,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEDeconvolutionLayerFixture3x3<float>, framewor
                                                                                                                    DataType::F32)),
                                                                                                                    data_layouts_dataset),
                                                                                                                    add_bias_dataset))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_fp32);
+}
+FIXTURE_DATA_TEST_CASE(RunAsymm, NEDeconvolutionLayerAsymmFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(data3x3_asymm, framework::dataset::make("DataType",
+                                                                                                                      DataType::F32)),
+                                                                                                                      data_layouts_dataset),
+                                                                                                                      add_bias_dataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32);
