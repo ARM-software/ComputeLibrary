@@ -100,6 +100,7 @@
 #include "arm_compute/core/NEON/kernels/NEHeightConcatenateLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEHistogramKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
+#include "arm_compute/core/NEON/kernels/NEInstanceNormalizationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEIntegralImageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NELKTrackerKernel.h"

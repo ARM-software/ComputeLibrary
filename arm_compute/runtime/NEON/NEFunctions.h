@@ -92,6 +92,7 @@
 #include "arm_compute/runtime/NEON/functions/NEHarrisCorners.h"
 #include "arm_compute/runtime/NEON/functions/NEHistogram.h"
 #include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
+#include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEIntegralImage.h"
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
