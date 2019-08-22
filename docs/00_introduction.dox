@@ -239,11 +239,47 @@ If there is more than one release in a month then an extra sequential number is 
 v19.08 Public major release
  - Various bug fixes.
  - Various optimisations.
- - Deprecated functions/interfaces
-    - Altered @ref QuantizationInfo interface to support per-channel quantization.
-    - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
-    - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
-    - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
+ - Deprecated NEON functions
+    - NEDepthConcatenateLayer
+    - NEWidthConcatenateLayer
+ - Deprecated OpenCL kernels / functions
+    - CLDepthConcatenateLayer
+    - CLGEMMInterleave4x4Kernel / CLGEMMInterleave4x4
+    - CLGEMMTranspose1xWKernel / CLGEMMTranspose1xW
+    - CLWidthConcatenateLayer
+ - New NEON kernels / functions:
+    - @ref NECast
+    - @ref NELSTMLayerQuantized
+    - @ref NEPReluLayer
+    - @ref NEBatchConcatenateLayerKernel
+    - @ref NEDepthToSpaceLayerKernel / @ref NEDepthToSpaceLayer
+    - @ref NEDepthwiseConvolutionLayerNativeKernel
+    - @ref NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+    - @ref NEMeanStdDevNormalizationKernel / @ref NEMeanStdDevNormalizationLayer
+    - @ref NESpaceToDepthLayerKernel / @ref NESpaceToDepthLayer
+ - New OpenCL kernels / functions:
+    - @ref CLLSTMLayerQuantized
+    - @ref CLPReluLayer
+    - @ref CLBatchConcatenateLayerKernel
+    - @ref CLDepthToSpaceLayerKernel / @ref CLDepthToSpaceLayer
+    - @ref CLGEMMLowpMatrixMultiplyNativeKernel
+    - @ref CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel
+    - @ref CLGEMMMatrixMultiplyNativeKernel
+    - @ref CLMeanStdDevNormalizationKernel / @ref CLMeanStdDevNormalizationLayer
+    - @ref CLSpaceToDepthLayerKernel / @ref CLSpaceToDepthLayer
+ - New examples:
+    - neon_opticalflow
+    - cl_cache
+    - neon_permute
+ - Enable the fusion of batch normalization with convolution and depthwise convolution layer for FP32 in the graph API (OpenCL only)
+ - Added support for fusing activation function and broadcast addition with the matrix multiplication for FP32 (OpenCL only)
+ - Re-factored the depthwise convolution layer kernel on NEON for generic cases
+ - Added an optimized depthwise convolution layer kernel for 5x5 filters (NEON only)
+ - Added support to enable OpenCL kernel cache. Added example showing how to load the prebuilt OpenCL kernels from a binary cache file
+ - Altered @ref QuantizationInfo interface to support per-channel quantization.
+ - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
+ - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
+ - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
 
 v19.05 Public major release
  - Various bug fixes.
