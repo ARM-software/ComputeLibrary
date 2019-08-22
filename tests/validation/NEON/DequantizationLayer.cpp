@@ -123,13 +123,15 @@ TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), datasets::QuantizedTypes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDequantizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), concat(datasets::QuantizedTypes(),
+                                                                                                                 datasets::QuantizedPerChannelTypes())),
                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), datasets::QuantizedTypes()),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEDequantizationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), concat(datasets::QuantizedTypes(),
+                                                                                                                       datasets::QuantizedPerChannelTypes())),
                                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output

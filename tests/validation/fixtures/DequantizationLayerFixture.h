@@ -49,7 +49,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype)
     {
-        _quantization_info = generate_quantization_info(src_data_type);
+        _quantization_info = generate_quantization_info(src_data_type, shape.z());
         _target            = compute_target(shape, src_data_type, dst_datatype);
         _reference         = compute_reference(shape, src_data_type);
     }
@@ -92,32 +92,34 @@ protected:
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType src_data_type)
     {
-        if(src_data_type == DataType::QASYMM8)
+        switch(src_data_type)
         {
-            SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else if(src_data_type == DataType::QSYMM8)
-        {
-            SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else if(src_data_type == DataType::QSYMM16)
-        {
-            SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
-            fill(src);
-            return reference::dequantization_layer<T>(src);
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR("Unsupported data type");
+            case DataType::QASYMM8:
+            case DataType::QASYMM8_PER_CHANNEL:
+            {
+                SimpleTensor<uint8_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            case DataType::QSYMM8:
+            {
+                SimpleTensor<int8_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            case DataType::QSYMM16:
+            {
+                SimpleTensor<int16_t> src{ shape, src_data_type, 1, _quantization_info };
+                fill(src);
+                return reference::dequantization_layer<T>(src);
+            }
+            default:
+                ARM_COMPUTE_ERROR("Unsupported data type");
         }
     }
 
 protected:
-    QuantizationInfo generate_quantization_info(DataType data_type)
+    QuantizationInfo generate_quantization_info(DataType data_type, int32_t num_channels)
     {
         std::mt19937                    gen(library.get()->seed());
         std::uniform_int_distribution<> distribution_scale_q8(1, 255);
@@ -130,6 +132,17 @@ protected:
                 return QuantizationInfo(1.f / distribution_scale_q16(gen));
             case DataType::QSYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen));
+            case DataType::QASYMM8_PER_CHANNEL:
+            {
+                std::vector<float>   scale(num_channels);
+                std::vector<int32_t> offset(num_channels);
+                for(int32_t i = 0; i < num_channels; ++i)
+                {
+                    scale[i]  = 1.f / distribution_scale_q8(gen);
+                    offset[i] = distribution_offset_q8(gen);
+                }
+                return QuantizationInfo(scale, offset);
+            }
             case DataType::QASYMM8:
                 return QuantizationInfo(1.f / distribution_scale_q8(gen), distribution_offset_q8(gen));
             default:

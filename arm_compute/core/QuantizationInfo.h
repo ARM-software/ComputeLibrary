@@ -103,6 +103,17 @@ public:
         : _scale(scale), _offset()
     {
     }
+    /** Construct quantization info.
+     *
+     * @note Used for asymmetric per channel quantization
+     *
+     * @param[in] scale  Scale.
+     * @param[in] offset Offset.
+     */
+    QuantizationInfo(std::vector<float> scale, std::vector<int32_t> offset)
+        : _scale(scale), _offset(offset)
+    {
+    }
     /** Scale vector accessor
      *
      * @return A reference to quantization scale metadata

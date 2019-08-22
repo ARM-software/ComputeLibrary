@@ -59,20 +59,22 @@ SimpleTensor<TOut> dequantization_layer_nchw(const SimpleTensor<TIn> &src)
 
     SimpleTensor<TOut> dst{ src.shape(), dst_data_type };
 
-    if(src_data_type == DataType::QSYMM8_PER_CHANNEL)
+    if(is_data_type_quantized_per_channel(src_data_type))
     {
         const int WH = src.shape().x() * src.shape().y();
         const int C  = src.shape().z();
         const int N  = src.shape().total_size() / (WH * C);
 
-        const std::vector<float> qscales = src.quantization_info().scale();
+        const std::vector<float>   qscales     = src.quantization_info().scale();
+        const std::vector<int32_t> qoffsets    = src.quantization_info().offset();
+        const bool                 has_offsets = src_data_type == DataType::QASYMM8_PER_CHANNEL;
 
         for(int n = 0; n < N; ++n)
         {
             for(int c = 0; c < C; ++c)
             {
                 const size_t                  idx           = n * C * WH + c * WH;
-                const UniformQuantizationInfo channel_qinfo = { qscales[c], 0 };
+                const UniformQuantizationInfo channel_qinfo = { qscales[c], has_offsets ? qoffsets[c] : 0 };
 
                 // Dequantize slice
                 for(int s = 0; s < WH; ++s)
