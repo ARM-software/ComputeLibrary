@@ -352,6 +352,7 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
     {
         case DataType::U8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
             *reinterpret_cast<uint8_t *>(ptr) = value;
             break;
         case DataType::S8:

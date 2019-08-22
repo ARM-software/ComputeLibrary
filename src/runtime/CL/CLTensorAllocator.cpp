@@ -139,7 +139,7 @@ void CLTensorAllocator::allocate()
     }
 
     // Allocate and fill the quantization parameter arrays
-    if(info().data_type() == DataType::QSYMM8_PER_CHANNEL)
+    if(is_data_type_quantized_per_channel(info().data_type()))
     {
         const size_t pad_size = 0;
         populate_quantization_info(_scale, _offset, info().quantization_info(), pad_size);

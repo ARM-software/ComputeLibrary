@@ -73,23 +73,24 @@ enum class Format
 /** Available data types */
 enum class DataType
 {
-    UNKNOWN,            /**< Unknown data type */
-    U8,                 /**< unsigned 8-bit number */
-    S8,                 /**< signed 8-bit number */
-    QSYMM8,             /**< quantized, symmetric fixed-point 8-bit number */
-    QASYMM8,            /**< quantized, asymmetric fixed-point 8-bit number */
-    QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
-    U16,                /**< unsigned 16-bit number */
-    S16,                /**< signed 16-bit number */
-    QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
-    U32,                /**< unsigned 32-bit number */
-    S32,                /**< signed 32-bit number */
-    U64,                /**< unsigned 64-bit number */
-    S64,                /**< signed 64-bit number */
-    F16,                /**< 16-bit floating-point number */
-    F32,                /**< 32-bit floating-point number */
-    F64,                /**< 64-bit floating-point number */
-    SIZET               /**< size_t */
+    UNKNOWN,             /**< Unknown data type */
+    U8,                  /**< unsigned 8-bit number */
+    S8,                  /**< signed 8-bit number */
+    QSYMM8,              /**< quantized, symmetric fixed-point 8-bit number */
+    QASYMM8,             /**< quantized, asymmetric fixed-point 8-bit number */
+    QSYMM8_PER_CHANNEL,  /**< quantized, symmetric per channel fixed-point 8-bit number */
+    QASYMM8_PER_CHANNEL, /**< quantized, asymmetric per channel fixed-point 8-bit number */
+    U16,                 /**< unsigned 16-bit number */
+    S16,                 /**< signed 16-bit number */
+    QSYMM16,             /**< quantized, symmetric fixed-point 16-bit number */
+    U32,                 /**< unsigned 32-bit number */
+    S32,                 /**< signed 32-bit number */
+    U64,                 /**< unsigned 64-bit number */
+    S64,                 /**< signed 64-bit number */
+    F16,                 /**< 16-bit floating-point number */
+    F32,                 /**< 32-bit floating-point number */
+    F64,                 /**< 64-bit floating-point number */
+    SIZET                /**< size_t */
 };
 
 /** Available Sampling Policies */

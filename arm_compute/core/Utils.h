@@ -115,6 +115,7 @@ inline size_t data_size_from_type(DataType data_type)
         case DataType::QSYMM8:
         case DataType::QASYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QASYMM8_PER_CHANNEL:
             return 1;
         case DataType::U16:
         case DataType::S16:
@@ -1014,6 +1015,7 @@ inline bool is_data_type_quantized(DataType dt)
         case DataType::QSYMM8:
         case DataType::QASYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QASYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
             return true;
         default:
@@ -1032,6 +1034,7 @@ inline bool is_data_type_quantized_asymmetric(DataType dt)
     switch(dt)
     {
         case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
             return true;
         default:
             return false;
@@ -1051,6 +1054,24 @@ inline bool is_data_type_quantized_symmetric(DataType dt)
         case DataType::QSYMM8:
         case DataType::QSYMM8_PER_CHANNEL:
         case DataType::QSYMM16:
+            return true;
+        default:
+            return false;
+    }
+}
+
+/** Check if a given data type is of per channel type
+ *
+ * @param[in] dt Input data type.
+ *
+ * @return True if data type is of per channel type, else false.
+ */
+inline bool is_data_type_quantized_per_channel(DataType dt)
+{
+    switch(dt)
+    {
+        case DataType::QSYMM8_PER_CHANNEL:
+        case DataType::QASYMM8_PER_CHANNEL:
             return true;
         default:
             return false;
