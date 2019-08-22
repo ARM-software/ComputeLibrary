@@ -40,7 +40,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QSYMM8, DataType::QSYMM16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_PER_CHANNEL, DataType::QSYMM8, DataType::QSYMM16);
 
     if(output->tensor_shape().total_size() > 0)
     {
@@ -95,20 +95,31 @@ void CLDequantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *o
     }
     ICLKernel::configure_internal(win);
 
-    const UniformQuantizationInfo qinfo   = input->info()->quantization_info().uniform();
-    const int                     qoffset = is_data_type_quantized_asymmetric(input->info()->data_type()) ? qinfo.offset : 0;
+    const bool  is_quantized_per_channel = is_data_type_quantized_per_channel(input->info()->data_type());
+    std::string kernel_name              = "dequantization_layer";
 
     // Create kernel
     CLBuildOptions build_opts;
-    build_opts.add_option("-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
-    build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qoffset));
+    if(!is_quantized_per_channel)
+    {
+        const UniformQuantizationInfo qinfo   = input->info()->quantization_info().uniform();
+        const int                     qoffset = is_data_type_quantized_asymmetric(input->info()->data_type()) ? qinfo.offset : 0;
+        build_opts.add_option("-DSCALE=" + float_to_string_with_full_precision(qinfo.scale));
+        build_opts.add_option("-DOFFSET=" + support::cpp11::to_string(qoffset));
+    }
+    else
+    {
+        kernel_name += "_per_channel";
+        kernel_name += input->info()->data_layout() == DataLayout::NCHW ? "_nchw" : "_nhwc";
+    }
+
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(vec_size_x));
     build_opts.add_option("-DDATA_TYPE_SRC=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DDATA_TYPE_DST=" + get_cl_type_from_data_type(output->info()->data_type()));
     build_opts.add_option_if(multi_access_x, "-DLAST_ACCESSED_X=" + support::cpp11::to_string(std::max<int>(output_width_x - vec_size_x, 0)));
 
     // Create kernel name
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("dequantization_layer", build_opts.options()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 }
 
 Status CLDequantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
@@ -123,8 +134,18 @@ void CLDequantizationLayerKernel::run(const Window &window, cl::CommandQueue &qu
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), 3);
-    Window slice            = window_collapsed.first_slice_window_3D();
+    const bool is_quantized_per_channel = is_data_type_quantized_per_channel(_input->info()->data_type());
+
+    // Collapse windo
+    Window new_window = is_quantized_per_channel ? window.collapse_if_possible(ICLKernel::window(), 4) : window.collapse_if_possible(ICLKernel::window(), 3);
+    Window slice      = new_window.first_slice_window_3D();
+
+    if(is_quantized_per_channel)
+    {
+        unsigned int idx = num_arguments_per_3D_tensor() * 2; //Skip the input and output parameters
+        _kernel.setArg(idx++, _input->quantization().scale->cl_buffer());
+        _kernel.setArg(idx++, _input->quantization().offset->cl_buffer());
+    }
 
     do
     {
@@ -133,6 +154,6 @@ void CLDequantizationLayerKernel::run(const Window &window, cl::CommandQueue &qu
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice, lws_hint());
     }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    while(new_window.slide_window_slice_3D(slice));
 }
 } // namespace arm_compute

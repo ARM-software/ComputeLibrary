@@ -32,6 +32,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DequantizationLayer.h"
 
 #include <random>
@@ -47,10 +48,10 @@ class DequantizationValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype)
+    void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
         _quantization_info = generate_quantization_info(src_data_type, shape.z());
-        _target            = compute_target(shape, src_data_type, dst_datatype);
+        _target            = compute_target(shape, src_data_type, dst_datatype, data_layout);
         _reference         = compute_reference(shape, src_data_type);
     }
 
@@ -61,11 +62,16 @@ protected:
         library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType src_data_type, DataType dst_datatype)
+    TensorType compute_target(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, src_data_type, 1, _quantization_info);
-        TensorType dst = create_tensor<TensorType>(shape, dst_datatype);
+        TensorType src = create_tensor<TensorType>(shape, src_data_type, 1, _quantization_info, data_layout);
+        TensorType dst = create_tensor<TensorType>(shape, dst_datatype, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType dequantization_layer;

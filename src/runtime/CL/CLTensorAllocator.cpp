@@ -79,8 +79,6 @@ void clear_quantization_arrays(CLFloatArray &scale, CLInt32Array &offset)
  * @param[in, out] offset   Quantization offset array
  * @param[in]      qinfo    Quantization info
  * @param[in]      pad_size Pad size to use in case array needs to be padded for computation purposes
- *
- * @return A pair (scale, offset) containing the respective allocated and filled arrays
  */
 void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const QuantizationInfo &qinfo, size_t pad_size)
 {
@@ -93,6 +91,16 @@ void populate_quantization_info(CLFloatArray &scale, CLInt32Array &offset, const
     scale                                  = CLFloatArray(num_elements + pad_size);
     scale.resize(num_elements);
     CLScheduler::get().queue().enqueueWriteBuffer(scale.cl_buffer(), CL_TRUE, 0, num_elements * element_size, qinfo.scale().data());
+
+    if(!qinfo.offset().empty())
+    {
+        // Create offset array
+        const std::vector<int32_t> &qoffset             = qinfo.offset();
+        const size_t                offset_element_size = sizeof(std::remove_reference<decltype(qoffset)>::type::value_type);
+        offset                                          = CLInt32Array(num_elements + pad_size);
+        offset.resize(num_elements);
+        CLScheduler::get().queue().enqueueWriteBuffer(offset.cl_buffer(), CL_TRUE, 0, num_elements * offset_element_size, qinfo.offset().data());
+    }
 }
 } // namespace
 

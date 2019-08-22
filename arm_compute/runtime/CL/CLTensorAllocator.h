@@ -146,8 +146,8 @@ private:
     CLMemory       _memory;                  /**< OpenCL memory */
     uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
     CLTensor      *_owner;                   /**< Owner of the allocator */
-    CLFloatArray   _scale;
-    CLInt32Array   _offset;
+    CLFloatArray   _scale;                   /**< Scales array in case of quantized per channel data type */
+    CLInt32Array   _offset;                  /**< Offsets array in case of quantized per channel data type */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */

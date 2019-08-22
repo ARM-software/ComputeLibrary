@@ -236,6 +236,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_im2col", "depthwise_convolution.cl" },
     { "depthwise_vector_to_tensor", "depthwise_convolution.cl" },
     { "dequantization_layer", "dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nhwc", "dequantization_layer.cl" },
+    { "dequantization_layer_per_channel_nchw", "dequantization_layer.cl" },
     { "derivative", "derivative.cl" },
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
