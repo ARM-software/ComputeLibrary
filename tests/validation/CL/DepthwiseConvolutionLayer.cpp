@@ -48,7 +48,7 @@ constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                  /**<
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(0);                  /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 constexpr float                      tolerance_num = 0.05f;                 /**< Tolerance number */
 
-const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
+const auto depth_multipliers       = framework::dataset::make("DepthMultiplier", { 1, 2, 5 });
 const auto large_depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 5, 8 });
 
 //Activation Functions
@@ -273,7 +273,7 @@ DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip
                 framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, true, true })),
                 input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier, dilation, expected)
 {
-    bool is_valid = bool(CLDepthwiseConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier,ActivationLayerInfo(), dilation));
+    bool is_valid = bool(CLDepthwiseConvolutionLayer::validate(&input_info.clone()->set_is_resizable(true), &weights_info.clone()->set_is_resizable(true), &biases_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), conv_info, depth_multiplier,ActivationLayerInfo(), dilation));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

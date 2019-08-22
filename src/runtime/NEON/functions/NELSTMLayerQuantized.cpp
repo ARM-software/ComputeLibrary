@@ -147,15 +147,30 @@ void NELSTMLayerQuantized::configure(const ITensor *input,
     _bias.allocator()->allocate();
 
     // Get the gate tensors
-    _memory_group.manage(&_input_gate_input);
-    _slice_input_tensor.configure(&_output_lowp, &_input_gate_input, { 0, 0 }, { output_size, batch_size });
-    _memory_group.manage(&_forget_gate_input);
-    _slice_forget_tensor.configure(&_output_lowp, &_forget_gate_input, { output_size, 0 }, { 2 * output_size, batch_size });
-    _memory_group.manage(&_input_modulation_gate_input);
-    _slice_cell_tensor.configure(&_output_lowp, &_input_modulation_gate_input, { 2 * output_size, 0 }, { 3 * output_size, batch_size });
-    _memory_group.manage(&_output_gate_input);
-    _slice_output_tensor.configure(&_output_lowp, &_output_gate_input, { 3 * output_size, 0 }, { 4 * output_size, batch_size });
-    _output_lowp.allocator()->allocate();
+    if(batch_size > 1)
+    {
+        _memory_group.manage(&_input_gate_input);
+        _slice_input_tensor.configure(&_output_lowp, &_input_gate_input, { 0, 0 }, { output_size, batch_size });
+        _memory_group.manage(&_forget_gate_input);
+        _slice_forget_tensor.configure(&_output_lowp, &_forget_gate_input, { output_size, 0 }, { 2 * output_size, batch_size });
+        _memory_group.manage(&_input_modulation_gate_input);
+        _slice_cell_tensor.configure(&_output_lowp, &_input_modulation_gate_input, { 2 * output_size, 0 }, { 3 * output_size, batch_size });
+        _memory_group.manage(&_output_gate_input);
+        _slice_output_tensor.configure(&_output_lowp, &_output_gate_input, { 3 * output_size, 0 }, { 4 * output_size, batch_size });
+        _output_lowp.allocator()->allocate();
+    }
+    else
+    {
+        _memory_group.manage(&_input_gate_input);
+        _slice_input_tensor.configure(&_output_lowp, &_input_gate_input, { 0 }, { output_size });
+        _memory_group.manage(&_forget_gate_input);
+        _slice_forget_tensor.configure(&_output_lowp, &_forget_gate_input, { output_size }, { 2 * output_size });
+        _memory_group.manage(&_input_modulation_gate_input);
+        _slice_cell_tensor.configure(&_output_lowp, &_input_modulation_gate_input, { 2 * output_size }, { 3 * output_size });
+        _memory_group.manage(&_output_gate_input);
+        _slice_output_tensor.configure(&_output_lowp, &_output_gate_input, { 3 * output_size }, { 4 * output_size });
+        _output_lowp.allocator()->allocate();
+    }
 
     // Forget gate
     _memory_group.manage(&_forget_gate_output);
@@ -264,6 +279,150 @@ Status NELSTMLayerQuantized::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(recurrent_to_input_weights, recurrent_to_forget_weights, recurrent_to_cell_weights, recurrent_to_output_weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&cell_state_info, cell_state_in);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&output_state_info, output_state_in);
+
+    // Validate internal functions
+    // _concat_input_weights
+    std::vector<const ITensorInfo *> inputs_weights_vector;
+    inputs_weights_vector.emplace_back(input_to_input_weights);
+    inputs_weights_vector.emplace_back(input_to_forget_weights);
+    inputs_weights_vector.emplace_back(input_to_cell_weights);
+    inputs_weights_vector.emplace_back(input_to_output_weights);
+    const QuantizationInfo qweights = input_to_input_weights->quantization_info(); // Weights quantization
+    const TensorInfo       input_weights(TensorShape(input_size, 4 * output_size), 1, DataType::QASYMM8, qweights);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(inputs_weights_vector, &input_weights, Window::DimY));
+
+    // _concat_recurrent_weights
+    std::vector<const ITensorInfo *> recurrent_weights_vector;
+    recurrent_weights_vector.emplace_back(recurrent_to_input_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_forget_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_cell_weights);
+    recurrent_weights_vector.emplace_back(recurrent_to_output_weights);
+    const TensorInfo recurrent_weights(TensorShape(output_size, 4 * output_size), 1, DataType::QASYMM8, qweights);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(recurrent_weights_vector, &recurrent_weights, Window::DimY));
+
+    // _concat_weights
+    std::vector<const ITensorInfo *> weights_vector;
+    weights_vector.emplace_back(&recurrent_weights);
+    weights_vector.emplace_back(&input_weights);
+    const TensorInfo weights(TensorShape(input_size + output_size, 4 * output_size), 1, DataType::QASYMM8, qweights);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(weights_vector, &weights, Window::DimX));
+    // _transpose_weights
+    const TensorShape weights_transposed_shape(weights.tensor_shape()[1], weights.tensor_shape()[0]);
+    TensorInfo        weights_transposed = weights.clone()->set_is_resizable(true).set_tensor_shape(weights_transposed_shape);
+    ARM_COMPUTE_RETURN_ON_ERROR(NETranspose::validate(&weights, &weights_transposed));
+
+    // _concat_inputs
+    std::vector<const ITensorInfo *> input_vector;
+    input_vector.emplace_back(input);
+    input_vector.emplace_back(output_state_in);
+    TensorInfo input_concatenated(TensorShape(output_size + input_size, batch_size), 1, DataType::QASYMM8, qasymm);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(input_vector, &input_concatenated, Window::DimX));
+
+    // _concat_bias
+    std::vector<const ITensorInfo *> bias_vector;
+    bias_vector.emplace_back(input_gate_bias);
+    bias_vector.emplace_back(forget_gate_bias);
+    bias_vector.emplace_back(cell_bias);
+    bias_vector.emplace_back(output_gate_bias);
+
+    const TensorInfo bias_concatenated(TensorShape(4 * output_size), 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConcatenateLayer::validate(bias_vector, &bias_concatenated, Window::DimX));
+
+    // Invert the offset for gemmlowp
+    input_concatenated.set_quantization_info(QuantizationInfo(qasymm.uniform().scale, -qasymm.uniform().offset));
+    weights_transposed.set_quantization_info(QuantizationInfo(qweights.uniform().scale, -qweights.uniform().offset));
+
+    // _gemmlowp
+    const TensorInfo output_highp(TensorShape(4 * output_size, batch_size), 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyCore::validate(&input_concatenated, &weights_transposed, nullptr, &output_highp));
+
+    // Set the offset back
+    input_concatenated.set_quantization_info(QuantizationInfo(qasymm.uniform().scale, qasymm.uniform().offset));
+    weights_transposed.set_quantization_info(QuantizationInfo(qweights.uniform().scale, qweights.uniform().offset));
+
+    // multiplier = (input_scale * weights_scale) / output_scale (2 ^ (-12))
+    const TensorInfo output_lowp(output_highp.tensor_shape(), 1, DataType::QSYMM16, qsymm_3);
+
+    const float multiplier = 4096.f * qasymm.uniform().scale * qweights.uniform().scale;
+    ARM_COMPUTE_UNUSED(multiplier);
+    ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+    // _output_stage
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPoint::validate(&output_highp, &bias_concatenated, &output_lowp));
+
+    TensorInfo input_gate_input;
+    TensorInfo forget_gate_input;
+    TensorInfo input_modulation_gate_input;
+    TensorInfo output_gate_input;
+
+    if(batch_size > 1)
+    {
+        // _slice_input_tensor
+        input_gate_input = TensorInfo(TensorShape(output_size, batch_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &input_gate_input, { 0, 0 }, { output_size, batch_size }));
+        // _slice_forget_tensor
+        forget_gate_input = TensorInfo(TensorShape(output_size, batch_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &forget_gate_input, { output_size, 0 }, { 2 * output_size, batch_size }));
+        // _slice_cell_tensor
+        input_modulation_gate_input = TensorInfo(TensorShape(output_size, batch_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &input_modulation_gate_input, { 2 * output_size, 0 }, { 3 * output_size, batch_size }));
+        // _slice_output_tensor
+        output_gate_input = TensorInfo(TensorShape(output_size, batch_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &output_gate_input, { 3 * output_size, 0 }, { 4 * output_size, batch_size }));
+    }
+    else
+    {
+        // _slice_input_tensor
+        input_gate_input = TensorInfo(TensorShape(output_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &input_gate_input, { 0 }, { output_size }));
+        // _slice_forget_tensor
+        forget_gate_input = TensorInfo(TensorShape(output_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &forget_gate_input, { output_size }, { 2 * output_size }));
+        // _slice_cell_tensor
+        input_modulation_gate_input = TensorInfo(TensorShape(output_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &input_modulation_gate_input, { 2 * output_size }, { 3 * output_size }));
+        // _slice_output_tensor
+        output_gate_input = TensorInfo(TensorShape(output_size), 1, DataType::QSYMM16, qsymm_3);
+        ARM_COMPUTE_RETURN_ON_ERROR(NESlice::validate(&output_lowp, &output_gate_input, { 3 * output_size }, { 4 * output_size }));
+    }
+
+    // _sigmoid_forget_gate
+    const TensorInfo forget_gate_output(forget_gate_input.tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&forget_gate_input, &forget_gate_output, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    // _sigmoid_input_gate
+    const TensorInfo input_gate_output(input_gate_input.tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&input_gate_input, &input_gate_output, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+    // _tanh_modulation_gate
+    const TensorInfo input_modulation_gate_output(input_modulation_gate_input.tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&input_modulation_gate_input, &input_modulation_gate_output, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.0f, 1.0f)));
+    // _sigmoid_output_gate
+    const TensorInfo output_gate_output(output_gate_input.tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(&output_gate_input, &output_gate_output, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC)));
+
+    // _mul_forget_gate_cell_state
+    const TensorInfo cell_state_tmp1(forget_gate_output.tensor_shape(), 1, DataType::QSYMM16, qsymm_4);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&forget_gate_output, cell_state_in, &cell_state_tmp1, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    // _mul_input_gate_input_mod_gate
+    const TensorInfo cell_state_tmp2(input_gate_output.tensor_shape(), 1, DataType::QSYMM16, qsymm_4);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&input_gate_output, &input_modulation_gate_output, &cell_state_tmp2, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    // _add_cell_state_tmps
+    ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAddition::validate(&cell_state_tmp1, &cell_state_tmp2, cell_state_out, ConvertPolicy::SATURATE));
+
+    // _tanh_modulation_gate
+    const TensorInfo output_state_tmp(cell_state_out->tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(cell_state_out, &output_state_tmp, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH, 1.0f, 1.0f)));
+
+    // _mul_output_state_tmp_output_gate
+    const TensorInfo output_state_out_symm(output_gate_output.tensor_shape(), 1, DataType::QSYMM16, qsymm_0);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEPixelWiseMultiplication::validate(&output_state_tmp, &output_gate_output, &output_state_out_symm, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_ZERO));
+
+    // _dequantize
+    const TensorInfo output_state_out_f32(output_state_out_symm.tensor_shape(), 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDequantizationLayer::validate(&output_state_out_symm, &output_state_out_f32));
+
+    // _quantize
+    ARM_COMPUTE_RETURN_ON_ERROR(NEQuantizationLayer::validate(&output_state_out_f32, output_state_out));
 
     if(cell_state_out->total_size() != 0)
     {

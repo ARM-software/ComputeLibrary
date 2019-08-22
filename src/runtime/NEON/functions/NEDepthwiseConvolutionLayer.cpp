@@ -583,10 +583,22 @@ Status NEDepthwiseConvolutionLayerOptimized::validate(const ITensorInfo         
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(channel_idx));
     }
 
+    const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+
+    if(is_quantized)
+    {
+        const UniformQuantizationInfo iq_info = input->quantization_info().uniform();
+        const UniformQuantizationInfo wq_info = weights->quantization_info().uniform();
+        const UniformQuantizationInfo oq_info = output->quantization_info().uniform();
+
+        float multiplier = (iq_info.scale * wq_info.scale) / oq_info.scale;
+        ARM_COMPUTE_UNUSED(multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON(multiplier > 1.0f);
+    }
+
     if(!NEDepthwiseConvolutionAssemblyDispatch::is_optimized_supported(input, weights, conv_info, depth_multiplier, dilation))
     {
-        const bool is_quantized = is_data_type_quantized_asymmetric(input->data_type());
-        TensorInfo accumulator  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
+        TensorInfo accumulator = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
         ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseConvolutionLayer3x3Kernel::validate(input, weights, is_quantized ? &accumulator : output, conv_info, depth_multiplier, dilation));
 
         if(is_quantized)
