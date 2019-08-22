@@ -139,6 +139,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float> },
+        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float> },
@@ -157,6 +158,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
         { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
+        { ActivationFunction::ELU, &NEActivationLayerKernel::activation<ActivationFunction::ELU, float16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
         { ActivationFunction::TANH, &NEActivationLayerKernel::activation<ActivationFunction::TANH, float16_t> },
@@ -271,6 +273,9 @@ NEActivationLayerKernel::activation(const Window &window)
                 case ActivationFunction::SOFT_RELU:
                     tmp = wrapper::vlog(wrapper::vadd(const_1, wrapper::vexpq(vin)));
                     break;
+                case ActivationFunction::ELU:
+                    tmp = wrapper::vbsl(wrapper::vcge(vin, const_0), vin, wrapper::vmul(va, wrapper::vsub(wrapper::vexpq(vin), const_1)));
+                    break;
                 case ActivationFunction::SQRT:
                     tmp = wrapper::vinv(wrapper::vinvsqrt(vin));
                     break;
@@ -319,6 +324,9 @@ NEActivationLayerKernel::activation(const Window &window)
                     break;
                 case ActivationFunction::SOFT_RELU:
                     tmp = std::log(static_cast<T>(1) + std::exp(in));
+                    break;
+                case ActivationFunction::ELU:
+                    tmp = (in >= 0) ? in : a * (std::exp(in) - 1);
                     break;
                 case ActivationFunction::SQRT:
                     tmp = std::sqrt(in);

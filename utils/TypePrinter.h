@@ -379,6 +379,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
         case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
             os << "LU_BOUNDED_RELU";
             break;
+        case ActivationLayerInfo::ActivationFunction::ELU:
+            os << "ELU";
+            break;
         case ActivationLayerInfo::ActivationFunction::SQUARE:
             os << "SQUARE";
             break;

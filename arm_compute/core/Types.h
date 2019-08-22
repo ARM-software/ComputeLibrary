@@ -1528,6 +1528,7 @@ public:
         LU_BOUNDED_RELU, /**< Lower and Upper Bounded Rectifier ( \f$ f(x) = min(a, max(b,x)) \f$ ) */
         LEAKY_RELU,      /**< Leaky Rectifier ( \f$ f(x) = \begin{cases}  \alpha x & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         SOFT_RELU,       /**< Soft Rectifier ( \f$ f(x)= log(1+e^x) \f$ ) */
+        ELU,             /**< Exponential Linear Unit ( \f$ f(x) = \begin{cases}  \alpha (exp(x) - 1) & \quad \text{if } x \text{ < 0}\\  x & \quad \text{if } x \geq \text{ 0 } \end{cases} \f$ ) */
         ABS,             /**< Absolute ( \f$ f(x)= |x| \f$ ) */
         SQUARE,          /**< Square ( \f$ f(x)= x^2 \f$ )*/
         SQRT,            /**< Square root ( \f$ f(x) = \sqrt{x} \f$ )*/

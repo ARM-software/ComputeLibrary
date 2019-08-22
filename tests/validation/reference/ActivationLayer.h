@@ -66,6 +66,9 @@ inline T activate_float(T x, T a, T b, ActivationLayerInfo::ActivationFunction a
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
             ret = std::log(static_cast<T>(1) + std::exp(x));
             break;
+        case ActivationLayerInfo::ActivationFunction::ELU:
+            ret = (x > 0) ? x : a * (std::exp(x) - static_cast<T>(1));
+            break;
         case ActivationLayerInfo::ActivationFunction::SQRT:
             ret = std::sqrt(x);
             break;

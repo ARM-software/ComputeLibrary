@@ -67,6 +67,7 @@ AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activ
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.00001f : epsilon);
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
         case ActivationLayerInfo::ActivationFunction::TANH:

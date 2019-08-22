@@ -69,6 +69,8 @@ void main(void)
     data_out = lrelu_op(data);
 #elif defined(SRELU)    /*SRELU*/
     data_out = srelu_op(data);
+#elif defined(ELU)      /*ELU*/
+    data_out = elu_op(data);
 #elif defined(ABS)      /*ABS*/
     data_out = abs_op(data);
 #elif defined(SQUARE)   /*SQUARE*/
@@ -121,6 +123,9 @@ void main(void)
 #elif defined(SRELU)    /*SRELU*/
     data_out.x = srelu_op(a);
     data_out.y = srelu_op(b);
+#elif defined(ELU)      /*ELU*/
+    data_out.x = elu_op(a);
+    data_out.y = elu_op(b);
 #elif defined(ABS)      /*ABS*/
     data_out.x = abs_op(a);
     data_out.y = abs_op(b);
@@ -133,7 +138,7 @@ void main(void)
 #elif defined(LINEAR)   /*LINEAR*/
     data_out.x = linear_op(a);
     data_out.y = linear_op(b);
-#elif defined(IDENTITY)   /*IDENTITY*/
+#elif defined(IDENTITY) /*IDENTITY*/
     data_out.x = identity_op(a);
     data_out.y = identity_op(b);
 #else                   /*LOGISTIC*/

@@ -49,6 +49,7 @@ public:
                             ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
                             ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
                             ActivationLayerInfo::ActivationFunction::SOFT_RELU,
+                            ActivationLayerInfo::ActivationFunction::ELU,
                             ActivationLayerInfo::ActivationFunction::SQRT,
                             ActivationLayerInfo::ActivationFunction::SQUARE,
                             ActivationLayerInfo::ActivationFunction::TANH,

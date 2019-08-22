@@ -180,6 +180,7 @@ const std::string &arm_compute::string_from_activation_func(ActivationLayerInfo:
         { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, "LU_BRELU" },
         { ActivationLayerInfo::ActivationFunction::LEAKY_RELU, "LRELU" },
         { ActivationLayerInfo::ActivationFunction::SOFT_RELU, "SRELU" },
+        { ActivationLayerInfo::ActivationFunction::ELU, "ELU" },
         { ActivationLayerInfo::ActivationFunction::SQRT, "SQRT" },
         { ActivationLayerInfo::ActivationFunction::SQUARE, "SQUARE" },
         { ActivationLayerInfo::ActivationFunction::TANH, "TANH" },

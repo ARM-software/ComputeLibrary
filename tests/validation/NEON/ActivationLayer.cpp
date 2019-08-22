@@ -56,6 +56,7 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::ELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
             switch(data_type)
