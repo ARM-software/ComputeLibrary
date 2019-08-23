@@ -209,7 +209,7 @@ public:
 #endif
                     strat.kernel(this->_Aptr + (multi * this->_A_multi_stride) + (batch * this->_A_batch_stride) + (m_start * this->_lda) + k0, this->_lda,
                                  b_panel,
-                                 result_buffer, this->_Nsize,
+                                 result_buffer, (nmax-n0),
                                  (k0 == 0) ? _beta : static_cast<Tr>(1),
                                  (m_end - m_start), (nmax - n0), kern_k);
                 }
