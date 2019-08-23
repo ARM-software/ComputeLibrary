@@ -118,6 +118,7 @@
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEPriorBoxLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEQuantizationLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEROIAlignLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEROIPoolingLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NERangeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEReductionOperationKernel.h"

@@ -116,6 +116,7 @@
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/NEON/functions/NEReduceMean.h"
