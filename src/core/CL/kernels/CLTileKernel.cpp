@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -145,7 +145,7 @@ void CLTileKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_4D_tensor_argument(idx, _input, slice);
         add_4D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_4D(slice));
 }

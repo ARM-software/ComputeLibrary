@@ -214,7 +214,7 @@ void CLGEMMLowpMatrixBReductionKernel::run(const Window &window, cl::CommandQueu
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(collapsed.slide_window_slice_2D(slice_out));
 }

@@ -119,7 +119,7 @@ void CLDepthToSpaceLayerKernel::run(const Window &window, cl::CommandQueue &queu
         add_3D_tensor_argument(idx, _input, slice_in);
         add_argument(idx, batch_id);
         add_4D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_in);
+        enqueue(queue, *this, slice_in, lws_hint());
 
         ++batch_id;
     }

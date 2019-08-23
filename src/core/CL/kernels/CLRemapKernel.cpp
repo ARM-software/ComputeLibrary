@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ void CLRemapKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _output, slice);
         add_2D_tensor_argument(idx, _map_x, slice);
         add_2D_tensor_argument(idx, _map_y, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

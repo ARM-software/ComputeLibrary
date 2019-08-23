@@ -149,6 +149,6 @@ void CLROIAlignLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     add_argument<cl_uint>(idx, _input->info()->strides_in_bytes()[3]);
     add_argument<cl_uint>(idx, _output->info()->strides_in_bytes()[3]);
 
-    enqueue(queue, *this, slice);
+    enqueue(queue, *this, slice, lws_hint());
 }
 } // namespace arm_compute

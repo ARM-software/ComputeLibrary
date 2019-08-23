@@ -156,7 +156,7 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
         }
 
         // Run kernel
-        enqueue(queue, *this, in_slice);
+        enqueue(queue, *this, in_slice, lws_hint());
     }
     while(window.slide_window_slice_4D(in_slice) && out_window.slide_window_slice_2D(out_slice));
 }

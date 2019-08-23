@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,7 +132,7 @@ void CLMeanStdDevKernel::run(const Window &window, cl::CommandQueue &queue)
         // Set slice step equal to height to force gws[1] to 1,
         // as each thread calculates the sum across all rows and columns equal to the number of elements processed by each work-item
         slice.set_dimension_step(Window::DimY, _input->info()->dimension(1));
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 

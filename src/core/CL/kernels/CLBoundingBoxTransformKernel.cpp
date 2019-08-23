@@ -127,6 +127,6 @@ void CLBoundingBoxTransformKernel::run(const Window &window, cl::CommandQueue &q
     add_2D_tensor_argument(idx, _deltas, slice);
 
     // Note that we don't need to loop over the slices, as we are sure that we are dealing with all 2D tensors
-    enqueue(queue, *this, slice);
+    enqueue(queue, *this, slice, lws_hint());
 }
 } // namespace arm_compute

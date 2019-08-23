@@ -121,6 +121,6 @@ void CLDepthwiseConvolutionLayerReshapeWeightsKernel::run(const Window &window, 
     unsigned int idx = 0;
     add_3D_tensor_argument(idx, _input, window);
     add_2D_tensor_argument(idx, _output, window);
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
 } // namespace arm_compute

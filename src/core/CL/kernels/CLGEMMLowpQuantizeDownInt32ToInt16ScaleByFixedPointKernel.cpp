@@ -174,7 +174,7 @@ void CLGEMMLowpQuantizeDownInt32ToInt16ScaleByFixedPointKernel::run(const Window
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx1, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
 }

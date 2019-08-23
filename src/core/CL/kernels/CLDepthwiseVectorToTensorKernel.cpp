@@ -119,7 +119,7 @@ void CLDepthwiseVectorToTensorKernel::run(const Window &window, cl::CommandQueue
         unsigned int idx = 0;
         add_1D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_1D(slice) && window.slide_window_slice_3D(slice_out));
 }

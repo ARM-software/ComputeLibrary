@@ -162,5 +162,5 @@ void CLHeightConcatenateLayerKernel::run(const Window &window, cl::CommandQueue 
     unsigned int idx = 0;
     add_4D_tensor_argument(idx, _input, window);
     add_4D_tensor_argument(idx, _output, window);
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }

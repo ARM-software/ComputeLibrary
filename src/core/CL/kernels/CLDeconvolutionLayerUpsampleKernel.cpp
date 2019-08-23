@@ -129,7 +129,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
-                enqueue(queue, *this, slice_out);
+                enqueue(queue, *this, slice_out, lws_hint());
             }
             while(collapsed.slide_window_slice_3D(slice_in) && collapsed.slide_window_slice_3D(slice_out));
             break;
@@ -148,7 +148,7 @@ void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQu
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, slice_in);
                 add_3D_tensor_argument(idx, _output, slice_out);
-                enqueue(queue, *this, slice_out);
+                enqueue(queue, *this, slice_out, lws_hint());
             }
             while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
             break;

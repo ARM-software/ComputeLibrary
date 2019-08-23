@@ -209,6 +209,6 @@ void CLFuseBatchNormalizationKernel::run(const arm_compute::Window &window, cl::
     {
         add_1D_tensor_argument(idx, _bn_gamma, slice_1d);
     }
-    enqueue(queue, *this, slice_3d);
+    enqueue(queue, *this, slice_3d, lws_hint());
 }
 } // namespace arm_compute

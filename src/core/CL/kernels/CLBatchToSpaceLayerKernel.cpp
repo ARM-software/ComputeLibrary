@@ -173,7 +173,7 @@ void CLBatchToSpaceLayerKernel::run(const Window &window, cl::CommandQueue &queu
             add_1D_tensor_argument(idx, _block_shape, vector_slice);
         }
         add_4D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice_in);
+        enqueue(queue, *this, slice_in, lws_hint());
 
         ++batch_id;
     }

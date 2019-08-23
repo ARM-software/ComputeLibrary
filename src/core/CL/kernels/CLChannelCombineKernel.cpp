@@ -281,7 +281,7 @@ void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)
             _kernel.setArg(idx++, slice.y().end());
         }
 
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

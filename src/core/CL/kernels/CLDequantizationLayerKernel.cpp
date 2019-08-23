@@ -131,7 +131,7 @@ void CLDequantizationLayerKernel::run(const Window &window, cl::CommandQueue &qu
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -181,7 +181,7 @@ void CLChannelExtractKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
         add_2D_tensor_argument(idx, _output, win_sub);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_2D(slice));
 }

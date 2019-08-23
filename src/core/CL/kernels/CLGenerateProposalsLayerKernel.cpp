@@ -124,6 +124,6 @@ void CLComputeAllAnchorsKernel::run(const Window &window, cl::CommandQueue &queu
 
     // Note that we don't need to loop over the slices, as we are launching exactly
     // as many threads as all the anchors generated
-    enqueue(queue, *this, collapsed);
+    enqueue(queue, *this, collapsed, lws_hint());
 }
 } // namespace arm_compute

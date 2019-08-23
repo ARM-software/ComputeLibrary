@@ -136,7 +136,7 @@ void CLPadLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice_out);
 
-        enqueue(queue, *this, slice_out);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }

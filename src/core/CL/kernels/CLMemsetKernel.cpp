@@ -103,7 +103,7 @@ void CLMemsetKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _tensor, slice);
-        enqueue(queue, *this, slice);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
 }

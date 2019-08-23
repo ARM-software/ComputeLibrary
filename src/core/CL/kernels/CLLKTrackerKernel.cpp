@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,7 @@ void CLLKTrackerInitKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
 
 void CLLKTrackerFinalizeKernel::configure(ICLLKInternalKeypointArray *new_points_internal, ICLKeyPointArray *new_points)
@@ -112,7 +112,7 @@ void CLLKTrackerFinalizeKernel::run(const Window &window, cl::CommandQueue &queu
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
 
 CLLKTrackerStage0Kernel::CLLKTrackerStage0Kernel()
@@ -202,7 +202,7 @@ void CLLKTrackerStage0Kernel::run(const Window &window, cl::CommandQueue &queue)
     add_2D_tensor_argument(idx, _old_scharr_gx, window);
     add_2D_tensor_argument(idx, _old_scharr_gy, window);
 
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
 
 CLLKTrackerStage1Kernel::CLLKTrackerStage1Kernel()
@@ -284,5 +284,5 @@ void CLLKTrackerStage1Kernel::run(const Window &window, cl::CommandQueue &queue)
     unsigned int idx = 0;
     add_2D_tensor_argument(idx, _new_input, window);
 
-    enqueue(queue, *this, window);
+    enqueue(queue, *this, window, lws_hint());
 }
