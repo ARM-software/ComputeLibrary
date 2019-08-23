@@ -52,6 +52,7 @@ RelativeTolerance<float> relative_tolerance_f16(0.01f);
 AbsoluteTolerance<float> absolute_tolerance_f16(0.001f);
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
 } // namespace
 
 TEST_SUITE(NEON)
@@ -126,6 +127,24 @@ FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerFixture<half>, fra
 #endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 TEST_SUITE_END() // Float
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+template <typename T>
+using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Accessor, NEROIAlignLayer, T>;
+
+FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+                       combine(combine(combine(combine(datasets::SmallROIDataset(),
+                                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
+                               framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
 TEST_SUITE_END() // RoiAlign
 TEST_SUITE_END() // NEON
