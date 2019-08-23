@@ -163,6 +163,7 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::QASYMM8_PER_CHANNEL, "QASYMM8_PER_CHANNEL" },
         { DataType::QASYMM8, "QASYMM8" },
         { DataType::QSYMM16, "QSYMM16" },
+        { DataType::QASYMM16, "QASYMM16" },
     };
 
     return dt_map[dt];

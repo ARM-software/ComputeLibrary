@@ -345,7 +345,7 @@ void CLLSTMLayerQuantized::run()
     _tanh_output_state.run();
     _mul_output_state_tmp_output_gate.run();
 
-    // Requantize output state from QSYMM16 to QASYMM16
+    // Requantize output state from QSYMM16 to QASYMM8
     _dequantize.run();
     _quantize.run();
 }

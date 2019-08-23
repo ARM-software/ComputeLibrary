@@ -646,6 +646,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
         case DataType::QSYMM16:
             os << "QSYMM16";
             break;
+        case DataType::QASYMM16:
+            os << "QASYMM16";
+            break;
         case DataType::U32:
             os << "U32";
             break;

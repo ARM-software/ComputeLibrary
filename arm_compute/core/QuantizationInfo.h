@@ -32,8 +32,9 @@
 
 namespace arm_compute
 {
-using qasymm8_t = uint8_t; /**< 8 bit quantized asymmetric scalar value */
-using qsymm16_t = int16_t; /**< 16 bit quantized symmetric scalar value */
+using qasymm8_t  = uint8_t;  /**< 8 bit quantized asymmetric scalar value */
+using qsymm16_t  = int16_t;  /**< 16 bit quantized symmetric scalar value */
+using qasymm16_t = uint16_t; /**< 16 bit quantized asymmetric scalar value */
 
 /** Quantization info when assuming per layer quantization */
 struct UniformQuantizationInfo
@@ -204,7 +205,7 @@ inline bool operator!=(const UniformQuantizationInfo &lhs, const UniformQuantiza
     return !(operator==(lhs, rhs));
 }
 
-/** Quantize a value given a asymmetric quantization scheme
+/** Quantize a value given a 8-bit asymmetric quantization scheme
  *
  * @param[in] value           Value to quantize
  * @param[in] qinfo           Quantization information to use for quantizing
@@ -219,7 +220,7 @@ inline uint8_t quantize_qasymm8(float value, const UniformQuantizationInfo &qinf
     return quantized;
 }
 
-/** Quantize a value given a asymmetric quantization scheme
+/** Quantize a value given a 8-bit asymmetric quantization scheme
  *
  * @param[in] value           Value to quantize
  * @param[in] qinfo           Quantization information to use for quantizing
@@ -235,7 +236,7 @@ inline uint8_t quantize_qasymm8(float value, const QuantizationInfo &qinfo, Roun
     return quantized;
 }
 
-/** Quantize a value given a symmetric quantization scheme
+/** Quantize a value given a 8-bit symmetric quantization scheme
  *
  * @param[in] value Value to quantize
  * @param[in] qinfo Quantization information to use for quantizing
@@ -249,7 +250,7 @@ inline int8_t quantize_qsymm8(float value, const QuantizationInfo &qinfo)
     return quantized;
 }
 
-/** Dequantize a value given a asymmetric quantization scheme
+/** Dequantize a value given a 8-bit asymmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] qinfo Quantization information to use for dequantizing
@@ -261,7 +262,7 @@ inline float dequantize_qasymm8(uint8_t value, const UniformQuantizationInfo &qi
     return (static_cast<int>(value) - qinfo.offset) * qinfo.scale;
 }
 
-/** Dequantize a value given a asymmetric quantization scheme
+/** Dequantize a value given a 8-bit asymmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] qinfo Quantization information to use for dequantizing
@@ -274,7 +275,7 @@ inline float dequantize_qasymm8(uint8_t value, const QuantizationInfo &qinfo)
     return (static_cast<int>(value) - uqinfo.offset) * uqinfo.scale;
 }
 
-/** Dequantize a value given an asymmetric quantization scheme
+/** Dequantize a value given an 8-bit asymmetric quantization scheme
  *
  * @param[in] value  Value to dequantize
  * @param[in] scale  Scale to use for dequantization
@@ -287,7 +288,7 @@ inline float dequantize(uint8_t value, float scale, int32_t offset)
     return (static_cast<int>(value) - offset) * scale;
 }
 
-/** Dequantize a value given a symmetric quantization scheme
+/** Dequantize a value given a 8-bit symmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] qinfo Quantization information to use for dequantizing
@@ -299,7 +300,7 @@ inline float dequantize_qsymm8(int8_t value, const UniformQuantizationInfo &qinf
     return value * qinfo.scale;
 }
 
-/** Dequantize a value given a symmetric quantization scheme
+/** Dequantize a value given a 8-bit symmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] scale Scale to use for dequantization
@@ -311,7 +312,7 @@ inline float dequantize(int8_t value, float scale)
     return value * scale;
 }
 
-/** Dequantize a value given a symmetric quantization scheme
+/** Dequantize a value given a 16-bit symmetric quantization scheme
  *
  * @param[in] value Value to dequantize
  * @param[in] scale Scale to use for dequantization
@@ -321,6 +322,19 @@ inline float dequantize(int8_t value, float scale)
 inline float dequantize(int16_t value, float scale)
 {
     return value * scale;
+}
+
+/** Dequantize a value given a 16-bit asymmetric quantization scheme
+ *
+ * @param[in] value  Value to dequantize
+ * @param[in] scale  Scale to use for dequantization
+ * @param[in] offset Zero-offset to use for dequantization
+ *
+ * @return Dequantized value
+ */
+inline float dequantize(uint16_t value, float scale, int32_t offset)
+{
+    return (static_cast<int>(value) - offset) * scale;
 }
 
 /** Quantize a value given a 16-bit symmetric quantization scheme
@@ -372,6 +386,57 @@ inline int16_t quantize_qsymm16(float value, const QuantizationInfo &qinfo)
 inline float dequantize_qsymm16(int16_t value, const QuantizationInfo &qinfo)
 {
     return dequantize_qsymm16(value, qinfo.uniform());
+}
+
+/** Quantize a value given a 16-bit asymmetric quantization scheme
+ *
+ * @param[in] value           Value to quantize
+ * @param[in] qinfo           Quantization information to use for quantizing
+ * @param[in] rounding_policy (Optional) Rounding policy to use. Default: nearest up
+ *
+ * @return Quantized value
+ */
+inline uint16_t quantize_qasymm16(float value, const UniformQuantizationInfo &qinfo, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
+{
+    int quantized = arm_compute::round(value / qinfo.scale, rounding_policy) + qinfo.offset;
+    quantized     = arm_compute::utility::clamp<int, uint16_t>(quantized);
+    return quantized;
+}
+
+/** Dequantize a value given a 16-bit asymmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+inline float dequantize_qasymm16(uint16_t value, const UniformQuantizationInfo &qinfo)
+{
+    return (static_cast<int>(value) - qinfo.offset) * qinfo.scale;
+}
+
+/** Quantize a value given a 16-bit asymmetric quantization scheme
+ *
+ * @param[in] value Value to quantize
+ * @param[in] qinfo Quantization information to use for quantizing
+ *
+ * @return Quantized value
+ */
+inline uint16_t quantize_qasymm16(float value, const QuantizationInfo &qinfo)
+{
+    return quantize_qasymm16(value, qinfo.uniform());
+}
+
+/** Dequantize a value given a 16-bit asymmetric quantization scheme
+ *
+ * @param[in] value Value to dequantize
+ * @param[in] qinfo Quantization information to use for dequantizing
+ *
+ * @return Dequantized value
+ */
+inline float dequantize_qasymm16(uint16_t value, const QuantizationInfo &qinfo)
+{
+    return dequantize_qasymm16(value, qinfo.uniform());
 }
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_QUANTIZATION_INFO_H__ */

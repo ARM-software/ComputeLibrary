@@ -83,6 +83,7 @@ enum class DataType
     U16,                 /**< unsigned 16-bit number */
     S16,                 /**< signed 16-bit number */
     QSYMM16,             /**< quantized, symmetric fixed-point 16-bit number */
+    QASYMM16,            /**< quantized, asymmetric fixed-point 16-bit number */
     U32,                 /**< unsigned 32-bit number */
     S32,                 /**< signed 32-bit number */
     U64,                 /**< unsigned 64-bit number */
