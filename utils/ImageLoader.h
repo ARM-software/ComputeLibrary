@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -249,14 +249,14 @@ public:
      *
      * @note If the image is a CLImage, the function maps and unmaps the image
      *
-     * @param[in,out] tensor Tensor with 3 planes to fill (Must be allocated, and of matching dimensions with the opened image). Data types supported: U8/F32
+     * @param[in,out] tensor Tensor with 3 planes to fill (Must be allocated, and of matching dimensions with the opened image). Data types supported: U8/F16/F32
      * @param[in]     bgr    (Optional) Fill the first plane with blue channel (default = false)
      */
     template <typename T>
     void fill_planar_tensor(T &tensor, bool bgr = false)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32, DataType::F16);
 
         const DataLayout  data_layout  = tensor.info()->data_layout();
         const TensorShape tensor_shape = tensor.info()->tensor_shape();
@@ -322,6 +322,13 @@ public:
                         *reinterpret_cast<float *>(out.ptr() + 0 * stride_z) = static_cast<float>(bgr ? blue : red);
                         *reinterpret_cast<float *>(out.ptr() + 1 * stride_z) = static_cast<float>(green);
                         *reinterpret_cast<float *>(out.ptr() + 2 * stride_z) = static_cast<float>(bgr ? red : blue);
+                        break;
+                    }
+                    case DataType::F16:
+                    {
+                        *reinterpret_cast<half *>(out.ptr() + 0 * stride_z) = static_cast<half>(bgr ? blue : red);
+                        *reinterpret_cast<half *>(out.ptr() + 1 * stride_z) = static_cast<half>(green);
+                        *reinterpret_cast<half *>(out.ptr() + 2 * stride_z) = static_cast<half>(bgr ? red : blue);
                         break;
                     }
                     default:

@@ -70,6 +70,9 @@ public:
     void preprocess(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void preprocess_typed(ITensor &tensor);
+
     std::array<float, 3> _mean;
     bool  _bgr;
     float _scale;
@@ -90,6 +93,9 @@ public:
     void preprocess(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void preprocess_typed(ITensor &tensor);
+
     float _min_range;
     float _max_range;
 };

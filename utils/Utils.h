@@ -401,7 +401,7 @@ public:
     void fill_tensor(T &tensor)
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::QASYMM8, arm_compute::DataType::S32, arm_compute::DataType::F32, arm_compute::DataType::F16);
         try
         {
             // Map buffer if creating a CLTensor

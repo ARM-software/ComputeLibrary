@@ -85,8 +85,8 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_moving_mean.npy"),
                                          get_weights_accessor(data_path,
                                                               "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
-                                         get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
-                                                                                             "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_beta.npy"),
+                                         nullptr, get_weights_accessor(data_path,
+                                                                       "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               .set_name("Conv2d_1a_3x3/BatchNorm/batchnorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv2d_1a_3x3/Relu")
@@ -98,8 +98,8 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_moving_mean.npy"),
                                          get_weights_accessor(data_path,
                                                               "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_moving_variance.npy"),
-                                         get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
-                                                                                             "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_beta.npy"),
+                                         nullptr, get_weights_accessor(data_path,
+                                                                       "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               .set_name("Conv2d_2a_3x3/BatchNorm/batchnorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv2d_2a_3x3/Relu")
@@ -112,8 +112,8 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_moving_mean.npy"),
                                          get_weights_accessor(data_path,
                                                               "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_moving_variance.npy"),
-                                         get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
-                                                                                             "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_beta.npy"),
+                                         nullptr, get_weights_accessor(data_path,
+                                                                       "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               .set_name("Conv2d_2b_3x3/BatchNorm/batchnorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv2d_2b_3x3/Relu")
@@ -128,8 +128,8 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_moving_mean.npy"),
                                          get_weights_accessor(data_path,
                                                               "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_moving_variance.npy"),
-                                         get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
-                                                                                             "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_beta.npy"),
+                                         nullptr, get_weights_accessor(data_path,
+                                                                       "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_beta.npy"),
                                          0.001f)
               .set_name("Conv2d_3b_1x1/BatchNorm/batchnorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv2d_3b_1x1/Relu")
@@ -142,8 +142,8 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_moving_mean.npy"),
                                          get_weights_accessor(data_path,
                                                               "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_moving_variance.npy"),
-                                         get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
-                                                                                             "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_beta.npy"),
+                                         nullptr, get_weights_accessor(data_path,
+                                                                       "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               .set_name("Conv2d_4a_3x3/BatchNorm/batchnorm")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Conv2d_4a_3x3/Relu")
@@ -249,7 +249,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -265,7 +265,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id0 + "1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id0 + "1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id0 + "1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d" + conv_id0 + "1x1/BatchNorm/batchnorm")
@@ -279,7 +279,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d" + conv_id1 + "5x5/BatchNorm/batchnorm")
@@ -295,7 +295,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -309,7 +309,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0b_3x3/BatchNorm/batchnorm")
@@ -323,7 +323,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0c_3x3/BatchNorm/batcnorm")
@@ -340,7 +340,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
@@ -364,7 +364,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_1a_1x1/BatchNorm/batchnorm")
@@ -380,7 +380,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -394,7 +394,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0b_3x3/BatchNorm/batchnorm")
@@ -408,7 +408,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_1a_1x1/BatchNorm/batchnorm")
@@ -437,7 +437,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -453,7 +453,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -467,7 +467,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0b_1x7/BatchNorm/batchnorm")
@@ -481,7 +481,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0c_7x1/BatchNorm/batchnorm")
@@ -497,7 +497,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -511,7 +511,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0b_7x1/BatchNorm/batchnorm")
@@ -525,7 +525,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0c_1x7/BatchNorm/batchnorm")
@@ -539,7 +539,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0d_7x1/BatchNorm/batchnorm")
@@ -553,7 +553,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0e_1x7/BatchNorm/batchnorm")
@@ -570,7 +570,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
@@ -594,7 +594,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -608,7 +608,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_1a_3x3/BatchNorm/batchnorm")
@@ -624,7 +624,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -638,7 +638,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0b_1x7/BatchNorm/batchnorm")
@@ -652,7 +652,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0c_7x1/BatchNorm/batchnorm")
@@ -666,7 +666,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_1a_3x3/BatchNorm/batchnorm")
@@ -703,7 +703,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_0/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -719,7 +719,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_1/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -735,7 +735,7 @@ private:
              << BatchNormalizationLayer(
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_BatchNorm_moving_mean.npy"),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_BatchNorm_moving_variance.npy"),
-                 get_random_accessor(1.f, 1.f),
+                 nullptr,
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_BatchNorm_beta.npy"),
                  0.001f)
              .set_name(param_path + "/Branch_1/Conv2d_0b_1x3/BatchNorm/batchnorm")
@@ -751,7 +751,7 @@ private:
              << BatchNormalizationLayer(
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_BatchNorm_moving_mean.npy"),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_BatchNorm_moving_variance.npy"),
-                 get_random_accessor(1.f, 1.f),
+                 nullptr,
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_BatchNorm_beta.npy"),
                  0.001f)
              .set_name(param_path + "/Branch_1/Conv2d" + conv_id + "3x1/BatchNorm/batchnorm")
@@ -770,7 +770,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0a_1x1/BatchNorm/batchnorm")
@@ -784,7 +784,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_2/Conv2d_0b_3x3/BatchNorm/batchnorm")
@@ -800,7 +800,7 @@ private:
              << BatchNormalizationLayer(
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_BatchNorm_moving_mean.npy"),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_BatchNorm_moving_variance.npy"),
-                 get_random_accessor(1.f, 1.f),
+                 nullptr,
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_BatchNorm_beta.npy"),
                  0.001f)
              .set_name(param_path + "/Branch_2/Conv2d_0c_1x3/BatchNorm/batchnorm")
@@ -816,7 +816,7 @@ private:
              << BatchNormalizationLayer(
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_BatchNorm_moving_mean.npy"),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_BatchNorm_moving_variance.npy"),
-                 get_random_accessor(1.f, 1.f),
+                 nullptr,
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_BatchNorm_beta.npy"),
                  0.001f)
              .set_name(param_path + "/Branch_2/Conv2d_0d_3x1/BatchNorm/batchnorm")
@@ -836,7 +836,7 @@ private:
             << BatchNormalizationLayer(
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_mean.npy"),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
-                get_random_accessor(1.f, 1.f),
+                nullptr,
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
                 0.001f)
             .set_name(param_path + "/Branch_3/Conv2d_0b_1x1/BatchNorm/batchnorm")
