@@ -447,6 +447,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "RGBA8888_to_RGB888_bt709", "color_convert.cl" },
     { "RGBA8888_to_YUV444_bt709", "color_convert.cl" },
     { "roi_align_layer", "roi_align_layer.cl" },
+    { "roi_align_layer_quantized", "roi_align_layer_quantized.cl" },
     { "roi_pooling_layer", "roi_pooling_layer.cl" },
     { "scale_nearest_neighbour_nchw", "scale.cl" },
     { "scale_nearest_neighbour_nhwc", "scale.cl" },
@@ -933,6 +934,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "roi_align_layer.cl",
 #include "./cl_kernels/roi_align_layer.clembed"
+    },
+    {
+        "roi_align_layer_quantized.cl",
+#include "./cl_kernels/roi_align_layer_quantized.clembed"
     },
     {
         "roi_pooling_layer.cl",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,15 +112,31 @@ T clamp(T value, T lower, T upper)
 {
     return std::max(lower, std::min(value, upper));
 }
+
+SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
+{
+    const UniformQuantizationInfo &quantization_info = rois.quantization_info().uniform();
+    SimpleTensor<float>            dst{ rois.shape(), DataType::F32, 1, QuantizationInfo(), rois.data_layout() };
+
+    for(int i = 0; i < rois.num_elements(); i += 5)
+    {
+        dst[i]     = static_cast<float>(rois[i]); // batch idx
+        dst[i + 1] = dequantize_qasymm16(rois[i + 1], quantization_info);
+        dst[i + 2] = dequantize_qasymm16(rois[i + 2], quantization_info);
+        dst[i + 3] = dequantize_qasymm16(rois[i + 3], quantization_info);
+        dst[i + 4] = dequantize_qasymm16(rois[i + 4], quantization_info);
+    }
+    return dst;
+}
 } // namespace
-template <typename T>
-SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &rois, const ROIPoolingLayerInfo &pool_info)
+template <typename T, typename TRois>
+SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<TRois> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
 {
     const size_t values_per_roi = rois.shape()[0];
     const size_t num_rois       = rois.shape()[1];
     DataType     dst_data_type  = src.data_type();
 
-    const auto *rois_ptr = static_cast<const T *>(rois.data());
+    const auto *rois_ptr = static_cast<const TRois *>(rois.data());
 
     TensorShape     input_shape = src.shape();
     TensorShape     output_shape(pool_info.pooled_width(), pool_info.pooled_height(), src.shape()[2], num_rois);
@@ -183,8 +199,19 @@ SimpleTensor<T> roi_align_layer(const SimpleTensor<T> &src, const SimpleTensor<T
     }
     return dst;
 }
-template SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &rois, const ROIPoolingLayerInfo &pool_info);
-template SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &rois, const ROIPoolingLayerInfo &pool_info);
+
+template SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
+template SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
+
+template <>
+SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+{
+    SimpleTensor<float>   src_tmp  = convert_from_asymmetric(src);
+    SimpleTensor<float>   rois_tmp = convert_rois_from_asymmetric(rois);
+    SimpleTensor<float>   dst_tmp  = roi_align_layer<float, float>(src_tmp, rois_tmp, pool_info, output_qinfo);
+    SimpleTensor<uint8_t> dst      = convert_to_asymmetric(dst_tmp, output_qinfo);
+    return dst;
+}
 } // namespace reference
 } // namespace validation
 } // namespace test
