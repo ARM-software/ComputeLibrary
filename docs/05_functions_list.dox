@@ -37,6 +37,7 @@ namespace arm_compute
         - @ref NEArithmeticAddition
         - @ref NEArithmeticSubtraction
         - @ref NEBox3x3
+        - @ref NECast
         - @ref NEConvolution3x3
         - @ref NEConvolutionRectangle
         - @ref NEDilate
@@ -54,6 +55,7 @@ namespace arm_compute
         - @ref NENonLinearFilter
         - @ref NENonMaximaSuppression3x3
         - @ref NEPixelWiseMultiplication
+        - @ref NEPReluLayer
         - @ref NERemap
         - @ref NERsqrtLayer
         - @ref NEScharr3x3
@@ -89,6 +91,7 @@ namespace arm_compute
         - @ref NEGEMMTranspose1xW
         - @ref NEHOGDetector
         - @ref NEMagnitude
+        - @ref NEMeanStdDevNormalizationLayer
         - @ref NEPermute
         - @ref NEPhase
         - @ref NEPriorBoxLayer
@@ -147,6 +150,7 @@ namespace arm_compute
     - @ref NELaplacianReconstruct
     - @ref NELocallyConnectedLayer
     - @ref NELSTMLayer
+    - @ref NELSTMLayerQuantized
     - @ref NEMeanStdDev
     - @ref NEMinMaxLocation
     - @ref NENormalizationLayer
@@ -165,6 +169,7 @@ namespace arm_compute
     - @ref NESobel7x7
     - @ref NESoftmaxLayer
     - @ref NESpaceToBatchLayer
+    - @ref NESpaceToDepthLayer
     - @ref NESplit
     - @ref NEStackLayer
     - @ref NEUnstack
@@ -185,6 +190,7 @@ namespace arm_compute
     - @ref CLCropResize
     - @ref CLDeconvolutionLayer
     - @ref CLDeconvolutionLayerUpsample
+    - @ref CLDepthToSpaceLayer
     - @ref CLDepthwiseConvolutionLayer
     - @ref CLDepthwiseConvolutionLayer3x3
     - @ref CLDequantizationLayer
@@ -218,6 +224,7 @@ namespace arm_compute
     - @ref CLLaplacianReconstruct
     - @ref CLLocallyConnectedLayer
     - @ref CLLSTMLayer
+    - @ref CLLSTMLayerQuantized
     - @ref CLMeanStdDev
     - @ref CLMinMaxLocation
     - @ref CLNormalizationLayer
@@ -232,6 +239,7 @@ namespace arm_compute
     - @ref CLSobel7x7
     - @ref CLSoftmaxLayer
     - @ref CLSpaceToBatchLayer
+    - @ref CLSpaceToDepthLayer
     - @ref CLSplit
     - @ref CLStackLayer
     - @ref CLUnstack
@@ -283,6 +291,7 @@ namespace arm_compute
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
         - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFloat
         - @ref CLMagnitude
+        - @ref CLMeanStdDevNormalizationLayer
         - @ref CLMedian3x3
         - @ref CLNonLinearFilter
         - @ref CLNonMaximaSuppression3x3
@@ -290,6 +299,7 @@ namespace arm_compute
         - @ref CLPhase
         - @ref CLPixelWiseMultiplication
         - @ref CLPoolingLayer
+        - @ref CLPReluLayer
         - @ref CLPriorBoxLayer
         - @ref CLRange
         - @ref CLRemap
