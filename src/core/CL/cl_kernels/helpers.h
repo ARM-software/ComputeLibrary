@@ -49,6 +49,69 @@
 
 #define CLAMP(x, min_val, max_val) min(max(x, min_val), max_val)
 
+#define REV1(x) ((x))
+#define REV2(x) ((x).s10)
+#define REV3(x) ((x).s210)
+#define REV4(x) ((x).s3210)
+#define REV8(x) ((x).s76543210)
+#define REV16(x) ((x).sFEDCBA9876543210)
+
+#define REVERSE_STR(x, s) REV##s((x))
+#define REVERSE(x, s) REVERSE_STR(x, s)
+
+#define ROT1_0(x) ((x))
+
+#define ROT2_0(x) ((x))
+#define ROT2_1(x) ((x).s10)
+
+#define ROT3_0(x) ((x))
+#define ROT3_1(x) ((x).s201)
+#define ROT3_2(x) ((x).s120)
+
+#define ROT4_0(x) ((x))
+#define ROT4_1(x) ((x).s3012)
+#define ROT4_2(x) ((x).s2301)
+#define ROT4_3(x) ((x).s1230)
+
+#define ROT8_0(x) ((x))
+#define ROT8_1(x) ((x).s70123456)
+#define ROT8_2(x) ((x).s67012345)
+#define ROT8_3(x) ((x).s56701234)
+#define ROT8_4(x) ((x).s45670123)
+#define ROT8_5(x) ((x).s34567012)
+#define ROT8_6(x) ((x).s23456701)
+#define ROT8_7(x) ((x).s12345670)
+
+#define ROT16_0(x) ((x))
+#define ROT16_1(x) ((x).sF0123456789ABCDE)
+#define ROT16_2(x) ((x).sEF0123456789ABCD)
+#define ROT16_3(x) ((x).sDEF0123456789ABC)
+#define ROT16_4(x) ((x).sCDEF0123456789AB)
+#define ROT16_5(x) ((x).sBCDEF0123456789A)
+#define ROT16_6(x) ((x).sABCDEF0123456789)
+#define ROT16_7(x) ((x).s9ABCDEF012345678)
+#define ROT16_8(x) ((x).s89ABCDEF01234567)
+#define ROT16_9(x) ((x).s789ABCDEF0123456)
+#define ROT16_10(x) ((x).s6789ABCDEF012345)
+#define ROT16_11(x) ((x).s56789ABCDEF01234)
+#define ROT16_12(x) ((x).s456789ABCDEF0123)
+#define ROT16_13(x) ((x).s3456789ABCDEF012)
+#define ROT16_14(x) ((x).s23456789ABCDEF01)
+#define ROT16_15(x) ((x).s123456789ABCDEF0)
+
+#define ROTATE_STR(x, s, n) ROT##s##_##n(x)
+#define ROTATE(x, s, n) ROTATE_STR(x, s, n)
+
+#define V_OFFS1(dt) (dt)(0)
+#define V_OFFS2(dt) (dt)(0, 1)
+#define V_OFFS3(dt) (dt)(0, 1, 3)
+#define V_OFFS4(dt) (dt)(0, 1, 2, 3)
+#define V_OFFS8(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7)
+#define V_OFFS16(dt) (dt)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+
+#define VEC_OFFS_STR(dt, s) V_OFFS##s(dt)
+#define VEC_OFFS(dt, s) VEC_OFFS_STR(dt, s)
+
 #define VLOAD_STR(size) vload##size
 #define VLOAD(size) VLOAD_STR(size)
 

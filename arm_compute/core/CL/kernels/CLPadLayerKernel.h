@@ -31,7 +31,7 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the PadLayer function. Only CONSTANT PaddingMode is currently supported*/
+/** Interface for the PadLayer function. */
 class CLPadLayerKernel : public ICLKernel
 {
 public:
@@ -56,7 +56,6 @@ public:
      * @param[in]  constant_value (Optional) Constant value to be used for the padding.
      * @param[in]  mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
-     *                            Only CONSTANT mode is currently supported.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
     /** Static function to check if given info will lead to a valid configuration of @ref CLPadLayerKernel
@@ -68,7 +67,6 @@ public:
      * @param[in] constant_value (Optional) Constant value to be used for the padding.
      * @param[in] mode           (Optional) Controls whether the padding should be filled with @p constant_value using CONSTANT,
      *                            or reflect the input, either including the border values (SYMMETRIC) or not (REFLECT).
-     *                            Only CONSTANT mode is currently supported.
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value = PixelValue(), PaddingMode mode = PaddingMode::CONSTANT);
 
@@ -80,6 +78,7 @@ private:
     ICLTensor       *_output;
     int              _input_start_x;
     int              _input_start_y;
+    bool             _4d_enabled;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLPADLAYERKERNEL_H__ */
