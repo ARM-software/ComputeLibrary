@@ -281,7 +281,7 @@ SimpleTensor<uint8_t> reduction_operation(const SimpleTensor<uint8_t> &src, cons
     {
         SimpleTensor<float> src_f = convert_from_asymmetric(src);
         SimpleTensor<float> dst_f = reference::reduction_operation<float, float>(src_f, dst_shape, axis, op);
-        return convert_to_asymmetric(dst_f, src.quantization_info());
+        return convert_to_asymmetric<uint8_t>(dst_f, src.quantization_info());
     }
     else
     {

@@ -200,7 +200,16 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
  *
  * @return Quantized tensor.
  */
-SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
+template <typename T>
+SimpleTensor<T> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
+
+/** Convert quantized simple tensor into float using tensor quantization information.
+ *
+ * @param[in] src Quantized tensor.
+ *
+ * @return Float tensor.
+ */
+SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src);
 
 /** Convert quantized simple tensor into float using tensor quantization information.
  *

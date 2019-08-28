@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,9 +49,10 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  boxes      Source tensor. Bounding box proposals in pixel coordinates. Size(M, 4), format [x1, y1, x2, y2]. Data types supported: F16/F32.
+     * @param[in]  boxes      Source tensor. Bounding box proposals in pixel coordinates. Size(M, 4), format [x1, y1, x2, y2]. Data types supported: QASYMM16/F16/F32.
      * @param[out] pred_boxes Destination tensor. Pixel coordinates of the transformed bounding boxes. Size (M, 4*K), format [x1, y1, x2, y2]. Data types supported: Same as @p input
-     * @param[in]  deltas     Bounding box translations and scales. Size (M, 4*K), format [dx, dy, dw, dh], K  is the number of classes. Data types supported: Same as @p input
+     * @param[in]  deltas     Bounding box translations and scales. Size (M, 4*K), format [dx, dy, dw, dh], K  is the number of classes.
+     *                        Data types supported: QASYMM8 if @p input is QASYMM16, otherise same as @p input
      * @param[in]  info       Contains BoundingBox operation information described in @ref BoundingBoxTransformInfo.
      *
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.
@@ -61,9 +62,10 @@ public:
 
     /** Static function to check if given info will lead to a valid configuration of @ref CLBoundingBoxTransform
      *
-     * @param[in] boxes      Source tensor info. Bounding box proposals in pixel coordinates. Size(M, 4), format [x1, y1, x2, y2]. Data types supported: F16/F32.
+     * @param[in] boxes      Source tensor info. Bounding box proposals in pixel coordinates. Size(M, 4), format [x1, y1, x2, y2]. Data types supported: QASYMM16/F16/F32.
      * @param[in] pred_boxes Destination tensor info. Pixel coordinates of the transformed bounding boxes. Size (M, 4*K), format [x1, y1, x2, y2]. Data types supported: Same as @p input
-     * @param[in] deltas     Bounding box translations and scales. Size (M, 4*K), format [dx, dy, dw, dh], K  is the number of classes. Data types supported: Same as @p input
+     * @param[in] deltas     Bounding box translations and scales. Size (M, 4*K), format [dx, dy, dw, dh], K  is the number of classes.
+     *                       Data types supported: QASYMM8 if @p input is QASYMM16, otherise same as @p input
      * @param[in] info       Contains BoundingBox operation information described in @ref BoundingBoxTransformInfo.
      *
      * @note Only single image prediction is supported. Height and Width (and scale) of the image will be contained in the BoundingBoxTransformInfo struct.

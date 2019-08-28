@@ -132,6 +132,7 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint16_t> &src)
     return dst;
 }
 
+template <>
 SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
     SimpleTensor<uint8_t>          dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
@@ -140,6 +141,19 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantize_qasymm8(src[i], qinfo);
+    }
+    return dst;
+}
+
+template <>
+SimpleTensor<uint16_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
+{
+    SimpleTensor<uint16_t>         dst{ src.shape(), DataType::QASYMM16, 1, quantization_info };
+    const UniformQuantizationInfo &qinfo = quantization_info.uniform();
+
+    for(int i = 0; i < src.num_elements(); ++i)
+    {
+        dst[i] = quantize_qasymm16(src[i], qinfo);
     }
     return dst;
 }

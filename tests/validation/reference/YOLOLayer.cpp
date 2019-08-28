@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 ARM Limited.
+ * Copyright (c) 2018-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ SimpleTensor<uint8_t> yolo_layer<uint8_t>(const SimpleTensor<uint8_t> &src, cons
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = yolo_layer<float>(src_tmp, info, num_classes);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     return dst;
 }
 

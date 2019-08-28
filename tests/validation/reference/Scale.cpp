@@ -196,7 +196,7 @@ SimpleTensor<uint8_t> scale(const SimpleTensor<uint8_t> &src, float scale_x, flo
         SimpleTensor<float> src_tmp                 = convert_from_asymmetric(src);
         float               constant_border_value_f = dequantize_qasymm8(constant_border_value, src.quantization_info());
         SimpleTensor<float> dst_tmp                 = scale_core<float>(src_tmp, scale_x, scale_y, policy, border_mode, constant_border_value_f, sampling_policy, ceil_policy_scale);
-        dst                                         = convert_to_asymmetric(dst_tmp, src.quantization_info());
+        dst                                         = convert_to_asymmetric<uint8_t>(dst_tmp, src.quantization_info());
     }
     else
     {

@@ -209,7 +209,7 @@ SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t> &src, const Si
     SimpleTensor<float>   src_tmp  = convert_from_asymmetric(src);
     SimpleTensor<float>   rois_tmp = convert_rois_from_asymmetric(rois);
     SimpleTensor<float>   dst_tmp  = roi_align_layer<float, float>(src_tmp, rois_tmp, pool_info, output_qinfo);
-    SimpleTensor<uint8_t> dst      = convert_to_asymmetric(dst_tmp, output_qinfo);
+    SimpleTensor<uint8_t> dst      = convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
     return dst;
 }
 } // namespace reference

@@ -45,6 +45,7 @@ std::string get_cl_type_from_data_type(const DataType &dt)
         case DataType::QSYMM8_PER_CHANNEL:
             return "char";
         case DataType::U16:
+        case DataType::QASYMM16:
             return "ushort";
         case DataType::S16:
         case DataType::QSYMM16:
@@ -80,6 +81,7 @@ std::string get_cl_select_type_from_data_type(const DataType &dt)
         case DataType::QSYMM8_PER_CHANNEL:
             return "char";
         case DataType::U16:
+        case DataType::QASYMM16:
             return "ushort";
         case DataType::F16:
         case DataType::S16:
@@ -114,6 +116,7 @@ std::string get_data_size_from_data_type(const DataType &dt)
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
         case DataType::F16:
             return "16";
         case DataType::U32:
@@ -258,6 +261,7 @@ size_t preferred_vector_width(const cl::Device &device, const DataType dt)
         case DataType::U16:
         case DataType::S16:
         case DataType::QSYMM16:
+        case DataType::QASYMM16:
             return device.getInfo<CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT>();
         case DataType::U32:
         case DataType::S32:

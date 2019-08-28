@@ -286,6 +286,7 @@ std::string arm_compute::string_from_pixel_value(const PixelValue &value, const 
     {
         case DataType::U8:
         case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
             // Needs conversion to 32 bit, otherwise interpreted as ASCII values
             ss << uint32_t(value.get<uint8_t>());
             converted_string = ss.str();
@@ -296,6 +297,7 @@ std::string arm_compute::string_from_pixel_value(const PixelValue &value, const 
             converted_string = ss.str();
             break;
         case DataType::U16:
+        case DataType::QASYMM16:
             ss << value.get<uint16_t>();
             converted_string = ss.str();
             break;
@@ -429,14 +431,16 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
 {
     switch(dt)
     {
-        case DataType::QASYMM8:
         case DataType::U8:
+        case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
         case DataType::S8:
             print_consecutive_elements_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::U16:
+        case DataType::QASYMM16:
             print_consecutive_elements_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n, stream_width, element_delim);
             break;
         case DataType::S16:
@@ -464,12 +468,14 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
 {
     switch(dt)
     {
-        case DataType::QASYMM8:
         case DataType::U8:
+        case DataType::QASYMM8:
+        case DataType::QASYMM8_PER_CHANNEL:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::S8:
             return max_consecutive_elements_display_width_impl<int8_t>(s, reinterpret_cast<const int8_t *>(ptr), n);
         case DataType::U16:
+        case DataType::QASYMM16:
             return max_consecutive_elements_display_width_impl<uint16_t>(s, reinterpret_cast<const uint16_t *>(ptr), n);
         case DataType::S16:
         case DataType::QSYMM16:

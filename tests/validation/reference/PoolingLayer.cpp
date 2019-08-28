@@ -157,7 +157,7 @@ SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, c
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = pooling_layer<float>(src_tmp, info, output_qinfo);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, output_qinfo);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_qinfo);
     return dst;
 }
 

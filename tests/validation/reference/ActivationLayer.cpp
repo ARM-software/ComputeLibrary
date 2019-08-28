@@ -61,7 +61,7 @@ SimpleTensor<uint8_t> activation_layer<uint8_t>(const SimpleTensor<uint8_t> &src
 
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = activation_layer<float>(src_tmp, info);
-    SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, dst_qinfo);
+    SimpleTensor<uint8_t> dst     = convert_to_asymmetric<uint8_t>(dst_tmp, dst_qinfo);
     return dst;
 }
 

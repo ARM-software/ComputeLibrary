@@ -21,33 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "helpers.h"
+#include "helpers_asymm.h"
 
 // This specifies the value to shift the result of roi_dims / pooled_dims before ceiling.
 // It is close to the epsilon machine (for a floating point system, x and x+EPS are the same number).
 #define EPS_GRID 0.00001f
 
 #if defined(DATA_TYPE) && defined(POOLED_DIM_X) && defined(POOLED_DIM_Y) && defined(MAX_DIM_X) && defined(MAX_DIM_Y) && defined(MAX_DIM_Z) && defined(SPATIAL_SCALE) && defined(OFFSET_IN) && defined(OFFSET_OUT) && defined(SCALE_IN) && defined(SCALE_OUT) && defined(OFFSET_ROIS) && defined(SCALE_ROIS) // Check for compile time constants
-
-#define CONVERT_RTE(x, type) (convert_##type##_rte((x)))
-#define CONVERT_DOWN(x, type) CONVERT_RTE(x, type)
-inline float dequantize_qasymm8(uchar input, float offset, float scale)
-{
-    return ((float)input - offset) * scale;
-}
-
-inline uchar quantize_qasymm8(float input, float offset, float scale)
-{
-    float out_f32 = input / scale + offset;
-    uchar res_u8  = CONVERT_SAT(CONVERT_DOWN(out_f32, int), uchar);
-    return res_u8;
-}
-
-inline float4 dequantize_qasymm16(ushort4 input, float offset, float scale)
-{
-    float4 in_f32 = (CONVERT(input, float4) - (float4)(offset)) * (float4)(scale);
-    return in_f32;
-}
 
 /** Performs a roi align on a single output pixel.
  *
@@ -178,7 +158,7 @@ __kernel void roi_align_layer_quantized(
     // Load roi parameters
     // roi is laid out as follows { batch_index, x1, y1, x2, y2 }
     const ushort roi_batch = *((__global ushort *)offset(&rois, 0, pw));
-    float4 roi             = dequantize_qasymm16(vload4(0, (__global ushort *)offset(&rois, 1, pw)), OFFSET_ROIS, SCALE_ROIS);
+    float4 roi             = DEQUANTIZE(vload4(0, (__global ushort *)offset(&rois, 1, pw)), OFFSET_ROIS, SCALE_ROIS, ushort, 4);
     float2 roi_anchor      = roi.s01 * convert_float(SPATIAL_SCALE);
     float2 roi_dims        = fmax((roi.s23 - roi.s01) * convert_float(SPATIAL_SCALE), 1.f);
 

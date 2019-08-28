@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,7 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, size_t axi
 
     SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float> dst_tmp = softmax_layer<float>(src_tmp, beta, axis);
-    SimpleTensor<T>     dst     = convert_to_asymmetric(dst_tmp, output_quantization_info);
+    SimpleTensor<T>     dst     = convert_to_asymmetric<uint8_t>(dst_tmp, output_quantization_info);
     return dst;
 }
 
