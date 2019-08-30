@@ -37,6 +37,7 @@
 #include "arm_compute/core/NEON/kernels/NEBitwiseNotKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseOrKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBitwiseXorKernel.h"
+#include "arm_compute/core/NEON/kernels/NEBoundingBoxTransformKernel.h"
 #include "arm_compute/core/NEON/kernels/NEBox3x3Kernel.h"
 #include "arm_compute/core/NEON/kernels/NECannyEdgeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEChannelCombineKernel.h"

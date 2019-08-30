@@ -37,6 +37,7 @@
 #include "arm_compute/runtime/NEON/functions/NEBitwiseNot.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseOr.h"
 #include "arm_compute/runtime/NEON/functions/NEBitwiseXor.h"
+#include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
 #include "arm_compute/runtime/NEON/functions/NEBox3x3.h"
 #include "arm_compute/runtime/NEON/functions/NECannyEdge.h"
 #include "arm_compute/runtime/NEON/functions/NECast.h"
