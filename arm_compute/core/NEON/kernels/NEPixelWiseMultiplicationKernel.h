@@ -127,6 +127,7 @@ private:
     ITensor       *_output;
     float          _scale;
     int            _scale_exponent;
+    bool           _run_optimized_qasymm8;
 };
 
 /** Interface for the complex pixelwise multiplication kernel. */
