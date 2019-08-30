@@ -53,12 +53,15 @@
  * @note Data type to use for the select instruction must be passed using the -DSELECT_DT compile flag, e.g. -DSELECT_DT=float
  * @note In case pad left is more than the vector size, the number of threads to skil alond the X axis must be passed using the
  *       -DTHREADS_TO_SKIP_X compile flag, e.g. -DTHREADS_TO_SKIP_X=1. This is defined as (PAD_LEFT / VEC_SIZE)
- * @note In pad also needs to be added to the top of the tensor, the following compile flags must be passed at compile time:
+ * @note If pad also needs to be added to the top of the tensor, the following compile flags must be passed at compile time:
  *       -# -DPAD_TOP: Pad to add to the top of the input tensor (e.g. -DPAD_TOP=3)
  *       -# -DSRC_HEIGHT: Input tensor's height (e.g. -DSRC_HEIGHT=127)
- * @note In pad also needs to be added to the depth of the tensor, the following compile flags must be passed at compile time:
+ * @note If pad also needs to be added to the depth of the tensor, the following compile flags must be passed at compile time:
  *       -# -DPAD_NEAR: Pad to add before the first plane of the input tensor (e.g. -DPAD_NEAR=3)
  *       -# -DSRC_DEPTH: Input tensor's depth (e.g. -DSRC_DEPTH=32)
+ * @note If pad also needs to be added to the batch of the tensor, the following compile flags must be passed at compile time:
+ *       -# -DPAD_BTOP: Pad to add before the first batch of the input tensor (e.g. -DPAD_BTOP=3)
+ *       -# -DSRC_BATCH: Input tensor's batch size (e.g. -DSRC_BATCH=4)
  *
  * @param[in]  src_ptr                           Pointer to the source image. Supported data types: U8, S8, QASYMM8, U16, S16, U32, S32, F16, F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -78,22 +81,30 @@
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void pad_layer(TENSOR3D_DECLARATION(src),
-                        TENSOR3D_DECLARATION(dst))
+                        TENSOR3D_DECLARATION(dst),
+                        uint batch)
 {
     const int x = get_global_id(0);
     const int y = get_global_id(1);
     const int z = get_global_id(2);
 
+#if defined(PAD_BTOP) || defined(PAD_NEAR)
+    uint cond = 0;
+#if defined(PAD_BTOP)
+    cond |= batch < PAD_BTOP || batch >= (PAD_BTOP + SRC_BATCH);
+#endif // defined(PAD_BTOP)
+
 #if defined(PAD_NEAR)
-    if(z < PAD_NEAR || z >= (PAD_NEAR + SRC_DEPTH))
+    cond |= z < PAD_NEAR || z >= (PAD_NEAR + SRC_DEPTH);
+#endif // defined(PAD_NEAR)
+    if(cond)
     {
         Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
-        VSTORE(VEC_SIZE)
-        ((VEC_TYPE)CONST_VAL, 0, (__global DATA_TYPE *)dst.ptr);
+        VSTORE(VEC_SIZE)((VEC_TYPE)CONST_VAL, 0, (__global DATA_TYPE *)dst.ptr);
     }
     else
     {
-#endif // defined(PAD_NEAR)
+#endif // defined(PAD_BTOP) || defined(PAD_NEAR)
 
         Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
         Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
@@ -115,6 +126,9 @@ __kernel void pad_layer(TENSOR3D_DECLARATION(src),
 #if defined(PAD_NEAR)
         src.ptr -= PAD_NEAR * src_step_z;
 #endif // defined(PAD_NEAR)
+#if defined(PAD_BTOP)
+        src.ptr -= PAD_BTOP * SRC_DEPTH * src_step_z;
+#endif // defined(PAD_BTOP)
 
         VEC_TYPE src_vals = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)src.ptr);
 
@@ -125,8 +139,8 @@ __kernel void pad_layer(TENSOR3D_DECLARATION(src),
 #endif // defined(PAD_TOP)
         VSTORE(VEC_SIZE)
         (select(src_vals, (VEC_TYPE)CONST_VAL, CONVERT_SELECT(cond)), 0, (__global DATA_TYPE *)dst.ptr);
-#if defined(PAD_NEAR)
+#if defined(PAD_NEAR) || defined(PAD_BTOP)
     }
-#endif // defined(PAD_NEAR)
+#endif // defined(PAD_NEAR) || defined(PAD_BTOP)
 }
 #endif // defined(DATA_TYPE) && defined(VEC_SIZE) && defined(CONST_VAL)

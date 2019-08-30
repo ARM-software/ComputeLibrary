@@ -183,7 +183,6 @@ void CLPadLayer::configure(ICLTensor *input, ICLTensor *output, const PaddingLis
 Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding, PixelValue constant_value, PaddingMode mode)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(padding.size() > input->num_dimensions());
-
     TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
 
     // Use CLCopyKernel and CLMemsetKernel to validate all padding modes as this includes all of the shape and info validation.
@@ -213,6 +212,7 @@ Status CLPadLayer::validate(const ITensorInfo *input, const ITensorInfo *output,
     {
         case PaddingMode::CONSTANT:
         {
+            ARM_COMPUTE_RETURN_ERROR_ON(padding.size() > 4);
             ARM_COMPUTE_RETURN_ON_ERROR(CLPadLayerKernel::validate(input, output, padding, constant_value, mode));
             break;
         }

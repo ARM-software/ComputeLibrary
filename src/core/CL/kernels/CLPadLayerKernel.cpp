@@ -99,6 +99,12 @@ void CLPadLayerKernel::configure(const ICLTensor *input, ICLTensor *output, cons
         {
             build_opts.add_option("-DPAD_NEAR=" + support::cpp11::to_string(padding.at(2).first));
             build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(input->info()->dimension(2)));
+
+            if(padding.size() > 3)
+            {
+                build_opts.add_option("-DPAD_BTOP=" + support::cpp11::to_string(padding.at(3).first));
+                build_opts.add_option("-DSRC_BATCH=" + support::cpp11::to_string(input->info()->dimension(3)));
+            }
         }
     }
 
@@ -130,11 +136,13 @@ void CLPadLayerKernel::run(const Window &window, cl::CommandQueue &queue)
 
     Window slice_out = window.first_slice_window_3D();
     Window slice_in  = win_in.first_slice_window_3D();
+    unsigned int batch = 0;
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice_out);
+        add_argument<unsigned int>(idx, batch++);
 
         enqueue(queue, *this, slice_out, lws_hint());
     }
