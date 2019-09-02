@@ -1,0 +1,5 @@
+<map id="CLLWSListExhaustive" name="CLLWSListExhaustive">
+<area shape="rect" id="node1" title="Exhaustive list of all possible LWS values." alt="" coords="5,155,160,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list.xhtml" title="Non instantiable base class for LWS combinations that use Index2Cooard mapping." alt="" coords="39,80,126,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__tuner_1_1_i_c_l_l_w_s_list.xhtml" title="Interface for LWS lists." alt="" coords="38,5,127,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="CLLWSListNormal" name="CLLWSListNormal">
+<area shape="rect" id="node1" title="A subset of LWS values that are either factors of gws when gws[2] &lt; 16 or power of 2." alt="" coords="5,155,139,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1cl__tuner_1_1_c_l_l_w_s_list.xhtml" title="Non instantiable base class for LWS combinations that use Index2Cooard mapping." alt="" coords="29,80,115,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1cl__tuner_1_1_i_c_l_l_w_s_list.xhtml" title="Interface for LWS lists." alt="" coords="27,5,117,32"/>
+</map>

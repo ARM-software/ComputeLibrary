@@ -1,0 +1,11 @@
+<map id="TensorDescriptor" name="TensorDescriptor">
+<area shape="rect" id="node1" title="Tensor metadata class." alt="" coords="352,273,481,300"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title=" " alt="" coords="5,184,231,211"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface." alt="" coords="55,95,181,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="255,184,351,211"/>
+<area shape="rect" id="node5" title=" " alt="" coords="376,184,457,211"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1_tensor_shape.xhtml" title="Shape of a tensor." alt="" coords="482,184,586,211"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1_dimensions.xhtml" title=" " alt="" coords="452,95,616,121"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality." alt="" coords="467,5,601,32"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1_quantization_info.xhtml" title="Quantization information." alt="" coords="611,184,737,211"/>
+</map>

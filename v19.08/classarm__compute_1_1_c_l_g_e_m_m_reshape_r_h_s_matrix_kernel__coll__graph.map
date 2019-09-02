@@ -1,0 +1,5 @@
+<map id="CLGEMMReshapeRHSMatrixKernel" name="CLGEMMReshapeRHSMatrixKernel">
+<area shape="rect" id="node1" title="OpenCL kernel to reshape the RHS matrix when performing the matrix multiplication In particular,..." alt="" coords="5,155,243,181"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_kernel.xhtml" title="Common interface for all the OpenCL kernels." alt="" coords="84,80,164,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels." alt="" coords="92,5,156,32"/>
+</map>
