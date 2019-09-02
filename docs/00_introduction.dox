@@ -248,9 +248,14 @@ v19.08 Public major release
     - CLGEMMTranspose1xWKernel / CLGEMMTranspose1xW
     - CLWidthConcatenateLayer
  - New NEON kernels / functions:
+    - @ref NEAbsLayer
     - @ref NECast
+    - @ref NEElementwisePower
+    - @ref NELogLayer
     - @ref NELSTMLayerQuantized
+    - @ref NENegLayer
     - @ref NEPReluLayer
+    - @ref NESinLayer
     - @ref NEBatchConcatenateLayerKernel
     - @ref NEDepthToSpaceLayerKernel / @ref NEDepthToSpaceLayer
     - @ref NEDepthwiseConvolutionLayerNativeKernel
@@ -258,8 +263,13 @@ v19.08 Public major release
     - @ref NEMeanStdDevNormalizationKernel / @ref NEMeanStdDevNormalizationLayer
     - @ref NESpaceToDepthLayerKernel / @ref NESpaceToDepthLayer
  - New OpenCL kernels / functions:
+    - @ref CLAbsLayer
+    - @ref CLElementwisePower
+    - @ref CLLogLayer
     - @ref CLLSTMLayerQuantized
+    - @ref CLNegLayer
     - @ref CLPReluLayer
+    - @ref CLSinLayer
     - @ref CLBatchConcatenateLayerKernel
     - @ref CLDepthToSpaceLayerKernel / @ref CLDepthToSpaceLayer
     - @ref CLGEMMLowpMatrixMultiplyNativeKernel
@@ -271,6 +281,9 @@ v19.08 Public major release
     - neon_opticalflow
     - cl_cache
     - neon_permute
+ - Added support for FP16 in @ref NEDeconvolutionLayer
+ - Added support for FP16 in @ref CLDeconvolutionLayer
+ - Added support for REDUCE_MIN and REDUCE_MAX in @ref ReductionOperation
  - Enable the fusion of batch normalization with convolution and depthwise convolution layer for FP32 in the graph API (OpenCL only)
  - Added support for fusing activation function and broadcast addition with the matrix multiplication for FP32 (OpenCL only)
  - Re-factored the depthwise convolution layer kernel on NEON for generic cases
@@ -280,6 +293,7 @@ v19.08 Public major release
  - The @ref NEDepthwiseConvolutionLayer3x3 will be replaced by @ref NEDepthwiseConvolutionLayerOptimized to accommodate for future optimizations.
  - Removed inner_border_right and inner_border_top parameters from @ref CLDeconvolutionLayer interface
  - Removed inner_border_right and inner_border_top parameters from @ref NEDeconvolutionLayer interface
+ - Optimized the NEON assembly kernel for GEMMLowp. The new implementation fuses the output stage and quantization with the matrix multiplication kernel
 
 v19.05 Public major release
  - Various bug fixes.
