@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited.
+ * Copyright (c) 2016-2019 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -277,9 +277,18 @@ public:
     {
         return _is_resizable;
     }
+    bool is_dynamic() const override
+    {
+        return _is_dynamic;
+    }
     ITensorInfo &set_is_resizable(bool is_resizable) override
     {
         _is_resizable = is_resizable;
+        return *this;
+    }
+    ITensorInfo &set_is_dynamic(bool is_dynamic) override
+    {
+        _is_dynamic = is_dynamic;
         return *this;
     }
     ValidRegion valid_region() const override
@@ -314,10 +323,11 @@ private:
     DataType         _data_type;
     Format           _format;
     bool             _is_resizable;
+    bool             _is_dynamic;
     ValidRegion      _valid_region;
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;
     DataLayout       _data_layout;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

@@ -33,7 +33,7 @@
 using namespace arm_compute;
 
 TensorInfo::TensorInfo()
-    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true },
+    : _total_size(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN), _is_resizable{ true }, _is_dynamic{ false },
       _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
@@ -49,6 +49,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _data_type                     = info.data_type();
     _format                        = info.format();
     _is_resizable                  = info.is_resizable();
+    _is_dynamic                    = info.is_dynamic();
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
